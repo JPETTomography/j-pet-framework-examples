@@ -73,10 +73,10 @@ tests_run: tests
 ################
 documentation:
 	doxygen Doxyfile
-clean:         
-	@rm -rf $(OBJECTS)  $(EXECUTABLE) *.o *.d Dict.cpp Dict.h $(LIBFRAMEWORK) latex html
-	@($(foreach MODULE, $(MODULES),$(MAKE) -C $(SRC_DIR)/$(MODULE) clean;))
-	@($(foreach EXAMPLE, $(EXAMPLE_DIRS), $(MAKE) -C $(EXAMPLE) clean;))
-	$(MAKE) -C $(SRC_DIR)/DBHandler clean
-	cd $(TEST_DIR); $(MAKE) clean
+clean:
+	rm -rf $(OBJECTS)  $(EXECUTABLE) *.o *.d Dict.cpp Dict.h $(LIBFRAMEWORK) latex html
+	$(foreach MODULE, $(MODULES),$(MAKE) -C '$(SRC_DIR)/$(MODULE)' clean;)
+	$(foreach EXAMPLE, $(EXAMPLE_DIRS), $(MAKE) -C '$(EXAMPLE)' clean;)
+	$(MAKE) -C '$(SRC_DIR)'/DBHandler clean
+	$(MAKE) -C '$(TEST_DIR)' clean
 
