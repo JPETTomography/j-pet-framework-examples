@@ -23,6 +23,7 @@ Requirements
 ------------
 
   1. ROOT (http://root.cern.ch) with properly paths
+     The recommended version of ROOT is 5.34. Note that this framework is not yet compatible with ROOT versions >= 6.00.
 
   2. gcc  
 
