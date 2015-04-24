@@ -13,12 +13,12 @@ UNPACKER_LIB = Unpacker2
 ################
 SRC_DIR = $(PWD)/framework
 #Modules that should have ROOT dictionnaries
-DMODULES = JPetAnalysisModule JPetBarrelSlot JPetEvent JPetHit JPetMacroLoader JPetPM JPetScin JPetSigCh JPetSignal JPetTRB JPetTSlot JPetUnpacker JPetFrame JPetFEB JPetLayer JPetSetup  JPetTOMBChannel JPetUser JPetTreeHeader JPetParamBank JPetPMCalib JPetScopeModule JPetCommonAnalysisModule 
+DMODULES = JPetAnalysisModule JPetBarrelSlot JPetLOR JPetHit JPetMacroLoader JPetPM JPetScin JPetSigCh JPetBaseSignal JPetRawSignal JPetRecoSignal JPetPhysSignal JPetTRB JPetTSlot JPetUnpacker JPetFEB JPetTOMBChannel JPetUser JPetTreeHeader JPetParamBank JPetPMCalib JPetLayer JPetFrame JPetCommonAnalysisModule
 DICTS   = $(DMODULES)
 READERS = JPetReader JPetHLDReader JPetScopeReader
 WRITERS = JPetWriter
 #Modules without ROOT dictionnaries
-NONDMODULES = DummyClass JPetLogger JPetCmdParser JPetParamManager JPetManager $(READERS) $(WRITERS) JPetDBParamGetter
+NONDMODULES = DummyClass JPetLogger JPetCmdParser JPetParamManager JPetManager $(READERS) $(WRITERS) JPetDBParamGetter JPetParamUtils
 MODULES = $(DMODULES) $(NONDMODULES)
 ################
 SRC_MODULES = $(foreach MODULE, $(MODULES), $(SRC_DIR)/$(MODULE)/$(MODULE).cpp) 
@@ -30,7 +30,7 @@ WORK_DIR = workdir/FrameworkExamples
 EXAMPLE_DIRS = $(sort $(dir $(wildcard $(WORK_DIR)/*/)))
 ################
 SOURCES = $(SRC_MODULES)
-HEADERS = JPetLoggerInclude.h #Event.h TDCHit.h ADCHit.h Sig.h
+HEADERS = JPetLoggerInclude.h
 HEADERS += $(SRC_HEADERS)
 HEADERS += linkdef.h
 OBJECTS = $(SOURCES:.cpp=.o)
@@ -51,7 +51,7 @@ LIB_LDOPTS += -L$(UNPACKER_PATH) -l$(UNPACKER_LIB)
 .cpp.o:
 	$(CC) -o $@ $^ -c $(COPTS)
 ################
-all: modules dbhandler
+all: modules dbhandler sharedlib
 #Dictionary for ROOT classes
 Dict.cpp: 
 	@echo "Generating dictionary ..."
