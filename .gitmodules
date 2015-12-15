@@ -1,0 +1,3 @@
+[submodule "j-pet-framework"]
+	path = j-pet-framework
+	url = koza.if.uj.edu.pl:/srv/git/j-pet-framework.git
