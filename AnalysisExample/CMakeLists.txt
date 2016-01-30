@@ -7,7 +7,24 @@
 
 cmake_minimum_required(VERSION 2.6)
 
+######################################################################
+### when creating a new project,
+### set this section appropriately for your project
+######################################################################
 set(projectName AnalysisExample)
+
+set(AUXILLIARY_FILES
+  run1.sh
+  cosm_barrel.hld.root
+  2stripMid.hld.root
+  conf_trb3.xml
+  README
+  )
+
+######################################################################
+### this section should not need to be modified for a new project
+######################################################################
+set(projectBinary ${projectName}.x)
 
 project(${projectName} CXX) # using only C++
 
@@ -18,17 +35,33 @@ include_directories(${Framework_INCLUDE_DIRS})
 add_definitions(${Framework_DEFINITIONS})
 
 generate_root_dictionaries(DICTIONARIES SOURCES ${SOURCES})
-add_executable(${projectName} ${SOURCES} ${HEADERS} ${DICTIONARIES})
-target_link_libraries(${projectName} JPetFramework)
+add_executable(${projectBinary} ${SOURCES} ${HEADERS} ${DICTIONARIES})
+target_link_libraries(${projectBinary} JPetFramework)
 
 add_custom_target(clean_data
   COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root)
 
 # copy the DB config file to an expected location
-set(db_config_dir ${CMAKE_CURRENT_BINARY_DIR}/DBConfig)
+set(db_config_dir ${CMAKE_CURRENT_BINARY_DIR}/../DBConfig)
 
-add_custom_command(TARGET ${projectName}
+add_custom_command(TARGET ${projectBinary}
   POST_BUILD
-  COMMAND cp -r ${CMAKE_CURRENT_SOURCE_DIR}/../j-pet-framework/DBHandler/Config ${db_config_dir}
-  )
+  COMMAND ${CMAKE_COMMAND}
+  ARGS -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/../j-pet-framework/DBHandler/Config ${db_config_dir}
+)
 
+# copy the example auxilliary files
+foreach( file_i ${AUXILLIARY_FILES})
+  if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${file_i})
+    set(CP_CMD copy_directory)
+  else()
+    set(CP_CMD copy)
+  endif()
+
+  add_custom_command(
+    TARGET ${projectBinary}
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND}
+    ARGS -E ${CP_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
+    )
+endforeach( file_i )
