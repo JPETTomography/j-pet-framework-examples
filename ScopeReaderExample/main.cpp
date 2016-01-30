@@ -5,7 +5,7 @@
 using namespace std;
 int main(int argc, char* argv[])
 {
-  JPetManager& manager = JPetManager::GetManager();
-  manager.ParseCmdLine(argc, argv);
-  manager.Run();
+  JPetManager& manager = JPetManager::getManager();
+  manager.parseCmdLine(argc, argv);
+  manager.run();
 }
