@@ -4,12 +4,12 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
-#pragma link C++ class ModuleA+;
-#pragma link C++ class ModuleB+;
-#pragma link C++ class ModuleC1+;
-#pragma link C++ class ModuleC2+;
-#pragma link C++ class ModuleC3+;
-#pragma link C++ class ModuleD+;
-#pragma link C++ class ModuleE+;
+#pragma link C++ class TaskA+;
+#pragma link C++ class TaskB+;
+#pragma link C++ class TaskC1+;
+#pragma link C++ class TaskC2+;
+#pragma link C++ class TaskC3+;
+#pragma link C++ class TaskD+;
+#pragma link C++ class TaskE+;
 
 #endif
