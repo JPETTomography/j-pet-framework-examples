@@ -62,7 +62,7 @@ void TaskC1::exec()
     }
     nPMs++; // count how many PM-s fired in one TimeWindow
 
-    sig.setTSlotIndex(tslot.getIndex());
+    sig.setTimeWindowIndex(tslot.getIndex());
     sig.setPM(getParamBank().getPM(i));
 
     // keep some statistics

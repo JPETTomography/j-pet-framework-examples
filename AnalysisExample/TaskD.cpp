@@ -47,7 +47,7 @@ void TaskD::exec()
   if (fSignals.empty()) {
     fSignals.push_back(currSignal);
   } else {
-    if (fSignals[0].getTSlotIndex() == currSignal.getTSlotIndex()) {
+    if (fSignals[0].getTimeWindowIndex() == currSignal.getTimeWindowIndex()) {
       fSignals.push_back(currSignal);
     } else {
       getStatistics().getHisto1D("No. signals in TSlot").Fill(fSignals.size());

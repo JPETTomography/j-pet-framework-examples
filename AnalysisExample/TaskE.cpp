@@ -31,7 +31,7 @@ void TaskE::exec()
   if (fHits.empty()) {
     fHits.push_back(currHit);
   } else {
-    if (fHits[0].getSignalA().getTSlotIndex() == currHit.getSignalB().getTSlotIndex()) {
+    if (fHits[0].getTimeWindowIndex() == currHit.getSignalB().getTimeWindowIndex()) {
       fHits.push_back(currHit);
     } else {
       saveLORs(createLORs(fHits)); //create LORs from previously saved signals
