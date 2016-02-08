@@ -7,7 +7,7 @@
 
 cmake_minimum_required(VERSION 2.6)
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/framework-lib/cmake)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/j-pet-framework/cmake)
 
 # add Framework submodule
 add_subdirectory(j-pet-framework)
