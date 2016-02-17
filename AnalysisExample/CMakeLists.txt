@@ -14,7 +14,7 @@ cmake_minimum_required(VERSION 2.6)
 set(projectName AnalysisExample)
 
 set(AUXILLIARY_FILES
-  run1.sh
+  run.sh
   collimated_source_small_barrel.hld.root
   conf_trb3.xml
   README
