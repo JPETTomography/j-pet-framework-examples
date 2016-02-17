@@ -15,8 +15,7 @@ set(projectName AnalysisExample)
 
 set(AUXILLIARY_FILES
   run1.sh
-  cosm_barrel.hld.root
-  2stripMid.hld.root
+  collimated_source_small_barrel.hld.root
   conf_trb3.xml
   README
   )

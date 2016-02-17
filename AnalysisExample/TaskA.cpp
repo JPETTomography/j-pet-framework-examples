@@ -6,7 +6,7 @@
 
 #include "TaskA.h"
 #include "JPetWriter/JPetWriter.h"
-#include "JPetUnpacker/Unpacker2/Event.h"
+#include "JPetUnpacker/Unpacker2/EventIII.h"
 
 //ClassImp(TaskA);
 
@@ -20,27 +20,27 @@ TaskA::TaskA(const char * name, const char * description):
 void TaskA::exec()
 {
   // Get HLD Event
-  auto evt = reinterpret_cast<Event*> (getEvent());
+  auto evt = reinterpret_cast<EventIII*> (getEvent());
   //evt->GetTitle();
   //evt->GetName();
 
-  // get number of TDC hits in a HLD event
-  int ntdc = evt->GetTotalNTDCHits();
+  // get number of TDC channels which fired in one TSlot
+  int ntdc = evt->GetTotalNTDCChannels();
 
   JPetTimeWindow tslot;
   tslot.setIndex(fCurrEventNumber);
 
-  TClonesArray* tdcHits = evt->GetTDCHitsArray();
+  // Get the array of TDC channels which fired
+  TClonesArray* tdcHits = evt->GetTDCChannelsArray();
 
-  // iterate over TDC hits
-  TDCHit* tdchit;
-  for (int i = 0; i < ntdc; i++) {
+  // iterate over TDC channels
+  TDCChannel* tdcChannel;
+  for (int i = 0; i < ntdc; ++i) {
 
-    tdchit = (TDCHit*) tdcHits->At(i);
-    JPetSigCh sigChTmp;
+    tdcChannel = static_cast<TDCChannel*>(tdcHits->At(i));
 
     // get data channel number which corresponds to the TOMB Channel number
-    auto tomb_number =  tdchit->GetChannel();
+    auto tomb_number =  tdcChannel->GetChannel();
 
     if (tomb_number % 65 == 0) { // skip trigger signals from TRB
       continue;
@@ -55,46 +55,56 @@ void TaskA::exec()
        if (currChannel == tomb_number) break;
     }
 
-    //while (tombch_index < kNumberOfTOMBs 
-           //&& 
-           //!= tomb_number)
-      //tombch_index++;
     if (tombch_index == getParamBank().getTOMBChannelsSize()) { // TOMBChannel object not found
-      WARNING( Form("TOMB Channel for DAQ channel %d was not found in database! Ignoring this channel.", tomb_number) );
+      //      WARNING( Form("TOMB Channel for DAQ channel %d was not found in database! Ignoring this channel.", tomb_number) );
       continue;
     }
     // get TOMBChannel object from database
     JPetTOMBChannel& tomb_channel = getParamBank().getTOMBChannel(tombch_index);
-    sigChTmp.setDAQch(tomb_number);
 
-    if (tomb_channel.getLocalChannelNumber() % 2 == 1) { // leading edge
-      sigChTmp.setType(JPetSigCh::Leading);
-      //set the local threshold number(1...4) using local channel number (1...8)
-      sigChTmp.setThresholdNumber(
-        (tomb_channel.getLocalChannelNumber() + 1) / 2.);
-    } else {  // trailing edge
-      sigChTmp.setType(JPetSigCh::Trailing);
-      //set the local threshold number(1...4) using local channel number (1...8)
-      sigChTmp.setThresholdNumber(
-        tomb_channel.getLocalChannelNumber() / 2.);
+    // one TDC channel may record multiple signals in one TSlot
+    // iterate over all signals from one TDC channel
+    for(int j = 0; j < tdcChannel->GetHitsNum(); ++j){
+      JPetSigCh sigChTmpLead, sigChTmpTrail;
+      sigChTmpLead.setDAQch(tomb_number);
+      sigChTmpTrail.setDAQch(tomb_number);
+      
+      sigChTmpLead.setType(JPetSigCh::Leading);
+      sigChTmpTrail.setType(JPetSigCh::Trailing);
+
+      sigChTmpLead.setThresholdNumber(tomb_channel.getLocalChannelNumber());
+      sigChTmpTrail.setThresholdNumber(tomb_channel.getLocalChannelNumber());
+      
+      // store pointers to the related parametric objects
+      sigChTmpLead.setPM(tomb_channel.getPM());
+      sigChTmpLead.setFEB(tomb_channel.getFEB());
+      sigChTmpLead.setTRB(tomb_channel.getTRB());
+      sigChTmpLead.setTOMBChannel(tomb_channel);
+      sigChTmpTrail.setPM(tomb_channel.getPM());
+      sigChTmpTrail.setFEB(tomb_channel.getFEB());
+      sigChTmpTrail.setTRB(tomb_channel.getTRB());
+      sigChTmpTrail.setTOMBChannel(tomb_channel);
+      
+      sigChTmpLead.setThreshold(tomb_channel.getThreshold());
+      sigChTmpTrail.setThreshold(tomb_channel.getThreshold());
+      
+      // check for empty TDC times
+      assert( tdcChannel->GetLeadTime(j) != -100000 );
+      assert( tdcChannel->GetTrailTime(j) != -100000 );
+      
+      // finally, set the times in ps [raw times are in ns]
+      sigChTmpLead.setValue(tdcChannel->GetLeadTime(j) * 1000.);
+      sigChTmpTrail.setValue(tdcChannel->GetTrailTime(j) * 1000.);
+
+      // and add the sigCh-s to TSlot
+      tslot.addCh(sigChTmpLead);
+      tslot.addCh(sigChTmpTrail);
     }
-
-    // store pointers to the related parametric objects
-    sigChTmp.setPM(tomb_channel.getPM());
-    sigChTmp.setFEB(tomb_channel.getFEB());
-    sigChTmp.setTRB(tomb_channel.getTRB());
-    sigChTmp.setTOMBChannel(tomb_channel);
-
-    sigChTmp.setThreshold(tomb_channel.getThreshold());
-
-    // finally, set the time in ps
-    sigChTmp.setValue(tdchit->GetLeadTime1() * 10.);
-
-    // and add the sigCh to TimeWindow
-    tslot.addCh(sigChTmp);
+    
   }
+  
   saveTimeWindow(tslot);
-
+  
   fCurrEventNumber++;
 }
 
