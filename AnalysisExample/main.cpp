@@ -1,5 +1,6 @@
-#include "JPetManager/JPetManager.h"
-#include "JPetTaskLoader/JPetTaskLoader.h"
+#include <DBHandler/HeaderFiles/DBHandler.h>
+#include <JPetManager/JPetManager.h>
+#include <JPetTaskLoader/JPetTaskLoader.h>
 #include "TaskA.h"
 #include "TaskB.h"
 #include "TaskC1.h"
@@ -7,10 +8,9 @@
 #include "TaskC3.h"
 #include "TaskD.h"
 #include "TaskE.h"
-
-
 using namespace std;
 int main(int argc, char* argv[]) {
+   DB::SERVICES::DBHandler::createInstance("../DBConfig/configDB.cfg");
   JPetManager& manager = JPetManager::getManager();
   manager.parseCmdLine(argc, argv);
   
