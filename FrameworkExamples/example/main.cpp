@@ -12,7 +12,7 @@
 using namespace std;
 int main(int argc, char *argv[])
 {
-	DB::SERVICES::DBHandler::createInstance("../DBConfig/configDB.cfg");
+	DB::SERVICES::DBHandler::createDBConnection("../DBConfig/configDB.cfg");
   JPetManager& manager = JPetManager::GetManager();
   manager.AddTask(new JPetAnalysisModuleA("Module A", "Process Experimental data into JPetSignal structures."));
   manager.AddTask(new JPetAnalysisModuleB("Module B", "Merge JPetSignals into Events."));

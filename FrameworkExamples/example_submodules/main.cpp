@@ -9,7 +9,7 @@
 #include "JPetAnalysisModuleA.h"
 
 int main(){
-	DB::SERVICES::DBHandler::createInstance("../DBConfig/configDB.cfg");
+	DB::SERVICES::DBHandler::createDBConnection("../DBConfig/configDB.cfg");
 	JPetAnalysisModuleA main_module;
 	main_module.exec();
 }
