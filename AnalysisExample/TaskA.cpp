@@ -27,7 +27,7 @@ TaskA::TaskA(const char * name, const char * description):
 
 
 void TaskA::exec()
-{
+{  
   // Get HLD Event
   auto evt = reinterpret_cast<EventIII*> (getEvent());
   //evt->GetTitle();
@@ -55,22 +55,15 @@ void TaskA::exec()
       continue;
     }
 
-    // find index of corresponding TOMB Channel
-    //int tombch_index = 0;
-    const auto  kNumberOfTOMBs = getParamBank().getTOMBChannelsSize();
-    auto tombch_index = 0;
-    for (; tombch_index < kNumberOfTOMBs; tombch_index++) {
-       auto currChannel = getParamBank().getTOMBChannel(tombch_index).getChannel();
-       if (currChannel == tomb_number) break;
-    }
-
-    if (tombch_index == getParamBank().getTOMBChannelsSize()) { // TOMBChannel object not found
-      //      WARNING( Form("TOMB Channel for DAQ channel %d was not found in database! Ignoring this channel.", tomb_number) );
+    if( getParamBank().getTOMBChannels().count(tomb_number) == 0 ) {
+      WARNING(Form("DAQ Channel %d appears in data but does not exist in the setup from DB.", tomb_number));
       continue;
     }
-    // get TOMBChannel object from database
-    JPetTOMBChannel& tomb_channel = getParamBank().getTOMBChannel(tombch_index);
 
+
+    // get TOMBChannel object from database
+    JPetTOMBChannel& tomb_channel = getParamBank().getTOMBChannel(tomb_number);
+    
     // one TDC channel may record multiple signals in one TSlot
     // iterate over all signals from one TDC channel
     for(int j = 0; j < tdcChannel->GetHitsNum(); ++j){

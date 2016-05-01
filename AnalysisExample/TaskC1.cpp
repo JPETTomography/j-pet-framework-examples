@@ -16,6 +16,8 @@
 #include "./TaskC1.h"
 #include "JPetWriter/JPetWriter.h"
 
+#include <unordered_map>
+
 //ClassImp(TaskC1);
 
 TaskC1::TaskC1(const char * name, const char * description):
@@ -40,30 +42,22 @@ void TaskC1::exec()
 {
   // A dummy analysis example:
   auto tslot = (JPetTimeWindow&) (*getEvent());
-  std::vector<JPetRawSignal> signals(getParamBank().getPMsSize());
+  std::unordered_map<int,JPetRawSignal> signals; // map PMT number to RawSignal
 
   // get number of SigCh's in a tslot
   const auto nSigChs = tslot.getNumberOfSigCh();
   // iterate over SigCh's in the Tslot and join them in signals
-  const auto kPMsSize = getParamBank().getPMsSize();
   for (auto i = 0; i < nSigChs; i++) {
     JPetSigCh sigch = tslot[i];
 
-    int index = 0;
-    while (index < kPMsSize
-        && getParamBank().getPM(index) != sigch.getPM())
-    {
-        index++;
-    }
-    signals.at(index).addPoint(sigch);
-    //signalsArray[index].addPoint(sigch);
+    signals[sigch.getPM().getID()].addPoint(sigch);
   }
 
   int nPMs = 0;
-  
-  for (int i = 0; i < kPMsSize; i++) {
-    JPetRawSignal sig = signals.at(i);
-    //JPetRawSignal sig = signalsArray[i];
+
+
+  for (auto & pmSignalPair : signals) {
+    JPetRawSignal sig = pmSignalPair.second;
 
     if (sig.getNumberOfPoints(JPetSigCh::Leading) == 0
         && sig.getNumberOfPoints(JPetSigCh::Trailing) == 0) { //skip empty signals
@@ -72,7 +66,7 @@ void TaskC1::exec()
     nPMs++; // count how many PM-s fired in one TimeWindow
 
     sig.setTimeWindowIndex(tslot.getIndex());
-    sig.setPM(getParamBank().getPM(i));
+    sig.setPM(getParamBank().getPM(pmSignalPair.first));
 
     // keep some statistics
     getStatistics().getHisto1D("No. leading points").Fill(sig.getNumberOfPoints(JPetSigCh::Leading));
@@ -91,7 +85,6 @@ void TaskC1::exec()
       // if the signal is worth keeping, write the signal to output tree
       saveRawSignal(sig);
     }
-
   }
 
   getStatistics().getHisto1D("No. of fired PM-s").Fill(nPMs);

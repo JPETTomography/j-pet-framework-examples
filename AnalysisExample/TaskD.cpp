@@ -30,12 +30,11 @@ void TaskD::init(const JPetTaskInterface::Options& opts)
   getStatistics().createHistogram( new TH1F("Scins multiplicity", "scintillators multiplicity", 65, 5.5,
 					    70.5));
 
-  // create a histogram of time difference for every scintillator in the setup                                        
-  // we loop over all scintillator objects in the parameters bank downloaded                                          
-  // from database for the run number given by user                                                                   
-  for(int i=0; i< getParamBank().getScintillatorsSize(); i++){
-    JPetScin & scin = getParamBank().getScintillator(i);
-    TString name = Form("dt for scin %d", scin.getID());
+  // create a histogram of time difference for every scintillator in the setup
+  // we loop over all scintillator objects in the parameters bank downloaded
+  // from database for the run number given by user
+  for(auto & scin : getParamBank().getScintillators()){
+    TString name = Form("dt for scin %d", scin.first);
     getStatistics().createHistogram( new TH1F(name, name, 100, -10000., 10000.) );
   }
   
