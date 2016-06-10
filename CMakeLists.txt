@@ -18,9 +18,9 @@ add_definitions(${Framework_DEFINITIONS})
 if(APPLE)
   set(CMAKE_MACOSX_RPATH ON)
   set(CMAKE_EXE_LINKER_FLAGS
-    "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,${ROOT_LIBRARY_DIR}"
+    "${CMAKE_EXE_LINKER_FLAGS} -std=c++11 -Wl,-rpath,${ROOT_LIBRARY_DIR}"
     )
 endif()
 
 add_subdirectory(AnalysisExample)
-add_subdirectory(ScopeReaderExample)
+add_subdirectory(ScopeLoaderExample)
