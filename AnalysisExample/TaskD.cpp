@@ -15,6 +15,7 @@
 
 #include "./TaskD.h"
 #include "JPetWriter/JPetWriter.h"
+#include <iostream>
 
 //ClassImp(TaskD);
 
@@ -34,7 +35,7 @@ void TaskD::init(const JPetTaskInterface::Options& opts)
   // we loop over all scintillator objects in the parameters bank downloaded
   // from database for the run number given by user
   for(auto & scin : getParamBank().getScintillators()){
-    TString name = Form("dt for scin %d", scin.first);
+    TString name = Form("dt for scin %d", scin.second->getID());
     getStatistics().createHistogram( new TH1F(name, name, 100, -10000., 10000.) );
   }
   

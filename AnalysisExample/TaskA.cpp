@@ -16,6 +16,7 @@
 #include "TaskA.h"
 #include "JPetWriter/JPetWriter.h"
 #include "JPetUnpacker/Unpacker2/EventIII.h"
+#include <iostream>
 
 //ClassImp(TaskA);
 
@@ -55,7 +56,7 @@ void TaskA::exec()
       continue;
     }
 
-    if( getParamBank().getTOMBChannels().count(tomb_number) == 0 ) {
+    if( getParamBank().getTOMBChannels().at(tomb_number) == 0 ) {
       WARNING(Form("DAQ Channel %d appears in data but does not exist in the setup from DB.", tomb_number));
       continue;
     }
