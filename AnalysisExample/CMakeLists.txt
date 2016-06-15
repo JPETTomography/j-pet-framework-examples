@@ -37,7 +37,7 @@ generate_root_dictionaries(DICTIONARIES SOURCES ${SOURCES})
 add_executable(${projectBinary} ${SOURCES} ${HEADERS} ${DICTIONARIES})
 target_link_libraries(${projectBinary} JPetFramework)
 
-add_custom_target(clean_data
+add_custom_target(clean_data_analysisexample
   COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root)
 
 # copy the DB config file to an expected location
