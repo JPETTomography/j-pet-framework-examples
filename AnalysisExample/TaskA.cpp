@@ -56,11 +56,10 @@ void TaskA::exec()
       continue;
     }
 
-    if( getParamBank().getTOMBChannels().at(tomb_number) == 0 ) {
+    if( getParamBank().getTOMBChannels().count(tomb_number) == 0 ) {
       WARNING(Form("DAQ Channel %d appears in data but does not exist in the setup from DB.", tomb_number));
       continue;
     }
-
 
     // get TOMBChannel object from database
     JPetTOMBChannel& tomb_channel = getParamBank().getTOMBChannel(tomb_number);
