@@ -24,3 +24,5 @@ endif()
 
 add_subdirectory(AnalysisExample)
 add_subdirectory(ScopeLoaderExample)
+add_subdirectory(LargeBarrelAnalysis)
+
