@@ -40,9 +40,9 @@ wget "${WGET_INPUT}" "${WGET_FLAGS[@]}" -P "${WGET_OUTPUT}"
 WGET_DIR=${DIR_SRE}
 WGET_INPUT=${HTTP_PATH}/${DIR_SRE}
 #downloading test data via wget
-get "${WGET_INPUT}" "${WGET_FLAGS[@]}" -P "${WGET_OUTPUT}" 
+wget "${WGET_INPUT}" "${WGET_FLAGS[@]}" -P "${WGET_OUTPUT}" 
 
 WGET_DIR=${DIR_LBE}
 WGET_INPUT=${HTTP_PATH}/${DIR_LBE}
 #downloading test data via wget
-get "${WGET_INPUT}" "${WGET_FLAGS[@]}" -P "${WGET_OUTPUT}" 
+wget "${WGET_INPUT}" "${WGET_FLAGS[@]}" -P "${WGET_OUTPUT}" 
