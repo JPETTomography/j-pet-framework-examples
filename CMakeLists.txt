@@ -22,6 +22,13 @@ if(APPLE)
     )
 endif()
 
+##download input files and config files
+#only once
+set(DOWNLOAD_DATA ${CMAKE_CURRENT_SOURCE_DIR}/download_data.sh ${CMAKE_CURRENT_SOURCE_DIR})
+if(NOT DOWNLOAD_DATA_HAPPENED)
+  execute_process( COMMAND ${DOWNLOAD_DATA} )
+  set(DOWNLOAD_DATA_HAPPENED TRUE CACHE BOOL "Has the download data happened?" FORCE)
+endif() 
 add_subdirectory(AnalysisExample)
 add_subdirectory(ScopeLoaderExample)
 add_subdirectory(LargeBarrelAnalysis)
