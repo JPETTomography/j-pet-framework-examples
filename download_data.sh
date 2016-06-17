@@ -7,11 +7,14 @@
 #analysis example
 DIR_AE=AnalysisExample
 
-#scope reader example
-DIR_SRE=ScopeLoaderExample
+#scope loader example
+DIR_SLE=ScopeLoaderExample
 
-#scope reader example
+#large barrel example
 DIR_LBE=LargeBarrelExample
+
+#framework examples
+DIR_FE=FrameworkExample
 
 HTTP_PATH="http://koza.if.uj.edu.pl/framework/Examples"
 WGET_OUTPUT="./"
@@ -37,12 +40,17 @@ WGET_INPUT=${HTTP_PATH}/${DIR_AE}
 #downloading test data via wget
 wget "${WGET_INPUT}" "${WGET_FLAGS[@]}" -P "${WGET_OUTPUT}" 
 
-WGET_DIR=${DIR_SRE}
-WGET_INPUT=${HTTP_PATH}/${DIR_SRE}
+WGET_DIR=${DIR_SLE}
+WGET_INPUT=${HTTP_PATH}/${DIR_SLE}
 #downloading test data via wget
 wget "${WGET_INPUT}" "${WGET_FLAGS[@]}" -P "${WGET_OUTPUT}" 
 
 WGET_DIR=${DIR_LBE}
 WGET_INPUT=${HTTP_PATH}/${DIR_LBE}
+#downloading test data via wget
+wget "${WGET_INPUT}" "${WGET_FLAGS[@]}" -P "${WGET_OUTPUT}" 
+
+WGET_DIR=${DIR_FE}
+WGET_INPUT=${HTTP_PATH}/${DIR_FE}
 #downloading test data via wget
 wget "${WGET_INPUT}" "${WGET_FLAGS[@]}" -P "${WGET_OUTPUT}" 
