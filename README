@@ -15,23 +15,20 @@ The J-PET Framework Examples Repository is a set of programs built on top of the
 
 The J-PET Framework library is a separate git repository available at:
 
-  koza.if.uj.edu.pl/srv/git/j-pet-framework.git
+   github.com/JPETTomography/j-pet-framework.git
 
 It is a sumodule of this (examples) repository. If you follow the instruction below, the sources of the The J-PET Framework library will be automatically downloaded and placed in a firectory named 'j-pet-framework'.
 
 The Latest Version
 ------------------
 
-The latest stable versions of both the examples and library can be downloaded from git repositories. You must have a git client istalled and have rights to access these repositories. If it is the case you can just do:
+The latest stable version can be downloaded from the github repository. You must have git client istalled and do:
  
-  git clone --recursive ssh://yourUser@koza.if.uj.edu.pl/srv/git/j-pet-framework-examples.git myFramework
-  cd myFramework 
+  git clone --recursive https://github.com/JPETTomography/j-pet-framework-examples.git
 
 If you have already a directory with the code and you want to update it, just write:
 
   git pull && git submodule update
-
-If you dont have the access to the repository server, please contact:wojciech.krzemien@if.uj.edu.pl
 
 
 Installation
@@ -42,12 +39,13 @@ Please see the file called INSTALL.
 Authors
 -------
 
-J-Pet analysis framework is being developed by Wojciech Krzemien, Karol Stola, Damian Trybek, Aleksander Gajos, Andrzej Gruntowski, Szymon Niedźwiecki, Oleksandr Rundel and Tomasz Kisielewski.
+J-PET Analysis Framework is being developed by Wojciech Krzemien, Aleksander Gajos, Andrzej Gruntowski, Szymon Niedźwiecki, Oleksandr Rundel and Tomasz Kisielewski.
+The former developers are Karol Stola and Damian Trybek.
+
 
 Bug Reporting & Contact
 -----------------------
 
 If you have any question or comment please write to: 
-wojciech.krzemien@if.uj.edu.pl
+wojciech.krzemien@ncbj.gov.pl
 or better post it to the Redmine list.
-
