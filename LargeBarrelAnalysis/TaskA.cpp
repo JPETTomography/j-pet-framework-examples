@@ -26,16 +26,33 @@ TaskA::TaskA(const char * name, const char * description):
 }
 
 
+void TaskA::init(const JPetTaskInterface::Options& opts){
+
+  
+  getStatistics().createHistogram( new TH1F("HitsPerEvtCh",
+					    "Hits per channel in one event",
+					    50,
+					    -0.5,
+					    49.5) );
+  
+  getStatistics().createHistogram( new TH1F("ChannelsPerEvt",
+					  "Channels fired in one event",
+					  200,
+					  -0.5,
+					  199.5) );
+  
+}
+
 void TaskA::exec()
 {  
   // Get HLD Event
   auto evt = reinterpret_cast<EventIII*> (getEvent());
-  //evt->GetTitle();
-  //evt->GetName();
 
   // get number of TDC channels which fired in one TSlot
   int ntdc = evt->GetTotalNTDCChannels();
 
+  getStatistics().getHisto1D("ChannelsPerEvt").Fill( ntdc );
+  
   JPetTimeWindow tslot;
   tslot.setIndex(fCurrEventNumber);
 
@@ -44,13 +61,14 @@ void TaskA::exec()
 
   // iterate over TDC channels
   TDCChannel* tdcChannel;
+
   for (int i = 0; i < ntdc; ++i) {
 
     tdcChannel = static_cast<TDCChannel*>(tdcHits->At(i));
 
     // get data channel number which corresponds to the TOMB Channel number
     auto tomb_number =  tdcChannel->GetChannel();
-
+    
     if (tomb_number % 65 == 0) { // skip trigger signals from TRB
       continue;
     }
@@ -59,14 +77,20 @@ void TaskA::exec()
       WARNING(Form("DAQ Channel %d appears in data but does not exist in the setup from DB.", tomb_number));
       continue;
     }
-
-
+    
+    
     // get TOMBChannel object from database
     JPetTOMBChannel& tomb_channel = getParamBank().getTOMBChannel(tomb_number);
     
     // one TDC channel may record multiple signals in one TSlot
     // iterate over all signals from one TDC channel
-    for(int j = 0; j < tdcChannel->GetHitsNum(); ++j){
+
+    // analyze number of hits per channel
+    getStatistics().getHisto1D("HitsPerEvtCh").Fill( tdcChannel->GetHitsNum() );
+    
+  // !!!!!! only to imitate the Go4 macros
+  // !!!!!! which take only last signals from the event    
+    for(int j = tdcChannel->GetHitsNum()-1; j < tdcChannel->GetHitsNum(); ++j){
       JPetSigCh sigChTmpLead, sigChTmpTrail;
       sigChTmpLead.setDAQch(tomb_number);
       sigChTmpTrail.setDAQch(tomb_number);
@@ -91,8 +115,12 @@ void TaskA::exec()
       sigChTmpTrail.setThreshold(tomb_channel.getThreshold());
       
       // check for empty TDC times
-      assert( tdcChannel->GetLeadTime(j) != -100000 );
-      assert( tdcChannel->GetTrailTime(j) != -100000 );
+      if( tdcChannel->GetLeadTime(j) == -100000 ){
+	continue;
+      }
+      if( tdcChannel->GetTrailTime(j) == -100000 ){
+	continue;
+      }
       
       // finally, set the times in ps [raw times are in ns]
       sigChTmpLead.setValue(tdcChannel->GetLeadTime(j) * 1000.);
@@ -102,7 +130,7 @@ void TaskA::exec()
       tslot.addCh(sigChTmpLead);
       tslot.addCh(sigChTmpTrail);
     }
-    
+
   }
   
   saveTimeWindow(tslot);
