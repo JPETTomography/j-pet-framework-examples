@@ -10,25 +10,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file TaskA.h
+ *  @file TaskB.h
  */
 
-#ifndef TASKA_H
-#define TASKA_H
+#ifndef TASKB1_H
+#define TASKB1_H
 
 #include <vector>
 
 #include "JPetTask/JPetTask.h"
+#include "JPetRawSignal/JPetRawSignal.h"
 #include "JPetTimeWindow/JPetTimeWindow.h"
 #include "JPetParamBank/JPetParamBank.h"
 #include "JPetParamManager/JPetParamManager.h"
 
+#include "LargeBarrelMapping.h"
+
 class JPetWriter;
 
-class TaskA: public JPetTask
+class TaskB1: public JPetTask
 {
 public:
-  TaskA(const char * name, const char * description);
+  TaskB1(const char * name, const char * description);
   virtual void init(const JPetTaskInterface::Options& opts);
   virtual void exec();
   virtual void terminate();
@@ -39,17 +42,19 @@ public:
     fParamManager = paramManager;
   }
   const JPetParamBank& getParamBank() {
-    assert(fParamManager);
     return fParamManager->getParamBank();
   }
 protected:
-  void saveTimeWindow( JPetTimeWindow slot);
-
+  void saveRawSignal( JPetRawSignal sig);
+  
+  const char * formatUniqueChannelDescription(const JPetTOMBChannel & channel, const char * prefix) const;
+  int calcGlobalPMTNumber(const JPetPM & pmt) const;
+  
   JPetWriter* fWriter;
   JPetParamManager* fParamManager;
-  long long int fCurrEventNumber;
-
-  //ClassDef(TaskA, 1);
   
+  LargeBarrelMapping fBarrelMap;
+  
+  //ClassDef(TaskB1, 1);
 };
-#endif /*  !TASKA_H */
+#endif /*  !TASKB1_H */

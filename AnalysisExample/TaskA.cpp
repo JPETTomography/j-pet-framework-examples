@@ -91,8 +91,8 @@ void TaskA::exec()
       sigChTmpTrail.setThreshold(tomb_channel.getThreshold());
       
       // check for empty TDC times
-      assert( tdcChannel->GetLeadTime(j) != -100000 );
-      assert( tdcChannel->GetTrailTime(j) != -100000 );
+      if( tdcChannel->GetLeadTime(j) == -100000 ) continue;
+      if( tdcChannel->GetTrailTime(j) == -100000 ) continue;
       
       // finally, set the times in ps [raw times are in ns]
       sigChTmpLead.setValue(tdcChannel->GetLeadTime(j) * 1000.);

@@ -10,46 +10,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file TaskA.h
+ *  @file TaskC.h
  */
 
-#ifndef TASKA_H
-#define TASKA_H
-
-#include <vector>
+#ifndef TASKC_H 
+#define TASKC_H 
 
 #include "JPetTask/JPetTask.h"
-#include "JPetTimeWindow/JPetTimeWindow.h"
-#include "JPetParamBank/JPetParamBank.h"
-#include "JPetParamManager/JPetParamManager.h"
+#include "JPetHit/JPetHit.h"
+#include "JPetRawSignal/JPetRawSignal.h"
 
 class JPetWriter;
 
-class TaskA: public JPetTask
-{
-public:
-  TaskA(const char * name, const char * description);
+class TaskC:public JPetTask {
+ public:
+  TaskC(const char * name, const char * description);
   virtual void init(const JPetTaskInterface::Options& opts);
   virtual void exec();
   virtual void terminate();
-  virtual void setWriter(JPetWriter* writer) {
-    fWriter = writer;
-  }
-  void setParamManager(JPetParamManager* paramManager) {
-    fParamManager = paramManager;
-  }
-  const JPetParamBank& getParamBank() {
-    assert(fParamManager);
-    return fParamManager->getParamBank();
-  }
-protected:
-  void saveTimeWindow( JPetTimeWindow slot);
+  virtual void setWriter(JPetWriter* writer) {fWriter =writer;}
+ protected:
+  std::vector<JPetHit> createHits(std::vector<JPetRawSignal>& signals);
+  void saveHits(std::vector<JPetHit> hits);
 
-  JPetWriter* fWriter;
-  JPetParamManager* fParamManager;
-  long long int fCurrEventNumber;
-
-  //ClassDef(TaskA, 1);
+  std::vector<JPetRawSignal> fSignals;
   
+  JPetWriter* fWriter;
+  
+  //ClassDef(TaskC, 1);
 };
-#endif /*  !TASKA_H */
+#endif /*  !TASKD_H */

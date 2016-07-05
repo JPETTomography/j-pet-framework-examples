@@ -10,46 +10,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file TaskA.h
+ *  @file TaskD.h
  */
 
-#ifndef TASKA_H
-#define TASKA_H
-
-#include <vector>
+#ifndef TASKD_H 
+#define TASKD_H 
 
 #include "JPetTask/JPetTask.h"
-#include "JPetTimeWindow/JPetTimeWindow.h"
-#include "JPetParamBank/JPetParamBank.h"
-#include "JPetParamManager/JPetParamManager.h"
+#include "JPetHit/JPetHit.h"
+#include "JPetRawSignal/JPetRawSignal.h"
+
+#include "LargeBarrelMapping.h"
 
 class JPetWriter;
 
-class TaskA: public JPetTask
-{
-public:
-  TaskA(const char * name, const char * description);
+class TaskD:public JPetTask {
+ public:
+  TaskD(const char * name, const char * description);
   virtual void init(const JPetTaskInterface::Options& opts);
   virtual void exec();
   virtual void terminate();
-  virtual void setWriter(JPetWriter* writer) {
-    fWriter = writer;
-  }
-  void setParamManager(JPetParamManager* paramManager) {
-    fParamManager = paramManager;
-  }
-  const JPetParamBank& getParamBank() {
-    assert(fParamManager);
-    return fParamManager->getParamBank();
-  }
-protected:
-  void saveTimeWindow( JPetTimeWindow slot);
+  virtual void setWriter(JPetWriter* writer) {fWriter =writer;}
+ protected:
+  const char * formatUniqueSlotDescription(const JPetBarrelSlot & slot, int threshold,const char * prefix);
+  void fillHistosForHit(const JPetHit & hit);
 
   JPetWriter* fWriter;
-  JPetParamManager* fParamManager;
-  long long int fCurrEventNumber;
 
-  //ClassDef(TaskA, 1);
+  LargeBarrelMapping fBarrelMap;
   
+  //ClassDef(TaskD, 1);
 };
-#endif /*  !TASKA_H */
+#endif /*  !TASKD_H */

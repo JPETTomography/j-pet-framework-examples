@@ -19,6 +19,11 @@ set(AUXILLIARY_FILES
   README
   )
 
+set(ROOT_SCRIPTS
+  rootlogon.C
+  rootalias.C
+  )
+
 ######################################################################
 ### this section should not need to be modified for a new project
 ######################################################################
@@ -62,4 +67,14 @@ foreach( file_i ${AUXILLIARY_FILES})
     COMMAND ${CMAKE_COMMAND}
     ARGS -E ${CP_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
     )
+endforeach( file_i )
+
+# copy the ROOT scripts
+foreach( file_i ${ROOT_SCRIPTS})
+add_custom_command(
+  TARGET ${projectBinary}
+  POST_BUILD
+  COMMAND ${CMAKE_COMMAND}
+  ARGS -E ${CP_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
+  )
 endforeach( file_i )
