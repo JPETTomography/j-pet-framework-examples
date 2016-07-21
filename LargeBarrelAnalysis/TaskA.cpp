@@ -12,8 +12,8 @@
  *
  *  @file TaskA.cpp
  */
-#include "JPetUnpacker/Unpacker2/EventIII.h"
-#include "JPetWriter/JPetWriter.h"
+#include <JPetUnpacker/Unpacker2/EventIII.h>
+#include <JPetWriter/JPetWriter.h>
 #include "TaskA.h"
 TaskA::TaskA(const char * name, const char * description)
 :JPetTask(name, description),fCurrEventNumber(0){}

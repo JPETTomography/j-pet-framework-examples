@@ -17,11 +17,11 @@
 #define TASKB1_H
 
 #include <vector>
-#include "JPetTask/JPetTask.h"
-#include "JPetRawSignal/JPetRawSignal.h"
-#include "JPetTimeWindow/JPetTimeWindow.h"
-#include "JPetParamBank/JPetParamBank.h"
-#include "JPetParamManager/JPetParamManager.h"
+#include <JPetTask/JPetTask.h>
+#include <JPetRawSignal/JPetRawSignal.h>
+#include <JPetTimeWindow/JPetTimeWindow.h>
+#include <JPetParamBank/JPetParamBank.h>
+#include <JPetParamManager/JPetParamManager.h>
 #include "LargeBarrelMapping.h"
 class JPetWriter;
 #ifdef __CINT__

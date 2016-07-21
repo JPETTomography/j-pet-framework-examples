@@ -17,10 +17,10 @@
 #define TASKA_H
 
 #include <vector>
-#include "JPetTask/JPetTask.h"
-#include "JPetTimeWindow/JPetTimeWindow.h"
-#include "JPetParamBank/JPetParamBank.h"
-#include "JPetParamManager/JPetParamManager.h"
+#include <JPetTask/JPetTask.h>
+#include <JPetTimeWindow/JPetTimeWindow.h>
+#include <JPetParamBank/JPetParamBank.h>
+#include <JPetParamManager/JPetParamManager.h>
 class JPetWriter;
 #ifdef __CINT__
 #	define override
