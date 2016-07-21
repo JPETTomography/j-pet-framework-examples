@@ -15,7 +15,7 @@
 
 #include <map>
 #include <string>
-#include "JPetWriter/JPetWriter.h"
+#include <JPetWriter/JPetWriter.h>
 #include "TaskB1.h"
 using namespace std;
 TaskB1::TaskB1(const char * name, const char * description):

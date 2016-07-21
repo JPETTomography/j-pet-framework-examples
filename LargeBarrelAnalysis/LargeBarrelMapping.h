@@ -28,7 +28,7 @@ public:
 	int getNumberOfSlots(const JPetLayer & layer) const;
 	int getNumberOfSlots(int layerNumber) const;
 	int getSlotNumber(const JPetBarrelSlot & slot) const;
-	int calcDeltaID(JPetHit & hit1, JPetHit & hit2) const;
+	int calcDeltaID(const JPetHit & hit1,const JPetHit & hit2) const;
 	void buildMappings(const JPetParamBank & paramBank);
 private:
 	std::map<double, int> fRadiusToLayer;

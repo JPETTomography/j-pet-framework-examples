@@ -12,40 +12,34 @@
  *
  *  @file TaskE.h
  */
-
 #ifndef TASKE_H 
 #define TASKE_H 
-
-#include "JPetTask/JPetTask.h"
-#include "JPetHit/JPetHit.h"
-#include "JPetRawSignal/JPetRawSignal.h"
-
+#include <JPetTask/JPetTask.h>
+#include <JPetHit/JPetHit.h>
+#include <JPetRawSignal/JPetRawSignal.h>
 #include "LargeBarrelMapping.h"
-
 class JPetWriter;
-
+#ifdef __CINT__
+#	define override
+#endif
 class TaskE:public JPetTask {
- public:
-  TaskE(const char * name, const char * description);
-  virtual void init(const JPetTaskInterface::Options& opts);
-  virtual void exec();
-  virtual void terminate();
-  virtual void setWriter(JPetWriter* writer) {fWriter =writer;}
- protected:
-  const char * formatUniqueSlotDescription(const JPetBarrelSlot & slot, int threshold,const char * prefix);
-
-  void fillCoincidenceHistos(std::vector<JPetHit>& hits);
-  void fillDeltaIDhisto(int delta_ID, int threshold, const JPetLayer & layer);
-  void fillTOFvsDeltaIDhisto(int delta_ID, int threshold, const JPetHit & hit1, const JPetHit & hit2);
-  bool isGoodTimeDiff(const JPetHit & hit, int thr);
-  void fillTOTvsTOThisto(int delta_ID, int thr, const JPetHit & hit1, const JPetHit & hit2);
-  
-  LargeBarrelMapping fBarrelMap;
-
-  std::vector<JPetHit> fHits;
-  
-  JPetWriter* fWriter;
-
-  //ClassDef(TaskE, 1);
+public:
+	TaskE(const char * name, const char * description);
+	virtual ~TaskE();
+	virtual void init(const JPetTaskInterface::Options& opts)override;
+	virtual void exec()override;
+	virtual void terminate()override;
+	virtual void setWriter(JPetWriter* writer)override;
+protected:
+	const char * formatUniqueSlotDescription(const JPetBarrelSlot & slot, int threshold,const char * prefix);
+	void fillCoincidenceHistos(const std::vector<JPetHit>& hits);
+	void fillDeltaIDhisto(int delta_ID, int threshold, const JPetLayer & layer);
+	void fillTOFvsDeltaIDhisto(int delta_ID, int threshold, const JPetHit & hit1, const JPetHit & hit2);
+	bool isGoodTimeDiff(const JPetHit & hit, int thr);
+	void fillTOTvsTOThisto(int delta_ID, int thr, const JPetHit & hit1, const JPetHit & hit2);
+private:
+	LargeBarrelMapping fBarrelMap;
+	std::vector<JPetHit> fHits;
+	JPetWriter* fWriter;
 };
 #endif /*  !TASKE_H */
