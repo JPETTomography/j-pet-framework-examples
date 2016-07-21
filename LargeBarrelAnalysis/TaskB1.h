@@ -17,44 +17,33 @@
 #define TASKB1_H
 
 #include <vector>
-
 #include "JPetTask/JPetTask.h"
 #include "JPetRawSignal/JPetRawSignal.h"
 #include "JPetTimeWindow/JPetTimeWindow.h"
 #include "JPetParamBank/JPetParamBank.h"
 #include "JPetParamManager/JPetParamManager.h"
-
 #include "LargeBarrelMapping.h"
-
 class JPetWriter;
-
+#ifdef __CINT__
+#	define override
+#endif
 class TaskB1: public JPetTask
 {
 public:
-  TaskB1(const char * name, const char * description);
-  virtual void init(const JPetTaskInterface::Options& opts);
-  virtual void exec();
-  virtual void terminate();
-  virtual void setWriter(JPetWriter* writer) {
-    fWriter = writer;
-  }
-  void setParamManager(JPetParamManager* paramManager) {
-    fParamManager = paramManager;
-  }
-  const JPetParamBank& getParamBank() {
-    return fParamManager->getParamBank();
-  }
+	TaskB1(const char * name, const char * description);
+	virtual ~TaskB1();
+	virtual void init(const JPetTaskInterface::Options& opts)override;
+	virtual void exec()override;
+	virtual void terminate()override;
+	virtual void setWriter(JPetWriter* writer)override;
+	virtual void setParamManager(JPetParamManager* paramManager)override;
+	const JPetParamBank& getParamBank()const;
 protected:
-  void saveRawSignal( JPetRawSignal sig);
-  
-  const char * formatUniqueChannelDescription(const JPetTOMBChannel & channel, const char * prefix) const;
-  int calcGlobalPMTNumber(const JPetPM & pmt) const;
-  
-  JPetWriter* fWriter;
-  JPetParamManager* fParamManager;
-  
-  LargeBarrelMapping fBarrelMap;
-  
-  //ClassDef(TaskB1, 1);
+	void saveRawSignal( JPetRawSignal sig);
+	const char * formatUniqueChannelDescription(const JPetTOMBChannel & channel, const char * prefix) const;
+	int calcGlobalPMTNumber(const JPetPM & pmt) const;
+	JPetWriter* fWriter;
+	JPetParamManager* fParamManager;
+	LargeBarrelMapping fBarrelMap;
 };
 #endif /*  !TASKB1_H */
