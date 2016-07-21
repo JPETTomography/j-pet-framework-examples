@@ -17,39 +17,28 @@
 #define TASKA_H
 
 #include <vector>
-
 #include "JPetTask/JPetTask.h"
 #include "JPetTimeWindow/JPetTimeWindow.h"
 #include "JPetParamBank/JPetParamBank.h"
 #include "JPetParamManager/JPetParamManager.h"
-
 class JPetWriter;
-
-class TaskA: public JPetTask
-{
+#ifdef __CINT__
+#	define override
+#endif
+class TaskA: public JPetTask{
 public:
-  TaskA(const char * name, const char * description);
-  virtual void init(const JPetTaskInterface::Options& opts);
-  virtual void exec();
-  virtual void terminate();
-  virtual void setWriter(JPetWriter* writer) {
-    fWriter = writer;
-  }
-  void setParamManager(JPetParamManager* paramManager) {
-    fParamManager = paramManager;
-  }
-  const JPetParamBank& getParamBank() {
-    assert(fParamManager);
-    return fParamManager->getParamBank();
-  }
+	TaskA(const char * name, const char * description);
+	virtual ~TaskA();
+	virtual void init(const JPetTaskInterface::Options& opts)override;
+	virtual void exec()override;
+	virtual void terminate()override;
+	virtual void setWriter(JPetWriter* writer)override;
+	virtual void setParamManager(JPetParamManager* paramManager)override;
+	const JPetParamBank& getParamBank()const;
 protected:
-  void saveTimeWindow( JPetTimeWindow slot);
-
-  JPetWriter* fWriter;
-  JPetParamManager* fParamManager;
-  long long int fCurrEventNumber;
-
-  //ClassDef(TaskA, 1);
-  
+	void saveTimeWindow( JPetTimeWindow slot);
+	JPetWriter* fWriter;
+	JPetParamManager* fParamManager;
+	long long int fCurrEventNumber;
 };
 #endif /*  !TASKA_H */
