@@ -23,6 +23,9 @@ void TaskA::init(const JPetTaskInterface::Options& opts){
 }
 TaskA::~TaskA(){}
 void TaskA::exec(){  
+	//getting the data from event in propriate format
+	//const is commented because this class has inproper architecture:
+	// all get-methods aren't tagged with const modifier
 	if(auto evt = reinterpret_cast</*const*/ EventIII*const>(getEvent())){
 		int ntdc = evt->GetTotalNTDCChannels();
 		getStatistics().getHisto1D("ChannelsPerEvt").Fill( ntdc );
@@ -30,6 +33,8 @@ void TaskA::exec(){
 		tslot.setIndex(fCurrEventNumber);
 		auto tdcHits = evt->GetTDCChannelsArray();
 		for (int i = 0; i < ntdc; ++i) {
+			//const is commented because this class has inproper architecture:
+			// all get-methods aren't tagged with const modifier
 			auto tdcChannel = dynamic_cast</*const*/ TDCChannel*const>(tdcHits->At(i));
 			auto tomb_number =  tdcChannel->GetChannel();
 			if (tomb_number % 65 == 0) { // skip trigger signals from TRB
