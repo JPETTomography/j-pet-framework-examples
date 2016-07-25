@@ -50,6 +50,7 @@ void TaskB1::init(const JPetTaskInterface::Options& opts){
 }
 
 void TaskB1::exec(){
+	//getting the data from event in propriate format
 	if(auto timeWindow = dynamic_cast<const JPetTimeWindow*const>(getEvent())){
 		map<int,JPetSigCh> leadSigChs;
 		map<int,JPetSigCh> trailSigChs;
@@ -63,6 +64,7 @@ void TaskB1::exec(){
 			if( sigch.getType() == JPetSigCh::Trailing )
 				trailSigChs[ daq_channel ] = sigch;
 		}
+		// iterate over the leading-edge SigChs
 		for (auto & chSigPair : leadSigChs) {
 			int daq_channel = chSigPair.first;
 			if( trailSigChs.count(daq_channel) != 0 ){ 
@@ -84,6 +86,8 @@ void TaskB1::exec(){
 				getStatistics().getHisto2D("was lead and trail edge?").Fill(0.,1.);
 			}
 		}
+		// the above loop will not count cases where there was only trailing edge signal
+		// count this in a separate loop
 		for (const auto & chSigPair : trailSigChs) {
 			int daq_channel = chSigPair.first;
 			if( leadSigChs.count(daq_channel) == 0 )

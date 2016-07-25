@@ -21,6 +21,7 @@ TaskC::TaskC(const char * name, const char * description):JPetTask(name, descrip
 TaskC::~TaskC(){}
 void TaskC::init(const JPetTaskInterface::Options& opts){}
 void TaskC::exec(){
+	//getting the data from event in propriate format
 	if(auto currSignal = dynamic_cast<const JPetRawSignal*const>(getEvent())){
 		getStatistics().getCounter("No. initial signals")++;
 		if (fSignals.empty()) {
@@ -41,6 +42,11 @@ vector<JPetHit> TaskC::createHits(const vector<JPetRawSignal>&signals){
 	for (auto i = signals.begin(); i != signals.end(); ++i) {
 		for (auto j = i; ++j != signals.end();) {
 			if (i->getPM().getScin() == j->getPM().getScin()) {
+				// found 2 signals from the same scintillator
+				// wrap the RawSignal objects into RecoSignal and PhysSignal
+				// for now this is just wrapping opne object into another
+				// in the future analyses it will involve more logic like
+				// reconstructing the signal's shape, charge, amplitude etc.
 				JPetRecoSignal recoSignalA;
 				JPetRecoSignal recoSignalB;
 				JPetPhysSignal physSignalA;
@@ -89,7 +95,12 @@ void TaskC::terminate(){
 
 void TaskC::saveHits(const vector<JPetHit>&hits){
 	assert(fWriter);
-	for (auto hit : hits)
+	for (auto hit : hits){
+		// here one can impose any conditions on hits that should be
+		// saved or skipped
+		// for now, all hits are written to the output file
+		// without checking anything
 		fWriter->write(hit);
+	}
 }
 void TaskC::setWriter(JPetWriter* writer){fWriter =writer;}
