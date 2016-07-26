@@ -16,29 +16,28 @@
 #ifndef TASKD_H 
 #define TASKD_H 
 
-#include "JPetTask/JPetTask.h"
-#include "JPetHit/JPetHit.h"
-#include "JPetRawSignal/JPetRawSignal.h"
-
+#include <JPetTask/JPetTask.h>
+#include <JPetHit/JPetHit.h>
+#include <JPetRawSignal/JPetRawSignal.h>
 #include "LargeBarrelMapping.h"
-
 class JPetWriter;
-
-class TaskD:public JPetTask {
- public:
-  TaskD(const char * name, const char * description);
-  virtual void init(const JPetTaskInterface::Options& opts);
-  virtual void exec();
-  virtual void terminate();
-  virtual void setWriter(JPetWriter* writer) {fWriter =writer;}
- protected:
-  const char * formatUniqueSlotDescription(const JPetBarrelSlot & slot, int threshold,const char * prefix);
-  void fillHistosForHit(const JPetHit & hit);
-
-  JPetWriter* fWriter;
-
-  LargeBarrelMapping fBarrelMap;
-  
-  //ClassDef(TaskD, 1);
+#ifdef __CINT__
+//when cint is used instead of compiler, override word is not recognized
+//nevertheless it's needed for checking if the structure of project is correct
+#	define override
+#endif
+class TaskD:public JPetTask{
+public:
+	TaskD(const char * name, const char * description);
+	virtual ~TaskD(){}
+	virtual void init(const JPetTaskInterface::Options& opts)override;
+	virtual void exec()override;
+	virtual void terminate()override;
+	virtual void setWriter(JPetWriter* writer)override;
+protected:
+	const char * formatUniqueSlotDescription(const JPetBarrelSlot & slot, int threshold,const char * prefix);
+	void fillHistosForHit(const JPetHit & hit);
+	JPetWriter* fWriter;
+	LargeBarrelMapping fBarrelMap;
 };
 #endif /*  !TASKD_H */

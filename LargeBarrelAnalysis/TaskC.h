@@ -16,27 +16,27 @@
 #ifndef TASKC_H 
 #define TASKC_H 
 
-#include "JPetTask/JPetTask.h"
-#include "JPetHit/JPetHit.h"
-#include "JPetRawSignal/JPetRawSignal.h"
-
+#include <JPetTask/JPetTask.h>
+#include <JPetHit/JPetHit.h>
+#include <JPetRawSignal/JPetRawSignal.h>
 class JPetWriter;
-
+#ifdef __CINT__
+//when cint is used instead of compiler, override word is not recognized
+//nevertheless it's needed for checking if the structure of project is correct
+#	define override
+#endif
 class TaskC:public JPetTask {
- public:
-  TaskC(const char * name, const char * description);
-  virtual void init(const JPetTaskInterface::Options& opts);
-  virtual void exec();
-  virtual void terminate();
-  virtual void setWriter(JPetWriter* writer) {fWriter =writer;}
- protected:
-  std::vector<JPetHit> createHits(std::vector<JPetRawSignal>& signals);
-  void saveHits(std::vector<JPetHit> hits);
-
-  std::vector<JPetRawSignal> fSignals;
-  
-  JPetWriter* fWriter;
-  
-  //ClassDef(TaskC, 1);
+public:
+	TaskC(const char * name, const char * description);
+	virtual ~TaskC();
+	virtual void init(const JPetTaskInterface::Options& opts)override;
+	virtual void exec()override;
+	virtual void terminate()override;
+	virtual void setWriter(JPetWriter* writer)override;
+protected:
+	std::vector<JPetHit> createHits(const std::vector<JPetRawSignal>& signals);
+	void saveHits(const std::vector<JPetHit>&hits);
+	std::vector<JPetRawSignal> fSignals;
+	JPetWriter* fWriter;
 };
 #endif /*  !TASKD_H */
