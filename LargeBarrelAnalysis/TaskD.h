@@ -10,37 +10,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file TaskA.h
+ *  @file TaskD.h
  */
 
-#ifndef TASKA_H
-#define TASKA_H
+#ifndef TASKD_H 
+#define TASKD_H 
 
-#include <vector>
 #include <JPetTask/JPetTask.h>
-#include <JPetTimeWindow/JPetTimeWindow.h>
-#include <JPetParamBank/JPetParamBank.h>
-#include <JPetParamManager/JPetParamManager.h>
+#include <JPetHit/JPetHit.h>
+#include <JPetRawSignal/JPetRawSignal.h>
+#include "LargeBarrelMapping.h"
 class JPetWriter;
 #ifdef __CINT__
 //when cint is used instead of compiler, override word is not recognized
 //nevertheless it's needed for checking if the structure of project is correct
 #	define override
 #endif
-class TaskA: public JPetTask{
+class TaskD:public JPetTask{
 public:
-	TaskA(const char * name, const char * description);
-	virtual ~TaskA();
+	TaskD(const char * name, const char * description);
+	virtual ~TaskD(){}
 	virtual void init(const JPetTaskInterface::Options& opts)override;
 	virtual void exec()override;
 	virtual void terminate()override;
 	virtual void setWriter(JPetWriter* writer)override;
-	virtual void setParamManager(JPetParamManager* paramManager)override;
-	const JPetParamBank& getParamBank()const;
 protected:
-	void saveTimeWindow( JPetTimeWindow slot);
+	const char * formatUniqueSlotDescription(const JPetBarrelSlot & slot, int threshold,const char * prefix);
+	void fillHistosForHit(const JPetHit & hit);
 	JPetWriter* fWriter;
-	JPetParamManager* fParamManager;
-	long long int fCurrEventNumber;
+	LargeBarrelMapping fBarrelMap;
 };
-#endif /*  !TASKA_H */
+#endif /*  !TASKD_H */

@@ -11,17 +11,9 @@ cmake_minimum_required(VERSION 2.6)
 ### when creating a new project,
 ### set this section appropriately for your project
 ######################################################################
-set(projectName LargeBarrelAnalysis)
+set(projectName ScopeAnalysis)
 
 set(AUXILLIARY_FILES
-  run.sh
-  conf_trb3.xml
-  README
-  )
-
-set(ROOT_SCRIPTS
-  rootlogon.C
-  rootalias.C
   )
 
 ######################################################################
@@ -41,18 +33,6 @@ generate_root_dictionaries(DICTIONARIES SOURCES ${SOURCES})
 add_executable(${projectBinary} ${SOURCES} ${HEADERS} ${DICTIONARIES})
 target_link_libraries(${projectBinary} JPetFramework)
 
-add_custom_target(clean_data_largebarrel
-  COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root)
-
-# copy the DB config file to an expected location
-set(db_config_dir ${CMAKE_CURRENT_BINARY_DIR}/../DBConfig)
-
-add_custom_command(TARGET ${projectBinary}
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND}
-  ARGS -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/../j-pet-framework/DBHandler/Config ${db_config_dir}
-)
-
 # copy the example auxilliary files
 foreach( file_i ${AUXILLIARY_FILES})
   if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${file_i})
@@ -60,21 +40,11 @@ foreach( file_i ${AUXILLIARY_FILES})
   else()
     set(CP_CMD copy)
   endif()
-
+    
   add_custom_command(
     TARGET ${projectBinary}
     POST_BUILD
     COMMAND ${CMAKE_COMMAND}
     ARGS -E ${CP_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
     )
-endforeach( file_i )
-
-# copy the ROOT scripts
-foreach( file_i ${ROOT_SCRIPTS})
-add_custom_command(
-  TARGET ${projectBinary}
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND}
-  ARGS -E ${CP_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
-  )
 endforeach( file_i )

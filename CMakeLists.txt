@@ -31,5 +31,6 @@ if(NOT DOWNLOAD_EXAMPLE_DATA_HAPPENED)
 endif() 
 add_subdirectory(AnalysisExample)
 add_subdirectory(ScopeLoaderExample)
+add_subdirectory(ScopeAnalysis)
 add_subdirectory(LargeBarrelAnalysis)
 

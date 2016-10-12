@@ -10,37 +10,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file TaskA.h
+ *  @file TaskE.h
  */
-
-#ifndef TASKA_H
-#define TASKA_H
-
-#include <vector>
+#ifndef TASKE_H 
+#define TASKE_H 
 #include <JPetTask/JPetTask.h>
-#include <JPetTimeWindow/JPetTimeWindow.h>
-#include <JPetParamBank/JPetParamBank.h>
-#include <JPetParamManager/JPetParamManager.h>
+#include <JPetHit/JPetHit.h>
+#include <JPetRawSignal/JPetRawSignal.h>
+#include "LargeBarrelMapping.h"
 class JPetWriter;
 #ifdef __CINT__
 //when cint is used instead of compiler, override word is not recognized
 //nevertheless it's needed for checking if the structure of project is correct
 #	define override
 #endif
-class TaskA: public JPetTask{
+class TaskE:public JPetTask {
 public:
-	TaskA(const char * name, const char * description);
-	virtual ~TaskA();
+	TaskE(const char * name, const char * description);
+	virtual ~TaskE();
 	virtual void init(const JPetTaskInterface::Options& opts)override;
 	virtual void exec()override;
 	virtual void terminate()override;
 	virtual void setWriter(JPetWriter* writer)override;
-	virtual void setParamManager(JPetParamManager* paramManager)override;
-	const JPetParamBank& getParamBank()const;
 protected:
-	void saveTimeWindow( JPetTimeWindow slot);
+	const char * formatUniqueSlotDescription(const JPetBarrelSlot & slot, int threshold,const char * prefix);
+	void fillCoincidenceHistos(const std::vector<JPetHit>& hits);
+	void fillDeltaIDhisto(int delta_ID, int threshold, const JPetLayer & layer);
+	void fillTOFvsDeltaIDhisto(int delta_ID, int threshold, const JPetHit & hit1, const JPetHit & hit2);
+	bool isGoodTimeDiff(const JPetHit & hit, int thr);
+	void fillTOTvsTOThisto(int delta_ID, int thr, const JPetHit & hit1, const JPetHit & hit2);
+private:
+	LargeBarrelMapping fBarrelMap;
+	std::vector<JPetHit> fHits;
 	JPetWriter* fWriter;
-	JPetParamManager* fParamManager;
-	long long int fCurrEventNumber;
 };
-#endif /*  !TASKA_H */
+#endif /*  !TASKE_H */

@@ -10,37 +10,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file TaskA.h
+ *  @file TaskC.h
  */
 
-#ifndef TASKA_H
-#define TASKA_H
+#ifndef TASKC_H 
+#define TASKC_H 
 
-#include <vector>
 #include <JPetTask/JPetTask.h>
-#include <JPetTimeWindow/JPetTimeWindow.h>
-#include <JPetParamBank/JPetParamBank.h>
-#include <JPetParamManager/JPetParamManager.h>
+#include <JPetHit/JPetHit.h>
+#include <JPetRawSignal/JPetRawSignal.h>
 class JPetWriter;
 #ifdef __CINT__
 //when cint is used instead of compiler, override word is not recognized
 //nevertheless it's needed for checking if the structure of project is correct
 #	define override
 #endif
-class TaskA: public JPetTask{
+class TaskC:public JPetTask {
 public:
-	TaskA(const char * name, const char * description);
-	virtual ~TaskA();
+	TaskC(const char * name, const char * description);
+	virtual ~TaskC();
 	virtual void init(const JPetTaskInterface::Options& opts)override;
 	virtual void exec()override;
 	virtual void terminate()override;
 	virtual void setWriter(JPetWriter* writer)override;
-	virtual void setParamManager(JPetParamManager* paramManager)override;
-	const JPetParamBank& getParamBank()const;
 protected:
-	void saveTimeWindow( JPetTimeWindow slot);
+	std::vector<JPetHit> createHits(const std::vector<JPetRawSignal>& signals);
+	void saveHits(const std::vector<JPetHit>&hits);
+	std::vector<JPetRawSignal> fSignals;
 	JPetWriter* fWriter;
-	JPetParamManager* fParamManager;
-	long long int fCurrEventNumber;
 };
-#endif /*  !TASKA_H */
+#endif /*  !TASKD_H */
