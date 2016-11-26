@@ -13,8 +13,8 @@
  *  @file TaskC.h
  */
 
-#ifndef TASKC_H 
-#define TASKC_H 
+#ifndef TASKC_H
+#define TASKC_H
 
 #include <JPetTask/JPetTask.h>
 #include <JPetHit/JPetHit.h>
@@ -25,9 +25,10 @@ class JPetWriter;
 //nevertheless it's needed for checking if the structure of project is correct
 #	define override
 #endif
-class TaskC:public JPetTask {
+class TaskC: public JPetTask
+{
 public:
-  TaskC(const char * name, const char * description);
+  TaskC(const char* name, const char* description);
   virtual ~TaskC();
   virtual void init(const JPetTaskInterface::Options& opts)override;
   virtual void exec()override;
@@ -35,10 +36,10 @@ public:
   virtual void setWriter(JPetWriter* writer)override;
 protected:
   std::vector<JPetHit> createHits(const std::vector<JPetRawSignal>& signals);
-  void saveHits(const std::vector<JPetHit>&hits);
-  void studyTimeWindow(const std::vector<JPetHit>&hits);
+  void saveHits(const std::vector<JPetHit>& hits);
+  void studyTimeWindow(const std::vector<JPetHit>& hits);
   std::vector<JPetRawSignal> fSignals;
   JPetWriter* fWriter;
-  const int kNumOfThresholds=4;
+  const int kNumOfThresholds = 4;
 };
 #endif /*  !TASKD_H */
