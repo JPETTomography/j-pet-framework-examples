@@ -27,18 +27,18 @@ class JPetWriter;
 #endif
 class TaskC:public JPetTask {
 public:
-  TaskC(const char * name, const char * description);
-  virtual ~TaskC();
-  virtual void init(const JPetTaskInterface::Options& opts)override;
-  virtual void exec()override;
-  virtual void terminate()override;
-  virtual void setWriter(JPetWriter* writer)override;
+	TaskC(const char * name, const char * description);
+	virtual ~TaskC();
+	virtual void init(const JPetTaskInterface::Options& opts)override;
+	virtual void exec()override;
+	virtual void terminate()override;
+	virtual void setWriter(JPetWriter* writer)override;
 protected:
-  std::vector<JPetHit> createHits(const std::vector<JPetRawSignal>& signals);
-  void saveHits(const std::vector<JPetHit>&hits);
+	std::vector<JPetHit> createHits(const std::vector<JPetRawSignal>& signals);
+	void saveHits(const std::vector<JPetHit>&hits);
+  	void sortHits(std::vector<JPetHit>&hits);
   void studyTimeWindow(const std::vector<JPetHit>&hits);
   std::vector<JPetRawSignal> fSignals;
   JPetWriter* fWriter;
-  const int kNumOfThresholds=4;
 };
 #endif /*  !TASKD_H */

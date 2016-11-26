@@ -37,19 +37,24 @@ int main(int argc, char* argv[]) {
   					    "Process unpacked HLD file into a tree of JPetTSlot objects"));
     });
   
-  
   manager.registerTask([](){
       return new JPetTaskLoader("tslot.raw", "raw.sig",
   				new TaskB1("Module B1: Make TOT histos and assemble signals",
 					   "Assemble signals and create TOT historgrams"));
     });
 
-  manager.registerTask([](){
+   manager.registerTask([](){ 
+       return new JPetTaskLoader("raw.sig", "phys.hit", 
+				 new TaskC("Module C: Pair signals", 
+					   "Create hits from pairs of signals")); 
+     }); 
+   
+   
+   manager.registerTask([](){
       return new JPetTaskLoader("raw.sig", "phys.hit",
   				new TaskC("Module C: Pair signals",
   					  "Create hits from pairs of signals"));
     });
-  
   
   manager.registerTask([](){
       return new JPetTaskLoader("phys.hit", "phys.hit.means",
@@ -63,6 +68,6 @@ int main(int argc, char* argv[]) {
   				new TaskE("Module E: Filter hits",
   					  "Pass only hits with time diffrerence close to the peak"));
     });
-  
+
   manager.run();
 }
