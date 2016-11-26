@@ -49,34 +49,43 @@ void TaskA::exec(){
 			// iterate over all signals from one TDC channel
 			// analyze number of hits per channel
 			getStatistics().getHisto1D("HitsPerEvtCh").Fill( tdcChannel->GetHitsNum() );
-			// !!!!!! only to imitate the Go4 macros
-			// !!!!!! which take only last signals from the event    
-			for(int j = tdcChannel->GetHitsNum()-1; j < tdcChannel->GetHitsNum(); ++j){
-				JPetSigCh sigChTmpLead, sigChTmpTrail;
-				sigChTmpLead.setDAQch(tomb_number);
-				sigChTmpTrail.setDAQch(tomb_number);
-				sigChTmpLead.setType(JPetSigCh::Leading);
-				sigChTmpTrail.setType(JPetSigCh::Trailing);
-				sigChTmpLead.setThresholdNumber(tomb_channel.getLocalChannelNumber());
-				sigChTmpTrail.setThresholdNumber(tomb_channel.getLocalChannelNumber());
-				sigChTmpLead.setPM(tomb_channel.getPM());
-				sigChTmpLead.setFEB(tomb_channel.getFEB());
-				sigChTmpLead.setTRB(tomb_channel.getTRB());
-				sigChTmpLead.setTOMBChannel(tomb_channel);
-				sigChTmpTrail.setPM(tomb_channel.getPM());
-				sigChTmpTrail.setFEB(tomb_channel.getFEB());
-				sigChTmpTrail.setTRB(tomb_channel.getTRB());
-				sigChTmpTrail.setTOMBChannel(tomb_channel);
-				sigChTmpLead.setThreshold(tomb_channel.getThreshold());
-				sigChTmpTrail.setThreshold(tomb_channel.getThreshold());
-				// check for empty TDC times
-				if( tdcChannel->GetLeadTime(j) == -100000 )continue;
-				if( tdcChannel->GetTrailTime(j) == -100000 )continue;
-				// finally, set the times in ps [raw times are in ns]
-				sigChTmpLead.setValue(tdcChannel->GetLeadTime(j) * 1000.);
-				sigChTmpTrail.setValue(tdcChannel->GetTrailTime(j) * 1000.);
-				tslot.addCh(sigChTmpLead);
-				tslot.addCh(sigChTmpTrail);
+
+			for(int j = 0; j < tdcChannel->GetHitsNum(); ++j){
+
+			  // check for empty TDC times
+			  if( tdcChannel->GetLeadTime(j) == -100000 )continue;
+			  if( tdcChannel->GetTrailTime(j) == -100000 )continue;
+
+			  // check for unreasable times
+			  // the times should be negative (measured w.r.t end of time window)
+			  // and not smaller than -1*timeWindowWidth (which can vary for different)
+			  // data but shoudl not exceed 1 ms, i.e. 1.e9 ps)
+			  if( tdcChannel->GetLeadTime(j) > 0 || tdcChannel->GetLeadTime(j) < -1.e9 )continue;
+			  if( tdcChannel->GetTrailTime(j) > 0 || tdcChannel->GetLeadTime(j) < -1.e9  )continue;
+
+			  JPetSigCh sigChTmpLead, sigChTmpTrail;
+			  sigChTmpLead.setDAQch(tomb_number);
+			  sigChTmpTrail.setDAQch(tomb_number);
+			  sigChTmpLead.setType(JPetSigCh::Leading);
+			  sigChTmpTrail.setType(JPetSigCh::Trailing);
+			  sigChTmpLead.setThresholdNumber(tomb_channel.getLocalChannelNumber());
+			  sigChTmpTrail.setThresholdNumber(tomb_channel.getLocalChannelNumber());
+			  sigChTmpLead.setPM(tomb_channel.getPM());
+			  sigChTmpLead.setFEB(tomb_channel.getFEB());
+			  sigChTmpLead.setTRB(tomb_channel.getTRB());
+			  sigChTmpLead.setTOMBChannel(tomb_channel);
+			  sigChTmpTrail.setPM(tomb_channel.getPM());
+			  sigChTmpTrail.setFEB(tomb_channel.getFEB());
+			  sigChTmpTrail.setTRB(tomb_channel.getTRB());
+			  sigChTmpTrail.setTOMBChannel(tomb_channel);
+			  sigChTmpLead.setThreshold(tomb_channel.getThreshold());
+			  sigChTmpTrail.setThreshold(tomb_channel.getThreshold());
+
+			  // finally, set the times in ps [raw times are in ns]
+			  sigChTmpLead.setValue(tdcChannel->GetLeadTime(j) * 1000.);
+			  sigChTmpTrail.setValue(tdcChannel->GetTrailTime(j) * 1000.);
+			  tslot.addCh(sigChTmpLead);
+			  tslot.addCh(sigChTmpTrail);
 			}
 		}
 		saveTimeWindow(tslot);
