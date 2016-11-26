@@ -16,10 +16,35 @@
 #include <iostream>
 #include <JPetWriter/JPetWriter.h>
 #include "TaskC.h"
+#include <algorithm>
+
 using namespace std;
+
+
 TaskC::TaskC(const char * name, const char * description):JPetTask(name, description){}
 TaskC::~TaskC(){}
-void TaskC::init(const JPetTaskInterface::Options& opts){}
+
+void TaskC::init(const JPetTaskInterface::Options& opts){
+
+  getStatistics().createHistogram(new TH1F("timeSepLarge",
+					   "time differences between subsequent hits; #Delta t [ns]",
+					   1000,
+					   0.,
+					   700000.
+					   )
+				  );
+  
+  getStatistics().createHistogram(new TH1F("timeSepSmall",
+					   "time differences between subsequent hits; #Delta t [ns]",
+					   1000,
+					   0.,
+					   200.
+					   )
+				  );
+ 
+  
+}
+
 void TaskC::exec(){
 	//getting the data from event in propriate format
 	if(auto currSignal = dynamic_cast<const JPetRawSignal*const>(getEvent())){
@@ -30,9 +55,14 @@ void TaskC::exec(){
 			if (fSignals[0].getTimeWindowIndex() == currSignal->getTimeWindowIndex()) {
 				fSignals.push_back(*currSignal);
 			} else {
-				saveHits(createHits(fSignals));
-				fSignals.clear();
-				fSignals.push_back(*currSignal);
+
+			  vector<JPetHit> hits = createHits(fSignals);
+			  sortHits(hits);
+			  studyTimeWindow(hits);
+			  saveHits(hits);
+			  
+			  fSignals.clear();
+			  fSignals.push_back(*currSignal);
 			}
 		}
 	}
@@ -71,11 +101,28 @@ vector<JPetHit> TaskC::createHits(const vector<JPetRawSignal>&signals){
 				}
 				physSignalA.setRecoSignal(recoSignalA);
 				physSignalB.setRecoSignal(recoSignalB);
+				auto leading_points_a = physSignalA.getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading);
+				auto leading_points_b = physSignalB.getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading);
+
+				//skip signals with no information on 1st threshold
+				if(leading_points_a.count(1) == 0) continue;
+				if(leading_points_b.count(1) == 0) continue;
+				
+				physSignalA.setTime(leading_points_a.at(1));
+				physSignalB.setTime(leading_points_b.at(1));
+
+				
 				JPetHit hit;
 				hit.setSignalA(physSignalA);
 				hit.setSignalB(physSignalB);
 				hit.setScintillator(i->getPM().getScin());
 				hit.setBarrelSlot(i->getPM().getScin().getBarrelSlot());
+				
+				physSignalA.setTime(physSignalA.getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).at(1));
+				physSignalB.setTime(physSignalB.getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).at(1));
+
+				hit.setTime( 0.5 * ( hit.getSignalA().getTime() + hit.getSignalB().getTime()) );
+				
 				hits.push_back(hit);
 				getStatistics().getCounter("No. found hits")++;
 			}
@@ -85,7 +132,7 @@ vector<JPetHit> TaskC::createHits(const vector<JPetRawSignal>&signals){
 }
 
 void TaskC::terminate(){
-	saveHits(createHits(fSignals)); //if there is something left
+  //	saveHits(createHits(fSignals)); //if there is something left
 	INFO( Form("From %d initial signals %d hits were paired.", 
 		   static_cast<int>(getStatistics().getCounter("No. initial signals")),
 		   static_cast<int>(getStatistics().getCounter("No. found hits")) )
@@ -93,9 +140,34 @@ void TaskC::terminate(){
 }
 
 
+void TaskC::sortHits(vector<JPetHit>&hits){
+
+  sort( hits.begin(), hits.end(),
+  	[](const JPetHit & A, const JPetHit & B){
+  	  return (A.getTime() < B.getTime());
+  	}
+  	);
+
+}
+
+void TaskC::studyTimeWindow(const vector<JPetHit>&hits){
+
+  for(int i=1; i<hits.size(); ++i){
+
+    assert(hits.at(i-1).getTime() <= hits.at(i).getTime());
+
+    double dt = hits.at(i).getTime() - hits.at(i-1).getTime();
+
+    getStatistics().getHisto1D("timeSepSmall").Fill(dt / 1000.); // we fill the histo in [ns]
+    getStatistics().getHisto1D("timeSepLarge").Fill(dt / 1000.); // we fill the histo in [ns]
+  }
+  
+
+}
+
 void TaskC::saveHits(const vector<JPetHit>&hits){
 	assert(fWriter);
-	for (auto hit : hits){
+      	for (auto hit : hits){
 		// here one can impose any conditions on hits that should be
 		// saved or skipped
 		// for now, all hits are written to the output file
