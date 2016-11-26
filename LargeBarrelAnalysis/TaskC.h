@@ -36,7 +36,9 @@ public:
 protected:
 	std::vector<JPetHit> createHits(const std::vector<JPetRawSignal>& signals);
 	void saveHits(const std::vector<JPetHit>&hits);
-	std::vector<JPetRawSignal> fSignals;
-	JPetWriter* fWriter;
+  	void sortHits(std::vector<JPetHit>&hits);
+  void studyTimeWindow(const std::vector<JPetHit>&hits);
+  std::vector<JPetRawSignal> fSignals;
+  JPetWriter* fWriter;
 };
 #endif /*  !TASKD_H */
