@@ -15,7 +15,7 @@
 
 #include "TaskA.h"
 #include "JPetWriter/JPetWriter.h"
-#include "JPetUnpacker/Unpacker2/EventIII.h"
+#include "Unpacker2/Unpacker2/EventIII.h"
 #include <iostream>
 
 //ClassImp(TaskA);
@@ -30,7 +30,7 @@ TaskA::TaskA(const char * name, const char * description):
 void TaskA::exec()
 {  
   // Get HLD Event
-  auto evt = reinterpret_cast<EventIII*> (getEvent());
+  auto evt = dynamic_cast<EventIII*> (getEvent());
   //evt->GetTitle();
   //evt->GetName();
 

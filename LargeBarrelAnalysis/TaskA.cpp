@@ -12,7 +12,7 @@
  *
  *  @file TaskA.cpp
  */
-#include <JPetUnpacker/Unpacker2/EventIII.h>
+#include <Unpacker2/Unpacker2/EventIII.h>
 #include <JPetWriter/JPetWriter.h>
 #include "TaskA.h"
 TaskA::TaskA(const char * name, const char * description)
@@ -26,7 +26,7 @@ void TaskA::exec(){
 	//getting the data from event in propriate format
 	//const is commented because this class has inproper architecture:
 	// all get-methods aren't tagged with const modifier
-	if(auto evt = reinterpret_cast</*const*/ EventIII*const>(getEvent())){
+	if(auto evt = dynamic_cast</*const*/ EventIII*const>(getEvent())){
 		int ntdc = evt->GetTotalNTDCChannels();
 		getStatistics().getHisto1D("ChannelsPerEvt").Fill( ntdc );
 		JPetTimeWindow tslot;
