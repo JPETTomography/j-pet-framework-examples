@@ -49,13 +49,6 @@ int main(int argc, char* argv[]) {
 					   "Create hits from pairs of signals")); 
      }); 
    
-   
-   manager.registerTask([](){
-      return new JPetTaskLoader("raw.sig", "phys.hit",
-  				new TaskC("Module C: Pair signals",
-  					  "Create hits from pairs of signals"));
-    });
-  
   manager.registerTask([](){
       return new JPetTaskLoader("phys.hit", "phys.hit.means",
 				new TaskD("Module D: Make histograms for hits",

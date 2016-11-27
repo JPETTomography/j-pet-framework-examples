@@ -154,6 +154,7 @@ void TaskC::studyTimeWindow(const vector<JPetHit>&hits){
 
   for(int i=1; i<hits.size(); ++i){
 
+    // make sure the hits are really sorted
     assert(hits.at(i-1).getTime() <= hits.at(i).getTime());
 
     double dt = hits.at(i).getTime() - hits.at(i-1).getTime();
