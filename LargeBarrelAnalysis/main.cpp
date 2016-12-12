@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
   manager.parseCmdLine(argc, argv);
   
   // Here create all analysis modules to be used:
-
+  /*
   manager.registerTask([](){
       return new JPetTaskLoader("hld", "tslot.raw",
   				  new TaskA("Module A: Unp to TSlot Raw",
@@ -48,14 +48,14 @@ int main(int argc, char* argv[]) {
 				 new TaskC("Module C: Pair signals", 
 					   "Create hits from pairs of signals")); 
      }); 
-   
+
   manager.registerTask([](){
       return new JPetTaskLoader("phys.hit", "phys.hit.means",
 				new TaskD("Module D: Make histograms for hits",
 					  "Only make timeDiff histos and produce mean timeDiff value for each threshold and slot to be used by the next module"));
     });
   
-  
+  */  
   manager.registerTask([](){
       return new JPetTaskLoader("phys.hit.means", "phys.hit.coincplots",
   				new TaskE("Module E: Filter hits",
