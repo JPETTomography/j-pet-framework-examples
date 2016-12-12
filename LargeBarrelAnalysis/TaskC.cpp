@@ -26,22 +26,24 @@ TaskC::~TaskC(){}
 
 void TaskC::init(const JPetTaskInterface::Options& opts){
 
-  getStatistics().createHistogram(new TH1F("timeSepLarge",
-					   "time differences between subsequent hits; #Delta t [ns]",
-					   1000,
-					   0.,
-					   700000.
-					   )
-				  );
-  
-  getStatistics().createHistogram(new TH1F("timeSepSmall",
-					   "time differences between subsequent hits; #Delta t [ns]",
-					   1000,
-					   0.,
-					   200.
-					   )
-				  );
- 
+
+  for(int i=1;i<=4;++i){
+    getStatistics().createHistogram(new TH1F(Form("timeSepLarge_thr_%d", i),
+					     "time differences between subsequent hits; #Delta t [ns]",
+					     1000,
+					     0.,
+					     700000.
+					     )
+				    );
+    
+    getStatistics().createHistogram(new TH1F(Form("timeSepSmall_thr_%d", i),
+					     "time differences between subsequent hits; #Delta t [ns]",
+					     200,
+					     0.,
+					     400.
+					     )
+				    );
+  }
   
 }
 
@@ -99,14 +101,31 @@ vector<JPetHit> TaskC::createHits(const vector<JPetRawSignal>&signals){
 					WARNING("TWO hits on the same scintillator side we ignore it");         
 					continue;
 				}
+				
+				if( recoSignalA.getRawSignal().getNumberOfPoints(JPetSigCh::Leading) < 4 ) continue;
+				if( recoSignalB.getRawSignal().getNumberOfPoints(JPetSigCh::Leading) < 4 ) continue;
+
+				bool thresholds_ok = true;
+				for(int i=1;i<=4;++i){
+				  if( recoSignalA.getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).count(i) < 1 ){
+				    thresholds_ok = false;
+				  }
+				  if( recoSignalB.getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).count(i) < 1 ){
+				    thresholds_ok = false;
+				  }
+				}
+				if(thresholds_ok == false){
+				  continue;
+				}
+				
 				physSignalA.setRecoSignal(recoSignalA);
 				physSignalB.setRecoSignal(recoSignalB);
 				auto leading_points_a = physSignalA.getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading);
 				auto leading_points_b = physSignalB.getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading);
 
 				//skip signals with no information on 1st threshold
-				if(leading_points_a.count(1) == 0) continue;
-				if(leading_points_b.count(1) == 0) continue;
+				// if(leading_points_a.count(1) == 0) continue;
+				// if(leading_points_b.count(1) == 0) continue;
 				
 				physSignalA.setTime(leading_points_a.at(1));
 				physSignalB.setTime(leading_points_b.at(1));
@@ -122,7 +141,7 @@ vector<JPetHit> TaskC::createHits(const vector<JPetRawSignal>&signals){
 				physSignalB.setTime(physSignalB.getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).at(1));
 
 				hit.setTime( 0.5 * ( hit.getSignalA().getTime() + hit.getSignalB().getTime()) );
-				
+
 				hits.push_back(hit);
 				getStatistics().getCounter("No. found hits")++;
 			}
@@ -154,13 +173,31 @@ void TaskC::studyTimeWindow(const vector<JPetHit>&hits){
 
   for(int i=1; i<hits.size(); ++i){
 
-    assert(hits.at(i-1).getTime() <= hits.at(i).getTime());
+    // make sure the hits are really sorted
+    // assert(hits.at(i-1).getTime() <= hits.at(i).getTime());
 
-    double dt = hits.at(i).getTime() - hits.at(i-1).getTime();
+    // double dt = hits.at(i).getTime() - hits.at(i-1).getTime();
 
-    getStatistics().getHisto1D("timeSepSmall").Fill(dt / 1000.); // we fill the histo in [ns]
-    getStatistics().getHisto1D("timeSepLarge").Fill(dt / 1000.); // we fill the histo in [ns]
+    // getStatistics().getHisto1D("timeSepSmall").Fill(dt / 1000.); // we fill the histo in [ns]
+    // getStatistics().getHisto1D("timeSepLarge").Fill(dt / 1000.); // we fill the histo in [ns]
+
+    for(int k=1;k<=4;++k){
+
+      double t2 = 0.5*(hits.at(i).getSignalA().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).at(k) + hits.at(i).getSignalB().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).at(k));
+
+      double t1 = 0.5*(hits.at(i-1).getSignalA().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).at(k) + hits.at(i-1).getSignalB().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).at(k));
+      
+
+      double dt = t2 - t1;
+
+      getStatistics().getHisto1D(Form("timeSepSmall_thr_%d", k)).Fill(dt / 1000.); // we fill the histo in [ns]
+      getStatistics().getHisto1D(Form("timeSepLarge_thr_%d", k)).Fill(dt / 1000.); // we fill the histo in [ns]
+      
+    }
+    
   }
+
+
   
 
 }
