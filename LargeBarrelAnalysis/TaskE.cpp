@@ -48,6 +48,15 @@ void TaskE::init(const JPetTaskInterface::Options& opts){
 			}
 		}
 	}
+
+	// create dt histos for each strip
+	for(auto & scin : getParamBank().getScintillators()){
+	  for (int thr=1;thr<=4;thr++){
+	    const char * histo_name = formatUniqueSlotDescription(scin.second->getBarrelSlot(), thr, "dTOF_");
+	    getStatistics().createHistogram( new TH1F(histo_name, histo_name, 2000, -20., 20.) );
+	  }
+	}
+
 }
 void TaskE::exec(){
 	//getting the data from event in propriate format
@@ -92,6 +101,7 @@ void TaskE::fillCoincidenceHistos(const vector<JPetHit>& hits){
 							fillTOFvsDeltaIDhisto(delta_ID, thr, hit1, hit2);
 							// fill TOT vs TOT histos
 							fillTOTvsTOThisto(delta_ID, thr, hit1, hit2);
+
 						}
 					}
 				}
@@ -130,7 +140,17 @@ void TaskE::fillTOFvsDeltaIDhisto(int delta_ID, int thr, const JPetHit & hit1, c
 	tof /= 1000.; // to have the TOF in ns instead of ps
 	
 	getStatistics().getHisto2D(histo_name).Fill(delta_ID, tof);
+
+	if(delta_ID == 24){
+	  
+	  histo_name = formatUniqueSlotDescription(hit1.getBarrelSlot(), thr, "dTOF_");
+	  getStatistics().getHisto1D(histo_name).Fill(tof);
+	  
+	}
+	
 }
+
+
 bool TaskE::isGoodTimeDiff(const JPetHit & hit, int thr){
 	double mean_timediff = getAuxilliaryData().getValue("timeDiffAB mean values",
 							    formatUniqueSlotDescription(hit.getBarrelSlot(),
