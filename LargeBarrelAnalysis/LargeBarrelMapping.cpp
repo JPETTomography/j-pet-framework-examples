@@ -21,7 +21,7 @@ int LargeBarrelMapping::getSlotNumber(const JPetBarrelSlot& slot) const{
 	return fThetaToSlot[getLayerNumber(slot.getLayer())-1].at(slot.getTheta());
 }
 int LargeBarrelMapping::calcDeltaID(const JPetHit& hit1,const JPetHit& hit2) const{
-	if(hit1.getBarrelSlot().getLayer().getId()==hit2.getBarrelSlot().getLayer().getId()){
+	if(hit1.getBarrelSlot().getLayer().getID()==hit2.getBarrelSlot().getLayer().getID()){
 		int delta_ID = abs(getSlotNumber(hit1.getBarrelSlot())-getSlotNumber(hit2.getBarrelSlot()));
 		int layer_size = getNumberOfSlots(hit1.getBarrelSlot().getLayer());
 		int half_layer_size = layer_size/2;
