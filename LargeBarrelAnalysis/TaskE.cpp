@@ -20,10 +20,10 @@
 using namespace std;
 TaskE::TaskE(const char* name, const char* description): JPetTask(name, description) {}
 TaskE::~TaskE() {}
-void TaskE::init(const JPetTaskInterface::Options&)
+void TaskE::init(const JPetTaskInterface::Options& opts)
 {
   fBarrelMap.buildMappings(getParamBank());
-  for (auto const & layer : getParamBank().getLayers()) {
+  for (auto & layer : getParamBank().getLayers()) {
     for (int thr = 1; thr <= 4; thr++) {
       // create histograms of Delta ID
       char* histo_name = Form("Delta_ID_for_coincidences_layer_%d_thr_%d", fBarrelMap.getLayerNumber(*layer.second), thr);
@@ -59,7 +59,6 @@ void TaskE::init(const JPetTaskInterface::Options&)
       getStatistics().createHistogram( new TH1F(histo_name, histo_name, 2000, -20., 20.) );
     }
   }
-
 }
 void TaskE::exec()
 {
@@ -138,7 +137,7 @@ void TaskE::fillTOFvsDeltaIDhisto(int delta_ID, int thr, const JPetHit& hit1, co
 {
   int layer_number = fBarrelMap.getLayerNumber(hit1.getBarrelSlot().getLayer());
   const char* histo_name = Form("TOF_vs_Delta_ID_layer_%d_thr_%d",
-                                layer_number,
+                                fBarrelMap.getLayerNumber(hit1.getBarrelSlot().getLayer()),
                                 thr);
 
   double tof = fabs( JPetHitUtils::getTimeAtThr(hit1, thr) -
