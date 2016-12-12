@@ -117,12 +117,6 @@ std::vector<JPetHit> TaskD::createHits(std::vector<JPetPhysSignal>& signals)
 
 void TaskD::terminate()
 {
-  std::cout <<"terminate() Taskd()" <<std::endl;
-  std::cout <<"number of signals:"<<fSignals.size() <<std::endl;
-  for(auto sig: fSignals) {
-    std::cout<<"some signal info:"<<sig.getPM().getScin().getID()<<std::endl;
-    std::cout<<"unique id:"<<sig.GetUniqueID()<<std::endl;
-  }
   //  saveHits(createHits(fSignals)); //if there is something left
   INFO( Form("From %d initial signals %d hits were paired.", 
 	     static_cast<int>(getStatistics().getCounter("No. initial signals")),
