@@ -22,7 +22,7 @@ TaskE::TaskE(const char * name, const char * description):JPetTask(name, descrip
 TaskE::~TaskE(){}
 void TaskE::init(const JPetTaskInterface::Options& opts){
 	fBarrelMap.buildMappings(getParamBank());
-	for(auto & layer : getParamBank().getLayers()){
+	for(auto const & layer : getParamBank().getLayers()){
 		for (int thr=1;thr<=4;thr++){
 			// create histograms of Delta ID
 			char * histo_name = Form("Delta_ID_for_coincidences_layer_%d_thr_%d", fBarrelMap.getLayerNumber(*layer.second), thr);
@@ -50,7 +50,7 @@ void TaskE::init(const JPetTaskInterface::Options& opts){
 	}
 
 	// create dt histos for each strip
-	for(auto & scin : getParamBank().getScintillators()){
+	for(auto const & scin : getParamBank().getScintillators()){
 	  for (int thr=1;thr<=4;thr++){
 	    const char * histo_name = formatUniqueSlotDescription(scin.second->getBarrelSlot(), thr, "dTOF_");
 	    getStatistics().createHistogram( new TH1F(histo_name, histo_name, 2000, -20., 20.) );

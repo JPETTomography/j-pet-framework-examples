@@ -37,7 +37,7 @@ void TaskB1::init(const JPetTaskInterface::Options& opts){
 	);
 	// create histograms for TDC hits multiplicity vs PMT number
 	// separately for each threshold
-	for(int thr=1;thr<=4;thr++){
+	for(int thr=1;thr<=kNumOfThresholds;thr++){
 		int n_pmts = getParamBank().getPMsSize();
 		char * histo_name = Form("HitsLeadingEdge_thr%d", thr);
 		char * histo_title = Form("%s;PMT No.;No. hits", histo_name);

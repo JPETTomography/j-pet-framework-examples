@@ -21,9 +21,10 @@ void TaskA::init(const JPetTaskInterface::Options& opts){
 	getStatistics().createHistogram( new TH1F("HitsPerEvtCh","Hits per channel in one event",50,-0.5,49.5) );
 	getStatistics().createHistogram( new TH1F("ChannelsPerEvt","Channels fired in one event",200,-0.5,199.5) );
 }
+
 TaskA::~TaskA(){}
 void TaskA::exec(){  
-	//getting the data from event in propriate format
+	//getting the data from event in apropriate format
 	//const is commented because this class has inproper architecture:
 	// all get-methods aren't tagged with const modifier
 	if(auto evt = dynamic_cast</*const*/ EventIII*const>(getEvent())){
@@ -52,34 +53,17 @@ void TaskA::exec(){
 
 			for(int j = 0; j < tdcChannel->GetHitsNum(); ++j){
 
-			  // check for empty TDC times
-			  if( tdcChannel->GetLeadTime(j) == -100000 )continue;
-			  if( tdcChannel->GetTrailTime(j) == -100000 )continue;
-
 			  // check for unreasable times
 			  // the times should be negative (measured w.r.t end of time window)
 			  // and not smaller than -1*timeWindowWidth (which can vary for different)
-			  // data but shoudl not exceed 1 ms, i.e. 1.e9 ps)
-			  if( tdcChannel->GetLeadTime(j) > 0 || tdcChannel->GetLeadTime(j) < -1.e9 )continue;
-			  if( tdcChannel->GetTrailTime(j) > 0 || tdcChannel->GetLeadTime(j) < -1.e9  )continue;
+			  // data but shoudl not exceed 1 ms, i.e. 1.e6 ns)
+                          if( tdcChannel->GetLeadTime(j) > kMaxTime ||
+                              tdcChannel->GetLeadTime(j) < kMinTime )continue;
+                          if( tdcChannel->GetTrailTime(j) > kMaxTime ||
+                              tdcChannel->GetTrailTime(j) < kMinTime )continue;
 
-			  JPetSigCh sigChTmpLead, sigChTmpTrail;
-			  sigChTmpLead.setDAQch(tomb_number);
-			  sigChTmpTrail.setDAQch(tomb_number);
-			  sigChTmpLead.setType(JPetSigCh::Leading);
-			  sigChTmpTrail.setType(JPetSigCh::Trailing);
-			  sigChTmpLead.setThresholdNumber(tomb_channel.getLocalChannelNumber());
-			  sigChTmpTrail.setThresholdNumber(tomb_channel.getLocalChannelNumber());
-			  sigChTmpLead.setPM(tomb_channel.getPM());
-			  sigChTmpLead.setFEB(tomb_channel.getFEB());
-			  sigChTmpLead.setTRB(tomb_channel.getTRB());
-			  sigChTmpLead.setTOMBChannel(tomb_channel);
-			  sigChTmpTrail.setPM(tomb_channel.getPM());
-			  sigChTmpTrail.setFEB(tomb_channel.getFEB());
-			  sigChTmpTrail.setTRB(tomb_channel.getTRB());
-			  sigChTmpTrail.setTOMBChannel(tomb_channel);
-			  sigChTmpLead.setThreshold(tomb_channel.getThreshold());
-			  sigChTmpTrail.setThreshold(tomb_channel.getThreshold());
+			  JPetSigCh sigChTmpLead = generateSigCh(tomb_channel, JPetSigCh::Leading);
+			  JPetSigCh sigChTmpTrail = generateSigCh(tomb_channel, JPetSigCh::Trailing);
 
 			  // finally, set the times in ps [raw times are in ns]
 			  sigChTmpLead.setValue(tdcChannel->GetLeadTime(j) * 1000.);
@@ -107,4 +91,18 @@ void TaskA::setParamManager(JPetParamManager* paramManager) {
 const JPetParamBank& TaskA::getParamBank()const{
 	assert(fParamManager);
 	return fParamManager->getParamBank();
+}
+
+JPetSigCh TaskA::generateSigCh(const JPetTOMBChannel & channel, JPetSigCh::EdgeType edge) const{
+
+  JPetSigCh sigch;
+  sigch.setDAQch(channel.getChannel());
+  sigch.setType(edge);
+  sigch.setThresholdNumber(channel.getLocalChannelNumber());
+  sigch.setThreshold(channel.getThreshold());
+  sigch.setPM(channel.getPM());
+  sigch.setFEB(channel.getFEB());
+  sigch.setTRB(channel.getTRB());
+  sigch.setTOMBChannel(channel);
+
 }

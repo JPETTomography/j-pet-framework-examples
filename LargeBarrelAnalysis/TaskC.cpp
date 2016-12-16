@@ -28,7 +28,7 @@ TaskC::~TaskC(){}
 void TaskC::init(const JPetTaskInterface::Options& opts){
 
 
-  for(int i=1;i<=4;++i){
+  for(int i=1;i<=kNumOfThresholds;++i){
     getStatistics().createHistogram(new TH1F(Form("timeSepLarge_thr_%d", i),
 					     "time differences between subsequent hits; #Delta t [ns]",
 					     1000,
@@ -106,11 +106,11 @@ vector<JPetHit> TaskC::createHits(const vector<JPetRawSignal>&signals){
 					continue;
 				}
 				
-				if( recoSignalA.getRawSignal().getNumberOfPoints(JPetSigCh::Leading) < 4 ) continue;
-				if( recoSignalB.getRawSignal().getNumberOfPoints(JPetSigCh::Leading) < 4 ) continue;
+				if( recoSignalA.getRawSignal().getNumberOfPoints(JPetSigCh::Leading) < kNumOfThresholds ) continue;
+				if( recoSignalB.getRawSignal().getNumberOfPoints(JPetSigCh::Leading) < kNumOfThresholds ) continue;
 
 				bool thresholds_ok = true;
-				for(int i=1;i<=4;++i){
+				for(int i=1;i<=kNumOfThresholds;++i){
 				  if( recoSignalA.getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).count(i) < 1 ){
 				    thresholds_ok = false;
 				  }
@@ -169,7 +169,7 @@ void TaskC::studyTimeWindow(const vector<JPetHit>&hits){
 
   // plot time differences for subsequent hits at each threshold separately
   for(int i=1; i<hits.size(); ++i){
-    for(int k=1;k<=4;++k){
+    for(int k=1;k<=kNumOfThresholds;++k){
       double t2 = 0.5*(hits.at(i).getSignalA().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).at(k) + hits.at(i).getSignalB().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).at(k));
       double t1 = 0.5*(hits.at(i-1).getSignalA().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).at(k) + hits.at(i-1).getSignalB().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).at(k));
       double dt = t2 - t1;
@@ -181,7 +181,7 @@ void TaskC::studyTimeWindow(const vector<JPetHit>&hits){
 
 void TaskC::saveHits(const vector<JPetHit>&hits){
 	assert(fWriter);
-      	for (auto hit : hits){
+      	for (auto const & hit : hits){
 		// here one can impose any conditions on hits that should be
 		// saved or skipped
 		// for now, all hits are written to the output file
