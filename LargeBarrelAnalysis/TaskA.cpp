@@ -50,8 +50,8 @@ void TaskA::exec(){
 			// iterate over all signals from one TDC channel
 			// analyze number of hits per channel
 			getStatistics().getHisto1D("HitsPerEvtCh").Fill( tdcChannel->GetHitsNum() );
-
-			for(int j = 0; j < tdcChannel->GetHitsNum(); ++j){
+			const int kNumHits = tdcChannel->GetHitsNum();
+			for(int j = 0; j < kNumHits; ++j){
 
 			  // check for unreasable times
 			  // the times should be negative (measured w.r.t end of time window)
