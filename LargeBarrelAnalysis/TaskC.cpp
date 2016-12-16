@@ -15,6 +15,7 @@
 
 #include <iostream>
 #include <JPetWriter/JPetWriter.h>
+#include <JPetAnalysisTools/JPetAnalysisTools.h>
 #include "TaskC.h"
 #include <algorithm>
 
@@ -59,8 +60,11 @@ void TaskC::exec(){
 			} else {
 
 			  vector<JPetHit> hits = createHits(fSignals);
-			  sortHits(hits);
+			  hits = JPetAnalysisTools::getHitsOrderedByTime(hits);
+			  // uncomment this in order to fill histograms
+			  // of time differences for subsequent hist
 			  studyTimeWindow(hits);
+			  
 			  saveHits(hits);
 			  
 			  fSignals.clear();
@@ -159,47 +163,20 @@ void TaskC::terminate(){
 }
 
 
-void TaskC::sortHits(vector<JPetHit>&hits){
 
-  sort( hits.begin(), hits.end(),
-  	[](const JPetHit & A, const JPetHit & B){
-  	  return (A.getTime() < B.getTime());
-  	}
-  	);
-
-}
 
 void TaskC::studyTimeWindow(const vector<JPetHit>&hits){
 
+  // plot time differences for subsequent hits at each threshold separately
   for(int i=1; i<hits.size(); ++i){
-
-    // make sure the hits are really sorted
-    // assert(hits.at(i-1).getTime() <= hits.at(i).getTime());
-
-    // double dt = hits.at(i).getTime() - hits.at(i-1).getTime();
-
-    // getStatistics().getHisto1D("timeSepSmall").Fill(dt / 1000.); // we fill the histo in [ns]
-    // getStatistics().getHisto1D("timeSepLarge").Fill(dt / 1000.); // we fill the histo in [ns]
-
     for(int k=1;k<=4;++k){
-
       double t2 = 0.5*(hits.at(i).getSignalA().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).at(k) + hits.at(i).getSignalB().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).at(k));
-
       double t1 = 0.5*(hits.at(i-1).getSignalA().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).at(k) + hits.at(i-1).getSignalB().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).at(k));
-      
-
       double dt = t2 - t1;
-
       getStatistics().getHisto1D(Form("timeSepSmall_thr_%d", k)).Fill(dt / 1000.); // we fill the histo in [ns]
       getStatistics().getHisto1D(Form("timeSepLarge_thr_%d", k)).Fill(dt / 1000.); // we fill the histo in [ns]
-      
     }
-    
   }
-
-
-  
-
 }
 
 void TaskC::saveHits(const vector<JPetHit>&hits){
