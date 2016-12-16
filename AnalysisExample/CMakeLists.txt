@@ -33,8 +33,7 @@ file(GLOB SOURCES *.cpp)
 include_directories(${Framework_INCLUDE_DIRS})
 add_definitions(${Framework_DEFINITIONS})
 
-generate_root_dictionaries(DICTIONARIES SOURCES ${SOURCES})
-add_executable(${projectBinary} ${SOURCES} ${HEADERS} ${DICTIONARIES})
+add_executable(${projectBinary} ${SOURCES} ${HEADERS})
 target_link_libraries(${projectBinary} JPetFramework)
 
 add_custom_target(clean_data_analysisexample
