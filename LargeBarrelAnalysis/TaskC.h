@@ -39,5 +39,6 @@ protected:
   void studyTimeWindow(const std::vector<JPetHit>&hits);
   std::vector<JPetRawSignal> fSignals;
   JPetWriter* fWriter;
+  const int kNumOfThresholds=4;
 };
 #endif /*  !TASKD_H */
