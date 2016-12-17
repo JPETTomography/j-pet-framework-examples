@@ -17,7 +17,7 @@
 #include "TaskA.h"
 TaskA::TaskA(const char * name, const char * description)
 :JPetTask(name, description),fCurrEventNumber(0){}
-void TaskA::init(const JPetTaskInterface::Options& opts){
+void TaskA::init(const JPetTaskInterface::Options& ){
 	getStatistics().createHistogram( new TH1F("HitsPerEvtCh","Hits per channel in one event",50,-0.5,49.5) );
 	getStatistics().createHistogram( new TH1F("ChannelsPerEvt","Channels fired in one event",200,-0.5,199.5) );
 }
@@ -105,4 +105,5 @@ JPetSigCh TaskA::generateSigCh(const JPetTOMBChannel & channel, JPetSigCh::EdgeT
   sigch.setTRB(channel.getTRB());
   sigch.setTOMBChannel(channel);
 
+  return sigch;
 }
