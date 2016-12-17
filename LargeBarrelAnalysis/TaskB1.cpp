@@ -22,7 +22,7 @@ TaskB1::TaskB1(const char * name, const char * description):
 JPetTask(name, description){}
 TaskB1::~TaskB1(){}
 
-void TaskB1::init(const JPetTaskInterface::Options& opts){
+void TaskB1::init(const JPetTaskInterface::Options&){
 	fBarrelMap.buildMappings(getParamBank());
 	// create histograms for TOT - one for each DAQ channel
 	for(auto & tomb : getParamBank().getTOMBChannels()){
@@ -37,7 +37,7 @@ void TaskB1::init(const JPetTaskInterface::Options& opts){
 	);
 	// create histograms for TDC hits multiplicity vs PMT number
 	// separately for each threshold
-	for(int thr=1;thr<=4;thr++){
+	for(int thr=1;thr<=kNumOfThresholds;thr++){
 		int n_pmts = getParamBank().getPMsSize();
 		char * histo_name = Form("HitsLeadingEdge_thr%d", thr);
 		char * histo_title = Form("%s;PMT No.;No. hits", histo_name);
@@ -55,8 +55,8 @@ void TaskB1::exec(){
 		map<int,JPetSigCh> leadSigChs;
 		map<int,JPetSigCh> trailSigChs;
 		map<int, JPetRawSignal> signals; 
-		const size_t nSigChs = timeWindow->getNumberOfSigCh();
-		for (auto i = 0; i < nSigChs; i++) {
+		const unsigned int nSigChs = timeWindow->getNumberOfSigCh();
+		for (unsigned int i = 0; i < nSigChs; i++) {
 			JPetSigCh sigch = timeWindow->operator[](i);
 			int daq_channel = sigch.getChannel();
 			if( sigch.getType() == JPetSigCh::Leading )

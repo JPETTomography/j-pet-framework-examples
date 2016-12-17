@@ -21,6 +21,7 @@
 #include <JPetTimeWindow/JPetTimeWindow.h>
 #include <JPetParamBank/JPetParamBank.h>
 #include <JPetParamManager/JPetParamManager.h>
+#include <JPetTOMBChannel/JPetTOMBChannel.h>
 class JPetWriter;
 #ifdef __CINT__
 //when cint is used instead of compiler, override word is not recognized
@@ -29,18 +30,21 @@ class JPetWriter;
 #endif
 class TaskA: public JPetTask{
 public:
-	TaskA(const char * name, const char * description);
-	virtual ~TaskA();
-	virtual void init(const JPetTaskInterface::Options& opts)override;
-	virtual void exec()override;
-	virtual void terminate()override;
-	virtual void setWriter(JPetWriter* writer)override;
-	virtual void setParamManager(JPetParamManager* paramManager)override;
-	const JPetParamBank& getParamBank()const;
+  TaskA(const char * name, const char * description);
+  virtual ~TaskA();
+  virtual void init(const JPetTaskInterface::Options& opts)override;
+  virtual void exec()override;
+  virtual void terminate()override;
+  virtual void setWriter(JPetWriter* writer)override;
+  virtual void setParamManager(JPetParamManager* paramManager)override;
+  const JPetParamBank& getParamBank()const;
 protected:
-	void saveTimeWindow( JPetTimeWindow slot);
-	JPetWriter* fWriter;
-	JPetParamManager* fParamManager;
-	long long int fCurrEventNumber;
+  void saveTimeWindow( JPetTimeWindow slot);
+  JPetSigCh generateSigCh(const JPetTOMBChannel & channel, JPetSigCh::EdgeType edge) const;
+  JPetWriter* fWriter;
+  JPetParamManager* fParamManager;
+  long long int fCurrEventNumber;
+  const double kMaxTime = 0.;
+  const double kMinTime = -1.e6;
 };
 #endif /*  !TASKA_H */
