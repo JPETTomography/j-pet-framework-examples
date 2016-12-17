@@ -20,7 +20,7 @@
 using namespace std;
 TaskE::TaskE(const char * name, const char * description):JPetTask(name, description){}
 TaskE::~TaskE(){}
-void TaskE::init(const JPetTaskInterface::Options& opts){
+void TaskE::init(const JPetTaskInterface::Options&){
 	fBarrelMap.buildMappings(getParamBank());
 	for(auto const & layer : getParamBank().getLayers()){
 		for (int thr=1;thr<=4;thr++){
@@ -130,7 +130,7 @@ void TaskE::fillDeltaIDhisto(int delta_ID, int threshold, const JPetLayer & laye
 void TaskE::fillTOFvsDeltaIDhisto(int delta_ID, int thr, const JPetHit & hit1, const JPetHit & hit2){
 	int layer_number = fBarrelMap.getLayerNumber(hit1.getBarrelSlot().getLayer());
 	const char * histo_name = Form("TOF_vs_Delta_ID_layer_%d_thr_%d",
-				       fBarrelMap.getLayerNumber(hit1.getBarrelSlot().getLayer()),
+				       layer_number,
 				       thr);
 	
 	double tof = fabs( JPetHitUtils::getTimeAtThr(hit1, thr) -
