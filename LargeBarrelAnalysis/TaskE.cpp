@@ -20,9 +20,9 @@
 using namespace std;
 TaskE::TaskE(const char * name, const char * description):JPetTask(name, description){}
 TaskE::~TaskE(){}
-void TaskE::init(const JPetTaskInterface::Options& opts){
+void TaskE::init(const JPetTaskInterface::Options&){
 	fBarrelMap.buildMappings(getParamBank());
-	for(auto & layer : getParamBank().getLayers()){
+	for(auto const & layer : getParamBank().getLayers()){
 		for (int thr=1;thr<=4;thr++){
 			// create histograms of Delta ID
 			char * histo_name = Form("Delta_ID_for_coincidences_layer_%d_thr_%d", fBarrelMap.getLayerNumber(*layer.second), thr);
@@ -48,6 +48,15 @@ void TaskE::init(const JPetTaskInterface::Options& opts){
 			}
 		}
 	}
+
+	// create dt histos for each strip
+	for(auto const & scin : getParamBank().getScintillators()){
+	  for (int thr=1;thr<=4;thr++){
+	    const char * histo_name = formatUniqueSlotDescription(scin.second->getBarrelSlot(), thr, "dTOF_");
+	    getStatistics().createHistogram( new TH1F(histo_name, histo_name, 2000, -20., 20.) );
+	  }
+	}
+
 }
 void TaskE::exec(){
 	//getting the data from event in propriate format
@@ -92,6 +101,7 @@ void TaskE::fillCoincidenceHistos(const vector<JPetHit>& hits){
 							fillTOFvsDeltaIDhisto(delta_ID, thr, hit1, hit2);
 							// fill TOT vs TOT histos
 							fillTOTvsTOThisto(delta_ID, thr, hit1, hit2);
+
 						}
 					}
 				}
@@ -120,7 +130,7 @@ void TaskE::fillDeltaIDhisto(int delta_ID, int threshold, const JPetLayer & laye
 void TaskE::fillTOFvsDeltaIDhisto(int delta_ID, int thr, const JPetHit & hit1, const JPetHit & hit2){
 	int layer_number = fBarrelMap.getLayerNumber(hit1.getBarrelSlot().getLayer());
 	const char * histo_name = Form("TOF_vs_Delta_ID_layer_%d_thr_%d",
-				       fBarrelMap.getLayerNumber(hit1.getBarrelSlot().getLayer()),
+				       layer_number,
 				       thr);
 	
 	double tof = fabs( JPetHitUtils::getTimeAtThr(hit1, thr) -
@@ -130,7 +140,17 @@ void TaskE::fillTOFvsDeltaIDhisto(int delta_ID, int thr, const JPetHit & hit1, c
 	tof /= 1000.; // to have the TOF in ns instead of ps
 	
 	getStatistics().getHisto2D(histo_name).Fill(delta_ID, tof);
+
+	if(delta_ID == 24){
+	  
+	  histo_name = formatUniqueSlotDescription(hit1.getBarrelSlot(), thr, "dTOF_");
+	  getStatistics().getHisto1D(histo_name).Fill(tof);
+	  
+	}
+	
 }
+
+
 bool TaskE::isGoodTimeDiff(const JPetHit & hit, int thr){
 	double mean_timediff = getAuxilliaryData().getValue("timeDiffAB mean values",
 							    formatUniqueSlotDescription(hit.getBarrelSlot(),

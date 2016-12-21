@@ -14,6 +14,8 @@ add_subdirectory(j-pet-framework)
 include_directories(j-pet-framework ${Framework_INCLUDE_DIRS})
 add_definitions(${Framework_DEFINITIONS})
 
+add_definitions(-std=c++11 -Wall -Wunused-parameter)
+
 # enable rpath on OS X and point it to ROOT
 if(APPLE)
   set(CMAKE_MACOSX_RPATH ON)

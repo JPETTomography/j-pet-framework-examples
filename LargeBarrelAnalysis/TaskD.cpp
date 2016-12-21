@@ -18,7 +18,7 @@
 #include "TaskD.h"
 
 TaskD::TaskD(const char * name, const char * description):JPetTask(name, description){}
-void TaskD::init(const JPetTaskInterface::Options& opts){
+void TaskD::init(const JPetTaskInterface::Options&){
 	fBarrelMap.buildMappings(getParamBank());
 	// create histograms for time differences at each slot and each threshold
 	for(auto & scin : getParamBank().getScintillators()){
