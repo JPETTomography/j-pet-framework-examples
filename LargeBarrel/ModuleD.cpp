@@ -31,68 +31,63 @@ void ModuleD::exec(){
     //getting the data from event in propriate format
     if(auto currSignal = dynamic_cast<const JPetPhysSignal*const>(getEvent())){
 
-        if (fSignals.empty()) {
-            fSignals.push_back(*currSignal);
+
+        if (!isFirstSignalSet) {
+            timeWindowIndex = currSignal->getRecoSignal().getRawSignal().getTimeWindowIndex();
+            fillSignalsMap(*currSignal);
+
         }
 
         else {
-            if (fSignals[0].getRecoSignal().getRawSignal().getTimeWindowIndex() == currSignal->getRecoSignal().getRawSignal().getTimeWindowIndex()) {
-                fSignals.push_back(*currSignal);
+            if (timeWindowIndex == currSignal->getRecoSignal().getRawSignal().getTimeWindowIndex()) {
+                fillSignalsMap(*currSignal);
             }
             else {
-                saveHits(createHits(fSignals));
-                fSignals.clear();
-                fSignals.push_back(*currSignal);
+                saveHits(createHits( fAllSignalsInTimeWindow, kTimeWindow));
+                fAllSignalsInTimeWindow.clear();
+                fillSignalsMap(*currSignal);
             }
         }
     }
 }
 
-vector<JPetHit> ModuleD::createHits(const vector<JPetPhysSignal>&signals){
+vector<JPetHit> ModuleD::createHits(map<int, pair<vector<JPetPhysSignal>, vector<JPetPhysSignal>>> fAllSignalsInTimeWindow, const double kTimeWindow){
+
+
+    // This method takes signal from side A on a scintilator and compares it with signals on side B - if they are within time window then it creates hit
 
     vector<JPetHit> hits;
 
-    for (auto i = signals.begin(); i != signals.end(); ++i) {
-        for (auto j = i; ++j != signals.end();) {
+    for (auto scintillator : fAllSignalsInTimeWindow) {
 
-            if (i -> getRecoSignal().getRawSignal().getPM().getScin() == j -> getRecoSignal().getRawSignal().getPM().getScin()) {
-                // found 2 signals from the same scintillator
+        auto sideA = scintillator.second.first;
+        auto sideB = scintillator.second.second;
 
-                // assign sides A and B properly
+        if(sideA.size() > 0 and sideB.size() > 0){
 
-                if(
-                    (i->getRecoSignal().getRawSignal().getPM().getSide() == JPetPM::SideA)
-                    &&(j->getRecoSignal().getRawSignal().getPM().getSide() == JPetPM::SideB)
-                ){
-                    if( abs(i -> getTime() - j -> getTime()) < TIME_WINDOW /*ps*/){
+            for(auto signalA : sideA){
+                for(auto signalB : sideB){
 
-                        JPetPhysSignal signalA = *i;
-                        JPetPhysSignal signalB = *j;
+                    if(abs(signalA.getTime() - signalB.getTime()) < kTimeWindow /*ps*/){
+
                         JPetHit hit;
                         hit.setSignalA(signalA);
                         hit.setSignalB(signalB);
-                        hit.setTime( (signalA -> getTime() + signalB -> getTime())/2.0 );
-                        hit.setScintillator(i -> getRecoSignal().getRawSignal().getPM().getScin());
-                        hit.setBarrelSlot(i -> getRecoSignal().getRawSignal().getPM().getScin().getBarrelSlot());
+                        hit.setTime( (signalA.getTime() + signalB.getTime())/2.0 );
+                        hit.setScintillator(signalA.getRecoSignal().getRawSignal().getPM().getScin());
+                        hit.setBarrelSlot(signalA.getRecoSignal().getRawSignal().getPM().getScin().getBarrelSlot());
 
                         hits.push_back(hit);
                     }
                 }
-                else {
-                    // if two hits on the same side, ignore
-                    WARNING("TWO hits on the same scintillator side we ignore it");
-                    continue;
-                }
-
-
             }
+
         }
-    }
     return hits;
 }
 
 void ModuleD::terminate(){
-    saveHits(createHits(fSignals)); //if there is something left
+    saveHits(createHits(fAllSignalsInTimeWindow, kTimeWindow)); //if there is something left
 }
 
 
@@ -110,3 +105,16 @@ void ModuleD::saveHits(const vector<JPetHit>& hits){
     }
 }
 void ModuleD::setWriter(JPetWriter* writer){fWriter =writer;}
+
+void ModuleD::fillSignalsMap(JPetPhysSignal signal){
+
+    if(signal.getRecoSignal().getRawSignal().getPM().getSide() == JPetPM::SideA){
+
+        fAllSignalsInTimeWindow.at(signal.getRecoSignal().getRawSignal().getPM().getScin().getID()).first.push_back(signal);
+    }
+    else{
+
+        fAllSignalsInTimeWindow.at(signal.getRecoSignal().getRawSignal().getPM().getScin().getID()).second.push_back(signal);
+    }
+
+};
