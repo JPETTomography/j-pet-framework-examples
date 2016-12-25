@@ -39,12 +39,19 @@ class ModuleD:public JPetTask {
         virtual void setWriter(JPetWriter* writer)override;
 
     protected:
-        std::vector<JPetPhysSignal> fSignals;
-        std::vector<JPetHit> createHits(const std::vector<JPetPhysSignal>& signals);
-        void saveHits(const std::vector<JPetHit>&hits);
-        JPetWriter* fWriter;
-        const double TIME_WINDOW = 50000; /* in ps -> 50ns*/
+        bool isFirstSignalSet = false;
+        int timeWindowIndex;
 
+        std::map <int, std::pair <std::vector<JPetPhysSignal>, std::vector<JPetPhysSignal>> > fAllSignalsInTimeWindow;
+        // Map od all signals within a single time window.
+        // It has a structure of < ScintillatorID <SignalsOnSideA, SignalsOnSideB> >
+
+        void fillSignalsMap(JPetPhysSignal signal);
+        std::vector<JPetHit> createHits(std::map <int, std::pair <std::vector<JPetPhysSignal>, std::vector<JPetPhysSignal>> > fAllSignalsInTimeWindow, const double kTimeWindow);
+        void saveHits(const std::vector<JPetHit>&hits);
+
+        JPetWriter* fWriter;
+        const double kTimeWindow = 50000; /* in ps -> 50ns*/
 };
 
 #endif /*  !MODULED_H */
