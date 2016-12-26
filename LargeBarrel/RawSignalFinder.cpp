@@ -10,22 +10,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file ModuleB.cpp
+ *  @file RawSignalFinder.cpp
  */
 
 #include <map>
 #include <vector>
 #include <string>
 #include <JPetWriter/JPetWriter.h>
-#include "ModuleB.h"
+#include "RawSignalFinder.h"
 
 using namespace std;
 
-ModuleB::ModuleB(const char * name, const char * description):
+RawSignalFinder::RawSignalFinder(const char * name, const char * description):
 JPetTask(name, description){}
-ModuleB::~ModuleB(){}
+RawSignalFinder::~RawSignalFinder(){}
 
-void ModuleB::init(const JPetTaskInterface::Options& opts){
+void RawSignalFinder::init(const JPetTaskInterface::Options& opts){
 
     getStatistics().createHistogram( new TH1F("Lead", "Number of points on leading edge", 18, -0.5, 17.5) );
     // getStatistics().createHistogram( new TH1F("Trail", "Points on trailing edge", 18, -0.5, 17.5) );
@@ -41,7 +41,7 @@ void ModuleB::init(const JPetTaskInterface::Options& opts){
 
 }
 
-void ModuleB::exec(){
+void RawSignalFinder::exec(){
     //getting the data from event in propriate format
     if(auto timeWindow = dynamic_cast<const JPetTimeWindow*const>(getEvent())){
 
@@ -140,19 +140,19 @@ void ModuleB::exec(){
     }
 }
 
-void ModuleB::terminate(){}
+void RawSignalFinder::terminate(){}
 
-void ModuleB::saveRawSignal( JPetRawSignal sig){
+void RawSignalFinder::saveRawSignal( JPetRawSignal sig){
     assert(fWriter);
     fWriter->write(sig);
 }
 
-void ModuleB::setWriter(JPetWriter* writer) {
+void RawSignalFinder::setWriter(JPetWriter* writer) {
     fWriter = writer;
 }
-void ModuleB::setParamManager(JPetParamManager* paramManager) {
+void RawSignalFinder::setParamManager(JPetParamManager* paramManager) {
     fParamManager = paramManager;
 }
-const JPetParamBank& ModuleB::getParamBank() const {
+const JPetParamBank& RawSignalFinder::getParamBank() const {
     return fParamManager->getParamBank();
 }

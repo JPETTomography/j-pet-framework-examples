@@ -16,10 +16,11 @@
 #include <DBHandler/HeaderFiles/DBHandler.h>
 #include <JPetManager/JPetManager.h>
 #include <JPetTaskLoader/JPetTaskLoader.h>
-#include "ModuleA.h"
-#include "ModuleB.h"
-#include "ModuleC2.h"
-#include "ModuleD.h"
+
+#include "Translator.h"
+#include "RawSignalFinder.h"
+#include "PhysicalDescriptor.h"
+#include "HitFinder.h"
 
 using namespace std;
 
@@ -32,13 +33,16 @@ int main(int argc, char* argv[]) {
 
   manager.registerTask([](){
       return new JPetTaskLoader("hld", "tslot_raw",
-                  new ModuleA("Module: Unp to TSlot Raw",
+                  new Translator("Module: Unp to TSlot Raw",
                         "Process unpacked HLD file into a tree of JPetTSlot objects"));
     });
 
+/**
+ * WARNING. In developement.
+ */
   manager.registerTask([](){
       return new JPetTaskLoader("tslot_raw", "raw_sig",
-                new ModuleB("Module: assemble signals",
+                new RawSignalFinder("Module: assemble signals",
                        "Assemble raw PMT signals from time window data"));
     });
 
@@ -53,20 +57,19 @@ int main(int argc, char* argv[]) {
 
 
 
-  /*=====  WARNING  ======*/
-  /* Module below is olny tempoary. For now it only sets time of signal arrival
-   * as time at first treshold of JPetRawSignal */
-
+/**
+ * WARNING. In developement
+ */
   manager.registerTask([](){
       return new JPetTaskLoader("raw_sig" /* will be changed to reco_sig */ , "phys_sig",
-                new ModuleC2("Module: assemble physical signals",
+                new PhysicalDescriptor("Module: assemble physical signals",
                        "Add physical properties of signals based on reconstructed signals"));
     });
 
 
   manager.registerTask([](){
       return new JPetTaskLoader("phys_sig", "hits",
-                new ModuleD("Module: create signals",
+                new HitFinder("Module: create signals",
                        "Create hits from physical signals from both ends of scintilators"));
     });
 
