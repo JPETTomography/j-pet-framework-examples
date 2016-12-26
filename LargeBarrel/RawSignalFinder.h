@@ -10,32 +10,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file TaskA.h
+ *  @file RawSignalFinder.h
  */
 
-#ifndef MODULEA_H
-#define MODULEA_H
-
+#ifndef RawSignalFinder_H
+#define RawSignalFinder_H
 
 #include <vector>
 #include <JPetTask/JPetTask.h>
+#include <JPetRawSignal/JPetRawSignal.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
 #include <JPetParamBank/JPetParamBank.h>
 #include <JPetParamManager/JPetParamManager.h>
-#include <JPetTOMBChannel/JPetTOMBChannel.h>
+#include "LargeBarrelMapping.h"
 
 class JPetWriter;
 
 #ifdef __CINT__
-//when cint is used instead of compiler, override word is not recognized
-//nevertheless it's needed for checking if the structure of project is correct
+// when cint is used instead of compiler, override word is not recognized
+// nevertheless it's needed for checking if the structure of project is correct
 #   define override
 #endif
+/**
+ * @brief      Module responsible for creating JPetRawSignals.
+ *
+ * This module takes JPetTimeWindow as an input and based on data from TDC channels
+ * creates JPetRawSignals for further analysis
+ *
+ *  WARNING: still in developement
+ */
+class RawSignalFinder: public JPetTask
+{
 
-class ModuleA: public JPetTask{
     public:
-        ModuleA(const char * name, const char * description);
-        virtual ~ModuleA();
+        RawSignalFinder(const char * name, const char * description);
+        virtual ~RawSignalFinder();
         virtual void init(const JPetTaskInterface::Options& opts)override;
         virtual void exec()override;
         virtual void terminate()override;
@@ -44,15 +53,10 @@ class ModuleA: public JPetTask{
         const JPetParamBank& getParamBank()const;
 
     protected:
-        void saveTimeWindow( JPetTimeWindow slot);
-        JPetSigCh generateSigCh(const JPetTOMBChannel & channel, JPetSigCh::EdgeType edge) const;
+        void saveRawSignal( JPetRawSignal sig);
         JPetWriter* fWriter;
         JPetParamManager* fParamManager;
-        long long int fCurrEventNumber;
-
-        const double kMaxTime = 0.;     //
-        const double kMinTime = -1.e6;  //
-
+        LargeBarrelMapping fBarrelMap;
 };
 
-#endif /*  !MODULEA_H */
+#endif /*  !RawSignalFinder_H */

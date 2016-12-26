@@ -10,22 +10,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file ModuleC2.cpp
+ *  @file PhysicalDescriptor.cpp
  */
 
 #include <iostream>
 #include <JPetWriter/JPetWriter.h>
-#include "ModuleC2.h"
+#include "PhysicalDescriptor.h"
 
 using namespace std;
 
-ModuleC2::ModuleC2(const char * name, const char * description):JPetTask(name, description){}
+PhysicalDescriptor::PhysicalDescriptor(const char * name, const char * description):JPetTask(name, description){}
 
-ModuleC2::~ModuleC2(){}
+PhysicalDescriptor::~PhysicalDescriptor(){}
 
-void ModuleC2::init(const JPetTaskInterface::Options& opts){}
+void PhysicalDescriptor::init(const JPetTaskInterface::Options& opts){}
 
-void ModuleC2::exec(){
+void PhysicalDescriptor::exec(){
 
     //getting the data from event in propriate format *Will be changed*
     if(auto currSignal = dynamic_cast<const JPetRawSignal*const>(getEvent())){
@@ -43,6 +43,6 @@ void ModuleC2::exec(){
     }
 }
 
-void ModuleC2::terminate(){}
+void PhysicalDescriptor::terminate(){}
 
-void ModuleC2::setWriter(JPetWriter* writer){fWriter =writer;}
+void PhysicalDescriptor::setWriter(JPetWriter* writer){fWriter =writer;}
