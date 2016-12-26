@@ -10,34 +10,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file ModuleB.h
+ *  @file Translator.h
  */
 
-#ifndef MODULEB_H
-#define MODULEB_H
+#ifndef Translator_H
+#define Translator_H
+
 
 #include <vector>
 #include <JPetTask/JPetTask.h>
-#include <JPetRawSignal/JPetRawSignal.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
 #include <JPetParamBank/JPetParamBank.h>
 #include <JPetParamManager/JPetParamManager.h>
-#include "LargeBarrelMapping.h"
+#include <JPetTOMBChannel/JPetTOMBChannel.h>
 
 class JPetWriter;
 
 #ifdef __CINT__
-// when cint is used instead of compiler, override word is not recognized
-// nevertheless it's needed for checking if the structure of project is correct
+//when cint is used instead of compiler, override word is not recognized
+//nevertheless it's needed for checking if the structure of project is correct
 #   define override
 #endif
 
-class ModuleB: public JPetTask
-{
-
+/**
+ * @brief      Module responsible for translating HLD data into J-PET data structure.
+ *
+ * This module is meant to be first in data analysis chain. As an input it takes unpacked HLD file
+ * and translates it's content into JPetTimeWindow data structure for further analysis.
+ *
+ */
+class Translator: public JPetTask{
     public:
-        ModuleB(const char * name, const char * description);
-        virtual ~ModuleB();
+        Translator(const char * name, const char * description);
+        virtual ~Translator();
         virtual void init(const JPetTaskInterface::Options& opts)override;
         virtual void exec()override;
         virtual void terminate()override;
@@ -46,10 +51,15 @@ class ModuleB: public JPetTask
         const JPetParamBank& getParamBank()const;
 
     protected:
-        void saveRawSignal( JPetRawSignal sig);
+        void saveTimeWindow( JPetTimeWindow slot);
+        JPetSigCh generateSigCh(const JPetTOMBChannel & channel, JPetSigCh::EdgeType edge) const;
         JPetWriter* fWriter;
         JPetParamManager* fParamManager;
-        LargeBarrelMapping fBarrelMap;
+        long long int fCurrEventNumber;
+
+        const double kMaxTime = 0.;     //
+        const double kMinTime = -1.e6;  //
+
 };
 
-#endif /*  !MODULEB_H */
+#endif /*  !Translator_H */

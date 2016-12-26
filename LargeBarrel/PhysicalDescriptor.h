@@ -10,15 +10,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file ModuleD.h
+ *  @file PhysicalDescriptor.h
  */
 
-#ifndef MODULED_H
-#define MODULED_H
+#ifndef PhysicalDescriptor_H
+#define PhysicalDescriptor_H
 
 #include <JPetTask/JPetTask.h>
 #include <JPetHit/JPetHit.h>
 #include <JPetRawSignal/JPetRawSignal.h>
+#include <JPetRecoSignal/JPetRecoSignal.h>
 
 class JPetWriter;
 
@@ -28,30 +29,24 @@ class JPetWriter;
 #   define override
 #endif
 
-class ModuleD:public JPetTask {
+/**
+ * @brief      Module responsible for creating physical quantities that describe a signal.
+ *
+ * This module takes reconstructed signal (JPetRecoSignal) as an input and characterize
+ * the signal by physical properties such as time of arrival or number of hotoelectrons in a whole signal.
+ */
+class PhysicalDescriptor: public JPetTask {
 
     public:
-        ModuleD(const char * name, const char * description);
-        virtual ~ModuleD();
+        PhysicalDescriptor(const char * name, const char * description);
+        virtual ~PhysicalDescriptor();
         virtual void init(const JPetTaskInterface::Options& opts)override;
         virtual void exec()override;
         virtual void terminate()override;
         virtual void setWriter(JPetWriter* writer)override;
 
     protected:
-        bool isFirstSignalSet = false;
-        int timeWindowIndex;
-
-        std::map <int, std::pair <std::vector<JPetPhysSignal>, std::vector<JPetPhysSignal>> > fAllSignalsInTimeWindow;
-        // Map od all signals within a single time window.
-        // It has a structure of < ScintillatorID <SignalsOnSideA, SignalsOnSideB> >
-
-        void fillSignalsMap(JPetPhysSignal signal);
-        std::vector<JPetHit> createHits(std::map <int, std::pair <std::vector<JPetPhysSignal>, std::vector<JPetPhysSignal>> > fAllSignalsInTimeWindow, const double kTimeWindow);
-        void saveHits(const std::vector<JPetHit>&hits);
-
         JPetWriter* fWriter;
-        const double kTimeWindow = 50000; /* in ps -> 50ns*/
 };
 
-#endif /*  !MODULED_H */
+#endif /*  !PhysicalDescriptor_H */

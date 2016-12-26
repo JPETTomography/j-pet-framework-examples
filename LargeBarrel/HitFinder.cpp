@@ -10,40 +10,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file ModuleD.cpp
+ *  @file HitFinder.cpp
  */
 
 #include <iostream>
 #include <JPetWriter/JPetWriter.h>
 #include <JPetAnalysisTools/JPetAnalysisTools.h>
-#include "ModuleD.h"
+#include "HitFinder.h"
 
 using namespace std;
 
-ModuleD::ModuleD(const char * name, const char * description):JPetTask(name, description){}
+HitFinder::HitFinder(const char * name, const char * description):JPetTask(name, description){}
 
-ModuleD::~ModuleD(){}
+HitFinder::~HitFinder(){}
 
-void ModuleD::init(const JPetTaskInterface::Options& opts){
+void HitFinder::init(const JPetTaskInterface::Options& opts){
 }
 
-void ModuleD::exec(){
+void HitFinder::exec(){
     //getting the data from event in propriate format
     if(auto currSignal = dynamic_cast<const JPetPhysSignal*const>(getEvent())){
 
 
-        if (!isFirstSignalSet) {
-            timeWindowIndex = currSignal->getRecoSignal().getRawSignal().getTimeWindowIndex();
+        if (DAQTimeWindowIndex == -1) {
+            DAQTimeWindowIndex = currSignal->getRecoSignal().getRawSignal().getTimeWindowIndex();
             fillSignalsMap(*currSignal);
 
         }
 
         else {
-            if (timeWindowIndex == currSignal->getRecoSignal().getRawSignal().getTimeWindowIndex()) {
+            if (DAQTimeWindowIndex == currSignal->getRecoSignal().getRawSignal().getTimeWindowIndex()) {
                 fillSignalsMap(*currSignal);
             }
             else {
-                saveHits(createHits( fAllSignalsInTimeWindow, kTimeWindow));
+                saveHits(createHits( fAllSignalsInTimeWindow, kTimeWindowWidth));
                 fAllSignalsInTimeWindow.clear();
                 fillSignalsMap(*currSignal);
             }
@@ -51,7 +51,8 @@ void ModuleD::exec(){
     }
 }
 
-vector<JPetHit> ModuleD::createHits(map<int, pair<vector<JPetPhysSignal>, vector<JPetPhysSignal>>> fAllSignalsInTimeWindow, const double kTimeWindow){
+
+vector<JPetHit> HitFinder::createHits(const SignalsContainer& fAllSignalsInTimeWindow, const double kTimeDifferenceWindow){
 
 
     // This method takes signal from side A on a scintilator and compares it with signals on side B - if they are within time window then it creates hit
@@ -68,7 +69,7 @@ vector<JPetHit> ModuleD::createHits(map<int, pair<vector<JPetPhysSignal>, vector
             for(auto signalA : sideA){
                 for(auto signalB : sideB){
 
-                    if(abs(signalA.getTime() - signalB.getTime()) < kTimeWindow /*ps*/){
+                    if(abs(signalA.getTime() - signalB.getTime()) < kTimeDifferenceWindow /*ps*/){
 
                         JPetHit hit;
                         hit.setSignalA(signalA);
@@ -83,15 +84,16 @@ vector<JPetHit> ModuleD::createHits(map<int, pair<vector<JPetPhysSignal>, vector
             }
 
         }
+    }
     return hits;
 }
 
-void ModuleD::terminate(){
-    saveHits(createHits(fAllSignalsInTimeWindow, kTimeWindow)); //if there is something left
+void HitFinder::terminate(){
+    saveHits(createHits(fAllSignalsInTimeWindow, kTimeWindowWidth)); //if there is something left
 }
 
 
-void ModuleD::saveHits(const vector<JPetHit>& hits){
+void HitFinder::saveHits(const vector<JPetHit>& hits){
     assert(fWriter);
     JPetAnalysisTools sort;
     auto sortedHits = sort.getHitsOrderedByTime(hits);
@@ -104,9 +106,10 @@ void ModuleD::saveHits(const vector<JPetHit>& hits){
         fWriter->write(hit);
     }
 }
-void ModuleD::setWriter(JPetWriter* writer){fWriter =writer;}
 
-void ModuleD::fillSignalsMap(JPetPhysSignal signal){
+void HitFinder::setWriter(JPetWriter* writer){fWriter =writer;}
+
+void HitFinder::fillSignalsMap(JPetPhysSignal signal){
 
     if(signal.getRecoSignal().getRawSignal().getPM().getSide() == JPetPM::SideA){
 

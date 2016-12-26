@@ -10,26 +10,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file ModuleA.cpp
+ *  @file Translator.cpp
  */
 
 #include <Unpacker2/Unpacker2/EventIII.h>
 #include <JPetWriter/JPetWriter.h>
-#include "ModuleA.h"
+#include "Translator.h"
 
-ModuleA::ModuleA(const char * name, const char * description)
+Translator::Translator(const char * name, const char * description)
 :JPetTask(name, description),fCurrEventNumber(0){}
 
-void ModuleA::init(const JPetTaskInterface::Options& opts){
+void Translator::init(const JPetTaskInterface::Options& opts){
 
     getStatistics().createHistogram( new TH1F("HitsPerEvtCh","Hits per channel in one event",50,-0.5,49.5) );
     getStatistics().createHistogram( new TH1F("ChannelsPerEvt","Channels fired in one event",200,-0.5,199.5) );
 
 }
 
-ModuleA::~ModuleA(){}
+Translator::~Translator(){}
 
-void ModuleA::exec(){
+void Translator::exec(){
     if(auto evt = reinterpret_cast</*const*/ EventIII*const>(getEvent())){
 
         int ntdc = evt->GetTotalNTDCChannels();
@@ -96,27 +96,27 @@ void ModuleA::exec(){
     }
 }
 
-void ModuleA::terminate(){}
+void Translator::terminate(){}
 
-void ModuleA::saveTimeWindow( JPetTimeWindow slot){
+void Translator::saveTimeWindow( JPetTimeWindow slot){
     assert(fWriter);
     fWriter->write(slot);
 }
 
-void ModuleA::setWriter(JPetWriter* writer){
+void Translator::setWriter(JPetWriter* writer){
     fWriter=writer;
 }
 
-void ModuleA::setParamManager(JPetParamManager* paramManager) {
+void Translator::setParamManager(JPetParamManager* paramManager) {
     fParamManager = paramManager;
 }
 
-const JPetParamBank& ModuleA::getParamBank()const{
+const JPetParamBank& Translator::getParamBank()const{
     assert(fParamManager);
     return fParamManager->getParamBank();
 }
 
-JPetSigCh ModuleA::generateSigCh(const JPetTOMBChannel & channel, JPetSigCh::EdgeType edge) const{
+JPetSigCh Translator::generateSigCh(const JPetTOMBChannel & channel, JPetSigCh::EdgeType edge) const{
 
     JPetSigCh sigch;
     sigch.setDAQch(channel.getChannel());
