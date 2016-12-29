@@ -33,14 +33,13 @@ TimeCalibTools::TOMBChToCorrection TimeCalibTools::loadTimeCalibration(const std
   TOMBChToCorrection timeCalibration;
   using boost::property_tree::ptree;
   try {
-    boost::property_tree::ptree propTree;
-    read_json(calibFile, propTree);
-    for (auto & corr : propTree.get_child("time_calibration")) {
+    boost::property_tree::ptree root;
+    read_json(calibFile, root);
+    for (auto & item : root) {
+      auto channel = std::stoul(item.first);
+      auto correction = item.second.get_value<double>();
+      timeCalibration.insert(std::make_pair(channel, correction));
     }
-    /// for tests
-    unsigned int channel = 1;
-    double correction = 1;
-    timeCalibration.insert(std::make_pair(channel, correction));
   } catch (const std::runtime_error& error) {
     std::string message = "Error opening time calibration file. Error = " + std::string(error.what());
     ERROR(message);
