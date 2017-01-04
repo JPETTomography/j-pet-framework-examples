@@ -53,12 +53,15 @@ class Translator: public JPetTask{
     protected:
         void saveTimeWindow( JPetTimeWindow slot);
         JPetSigCh generateSigCh(const JPetTOMBChannel & channel, JPetSigCh::EdgeType edge) const;
-        JPetWriter* fWriter;
-        JPetParamManager* fParamManager;
-        long long int fCurrEventNumber;
+        JPetWriter* fWriter = 0;
+        JPetParamManager* fParamManager = 0;
+        long long int fCurrEventNumber = -1;
+
+        // DAQ time window width. Time of signals should be within this time window
+        const double kDAQTimeWindowWidth = 1.e6;
 
         const double kMaxTime = 0.;     //
-        const double kMinTime = -1.e6;  //
+        const double kMinTime = -kDAQTimeWindowWidth;  //
 
 };
 

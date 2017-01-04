@@ -52,14 +52,14 @@ void HitFinder::exec(){
 }
 
 
-vector<JPetHit> HitFinder::createHits(const SignalsContainer& fAllSignalsInTimeWindow, const double kTimeDifferenceWindow){
+vector<JPetHit> HitFinder::createHits(const SignalsContainer& allSignalsInTimeWindow, const double timeDifferenceWindow){
 
 
     // This method takes signal from side A on a scintilator and compares it with signals on side B - if they are within time window then it creates hit
 
     vector<JPetHit> hits;
 
-    for (auto scintillator : fAllSignalsInTimeWindow) {
+    for (auto scintillator : allSignalsInTimeWindow) {
 
         auto sideA = scintillator.second.first;
         auto sideB = scintillator.second.second;
@@ -69,7 +69,7 @@ vector<JPetHit> HitFinder::createHits(const SignalsContainer& fAllSignalsInTimeW
             for(auto signalA : sideA){
                 for(auto signalB : sideB){
 
-                    if(abs(signalA.getTime() - signalB.getTime()) < kTimeDifferenceWindow /*ps*/){
+                    if(abs(signalA.getTime() - signalB.getTime()) < timeDifferenceWindow /*ps*/){
 
                         JPetHit hit;
                         hit.setSignalA(signalA);
@@ -95,10 +95,9 @@ void HitFinder::terminate(){
 
 void HitFinder::saveHits(const vector<JPetHit>& hits){
     assert(fWriter);
-    JPetAnalysisTools sort;
-    auto sortedHits = sort.getHitsOrderedByTime(hits);
+    auto sortedHits = JPetAnalysisTools::getHitsOrderedByTime(hits);
 
-    for (auto hit : sortedHits){
+    for (const auto & hit : sortedHits){
         // here one can impose any conditions on hits that should be
         // saved or skipped
         // for now, all hits are written to the output file
