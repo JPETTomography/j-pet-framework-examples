@@ -63,7 +63,7 @@ class HitFinder:public JPetTask {
 
 
         void fillSignalsMap(JPetPhysSignal signal);
-        std::vector<JPetHit> createHits(const SignalsContainer& fAllSignalsInTimeWindow, const double kTimeDifferenceWindow);
+        std::vector<JPetHit> createHits(const SignalsContainer& allSignalsInTimeWindow, const double timeDifferenceWindow);
         void saveHits(const std::vector<JPetHit>&hits);
 
         JPetWriter* fWriter = 0;
