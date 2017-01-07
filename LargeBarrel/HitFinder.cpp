@@ -17,6 +17,7 @@
 #include <JPetWriter/JPetWriter.h>
 #include <JPetAnalysisTools/JPetAnalysisTools.h>
 #include "HitFinder.h"
+#include "HitFinderTools.h"
 
 using namespace std;
 
@@ -43,7 +44,7 @@ void HitFinder::exec(){
                 fillSignalsMap(*currSignal);
             }
             else {
-                saveHits(createHits( fAllSignalsInTimeWindow, kTimeWindowWidth));
+                saveHits(HitTools.createHits( fAllSignalsInTimeWindow, kTimeWindowWidth));
                 fAllSignalsInTimeWindow.clear();
                 fillSignalsMap(*currSignal);
             }
@@ -52,44 +53,9 @@ void HitFinder::exec(){
 }
 
 
-vector<JPetHit> HitFinder::createHits(const SignalsContainer& allSignalsInTimeWindow, const double timeDifferenceWindow){
-
-
-    // This method takes signal from side A on a scintilator and compares it with signals on side B - if they are within time window then it creates hit
-
-    vector<JPetHit> hits;
-
-    for (auto scintillator : allSignalsInTimeWindow) {
-
-        auto sideA = scintillator.second.first;
-        auto sideB = scintillator.second.second;
-
-        if(sideA.size() > 0 and sideB.size() > 0){
-
-            for(auto signalA : sideA){
-                for(auto signalB : sideB){
-
-                    if(abs(signalA.getTime() - signalB.getTime()) < timeDifferenceWindow /*ps*/){
-
-                        JPetHit hit;
-                        hit.setSignalA(signalA);
-                        hit.setSignalB(signalB);
-                        hit.setTime( (signalA.getTime() + signalB.getTime())/2.0 );
-                        hit.setScintillator(signalA.getRecoSignal().getRawSignal().getPM().getScin());
-                        hit.setBarrelSlot(signalA.getRecoSignal().getRawSignal().getPM().getScin().getBarrelSlot());
-
-                        hits.push_back(hit);
-                    }
-                }
-            }
-
-        }
-    }
-    return hits;
-}
 
 void HitFinder::terminate(){
-    saveHits(createHits(fAllSignalsInTimeWindow, kTimeWindowWidth)); //if there is something left
+    saveHits(HitTools.createHits(fAllSignalsInTimeWindow, kTimeWindowWidth)); //if there is something left
 }
 
 
