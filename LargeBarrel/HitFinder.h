@@ -19,6 +19,7 @@
 #include <JPetTask/JPetTask.h>
 #include <JPetHit/JPetHit.h>
 #include <JPetRawSignal/JPetRawSignal.h>
+#include "HitFinderTools.h"
 
 class JPetWriter;
 
@@ -51,20 +52,16 @@ class HitFinder:public JPetTask {
 
     protected:
 
-        /**
-         * Map od all signals within a single DAQ time window. It has a structure
-         * of < ScintillatorID <SignalsOnSideA, SignalsOnSideB> > Wider
-         * described in class descrption */
-        typedef std::map <int, std::pair <std::vector<JPetPhysSignal>, std::vector<JPetPhysSignal>> > SignalsContainer;
 
         int DAQTimeWindowIndex = -1; /// Index which defines a given DAQ time window (defined at the hardware level).
 
-        SignalsContainer fAllSignalsInTimeWindow;
+        HitFinderTools::SignalsContainer fAllSignalsInTimeWindow;
 
+
+        HitFinderTools HitTools;
 
         void fillSignalsMap(JPetPhysSignal signal);
-        std::vector<JPetHit> createHits(const SignalsContainer& allSignalsInTimeWindow, const double timeDifferenceWindow);
-        void saveHits(const std::vector<JPetHit>&hits);
+        void saveHits(const std::vector<JPetHit>& hits);
 
         JPetWriter* fWriter = 0;
         const double kTimeWindowWidth = 50000; /// in ps -> 50ns. Maximal time difference between signals
