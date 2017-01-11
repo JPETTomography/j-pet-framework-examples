@@ -31,10 +31,12 @@ vector<JPetHit> HitFinderTools::createHits(const SignalsContainer& allSignalsInT
 
         if(sideA.size() > 0 and sideB.size() > 0){
 
+        std::sort(sideA.begin(), sideA.end(), [] (const JPetPhysSignal & h1, const JPetPhysSignal & h2) {return h1.getTime() < h2.getTime();});
+        std::sort(sideB.begin(), sideB.end(), [] (const JPetPhysSignal & h1, const JPetPhysSignal & h2) {return h1.getTime() < h2.getTime();});
             for(auto signalA : sideA){
                 for(auto signalB : sideB){
 
-                    if(abs(signalA.getTime() - signalB.getTime()) < timeDifferenceWindow /*ps*/){
+                    if(abs(signalA.getTime() - signalB.getTime()) < timeDifferenceWindow  && (signalA.getTime() - signalB.getTime()) < timeDifferenceWindow/*ps*/){
 
                         JPetHit hit;
                         hit.setSignalA(signalA);
