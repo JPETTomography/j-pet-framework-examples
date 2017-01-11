@@ -10,11 +10,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file Module2.h
+ *  @file SignalFinder.h
  */
 
-#ifndef MODULE2_H
-#define MODULE2_H
+#ifndef SIGNALFINDER_H
+#define SIGNALFINDER_H
 
 #include <vector>
 #include <JPetTask/JPetTask.h>
@@ -24,35 +24,40 @@
 #include <JPetParamManager/JPetParamManager.h>
 #include "LargeBarrelMapping.h"
 
-using namespace std;
 class JPetWriter;
 
 #ifdef __CINT__
 #define override
 #endif
 
-class Module2: public JPetTask {
+class SignalFinder: public JPetTask {
 	public:
-		Module2(const char * name, const char * description);
-		virtual ~Module2();
+		SignalFinder(const char * name, const char * description, bool printStats);
+		virtual ~SignalFinder();
 		virtual void init(const JPetTaskInterface::Options& opts) override;
 		virtual void exec() override;
 		virtual void terminate() override;
 		virtual void setWriter(JPetWriter* writer) override;
 		virtual void setParamManager(JPetParamManager* paramManager) override;
 		const JPetParamBank& getParamBank()const;
+		bool fSaveControlHistos = true;
 
 	protected:
 		JPetWriter* fWriter;
 		JPetParamManager* fParamManager;
 		LargeBarrelMapping fBarrelMap;
-		void saveRawSignals(vector<JPetRawSignal> sigChVec);
-		vector<JPetRawSignal> buildRawSignals(Int_t timeWindowIndex, vector<JPetSigCh> sigChFromSamePM);
-		int findSigChOnNextThr(JPetSigCh sigCh, vector<JPetSigCh> sigChVec);
-		int findTrailingSigCh(JPetSigCh leadingSigCh, vector<JPetSigCh> trailingSigChVec);
+		void saveRawSignals(const std::vector<JPetRawSignal> & sigChVec);
+		std::map<int,std::vector<JPetSigCh>> getSigChsPMMapById(const JPetTimeWindow* timeWindow);
+		std::vector<JPetRawSignal> buildAllSignals(Int_t timeWindowIndex,
+					std::map<int,std::vector<JPetSigCh>> sigChsPMMap);
+		std::vector<JPetRawSignal> buildRawSignals(Int_t timeWindowIndex,
+					const std::vector<JPetSigCh> & sigChFromSamePM);
+		int findSigChOnNextThr(Double_t sigChValue, const std::vector<JPetSigCh> & sigChVec);
+		int findTrailingSigCh(JPetSigCh leadingSigCh,
+				      const std::vector<JPetSigCh> & trailingSigChVec);
 		const int kNumOfThresholds = 4;
-		const Float_t SIGCH_EDGE_MAX_TIME = 20000; //[ps]
-		const Float_t SIGCH_LEAD_TRAIL_MAX_TIME = 300000; //[ps]
+		const Float_t kSigChEdgeMaxTime = 20000; //[ps]
+		const Float_t kSigChLeadTrailMaxTime = 300000; //[ps]
 };
-#endif 
-/*  !MODULE2_H */
+#endif
+/*  !SIGNALFINDER_H */

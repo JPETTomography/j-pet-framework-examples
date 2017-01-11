@@ -17,7 +17,7 @@
 #include <JPetManager/JPetManager.h>
 #include <JPetTaskLoader/JPetTaskLoader.h>
 #include "Module1.h"
-#include "Module2.h"
+#include "SignalFinder.h"
 
 using namespace std;
 
@@ -40,8 +40,9 @@ int main(int argc, char* argv[]) {
 	manager.registerTask([](){
 		return new JPetTaskLoader("tslot.raw", 
 					"raw.sig",
-					new Module2("Module 2: Create Raw Sigs",
-						"Create Raw Signals, draw TOTs per THR")
+					new SignalFinder("SignalFinder: Create Raw Sigs",
+						"Create Raw Signals, optionallh draw TOTs per THR",
+						true)
 		);
 	});
 
