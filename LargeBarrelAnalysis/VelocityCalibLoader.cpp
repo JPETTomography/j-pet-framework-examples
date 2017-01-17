@@ -35,7 +35,7 @@ void VelocityCalibLoader::exec()
 {
   if( auto oldHit = dynamic_cast<const JPetHit* const> (getEvent())) {
     JPetHit hitWithInteractionPoint;
-    hitWithInteractionPoint.setPosZ( oldHit->getTimeDiff() * fVelocityCalibration.at(oldHit->getScinID() / 2.0 ) );
+    hitWithInteractionPoint.setPosZ( hitWithInteractionPoint.getTimeDiff() * VelocityCalibTools::getVelocity(fVelocityCalibration, hitWithInteractionPoint.getScinID()) / 2.0 ) ;
     hitWithInteractionPoint.setPosY( oldHit->getPosY() );
     hitWithInteractionPoint.setPosZ( oldHit->getPosZ() );
     
