@@ -35,7 +35,15 @@ void VelocityCalibLoader::exec()
 {
   if( auto oldHit = dynamic_cast<const JPetHit* const> (getEvent())) {
     JPetHit hitWithInteractionPoint;
-    hitWithInteractionPoint.setPosZ( hitWithInteractionPoint.getTimeDiff() * VelocityCalibTools::getVelocity(fVelocityCalibration, hitWithInteractionPoint.getScinID()) / 2.0 ) ;
+    /*This assumes that you have proper time callibration and filled timeDiff field*/
+    if( oldHit->getTimeDiff() != 0 )
+      hitWithInteractionPoint.setPosZ( oldHit->getTimeDiff() / 1000.0 * VelocityCalibTools::getVelocity(fVelocityCalibration, oldHit->getScintillator().getID()) / 2.0 ) ;
+    else
+    {
+      WARNING("No time difference set for hit, it will be ommitted");
+      return;
+    }
+    
     hitWithInteractionPoint.setPosY( oldHit->getPosY() );
     hitWithInteractionPoint.setPosZ( oldHit->getPosZ() );
     
