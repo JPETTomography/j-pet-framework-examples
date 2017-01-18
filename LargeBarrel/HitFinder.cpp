@@ -35,18 +35,18 @@ void HitFinder::exec(){
 
         if (DAQTimeWindowIndex == -1) {
             DAQTimeWindowIndex = currSignal->getRecoSignal().getRawSignal().getTimeWindowIndex();
-            fillSignalsMap(*currSignal);
+            HitTools.fillContainer(fAllSignalsInTimeWindow, *currSignal);
 
         }
 
         else {
             if (DAQTimeWindowIndex == currSignal->getRecoSignal().getRawSignal().getTimeWindowIndex()) {
-                fillSignalsMap(*currSignal);
+                HitTools.fillContainer(fAllSignalsInTimeWindow, *currSignal);
             }
             else {
                 saveHits(HitTools.createHits( fAllSignalsInTimeWindow, kTimeWindowWidth));
                 fAllSignalsInTimeWindow.clear();
-                fillSignalsMap(*currSignal);
+                HitTools.fillContainer(fAllSignalsInTimeWindow, *currSignal);
             }
         }
     }
@@ -73,16 +73,3 @@ void HitFinder::saveHits(const vector<JPetHit>& hits){
 }
 
 void HitFinder::setWriter(JPetWriter* writer){fWriter =writer;}
-
-void HitFinder::fillSignalsMap(JPetPhysSignal signal){
-
-    if(signal.getRecoSignal().getRawSignal().getPM().getSide() == JPetPM::SideA){
-
-        fAllSignalsInTimeWindow.at(signal.getRecoSignal().getRawSignal().getPM().getScin().getID()).first.push_back(signal);
-    }
-    else{
-
-        fAllSignalsInTimeWindow.at(signal.getRecoSignal().getRawSignal().getPM().getScin().getID()).second.push_back(signal);
-    }
-
-};

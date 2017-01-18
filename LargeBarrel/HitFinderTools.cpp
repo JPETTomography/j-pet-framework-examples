@@ -36,7 +36,9 @@ vector<JPetHit> HitFinderTools::createHits(const SignalsContainer& allSignalsInT
             for(auto signalA : sideA){
                 for(auto signalB : sideB){
 
-                    if(abs(signalA.getTime() - signalB.getTime()) < timeDifferenceWindow  && (signalA.getTime() - signalB.getTime()) < timeDifferenceWindow/*ps*/){
+                    if( (signalB.getTime() - signalA.getTime()) > timeDifferenceWindow){break;}
+
+                    if(abs(signalA.getTime() - signalB.getTime()) < timeDifferenceWindow /*ps*/){
 
                         JPetHit hit;
                         hit.setSignalA(signalA);
@@ -53,4 +55,18 @@ vector<JPetHit> HitFinderTools::createHits(const SignalsContainer& allSignalsInT
         }
     }
     return hits;
+}
+
+void HitFinderTools::fillContainer(SignalsContainer& allSignalsInTimeWindow, JPetPhysSignal signal){
+
+    if(signal.getRecoSignal().getRawSignal().getPM().getSide() == JPetPM::SideA){
+
+        allSignalsInTimeWindow.at(signal.getRecoSignal().getRawSignal().getPM().getScin().getID()).first.push_back(signal);
+    }
+    else{
+
+        allSignalsInTimeWindow.at(signal.getRecoSignal().getRawSignal().getPM().getScin().getID()).second.push_back(signal);
+    }
+
+
 }

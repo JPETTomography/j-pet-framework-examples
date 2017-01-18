@@ -60,7 +60,6 @@ class HitFinder:public JPetTask {
 
         HitFinderTools HitTools;
 
-        void fillSignalsMap(JPetPhysSignal signal);
         void saveHits(const std::vector<JPetHit>& hits);
 
         JPetWriter* fWriter = 0;
