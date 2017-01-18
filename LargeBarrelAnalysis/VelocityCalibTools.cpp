@@ -35,8 +35,8 @@ VelocityCalibTools::scintillatorVelocities VelocityCalibTools::loadVelocities(co
     std::ifstream inputFile;
     inputFile.open( velocityFile.c_str() );
     unsigned int scintID;
-    double velocity;
-    while( inputFile >> scintID >> velocity )
+    double velocity, velocityError;
+    while( inputFile >> scintID >> velocity >> velocityError )
       velocities.insert(std::make_pair(scintID, velocity));
     inputFile.close();
   } catch (const std::runtime_error& error)
@@ -44,7 +44,6 @@ VelocityCalibTools::scintillatorVelocities VelocityCalibTools::loadVelocities(co
     std::string msg = "Error opening velocity calibration file: " + std::string(error.what()); 
     ERROR(msg);
   }
-  
-  
+    
   return velocities;
 }
