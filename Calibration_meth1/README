@@ -1,0 +1,44 @@
+Aim
+---
+This example show a full dummy analysis of data from the J-PET big barrel. 
+
+Expected output
+---------------
+No output to stdout.
+JPet.log file appears with the log of the processing and ROOT files with the following etensions are produced:
+ *.tslot.raw.root
+ *.tslot.cal.root
+ *.raw.sig.root
+ *.reco.sig.root
+ *.phys.sig.root
+ *.phys.hit.root
+ *.phys.eve.root
+
+where "*" stands for the name of the input file
+
+Input Data
+-----------
+For this example, user must provide their own data file(s) collected with the big barrel.
+
+Description
+--------------
+The analysis is split into tasks, from A to E.
+
+
+Additional info
+--------------
+
+Compiling 
+------------
+make
+
+Running
+------------
+The script run.sh contains an example of running the analysis. Note, however, that
+the user must fill the input data file name and the number of run
+
+
+Author
+------------
+Aleksander Gajos
+Please report any bugs and suggestions of corrections to: <alek.gajos@gmail.com>
