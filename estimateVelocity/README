@@ -1,0 +1,34 @@
+Aim
+---
+This is a program for calculating effective velocity from output of program effectiveVelocity
+
+Expected output
+---------------
+Program plots control spectra for all scintillators and file "resultsForThreshold<thresholdLabel>.txt"
+
+where thresholdLabel is hardcoded label inside source file.
+
+Input Data
+-----------
+User must provide txt file with format the same as output of effectiveVelocity program.
+
+Description
+--------------
+Program plots positions vs mean values of time differences and fits linear function. From its parameters it is calculating velocity for given strip.
+
+Additional info
+--------------
+
+Compiling 
+------------
+make
+
+Running
+------------
+The script run.sh contains an example of running the analysis. 
+
+
+Author
+------------
+Monika Pawlik-Niedzwiecka, Szymon Niedzwiecki
+Please report any bugs and suggestions of corrections to: <wictusn@gmail.com>

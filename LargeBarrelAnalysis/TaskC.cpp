@@ -139,7 +139,8 @@ vector<JPetHit> TaskC::createHits(const vector<JPetRawSignal>&signals){
 				physSignalB.setTime(physSignalB.getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).at(1));
 
 				hit.setTime( 0.5 * ( hit.getSignalA().getTime() + hit.getSignalB().getTime()) );
-
+				hit.setTimeDiff( hit.getSignalA().getTime() - hit.getSignalB().getTime() );
+				std::cout << hit.getTimeDiff() << std::endl;
 				hits.push_back(hit);
 				getStatistics().getCounter("No. found hits")++;
 			}

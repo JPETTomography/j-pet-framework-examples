@@ -11,7 +11,7 @@ cmake_minimum_required(VERSION 2.6)
 ### when creating a new project,
 ### set this section appropriately for your project
 ######################################################################
-set(projectName LargeBarrelAnalysis)
+set(projectName effectiveVelocity)
 
 set(AUXILLIARY_FILES
   run.sh
@@ -33,16 +33,14 @@ project(${projectName} CXX) # using only C++
 
 file(GLOB HEADERS *.h)
 file(GLOB SOURCES *.cpp)
-file(GLOB UNIT_TEST_SOURCES *Test.cpp)
-list(REMOVE_ITEM SOURCES ${UNIT_TEST_SOURCES})
 
 include_directories(${Framework_INCLUDE_DIRS})
 add_definitions(${Framework_DEFINITIONS})
 
-add_executable(${projectBinary} ${SOURCES} ${HEADERS})
+add_executable(${projectBinary} ${SOURCES} ${HEADERS} ${DICTIONARIES})
 target_link_libraries(${projectBinary} JPetFramework)
 
-add_custom_target(clean_data_largebarrel
+add_custom_target(clean_data_velocity
   COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root)
 
 # copy the DB config file to an expected location
@@ -79,21 +77,3 @@ add_custom_command(
   ARGS -E ${CP_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
   )
 endforeach( file_i )
-
-set(TESTS_DIR ${CMAKE_CURRENT_BINARY_DIR}/tests)
-file(MAKE_DIRECTORY ${TESTS_DIR})
-foreach(test_source ${UNIT_TEST_SOURCES})
-  get_filename_component(test ${test_source} NAME_WE)
-  
-  list(APPEND test_binaries ${test}.x)
-  add_executable(${test}.x EXCLUDE_FROM_ALL ${test_source} VelocityCalibTools.cpp 
-    ${test_dictionaries}
-    )
-  set_target_properties(${test}.x PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TESTS_DIR} )
-  target_link_libraries(${test}.x
-    JPetFramework
-    ${Boost_LIBRARIES}
-    )
-endforeach()
-
-add_custom_target(velocityTests DEPENDS ${test_binaries} )
