@@ -20,8 +20,8 @@ double VelocityCalibTools::getVelocity(const VelocityCalibTools::scintillatorVel
 {
   if( velocities.find(scintID) == velocities.end() )
   {
-    WARNING("No velocity calibration available for this channel");
-    return 0.0;
+    WARNING("No velocity calibration available for this channel, returning velocity = 1.0");
+    return 1.0;
   }
   else
     return velocities.at(scintID);
