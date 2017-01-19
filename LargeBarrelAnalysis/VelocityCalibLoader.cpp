@@ -34,34 +34,11 @@ void VelocityCalibLoader::init(const JPetTaskInterface::Options& opts)
 void VelocityCalibLoader::exec()
 {
   if( auto oldHit = dynamic_cast<const JPetHit* const> (getEvent())) {
-    JPetHit hitWithInteractionPoint;
+    auto correctedHit = createCorrectedHit(oldHit);
     /*This assumes that you have proper time callibration and filled timeDiff field*/
-    if( oldHit->getTimeDiff() != 0 )
-      hitWithInteractionPoint.setPosZ( oldHit->getTimeDiff() / 1000.0 * VelocityCalibTools::getVelocity(fVelocityCalibration, oldHit->getScintillator().getID()) / 2.0 ) ;
-    else
-    {
-      WARNING("No time difference set for hit, it will be ommitted");
-      return;
-    }
-    
-    hitWithInteractionPoint.setPosY( oldHit->getPosY() );
-    hitWithInteractionPoint.setPosZ( oldHit->getPosZ() );
-    
-    hitWithInteractionPoint.setBarrelSlot( const_cast<JPetBarrelSlot&>(oldHit->getBarrelSlot()) );
-    hitWithInteractionPoint.setScinID( oldHit->getScinID() );
-    hitWithInteractionPoint.setScintillator( const_cast<JPetScin&> (oldHit->getScintillator()) );    
-    
-    hitWithInteractionPoint.setEnergy( oldHit->getEnergy());
-    hitWithInteractionPoint.setQualityOfEnergy( oldHit->getQualityOfEnergy() );
-    hitWithInteractionPoint.setTime( oldHit->getTime() );
-    hitWithInteractionPoint.setQualityOfTime( oldHit->getQualityOfTime() );
-    hitWithInteractionPoint.setTimeDiff( oldHit->getTimeDiff() );
-    hitWithInteractionPoint.setQualityOfTimeDiff( oldHit->getQualityOfTimeDiff() );
-    
-    hitWithInteractionPoint.setSignalA( const_cast<JPetPhysSignal&>(oldHit->getSignalA()) );
-    hitWithInteractionPoint.setSignalB( const_cast<JPetPhysSignal&>(oldHit->getSignalB()) );
+       
     assert(fWriter);
-    fWriter->write(hitWithInteractionPoint);
+    fWriter->write(correctedHit);
   }
 }
 
@@ -75,3 +52,35 @@ void VelocityCalibLoader::setWriter(JPetWriter* writer)
   fWriter = writer;
 }
 
+JPetHit VelocityCalibLoader::createCorrectedHit(const JPetHit& oldHit)
+{
+  JPetHit hitWithInteractionPoint;
+  hitWithInteractionPoint.setPosY( oldHit->getPosY() );
+  hitWithInteractionPoint.setPosZ( oldHit->getPosZ() );
+    
+  hitWithInteractionPoint.setBarrelSlot( const_cast<JPetBarrelSlot&>(oldHit->getBarrelSlot()) );
+  hitWithInteractionPoint.setScinID( oldHit->getScinID() );
+  hitWithInteractionPoint.setScintillator( const_cast<JPetScin&> (oldHit->getScintillator()) );    
+    
+  hitWithInteractionPoint.setEnergy( oldHit->getEnergy());
+  hitWithInteractionPoint.setQualityOfEnergy( oldHit->getQualityOfEnergy() );
+  hitWithInteractionPoint.setTime( oldHit->getTime() );
+  hitWithInteractionPoint.setQualityOfTime( oldHit->getQualityOfTime() );
+  hitWithInteractionPoint.setTimeDiff( oldHit->getTimeDiff() );
+  hitWithInteractionPoint.setQualityOfTimeDiff( oldHit->getQualityOfTimeDiff() );
+    
+  hitWithInteractionPoint.setSignalA( const_cast<JPetPhysSignal&>(oldHit->getSignalA()) );
+  hitWithInteractionPoint.setSignalB( const_cast<JPetPhysSignal&>(oldHit->getSignalB()) );
+  
+  if( oldHit->getTimeDiff() != 0 )
+  {
+      hitWithInteractionPoint.setPosZ( oldHit->getTimeDiff() / 1000.0 * VelocityCalibTools::getVelocity(fVelocityCalibration, oldHit->getScintillator().getID()) / 2.0 ) ;
+      return hitWithInteractionPoint;
+  }
+  else
+  {
+      WARNING("No time difference set for hit, it will be ommitted");
+      return oldHit;
+  }  
+  
+}

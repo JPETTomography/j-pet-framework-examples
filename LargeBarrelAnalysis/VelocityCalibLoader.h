@@ -33,6 +33,8 @@ virtual void init(const JPetTaskInterface::Options& opts)override;
 virtual void exec()override;
 virtual void terminate()override;
 virtual void setWriter(JPetWriter* writer)override;
+private:
+  JPetHit createCorrectedHit(const JPetHit& oldHit);
 protected:
   JPetWriter* fWriter = nullptr;
   std::map<unsigned int, double> fVelocityCalibration;
