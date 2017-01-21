@@ -13,8 +13,8 @@
  *  @file TimeCalibTools.cpp
  */
 
-#include <boost/property_tree/json_parser.hpp>
-
+#include <boost/algorithm/string/predicate.hpp> /// for starts_with
+#include <sstream>
 #include "TimeCalibTools.h"
 #include "JPetLoggerInclude.h"
 
@@ -31,18 +31,63 @@ double TimeCalibTools::getTimeCalibCorrection(const TOMBChToCorrection& timeCali
 TimeCalibTools::TOMBChToCorrection TimeCalibTools::loadTimeCalibration(const std::string& calibFile)
 {
   TOMBChToCorrection timeCalibration;
-  using boost::property_tree::ptree;
-  try {
-    boost::property_tree::ptree root;
-    read_json(calibFile, root);
-    for (auto & item : root) {
-      auto channel = std::stoul(item.first);
-      auto correction = item.second.get_value<double>();
-      timeCalibration.insert(std::make_pair(channel, correction));
-    }
-  } catch (const std::runtime_error& error) {
-    std::string message = "Error opening time calibration file. Error = " + std::string(error.what());
-    ERROR(message);
+  auto calibRecords = readCalibrationRecordsFromFile(calibFile);
+  /// Fake transform for a moment.
+  for (const auto & record : calibRecords) {
+    timeCalibration.insert(std::make_pair(record.slot, record.offset_value));
   }
   return timeCalibration;
+}
+
+std::vector<TimeCalibRecord> TimeCalibTools::readCalibrationRecordsFromFile(const std::string& calibFile)
+{
+  using namespace std;
+  namespace ba = boost::algorithm;
+
+  std::vector<TimeCalibRecord> timeCalibRecords;
+  string line;
+  TimeCalibRecord record = { -1, -1, JPetPM::SideA, -1, 0.0, -1.0 };
+  ifstream inputFile(calibFile);
+
+  while (getline(inputFile, line)) {
+    /// Lines starting with # are comments and they are ignored.
+    if (ba::starts_with(line, "#")) {
+      continue;
+    } else {
+      if (fillTimeCalibRecord(line, record)) {
+        timeCalibRecords.push_back(record);
+      } else {
+        ERROR("Line from the time calibration file seems to be incorrect:" + line);
+      }
+    }
+  }
+  return timeCalibRecords;
+}
+
+bool TimeCalibTools::fillTimeCalibRecord(const std::string& input, TimeCalibRecord& outRecord)
+{
+  using namespace std;
+  int layer = -1;
+  int slot = -1;
+  char side = 'A';
+  int thr = -1;
+  double o_val = 0;
+  double o_uncert = 0;
+  istringstream ss(input);
+  ss >> layer >> slot >> side >> thr >> o_val >> o_uncert;
+  if (ss.fail() || (side != 'A' && side != 'B')) {
+    return false;
+  } else {
+    outRecord.layer = layer;
+    outRecord.slot = slot;
+    if (side == 'A') {
+      outRecord.side = JPetPM::SideA;
+    } else {
+      outRecord.side = JPetPM::SideB;
+    }
+    outRecord.threshold = thr;
+    outRecord.offset_value = o_val;
+    outRecord.offset_uncertainty = o_uncert;
+    return true;
+  }
 }

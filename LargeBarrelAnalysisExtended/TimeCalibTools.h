@@ -11,6 +11,7 @@
  *  limitations under the License.
  *
  *  @file TimeCalibTools.h
+ *  @brief Set of helper tools to load and apply time calibration constants.
  */
 
 #ifndef TIMECALIBTOOLS_H
@@ -18,12 +19,36 @@
 
 #include <map>
 #include <string>
-  
+#include "../j-pet-framework/JPetPM/JPetPM.h" /// for JPetPM::Side
+
+/// POD helper structure that stores time calibration parameters for one element.
+/// It is not initialized by default!!! User is responsible for the proper initialization.
+struct TimeCalibRecord {
+  int layer;  /// 1-3, -1 corresponds to not set
+  int slot;   ///  1-96, -1 corresponds to not set
+  JPetPM::Side side; /// SideA or SideB
+  int threshold; /// 1-4, -1 corresponds to not set
+  double offset_value;
+  double offset_uncertainty; /// -1 corresponds to not set
+};
+
 class TimeCalibTools
 {
 public:
   typedef std::map<unsigned int, double> TOMBChToCorrection;
+  /// Method returns a correction for the given tombChannel
   static double getTimeCalibCorrection(const TOMBChToCorrection& timeCalibration, const unsigned int channel);
+  /// Main method to be used to load the time calibration parameters.
   static TOMBChToCorrection loadTimeCalibration(const std::string& calibFile);
+
+  /// Method reads the calibration file and generates a vector of TimeCalibRecords based on its content.
+  static std::vector<TimeCalibRecord> readCalibrationRecordsFromFile(const std::string& calibFile);
+  /// Method fills record parameters based on the input string.
+  /// The input string is assumed to contain 6 elements e.g. 1 1 A 2 5.0 2.0
+  /// The elements correspond to layer slot side threshold offset_value offset_uncertainty.
+  /// layer,slot, threshold are treated as int. offset_value and offset_uncertainty are treated as double.
+  /// side can have value: A or B.
+  /// If the line does not conform to described condition false is return, and the record is not changed
+  static bool fillTimeCalibRecord(const std::string& input, TimeCalibRecord& outRecord);
 };
 #endif /*  !TIMECALIBTOOLS_H */
