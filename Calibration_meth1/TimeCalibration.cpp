@@ -174,13 +174,156 @@ void TimeCalibration::exec(){
 
 void TimeCalibration::terminate(){
 
-
+//getting Layer and Slots numbers from analysing files name
 std::vector<int> vectorOfNumbers;
 std::string str(gDirectory->GetFile()->GetName());//getting directory of analysing file
 
 
+int number=0;
+
+for (unsigned int i=0; i < str.size(); i++){
+
+	if (isdigit(str[i])){
+
+          std::stringstream ss;
+          ss<<str[i];
+          ss>>number; //convert string into int and store it in "asInt"
+
+	  std::cout << "number" << number << std::endl;
+
+         vectorOfNumbers.push_back(number);
+
+	}
 }
 
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// save timeDiffAB mean values for each slot and each threshold in a JPetAuxilliaryData object
+	// so that they are available to the consecutive modules
+	getAuxilliaryData().createMap("timeDiffAB mean values");
+
+
+//create output txt file with calibration parameters 
+ 
+	std::ofstream results_fit;
+        results_fit.open("results.txt", std::ios::app); //file will be overwritten
+
+
+	for(auto & slot : getParamBank().getBarrelSlots()){
+
+		for (int thr=1;thr<=4;thr++){
+
+//scintillators
+			const char * histo_name_l = formatUniqueSlotDescription(*(slot.second), thr, "timeDiffAB_leading_");
+			double mean_l = getStatistics().getHisto1D(histo_name_l).GetMean();
+			getAuxilliaryData().setValue("timeDiffAB mean values", histo_name_l, mean_l);
+
+			TH1F* histoToSave_leading = &(getStatistics().getHisto1D(histo_name_l));
+
+			const char * histo_name_t = formatUniqueSlotDescription(*(slot.second), thr, "timeDiffAB_trailing_");
+			double mean_t = getStatistics().getHisto1D(histo_name_t).GetMean();
+			getAuxilliaryData().setValue("timeDiffAB mean values", histo_name_t, mean_t);
+
+			TH1F* histoToSave_trailing = &(getStatistics().getHisto1D(histo_name_t));
+
+
+//reference detector
+
+			const char * histo_name_Ref_l = formatUniqueSlotDescription(*(slot.second), thr, "timeDiffRef_leading_");
+			double mean_Ref_l = getStatistics().getHisto1D(histo_name_Ref_l).GetMean();
+			getAuxilliaryData().setValue("timeDiffRef mean values", histo_name_Ref_l, mean_Ref_l);
+
+			TH1F* histoToSave_Ref_leading = &(getStatistics().getHisto1D(histo_name_Ref_l));
+
+			const char * histo_name_Ref_t = formatUniqueSlotDescription(*(slot.second), thr, "timeDiffRef_trailing_");
+			double mean_Ref_t = getStatistics().getHisto1D(histo_name_Ref_t).GetMean();
+			getAuxilliaryData().setValue("timeDiffref mean values", histo_name_Ref_t, mean_Ref_t);
+
+			TH1F* histoToSave_Ref_trailing = &(getStatistics().getHisto1D(histo_name_Ref_t));
+
+
+//non zero histos 
+// slot.first - ID
+// slot.second - wskaznik na JPetBarrelSlot
+//save fit parameters only for layerX and SlotY (taken from analysing files name)
+//fit just for proper slot
+
+			if(histoToSave_leading->GetEntries() != 0 && histoToSave_trailing->GetEntries() != 0
+                          && (slot.second)->getLayer().getID()== vectorOfNumbers[0]
+                          && (slot.first==(10*vectorOfNumbers[1]+vectorOfNumbers[2]))){
+
+			//if(histoToSave->GetEntries() != 0 && (slot.second)->getLayer().getID()== 1 && (slot.first==20)){
+
+
+//fit scintilators
+
+			int highestBin_l = histoToSave_leading->GetBinCenter(histoToSave_leading->GetMaximumBin());
+			histoToSave_leading->Fit("gaus","","", highestBin_l-5, highestBin_l+5);
+			histoToSave_leading->Draw();
+		
+			int highestBin_t = histoToSave_trailing->GetBinCenter(histoToSave_trailing->GetMaximumBin());
+			histoToSave_trailing->Fit("gaus","","", highestBin_t-5, highestBin_t+5);
+			histoToSave_trailing->Draw();
+
+		
+			TF1 *fit_l = histoToSave_leading->GetFunction("gaus");
+			TF1 *fit_t = histoToSave_trailing->GetFunction("gaus");
+
+			double position_peak_l = fit_l->GetParameter(1);
+   			double position_peak_error_l=fit_l->GetParError(1);
+			double sigma_peak_l =fit_l->GetParameter(2);
+			double chi2_ndf_l = fit_l->GetChisquare()/fit_l->GetNDF();
+
+			double position_peak_t = fit_t->GetParameter(1);
+   			double position_peak_error_t=fit_t->GetParError(1);
+			double sigma_peak_t =fit_t->GetParameter(2);
+			double chi2_ndf_t = fit_t->GetChisquare()/fit_t->GetNDF();
+
+
+
+//fit reference detector
+
+			int highestBin_Ref_l = histoToSave_Ref_leading->GetBinCenter(histoToSave_Ref_leading->GetMaximumBin());
+			histoToSave_Ref_leading->Fit("gaus","","", highestBin_Ref_l-50, highestBin_Ref_l+50); //range for fit
+			TF1 *fit_Ref_l = histoToSave_Ref_leading->GetFunction("gaus");
+			fit_Ref_l->SetRange(highestBin_Ref_l-200, highestBin_Ref_l+200); //range to draw gaus function
+			histoToSave_Ref_leading->Draw();
+
+
+			int highestBin_Ref_t = histoToSave_Ref_trailing->GetBinCenter(histoToSave_Ref_trailing->GetMaximumBin());
+			histoToSave_Ref_trailing->Fit("gaus","","", highestBin_Ref_t-50, highestBin_Ref_t+50); //range for fit
+ 			TF1 *fit_Ref_t = histoToSave_Ref_trailing->GetFunction("gaus");
+			fit_Ref_t->SetRange(highestBin_Ref_t-200, highestBin_Ref_t+200); //range to draw gaus function
+			histoToSave_Ref_trailing->Draw();
+
+
+			double position_peak_Ref_l = fit_Ref_l->GetParameter(1);
+   			double position_peak_error_Ref_l=fit_Ref_l->GetParError(1);
+			double sigma_peak_Ref_l =fit_Ref_l->GetParameter(2);
+			double chi2_ndf_Ref_l = fit_Ref_l->GetChisquare()/fit_Ref_l->GetNDF();
+
+			double position_peak_Ref_t = fit_Ref_t->GetParameter(1);
+   			double position_peak_error_Ref_t=fit_Ref_t->GetParError(1);
+			double sigma_peak_Ref_t =fit_Ref_t->GetParameter(2);
+			double chi2_ndf_Ref_t = fit_Ref_t->GetChisquare()/fit_Ref_t->GetNDF();
+
+//save parameters in .txt file: Layer, Slot, Position leding, Error_position leading,
+//Width leading, Chi2/ndf leading, Position trailing, Error_position trailing, Width trailing,
+//Chi2/ndf trailing
+//Position leding ref, Error_position leading ref, Width leading ref, Chi2/ndf leading ref,
+//Position trailing ref, Error_position trailing ref, Width trailing ref, Chi2/ndf trailing ref
+
+		results_fit <<  (slot.second)->getLayer().getID() << "\t" <<  slot.first << "\t" << thr << "\t" << position_peak_l << "\t" << position_peak_error_l  << "\t" << sigma_peak_l  << "\t" << chi2_ndf_l  << "\t" << position_peak_t << "\t" << position_peak_error_t  << "\t" << sigma_peak_t  << "\t" << chi2_ndf_t  << position_peak_Ref_l << "\t" << position_peak_error_Ref_l  << "\t" << sigma_peak_Ref_l  << "\t" << chi2_ndf_Ref_l  << "\t" << position_peak_Ref_t << "\t" << position_peak_error_Ref_t  << "\t" << sigma_peak_Ref_t  << "\t" << chi2_ndf_Ref_t  << "\t" << std::endl;
+
+			}
+			
+		}
+	}
+
+	results_fit.close();
+
+}
 
 //////////////////////////////////
 
