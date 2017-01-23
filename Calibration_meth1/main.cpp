@@ -19,13 +19,13 @@
 #include "TaskA.h"
 #include "TaskB1.h"
 #include "TaskC.h"
-#include "Calib1.h"
-//#include "TaskE.h"
+#include "TimeCalibration.h"
+
 
 using namespace std;
 
 int main(int argc, char* argv[]) {
-	DB::SERVICES::DBHandler::createDBConnection("../DBConfig/configDB.cfg");
+  DB::SERVICES::DBHandler::createDBConnection("../DBConfig/configDB.cfg");
   JPetManager& manager = JPetManager::getManager();
   manager.parseCmdLine(argc, argv);
   
@@ -50,21 +50,10 @@ int main(int argc, char* argv[]) {
      }); 
    manager.registerTask([](){                                                                                                                                                                                
        return new JPetTaskLoader("phys.hit", "phys.hit.calib",    
-				 new Calib1("first rough time calibration with data measured with reference detector",                                                                                        
-					    "Calibrates single strips and synchronizes all the layers"));       
+				 new TimeCalibration("first rough time calibration with data measured with reference detector",                                                                                        
+					    "Create calibration constants"));       
      });
-  // manager.registerTask([](){
-  //     return new JPetTaskLoader("phys.hit", "phys.hit.means",
-  // 				new TaskD("Module D: Make histograms for hits",
-  // 					  "Only make timeDiff histos and produce mean timeDiff value for each threshold and slot to be used by the next module"));
-  //   });
-  
 
-  // manager.registerTask([](){
-  //     return new JPetTaskLoader("phys.hit.means", "phys.hit.coincplots",
-  // 				new TaskE("Module E: Filter hits",
-  // 					  "Pass only hits with time diffrerence close to the peak"));
-  //   });
 
   manager.run();
 }

@@ -83,7 +83,7 @@ vector<JPetHit> TaskC::createHits(const vector<JPetRawSignal>&signals){
 			}
 		}
 		//Part devoted to the refference signal: slot=193, PM=385 on side B!
-		  int LayerID = i->getPM().getScin().getBarrelSlot().getLayer().getID();
+		  int LayerID = i->getPM().getScin().getBarrelSlot().getLayer().getId();
 		  int ScintID = i->getPM().getScin().getID();
 		  int PmID    = i->getPM().getID();
 		  //		  int TMBChannel = 

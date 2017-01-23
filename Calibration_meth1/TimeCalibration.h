@@ -10,10 +10,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file TaskE.h
+ * Purpose: Time calibration with data measured with reference detector
+ *  @file TimeCalibration.h
  */
-#ifndef TASKE_H 
-#define TASKE_H 
+
+#ifndef TimeCalibration_H 
+#define TimeCalibration_H 
+
 #include <JPetTask/JPetTask.h>
 #include <JPetHit/JPetHit.h>
 #include <JPetRawSignal/JPetRawSignal.h>
@@ -24,24 +27,21 @@ class JPetWriter;
 //nevertheless it's needed for checking if the structure of project is correct
 #	define override
 #endif
-class TaskE:public JPetTask {
+class TimeCalibration:public JPetTask{
 public:
-	TaskE(const char * name, const char * description);
-	virtual ~TaskE();
+	TimeCalibration(const char * name, const char * description);
+	virtual ~TimeCalibration(){}
 	virtual void init(const JPetTaskInterface::Options& opts)override;
 	virtual void exec()override;
 	virtual void terminate()override;
 	virtual void setWriter(JPetWriter* writer)override;
 protected:
 	const char * formatUniqueSlotDescription(const JPetBarrelSlot & slot, int threshold,const char * prefix);
-	void fillCoincidenceHistos(const std::vector<JPetHit>& hits);
-	void fillDeltaIDhisto(int delta_ID, int threshold, const JPetLayer & layer);
-	void fillTOFvsDeltaIDhisto(int delta_ID, int threshold, const JPetHit & hit1, const JPetHit & hit2);
-	bool isGoodTimeDiff(const JPetHit & hit, int thr);
-	void fillTOTvsTOThisto(int delta_ID, int thr, const JPetHit & hit1, const JPetHit & hit2);
-private:
-	LargeBarrelMapping fBarrelMap;
-	std::vector<JPetHit> fHits;
+	void fillHistosForHit(const JPetHit & hit,const std::vector<double> &RefTimesL,const std::vector<double> & RefTimesT);
+	std::vector <JPetHit> fhitsCalib;
+	std::vector <double> fRefTimesL;
+	std::vector <double> fRefTimesT;
 	JPetWriter* fWriter;
+	LargeBarrelMapping fBarrelMap;
 };
-#endif /*  !TASKE_H */
+#endif /*  !TimeCalibration_H */

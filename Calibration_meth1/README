@@ -1,28 +1,29 @@
 Aim
 ---
-This example show a full dummy analysis of data from the J-PET big barrel. 
+
+Time calibration with data measured with reference detector
+
 
 Expected output
 ---------------
 No output to stdout.
 JPet.log file appears with the log of the processing and ROOT files with the following etensions are produced:
  *.tslot.raw.root
- *.tslot.cal.root
  *.raw.sig.root
- *.reco.sig.root
- *.phys.sig.root
  *.phys.hit.root
- *.phys.eve.root
+ *.phys.hit.calib
+
 
 where "*" stands for the name of the input file
 
 Input Data
 -----------
-For this example, user must provide their own data file(s) collected with the big barrel.
+User must provide data file(s) collected for the measurement with reference detector
+For Run1 data files are in directories: /data/jpet/2016.08.25_X
 
 Description
 --------------
-The analysis is split into tasks, from A to E.
+The analysis is split into tasks, A, B, C and TimeCalibration.
 
 
 Additional info
@@ -34,11 +35,12 @@ make
 
 Running
 ------------
-The script run.sh contains an example of running the analysis. Note, however, that
-the user must fill the input data file name and the number of run
+The script run.sh contains an example of running the analysis. Note, however, that the user must fill the input data file name and the number of run
 
 
 Author
 ------------
-Aleksander Gajos
-Please report any bugs and suggestions of corrections to: <alek.gajos@gmail.com>
+Michal Silarski & Magda Skurzok
+Please report any bugs and suggestions of corrections to: <michal.silarski@uj.edu.pl, mskurzok@gmail.com>
+
+
