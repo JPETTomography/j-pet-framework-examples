@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
     return new JPetTaskLoader("tslot.raw",
                               "raw.sig",
                               new SignalFinder("SignalFinder: Create Raw Sigs",
-                                  "Create Raw Signals, optionallh draw TOTs per THR",
+                                  "Create Raw Signals, optional  draw TOTs per THR",
                                   true)
                              );
   });
