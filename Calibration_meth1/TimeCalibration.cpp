@@ -206,8 +206,9 @@ for (unsigned int i=0; i < str.size(); i++){
 
 //create output txt file with calibration parameters 
  
-	std::ofstream results_fit;
-        results_fit.open("results.txt", std::ios::app); //file will be overwritten
+	std::ofstream results_fit_t,results_fit_l;
+        results_fit_l.open("results_leading.txt", std::ios::app); //file will be overwritten
+        results_fit_t.open("results_trailing.txt", std::ios::app); //file will be overwritten
 
 
 	for(auto & slot : getParamBank().getBarrelSlots()){
@@ -314,14 +315,23 @@ for (unsigned int i=0; i < str.size(); i++){
 //Position leding ref, Error_position leading ref, Width leading ref, Chi2/ndf leading ref,
 //Position trailing ref, Error_position trailing ref, Width trailing ref, Chi2/ndf trailing ref
 
-		results_fit <<  (slot.second)->getLayer().getID() << "\t" <<  slot.first << "\t" << thr << "\t" << position_peak_l << "\t" << position_peak_error_l  << "\t" << sigma_peak_l  << "\t" << chi2_ndf_l  << "\t" << position_peak_t << "\t" << position_peak_error_t  << "\t" << sigma_peak_t  << "\t" << chi2_ndf_t  << position_peak_Ref_l << "\t" << position_peak_error_Ref_l  << "\t" << sigma_peak_Ref_l  << "\t" << chi2_ndf_Ref_l  << "\t" << position_peak_Ref_t << "\t" << position_peak_error_Ref_t  << "\t" << sigma_peak_Ref_t  << "\t" << chi2_ndf_Ref_t  << "\t" << std::endl;
+		//results_fit <<  (slot.second)->getLayer().getID() << "\t" <<  slot.first << "\t" << thr << "\t" << position_peak_l << "\t" << position_peak_error_l  << "\t" << sigma_peak_l  << "\t" << chi2_ndf_l  << "\t" << position_peak_t << "\t" << position_peak_error_t  << "\t" << sigma_peak_t  << "\t" << chi2_ndf_t  << position_peak_Ref_l << "\t" << position_peak_error_Ref_l  << "\t" << sigma_peak_Ref_l  << "\t" << chi2_ndf_Ref_l  << "\t" << position_peak_Ref_t << "\t" << position_peak_error_Ref_t  << "\t" << sigma_peak_Ref_t  << "\t" << chi2_ndf_Ref_t  << "\t" << std::endl;
 
+//results for tA - tB 
+
+results_fit_l <<  (slot.second)->getLayer().getID() << "\t" <<  slot.first << "\t" << "B" << "\t" << thr << "\t" << position_peak_l << "\t" << position_peak_error_l  << "\t" << std::endl;
+
+results_fit_t <<  (slot.second)->getLayer().getID() << "\t" <<  slot.first << "\t" << "B" << "\t" << thr << "\t" << position_peak_t << "\t" << position_peak_error_t  << "\t" << std::endl;
+
+
+//layer slot side threshold offset_value offset_uncertainty
 			}
 			
 		}
 	}
 
-	results_fit.close();
+	results_fit_l.close();
+	results_fit_t.close();
 
 }
 
@@ -361,15 +371,20 @@ void TimeCalibration::fillHistosForHit(const JPetHit & hit, const std::vector<do
 //Here we take advantage of the fact that the hits are somehow ordered in time, which is true for now if this is not true we
 //have to insert this part of the code (and the one on the beginning of this function outside this function and create a vecor
 //of hits and then for each refference hit look for the next hit in time
-			for(int i = 0; i < fRefTimesL.size();i++) {
+//taken minimal time difference between Ref and Scint
+			double timeDiffLmin=10000000000.;
+			for(unsigned int i = 0; i < fRefTimesL.size();i++) { 
 			double timeDiffHit_L = (lead_times_A[thr] + lead_times_B[thr])/2. -fRefTimesL[i];
-			timeDiffHit_L = timeDiffHit_L/1000000.;//ps -> micros
-			const char * histo_name_Ref_l = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffRef_leading_");
-			getStatistics().getHisto1D(histo_name_Ref_l).Fill(timeDiffHit_L);
-			
+			 timeDiffHit_L = timeDiffHit_L/1000000.;//ps -> micros
+			 if(fabs(timeDiffHit_L) < timeDiffLmin){
+			  timeDiffLmin = timeDiffHit_L;
+			 }
 			}
+				const char * histo_name_Ref_l = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffRef_leading_");
+				getStatistics().getHisto1D(histo_name_Ref_l).Fill(timeDiffLmin);
 		}
 	}
+
 
 
 //trailing
@@ -388,19 +403,23 @@ void TimeCalibration::fillHistosForHit(const JPetHit & hit, const std::vector<do
 			// fill the timeDiffAB vs slot ID histogram
 			int layer_number = fBarrelMap.getLayerNumber( hit.getBarrelSlot().getLayer() );
 			int slot_number = fBarrelMap.getSlotNumber( hit.getBarrelSlot() );
-			getStatistics().getHisto2D(Form("TimeDiffVsID_layer%d_thr%d_trailing", layer_number, thr)).Fill( slot_number,
-															 timeDiffAB_t);
+			getStatistics().getHisto2D(Form("TimeDiffVsID_layer%d_thr%d_trailing", layer_number, thr)).Fill( slot_number, timeDiffAB_t);
+															
 //Assuming that the refference signal is always the first one we take the first hit after the hit in the refference detector                                                                              
 //Here we take advantage of the fact that the hits are somehow ordered in time, which is true for now if this is not true we
 //have to insert this part of the code (and the one on the beginning of this function outside this function and create a vecor
 //of hits and then for each refference hit look for the next hit in time. 
-			for(int i = 0; i < fRefTimesT.size();i++) {
-                          double timeDiffHit_T = (trail_times_A[thr] + trail_times_B[thr])/2. -fRefTimesT[i];
-			  timeDiffHit_T = timeDiffHit_T/1000000.; //ps->micros
+//taken minimal time difference between Ref and Scint
+			double timeDiffTmin=10000000000.;
+			for(unsigned int i = 0; i < fRefTimesT.size();i++) { 
+                            double timeDiffHit_T = (trail_times_A[thr] + trail_times_B[thr])/2. -fRefTimesT[i];
+			    timeDiffHit_T = timeDiffHit_T/1000000.; //ps->micros
+			  if(fabs(timeDiffHit_T) < timeDiffTmin){
+			    timeDiffTmin = timeDiffHit_T;
+			  }
+			}
 			  const char * histo_name_Ref_t = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffRef_trailing_");
-			  getStatistics().getHisto1D(histo_name_Ref_t).Fill(timeDiffHit_T);
-			  
-			  }	
+			  getStatistics().getHisto1D(histo_name_Ref_t).Fill(timeDiffTmin);	
 	        }
 	}
 }
