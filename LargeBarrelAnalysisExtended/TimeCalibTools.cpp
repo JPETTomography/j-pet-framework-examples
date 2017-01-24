@@ -34,7 +34,7 @@ TimeCalibTools::TOMBChToCorrection TimeCalibTools::loadTimeCalibration(const std
   auto calibRecords = readCalibrationRecordsFromFile(calibFile);
   /// Fake transform for a moment.
   for (const auto & record : calibRecords) {
-    timeCalibration.insert(std::make_pair(record.slot, record.offset_value));
+    timeCalibration.insert(std::make_pair(record.slot, record.offset_value_leading));
   }
   return timeCalibration;
 }
@@ -46,7 +46,7 @@ std::vector<TimeCalibRecord> TimeCalibTools::readCalibrationRecordsFromFile(cons
 
   std::vector<TimeCalibRecord> timeCalibRecords;
   string line;
-  TimeCalibRecord record = { -1, -1, JPetPM::SideA, -1, 0.0, -1.0 };
+  TimeCalibRecord record = { -1, -1, JPetPM::SideA, -1, 0.0, -1.0, 0.0, -1.0, -1.0 };
   ifstream inputFile(calibFile);
 
   while (getline(inputFile, line)) {
@@ -71,10 +71,13 @@ bool TimeCalibTools::fillTimeCalibRecord(const std::string& input, TimeCalibReco
   int slot = -1;
   char side = 'A';
   int thr = -1;
-  double o_val = 0;
-  double o_uncert = 0;
+  double o_val_lead = 0;
+  double o_uncert_lead = 0;
+  double o_val_trail = 0;
+  double o_uncert_trail = 0;
+  double quality = 0;
   istringstream ss(input);
-  ss >> layer >> slot >> side >> thr >> o_val >> o_uncert;
+  ss >> layer >> slot >> side >> thr >> o_val_lead >> o_uncert_lead >> o_val_trail >> o_uncert_trail >> quality;
   if (ss.fail() || (side != 'A' && side != 'B')) {
     return false;
   } else {
@@ -86,8 +89,11 @@ bool TimeCalibTools::fillTimeCalibRecord(const std::string& input, TimeCalibReco
       outRecord.side = JPetPM::SideB;
     }
     outRecord.threshold = thr;
-    outRecord.offset_value = o_val;
-    outRecord.offset_uncertainty = o_uncert;
+    outRecord.offset_value_leading = o_val_lead;
+    outRecord.offset_uncertainty_leading = o_uncert_lead;
+    outRecord.offset_value_trailing = o_val_trail;
+    outRecord.offset_uncertainty_trailing = o_uncert_trail;
+    outRecord.quality = quality;
     return true;
   }
 }
