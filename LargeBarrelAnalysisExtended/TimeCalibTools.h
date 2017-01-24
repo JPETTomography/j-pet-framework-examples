@@ -28,8 +28,11 @@ struct TimeCalibRecord {
   int slot;   ///  1-96, -1 corresponds to not set
   JPetPM::Side side; /// SideA or SideB
   int threshold; /// 1-4, -1 corresponds to not set
-  double offset_value;
-  double offset_uncertainty; /// -1 corresponds to not set
+  double offset_value_leading;
+  double offset_uncertainty_leading; /// -1 corresponds to not set
+  double offset_value_trailing;
+  double offset_uncertainty_trailing; /// -1 corresponds to not set
+  double quality; /// -1 to not set
 };
 
 class TimeCalibTools
