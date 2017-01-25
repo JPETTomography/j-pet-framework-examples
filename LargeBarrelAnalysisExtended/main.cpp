@@ -44,12 +44,12 @@ int main(int argc, char* argv[])
   });
 
   manager.registerTask([]() {
-    return new JPetTaskLoader("tslot.raw", "tslot.raw",
+    return new JPetTaskLoader("tslot.raw", "tslot_calib.raw",
                               new TimeCalibLoader("Apply time corrections from prepared calibrations",
                                   "Apply time corrections from prepared calibrations"));
   });
   manager.registerTask([]() {
-    return new JPetTaskLoader("tslot.raw",
+    return new JPetTaskLoader("tslot_calib.raw",
                               "raw.sig",
                               new SignalFinder("SignalFinder: Create Raw Sigs",
                                   "Create Raw Signals, optional  draw TOTs per THR",
@@ -57,11 +57,11 @@ int main(int argc, char* argv[])
                              );
   });
 
-  manager.registerTask([]() {
-    return new JPetTaskLoader("phys_sig", "hits",
-                              new HitFinder("Module: Pair signals",
-                                            "Create hits from physical signals from both ends of scintilators"));
-  });
+  //manager.registerTask([]() {
+  //return new JPetTaskLoader("phys_sig", "hits",
+  //new HitFinder("Module: Pair signals",
+  //"Create hits from physical signals from both ends of scintilators"));
+  //});
 
   //manager.registerTask([]() {
   //return new JPetTaskLoader("raw.sig", "phys.hit",

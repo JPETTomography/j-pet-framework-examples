@@ -27,8 +27,8 @@ TimeCalibLoader::~TimeCalibLoader() {}
 void TimeCalibLoader::init(const JPetTaskInterface::Options& opts)
 {
   auto calibFile =  std::string("timeCalib.txt");
-  if (opts.count("TimeCalibLoader_ConfigFile")) {
-    calibFile = opts.at("TimeCalibLoader_ConfigFile");
+  if (opts.count(fConfigFileParamKey)) {
+    calibFile = opts.at(fConfigFileParamKey);
   }
   fTimeCalibration = TimeCalibTools::loadTimeCalibration(calibFile);
 }
