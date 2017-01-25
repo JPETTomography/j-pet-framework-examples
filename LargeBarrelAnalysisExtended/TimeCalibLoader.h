@@ -40,6 +40,7 @@ public:
 protected:
   void saveTimeWindow(const JPetTimeWindow& window);
 
+  const std::string fConfigFileParamKey = "TimeCalibLoader_ConfigFile";  ///Name of the user defined parameter key for which the value would correspond to the time calibration file name
   JPetWriter* fWriter = nullptr;
   JPetParamManager* fParamManager = nullptr;
   std::map<unsigned int, double> fTimeCalibration;
