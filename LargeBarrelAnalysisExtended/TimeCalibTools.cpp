@@ -30,6 +30,7 @@ double TimeCalibTools::getTimeCalibCorrection(const TOMBChToCorrection& timeCali
 
 TimeCalibTools::TOMBChToCorrection TimeCalibTools::loadTimeCalibration(const std::string& calibFile)
 {
+  INFO("Loading time calibration from:" + calibFile);
   TOMBChToCorrection timeCalibration;
   auto calibRecords = readCalibrationRecordsFromFile(calibFile);
   /// Fake transform for a moment.
