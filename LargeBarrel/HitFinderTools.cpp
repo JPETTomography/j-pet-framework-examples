@@ -33,19 +33,23 @@ vector<JPetHit> HitFinderTools::createHits(const SignalsContainer& allSignalsInT
 
         std::sort(sideA.begin(), sideA.end(), [] (const JPetPhysSignal & h1, const JPetPhysSignal & h2) {return h1.getTime() < h2.getTime();});
         std::sort(sideB.begin(), sideB.end(), [] (const JPetPhysSignal & h1, const JPetPhysSignal & h2) {return h1.getTime() < h2.getTime();});
+
             for(auto signalA : sideA){
                 for(auto signalB : sideB){
 
                     if( (signalB.getTime() - signalA.getTime()) > timeDifferenceWindow){break;}
-
                     if(abs(signalA.getTime() - signalB.getTime()) < timeDifferenceWindow /*ps*/){
 
+                    cout << "A:: " << signalA.getTime() << endl;
+                    cout << "B:: " << signalB.getTime() << endl;
+                    cout << signalA.getTime() - signalB.getTime() << endl;
                         JPetHit hit;
                         hit.setSignalA(signalA);
                         hit.setSignalB(signalB);
                         hit.setTime( (signalA.getTime() + signalB.getTime())/2.0 );
-                        hit.setScintillator(signalA.getRecoSignal().getRawSignal().getPM().getScin());
-                        hit.setBarrelSlot(signalA.getRecoSignal().getRawSignal().getPM().getScin().getBarrelSlot());
+                        cout << timeDifferenceWindow << endl;
+                        // hit.setScintillator(signalA.getRecoSignal().getRawSignal().getPM().getScin());
+                        // hit.setBarrelSlot(signalA.getRecoSignal().getRawSignal().getPM().getScin().getBarrelSlot());
 
                         hits.push_back(hit);
                     }
