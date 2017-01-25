@@ -13,31 +13,28 @@
  *  @file TaskD.h
  */
 
-#ifndef TASKD_H 
-#define TASKD_H 
-
+#ifndef _____TIME___SYNC____TASK_________ 
+#       define _____TIME___SYNC____TASK_________
+#include <memory>
 #include <JPetTask/JPetTask.h>
 #include <JPetHit/JPetHit.h>
 #include <JPetRawSignal/JPetRawSignal.h>
-#include "LargeBarrelMapping.h"
-class JPetWriter;
+#include <JPetLargeBarrelExtensions/PetDict.h>
+#include <JPetLargeBarrelExtensions/BarrelExtensions.h>
+class Synchronization;
 #ifdef __CINT__
 //when cint is used instead of compiler, override word is not recognized
 //nevertheless it's needed for checking if the structure of project is correct
 #	define override
 #endif
-class TaskD:public JPetTask{
+class TaskSyncAB:public LargeBarrelTask {
 public:
-	TaskD(const char * name, const char * description);
-	virtual ~TaskD(){}
-	virtual void init(const JPetTaskInterface::Options& opts)override;
-	virtual void exec()override;
-	virtual void terminate()override;
-	virtual void setWriter(JPetWriter* writer)override;
-protected:
-	const char * formatUniqueSlotDescription(const JPetBarrelSlot & slot, int threshold,const char * prefix);
-	void fillHistosForHit(const JPetHit & hit);
-	JPetWriter* fWriter;
-	LargeBarrelMapping fBarrelMap;
+  TaskSyncAB(const char * name, const char * description);
+  virtual ~TaskSyncAB();
+  virtual void init(const JPetTaskInterface::Options& opts)override;
+  virtual void exec()override;
+  virtual void terminate()override;
+private:
+  std::shared_ptr<Synchronization>fSync;
 };
-#endif /*  !TASKD_H */
+#endif

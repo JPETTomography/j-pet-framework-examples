@@ -22,31 +22,25 @@
 #include <JPetTimeWindow/JPetTimeWindow.h>
 #include <JPetParamBank/JPetParamBank.h>
 #include <JPetParamManager/JPetParamManager.h>
-#include "LargeBarrelMapping.h"
+#include <JPetLargeBarrelExtensions/PetDict.h>
+#include <JPetLargeBarrelExtensions/BarrelExtensions.h>
 class JPetWriter;
 #ifdef __CINT__
 //when cint is used instead of compiler, override word is not recognized
 //nevertheless it's needed for checking if the structure of project is correct
 #	define override
 #endif
-class TaskB1: public JPetTask
-{
+class TaskB1: public LargeBarrelTask {
 public:
   TaskB1(const char * name, const char * description);
   virtual ~TaskB1();
   virtual void init(const JPetTaskInterface::Options& opts)override;
   virtual void exec()override;
   virtual void terminate()override;
-  virtual void setWriter(JPetWriter* writer)override;
-  virtual void setParamManager(JPetParamManager* paramManager)override;
-  const JPetParamBank& getParamBank()const;
 protected:
   void saveRawSignal( JPetRawSignal sig);
   const char * formatUniqueChannelDescription(const JPetTOMBChannel & channel, const char * prefix) const;
   int calcGlobalPMTNumber(const JPetPM & pmt) const;
-  JPetWriter* fWriter;
-  JPetParamManager* fParamManager;
-  LargeBarrelMapping fBarrelMap;
   const int kNumOfThresholds = 4;
 };
 #endif /*  !TASKB1_H */

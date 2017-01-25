@@ -40,7 +40,7 @@ add_definitions(${Framework_DEFINITIONS})
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})
 target_link_libraries(${projectBinary} JPetFramework)
 
-add_custom_target(clean_data_largebarrel
+add_custom_target(clean_data_largebarrel_timesync
   COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root)
 
 # copy the DB config file to an expected location
