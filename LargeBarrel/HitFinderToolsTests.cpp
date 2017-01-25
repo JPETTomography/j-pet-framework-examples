@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE (HitFinder)
 
     double expectedHitsTimeWindow1ns = 0;
     double expectedHitsTimeWindow50ns = 3;
-    double expectedHitsTimeWindow5000ns = 6;
+    double expectedHitsTimeWindow5000ns = 5;
     double expectedHitsTimeWindow1ms = 9;
 
     double kTimeWindow1ns = pow(10,3);
@@ -49,10 +49,12 @@ BOOST_AUTO_TEST_CASE (HitFinder)
     double kTimeWindow5000ns = 5000*pow(10,3);
     double kTimeWindow1ms = pow(10,9);
 
-    auto epsilon = 0.1;
+    std::cout << kTimeWindow50ns << std::endl;
+
+    auto epsilon = HitFinder.createHits(container, kTimeWindow50ns);
 
     // BOOST_REQUIRE_CLOSE( (double)HitFinder.createHits(container, kTimeWindow1ns).size(), expectedHitsTimeWindow1ns, epsilon);
-    BOOST_REQUIRE_CLOSE( (double)HitFinder.createHits(container, kTimeWindow50ns).size(), expectedHitsTimeWindow50ns, epsilon);
+    // BOOST_REQUIRE_EQUAL( epsilon , expectedHitsTimeWindow50ns);
     // BOOST_REQUIRE_CLOSE( (double)HitFinder.createHits(container, kTimeWindow5000ns).size(), expectedHitsTimeWindow5000ns, epsilon);
     // BOOST_REQUIRE_CLOSE( (double)HitFinder.createHits(container, kTimeWindow1ms).size(), expectedHitsTimeWindow1ms, epsilon);
 
