@@ -47,6 +47,11 @@ int main(int argc, char* argv[]) {
 				 new TaskC("Module C: Pair signals", 
 					   "Create hits from pairs of signals")); 
      }); 
+   manager.registerTask([](){ 
+       return new JPetTaskLoader("phys.hit", "AB.stat", 
+				 new TaskSyncAB("Module for AB spectra", 
+					"analyses hits and obtaines A-B time differences","DeltasA.txt")); 
+     }); 
 
 
   manager.run();

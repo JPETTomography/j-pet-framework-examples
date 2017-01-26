@@ -16,6 +16,7 @@
 #ifndef _____TIME___SYNC____TASK_________ 
 #       define _____TIME___SYNC____TASK_________
 #include <memory>
+#include <string>
 #include <JPetTask/JPetTask.h>
 #include <JPetHit/JPetHit.h>
 #include <JPetRawSignal/JPetRawSignal.h>
@@ -29,12 +30,13 @@ class Synchronization;
 #endif
 class TaskSyncAB:public LargeBarrelTask {
 public:
-  TaskSyncAB(const char * name, const char * description);
+  TaskSyncAB(const char * name, const char * description, const std::string&filename);
   virtual ~TaskSyncAB();
   virtual void init(const JPetTaskInterface::Options& opts)override;
   virtual void exec()override;
   virtual void terminate()override;
 private:
-  std::shared_ptr<Synchronization>fSync;
+    std::string f_filename;
+    std::shared_ptr<Synchronization>fSync;
 };
 #endif

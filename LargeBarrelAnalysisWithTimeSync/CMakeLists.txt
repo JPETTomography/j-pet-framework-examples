@@ -15,6 +15,7 @@ set(projectName LargeBarrelAnalysisWithTimeSync)
 
 set(AUXILLIARY_FILES
   run.sh
+  DeltasA.txt
   conf_trb3.xml
   README
   )

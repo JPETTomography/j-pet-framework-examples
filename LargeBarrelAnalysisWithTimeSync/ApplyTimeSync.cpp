@@ -15,18 +15,21 @@
 
 #include <list>
 #include <memory>
+#include <fstream>
 #include <JPetWriter/JPetWriter.h>
 #include <JPetHitUtils/JPetHitUtils.h>
 #include <JPetLargeBarrelExtensions/BarrelExtensions.h>
 #include <JPetLargeBarrelExtensions/TimeSyncDeltas.h>
 #include "ApplyTimeSync.h"
 using namespace std;
-TaskSyncAB::TaskSyncAB(const char * name, const char * description)
-:LargeBarrelTask(name, description){}
+TaskSyncAB::TaskSyncAB(const char * name, const char * description, const std::string&filename)
+:LargeBarrelTask(name, description),f_filename(filename){}
 TaskSyncAB::~TaskSyncAB(){}
 void TaskSyncAB::init(const JPetTaskInterface::Options&opts){
     LargeBarrelTask::init(opts);
-    fSync=make_shared<Synchronization>(map(),cin,defaultTimeCalculation);
+    ifstream file(f_filename);
+    fSync=make_shared<Synchronization>(map(),file,defaultTimeCalculation);
+    file.close();
     for(auto & layer : getParamBank().getLayers()){
 	const auto ln=map()->getLayerNumber(*layer.second);
 	for(size_t sl=1,n=map()->getSlotsCount(ln);sl<=n;sl++){
