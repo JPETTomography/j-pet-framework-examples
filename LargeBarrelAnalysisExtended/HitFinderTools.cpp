@@ -33,17 +33,21 @@ vector<JPetHit> HitFinderTools::createHits(const SignalsContainer& allSignalsInT
 
         std::sort(sideA.begin(), sideA.end(), [] (const JPetPhysSignal & h1, const JPetPhysSignal & h2) {return h1.getTime() < h2.getTime();});
         std::sort(sideB.begin(), sideB.end(), [] (const JPetPhysSignal & h1, const JPetPhysSignal & h2) {return h1.getTime() < h2.getTime();});
+
             for(auto signalA : sideA){
                 for(auto signalB : sideB){
 
-                    if(abs(signalA.getTime() - signalB.getTime()) < timeDifferenceWindow  && (signalA.getTime() - signalB.getTime()) < timeDifferenceWindow/*ps*/){
+                    if( (signalB.getTime() - signalA.getTime()) > timeDifferenceWindow){break;}
+                    if(abs(signalA.getTime() - signalB.getTime()) < timeDifferenceWindow /*ps*/){
 
                         JPetHit hit;
+
                         hit.setSignalA(signalA);
                         hit.setSignalB(signalB);
                         hit.setTime( (signalA.getTime() + signalB.getTime())/2.0 );
-                        hit.setScintillator(signalA.getRecoSignal().getRawSignal().getPM().getScin());
-                        hit.setBarrelSlot(signalA.getRecoSignal().getRawSignal().getPM().getScin().getBarrelSlot());
+
+                        hit.setScintillator(signalA.getPM().getScin());
+                        hit.setBarrelSlot(signalA.getPM().getScin().getBarrelSlot());
 
                         hits.push_back(hit);
                     }
@@ -53,4 +57,18 @@ vector<JPetHit> HitFinderTools::createHits(const SignalsContainer& allSignalsInT
         }
     }
     return hits;
+}
+
+void HitFinderTools::fillContainer(SignalsContainer& allSignalsInTimeWindow, JPetPhysSignal signal){
+
+    if(signal.getRecoSignal().getRawSignal().getPM().getSide() == JPetPM::SideA){
+
+        allSignalsInTimeWindow.at(signal.getRecoSignal().getRawSignal().getPM().getScin().getID()).first.push_back(signal);
+    }
+    else{
+
+        allSignalsInTimeWindow.at(signal.getRecoSignal().getRawSignal().getPM().getScin().getID()).second.push_back(signal);
+    }
+
+
 }
