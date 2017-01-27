@@ -37,6 +37,8 @@ class HitFinderTools
 
         std::vector<JPetHit> createHits(const SignalsContainer& allSignalsInTimeWindow, const double timeDifferenceWindow);
 
+        void fillContainer(SignalsContainer& allSignalsInTimeWindow, JPetPhysSignal physSignal);
+
 
 };
 
