@@ -1,4 +1,4 @@
-/**
+/**ifstream
  *  @copyright Copyright 2016 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -39,24 +39,40 @@ void TimeCalibration::init(const JPetTaskInterface::Options& opts){
 // create histograms for time differences at each slot and each threshold
 
 	auto scints = getParamBank().getScintillators();
-
+	//
+	std::ofstream output;
+	output.open(OutputFile,std::ios::app); //file will be overwritten           
+	 if(output.tellp()==0){
+	  output << "# Time calibration constants" << std::endl;
+	  output << "# For side A we apply only the correction from refference detector, for side B the correction is equal to the sum of the A-B" << std::endl;
+          output << "# correction and offset with respect to the refference detector. For side A we report the sigmas and chi2/ndf for fit to the time difference spectra with refference detector" << std::endl;
+	  output << "# while the same quality variables for fits to the A-B time difference are given for B side section" << std::endl;
+	  output << "# Description of the parameters:layer(1-3) slot(1-48/96) side(A-B) threshold(1-4) offset_value_leading offset_uncertainty_leading offset_value_trailing offset_uncertainty_trailing" << std::endl;
+	  output << "# sigma_offset_leading sigma_offset_trailing (chi2/ndf)_leading" << std::endl;
+	  output << "# Calibration started on "<< __DATE__ << " at " << __TIME__ << std::endl;
+	  }
+	  else{
+	    output << "# Calibration started on "<< __DATE__ << " at " << __TIME__ << std::endl;
+	  output.close();
+	  }
+	//
 	for (const auto & scin: scints) {
 
 		for (int thr=1;thr<=4;thr++){//over threshold
 
 //histos for leading edge
 			const char * histo_name_l = formatUniqueSlotDescription(scin.second->getBarrelSlot(), thr, "timeDiffAB_leading_");
-			getStatistics().createHistogram( new TH1F(histo_name_l, histo_name_l, 100, -20., 20.) );
+			getStatistics().createHistogram( new TH1F(histo_name_l, histo_name_l, 400, -20., 20.) );
 //histograms for leading edge refference detector time difference
                         const char * histo_name_Ref_l = formatUniqueSlotDescription(scin.second->getBarrelSlot(), thr, "timeDiffRef_leading_");
-			getStatistics().createHistogram( new TH1F(histo_name_Ref_l, histo_name_Ref_l, 100, -2000., 2000.) );
+			getStatistics().createHistogram( new TH1F(histo_name_Ref_l, histo_name_Ref_l, 600,-30.,30.) );
 			
 //histos for trailing edge			
 			const char * histo_name_t = formatUniqueSlotDescription(scin.second->getBarrelSlot(), thr, "timeDiffAB_trailing_");
-			getStatistics().createHistogram( new TH1F(histo_name_t, histo_name_t, 100, -20., 20.) );
+			getStatistics().createHistogram( new TH1F(histo_name_t, histo_name_t, 400, -20., 20.) );
 //histograms for leading edge refference detector time difference
                         const char * histo_name_Ref_t = formatUniqueSlotDescription(scin.second->getBarrelSlot(), thr, "timeDiffRef_trailing_");
-			getStatistics().createHistogram( new TH1F(histo_name_Ref_t, histo_name_Ref_t, 100, -2000., 2000.) );
+			getStatistics().createHistogram( new TH1F(histo_name_Ref_t, histo_name_Ref_t, 600,-30.,30.) );
 		}
 	}
 
@@ -139,7 +155,7 @@ void TimeCalibration::exec(){
 		fRefTimesL.clear();
 		fRefTimesT.clear();
 	        fhitsCalib.push_back(*hit);
-
+//
 //If the first hit in the next time window is the refference detector hit save its times
 		if(PMid==kPMidRef){
 		  auto lead_times_B = hit->getSignalB().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading);
@@ -156,11 +172,7 @@ void TimeCalibration::exec(){
 		  fRefTimesT.push_back(RefTimeTrail[1]);
 		}
 	    }
-	  }
-
-
-
-	  
+	  }	  
       	  if(PMid==kPMidRef){
 	      fhitsCalib.push_back(*hit);
 	  fWriter->write(*hit);
@@ -178,10 +190,9 @@ void TimeCalibration::terminate(){
 std::vector<int> vectorOfNumbers;
 std::string str(gDirectory->GetFile()->GetName());//getting directory of analysing file
 
-
 int number=0;
 
-for (unsigned int i=0; i < str.size(); i++){
+ for (unsigned int i=str.size()-1;i>0; i--){
 
 	if (isdigit(str[i])){
 
@@ -190,31 +201,23 @@ for (unsigned int i=0; i < str.size(); i++){
           ss>>number; //convert string into int and store it in "asInt"
 
 	  std::cout << "number" << number << std::endl;
-
          vectorOfNumbers.push_back(number);
 
 	}
 }
-
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-
 // save timeDiffAB mean values for each slot and each threshold in a JPetAuxilliaryData object
 	// so that they are available to the consecutive modules
 	getAuxilliaryData().createMap("timeDiffAB mean values");
-
-
+//
 //create output txt file with calibration parameters 
- 
-	std::ofstream results_fit_t,results_fit_l;
-        results_fit_l.open("results_leading.txt", std::ios::app); //file will be overwritten
-        results_fit_t.open("results_trailing.txt", std::ios::app); //file will be overwritten
-
+//
+	std::ofstream results_fit_l;
+        results_fit_l.open(OutputFile, std::ios::app); //file will be overwritten
 
 	for(auto & slot : getParamBank().getBarrelSlots()){
 
 		for (int thr=1;thr<=4;thr++){
-
 //scintillators
 			const char * histo_name_l = formatUniqueSlotDescription(*(slot.second), thr, "timeDiffAB_leading_");
 			double mean_l = getStatistics().getHisto1D(histo_name_l).GetMean();
@@ -227,10 +230,7 @@ for (unsigned int i=0; i < str.size(); i++){
 			getAuxilliaryData().setValue("timeDiffAB mean values", histo_name_t, mean_t);
 
 			TH1F* histoToSave_trailing = &(getStatistics().getHisto1D(histo_name_t));
-
-
 //reference detector
-
 			const char * histo_name_Ref_l = formatUniqueSlotDescription(*(slot.second), thr, "timeDiffRef_leading_");
 			double mean_Ref_l = getStatistics().getHisto1D(histo_name_Ref_l).GetMean();
 			getAuxilliaryData().setValue("timeDiffRef mean values", histo_name_Ref_l, mean_Ref_l);
@@ -242,23 +242,15 @@ for (unsigned int i=0; i < str.size(); i++){
 			getAuxilliaryData().setValue("timeDiffref mean values", histo_name_Ref_t, mean_Ref_t);
 
 			TH1F* histoToSave_Ref_trailing = &(getStatistics().getHisto1D(histo_name_Ref_t));
-
-
 //non zero histos 
 // slot.first - ID
 // slot.second - wskaznik na JPetBarrelSlot
 //save fit parameters only for layerX and SlotY (taken from analysing files name)
 //fit just for proper slot
-
 			if(histoToSave_leading->GetEntries() != 0 && histoToSave_trailing->GetEntries() != 0
-                          && (slot.second)->getLayer().getID()== vectorOfNumbers[0]
-                          && (slot.first==(10*vectorOfNumbers[1]+vectorOfNumbers[2]))){
-
-			//if(histoToSave->GetEntries() != 0 && (slot.second)->getLayer().getID()== 1 && (slot.first==20)){
-
-
+                          && (slot.second)->getLayer().getID()== vectorOfNumbers[2]
+			   && (slot.first==(10*vectorOfNumbers[1]+vectorOfNumbers[0]))){
 //fit scintilators
-
 			int highestBin_l = histoToSave_leading->GetBinCenter(histoToSave_leading->GetMaximumBin());
 			histoToSave_leading->Fit("gaus","","", highestBin_l-5, highestBin_l+5);
 			histoToSave_leading->Draw();
@@ -280,9 +272,6 @@ for (unsigned int i=0; i < str.size(); i++){
    			double position_peak_error_t=fit_t->GetParError(1);
 			double sigma_peak_t =fit_t->GetParameter(2);
 			double chi2_ndf_t = fit_t->GetChisquare()/fit_t->GetNDF();
-
-
-
 //fit reference detector
 
 			int highestBin_Ref_l = histoToSave_Ref_leading->GetBinCenter(histoToSave_Ref_leading->GetMaximumBin());
@@ -309,30 +298,18 @@ for (unsigned int i=0; i < str.size(); i++){
 			double sigma_peak_Ref_t =fit_Ref_t->GetParameter(2);
 			double chi2_ndf_Ref_t = fit_Ref_t->GetChisquare()/fit_Ref_t->GetNDF();
 
-//save parameters in .txt file: Layer, Slot, Position leding, Error_position leading,
-//Width leading, Chi2/ndf leading, Position trailing, Error_position trailing, Width trailing,
-//Chi2/ndf trailing
-//Position leding ref, Error_position leading ref, Width leading ref, Chi2/ndf leading ref,
-//Position trailing ref, Error_position trailing ref, Width trailing ref, Chi2/ndf trailing ref
-
-		//results_fit <<  (slot.second)->getLayer().getID() << "\t" <<  slot.first << "\t" << thr << "\t" << position_peak_l << "\t" << position_peak_error_l  << "\t" << sigma_peak_l  << "\t" << chi2_ndf_l  << "\t" << position_peak_t << "\t" << position_peak_error_t  << "\t" << sigma_peak_t  << "\t" << chi2_ndf_t  << position_peak_Ref_l << "\t" << position_peak_error_Ref_l  << "\t" << sigma_peak_Ref_l  << "\t" << chi2_ndf_Ref_l  << "\t" << position_peak_Ref_t << "\t" << position_peak_error_Ref_t  << "\t" << sigma_peak_Ref_t  << "\t" << chi2_ndf_Ref_t  << "\t" << std::endl;
-
-//results for tA - tB 
-
-results_fit_l <<  (slot.second)->getLayer().getID() << "\t" <<  slot.first << "\t" << "B" << "\t" << thr << "\t" << position_peak_l << "\t" << position_peak_error_l  << "\t" << std::endl;
-
-results_fit_t <<  (slot.second)->getLayer().getID() << "\t" <<  slot.first << "\t" << "B" << "\t" << thr << "\t" << position_peak_t << "\t" << position_peak_error_t  << "\t" << std::endl;
-
-
-//layer slot side threshold offset_value offset_uncertainty
+// 
+			results_fit_l << (slot.second)->getLayer().getID() << "\t" <<  slot.first << "\t" << "A" << "\t" << thr << "\t" << position_peak_Ref_l
+                                      << "\t" << position_peak_error_Ref_l  << "\t" << position_peak_Ref_t << "\t" << position_peak_error_Ref_t  << "\t" << sigma_peak_Ref_l
+                                      << "\t" <<sigma_peak_Ref_t << "\t"  <<chi2_ndf_Ref_l << "\t" <<chi2_ndf_Ref_t <<std::endl;
+                        results_fit_l << (slot.second)->getLayer().getID() << "\t" <<  slot.first << "\t" << "B" << "\t" << thr << "\t" << position_peak_Ref_l+position_peak_l
+                                      << "\t" << sqrt(pow(position_peak_error_Ref_l,2) + pow(position_peak_error_l,2))  << "\t" << position_peak_Ref_t+ position_peak_t << "\t"
+                                      << sqrt(pow(position_peak_error_Ref_t,2)+pow(position_peak_error_t,2)) << "\t" << sigma_peak_l << "\t" << sigma_peak_t <<"\t" << chi2_ndf_l << "\t" <<chi2_ndf_t <<std::endl;
 			}
 			
 		}
 	}
-
 	results_fit_l.close();
-	results_fit_t.close();
-
 }
 
 //////////////////////////////////
@@ -354,7 +331,7 @@ void TimeCalibration::fillHistosForHit(const JPetHit & hit, const std::vector<do
 
 		if( lead_times_B.count(thr) > 0 ){ // if there was leading time at the same threshold at opposite side
 
-			double timeDiffAB_l = lead_times_A[thr] - lead_times_B[thr];
+			double timeDiffAB_l = lead_times_B[thr] - lead_times_A[thr];
 			timeDiffAB_l/= 1000.; // we want the plots in ns instead of ps
 
 			// fill the appropriate histogram
@@ -371,11 +348,11 @@ void TimeCalibration::fillHistosForHit(const JPetHit & hit, const std::vector<do
 //Here we take advantage of the fact that the hits are somehow ordered in time, which is true for now if this is not true we
 //have to insert this part of the code (and the one on the beginning of this function outside this function and create a vecor
 //of hits and then for each refference hit look for the next hit in time
-//taken minimal time difference between Ref and Scint
-			double timeDiffLmin=10000000000.;
+//taken minimum time difference between Ref and Scint
+			double timeDiffLmin=10000000000000.;
 			for(unsigned int i = 0; i < fRefTimesL.size();i++) { 
 			double timeDiffHit_L = (lead_times_A[thr] + lead_times_B[thr])/2. -fRefTimesL[i];
-			 timeDiffHit_L = timeDiffHit_L/1000000.;//ps -> micros
+			 timeDiffHit_L = timeDiffHit_L/1000.;//ps -> ns
 			 if(fabs(timeDiffHit_L) < timeDiffLmin){
 			  timeDiffLmin = timeDiffHit_L;
 			 }
@@ -393,7 +370,7 @@ void TimeCalibration::fillHistosForHit(const JPetHit & hit, const std::vector<do
 
 		if( trail_times_B.count(thr) > 0 ){ // if there was trailing time at the same threshold at opposite side
 
-			double timeDiffAB_t = trail_times_A[thr] - trail_times_B[thr];
+			double timeDiffAB_t = trail_times_B[thr] - trail_times_A[thr];
 			timeDiffAB_t/= 1000.; // we want the plots in ns instead of ps
 
 			// fill the appropriate histogram
@@ -410,10 +387,10 @@ void TimeCalibration::fillHistosForHit(const JPetHit & hit, const std::vector<do
 //have to insert this part of the code (and the one on the beginning of this function outside this function and create a vecor
 //of hits and then for each refference hit look for the next hit in time. 
 //taken minimal time difference between Ref and Scint
-			double timeDiffTmin=10000000000.;
+			double timeDiffTmin=10000000000000.;
 			for(unsigned int i = 0; i < fRefTimesT.size();i++) { 
                             double timeDiffHit_T = (trail_times_A[thr] + trail_times_B[thr])/2. -fRefTimesT[i];
-			    timeDiffHit_T = timeDiffHit_T/1000000.; //ps->micros
+			    timeDiffHit_T = timeDiffHit_T/1000.; //ps->ns
 			  if(fabs(timeDiffHit_T) < timeDiffTmin){
 			    timeDiffTmin = timeDiffHit_T;
 			  }
@@ -434,4 +411,3 @@ const char * TimeCalibration::formatUniqueSlotDescription(const JPetBarrelSlot &
 
 }
 void TimeCalibration::setWriter(JPetWriter* writer){fWriter =writer;}
-

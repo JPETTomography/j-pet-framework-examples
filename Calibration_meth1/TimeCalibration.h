@@ -43,5 +43,6 @@ protected:
 	std::vector <double> fRefTimesT;
 	JPetWriter* fWriter;
 	LargeBarrelMapping fBarrelMap;
+	std::string OutputFile = "TimeConstants.txt";
 };
 #endif /*  !TimeCalibration_H */
