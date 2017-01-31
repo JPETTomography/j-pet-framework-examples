@@ -4,6 +4,49 @@
 
 #include "TimeCalibTools.h"
 
+
+struct myFixtures {
+  std::vector<TimeCalibRecord> fCorrectRecords = {
+    {
+      .layer = 1,
+      .slot = 1,
+      .side = JPetPM::SideA,
+      .threshold = 1,
+      .offset_value_leading = 7 ,
+      .offset_uncertainty_leading = 0,
+      .offset_value_trailing = 0,
+      .offset_uncertainty_trailing = 0,
+      .quality = 0
+    },
+    {
+      .layer = 3,
+      .slot = 2,
+      .side = JPetPM::SideB,
+      .threshold = 4,
+      .offset_value_leading = 5 ,
+      .offset_uncertainty_leading = 0,
+      .offset_value_trailing = 0,
+      .offset_uncertainty_trailing = 0,
+      .quality = 0
+    },
+    {
+      .layer = 2,
+      .slot = 90,
+      .side = JPetPM::SideB,
+      .threshold = 2,
+      .offset_value_leading = -3 ,
+      .offset_uncertainty_leading = 0,
+      .offset_value_trailing = 0,
+      .offset_uncertainty_trailing = 0,
+      .quality = 0
+    }
+  };
+  std::map<std::tuple<int, int, JPetPM::Side, int>, int> fCorrectTombMap = {{std::make_tuple(1, 1, JPetPM::SideA, 1), 22},
+    {std::make_tuple(3, 2, JPetPM::SideB, 4), 13},
+    {std::make_tuple(2, 90, JPetPM::SideB, 2), 73}
+  };
+};
+
 BOOST_AUTO_TEST_SUITE (TimeCalibToolsSuite)
 
 BOOST_AUTO_TEST_CASE (getTimeCalibCorrection)
@@ -33,8 +76,13 @@ BOOST_AUTO_TEST_CASE (getTimeCalibCorrection2)
 
 BOOST_AUTO_TEST_CASE (loadTimeCalibration)
 {
+  std::map<std::tuple<int, int, JPetPM::Side, int>, int> tombMap = {{std::make_tuple(1, 10, JPetPM::SideB, 1), 10},
+    {std::make_tuple(1, 11, JPetPM::SideA, 2), 11},
+    {std::make_tuple(1, 12, JPetPM::SideB, 3), 12},
+    {std::make_tuple(1, 13, JPetPM::SideA, 4), 13}
+  };
   std::map<unsigned int, double> expected = { {10, -6.9443}, {11, -6.96546}, {12, -6.68968}, {13, -6.69345}};
-  auto obtained = TimeCalibTools::loadTimeCalibration("configFiles/timeCalib.txt");
+  auto obtained = TimeCalibTools::loadTimeCalibration("configFiles/timeCalib.txt", tombMap);
   BOOST_REQUIRE_EQUAL(expected.size(), obtained.size());
   BOOST_REQUIRE(expected == obtained);
 }
@@ -165,6 +213,147 @@ BOOST_AUTO_TEST_CASE (readCalibrationRecordsFromFile_no_file)
 {
   auto obtained = TimeCalibTools::readCalibrationRecordsFromFile("blabal.txt");
   BOOST_REQUIRE(obtained.empty());
+}
+
+BOOST_AUTO_TEST_CASE (areCorrectTimeCalibRecords)
+{
+  std::vector<TimeCalibRecord> records = {
+    {
+      .layer = 1,
+      .slot = 1,
+      .side = JPetPM::SideA,
+      .threshold = 1,
+      .offset_value_leading = 0 ,
+      .offset_uncertainty_leading = 0,
+      .offset_value_trailing = 0,
+      .offset_uncertainty_trailing = 0,
+      .quality = 0
+    },
+    {
+      .layer = 3,
+      .slot = 2,
+      .side = JPetPM::SideB,
+      .threshold = 4,
+      .offset_value_leading = 0 ,
+      .offset_uncertainty_leading = 0,
+      .offset_value_trailing = 0,
+      .offset_uncertainty_trailing = 0,
+      .quality = 0
+    },
+    {
+      .layer = 2,
+      .slot = 90,
+      .side = JPetPM::SideB,
+      .threshold = 2,
+      .offset_value_leading = 0 ,
+      .offset_uncertainty_leading = 0,
+      .offset_value_trailing = 0,
+      .offset_uncertainty_trailing = 0,
+      .quality = 0
+    }
+  };
+  BOOST_REQUIRE(TimeCalibTools::areCorrectTimeCalibRecords(records));
+}
+
+BOOST_AUTO_TEST_CASE (areCorrectTimeCalibRecords_wrong)
+{
+  std::vector<TimeCalibRecord> records = {
+    {
+      .layer = 1,
+      .slot = 1,
+      .side = JPetPM::SideA,
+      .threshold = 1,
+      .offset_value_leading = 0 ,
+      .offset_uncertainty_leading = 0,
+      .offset_value_trailing = 0,
+      .offset_uncertainty_trailing = 0,
+      .quality = 0
+    },
+    {
+      .layer = 3,
+      .slot = 2,
+      .side = JPetPM::SideB,
+      .threshold = 4,
+      .offset_value_leading = 0 ,
+      .offset_uncertainty_leading = 0,
+      .offset_value_trailing = 0,
+      .offset_uncertainty_trailing = 0,
+      .quality = 0
+    },
+    {
+      .layer = 2,
+      .slot = 90,
+      .side = JPetPM::SideB,
+      .threshold = 5,   /// threshold >4
+      .offset_value_leading = 0 ,
+      .offset_uncertainty_leading = 0,
+      .offset_value_trailing = 0,
+      .offset_uncertainty_trailing = 0,
+      .quality = 0
+    }
+  };
+  BOOST_REQUIRE(!TimeCalibTools::areCorrectTimeCalibRecords(records));
+}
+
+BOOST_AUTO_TEST_CASE (areCorrectTimeCalibRecords_wrong2)
+{
+  std::vector<TimeCalibRecord> records = {
+    {
+      .layer = 1,
+      .slot = 1,
+      .side = JPetPM::SideA,
+      .threshold = 1,
+      .offset_value_leading = 0 ,
+      .offset_uncertainty_leading = 0,
+      .offset_value_trailing = 0,
+      .offset_uncertainty_trailing = 0,
+      .quality = 0
+    },
+    {
+      .layer = 3,
+      .slot = 2,
+      .side = JPetPM::SideB,
+      .threshold = 4,
+      .offset_value_leading = 0 ,
+      .offset_uncertainty_leading = 0,
+      .offset_value_trailing = 0,
+      .offset_uncertainty_trailing = 0,
+      .quality = 0
+    },
+    {
+      .layer = 4, /// layer > 3
+      .slot = 90,
+      .side = JPetPM::SideB,
+      .threshold = 4,
+      .offset_value_leading = 0,
+      .offset_uncertainty_leading = 0,
+      .offset_value_trailing = 0,
+      .offset_uncertainty_trailing = 0,
+      .quality = 0
+    }
+  };
+  BOOST_REQUIRE(!TimeCalibTools::areCorrectTimeCalibRecords(records));
+}
+
+BOOST_AUTO_TEST_CASE (generateTimeCalibration_empty)
+{
+  std::vector<TimeCalibRecord> records;
+  std::map<std::tuple<int, int, JPetPM::Side, int>, int> tombMap;
+  auto calibration = TimeCalibTools::generateTimeCalibration(records, tombMap);
+  BOOST_REQUIRE(calibration.empty());
+}
+
+BOOST_FIXTURE_TEST_CASE (generateTimeCalibration, myFixtures )
+{
+  auto epsilon = 0.0001;
+  auto calibration = TimeCalibTools::generateTimeCalibration(fCorrectRecords, fCorrectTombMap);
+  BOOST_REQUIRE_EQUAL(calibration.size(), 3u);
+  BOOST_REQUIRE_EQUAL(calibration.count(22), 1);
+  BOOST_REQUIRE_EQUAL(calibration.count(13), 1);
+  BOOST_REQUIRE_EQUAL(calibration.count(73), 1);
+  BOOST_REQUIRE_CLOSE(calibration.at(22), 7, epsilon);
+  BOOST_REQUIRE_CLOSE(calibration.at(13), 5, epsilon);
+  BOOST_REQUIRE_CLOSE(calibration.at(73), -3, epsilon);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
