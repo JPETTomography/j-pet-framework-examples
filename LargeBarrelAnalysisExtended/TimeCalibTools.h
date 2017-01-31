@@ -39,13 +39,20 @@ class TimeCalibTools
 {
 public:
   typedef std::map<unsigned int, double> TOMBChToCorrection;
+  typedef std::map<std::tuple<int, int, JPetPM::Side, int>, int> TOMBChMap;
   /// Method returns a correction for the given tombChannel
   static double getTimeCalibCorrection(const TOMBChToCorrection& timeCalibration, const unsigned int channel);
   /// Main method to be used to load the time calibration parameters.
-  static TOMBChToCorrection loadTimeCalibration(const std::string& calibFile);
+  /// tombMap contains the dependency between layer, barrel slot, PM side, threshold and TOMB channel number.
+  static TOMBChToCorrection loadTimeCalibration(const std::string& calibFile, const TOMBChMap& tombMap);
+  /// Method generates a dependedce map between TOMB channel numbers and calibration corrections.
+  /// tombMap contains the dependency between layer, barrel slot, PM side, threshold and TOMB channel number.
+  /// calibRecords contains the calibration parameters.
+  static TOMBChToCorrection generateTimeCalibration(const std::vector<TimeCalibRecord>& calibRecords,  const TimeCalibTools::TOMBChMap& tombMap);
 
   /// Method reads the calibration file and generates a vector of TimeCalibRecords based on its content.
   static std::vector<TimeCalibRecord> readCalibrationRecordsFromFile(const std::string& calibFile);
+
   /// Method fills record parameters based on the input string.
   /// The input string is assumed to contain 6 elements e.g. 1 1 A 2 5.0 2.0
   /// The elements correspond to layer slot side threshold offset_value offset_uncertainty.
@@ -53,5 +60,14 @@ public:
   /// side can have value: A or B.
   /// If the line does not conform to described condition false is return, and the record is not changed
   static bool fillTimeCalibRecord(const std::string& input, TimeCalibRecord& outRecord);
+  /// Method checks if the calibration records are correct:
+  /// 1. layer elements correspond to value: 1 to 3
+  /// 2. slot elements correspond to values: 1 to 96
+  /// 3. thresholds elements correspond to values: 1-4
+  /// If any of the elements does not fullfill any of the conditions false is returned.
+  static bool areCorrectTimeCalibRecords(const std::vector<TimeCalibRecord>& records);
+private:
+  TimeCalibTools(const TimeCalibTools&);
+  void operator=(const TimeCalibTools&);
 };
 #endif /*  !TIMECALIBTOOLS_H */
