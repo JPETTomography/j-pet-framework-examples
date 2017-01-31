@@ -15,6 +15,8 @@
 
 #include "TimeCalibLoader.h"
 #include "TimeCalibTools.h"
+#include <JPetParamBankTools/JPetParamBankTools.h>
+#include <JPetParamManager/JPetParamManager.h>
 
 TimeCalibLoader::TimeCalibLoader(const char* name, const char* description):
   JPetTask(name, description)
@@ -30,7 +32,9 @@ void TimeCalibLoader::init(const JPetTaskInterface::Options& opts)
   if (opts.count(fConfigFileParamKey)) {
     calibFile = opts.at(fConfigFileParamKey);
   }
-  fTimeCalibration = TimeCalibTools::loadTimeCalibration(calibFile);
+  assert(fParamManager);
+  auto tombMap = JPetParamBankTools::getTOMBMap(fParamManager->getParamBank());
+  fTimeCalibration = TimeCalibTools::loadTimeCalibration(calibFile, tombMap);
 }
 
 void TimeCalibLoader::exec()
