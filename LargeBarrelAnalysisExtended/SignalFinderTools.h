@@ -41,7 +41,7 @@ public:
       double sigChEdgeMaxTime,
       double sigChLeadTrailMaxTime);
   static int findSigChOnNextThr(Double_t sigChValue, const std::vector<JPetSigCh>& sigChVec, double sigChEdgeMaxTime);
-  static int findTrailingSigCh(JPetSigCh leadingSigCh,
+  static int findTrailingSigCh(const JPetSigCh& leadingSigCh,
                                const std::vector<JPetSigCh>& trailingSigChVec,
                                double sigChLeadTrailMaxTime);
 
