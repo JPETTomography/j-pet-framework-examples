@@ -76,18 +76,33 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(Int_t timeWindowIndex,
     double sigChEdgeMaxTime,
     double sigChLeadTrailMaxTime)
 {
-
+  vector<JPetRawSignal> rawSigVec;
+  if (numOfThresholds != 4) {
+    ERROR("This function is ment to work with 4 thresholds only!");
+    return rawSigVec;
+  }
   vector<JPetSigCh> tmp;
   vector<vector<JPetSigCh>> thresholdSigCh(2 * numOfThresholds, tmp);
 
+  bool errorOccured = false;
+
   //division into subvectors according to threshold number:
   //0-3 leading, 4-7 trailing
-  for (JPetSigCh sigCh : sigChFromSamePM) {
+  for (const JPetSigCh & sigCh : sigChFromSamePM) {
+    auto threshNum = sigCh.getThresholdNumber();
+    if ((threshNum <= 0) || (threshNum > 2 * numOfThresholds)) {
+      ERROR("Threshold number out of range:" + std::to_string(threshNum));
+      errorOccured = true;
+      break;
+    }
     if (sigCh.getType() == JPetSigCh::Leading) {
       thresholdSigCh.at(sigCh.getThresholdNumber() - 1).push_back(sigCh);
     } else if (sigCh.getType() == JPetSigCh::Trailing) {
       thresholdSigCh.at(sigCh.getThresholdNumber() + numOfThresholds - 1).push_back(sigCh);
     }
+  }
+  if (errorOccured) {
+    return rawSigVec;
   }
 
   //probably not needed vector sorting according to Signal channel time values
@@ -95,8 +110,7 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(Int_t timeWindowIndex,
     sort(thrVec.begin(), thrVec.end(), sortByTimeValue);
   }
 
-  //constructing Raw Signals
-  vector<JPetRawSignal> rawSigVec;
+  assert(thresholdSigCh.size() > 0);
   while (thresholdSigCh.at(0).size() > 0) {
 
     JPetRawSignal* rawSig = new JPetRawSignal();
@@ -109,13 +123,15 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(Int_t timeWindowIndex,
 
     //looking for points from other thresholds that belong to the same leading edge
     //and search for equivalent trailing edge points
-
     //first thr trailing
+
+    assert(thresholdSigCh.at(0).size() > 0);
+    assert(thresholdSigCh.size() > 4);
     int closestTrailingSigCh0 = findTrailingSigCh(thresholdSigCh.at(0).at(0), thresholdSigCh.at(4), sigChLeadTrailMaxTime);
     if (closestTrailingSigCh0 != -1) {
       double tot0 = thresholdSigCh.at(4).at(closestTrailingSigCh0).getValue()
                     - thresholdSigCh.at(0).at(0).getValue();
-      stats.getHisto1D("TOT_thr_1").Fill(tot0 / 1000.0);
+      if (saveControlHistos) stats.getHisto1D("TOT_thr_1").Fill(tot0 / 1000.0);
       rawSig->addPoint(thresholdSigCh.at(4).at(closestTrailingSigCh0));
       thresholdSigCh.at(4).erase(thresholdSigCh.at(4).begin() + closestTrailingSigCh0);
     }
@@ -188,13 +204,12 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(Int_t timeWindowIndex,
     stats.getHisto1D("remainig_trailing_sig_ch_per_thr").Fill(4, thresholdSigCh.at(7).size());
   }
 
-  //return argument
   return rawSigVec;
 }
 
 
 //method of finding Signal Channels that belong to the same leading edge
-//not more than some amount of ps away, defined in header file
+//not more than sigChEdgeMaxTime away. Defined in ps.
 int SignalFinderTools::findSigChOnNextThr(Double_t sigChValue, const vector<JPetSigCh>& sigChVec, double sigChEdgeMaxTime)
 {
   for (Int_t i = 0; i < sigChVec.size(); i++) {
@@ -206,10 +221,10 @@ int SignalFinderTools::findSigChOnNextThr(Double_t sigChValue, const vector<JPet
 }
 
 //method of finding trailing edge SigCh that suits certian leading edge SigCh
-//not further away than amount in ps defined in header files
+//not further away than sigChLeadTrailMaxTime in ps
 //if more than one trailing edge SigCh found, returning one with the smallest index
 //that is equivalent of SigCh earliest in time
-int SignalFinderTools::findTrailingSigCh(JPetSigCh leadingSigCh, const vector<JPetSigCh>& trailingSigChVec, double sigChLeadTrailMaxTime)
+int SignalFinderTools::findTrailingSigCh(const JPetSigCh& leadingSigCh, const vector<JPetSigCh>& trailingSigChVec, double sigChLeadTrailMaxTime)
 {
   vector<int> trailingFoundIdices;
   for (Int_t i = 0; i < trailingSigChVec.size(); i++) {
