@@ -17,9 +17,10 @@
 using namespace std;
 
 //method of maping time window sigChs to map of PMs
+/// pm_id -> vect<JPetSigCh>
 map<int, vector<JPetSigCh>> SignalFinderTools::getSigChsPMMapById(const JPetTimeWindow* timeWindow)
 {
-
+  assert(timeWindow);
   map<int, vector<JPetSigCh>> sigChsPMMap;
 
   //map Signal Channels in this Time window according to PM they belong to
