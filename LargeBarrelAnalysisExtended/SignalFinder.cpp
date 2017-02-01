@@ -24,68 +24,84 @@ using namespace std;
 
 
 
-SignalFinder::SignalFinder(const char * name, const char * description, bool saveControlHistos)
-						: JPetTask(name, description){
-	fSaveControlHistos = saveControlHistos;
+SignalFinder::SignalFinder(const char* name, const char* description, bool saveControlHistos)
+  : JPetTask(name, description)
+{
+  fSaveControlHistos = saveControlHistos;
 }
 
-SignalFinder::~SignalFinder(){}
+SignalFinder::~SignalFinder() {}
 
 //SignalFinder init method
-void SignalFinder::init(const JPetTaskInterface::Options&){
+void SignalFinder::init(const JPetTaskInterface::Options& opts)
+{
+  INFO("Signal finding started.");
 
-	INFO("Signal finding started.");
-	fBarrelMap.buildMappings(getParamBank());
-	if(fSaveControlHistos){
-		getStatistics().createHistogram(new TH1F("remainig_leading_sig_ch_per_thr", "Remainig Leading Signal Channels", 4, 0.5, 4.5));
-		getStatistics().createHistogram(new TH1F("remainig_trailing_sig_ch_per_thr", "Remainig Trailing Signal Channels", 4, 0.5, 4.5));
-		getStatistics().createHistogram(new TH1F("TOT_thr_1", "TOT on threshold 1 [ns]", 100, 20.0, 100.0));
-		getStatistics().createHistogram(new TH1F("TOT_thr_2", "TOT on threshold 2 [ns]", 100, 20.0, 100.0));
-		getStatistics().createHistogram(new TH1F("TOT_thr_3", "TOT on threshold 3 [ns]", 100, 20.0, 100.0));
-		getStatistics().createHistogram(new TH1F("TOT_thr_4", "TOT on threshold 4 [ns]", 100, 20.0, 100.0));
-	}
+  if (opts.count(fEdgeMaxTimeParamKey)) {
+    kSigChEdgeMaxTime = std::atof(opts.at(fEdgeMaxTimeParamKey).c_str());
+  } 
+  if (opts.count(fLeadTrailMaxTimeParamKey)) {
+    kSigChLeadTrailMaxTime = std::atof(opts.at(fLeadTrailMaxTimeParamKey).c_str());
+  }
+
+  fBarrelMap.buildMappings(getParamBank());
+  if (fSaveControlHistos) {
+    getStatistics().createHistogram(new TH1F("remainig_leading_sig_ch_per_thr", "Remainig Leading Signal Channels", 4, 0.5, 4.5));
+    getStatistics().createHistogram(new TH1F("remainig_trailing_sig_ch_per_thr", "Remainig Trailing Signal Channels", 4, 0.5, 4.5));
+    getStatistics().createHistogram(new TH1F("TOT_thr_1", "TOT on threshold 1 [ns]", 100, 20.0, 100.0));
+    getStatistics().createHistogram(new TH1F("TOT_thr_2", "TOT on threshold 2 [ns]", 100, 20.0, 100.0));
+    getStatistics().createHistogram(new TH1F("TOT_thr_3", "TOT on threshold 3 [ns]", 100, 20.0, 100.0));
+    getStatistics().createHistogram(new TH1F("TOT_thr_4", "TOT on threshold 4 [ns]", 100, 20.0, 100.0));
+  }
 }
 
 //SignalFinder execution method
-void SignalFinder::exec(){
+void SignalFinder::exec()
+{
 
-	//getting the data from event in propriate format
-	if(auto timeWindow = dynamic_cast<const JPetTimeWindow*const>(getEvent())){
+  //getting the data from event in propriate format
+  if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(getEvent())) {
 
-		//mapping method invocation
-		map<int,vector<JPetSigCh>> sigChsPMMap = SignalFinderTools::getSigChsPMMapById(timeWindow);
+    //mapping method invocation
+    map<int, vector<JPetSigCh>> sigChsPMMap = SignalFinderTools::getSigChsPMMapById(timeWindow);
+    std::cout <<"after getSigChsPMMapById" <<std::endl;
+    //building signals method invocation
+    vector<JPetRawSignal> allSignals = SignalFinderTools::buildAllSignals(timeWindow->getIndex(), sigChsPMMap, kNumOfThresholds , getStatistics(), fSaveControlHistos,  kSigChEdgeMaxTime, kSigChLeadTrailMaxTime);
 
-		//building signals method invocation
-		vector<JPetRawSignal> allSignals = SignalFinderTools::buildAllSignals(timeWindow->getIndex(), sigChsPMMap, kNumOfThresholds ,getStatistics(),fSaveControlHistos,  kSigChEdgeMaxTime, kSigChLeadTrailMaxTime);
-
-		//saving method invocation
-		saveRawSignals(allSignals);
-	}
+    std::cout <<"after buildAllSignals" <<std::endl;
+    //saving method invocation
+    saveRawSignals(allSignals);
+  }
 }
 
 //SignalFinder finish method
-void SignalFinder::terminate(){
-	INFO("Signal finding ended.");
+void SignalFinder::terminate()
+{
+  INFO("Signal finding ended.");
 }
 
 
 //saving method
-void SignalFinder::saveRawSignals(const vector<JPetRawSignal> & sigChVec){
-	assert(fWriter);
-	for(const auto & sigCh : sigChVec){
-		fWriter->write(sigCh);
-	}
+void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& sigChVec)
+{
+  assert(fWriter);
+  for (const auto & sigCh : sigChVec) {
+    fWriter->write(sigCh);
+  }
 }
 
 //other methods - TODO check if neccessary
-void SignalFinder::setWriter(JPetWriter* writer) {
-	fWriter = writer;
+void SignalFinder::setWriter(JPetWriter* writer)
+{
+  fWriter = writer;
 }
 
-void SignalFinder::setParamManager(JPetParamManager* paramManager) {
-	fParamManager = paramManager;
+void SignalFinder::setParamManager(JPetParamManager* paramManager)
+{
+  fParamManager = paramManager;
 }
 
-const JPetParamBank& SignalFinder::getParamBank() const {
-	return fParamManager->getParamBank();
+const JPetParamBank& SignalFinder::getParamBank() const
+{
+  return fParamManager->getParamBank();
 }
