@@ -64,7 +64,8 @@ class HitFinder:public JPetTask {
         void saveHits(const std::vector<JPetHit>& hits);
 
         JPetWriter* fWriter = 0;
-        const double kTimeWindowWidth = 50000; /// in ps -> 50ns. Maximal time difference between signals
+        const std::string fTimeWindowWidthParamKey = "HitFinder_TimeWindowWidth"; 
+        double kTimeWindowWidth = 50000; /// in ps -> 50ns. Maximal time difference between signals
 
 };
 
