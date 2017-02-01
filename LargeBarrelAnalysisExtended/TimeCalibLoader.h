@@ -30,13 +30,11 @@ class TimeCalibLoader : public JPetTask
 public:
   TimeCalibLoader(const char* name, const char* description);
   virtual ~TimeCalibLoader();
-  virtual void init(const JPetTaskInterface::Options& opts)override;
-  virtual void exec()override;
-  virtual void terminate()override;
-  virtual void setWriter(JPetWriter* writer)override;
-  virtual void setParamManager(JPetParamManager* paramManager)override;
-
-
+  virtual void init(const JPetTaskInterface::Options& opts) override;
+  virtual void exec() override;
+  virtual void terminate() override;
+  virtual void setWriter(JPetWriter* writer) override;
+  virtual void setParamManager(JPetParamManager* paramManager) override;
 protected:
   void saveTimeWindow(const JPetTimeWindow& window);
 
