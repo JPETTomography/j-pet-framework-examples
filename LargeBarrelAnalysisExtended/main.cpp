@@ -17,11 +17,10 @@
 #include <JPetManager/JPetManager.h>
 #include <JPetTaskLoader/JPetTaskLoader.h>
 #include "TaskA.h"
-#include "SignalFinder.h"
-#include "PhysicalDescriptor.h"
-#include "HitFinder.h"
 #include "TimeCalibLoader.h"
-#include "TaskC.h"
+#include "SignalFinder.h"
+#include "HitFinder.h"
+#include "TaskC2.h"
 #include "TaskD.h"
 #include "TaskE.h"
 
@@ -57,17 +56,20 @@ int main(int argc, char* argv[])
                              );
   });
 
+  manager.registerTask([]() {
+    return new JPetTaskLoader("raw.sig",
+                              "phys.sig",
+                              new TaskC2("SignalPhysTransform: Create Phys Sigs",
+                                  "Create Phys Signals, ")
+                             );
+  });
+
   //manager.registerTask([]() {
   //return new JPetTaskLoader("phys_sig", "hits",
   //new HitFinder("Module: Pair signals",
   //"Create hits from physical signals from both ends of scintilators"));
   //});
 
-  //manager.registerTask([]() {
-  //return new JPetTaskLoader("raw.sig", "phys.hit",
-  //new TaskC("Module C: Pair signals",
-  //"Create hits from pairs of signals"));
-  //});
 
   // manager.registerTask([](){
   //     return new JPetTaskLoader("phys.hit", "phys.hit.means",
