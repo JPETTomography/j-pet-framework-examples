@@ -36,12 +36,9 @@ void HitFinder::exec()
 {
   //getting the data from event in propriate format
   if (auto currSignal = dynamic_cast<const JPetPhysSignal* const>(getEvent())) {
-
-
     if (DAQTimeWindowIndex == -1) {
       DAQTimeWindowIndex = currSignal->getRecoSignal().getRawSignal().getTimeWindowIndex();
       fillSignalsMap(*currSignal);
-
     }
 
     else {
@@ -85,13 +82,17 @@ void HitFinder::setWriter(JPetWriter* writer)
 
 void HitFinder::fillSignalsMap(JPetPhysSignal signal)
 {
-
   if (signal.getRecoSignal().getRawSignal().getPM().getSide() == JPetPM::SideA) {
-
-    fAllSignalsInTimeWindow.at(signal.getRecoSignal().getRawSignal().getPM().getScin().getID()).first.push_back(signal);
+    if (fAllSignalsInTimeWindow.find(signal.getRecoSignal().getRawSignal().getPM().getScin().getID()) != fAllSignalsInTimeWindow.end()) {
+      fAllSignalsInTimeWindow.at(signal.getRecoSignal().getRawSignal().getPM().getScin().getID()).first.push_back(signal);
+    } else {
+      WARNING("Map element not found! ");
+    }
   } else {
-
-    fAllSignalsInTimeWindow.at(signal.getRecoSignal().getRawSignal().getPM().getScin().getID()).second.push_back(signal);
+    if (fAllSignalsInTimeWindow.find(signal.getRecoSignal().getRawSignal().getPM().getScin().getID()) != fAllSignalsInTimeWindow.end()) {
+      fAllSignalsInTimeWindow.at(signal.getRecoSignal().getRawSignal().getPM().getScin().getID()).second.push_back(signal);
+    } else {
+      WARNING("Map element not found! ");
+    }
   }
-
 };
