@@ -16,7 +16,7 @@
 #include <DBHandler/HeaderFiles/DBHandler.h>
 #include <JPetManager/JPetManager.h>
 #include <JPetTaskLoader/JPetTaskLoader.h>
-#include "TaskA.h"
+#include "TimeWindowCreator.h"
 #include "TimeCalibLoader.h"
 #include "SignalFinder.h"
 #include "HitFinder.h"
@@ -37,8 +37,8 @@ int main(int argc, char* argv[])
   manager.registerTask([]() {
     return new JPetTaskLoader("hld",
                               "tslot.raw",
-                              new TaskA("TaskA: Unp to Timewindow",
-                                        "Process unpacked HLD file into a tree of JPetTimeWindow objects")
+                              new TimeWindowCreator("TimeWindowCreator: Unp to Timewindow",
+                                  "Process unpacked HLD file into a tree of JPetTimeWindow objects")
                              );
   });
 
