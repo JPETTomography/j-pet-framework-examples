@@ -28,7 +28,7 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-  DB::SERVICES::DBHandler::createDBConnection("../DBConfig/configDB.cfg");
+  //DB::SERVICES::DBHandler::createDBConnection("../DBConfig/configDB.cfg");
   JPetManager& manager = JPetManager::getManager();
   manager.parseCmdLine(argc, argv);
 
@@ -60,15 +60,15 @@ int main(int argc, char* argv[])
     return new JPetTaskLoader("raw.sig",
                               "phys.sig",
                               new TaskC2("SignalPhysTransform: Create Phys Sigs",
-                                  "Create Phys Signals, ")
+                                         "Create Phys Signals, ")
                              );
   });
 
-  //manager.registerTask([]() {
-  //return new JPetTaskLoader("phys_sig", "hits",
-  //new HitFinder("Module: Pair signals",
-  //"Create hits from physical signals from both ends of scintilators"));
-  //});
+  manager.registerTask([]() {
+    return new JPetTaskLoader("phys.sig", "hits",
+                              new HitFinder("Module: Pair signals",
+                                            "Create hits from physical signals from both ends of scintilators"));
+  });
 
 
   // manager.registerTask([](){
