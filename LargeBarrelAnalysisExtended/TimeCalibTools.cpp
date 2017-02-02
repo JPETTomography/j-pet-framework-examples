@@ -22,7 +22,7 @@
 double TimeCalibTools::getTimeCalibCorrection(const TOMBChToCorrection& timeCalibration, const unsigned int channel)
 {
   if (timeCalibration.find(channel) == timeCalibration.end()) {
-    WARNING("No time calibration available for this channel");
+    DEBUG("No time calibration available for this channel");
     return 0.0;
   } else {
     return timeCalibration.at(channel);
