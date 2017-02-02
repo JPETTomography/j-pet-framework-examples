@@ -16,12 +16,13 @@
 #include "SignalFinderTools.h"
 using namespace std;
 
-//method of maping time window sigChs to map of PMs
-/// pm_id -> vect<JPetSigCh>
 map<int, vector<JPetSigCh>> SignalFinderTools::getSigChsPMMapById(const JPetTimeWindow* timeWindow)
 {
-  assert(timeWindow);
   map<int, vector<JPetSigCh>> sigChsPMMap;
+  if (!timeWindow) {
+    WARNING("timeWindow pointer is not set");
+    return sigChsPMMap;
+  }
 
   //map Signal Channels in this Time window according to PM they belong to
   const unsigned int nSigChs = timeWindow->getNumberOfSigCh();
@@ -113,13 +114,13 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(Int_t timeWindowIndex,
   assert(thresholdSigCh.size() > 0);
   while (thresholdSigCh.at(0).size() > 0) {
 
-    JPetRawSignal* rawSig = new JPetRawSignal();
-    rawSig->setTimeWindowIndex(timeWindowIndex);
-    rawSig->setPM(thresholdSigCh.at(0).at(0).getPM());
-    rawSig->setBarrelSlot(thresholdSigCh.at(0).at(0).getPM().getBarrelSlot());
+    JPetRawSignal rawSig;
+    rawSig.setTimeWindowIndex(timeWindowIndex);
+    rawSig.setPM(thresholdSigCh.at(0).at(0).getPM());
+    rawSig.setBarrelSlot(thresholdSigCh.at(0).at(0).getPM().getBarrelSlot());
 
     //first leading added by default
-    rawSig->addPoint(thresholdSigCh.at(0).at(0));
+    rawSig.addPoint(thresholdSigCh.at(0).at(0));
 
     //looking for points from other thresholds that belong to the same leading edge
     //and search for equivalent trailing edge points
@@ -132,7 +133,7 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(Int_t timeWindowIndex,
       double tot0 = thresholdSigCh.at(4).at(closestTrailingSigCh0).getValue()
                     - thresholdSigCh.at(0).at(0).getValue();
       if (saveControlHistos) stats.getHisto1D("TOT_thr_1").Fill(tot0 / 1000.0);
-      rawSig->addPoint(thresholdSigCh.at(4).at(closestTrailingSigCh0));
+      rawSig.addPoint(thresholdSigCh.at(4).at(closestTrailingSigCh0));
       thresholdSigCh.at(4).erase(thresholdSigCh.at(4).begin() + closestTrailingSigCh0);
     }
 
@@ -145,11 +146,11 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(Int_t timeWindowIndex,
         double tot1 = thresholdSigCh.at(5).at(closestTrailingSigCh1).getValue()
                       - thresholdSigCh.at(1).at(nextThrSigChIndex1).getValue();
         if (saveControlHistos) stats.getHisto1D("TOT_thr_2").Fill(tot1 / 1000.0);
-        rawSig->addPoint(thresholdSigCh.at(5).at(closestTrailingSigCh1));
+        rawSig.addPoint(thresholdSigCh.at(5).at(closestTrailingSigCh1));
         thresholdSigCh.at(5).erase(thresholdSigCh.at(5).begin() + closestTrailingSigCh1);
       }
 
-      rawSig->addPoint(thresholdSigCh.at(1).at(nextThrSigChIndex1));
+      rawSig.addPoint(thresholdSigCh.at(1).at(nextThrSigChIndex1));
       thresholdSigCh.at(1).erase(thresholdSigCh.at(1).begin() + nextThrSigChIndex1);
     }
 
@@ -162,11 +163,11 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(Int_t timeWindowIndex,
         double tot2 = thresholdSigCh.at(6).at(closestTrailingSigCh2).getValue()
                       - thresholdSigCh.at(2).at(nextThrSigChIndex2).getValue();
         if (saveControlHistos) stats.getHisto1D("TOT_thr_3").Fill(tot2 / 1000.0);
-        rawSig->addPoint(thresholdSigCh.at(6).at(closestTrailingSigCh2));
+        rawSig.addPoint(thresholdSigCh.at(6).at(closestTrailingSigCh2));
         thresholdSigCh.at(6).erase(thresholdSigCh.at(6).begin() + closestTrailingSigCh2);
       }
 
-      rawSig->addPoint(thresholdSigCh.at(2).at(nextThrSigChIndex2));
+      rawSig.addPoint(thresholdSigCh.at(2).at(nextThrSigChIndex2));
       thresholdSigCh.at(2).erase(thresholdSigCh.at(2).begin() + nextThrSigChIndex2);
     }
 
@@ -179,16 +180,16 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(Int_t timeWindowIndex,
         double tot3 = thresholdSigCh.at(7).at(closestTrailingSigCh3).getValue()
                       - thresholdSigCh.at(3).at(nextThrSigChIndex3).getValue();
         if (saveControlHistos) stats.getHisto1D("TOT_thr_4").Fill(tot3 / 1000.0);
-        rawSig->addPoint(thresholdSigCh.at(7).at(closestTrailingSigCh3));
+        rawSig.addPoint(thresholdSigCh.at(7).at(closestTrailingSigCh3));
         thresholdSigCh.at(7).erase(thresholdSigCh.at(7).begin() + closestTrailingSigCh3);
       }
 
-      rawSig->addPoint(thresholdSigCh.at(3).at(nextThrSigChIndex3));
+      rawSig.addPoint(thresholdSigCh.at(3).at(nextThrSigChIndex3));
       thresholdSigCh.at(3).erase(thresholdSigCh.at(3).begin() + nextThrSigChIndex3);
     }
 
     //adding created Raw Signal to vector
-    rawSigVec.push_back(*rawSig);
+    rawSigVec.push_back(rawSig);
     thresholdSigCh.at(0).erase(thresholdSigCh.at(0).begin() + 0);
   }
 
