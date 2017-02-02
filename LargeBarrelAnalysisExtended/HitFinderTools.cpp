@@ -17,58 +17,51 @@
 
 using namespace std;
 
-vector<JPetHit> HitFinderTools::createHits(const SignalsContainer& allSignalsInTimeWindow, const double timeDifferenceWindow){
+vector<JPetHit> HitFinderTools::createHits(const SignalsContainer& allSignalsInTimeWindow, const double timeDifferenceWindow)
+{
 
 
-    // This method takes signal from side A on a scintilator and compares it with signals on side B - if they are within time window then it creates hit
+  // This method takes signal from side A on a scintilator and compares it with signals on side B - if they are within time window then it creates hit
 
-    vector<JPetHit> hits;
+  vector<JPetHit> hits;
 
-    for (auto scintillator : allSignalsInTimeWindow) {
+  for (auto scintillator : allSignalsInTimeWindow) {
 
-        auto sideA = scintillator.second.first;
-        auto sideB = scintillator.second.second;
+    auto sideA = scintillator.second.first;
+    auto sideB = scintillator.second.second;
 
-        if(sideA.size() > 0 and sideB.size() > 0){
+    if (sideA.size() > 0 and sideB.size() > 0) {
 
-        std::sort(sideA.begin(), sideA.end(), [] (const JPetPhysSignal & h1, const JPetPhysSignal & h2) {return h1.getTime() < h2.getTime();});
-        std::sort(sideB.begin(), sideB.end(), [] (const JPetPhysSignal & h1, const JPetPhysSignal & h2) {return h1.getTime() < h2.getTime();});
+      std::sort(sideA.begin(), sideA.end(), [] (const JPetPhysSignal & h1, const JPetPhysSignal & h2) {
+        return h1.getTime() < h2.getTime();
+      });
+      std::sort(sideB.begin(), sideB.end(), [] (const JPetPhysSignal & h1, const JPetPhysSignal & h2) {
+        return h1.getTime() < h2.getTime();
+      });
 
-            for(auto signalA : sideA){
-                for(auto signalB : sideB){
+      for (auto signalA : sideA) {
+        for (auto signalB : sideB) {
 
-                    if( (signalB.getTime() - signalA.getTime()) > timeDifferenceWindow){break;}
-                    if(abs(signalA.getTime() - signalB.getTime()) < timeDifferenceWindow /*ps*/){
+          if ( (signalB.getTime() - signalA.getTime()) > timeDifferenceWindow) {
+            break;
+          }
+          if (abs(signalA.getTime() - signalB.getTime()) < timeDifferenceWindow /*ps*/) {
 
-                        JPetHit hit;
+            JPetHit hit;
 
-                        hit.setSignalA(signalA);
-                        hit.setSignalB(signalB);
-                        hit.setTime( (signalA.getTime() + signalB.getTime())/2.0 );
+            hit.setSignalA(signalA);
+            hit.setSignalB(signalB);
+            hit.setTime( (signalA.getTime() + signalB.getTime()) / 2.0 );
 
-                        hit.setScintillator(signalA.getPM().getScin());
-                        hit.setBarrelSlot(signalA.getPM().getScin().getBarrelSlot());
+            hit.setScintillator(signalA.getPM().getScin());
+            hit.setBarrelSlot(signalA.getPM().getScin().getBarrelSlot());
 
-                        hits.push_back(hit);
-                    }
-                }
-            }
-
+            hits.push_back(hit);
+          }
         }
+      }
+
     }
-    return hits;
-}
-
-void HitFinderTools::fillContainer(SignalsContainer& allSignalsInTimeWindow, JPetPhysSignal signal){
-
-    if(signal.getRecoSignal().getRawSignal().getPM().getSide() == JPetPM::SideA){
-
-        allSignalsInTimeWindow.at(signal.getRecoSignal().getRawSignal().getPM().getScin().getID()).first.push_back(signal);
-    }
-    else{
-
-        allSignalsInTimeWindow.at(signal.getRecoSignal().getRawSignal().getPM().getScin().getID()).second.push_back(signal);
-    }
-
-
+  }
+  return hits;
 }
