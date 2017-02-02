@@ -42,13 +42,13 @@ int main(int argc, char* argv[])
                              );
   });
 
+  //manager.registerTask([]() {
+  //return new JPetTaskLoader("tslot.raw", "tslot_calib.raw",
+  //new TimeCalibLoader("Apply time corrections from prepared calibrations",
+  //"Apply time corrections from prepared calibrations"));
+  //});
   manager.registerTask([]() {
-    return new JPetTaskLoader("tslot.raw", "tslot_calib.raw",
-                              new TimeCalibLoader("Apply time corrections from prepared calibrations",
-                                  "Apply time corrections from prepared calibrations"));
-  });
-  manager.registerTask([]() {
-    return new JPetTaskLoader("tslot_calib.raw",
+    return new JPetTaskLoader("tslot.raw",
                               "raw.sig",
                               new SignalFinder("SignalFinder: Create Raw Sigs",
                                   "Create Raw Signals, optional  draw TOTs per THR",
