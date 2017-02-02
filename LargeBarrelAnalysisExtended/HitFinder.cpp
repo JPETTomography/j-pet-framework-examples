@@ -82,17 +82,22 @@ void HitFinder::setWriter(JPetWriter* writer)
 
 void HitFinder::fillSignalsMap(JPetPhysSignal signal)
 {
+  auto scinId = signal.getRecoSignal().getRawSignal().getPM().getScin().getID();
   if (signal.getRecoSignal().getRawSignal().getPM().getSide() == JPetPM::SideA) {
-    if (fAllSignalsInTimeWindow.find(signal.getRecoSignal().getRawSignal().getPM().getScin().getID()) != fAllSignalsInTimeWindow.end()) {
-      fAllSignalsInTimeWindow.at(signal.getRecoSignal().getRawSignal().getPM().getScin().getID()).first.push_back(signal);
+    if (fAllSignalsInTimeWindow.find(scinId) != fAllSignalsInTimeWindow.end()) {
+      fAllSignalsInTimeWindow.at(scinId).first.push_back(signal);
     } else {
-      WARNING("Map element not found! ");
+      std::vector<JPetPhysSignal> sideA = {signal};
+      std::vector<JPetPhysSignal> sideB;
+      fAllSignalsInTimeWindow.insert(std::make_pair(scinId, std::make_pair(sideA, sideB)));
     }
   } else {
-    if (fAllSignalsInTimeWindow.find(signal.getRecoSignal().getRawSignal().getPM().getScin().getID()) != fAllSignalsInTimeWindow.end()) {
-      fAllSignalsInTimeWindow.at(signal.getRecoSignal().getRawSignal().getPM().getScin().getID()).second.push_back(signal);
+    if (fAllSignalsInTimeWindow.find(scinId) != fAllSignalsInTimeWindow.end()) {
+      fAllSignalsInTimeWindow.at(scinId).second.push_back(signal);
     } else {
-      WARNING("Map element not found! ");
+      std::vector<JPetPhysSignal> sideA;
+      std::vector<JPetPhysSignal> sideB = {signal};
+      fAllSignalsInTimeWindow.insert(std::make_pair(scinId, std::make_pair(sideA, sideB)));
     }
   }
 };
