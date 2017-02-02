@@ -39,7 +39,7 @@ void SignalFinder::init(const JPetTaskInterface::Options& opts)
 
   if (opts.count(fEdgeMaxTimeParamKey)) {
     kSigChEdgeMaxTime = std::atof(opts.at(fEdgeMaxTimeParamKey).c_str());
-  } 
+  }
   if (opts.count(fLeadTrailMaxTimeParamKey)) {
     kSigChLeadTrailMaxTime = std::atof(opts.at(fLeadTrailMaxTimeParamKey).c_str());
   }
@@ -64,11 +64,8 @@ void SignalFinder::exec()
 
     //mapping method invocation
     map<int, vector<JPetSigCh>> sigChsPMMap = SignalFinderTools::getSigChsPMMapById(timeWindow);
-    std::cout <<"after getSigChsPMMapById" <<std::endl;
     //building signals method invocation
     vector<JPetRawSignal> allSignals = SignalFinderTools::buildAllSignals(timeWindow->getIndex(), sigChsPMMap, kNumOfThresholds , getStatistics(), fSaveControlHistos,  kSigChEdgeMaxTime, kSigChLeadTrailMaxTime);
-
-    std::cout <<"after buildAllSignals" <<std::endl;
     //saving method invocation
     saveRawSignals(allSignals);
   }
