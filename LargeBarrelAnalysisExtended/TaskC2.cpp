@@ -125,6 +125,12 @@ JPetPhysSignal TaskC2::createPhysSignal(JPetRecoSignal& recoSignal)
   physSignal.setTime(time);
   physSignal.setQualityOfTime(1.0);
 
+  auto leading_points = recoSignal.getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading);
+  if (leading_points.find(1) == leading_points.end()) {
+    WARNING("No data at first threshold - the time will not be set");
+  } else {
+    physSignal.setTime(leading_points.at(1));
+  }
   // store the original JPetRecoSignal in the PhysSignal as a processing history
   physSignal.setRecoSignal(recoSignal);
   return physSignal;
