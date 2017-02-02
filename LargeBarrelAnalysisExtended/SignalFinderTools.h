@@ -25,7 +25,10 @@
 class SignalFinderTools
 {
 public:
+  /// Method returns a map of vectors of JPetSigCh ordered by photomultiplier id.
+  /// The map is based on the JPetSigCh from a given timeWindow.
   static std::map<int, std::vector<JPetSigCh>> getSigChsPMMapById(const JPetTimeWindow* timeWindow);
+  /// Method reconstructs all signals based on the signal channels from the SigChPMMap
   static std::vector<JPetRawSignal> buildAllSignals(Int_t timeWindowIndex,
       std::map<int, std::vector<JPetSigCh>> sigChsPMMap,
       int numOfThresholds,
@@ -33,6 +36,7 @@ public:
       bool saveControlHistos,
       double sigChEdgeMaxTime,
       double sigChLeadTrailMaxTime);
+  /// Method reconstructs signals based on the signal channels from the sigChFromSamePM container
   static std::vector<JPetRawSignal> buildRawSignals(Int_t timeWindowIndex,
       const std::vector<JPetSigCh>& sigChFromSamePM,
       int numOfThresholds,

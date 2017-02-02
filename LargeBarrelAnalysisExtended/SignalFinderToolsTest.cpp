@@ -8,6 +8,12 @@
 
 BOOST_AUTO_TEST_SUITE(FirstSuite)
 
+BOOST_AUTO_TEST_CASE( getSigChsPMMapById_nullPointer )
+{
+  auto results =  SignalFinderTools::getSigChsPMMapById(nullptr);
+  BOOST_REQUIRE(results.empty());
+}
+
 BOOST_AUTO_TEST_CASE( getSigChsPMMapById )
 {
   JPetTimeWindow window;
