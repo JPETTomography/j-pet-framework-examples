@@ -44,27 +44,29 @@ class HitFinder: public JPetTask
 {
 
 public:
-  HitFinder(const char* name, const char* description);
-  virtual ~HitFinder();
-  virtual void init(const JPetTaskInterface::Options& opts)override;
-  virtual void exec()override;
-  virtual void terminate()override;
-  virtual void setWriter(JPetWriter* writer)override;
+	HitFinder(const char* name, const char* description);
+	virtual ~HitFinder();
+	virtual void init(const JPetTaskInterface::Options& opts)override;
+	virtual void exec()override;
+	virtual void terminate()override;
+	virtual void setWriter(JPetWriter* writer)override;
 
 protected:
-  int DAQTimeWindowIndex; /// Index which defines a given DAQ time window (defined at the hardware level).
-  bool firstSignal = true;
 
-  HitFinderTools::SignalsContainer fAllSignalsInTimeWindow;
+  	//Index that defines a given DAQ time window (defined at the hardware level)
+	int DAQTimeWindowIndex;
+	bool firstSignal = true;
 
-  HitFinderTools HitTools;
+	HitFinderTools::SignalsContainer fAllSignalsInTimeWindow;
 
-  void fillSignalsMap(JPetPhysSignal signal);
-  void saveHits(const std::vector<JPetHit>& hits);
+	HitFinderTools HitTools;
 
-  JPetWriter* fWriter;
-  const std::string fTimeWindowWidthParamKey = "HitFinder_TimeWindowWidth";
-  double kTimeWindowWidth = 50000; /// in ps -> 50ns. Maximal time difference between signals
+	void fillSignalsMap(JPetPhysSignal signal);
+	void saveHits(const std::vector<JPetHit>& hits);
+
+	JPetWriter* fWriter;
+	const std::string fTimeWindowWidthParamKey = "HitFinder_TimeWindowWidth";
+	double kTimeWindowWidth = 50000; /// in ps -> 50ns. Maximal time difference between signals
 
 };
 

@@ -32,10 +32,12 @@ public:
    * of those two signals needs to be less then specified time difference (kTimeWindowWidth)
    *
    */
-  typedef std::map <int, std::pair <std::vector<JPetPhysSignal>, std::vector<JPetPhysSignal>> > SignalsContainer;
-
-
-  std::vector<JPetHit> createHits(const SignalsContainer& allSignalsInTimeWindow, const double timeDifferenceWindow);
+	typedef std::map <int,
+  			std::pair <std::vector<JPetPhysSignal>,
+  					std::vector<JPetPhysSignal>>> SignalsContainer;
+	std::vector<JPetHit> createHits(
+  				const SignalsContainer& allSignalsInTimeWindow,
+				const double timeDifferenceWindow);
 
 };
 
