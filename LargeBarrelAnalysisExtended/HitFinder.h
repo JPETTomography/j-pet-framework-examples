@@ -52,7 +52,8 @@ public:
   virtual void setWriter(JPetWriter* writer)override;
 
 protected:
-  int DAQTimeWindowIndex = -1; /// Index which defines a given DAQ time window (defined at the hardware level).
+  int DAQTimeWindowIndex; /// Index which defines a given DAQ time window (defined at the hardware level).
+  bool firstSignal = true;
 
   HitFinderTools::SignalsContainer fAllSignalsInTimeWindow;
 
@@ -61,7 +62,7 @@ protected:
   void fillSignalsMap(JPetPhysSignal signal);
   void saveHits(const std::vector<JPetHit>& hits);
 
-  JPetWriter* fWriter = 0;
+  JPetWriter* fWriter;
   const std::string fTimeWindowWidthParamKey = "HitFinder_TimeWindowWidth";
   double kTimeWindowWidth = 50000; /// in ps -> 50ns. Maximal time difference between signals
 

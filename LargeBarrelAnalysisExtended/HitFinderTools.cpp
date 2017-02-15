@@ -20,9 +20,6 @@ using namespace std;
 vector<JPetHit> HitFinderTools::createHits(const SignalsContainer& allSignalsInTimeWindow, const double timeDifferenceWindow)
 {
 
-
-  // This method takes signal from side A on a scintilator and compares it with signals on side B - if they are within time window then it creates hit
-
   vector<JPetHit> hits;
 
   for (auto scintillator : allSignalsInTimeWindow) {
@@ -45,16 +42,18 @@ vector<JPetHit> HitFinderTools::createHits(const SignalsContainer& allSignalsInT
           if ( (signalB.getTime() - signalA.getTime()) > timeDifferenceWindow) {
             break;
           }
+
           if (abs(signalA.getTime() - signalB.getTime()) < timeDifferenceWindow /*ps*/) {
 
             JPetHit hit;
 
             hit.setSignalA(signalA);
             hit.setSignalB(signalB);
-            hit.setTime( (signalA.getTime() + signalB.getTime()) / 2.0 );
+            hit.setTime((signalA.getTime() + signalB.getTime()) / 2.0);
+	    hit.setTimeDiff(fabs(signalA.getTime() - signalB.getTime()));
 
             hit.setScintillator(signalA.getPM().getScin());
-            hit.setBarrelSlot(signalA.getPM().getScin().getBarrelSlot());
+            hit.setBarrelSlot(signalA.getPM().getBarrelSlot());
 
             hits.push_back(hit);
           }
