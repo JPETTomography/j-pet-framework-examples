@@ -35,23 +35,23 @@ void EventFinder::initTimeWindows(){
 void EventFinder::init(const JPetTaskInterface::Options&){
 
 	initTimeWindows();
-	INFO("EventFinder Module started.");
+	INFO("Event finding started.");
+
 	if (fSaveControlHistos) {
 		for(auto timeWindow : fEventTimeWindows){
-			//cout<<Form("hits_per_event_%f", timeWindow)<<endl;
 			getStatistics().createHistogram(
-				new TH1F(Form("hits_per_event_%f", timeWindow), 
-					Form("Number of Hits in Event %f ps", timeWindow), 
-					20, 0.5, 20.5));			
+				new TH1F(Form("hits_per_event_%d", timeWindow),
+					Form("Number of Hits in Event %d ps", timeWindow),
+					20, 0.5, 20.5));
 		}
 	}
-	//fBarrelMap.buildMappings(getParamBank());
+
 	INFO("Mapping Hits by Time Window.");
 }
+
 void EventFinder::exec(){
 
-	//getting the data from event in propriate format
-	if(auto hit =dynamic_cast<const JPetHit*const>(getEvent())){
+	if(auto hit = dynamic_cast<const JPetHit*const>(getEvent())){
 		if(hit->isSignalASet() && hit->isSignalBSet()){
 			if(hit->getSignalA().getTimeWindowIndex() == hit->getSignalB().getTimeWindowIndex()){
 				int timeWindowIndex = hit->getSignalA().getTimeWindowIndex();
@@ -71,7 +71,7 @@ void EventFinder::exec(){
 
 //sorting method
 bool sortByTimeValue(JPetHit hit1, JPetHit hit2) {
-  return (hit1.getTime() < hit2.getTime());
+	return (hit1.getTime() < hit2.getTime());
 }
 
 
@@ -102,16 +102,16 @@ void EventFinder::terminate(){
 				}
 				hitVec.erase(hitVec.begin() + 0);
 				if (fSaveControlHistos) getStatistics()
-						.getHisto1D(Form("hits_per_event_%f", timeWindow))
+						.getHisto1D(Form("hits_per_event_%d", timeWindow))
 						.Fill(event.getHits().size());
-				//eventVec.push_back(event);
+				eventVec.push_back(event);
 			}
 
 		}
 		
 	}
 
-	//saveEvents(eventVec);
+	saveEvents(eventVec);
 	INFO("Event finding ended. Writing to tree");
 
 }
