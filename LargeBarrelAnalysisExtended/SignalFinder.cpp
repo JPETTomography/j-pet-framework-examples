@@ -44,7 +44,7 @@ void SignalFinder::init(const JPetTaskInterface::Options& opts)
 	}
 
 	if (fSaveControlHistos) {
-		sgetStatistics().createHistogram(
+		getStatistics().createHistogram(
 			new TH1F("remainig_leading_sig_ch_per_thr",
 				"Remainig Leading Signal Channels",
 				4, 0.5, 4.5));

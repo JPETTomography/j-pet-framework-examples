@@ -21,7 +21,6 @@
 #include <JPetTask/JPetTask.h>
 #include <JPetHit/JPetHit.h>
 #include <JPetEvent/JPetEvent.h>
-#include "LargeBarrelMapping.h"
 
 class JPetWriter;
 
@@ -46,6 +45,5 @@ protected:
 	bool fSaveControlHistos = true;	
 	std::vector<Float_t> fEventTimeWindows;
 	void initTimeWindows();
-	//LargeBarrelMapping fBarrelMap;
 };
 #endif /*  !EVENTFINDER_H */
