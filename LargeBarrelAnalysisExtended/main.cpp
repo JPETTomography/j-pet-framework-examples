@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
 	//DB::SERVICES::DBHandler::createDBConnection("../DBConfig/configDB.cfg");
 	JPetManager& manager = JPetManager::getManager();
 	manager.parseCmdLine(argc, argv);
-
+	/*
 	//First task - unpacking
 	manager.registerTask([]() {
 		return new JPetTaskLoader("hld", "tslot.raw",
@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
 				)
 		);
 	});
-
+	*/
 	//Second task placeholder - Signal Channel calibration
 	/*
 	manager.registerTask([]() {
@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
 		);
 	});
 	*/
-
+	/*
 	//Third task - Raw Signal Creation
 	manager.registerTask([]() {
 		return new JPetTaskLoader("tslot.raw", "raw.sig",
@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
 				)
 		);
 	});
-
+	*/
 	//Sixth task - unknown Event construction
 	manager.registerTask([]() {
 		return new JPetTaskLoader("hits", "unk.evt",

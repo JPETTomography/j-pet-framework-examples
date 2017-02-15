@@ -27,8 +27,6 @@ void EventFinder::initTimeWindows(){
 	fEventTimeWindows.push_back(5000.0);
 	fEventTimeWindows.push_back(10000.0);
 	fEventTimeWindows.push_back(20000.0);
-	fEventTimeWindows.push_back(30000.0);
-	fEventTimeWindows.push_back(40000.0);
 
 }
 
@@ -40,8 +38,8 @@ void EventFinder::init(const JPetTaskInterface::Options&){
 	if (fSaveControlHistos) {
 		for(auto timeWindow : fEventTimeWindows){
 			getStatistics().createHistogram(
-				new TH1F(Form("hits_per_event_%d", timeWindow),
-					Form("Number of Hits in Event %d ps", timeWindow),
+				new TH1F(Form("hits_per_event_%f", timeWindow),
+					Form("Number of Hits in Event %f ps", timeWindow),
 					20, 0.5, 20.5));
 		}
 	}
@@ -102,7 +100,7 @@ void EventFinder::terminate(){
 				}
 				hitVec.erase(hitVec.begin() + 0);
 				if (fSaveControlHistos) getStatistics()
-						.getHisto1D(Form("hits_per_event_%d", timeWindow))
+						.getHisto1D(Form("hits_per_event_%f", timeWindow))
 						.Fill(event.getHits().size());
 				eventVec.push_back(event);
 			}
