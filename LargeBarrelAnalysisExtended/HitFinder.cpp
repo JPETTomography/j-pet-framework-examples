@@ -27,8 +27,10 @@ HitFinder::~HitFinder() {}
 
 void HitFinder::init(const JPetTaskInterface::Options& opts)
 {
+
+  getStatistics().createHistogram(new TH1F("hits_per_time_window", "Number of Hits in Time Window", 101, -0.5, 100.5));
   if (opts.count(fTimeWindowWidthParamKey )) {
-    kTimeWindowWidth = std::atof(opts.at(fTimeWindowWidthParamKey).c_str());
+    kTimeWindowWidth = atof(opts.at(fTimeWindowWidthParamKey).c_str());
   }
 }
 
@@ -36,17 +38,21 @@ void HitFinder::exec()
 {
   //getting the data from event in propriate format
   if (auto currSignal = dynamic_cast<const JPetPhysSignal* const>(getEvent())) {
-    if (DAQTimeWindowIndex == -1) {
+    if (firstSignal) {
       DAQTimeWindowIndex = currSignal->getRecoSignal().getRawSignal().getTimeWindowIndex();
       fillSignalsMap(*currSignal);
+      firstSignal = false;
     }
 
     else {
       if (DAQTimeWindowIndex == currSignal->getRecoSignal().getRawSignal().getTimeWindowIndex()) {
         fillSignalsMap(*currSignal);
       } else {
-        saveHits(HitTools.createHits( fAllSignalsInTimeWindow, kTimeWindowWidth));
+	vector<JPetHit> hits = HitTools.createHits(fAllSignalsInTimeWindow, kTimeWindowWidth);
+        saveHits(hits);
+	getStatistics().getHisto1D("hits_per_time_window").Fill(hits.size());
         fAllSignalsInTimeWindow.clear();
+        DAQTimeWindowIndex = currSignal->getRecoSignal().getRawSignal().getTimeWindowIndex();
         fillSignalsMap(*currSignal);
       }
     }
@@ -57,7 +63,7 @@ void HitFinder::exec()
 
 void HitFinder::terminate()
 {
-  saveHits(HitTools.createHits(fAllSignalsInTimeWindow, kTimeWindowWidth)); //if there is something left
+  //saveHits(HitTools.createHits(fAllSignalsInTimeWindow, kTimeWindowWidth)); //if there is something left
 }
 
 
