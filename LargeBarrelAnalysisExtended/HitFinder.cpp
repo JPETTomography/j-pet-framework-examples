@@ -27,77 +27,89 @@ HitFinder::~HitFinder() {}
 
 void HitFinder::init(const JPetTaskInterface::Options& opts)
 {
-  if (opts.count(fTimeWindowWidthParamKey )) {
-    kTimeWindowWidth = std::atof(opts.at(fTimeWindowWidthParamKey).c_str());
-  }
+	INFO("Hit finding started.");
+	getStatistics().createHistogram(
+				new TH1F("hits_per_time_window",
+					"Number of Hits in Time Window",
+					101, -0.5, 100.5
+				)
+	);
+
+	if (opts.count(fTimeWindowWidthParamKey )) {
+		kTimeWindowWidth = atof(opts.at(fTimeWindowWidthParamKey).c_str());
+	}
 }
 
 void HitFinder::exec()
 {
-  //getting the data from event in propriate format
-  if (auto currSignal = dynamic_cast<const JPetPhysSignal* const>(getEvent())) {
-    if (DAQTimeWindowIndex == -1) {
-      DAQTimeWindowIndex = currSignal->getRecoSignal().getRawSignal().getTimeWindowIndex();
-      fillSignalsMap(*currSignal);
-    }
 
-    else {
-      if (DAQTimeWindowIndex == currSignal->getRecoSignal().getRawSignal().getTimeWindowIndex()) {
-        fillSignalsMap(*currSignal);
-      } else {
-        saveHits(HitTools.createHits( fAllSignalsInTimeWindow, kTimeWindowWidth));
-        fAllSignalsInTimeWindow.clear();
-        fillSignalsMap(*currSignal);
-      }
-    }
-  }
+	//getting the data from event in apropriate format
+	if (auto currSignal = dynamic_cast<const JPetPhysSignal* const>(getEvent())) {
+		if (firstSignal) {
+			DAQTimeWindowIndex = currSignal->getTimeWindowIndex();
+			fillSignalsMap(*currSignal);
+			firstSignal = false;
+		} else {
+			if (DAQTimeWindowIndex == currSignal->getTimeWindowIndex()) {
+				fillSignalsMap(*currSignal);
+			} else {
+				vector<JPetHit> hits = HitTools.createHits(
+								fAllSignalsInTimeWindow,
+								kTimeWindowWidth);
+
+				saveHits(hits);
+				getStatistics().getHisto1D("hits_per_time_window").Fill(hits.size());
+				fAllSignalsInTimeWindow.clear();
+				DAQTimeWindowIndex = currSignal->getTimeWindowIndex();
+				fillSignalsMap(*currSignal);
+			}
+		}
+	}
 }
 
 
 
 void HitFinder::terminate()
 {
-  saveHits(HitTools.createHits(fAllSignalsInTimeWindow, kTimeWindowWidth)); //if there is something left
+	INFO("Hit finding ended.");
 }
 
 
 void HitFinder::saveHits(const vector<JPetHit>& hits)
 {
-  assert(fWriter);
-  auto sortedHits = JPetAnalysisTools::getHitsOrderedByTime(hits);
+	assert(fWriter);
+	auto sortedHits = JPetAnalysisTools::getHitsOrderedByTime(hits);
 
-  for (const auto & hit : sortedHits) {
-    // here one can impose any conditions on hits that should be
-    // saved or skipped
-    // for now, all hits are written to the output file
-    // without checking anything
-    fWriter->write(hit);
-  }
+	for (const auto & hit : sortedHits) {
+		fWriter->write(hit);
+	}
 }
 
 void HitFinder::setWriter(JPetWriter* writer)
 {
-  fWriter = writer;
+	fWriter = writer;
 }
 
 void HitFinder::fillSignalsMap(JPetPhysSignal signal)
 {
-  auto scinId = signal.getRecoSignal().getRawSignal().getPM().getScin().getID();
-  if (signal.getRecoSignal().getRawSignal().getPM().getSide() == JPetPM::SideA) {
-    if (fAllSignalsInTimeWindow.find(scinId) != fAllSignalsInTimeWindow.end()) {
-      fAllSignalsInTimeWindow.at(scinId).first.push_back(signal);
-    } else {
-      std::vector<JPetPhysSignal> sideA = {signal};
-      std::vector<JPetPhysSignal> sideB;
-      fAllSignalsInTimeWindow.insert(std::make_pair(scinId, std::make_pair(sideA, sideB)));
-    }
-  } else {
-    if (fAllSignalsInTimeWindow.find(scinId) != fAllSignalsInTimeWindow.end()) {
-      fAllSignalsInTimeWindow.at(scinId).second.push_back(signal);
-    } else {
-      std::vector<JPetPhysSignal> sideA;
-      std::vector<JPetPhysSignal> sideB = {signal};
-      fAllSignalsInTimeWindow.insert(std::make_pair(scinId, std::make_pair(sideA, sideB)));
-    }
-  }
-};
+	auto scinId = signal.getPM().getScin().getID();
+	if (signal.getPM().getSide() == JPetPM::SideA) {
+		if (fAllSignalsInTimeWindow.find(scinId) != fAllSignalsInTimeWindow.end()) {
+			fAllSignalsInTimeWindow.at(scinId).first.push_back(signal);
+		} else {
+			std::vector<JPetPhysSignal> sideA = {signal};
+			std::vector<JPetPhysSignal> sideB;
+			fAllSignalsInTimeWindow.insert(std::make_pair(scinId,
+						std::make_pair(sideA, sideB)));
+		}
+	} else {
+		if (fAllSignalsInTimeWindow.find(scinId) != fAllSignalsInTimeWindow.end()) {
+			fAllSignalsInTimeWindow.at(scinId).second.push_back(signal);
+		} else {
+			std::vector<JPetPhysSignal> sideA;
+			std::vector<JPetPhysSignal> sideB = {signal};
+			fAllSignalsInTimeWindow.insert(std::make_pair(scinId,
+						std::make_pair(sideA, sideB)));
+		}
+	}
+}
