@@ -16,71 +16,87 @@
 #include <DBHandler/HeaderFiles/DBHandler.h>
 #include <JPetManager/JPetManager.h>
 #include <JPetTaskLoader/JPetTaskLoader.h>
-#include "TaskA.h"
-#include "SignalFinder.h"
-#include "PhysicalDescriptor.h"
-#include "HitFinder.h"
+#include "TimeWindowCreator.h"
 #include "TimeCalibLoader.h"
-#include "TaskC.h"
-#include "TaskD.h"
-#include "TaskE.h"
+#include "SignalFinder.h"
+#include "SignalTransformer.h"
+#include "HitFinder.h"
+#include "EventFinder.h"
 
 using namespace std;
 
 int main(int argc, char* argv[])
 {
-  DB::SERVICES::DBHandler::createDBConnection("../DBConfig/configDB.cfg");
-  JPetManager& manager = JPetManager::getManager();
-  manager.parseCmdLine(argc, argv);
+	//Connection to the remote database disabled for the moment
+	//DB::SERVICES::DBHandler::createDBConnection("../DBConfig/configDB.cfg");
+	JPetManager& manager = JPetManager::getManager();
+	manager.parseCmdLine(argc, argv);
 
-  // Here create all analysis modules to be used:
-
-  manager.registerTask([]() {
-    return new JPetTaskLoader("hld",
-                              "tslot.raw",
-                              new TaskA("TaskA: Unp to Timewindow",
-                                        "Process unpacked HLD file into a tree of JPetTimeWindow objects")
-                             );
-  });
-
-  manager.registerTask([]() {
-    return new JPetTaskLoader("tslot.raw", "tslot_calib.raw",
-                              new TimeCalibLoader("Apply time corrections from prepared calibrations",
-                                  "Apply time corrections from prepared calibrations"));
-  });
-  manager.registerTask([]() {
-    return new JPetTaskLoader("tslot_calib.raw",
-                              "raw.sig",
-                              new SignalFinder("SignalFinder: Create Raw Sigs",
-                                  "Create Raw Signals, optional  draw TOTs per THR",
-                                  true)
-                             );
-  });
-
-  //manager.registerTask([]() {
-  //return new JPetTaskLoader("phys_sig", "hits",
-  //new HitFinder("Module: Pair signals",
-  //"Create hits from physical signals from both ends of scintilators"));
-  //});
-
-  //manager.registerTask([]() {
-  //return new JPetTaskLoader("raw.sig", "phys.hit",
-  //new TaskC("Module C: Pair signals",
-  //"Create hits from pairs of signals"));
-  //});
-
-  // manager.registerTask([](){
-  //     return new JPetTaskLoader("phys.hit", "phys.hit.means",
-  // 				new TaskD("Module D: Make histograms for hits",
-  // 					  "Only make timeDiff histos and produce mean timeDiff value for each threshold and slot to be used by the next module"));
-  //   });
+	//First task - unpacking
+	
+	manager.registerTask([]() {
+		return new JPetTaskLoader("hld", "tslot.raw",
+				new TimeWindowCreator(
+					"TimeWindowCreator",
+					"Process unpacked HLD file into a tree of JPetTimeWindow objects"
+				)
+		);
+	});
+	
+	//Second task placeholder - Signal Channel calibration
+	//manager.registerTask([]() {
+	//	return new JPetTaskLoader("tslot.raw", "tslot.calib",
+	//		new TimeCalibLoader(
+	//			"TimeCalibLoader",
+	//			"Apply time corrections from prepared calibrations"
+	//		)
+	//	);
+	//});
 
 
-  // manager.registerTask([](){
-  //     return new JPetTaskLoader("phys.hit.means", "phys.hit.coincplots",
-  // 				new TaskE("Module E: Filter hits",
-  // 					  "Pass only hits with time diffrerence close to the peak"));
-  //   });
+	//Third task - Raw Signal Creation
+	
+	manager.registerTask([]() {
+		return new JPetTaskLoader("tslot.raw", "raw.sig",
+				new SignalFinder(
+					"SignalFinder",
+					"Create Raw Signals, optional - draw control histograms",
+                                  	true
+                                )
+		);
+	});
+	
+	
+	//Fourth task - Reco & Phys signal creation
+	manager.registerTask([]() {
+		return new JPetTaskLoader("raw.sig", "phys.sig",
+				new SignalTransformer(
+					"SignalTransformer",
+					"Create Reco & Phys Signals"
+				)
+		);
+	});
+	
 
-  manager.run();
+	//Fifth task - Hit construction
+	manager.registerTask([]() {
+		return new JPetTaskLoader("phys.sig", "hits",
+				new HitFinder(
+					"HitFinder",
+					"Create hits from physical signals"
+				)
+		);
+	});
+
+	//Sixth task - unknown Event construction
+	manager.registerTask([]() {
+		return new JPetTaskLoader("hits", "unk.evt",
+				new EventFinder(
+					"EventFinder",
+					"Create Events as group of Hits"
+				)
+		);
+	});
+
+	manager.run();
 }

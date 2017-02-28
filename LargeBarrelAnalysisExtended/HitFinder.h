@@ -16,6 +16,8 @@
 #ifndef HitFinder_H
 #define HitFinder_H
 
+#include <map>
+#include <vector>
 #include <JPetTask/JPetTask.h>
 #include <JPetHit/JPetHit.h>
 #include <JPetRawSignal/JPetRawSignal.h>
@@ -40,31 +42,34 @@ class JPetWriter;
  * of those two signals needs to be less then specified time difference (kTimeWindowWidth)
  *
  */
-class HitFinder:public JPetTask {
+class HitFinder: public JPetTask
+{
 
-    public:
-        HitFinder(const char * name, const char * description);
-        virtual ~HitFinder();
-        virtual void init(const JPetTaskInterface::Options& opts)override;
-        virtual void exec()override;
-        virtual void terminate()override;
-        virtual void setWriter(JPetWriter* writer)override;
+public:
+	HitFinder(const char* name, const char* description);
+	virtual ~HitFinder();
+	virtual void init(const JPetTaskInterface::Options& opts)override;
+	virtual void exec()override;
+	virtual void terminate()override;
+	virtual void setWriter(JPetWriter* writer)override;
+	std::map<int, std::vector<double>> fVelocityMap;
 
-    protected:
+protected:
 
+  	//Index that defines a given DAQ time window (defined at the hardware level)
+	int DAQTimeWindowIndex;
+	bool firstSignal = true;
 
-        int DAQTimeWindowIndex = -1; /// Index which defines a given DAQ time window (defined at the hardware level).
+	HitFinderTools::SignalsContainer fAllSignalsInTimeWindow;
+	HitFinderTools HitTools;
+	std::map<int, std::vector<double>> readVelocityFile();
 
-        HitFinderTools::SignalsContainer fAllSignalsInTimeWindow;
+	void fillSignalsMap(JPetPhysSignal signal);
+	void saveHits(const std::vector<JPetHit>& hits);
 
-
-        HitFinderTools HitTools;
-
-        void fillSignalsMap(JPetPhysSignal signal);
-        void saveHits(const std::vector<JPetHit>& hits);
-
-        JPetWriter* fWriter = 0;
-        const double kTimeWindowWidth = 50000; /// in ps -> 50ns. Maximal time difference between signals
+	JPetWriter* fWriter;
+	const std::string fTimeWindowWidthParamKey = "HitFinder_TimeWindowWidth";
+	double kTimeWindowWidth = 50000; /// in ps -> 50ns. Maximal time difference between signals
 
 };
 

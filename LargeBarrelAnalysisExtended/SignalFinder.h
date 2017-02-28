@@ -17,12 +17,10 @@
 #define SIGNALFINDER_H
 
 #include <vector>
+#include <map>
 #include <JPetTask/JPetTask.h>
 #include <JPetRawSignal/JPetRawSignal.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
-#include <JPetParamBank/JPetParamBank.h>
-#include <JPetParamManager/JPetParamManager.h>
-#include "LargeBarrelMapping.h"
 
 class JPetWriter;
 
@@ -30,26 +28,27 @@ class JPetWriter;
 #define override
 #endif
 
-class SignalFinder: public JPetTask {
-	public:
-		SignalFinder(const char * name, const char * description, bool printStats);
-		virtual ~SignalFinder();
-		virtual void init(const JPetTaskInterface::Options& opts) override;
-		virtual void exec() override;
-		virtual void terminate() override;
-		virtual void setWriter(JPetWriter* writer) override;
-		virtual void setParamManager(JPetParamManager* paramManager) override;
-		const JPetParamBank& getParamBank()const;
-		bool fSaveControlHistos = true;
+class SignalFinder: public JPetTask
+{
+public:
+  SignalFinder(const char* name, const char* description, bool printStats);
+  virtual ~SignalFinder();
+  virtual void init(const JPetTaskInterface::Options& opts) override;
+  virtual void exec() override;
+  virtual void terminate() override;
+  virtual void setWriter(JPetWriter* writer) override;
+  bool fSaveControlHistos = true;
+  std::map<int, std::map<int, std::map<int, std::map<int, std::vector<double>>>>> fOffsetMap;
 
-	protected:
-		JPetWriter* fWriter;
-		JPetParamManager* fParamManager;
-		LargeBarrelMapping fBarrelMap;
-		void saveRawSignals(const std::vector<JPetRawSignal> & sigChVec);
-		const int kNumOfThresholds = 4;
-		const Float_t kSigChEdgeMaxTime = 20000; //[ps]
-		const Float_t kSigChLeadTrailMaxTime = 300000; //[ps]
+protected:
+  JPetWriter* fWriter;
+  std::map<int, std::map<int, std::map<int, std::map<int, std::vector<double>>>>> readTimeOffsetsFile();
+  void saveRawSignals(const std::vector<JPetRawSignal>& sigChVec);
+  const std::string fEdgeMaxTimeParamKey = "SignalFinder_EdgeMaxTime"; 
+  const std::string fLeadTrailMaxTimeParamKey = "SignalFinder_LeadTrailMaxTime";
+  Float_t kSigChEdgeMaxTime = 20000; //[ps]
+  Float_t kSigChLeadTrailMaxTime = 300000; //[ps]
+  const int kNumOfThresholds = 4;
 };
 #endif
 /*  !SIGNALFINDER_H */

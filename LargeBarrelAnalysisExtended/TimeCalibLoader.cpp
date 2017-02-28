@@ -15,6 +15,8 @@
 
 #include "TimeCalibLoader.h"
 #include "TimeCalibTools.h"
+//#include <JPetParamBankTools/JPetParamBankTools.h>
+#include <JPetParamManager/JPetParamManager.h>
 
 TimeCalibLoader::TimeCalibLoader(const char* name, const char* description):
   JPetTask(name, description)
@@ -26,11 +28,13 @@ TimeCalibLoader::~TimeCalibLoader() {}
 
 void TimeCalibLoader::init(const JPetTaskInterface::Options& opts)
 {
-  auto calibFile =  std::string("timeCalib.txt");
+  auto calibFile =  std::string("TimeConstants_Layer1_2.txt");
   if (opts.count(fConfigFileParamKey)) {
     calibFile = opts.at(fConfigFileParamKey);
   }
-  fTimeCalibration = TimeCalibTools::loadTimeCalibration(calibFile);
+  assert(fParamManager);
+  //auto tombMap = JPetParamBankTools::getTOMBMap(fParamManager->getParamBank());
+  //fTimeCalibration = TimeCalibTools::loadTimeCalibration(calibFile, tombMap);
 }
 
 void TimeCalibLoader::exec()
@@ -39,7 +43,10 @@ void TimeCalibLoader::exec()
     JPetTimeWindow correctedWindow;
     auto newSigChs = oldTimeWindow->getSigChVect();
     for (auto & sigCh : newSigChs) {
-      sigCh.setValue(sigCh.getValue() + TimeCalibTools::getTimeCalibCorrection(fTimeCalibration, sigCh.getTOMBChannel().getChannel()));
+      sigCh.setValue(sigCh.getValue()
+      			+ TimeCalibTools::getTimeCalibCorrection(
+      						fTimeCalibration,
+      						sigCh.getTOMBChannel().getChannel()));
       correctedWindow.addCh(sigCh);
     }
     correctedWindow.setIndex(oldTimeWindow->getIndex());
