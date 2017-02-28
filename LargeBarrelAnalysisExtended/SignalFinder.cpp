@@ -33,6 +33,10 @@ SignalFinder::~SignalFinder() {}
 //SignalFinder init method
 void SignalFinder::init(const JPetTaskInterface::Options& opts)
 {
+
+	INFO("Reading offsets.");
+	fOffsetMap = readTimeOffsetsFile();
+
 	INFO("Signal finding started.");
 
 	if (opts.count(fEdgeMaxTimeParamKey)) {
@@ -63,7 +67,7 @@ void SignalFinder::exec()
 	if(auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(getEvent())) {
 
 		//mapping method invocation
-		map<int, vector<JPetSigCh>> sigChsPMMap = SignalFinderTools::getSigChsPMMapById(timeWindow);
+		map<int, vector<JPetSigCh>> sigChsPMMap = SignalFinderTools::getSigChsPMMapById(timeWindow, fOffsetMap);
 
 		//building signals method invocation
 		vector<JPetRawSignal> allSignals = SignalFinderTools::buildAllSignals(
@@ -100,4 +104,41 @@ void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& sigChVec)
 void SignalFinder::setWriter(JPetWriter* writer)
 {
 	fWriter = writer;
+}
+
+map<int, map<int, map<int, map<int, vector<double>>>>> SignalFinder::readTimeOffsetsFile()
+{
+	map<int, map<int, map<int, map<int, vector<double>>>>> mapLayer;
+
+	ifstream input;
+	input.open("TimeConstantsLayer1_2.txt");
+	if(input.is_open()) INFO("File with offsets opened.");
+	else INFO("File with offsets ERROR.");
+
+	int layer = 0, slot = 0, side = 0, thr = 0;
+	double offset_value_leading=0.0,offset_uncertainty_leading=0.0;
+	double offset_value_trailing=0.0,offset_uncertainty_trailing=0.0;
+	double sigma_offset_leading=0.0,sigma_offset_trailing=0.0;
+	double chi2ndf_leading=0.0,chi2ndf_trailing=0.0;
+
+	while(!input.eof()){
+
+		input>>layer>>slot>>side>>thr>>offset_value_leading>>offset_uncertainty_leading>>offset_value_trailing
+			>>offset_uncertainty_trailing>>sigma_offset_leading>>sigma_offset_trailing>>chi2ndf_leading>>chi2ndf_trailing;
+
+		vector<double> values;
+		values.push_back(offset_value_leading);
+		values.push_back(offset_uncertainty_leading);
+		values.push_back(offset_value_trailing);
+		values.push_back(offset_uncertainty_trailing);
+		values.push_back(sigma_offset_leading);
+		values.push_back(sigma_offset_trailing);
+		values.push_back(chi2ndf_leading);
+		values.push_back(chi2ndf_trailing);
+
+		mapLayer[layer][slot][side][thr] = values;
+
+	}
+
+	return mapLayer;
 }

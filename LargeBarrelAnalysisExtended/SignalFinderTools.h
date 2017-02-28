@@ -28,7 +28,10 @@ public:
 
 	//Method returns a map of vectors of JPetSigCh ordered by photomultiplier id.
 	//The map is based on the JPetSigCh from a given timeWindow.
-	static std::map<int, std::vector<JPetSigCh>> getSigChsPMMapById(const JPetTimeWindow* timeWindow);
+	static std::map<int, std::vector<JPetSigCh>> getSigChsPMMapById(
+					const JPetTimeWindow* timeWindow,
+					const std::map<int, std::map<int, std::map<int, std::map<int, std::vector<double>>>>> offsetMap
+	);
 
 	//Method reconstructs all signals based on the signal channels
 	//from the SigChPMMap

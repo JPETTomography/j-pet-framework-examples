@@ -16,8 +16,11 @@
 #include "SignalFinderTools.h"
 using namespace std;
 
-map<int, vector<JPetSigCh>> SignalFinderTools::getSigChsPMMapById(const JPetTimeWindow* timeWindow)
+map<int, vector<JPetSigCh>> SignalFinderTools::getSigChsPMMapById(
+				const JPetTimeWindow* timeWindow, 
+				const std::map<int, std::map<int, std::map<int, std::map<int, std::vector<double>>>>> offsetMap)
 {
+
 	map<int, vector<JPetSigCh>> sigChsPMMap;
 	if(!timeWindow) {
 		WARNING("timeWindow pointer is not set");
@@ -28,6 +31,67 @@ map<int, vector<JPetSigCh>> SignalFinderTools::getSigChsPMMapById(const JPetTime
 	const unsigned int nSigChs = timeWindow->getNumberOfSigCh();
 	for(unsigned int i = 0; i < nSigChs; i++) {
 		JPetSigCh sigCh = timeWindow->operator[](i);
+
+		double offset = 0.0;
+		auto layer = offsetMap.find(sigCh.getPM().getBarrelSlot().getLayer().getID());
+		if(layer != offsetMap.end()){
+		 	auto slotMap = layer->second;
+			auto slot = slotMap.find(sigCh.getPM().getBarrelSlot().getID());
+			if(slot != slotMap.end()){
+				//cout<<"Slot found: "<<sigCh.getPM().getBarrelSlot().getID()<<endl;
+				auto sideMap = slot->second;
+				
+				auto sideA = sideMap.find(1);
+				auto sideB = sideMap.find(2);
+
+				if(sideA != sideMap.end() && sideB != sideMap.end()){
+
+					auto thrMapA = sideA->second;
+					auto thrMapB = sideB->second;
+
+					auto valuesA = thrMapA.find(sigCh.getThresholdNumber());
+					auto valuesB = thrMapB.find(sigCh.getThresholdNumber());
+
+					if(valuesA != thrMapA.end() && valuesB != thrMapB.end()){
+
+						auto valVecA = valuesA->second;
+						auto valVecB = valuesB->second;
+
+						if(sigCh.getType()==JPetSigCh::Leading) {
+							
+							double offsetA = 1000*valVecA.at(0);
+							double offsetB = 1000*valVecB.at(0);
+
+							if(sigCh.getPM().getSide()==JPetPM::SideA) offset = offsetA;
+							else offset = offsetB;
+							//else offset = offsetA - offsetB;
+
+						}else if(sigCh.getType()==JPetSigCh::Trailing) {
+								
+							double offsetA = 1000*valVecA.at(2);
+							double offsetB = 1000*valVecB.at(2);
+
+							if(sigCh.getPM().getSide()==JPetPM::SideA) offset = offsetA;
+							else offset = offsetB;
+							//else offset = offsetA - offsetB;
+
+						}
+					}else{
+						cout<<"Fail read map thr "<<sigCh.getThresholdNumber()<<endl;
+					}
+				}else{
+					cout<<"Fail read map side "<<endl;
+				}
+			}else{
+				cout<<"Fail read map slot "<<sigCh.getPM().getBarrelSlot().getID()<<endl;
+			}
+		}else{
+			if(sigCh.getPM().getBarrelSlot().getLayer().getID()!=3) 
+				cout<<"Fail read map layer "<<sigCh.getPM().getBarrelSlot().getLayer().getID()<<endl;
+		}
+
+		sigCh.setValue(sigCh.getValue() - offset);
+
 		int pmt_id = sigCh.getPM().getID();
 		auto search = sigChsPMMap.find(pmt_id);
 		if (search == sigChsPMMap.end()) {

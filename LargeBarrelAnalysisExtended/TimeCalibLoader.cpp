@@ -28,7 +28,7 @@ TimeCalibLoader::~TimeCalibLoader() {}
 
 void TimeCalibLoader::init(const JPetTaskInterface::Options& opts)
 {
-  auto calibFile =  std::string("timeCalib.txt");
+  auto calibFile =  std::string("TimeConstants_Layer1_2.txt");
   if (opts.count(fConfigFileParamKey)) {
     calibFile = opts.at(fConfigFileParamKey);
   }
@@ -43,7 +43,10 @@ void TimeCalibLoader::exec()
     JPetTimeWindow correctedWindow;
     auto newSigChs = oldTimeWindow->getSigChVect();
     for (auto & sigCh : newSigChs) {
-      sigCh.setValue(sigCh.getValue() + TimeCalibTools::getTimeCalibCorrection(fTimeCalibration, sigCh.getTOMBChannel().getChannel()));
+      sigCh.setValue(sigCh.getValue()
+      			+ TimeCalibTools::getTimeCalibCorrection(
+      						fTimeCalibration,
+      						sigCh.getTOMBChannel().getChannel()));
       correctedWindow.addCh(sigCh);
     }
     correctedWindow.setIndex(oldTimeWindow->getIndex());

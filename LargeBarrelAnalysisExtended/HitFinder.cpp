@@ -27,11 +27,31 @@ HitFinder::~HitFinder() {}
 
 void HitFinder::init(const JPetTaskInterface::Options& opts)
 {
+
+	INFO("Reading velocities.");
+	fVelocityMap = readVelocityFile();
+
 	INFO("Hit finding started.");
 	getStatistics().createHistogram(
 				new TH1F("hits_per_time_window",
 					"Number of Hits in Time Window",
 					101, -0.5, 100.5
+				)
+	);
+
+	getStatistics().createHistogram(
+				new TH2F("time_diff_per_scin",
+					"time_diff_per_scin",
+					200, -20000.0, 20000.0,
+					192, 1.0, 193.0
+				)
+	);
+
+	getStatistics().createHistogram(
+				new TH2F("hit_pos_per_scin",
+					"hit_pos_per_scin",
+					200, -150.0, 150.0,
+					192, 1.0, 193.0
 				)
 	);
 
@@ -54,8 +74,10 @@ void HitFinder::exec()
 				fillSignalsMap(*currSignal);
 			} else {
 				vector<JPetHit> hits = HitTools.createHits(
+								getStatistics(),
 								fAllSignalsInTimeWindow,
-								kTimeWindowWidth);
+								kTimeWindowWidth,
+								fVelocityMap);
 
 				saveHits(hits);
 				getStatistics().getHisto1D("hits_per_time_window").Fill(hits.size());
@@ -112,4 +134,30 @@ void HitFinder::fillSignalsMap(JPetPhysSignal signal)
 						std::make_pair(sideA, sideB)));
 		}
 	}
+}
+
+map<int, vector<double>> HitFinder::readVelocityFile(){
+
+	map<int, vector<double>> velocitiesMap;
+
+	ifstream input;
+	input.open("resultsForThresholda.txt");
+	if(input.is_open()) INFO("File with velocities for THR A opened.");
+	else INFO("File with velocities ERROR.");
+
+	int slot = 0; 
+	double vel = 0.0, error = 0.0;
+
+	while(!input.eof()){
+
+		input>>slot>>vel>>error;
+
+		vector<double> values;
+		values.push_back(vel);
+		values.push_back(error);
+
+		velocitiesMap[slot] = values;
+	}
+
+	return velocitiesMap;
 }

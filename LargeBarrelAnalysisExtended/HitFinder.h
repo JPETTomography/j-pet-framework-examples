@@ -16,6 +16,8 @@
 #ifndef HitFinder_H
 #define HitFinder_H
 
+#include <map>
+#include <vector>
 #include <JPetTask/JPetTask.h>
 #include <JPetHit/JPetHit.h>
 #include <JPetRawSignal/JPetRawSignal.h>
@@ -50,6 +52,7 @@ public:
 	virtual void exec()override;
 	virtual void terminate()override;
 	virtual void setWriter(JPetWriter* writer)override;
+	std::map<int, std::vector<double>> fVelocityMap;
 
 protected:
 
@@ -58,8 +61,8 @@ protected:
 	bool firstSignal = true;
 
 	HitFinderTools::SignalsContainer fAllSignalsInTimeWindow;
-
 	HitFinderTools HitTools;
+	std::map<int, std::vector<double>> readVelocityFile();
 
 	void fillSignalsMap(JPetPhysSignal signal);
 	void saveHits(const std::vector<JPetHit>& hits);

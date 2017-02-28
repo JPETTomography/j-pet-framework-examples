@@ -33,6 +33,7 @@ int main(int argc, char* argv[])
 	manager.parseCmdLine(argc, argv);
 
 	//First task - unpacking
+	
 	manager.registerTask([]() {
 		return new JPetTaskLoader("hld", "tslot.raw",
 				new TimeWindowCreator(
@@ -41,20 +42,20 @@ int main(int argc, char* argv[])
 				)
 		);
 	});
-
+	
 	//Second task placeholder - Signal Channel calibration
-	/*
-	manager.registerTask([]() {
-		return new JPetTaskLoader("tslot.raw", "tslot.calib.raw",
-			new TimeCalibLoader(
-				"TimeCalibLoader",
-				"Apply time corrections from prepared calibrations"
-			)
-		);
-	});
-	*/
+	//manager.registerTask([]() {
+	//	return new JPetTaskLoader("tslot.raw", "tslot.calib",
+	//		new TimeCalibLoader(
+	//			"TimeCalibLoader",
+	//			"Apply time corrections from prepared calibrations"
+	//		)
+	//	);
+	//});
+
 
 	//Third task - Raw Signal Creation
+	
 	manager.registerTask([]() {
 		return new JPetTaskLoader("tslot.raw", "raw.sig",
 				new SignalFinder(
@@ -64,7 +65,8 @@ int main(int argc, char* argv[])
                                 )
 		);
 	});
-
+	
+	
 	//Fourth task - Reco & Phys signal creation
 	manager.registerTask([]() {
 		return new JPetTaskLoader("raw.sig", "phys.sig",
@@ -74,6 +76,7 @@ int main(int argc, char* argv[])
 				)
 		);
 	});
+	
 
 	//Fifth task - Hit construction
 	manager.registerTask([]() {

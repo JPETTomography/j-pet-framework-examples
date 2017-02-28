@@ -17,6 +17,7 @@
 #define SIGNALFINDER_H
 
 #include <vector>
+#include <map>
 #include <JPetTask/JPetTask.h>
 #include <JPetRawSignal/JPetRawSignal.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
@@ -37,9 +38,11 @@ public:
   virtual void terminate() override;
   virtual void setWriter(JPetWriter* writer) override;
   bool fSaveControlHistos = true;
+  std::map<int, std::map<int, std::map<int, std::map<int, std::vector<double>>>>> fOffsetMap;
 
 protected:
   JPetWriter* fWriter;
+  std::map<int, std::map<int, std::map<int, std::map<int, std::vector<double>>>>> readTimeOffsetsFile();
   void saveRawSignals(const std::vector<JPetRawSignal>& sigChVec);
   const std::string fEdgeMaxTimeParamKey = "SignalFinder_EdgeMaxTime"; 
   const std::string fLeadTrailMaxTimeParamKey = "SignalFinder_LeadTrailMaxTime";
