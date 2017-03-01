@@ -25,6 +25,23 @@
 #include <JPetTask/JPetTask.h>
 #include <map>
 
+/**
+ * @brief module to apply the time calibration in J-PET. It takes
+ * as an input a tree of uncalibrated JPetSigCh objects and saves a tree of calibrated
+ * onces.
+ * The name of the file with the calibration constants should be defined
+ * by user option (in in json file)  in the following format:
+ * "TimeCalibLoader_ConfigFile":"path_and_filename_with_calib_constants"
+ * The default file name "timeCalib.txt" will be used if the user option
+ * is not set.
+ * The current correction has a following formula: raw_time - 1000 * correction_constant
+ * 1000 factor is needed because current calib constants are expressed in ns, while
+ * JPetSigCh time is in ps.
+ * If a calibration constant is missing for a given channel, then the 0 is returned.
+ * Also, info to log will be sent if DEBUG level is activated.
+ * The calibration is applied based on the TOMB identifier.
+ *
+ */
 class TimeCalibLoader : public JPetTask
 {
 public:
@@ -38,10 +55,9 @@ public:
 protected:
   void saveTimeWindow(const JPetTimeWindow& window);
 
-  const std::string fConfigFileParamKey = "TimeCalibLoader_ConfigFile";  ///Name of the user defined parameter key for which the value would correspond to the time calibration file name
+  const std::string fConfigFileParamKey = "TimeCalibLoader_ConfigFile";  ///Name of the option for which the value would correspond to the time calibration file name.
   JPetWriter* fWriter = nullptr;
   JPetParamManager* fParamManager = nullptr;
   std::map<unsigned int, double> fTimeCalibration;
-
 };
 #endif /*  !TIMECALIBLOADER_H */
