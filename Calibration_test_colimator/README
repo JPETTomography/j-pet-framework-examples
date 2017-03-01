@@ -1,0 +1,46 @@
+Aim
+---
+
+Time calibration with data measured with reference detector
+
+
+Expected output
+---------------
+No output to stdout.
+JPet.log file appears with the log of the processing and ROOT files with the following etensions are produced:
+ *.tslot.raw.root
+ *.raw.sig.root
+ *.phys.hit.root
+ *.phys.hit.calib
+
+
+where "*" stands for the name of the input file
+
+Input Data
+-----------
+User must provide data file(s) collected for the measurement with reference detector
+For Run1 data files are in directories: /data/jpet/2016.08.25_X
+
+Description
+--------------
+The analysis is split into tasks, A, B, C and TimeCalibration.
+
+
+Additional info
+--------------
+
+Compiling 
+------------
+make
+
+Running
+------------
+The script run.sh contains an example of running the analysis. Note, however, that the user must fill the input data file name and the number of run
+
+
+Author
+------------
+Michal Silarski & Magda Skurzok
+Please report any bugs and suggestions of corrections to: <michal.silarski@uj.edu.pl, mskurzok@gmail.com>
+
+

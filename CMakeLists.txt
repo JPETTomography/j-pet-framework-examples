@@ -35,4 +35,6 @@ add_subdirectory(AnalysisExample)
 add_subdirectory(ScopeLoaderExample)
 add_subdirectory(ScopeAnalysis)
 add_subdirectory(LargeBarrelAnalysis)
+add_subdirectory(Calibration_meth1)
+add_subdirectory(Calibration_test_colimator)
 
