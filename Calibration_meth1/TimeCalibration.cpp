@@ -47,8 +47,7 @@ void TimeCalibration::init(const JPetTaskInterface::Options& opts){
 	  output << "# For side A we apply only the correction from refference detector, for side B the correction is equal to the sum of the A-B" << std::endl;
           output << "# correction and offset with respect to the refference detector. For side A we report the sigmas and chi2/ndf for fit to the time difference spectra with refference detector" << std::endl;
 	  output << "# while the same quality variables for fits to the A-B time difference are given for B side section" << std::endl;
-	  output << "# Description of the parameters:layer(1-3) slot(1-48/96) side(A-B) threshold(1-4) offset_value_leading offset_uncertainty_leading offset_value_trailing offset_uncertainty_trailing" << std::endl;
-	  output << "# sigma_offset_leading sigma_offset_trailing (chi2/ndf)_leading" << std::endl;
+	  output << "# Description of the parameters: layer(1-3) | slot(1-48/96) | side(A-B) | threshold(1-4) | offset_value_leading | offset_uncertainty_leading | offset_value_trailing | offset_uncertainty_trailing | sigma_offset_leading | sigma_offset_trailing | (chi2/ndf)_leading | (chi2/ndf)_trailing" << std::endl;
 	  output << "# Calibration started on "<< __DATE__ << " at " << __TIME__ << std::endl;
 	  }
 	  else{
@@ -200,7 +199,7 @@ int number=0;
           ss<<str[i];
           ss>>number; //convert string into int and store it in "asInt"
 
-	  std::cout << "number" << number << std::endl;
+	  //std::cout << "number" << number << std::endl;
          vectorOfNumbers.push_back(number);
 
 	}
@@ -212,8 +211,8 @@ int number=0;
 //
 //create output txt file with calibration parameters 
 //
-	std::ofstream results_fit_l;
-        results_fit_l.open(OutputFile, std::ios::app); //file will be overwritten
+	std::ofstream results_fit;
+        results_fit.open(OutputFile, std::ios::app); //file will be overwritten
 
 	for(auto & slot : getParamBank().getBarrelSlots()){
 
@@ -248,8 +247,12 @@ int number=0;
 //save fit parameters only for layerX and SlotY (taken from analysing files name)
 //fit just for proper slot
 			if(histoToSave_leading->GetEntries() != 0 && histoToSave_trailing->GetEntries() != 0
-                          && (slot.second)->getLayer().getID()== vectorOfNumbers[2]
+                          &&  (slot.second)->getLayer().getID()==vectorOfNumbers[2]
 			   && (slot.first==(10*vectorOfNumbers[1]+vectorOfNumbers[0]))){
+
+//std::cout << "layer=" << vectorOfNumbers[2] << std::endl;
+//std::cout << "slot=" << 10*vectorOfNumbers[1]+vectorOfNumbers[0] << std::endl;
+
 //fit scintilators
 			int highestBin_l = histoToSave_leading->GetBinCenter(histoToSave_leading->GetMaximumBin());
 			histoToSave_leading->Fit("gaus","","", highestBin_l-5, highestBin_l+5);
@@ -275,16 +278,16 @@ int number=0;
 //fit reference detector
 
 			int highestBin_Ref_l = histoToSave_Ref_leading->GetBinCenter(histoToSave_Ref_leading->GetMaximumBin());
-			histoToSave_Ref_leading->Fit("gaus","","", highestBin_Ref_l-50, highestBin_Ref_l+50); //range for fit
+			histoToSave_Ref_leading->Fit("gaus","","", highestBin_Ref_l-5, highestBin_Ref_l+5); //range for fit
 			TF1 *fit_Ref_l = histoToSave_Ref_leading->GetFunction("gaus");
-			fit_Ref_l->SetRange(highestBin_Ref_l-200, highestBin_Ref_l+200); //range to draw gaus function
+			fit_Ref_l->SetRange(highestBin_Ref_l-100, highestBin_Ref_l+100); //range to draw gaus function
 			histoToSave_Ref_leading->Draw();
 
 
 			int highestBin_Ref_t = histoToSave_Ref_trailing->GetBinCenter(histoToSave_Ref_trailing->GetMaximumBin());
-			histoToSave_Ref_trailing->Fit("gaus","","", highestBin_Ref_t-50, highestBin_Ref_t+50); //range for fit
+			histoToSave_Ref_trailing->Fit("gaus","","", highestBin_Ref_t-5, highestBin_Ref_t+5); //range for fit
  			TF1 *fit_Ref_t = histoToSave_Ref_trailing->GetFunction("gaus");
-			fit_Ref_t->SetRange(highestBin_Ref_t-200, highestBin_Ref_t+200); //range to draw gaus function
+			fit_Ref_t->SetRange(highestBin_Ref_t-100, highestBin_Ref_t+100); //range to draw gaus function
 			histoToSave_Ref_trailing->Draw();
 
 
@@ -298,18 +301,20 @@ int number=0;
 			double sigma_peak_Ref_t =fit_Ref_t->GetParameter(2);
 			double chi2_ndf_Ref_t = fit_Ref_t->GetChisquare()/fit_Ref_t->GetNDF();
 
-// 
-			results_fit_l << (slot.second)->getLayer().getID() << "\t" <<  slot.first << "\t" << "A" << "\t" << thr << "\t" << position_peak_Ref_l
-                                      << "\t" << position_peak_error_Ref_l  << "\t" << position_peak_Ref_t << "\t" << position_peak_error_Ref_t  << "\t" << sigma_peak_Ref_l
-                                      << "\t" <<sigma_peak_Ref_t << "\t"  <<chi2_ndf_Ref_l << "\t" <<chi2_ndf_Ref_t <<std::endl;
-                        results_fit_l << (slot.second)->getLayer().getID() << "\t" <<  slot.first << "\t" << "B" << "\t" << thr << "\t" << position_peak_Ref_l+position_peak_l
-                                      << "\t" << sqrt(pow(position_peak_error_Ref_l,2) + pow(position_peak_error_l,2))  << "\t" << position_peak_Ref_t+ position_peak_t << "\t"
-                                      << sqrt(pow(position_peak_error_Ref_t,2)+pow(position_peak_error_t,2)) << "\t" << sigma_peak_l << "\t" << sigma_peak_t <<"\t" << chi2_ndf_l << "\t" <<chi2_ndf_t <<std::endl;
+// writing to apropriate format (txt file)
+//side A
+//AB offset=0, offset just from reference detector
+			results_fit << (slot.second)->getLayer().getID() << "\t" <<  slot.first << "\t" << "A" << "\t" << thr << "\t" << position_peak_Ref_l << "\t" << position_peak_error_Ref_l  << "\t" << position_peak_Ref_t << "\t" << position_peak_error_Ref_t  << "\t" << sigma_peak_Ref_l << "\t" <<sigma_peak_Ref_t << "\t"  <<chi2_ndf_Ref_l << "\t" <<chi2_ndf_Ref_t <<std::endl;
+
+//side B
+//AB offset!=0, offset from reference detector: total offset AB offset + Ref Det offset
+                        results_fit << (slot.second)->getLayer().getID() << "\t" <<  slot.first << "\t" << "B" << "\t" << thr << "\t" << position_peak_Ref_l+position_peak_l << "\t" << sqrt(pow(position_peak_error_Ref_l,2) + pow(position_peak_error_l,2))  << "\t" << position_peak_Ref_t+ position_peak_t << "\t" << sqrt(pow(position_peak_error_Ref_t,2)+pow(position_peak_error_t,2)) << "\t" << sigma_peak_l << "\t" << sigma_peak_t <<"\t" << chi2_ndf_l << "\t" <<chi2_ndf_t <<std::endl;
+
 			}
 			
 		}
 	}
-	results_fit_l.close();
+	results_fit.close();
 }
 
 //////////////////////////////////

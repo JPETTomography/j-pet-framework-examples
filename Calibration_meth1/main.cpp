@@ -48,6 +48,7 @@ int main(int argc, char* argv[]) {
 				 new TaskC("Module C: Pair signals", 
 					   "Create hits from pairs of signals")); 
      }); 
+
    manager.registerTask([](){                                                                                                                                                                                
        return new JPetTaskLoader("phys.hit", "phys.hit.calib",    
 				 new TimeCalibration("first rough time calibration with data measured with reference detector",                                                                                        

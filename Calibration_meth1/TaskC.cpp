@@ -73,6 +73,7 @@ vector<JPetHit> TaskC::createHits(const vector<JPetRawSignal>&signals){
 				}
 				physSignalA.setRecoSignal(recoSignalA);
 				physSignalB.setRecoSignal(recoSignalB);
+
 				JPetHit hit;
 				hit.setSignalA(physSignalA);
 				hit.setSignalB(physSignalB);
@@ -82,6 +83,7 @@ vector<JPetHit> TaskC::createHits(const vector<JPetRawSignal>&signals){
 				getStatistics().getCounter("No. found hits")++;
 			}
 		}
+
 		//Part devoted to the refference signal: slot=193, PM=385 on side B!
 		  int LayerID = i->getPM().getScin().getBarrelSlot().getLayer().getID();
 		  int ScintID = i->getPM().getScin().getID();
