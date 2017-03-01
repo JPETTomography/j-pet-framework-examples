@@ -14,6 +14,7 @@
  */
 
 #include <boost/algorithm/string/predicate.hpp> /// for starts_with
+#include <boost/filesystem.hpp> /// for exists()
 #include <algorithm> /// for any_of()
 #include <sstream>
 #include "TimeCalibTools.h"
@@ -22,7 +23,7 @@
 double TimeCalibTools::getTimeCalibCorrection(const TOMBChToCorrection& timeCalibration, const unsigned int channel)
 {
   if (timeCalibration.find(channel) == timeCalibration.end()) {
-    DEBUG("No time calibration available for this channel");
+    DEBUG("No time calibration available for the channel" + std::to_string(channel));
     return 0.0;
   } else {
     return timeCalibration.at(channel);
@@ -32,6 +33,11 @@ double TimeCalibTools::getTimeCalibCorrection(const TOMBChToCorrection& timeCali
 TimeCalibTools::TOMBChToCorrection TimeCalibTools::loadTimeCalibration(const std::string& calibFile, const TimeCalibTools::TOMBChMap& tombMap)
 {
   INFO("Loading time calibration from:" + calibFile);
+  if ( !boost::filesystem::exists(calibFile)) {
+    ERROR("Calibration file does not exist:" + calibFile + " Returning empty timeCalibration");
+    TOMBChToCorrection timeCalibration;
+    return timeCalibration;
+  }
   auto calibRecords = readCalibrationRecordsFromFile(calibFile);
   return generateTimeCalibration(calibRecords, tombMap);
 }

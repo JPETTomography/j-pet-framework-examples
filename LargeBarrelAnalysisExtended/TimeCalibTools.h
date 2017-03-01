@@ -40,7 +40,7 @@ class TimeCalibTools
 public:
   typedef std::map<unsigned int, double> TOMBChToCorrection;
   typedef std::map<std::tuple<int, int, JPetPM::Side, int>, int> TOMBChMap;
-  /// Method returns a correction for the given tombChannel
+  /// Method returns a time correction for the given tombChannel.
   static double getTimeCalibCorrection(const TOMBChToCorrection& timeCalibration, const unsigned int channel);
   /// Main method to be used to load the time calibration parameters.
   /// tombMap contains the dependency between layer, barrel slot, PM side, threshold and TOMB channel number.
