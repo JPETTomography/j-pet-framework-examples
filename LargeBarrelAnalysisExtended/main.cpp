@@ -27,73 +27,72 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-	//Connection to the remote database disabled for the moment
-	//DB::SERVICES::DBHandler::createDBConnection("../DBConfig/configDB.cfg");
-	JPetManager& manager = JPetManager::getManager();
-	manager.parseCmdLine(argc, argv);
+  //Connection to the remote database disabled for the moment
+  //DB::SERVICES::DBHandler::createDBConnection("../DBConfig/configDB.cfg");
+  JPetManager& manager = JPetManager::getManager();
+  manager.parseCmdLine(argc, argv);
 
-	//First task - unpacking
-	manager.registerTask([]() {
-		return new JPetTaskLoader("hld", "tslot.raw",
-				new TimeWindowCreator(
-					"TimeWindowCreator",
-					"Process unpacked HLD file into a tree of JPetTimeWindow objects"
-				)
-		);
-	});
+  //First task - unpacking
+  manager.registerTask([]() {
+    return new JPetTaskLoader("hld", "tslot.raw",
+                              new TimeWindowCreator(
+                                "TimeWindowCreator",
+                                "Process unpacked HLD file into a tree of JPetTimeWindow objects"
+                              )
+                             );
+  });
 
-	//Second task placeholder - Signal Channel calibration
-	/*
-	manager.registerTask([]() {
-		return new JPetTaskLoader("tslot.raw", "tslot.calib.raw",
-			new TimeCalibLoader(
-				"TimeCalibLoader",
-				"Apply time corrections from prepared calibrations"
-			)
-		);
-	});
-	*/
+  //Second task placeholder - Signal Channel calibration
 
-	//Third task - Raw Signal Creation
-	manager.registerTask([]() {
-		return new JPetTaskLoader("tslot.raw", "raw.sig",
-				new SignalFinder(
-					"SignalFinder",
-					"Create Raw Signals, optional - draw control histograms",
-                                  	true
-                                )
-		);
-	});
+  manager.registerTask([]() {
+    return new JPetTaskLoader("tslot.raw", "tslot.calib.raw",
+                              new TimeCalibLoader(
+                                "TimeCalibLoader",
+                                "Apply time corrections from prepared calibrations"
+                              )
+                             );
+  });
 
-	//Fourth task - Reco & Phys signal creation
-	manager.registerTask([]() {
-		return new JPetTaskLoader("raw.sig", "phys.sig",
-				new SignalTransformer(
-					"SignalTransformer",
-					"Create Reco & Phys Signals"
-				)
-		);
-	});
+  //Third task - Raw Signal Creation
+  manager.registerTask([]() {
+    return new JPetTaskLoader("tslot.calib.raw", "raw.sig",
+                              new SignalFinder(
+                                "SignalFinder",
+                                "Create Raw Signals, optional - draw control histograms",
+                                true
+                              )
+                             );
+  });
 
-	//Fifth task - Hit construction
-	manager.registerTask([]() {
-		return new JPetTaskLoader("phys.sig", "hits",
-				new HitFinder(
-					"HitFinder",
-					"Create hits from physical signals"
-				)
-		);
-	});
+  ////Fourth task - Reco & Phys signal creation
+  manager.registerTask([]() {
+    return new JPetTaskLoader("raw.sig", "phys.sig",
+                              new SignalTransformer(
+                                "SignalTransformer",
+                                "Create Reco & Phys Signals"
+                              )
+                             );
+  });
 
-	//Sixth task - unknown Event construction
-	manager.registerTask([]() {
-		return new JPetTaskLoader("hits", "unk.evt",
-				new EventFinder(
-					"EventFinder",
-					"Create Events as group of Hits"
-				)
-		);
-	});
+  ////Fifth task - Hit construction
+  manager.registerTask([]() {
+    return new JPetTaskLoader("phys.sig", "hits",
+                              new HitFinder(
+                                "HitFinder",
+                                "Create hits from physical signals"
+                              )
+                             );
+  });
 
-	manager.run();
+  ////Sixth task - unknown Event construction
+  manager.registerTask([]() {
+    return new JPetTaskLoader("hits", "unk.evt",
+                              new EventFinder(
+                                "EventFinder",
+                                "Create Events as group of Hits"
+                              )
+                             );
+  });
+
+  manager.run();
 }
