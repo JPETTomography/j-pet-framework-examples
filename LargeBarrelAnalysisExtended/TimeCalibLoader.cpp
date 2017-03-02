@@ -15,6 +15,8 @@
 
 #include "TimeCalibLoader.h"
 #include "TimeCalibTools.h"
+#include "JPetGeomMapping/JPetGeomMapping.h"
+#include <JPetParamManager/JPetParamManager.h>
 
 TimeCalibLoader::TimeCalibLoader(const char* name, const char* description):
   JPetTask(name, description)
@@ -30,7 +32,13 @@ void TimeCalibLoader::init(const JPetTaskInterface::Options& opts)
   if (opts.count(fConfigFileParamKey)) {
     calibFile = opts.at(fConfigFileParamKey);
   }
-  fTimeCalibration = TimeCalibTools::loadTimeCalibration(calibFile);
+  assert(fParamManager);
+  JPetGeomMapping mapper(fParamManager->getParamBank());
+  auto tombMap = mapper.getTOMBMapping();
+  fTimeCalibration = TimeCalibTools::loadTimeCalibration(calibFile, tombMap);
+  if (fTimeCalibration.empty()) {
+    ERROR("Time calibration seems to be empty");
+  }
 }
 
 void TimeCalibLoader::exec()
@@ -39,7 +47,8 @@ void TimeCalibLoader::exec()
     JPetTimeWindow correctedWindow;
     auto newSigChs = oldTimeWindow->getSigChVect();
     for (auto & sigCh : newSigChs) {
-      sigCh.setValue(sigCh.getValue() + TimeCalibTools::getTimeCalibCorrection(fTimeCalibration, sigCh.getTOMBChannel().getChannel()));
+      /// Calibration time is ns so we should change it to ps, cause all the time is in ps.
+      sigCh.setValue(sigCh.getValue() - 1000. * TimeCalibTools::getTimeCalibCorrection(fTimeCalibration, sigCh.getTOMBChannel().getChannel()));
       correctedWindow.addCh(sigCh);
     }
     correctedWindow.setIndex(oldTimeWindow->getIndex());

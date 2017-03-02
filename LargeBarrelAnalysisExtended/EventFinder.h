@@ -10,34 +10,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file TaskD.h
+ *  @file EventFinder.h
  */
 
-#ifndef TASKD_H 
-#define TASKD_H 
+#ifndef EVENTFINDER_H 
+#define EVENTFINDER_H 
 
+#include <vector>
+#include <map>
 #include <JPetTask/JPetTask.h>
 #include <JPetHit/JPetHit.h>
-#include <JPetRawSignal/JPetRawSignal.h>
-#include "LargeBarrelMapping.h"
+#include <JPetEvent/JPetEvent.h>
+
 class JPetWriter;
+
 #ifdef __CINT__
-//when cint is used instead of compiler, override word is not recognized
-//nevertheless it's needed for checking if the structure of project is correct
 #	define override
 #endif
-class TaskD:public JPetTask{
+
+class EventFinder : public JPetTask{
 public:
-	TaskD(const char * name, const char * description);
-	virtual ~TaskD(){}
+	EventFinder(const char * name, const char * description);
+	virtual ~EventFinder(){}
 	virtual void init(const JPetTaskInterface::Options& opts)override;
 	virtual void exec()override;
 	virtual void terminate()override;
 	virtual void setWriter(JPetWriter* writer)override;
 protected:
-	const char * formatUniqueSlotDescription(const JPetBarrelSlot & slot, int threshold,const char * prefix);
-	void fillHistosForHit(const JPetHit & hit);
 	JPetWriter* fWriter;
-	LargeBarrelMapping fBarrelMap;
+	void saveEvents(const std::vector<JPetEvent>& event);
+	std::map<int, std::vector<JPetHit>> fHitTimeWindowMap;
+	bool fSaveControlHistos = true;	
+	std::vector<Float_t> fEventTimeWindows;
+	void initTimeWindows();
 };
-#endif /*  !TASKD_H */
+#endif /*  !EVENTFINDER_H */

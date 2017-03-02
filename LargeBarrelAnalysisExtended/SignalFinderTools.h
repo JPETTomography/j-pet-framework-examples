@@ -25,25 +25,43 @@
 class SignalFinderTools
 {
 public:
-  static std::map<int, std::vector<JPetSigCh>> getSigChsPMMapById(const JPetTimeWindow* timeWindow);
-  static std::vector<JPetRawSignal> buildAllSignals(Int_t timeWindowIndex,
-      std::map<int, std::vector<JPetSigCh>> sigChsPMMap,
-      int numOfThresholds,
-      JPetStatistics& stats,
-      bool saveControlHistos,
-      double sigChEdgeMaxTime,
-      double sigChLeadTrailMaxTime);
-  static std::vector<JPetRawSignal> buildRawSignals(Int_t timeWindowIndex,
-      const std::vector<JPetSigCh>& sigChFromSamePM,
-      int numOfThresholds,
-      JPetStatistics& stats,
-      bool saveControlHistos,
-      double sigChEdgeMaxTime,
-      double sigChLeadTrailMaxTime);
-  static int findSigChOnNextThr(Double_t sigChValue, const std::vector<JPetSigCh>& sigChVec, double sigChEdgeMaxTime);
-  static int findTrailingSigCh(JPetSigCh leadingSigCh,
-                               const std::vector<JPetSigCh>& trailingSigChVec,
-                               double sigChLeadTrailMaxTime);
+
+	//Method returns a map of vectors of JPetSigCh ordered by photomultiplier id.
+	//The map is based on the JPetSigCh from a given timeWindow.
+	static std::map<int, std::vector<JPetSigCh>> getSigChsPMMapById(const JPetTimeWindow* timeWindow);
+
+	//Method reconstructs all signals based on the signal channels
+	//from the SigChPMMap
+	static std::vector<JPetRawSignal> buildAllSignals(
+  				Int_t timeWindowIndex,
+				std::map<int, std::vector<JPetSigCh>> sigChsPMMap,
+				int numOfThresholds,
+				JPetStatistics& stats,
+				bool saveControlHistos,
+				double sigChEdgeMaxTime,
+				double sigChLeadTrailMaxTime
+	);
+
+	//Method reconstructs signals based on the signal channels
+	//from the sigChFromSamePM container
+	static std::vector<JPetRawSignal> buildRawSignals(Int_t timeWindowIndex,
+				const std::vector<JPetSigCh>& sigChFromSamePM,
+				int numOfThresholds,
+				JPetStatistics& stats,
+				bool saveControlHistos,
+				double sigChEdgeMaxTime,
+				double sigChLeadTrailMaxTime
+	);
+
+  	//Methods for checking relative between Signal Channel times
+	//and if they fit in defined time windows
+	static int findSigChOnNextThr(Double_t sigChValue,
+				const std::vector<JPetSigCh>& sigChVec,
+				double sigChEdgeMaxTime);
+
+	static int findTrailingSigCh(const JPetSigCh& leadingSigCh,
+				const std::vector<JPetSigCh>& trailingSigChVec,
+				double sigChLeadTrailMaxTime);
 
 };
 #endif /*  !SIGNALFINDERTOOLS_H */
