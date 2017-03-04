@@ -68,16 +68,21 @@ vector<JPetHit> HitFinderTools::createHits(JPetStatistics& stats,
 						hit.setEnergy(-1.0);
 						hit.setQualityOfEnergy(-1.0);
 
-            					hit.setScintillator(signalA.getPM().getScin());
+            hit.setScintillator(signalA.getPM().getScin());
 						hit.setBarrelSlot(signalA.getPM().getBarrelSlot());
+
+						hit.setPosX(hit.getBarrelSlot().getLayer().getRadius()
+												*cos(hit.getBarrelSlot().getTheta()));
+						hit.setPosY(hit.getBarrelSlot().getLayer().getRadius()
+												*sin(hit.getBarrelSlot().getTheta()));
 
 						auto search = velMap.find(hit.getBarrelSlot().getID());
 						if(search != velMap.end()){
 							double vel = search->second.at(0);
 							double position = vel*hit.getTimeDiff()/2000;
-							hit.setPosX(position);
+							hit.setPosZ(position);
 						}else{
-							hit.setPosX(-1000000.0);
+							hit.setPosZ(-1000000.0);
 						}
 
 						hits.push_back(hit);
@@ -87,7 +92,7 @@ vector<JPetHit> HitFinderTools::createHits(JPetStatistics& stats,
 							(float) (hit.getScintillator().getID()));
 
 						stats.getHisto2D("hit_pos_per_scin")
-							.Fill(hit.getPosX(),
+							.Fill(hit.getPosZ(),
 							(float) (hit.getScintillator().getID()));
 
 					}

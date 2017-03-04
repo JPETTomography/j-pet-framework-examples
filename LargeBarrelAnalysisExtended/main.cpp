@@ -22,6 +22,7 @@
 #include "SignalTransformer.h"
 #include "HitFinder.h"
 #include "EventFinder.h"
+#include "EventCategorizer.h"
 
 using namespace std;
 
@@ -33,7 +34,6 @@ int main(int argc, char* argv[])
 	manager.parseCmdLine(argc, argv);
 
 	//First task - unpacking
-	
 	manager.registerTask([]() {
 		return new JPetTaskLoader("hld", "tslot.raw",
 				new TimeWindowCreator(
@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
 				)
 		);
 	});
-	
+
 	//Second task placeholder - Signal Channel calibration
 	//manager.registerTask([]() {
 	//	return new JPetTaskLoader("tslot.raw", "tslot.calib",
@@ -52,7 +52,6 @@ int main(int argc, char* argv[])
 	//		)
 	//	);
 	//});
-
 
 	//Third task - Raw Signal Creation
 	
@@ -95,6 +94,17 @@ int main(int argc, char* argv[])
 				new EventFinder(
 					"EventFinder",
 					"Create Events as group of Hits"
+				)
+		);
+	});
+
+
+	//Seventh task - Event Categorization
+	manager.registerTask([]() {
+		return new JPetTaskLoader("unk.evt", "cat.evt",
+				new EventCategorizer(
+					"EventCategorizer",
+					"Categorize Events"
 				)
 		);
 	});
