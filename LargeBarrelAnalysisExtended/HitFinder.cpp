@@ -65,12 +65,12 @@ void HitFinder::exec()
 
 	//getting the data from event in apropriate format
 	if (auto currSignal = dynamic_cast<const JPetPhysSignal* const>(getEvent())) {
-		if (firstSignal) {
-			DAQTimeWindowIndex = currSignal->getTimeWindowIndex();
+		if (kFirstTime) {
+			kTimeSlotIndex = currSignal->getTimeWindowIndex();
 			fillSignalsMap(*currSignal);
-			firstSignal = false;
+			kFirstTime = false;
 		} else {
-			if (DAQTimeWindowIndex == currSignal->getTimeWindowIndex()) {
+			if (kTimeSlotIndex == currSignal->getTimeWindowIndex()) {
 				fillSignalsMap(*currSignal);
 			} else {
 				vector<JPetHit> hits = HitTools.createHits(
@@ -82,7 +82,7 @@ void HitFinder::exec()
 				saveHits(hits);
 				getStatistics().getHisto1D("hits_per_time_window").Fill(hits.size());
 				fAllSignalsInTimeWindow.clear();
-				DAQTimeWindowIndex = currSignal->getTimeWindowIndex();
+				kTimeSlotIndex = currSignal->getTimeWindowIndex();
 				fillSignalsMap(*currSignal);
 			}
 		}

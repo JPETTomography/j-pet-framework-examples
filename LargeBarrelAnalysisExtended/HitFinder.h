@@ -56,17 +56,14 @@ public:
 
 protected:
 
-  	//Index that defines a given DAQ time window (defined at the hardware level)
-	int DAQTimeWindowIndex;
-	bool firstSignal = true;
-
+  	//Index that defines a given DAQ time slot (defined at the hardware level)
+	int kTimeSlotIndex;
+	bool kFirstTime = true;
 	HitFinderTools::SignalsContainer fAllSignalsInTimeWindow;
 	HitFinderTools HitTools;
 	std::map<int, std::vector<double>> readVelocityFile();
-
 	void fillSignalsMap(JPetPhysSignal signal);
 	void saveHits(const std::vector<JPetHit>& hits);
-
 	JPetWriter* fWriter;
 	const std::string fTimeWindowWidthParamKey = "HitFinder_TimeWindowWidth";
 	double kTimeWindowWidth = 50000; /// in ps -> 50ns. Maximal time difference between signals

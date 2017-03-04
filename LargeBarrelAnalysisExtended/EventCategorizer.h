@@ -10,11 +10,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file EventFinder.h
+ *  @file EventCategorizer.h
  */
 
-#ifndef EVENTFINDER_H 
-#define EVENTFINDER_H 
+#ifndef EVENTCATEGORIZER_H
+#define EVENTCATEGORIZER_H
 
 #include <vector>
 #include <map>
@@ -28,23 +28,17 @@ class JPetWriter;
 #	define override
 #endif
 
-class EventFinder : public JPetTask{
+class EventCategorizer : public JPetTask{
 public:
-	EventFinder(const char * name, const char * description);
-	virtual ~EventFinder(){}
+	EventCategorizer(const char * name, const char * description);
+	virtual ~EventCategorizer(){}
 	virtual void init(const JPetTaskInterface::Options& opts)override;
 	virtual void exec()override;
 	virtual void terminate()override;
 	virtual void setWriter(JPetWriter* writer)override;
 protected:
-  	int kTimeSlotIndex;
-  	bool kFirstTime = true;
-  	double kEventTimeWindow = 5000.0; //ps
-	const std::string fEventTimeParamKey = "EventFinder_EventTime";
-    	std::vector<JPetHit> fHitVector;
-  	bool fSaveControlHistos = true;
 	JPetWriter* fWriter;
 	void saveEvents(const std::vector<JPetEvent>& event);
-	std::vector<JPetEvent> buildEvents(std::vector<JPetHit> hitVec);
+	bool fSaveControlHistos = true;
 };
-#endif /*  !EVENTFINDER_H */
+#endif /*  !EVENTCATEGORIZER_H */

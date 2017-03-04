@@ -88,6 +88,7 @@ int main(int argc, char* argv[])
 		);
 	});
 
+
 	//Sixth task - unknown Event construction
 	manager.registerTask([]() {
 		return new JPetTaskLoader("hits", "unk.evt",
