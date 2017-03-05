@@ -28,19 +28,19 @@ class JPetWriter;
 class SignalTransformer: public JPetTask
 {
 
-public:
-	SignalTransformer(const char* name, const char* description);
-	virtual void init(const JPetTaskInterface::Options& opts)override;
-	virtual void exec()override;
-	virtual void terminate()override;
-	virtual void setWriter(JPetWriter* writer) override{
-		fWriter = writer;
-	}
+	public:
+		SignalTransformer(const char* name, const char* description);
+		virtual void init(const JPetTaskInterface::Options& opts)override;
+		virtual void exec()override;
+		virtual void terminate()override;
+		virtual void setWriter(JPetWriter* writer) override{
+			fWriter = writer;
+		}
 
-protected:
-	JPetRecoSignal createRecoSignal(JPetRawSignal& rawSignal);
-	JPetPhysSignal createPhysSignal(JPetRecoSignal& signals);
-	void savePhysSignal( JPetPhysSignal signal);
-	JPetWriter* fWriter;
+	protected:
+		JPetRecoSignal createRecoSignal(JPetRawSignal& rawSignal);
+		JPetPhysSignal createPhysSignal(JPetRecoSignal& signals);
+		void savePhysSignal( JPetPhysSignal signal);
+		JPetWriter* fWriter;
 };
 #endif /*  !SIGNALTRANSFORMER_H */

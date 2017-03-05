@@ -16,6 +16,7 @@
 #include <DBHandler/HeaderFiles/DBHandler.h>
 #include <JPetManager/JPetManager.h>
 #include <JPetTaskLoader/JPetTaskLoader.h>
+
 #include "TimeWindowCreator.h"
 #include "TimeCalibLoader.h"
 #include "SignalFinder.h"
@@ -32,7 +33,7 @@ int main(int argc, char* argv[])
   JPetManager& manager = JPetManager::getManager();
   manager.parseCmdLine(argc, argv);
 
-  //First task - unpacking
+  // First task - unpacking
   manager.registerTask([]() {
     return new JPetTaskLoader("hld", "tslot.raw",
                               new TimeWindowCreator(

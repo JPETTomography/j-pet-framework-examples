@@ -54,7 +54,7 @@ JPetRecoSignal SignalTransformer::createRecoSignal(JPetRawSignal& rawSignal)
 	//finding TOT for every threshold 1-4
 	std::vector<double> tots;
 	for(int i=1;i<5;i++){
-		auto leadSearch = leadingPoints.find(i);
+		auto leadSearch = leadingPoints.find(i); //change to at(i) - wouldn't that be faster?
 		auto trailSearch = trailingPoints.find(i);
 		if (leadSearch != leadingPoints.end()
 			&& trailSearch != trailingPoints.end())
@@ -92,6 +92,7 @@ JPetPhysSignal SignalTransformer::createPhysSignal(JPetRecoSignal& recoSignal)
 	std::map<int,double> leadingPointsMap = recoSignal
 				.getRawSignal()
 				.getTimesVsThresholdNumber(JPetSigCh::Leading);
+
 	double time = leadingPointsMap.begin()->second;
 	physSignal.setTime(time);
 	physSignal.setQualityOfTime(0.0);

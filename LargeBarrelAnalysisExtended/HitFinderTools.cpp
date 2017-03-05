@@ -67,7 +67,7 @@ vector<JPetHit> HitFinderTools::createHits(const SignalsContainer& allSignalsInT
 						hit.setEnergy(-1.0);
 						hit.setQualityOfEnergy(-1.0);
 
-            					hit.setScintillator(signalA.getPM().getScin());
+            			hit.setScintillator(signalA.getPM().getScin());
 						hit.setBarrelSlot(signalA.getPM().getBarrelSlot());
 
 						hits.push_back(hit);

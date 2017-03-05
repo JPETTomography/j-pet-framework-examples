@@ -10,16 +10,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file HitFinder.h
+ *  @file PreEventFinder.h
  */
 
-#ifndef HitFinder_H
-#define HitFinder_H
+#ifndef PREEVENTFINDER_H
+#define PREEVENTFINDER_H
 
 #include <JPetTask/JPetTask.h>
 #include <JPetHit/JPetHit.h>
-#include <JPetRawSignal/JPetRawSignal.h>
-#include "HitFinderTools.h"
+#include <JPetEvent/JPetEvent.h>
+// #include "PreEventFinderTools.h"
 
 class JPetWriter;
 
@@ -40,35 +40,23 @@ class JPetWriter;
  * of those two signals needs to be less then specified time difference (kTimeWindowWidth)
  *
  */
-class HitFinder: public JPetTask
+class PreEventFinder: public JPetTask
 {
 
-	public:
-		HitFinder(const char* name, const char* description);
-		virtual ~HitFinder();
-		virtual void init(const JPetTaskInterface::Options& opts)override;
-		virtual void exec()override;
-		virtual void terminate()override;
-		virtual void setWriter(JPetWriter* writer)override;
+  public:
+    PreEventFinder(const char* name, const char* description);
+    virtual ~PreEventFinder();
+    virtual void init(const JPetTaskInterface::Options& opts)override;
+    virtual void exec()override;
+    virtual void terminate()override;
+    virtual void setWriter(JPetWriter* writer)override;
 
-	protected:
-
-	  	//Index that defines a given DAQ time window (defined at the hardware level)
-		int DAQTimeWindowIndex;
-		bool firstSignal = true;
-
-		HitFinderTools::SignalsContainer fAllSignalsInTimeWindow;
-		std::vector<JPetHit> HitsInTimeWindow;
-
-		HitFinderTools HitTools;
-
-		void fillSignalsMap(JPetPhysSignal signal);
-		void saveHits(const std::vector<JPetHit>& hits);
-
-		JPetWriter* fWriter;
-		const std::string fTimeWindowWidthParamKey = "HitFinder_TimeWindowWidth";
-		double kTimeWindowWidth = 50000; /// in ps -> 50ns. Maximal time difference between signals
-
+  protected:
+    JPetWriter* fWriter = 0;
+    std::vector<JPetHit> fHits;
+    const double kSubsequentHitsTimeDiff = 10000; /*ps*/
+    std::vector<JPetEvent> CreatePreEvents( std::vector<JPetHit>& Hits, double subsequentHitsTimeDiff);
+    void SavePreEvents( std::vector<JPetEvent> PreEventsInTimeWindow);
 };
 
-#endif /*  !HitFinder_H */
+#endif /*  !PREEVENTFinder_H */

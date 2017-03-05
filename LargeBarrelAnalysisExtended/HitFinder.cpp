@@ -49,16 +49,16 @@ void HitFinder::exec()
 			DAQTimeWindowIndex = currSignal->getTimeWindowIndex();
 			fillSignalsMap(*currSignal);
 			firstSignal = false;
-		} else {
+		}
+		else {
 			if (DAQTimeWindowIndex == currSignal->getTimeWindowIndex()) {
 				fillSignalsMap(*currSignal);
-			} else {
-				vector<JPetHit> hits = HitTools.createHits(
-								fAllSignalsInTimeWindow,
-								kTimeWindowWidth);
+			}
+			else {
+				HitsInTimeWindow = HitTools.createHits(fAllSignalsInTimeWindow, kTimeWindowWidth);
+				saveHits(HitTools.createHits(fAllSignalsInTimeWindow, kTimeWindowWidth));
+				getStatistics().getHisto1D("hits_per_time_window").Fill(HitsInTimeWindow.size());
 
-				saveHits(hits);
-				getStatistics().getHisto1D("hits_per_time_window").Fill(hits.size());
 				fAllSignalsInTimeWindow.clear();
 				DAQTimeWindowIndex = currSignal->getTimeWindowIndex();
 				fillSignalsMap(*currSignal);
@@ -71,6 +71,9 @@ void HitFinder::exec()
 
 void HitFinder::terminate()
 {
+	HitsInTimeWindow = HitTools.createHits(fAllSignalsInTimeWindow, kTimeWindowWidth);
+	saveHits(HitTools.createHits(fAllSignalsInTimeWindow, kTimeWindowWidth));
+
 	INFO("Hit finding ended.");
 }
 

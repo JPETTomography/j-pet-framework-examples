@@ -35,26 +35,26 @@ class JPetWriter;
 
 class TimeWindowCreator: public JPetTask
 {
-public:
-  TimeWindowCreator(const char* name, const char* description);
-  virtual ~TimeWindowCreator();
-  virtual void init(const JPetTaskInterface::Options& opts) override;
-  virtual void exec() override;
-  virtual void terminate() override;
-  virtual void setWriter(JPetWriter* writer) override;
-  virtual void setParamManager(JPetParamManager* paramManager) override;
-  const JPetParamBank& getParamBank() const;
+  public:
+    TimeWindowCreator(const char* name, const char* description);
+    virtual ~TimeWindowCreator();
+    virtual void init(const JPetTaskInterface::Options& opts) override;
+    virtual void exec() override;
+    virtual void terminate() override;
+    virtual void setWriter(JPetWriter* writer) override;
+    virtual void setParamManager(JPetParamManager* paramManager) override;
+    const JPetParamBank& getParamBank() const;
 
-protected:
-  void saveTimeWindow(const JPetTimeWindow& slot);
-  JPetSigCh generateSigCh(const JPetTOMBChannel& channel, JPetSigCh::EdgeType edge) const;
-  JPetWriter* fWriter = nullptr;
-  JPetParamManager* fParamManager = nullptr;
-  long long int fCurrEventNumber = 0;
-  const std::string kMaxTimeParamKey = "TimeWindowCreator_MaxTime";
-  const std::string kMinTimeParamKey = "TimeWindowCreator_MinTime";
-  double fMaxTime = 0.;
-  double fMinTime = -1.e6;
+  protected:
+    void saveTimeWindow(const JPetTimeWindow& slot);
+    JPetSigCh generateSigCh(const JPetTOMBChannel& channel, JPetSigCh::EdgeType edge) const;
+    JPetWriter* fWriter = nullptr;
+    JPetParamManager* fParamManager = nullptr;
+    long long int fCurrEventNumber = 0;
+    const std::string kMaxTimeParamKey = "TimeWindowCreator_MaxTime";
+    const std::string kMinTimeParamKey = "TimeWindowCreator_MinTime";
+    double fMaxTime = 0.;
+    double fMinTime = -1.e6;
 };
 
 #endif /*  !TimeWindowCreator_H */
