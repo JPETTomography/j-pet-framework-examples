@@ -56,9 +56,10 @@ void HitFinder::exec()
 			}
 			else {
 				HitsInTimeWindow = HitTools.createHits(fAllSignalsInTimeWindow, kTimeWindowWidth);
-				saveHits(HitTools.createHits(fAllSignalsInTimeWindow, kTimeWindowWidth));
+				saveHits(HitsInTimeWindow);
 				getStatistics().getHisto1D("hits_per_time_window").Fill(HitsInTimeWindow.size());
 
+				HitsInTimeWindow.clear();
 				fAllSignalsInTimeWindow.clear();
 				DAQTimeWindowIndex = currSignal->getTimeWindowIndex();
 				fillSignalsMap(*currSignal);
@@ -72,7 +73,7 @@ void HitFinder::exec()
 void HitFinder::terminate()
 {
 	HitsInTimeWindow = HitTools.createHits(fAllSignalsInTimeWindow, kTimeWindowWidth);
-	saveHits(HitTools.createHits(fAllSignalsInTimeWindow, kTimeWindowWidth));
+	saveHits(HitsInTimeWindow);
 
 	INFO("Hit finding ended.");
 }
