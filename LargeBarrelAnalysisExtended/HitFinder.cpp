@@ -27,17 +27,37 @@ HitFinder::~HitFinder() {}
 
 void HitFinder::init(const JPetTaskInterface::Options& opts)
 {
-	INFO("Hit finding started.");
-	getStatistics().createHistogram(
-				new TH1F("hits_per_time_window",
-					"Number of Hits in Time Window",
-					101, -0.5, 100.5
-				)
-	);
+	INFO("Reading velocities.");
+	fVelocityMap = readVelocityFile();
+
+  getStatistics().createHistogram(
+    new TH1F("hits_per_time_window",
+      "Number of Hits in Time Window",
+      101, -0.5, 100.5
+    )
+  );
+
+  getStatistics().createHistogram(
+    new TH2F("time_diff_per_scin",
+      "Signals Time Difference per Scintillator ID",
+      200, -20000.0, 20000.0,
+      192, 1.0, 193.0
+    )
+  );
+
+  getStatistics().createHistogram(
+    new TH2F("hit_pos_per_scin",
+      "Hit Position per Scintillator ID",
+      200, -150.0, 150.0,
+      192, 1.0, 193.0
+    )
+  );
 
 	if (opts.count(fTimeWindowWidthParamKey )) {
 		kTimeWindowWidth = atof(opts.at(fTimeWindowWidthParamKey).c_str());
 	}
+
+		INFO("Hit finding started.");
 }
 
 void HitFinder::exec()
@@ -45,23 +65,24 @@ void HitFinder::exec()
 
 	//getting the data from event in apropriate format
 	if (auto currSignal = dynamic_cast<const JPetPhysSignal* const>(getEvent())) {
-		if (firstSignal) {
-			DAQTimeWindowIndex = currSignal->getTimeWindowIndex();
+		if (kFirstTime) {
+			kTimeSlotIndex = currSignal->getTimeWindowIndex();
 			fillSignalsMap(*currSignal);
-			firstSignal = false;
+			kFirstTime = false;
 		} else {
-			if (DAQTimeWindowIndex == currSignal->getTimeWindowIndex()) {
+			if (kTimeSlotIndex == currSignal->getTimeWindowIndex()) {
 				fillSignalsMap(*currSignal);
 			} else {
-				vector<JPetHit> hits = HitTools.createHits(
-								fAllSignalsInTimeWindow,
-								kTimeWindowWidth);
-
-				saveHits(hits);
-				getStatistics().getHisto1D("hits_per_time_window").Fill(hits.size());
-				fAllSignalsInTimeWindow.clear();
-				DAQTimeWindowIndex = currSignal->getTimeWindowIndex();
-				fillSignalsMap(*currSignal);
+        vector<JPetHit> hits = HitTools.createHits(
+          getStatistics(),
+          fAllSignalsInTimeWindow,
+          kTimeWindowWidth,
+          fVelocityMap);
+        saveHits(hits);
+        getStatistics().getHisto1D("hits_per_time_window").Fill(hits.size());
+        fAllSignalsInTimeWindow.clear();
+        kTimeSlotIndex = currSignal->getTimeWindowIndex();
+        fillSignalsMap(*currSignal);
 			}
 		}
 	}
@@ -112,4 +133,30 @@ void HitFinder::fillSignalsMap(JPetPhysSignal signal)
 						std::make_pair(sideA, sideB)));
 		}
 	}
+}
+
+map<int, vector<double>> HitFinder::readVelocityFile(){
+
+	map<int, vector<double>> velocitiesMap;
+
+	ifstream input;
+	input.open("resultsForThresholda.txt");
+	if(input.is_open()) INFO("File with velocities for THR A opened.");
+	else INFO("File with velocities ERROR.");
+
+	int slot = 0;
+	double vel = 0.0, error = 0.0;
+
+	while(!input.eof()){
+
+		input>>slot>>vel>>error;
+
+		vector<double> values;
+		values.push_back(vel);
+		values.push_back(error);
+
+		velocitiesMap[slot] = values;
+	}
+
+	return velocitiesMap;
 }

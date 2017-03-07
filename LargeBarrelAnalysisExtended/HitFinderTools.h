@@ -17,6 +17,7 @@
 #define HITFINDERTOOLS_H
 
 #include <JPetHit/JPetHit.h>
+#include <JPetStatistics/JPetStatistics.h>
 
 #include <vector>
 
@@ -33,11 +34,13 @@ public:
    *
    */
 	typedef std::map <int,
-  			std::pair <std::vector<JPetPhysSignal>,
+		std::pair <std::vector<JPetPhysSignal>,
   					std::vector<JPetPhysSignal>>> SignalsContainer;
 	std::vector<JPetHit> createHits(
-  				const SignalsContainer& allSignalsInTimeWindow,
-				const double timeDifferenceWindow);
+		JPetStatistics& stats,
+		const SignalsContainer& allSignalsInTimeWindow,
+		const double timeDifferenceWindow,
+		const std::map<int, std::vector<double>> velMap);
 
 };
 

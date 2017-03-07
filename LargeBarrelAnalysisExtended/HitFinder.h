@@ -16,6 +16,8 @@
 #ifndef HitFinder_H
 #define HitFinder_H
 
+#include <map>
+#include <vector>
 #include <JPetTask/JPetTask.h>
 #include <JPetHit/JPetHit.h>
 #include <JPetRawSignal/JPetRawSignal.h>
@@ -50,20 +52,18 @@ public:
 	virtual void exec()override;
 	virtual void terminate()override;
 	virtual void setWriter(JPetWriter* writer)override;
+	std::map<int, std::vector<double>> fVelocityMap;
 
 protected:
 
   	//Index that defines a given DAQ time window (defined at the hardware level)
-	int DAQTimeWindowIndex;
-	bool firstSignal = true;
-
+	int kTimeSlotIndex;
+	bool kFirstTime = true;
 	HitFinderTools::SignalsContainer fAllSignalsInTimeWindow;
-
 	HitFinderTools HitTools;
-
+  	std::map<int, std::vector<double>> readVelocityFile();
 	void fillSignalsMap(JPetPhysSignal signal);
 	void saveHits(const std::vector<JPetHit>& hits);
-
 	JPetWriter* fWriter;
 	const std::string fTimeWindowWidthParamKey = "HitFinder_TimeWindowWidth";
 	double kTimeWindowWidth = 50000; /// in ps -> 50ns. Maximal time difference between signals
