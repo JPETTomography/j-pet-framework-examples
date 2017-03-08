@@ -7,12 +7,12 @@ Expected output
 No output to stdout.
 JPet.log file appears with the log of the processing and ROOT files with the following etensions are produced:
  *.tslot.raw.root
- *.tslot.cal.root
+ *.tslot.calib.root
  *.raw.sig.root
- *.reco.sig.root
  *.phys.sig.root
- *.phys.hit.root
- *.phys.eve.root
+ *.hit.root
+ *.unk.evt.root
+ *.cat.evt.root
 
 where "*" stands for the name of the input file
 
@@ -22,7 +22,7 @@ For this example, user must provide their own data file(s) collected with the bi
 
 Description
 --------------
-The analysis is split into tasks, from A to E.
+The analysis is split into tasks.
 
 
 Additional info

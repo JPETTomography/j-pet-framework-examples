@@ -16,6 +16,10 @@ set(projectName LargeBarrelAnalysisExtended)
 set(AUXILLIARY_FILES
   run.sh
   conf_trb3.xml
+  resultsForThresholda.txt
+  large_barrel.json
+  TimeConstants_Layer1_2.txt
+  userParams.json
   README
   )
 
