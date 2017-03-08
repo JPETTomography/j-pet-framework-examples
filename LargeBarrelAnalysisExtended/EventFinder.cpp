@@ -21,30 +21,17 @@ using namespace std;
 
 EventFinder::EventFinder(const char * name, const char * description):JPetTask(name, description){}
 
-void EventFinder::initTimeWindows(){
+void EventFinder::init(const JPetTaskInterface::Options& opts){
 
-	//time in ps
-	fEventTimeWindows.push_back(5000.0);
-	fEventTimeWindows.push_back(10000.0);
-	fEventTimeWindows.push_back(20000.0);
-
-}
-
-void EventFinder::init(const JPetTaskInterface::Options&){
-
-	initTimeWindows();
 	INFO("Event finding started.");
 
-	if (fSaveControlHistos) {
-		for(auto timeWindow : fEventTimeWindows){
-			getStatistics().createHistogram(
-				new TH1F(Form("hits_per_event_%f", timeWindow),
-					Form("Number of Hits in Event %f ps", timeWindow),
-					20, 0.5, 20.5));
-		}
-	}
+	if (opts.count(fEventTimeParamKey))
+		kEventTimeWindow = std::atof(opts.at(fEventTimeParamKey).c_str());
 
-	INFO("Mapping Hits by Time Window.");
+	if (fSaveControlHistos)
+		getStatistics().createHistogram(
+			new TH1F("hits_per_event","Number of Hits in Event",20, 0.5, 20.5)
+		);
 }
 
 void EventFinder::exec(){
@@ -52,16 +39,21 @@ void EventFinder::exec(){
 	if(auto hit = dynamic_cast<const JPetHit*const>(getEvent())){
 		if(hit->isSignalASet() && hit->isSignalBSet()){
 			if(hit->getSignalA().getTimeWindowIndex() == hit->getSignalB().getTimeWindowIndex()){
-				int timeWindowIndex = hit->getSignalA().getTimeWindowIndex();
-				auto search = fHitTimeWindowMap.find(timeWindowIndex);
-				if (search == fHitTimeWindowMap.end()) {
-					vector<JPetHit> tmp;
-					tmp.push_back(*hit);
-					fHitTimeWindowMap.insert(pair<int, vector<JPetHit>>(timeWindowIndex, tmp));
-				} else {
-					search->second.push_back(*hit);
+				if(kFirstTime){
+					kTimeSlotIndex = hit->getSignalA().getTimeWindowIndex();
+					fHitVector.push_back(*hit);
+					kFirstTime = false;
+				}else{
+					if(kTimeSlotIndex == hit->getSignalA().getTimeWindowIndex()){
+						fHitVector.push_back(*hit);
+					}else{
+						vector<JPetEvent> events = buildEvents(fHitVector);
+						saveEvents(events);
+						fHitVector.clear();
+						kTimeSlotIndex = hit->getSignalA().getTimeWindowIndex();
+						fHitVector.push_back(*hit);
+					}
 				}
-
 			}
 		}
 	}
@@ -74,44 +66,40 @@ bool sortByTimeValue(JPetHit hit1, JPetHit hit2) {
 
 
 void EventFinder::terminate(){
-	
+	INFO("Event fiding ended.");
+}
+
+vector<JPetEvent> EventFinder::buildEvents(vector<JPetHit> hitVec){
+
 	vector<JPetEvent> eventVec;
+	sort(hitVec.begin(), hitVec.end(), sortByTimeValue);
 
-	INFO("Hit mapping by TimeWindow ended. Starting Event Finding");
-	for(auto element : fHitTimeWindowMap){
-		for(auto timeWindow : fEventTimeWindows){
+	while(hitVec.size()>0){
 
-			vector<JPetHit> hitVec = element.second;
-			sort(hitVec.begin(), hitVec.end(), sortByTimeValue);
+		JPetEvent event;
+		event.setEventType(JPetEventType::kUnknown);
 
-			while(hitVec.size()>0){
-				
-				JPetEvent event;
-				event.setEventType(JPetEventType::kUnknown);
-	
-				event.addHit(hitVec.at(0));
-				while(hitVec.size()>1){
-					if(fabs(hitVec.at(1).getTime()-hitVec.at(0).getTime()) < timeWindow) {
-						event.addHit(hitVec.at(1));
-						hitVec.erase(hitVec.begin() + 1);
-					} else {
-						break;
-					}
-				}
-				hitVec.erase(hitVec.begin() + 0);
-				if (fSaveControlHistos) getStatistics()
-						.getHisto1D(Form("hits_per_event_%f", timeWindow))
-						.Fill(event.getHits().size());
-				eventVec.push_back(event);
+		event.addHit(hitVec.at(0));
+
+		while(hitVec.size()>1){
+			if(fabs(hitVec.at(1).getTime()-hitVec.at(0).getTime()) < kEventTimeWindow) {
+				event.addHit(hitVec.at(1));
+				hitVec.erase(hitVec.begin() + 1);
+			} else {
+				break;
 			}
-
 		}
-		
+
+		hitVec.erase(hitVec.begin() + 0);
+
+		if (fSaveControlHistos) getStatistics()
+														.getHisto1D("hits_per_event")
+														.Fill(event.getHits().size());
+
+		eventVec.push_back(event);
 	}
 
-	saveEvents(eventVec);
-	INFO("Event finding ended. Writing to tree");
-
+	return eventVec;
 }
 
 void EventFinder::setWriter(JPetWriter* writer) { fWriter = writer; }
