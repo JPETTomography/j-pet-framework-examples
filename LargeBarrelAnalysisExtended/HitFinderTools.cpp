@@ -17,8 +17,10 @@
 
 using namespace std;
 
-vector<JPetHit> HitFinderTools::createHits(const SignalsContainer& allSignalsInTimeWindow,
-						const double timeDifferenceWindow)
+vector<JPetHit> HitFinderTools::createHits(JPetStatistics& stats,
+  const SignalsContainer& allSignalsInTimeWindow,
+  const double timeDifferenceWindow,
+  const std::map<int, std::vector<double>> velMap)
 {
 	vector<JPetHit> hits;
 
@@ -58,19 +60,37 @@ vector<JPetHit> HitFinderTools::createHits(const SignalsContainer& allSignalsInT
 						JPetHit hit;
 						hit.setSignalA(signalA);
 						hit.setSignalB(signalB);
-						hit.setTime((signalA.getTime()
-								+ signalB.getTime())/2.0);
+						hit.setTime((signalA.getTime()+signalB.getTime())/2.0);
 						hit.setQualityOfTime(-1.0);
-						hit.setTimeDiff(fabs(signalA.getTime()
-								- signalB.getTime()));
+						hit.setTimeDiff(signalA.getTime()-signalB.getTime());
 						hit.setQualityOfTimeDiff(-1.0);
 						hit.setEnergy(-1.0);
 						hit.setQualityOfEnergy(-1.0);
-
-            					hit.setScintillator(signalA.getPM().getScin());
+            hit.setScintillator(signalA.getPM().getScin());
 						hit.setBarrelSlot(signalA.getPM().getBarrelSlot());
+						hit.setPosX(hit.getBarrelSlot().getLayer().getRadius()
+												*cos(hit.getBarrelSlot().getTheta()));
+						hit.setPosY(hit.getBarrelSlot().getLayer().getRadius()
+												*sin(hit.getBarrelSlot().getTheta()));
+
+						auto search = velMap.find(hit.getBarrelSlot().getID());
+						if(search != velMap.end()){
+							double vel = search->second.at(0);
+							double position = vel*hit.getTimeDiff()/2000;
+							hit.setPosZ(position);
+						}else{
+							hit.setPosZ(-1000000.0);
+						}
 
 						hits.push_back(hit);
+
+            stats.getHisto2D("time_diff_per_scin")
+              .Fill(hit.getTimeDiff(),
+                (float) (hit.getScintillator().getID()));
+
+						stats.getHisto2D("hit_pos_per_scin")
+							.Fill(hit.getPosZ(),
+                (float) (hit.getScintillator().getID()));
 					}
 				}
 			}
