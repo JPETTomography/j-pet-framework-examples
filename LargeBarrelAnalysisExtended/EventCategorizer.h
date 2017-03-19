@@ -29,16 +29,16 @@ class JPetWriter;
 #endif
 
 class EventCategorizer : public JPetTask{
-public:
-	EventCategorizer(const char * name, const char * description);
-	virtual ~EventCategorizer(){}
-	virtual void init(const JPetTaskInterface::Options& opts)override;
-	virtual void exec()override;
-	virtual void terminate()override;
-	virtual void setWriter(JPetWriter* writer)override;
-protected:
-	JPetWriter* fWriter;
-	void saveEvents(const std::vector<JPetEvent>& event);
-	bool fSaveControlHistos = true;
-};
+    public:
+    	EventCategorizer(const char * name, const char * description);
+    	virtual ~EventCategorizer(){}
+    	virtual void init(const JPetTaskInterface::Options& opts)override;
+    	virtual void exec()override;
+    	virtual void terminate()override;
+    	virtual void setWriter(JPetWriter* writer)override;
+    protected:
+    	JPetWriter* fWriter;
+    	void saveEvents(const std::vector<JPetEvent>& event);
+    	bool fSaveControlHistos = true;
+    };
 #endif /*  !EVENTCATEGORIZER_H */

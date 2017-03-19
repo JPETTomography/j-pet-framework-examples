@@ -66,12 +66,13 @@ vector<JPetHit> HitFinderTools::createHits(JPetStatistics& stats,
 						hit.setQualityOfTimeDiff(-1.0);
 						hit.setEnergy(-1.0);
 						hit.setQualityOfEnergy(-1.0);
-            hit.setScintillator(signalA.getPM().getScin());
+            			hit.setScintillator(signalA.getPM().getScin());
 						hit.setBarrelSlot(signalA.getPM().getBarrelSlot());
 						hit.setPosX(hit.getBarrelSlot().getLayer().getRadius()
 												*cos(hit.getBarrelSlot().getTheta()));
 						hit.setPosY(hit.getBarrelSlot().getLayer().getRadius()
 												*sin(hit.getBarrelSlot().getTheta()));
+
 
 						auto search = velMap.find(hit.getBarrelSlot().getID());
 						if(search != velMap.end()){
@@ -84,13 +85,9 @@ vector<JPetHit> HitFinderTools::createHits(JPetStatistics& stats,
 
 						hits.push_back(hit);
 
-            stats.getHisto2D("time_diff_per_scin")
-              .Fill(hit.getTimeDiff(),
-                (float) (hit.getScintillator().getID()));
+            			stats.getHisto2D("time_diff_per_scin").Fill(hit.getTimeDiff(), (float) (hit.getScintillator().getID()));
 
-						stats.getHisto2D("hit_pos_per_scin")
-							.Fill(hit.getPosZ(),
-                (float) (hit.getScintillator().getID()));
+						stats.getHisto2D("hit_pos_per_scin").Fill(hit.getPosZ(), (float) (hit.getScintillator().getID()));
 					}
 				}
 			}

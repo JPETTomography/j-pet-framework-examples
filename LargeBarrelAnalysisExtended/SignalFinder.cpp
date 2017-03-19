@@ -67,7 +67,7 @@ void SignalFinder::exec()
 
 		//building signals method invocation
 		vector<JPetRawSignal> allSignals = SignalFinderTools::buildAllSignals(
-							timeWindow->getIndex(),
+								timeWindow->getIndex(),
     							sigChsPMMap,
     							kNumOfThresholds ,
     							getStatistics(),

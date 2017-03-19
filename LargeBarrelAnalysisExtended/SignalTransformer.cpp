@@ -92,6 +92,7 @@ JPetPhysSignal SignalTransformer::createPhysSignal(JPetRecoSignal& recoSignal)
 	std::map<int,double> leadingPointsMap = recoSignal
 				.getRawSignal()
 				.getTimesVsThresholdNumber(JPetSigCh::Leading);
+
 	double time = leadingPointsMap.begin()->second;
 	physSignal.setTime(time);
 	physSignal.setQualityOfTime(0.0);

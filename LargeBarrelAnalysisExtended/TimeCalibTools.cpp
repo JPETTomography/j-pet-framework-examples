@@ -49,9 +49,11 @@ TimeCalibTools::TOMBChToCorrection TimeCalibTools::generateTimeCalibration(const
     std::transform(calibRecords.begin(),
                    calibRecords.end(),
                    std::inserter(timeCalibration, timeCalibration.begin()),
+
     [&tombMap](const TimeCalibRecord & r) {
       auto key = std::make_tuple(r.layer, r.slot, r.side, r.threshold);
       auto correction = r.offset_value_leading;
+
       if (tombMap.find(key) != tombMap.end()) {
         auto tombCh = tombMap.at(key);
         return std::make_pair(tombCh, correction);
@@ -126,7 +128,9 @@ bool TimeCalibTools::fillTimeCalibRecord(const std::string& input, TimeCalibReco
   double o_uncert_trail = 0;
   double quality = 0;
   istringstream ss(input);
+
   ss >> layer >> slot >> side >> thr >> o_val_lead >> o_uncert_lead >> o_val_trail >> o_uncert_trail >> quality;
+
   if (ss.fail() || (side != 'A' && side != 'B')) {
     return false;
   } else {

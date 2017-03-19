@@ -25,11 +25,13 @@ void TimeWindowCreator::init(const JPetTaskInterface::Options& opts)
   if (opts.count(kMaxTimeParamKey)) {
     fMaxTime = std::atof(opts.at(kMaxTimeParamKey).c_str());
   }
+
   if (opts.count(kMinTimeParamKey)) {
     fMinTime = std::atof(opts.at(kMinTimeParamKey).c_str());
   }
   getStatistics().createHistogram( new TH1F("HitsPerEvtCh", "Hits per channel in one event", 50, -0.5, 49.5) );
-  getStatistics().createHistogram( new TH1F("ChannelsPerEvt", "Channels fired in one event", 200, -0.5, 199.5) );
+  getStatistics().createHistogram( new TH1F("ChannelsPerEvt", "Channels fired in one event", 300, -0.5, 299.5) );
+
 }
 
 TimeWindowCreator::~TimeWindowCreator() {}
@@ -40,29 +42,38 @@ void TimeWindowCreator::exec()
   //const is commented because this class has inproper architecture:
   // all get-methods aren't tagged with const modifier
   if (auto evt = dynamic_cast </*const*/ EventIII * const > (getEvent())) {
+
     int ntdc = evt->GetTotalNTDCChannels();
     getStatistics().getHisto1D("ChannelsPerEvt").Fill( ntdc );
+
     JPetTimeWindow tslot;
     tslot.setIndex(fCurrEventNumber);
+
     auto tdcHits = evt->GetTDCChannelsArray();
+
     for (int i = 0; i < ntdc; ++i) {
       //const is commented because this class has inproper architecture:
       // all get-methods aren't tagged with const modifier
       auto tdcChannel = dynamic_cast </*const*/ TDCChannel * const > (tdcHits->At(i));
       auto tomb_number =  tdcChannel->GetChannel();
+
       if (tomb_number % 65 == 0) { // skip trigger signals from TRB
         continue;
       }
+
       if ( getParamBank().getTOMBChannels().count(tomb_number) == 0 ) {
         WARNING(Form("DAQ Channel %d appears in data but does not exist in the setup from DB.", tomb_number));
         continue;
       }
+
       JPetTOMBChannel& tomb_channel = getParamBank().getTOMBChannel(tomb_number);
       // one TDC channel may record multiple signals in one TSlot
       // iterate over all signals from one TDC channel
       // analyze number of hits per channel
       getStatistics().getHisto1D("HitsPerEvtCh").Fill( tdcChannel->GetHitsNum() );
+
       const int kNumHits = tdcChannel->GetHitsNum();
+
       for (int j = 0; j < kNumHits; ++j) {
 
         // check for unreasonable times

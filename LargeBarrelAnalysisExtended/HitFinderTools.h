@@ -23,7 +23,7 @@
 
 class HitFinderTools
 {
-public:
+  public:
 
   /**
    * Map od all signals within a single DAQ time window.
@@ -33,14 +33,14 @@ public:
    * of those two signals needs to be less then specified time difference (kTimeWindowWidth)
    *
    */
-	typedef std::map <int,
-		std::pair <std::vector<JPetPhysSignal>,
-  					std::vector<JPetPhysSignal>>> SignalsContainer;
-	std::vector<JPetHit> createHits(
-		JPetStatistics& stats,
-		const SignalsContainer& allSignalsInTimeWindow,
-		const double timeDifferenceWindow,
-		const std::map<int, std::vector<double>> velMap);
+  	typedef std::map <int,
+  		                std::pair <std::vector<JPetPhysSignal>,
+    	                           std::vector<JPetPhysSignal>>> SignalsContainer;
+
+    std::vector<JPetHit> createHits(JPetStatistics& stats,
+  	                                const SignalsContainer& allSignalsInTimeWindow,
+  	                                const double timeDifferenceWindow,
+  	                                const std::map<int, std::vector<double>> velMap);
 
 };
 

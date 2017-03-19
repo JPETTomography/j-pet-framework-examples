@@ -92,9 +92,7 @@ vector<JPetEvent> EventFinder::buildEvents(vector<JPetHit> hitVec){
 
 		hitVec.erase(hitVec.begin() + 0);
 
-		if (fSaveControlHistos) getStatistics()
-														.getHisto1D("hits_per_event")
-														.Fill(event.getHits().size());
+		if (fSaveControlHistos) getStatistics().getHisto1D("hits_per_event").Fill(event.getHits().size());
 
 		eventVec.push_back(event);
 	}

@@ -13,8 +13,8 @@
  *  @file EventFinder.h
  */
 
-#ifndef EVENTFINDER_H 
-#define EVENTFINDER_H 
+#ifndef EVENTFINDER_H
+#define EVENTFINDER_H
 
 #include <vector>
 #include <map>
@@ -29,22 +29,23 @@ class JPetWriter;
 #endif
 
 class EventFinder : public JPetTask{
-public:
-	EventFinder(const char * name, const char * description);
-	virtual ~EventFinder(){}
-	virtual void init(const JPetTaskInterface::Options& opts)override;
-	virtual void exec()override;
-	virtual void terminate()override;
-	virtual void setWriter(JPetWriter* writer)override;
-protected:
-  	int kTimeSlotIndex;
-  	bool kFirstTime = true;
-  	double kEventTimeWindow = 5000.0; //ps
-	const std::string fEventTimeParamKey = "EventFinder_EventTime";
-    	std::vector<JPetHit> fHitVector;
-  	bool fSaveControlHistos = true;
-	JPetWriter* fWriter;
-	void saveEvents(const std::vector<JPetEvent>& event);
-	std::vector<JPetEvent> buildEvents(std::vector<JPetHit> hitVec);
+    public:
+    	EventFinder(const char * name, const char * description);
+    	virtual ~EventFinder(){}
+    	virtual void init(const JPetTaskInterface::Options& opts)override;
+    	virtual void exec()override;
+    	virtual void terminate()override;
+    	virtual void setWriter(JPetWriter* writer)override;
+
+    protected:
+      	int kTimeSlotIndex;
+      	bool kFirstTime = true;
+      	double kEventTimeWindow = 5000.0; //ps
+    	const std::string fEventTimeParamKey = "EventFinder_EventTime";
+        	std::vector<JPetHit> fHitVector;
+      	bool fSaveControlHistos = true;
+    	JPetWriter* fWriter;
+    	void saveEvents(const std::vector<JPetEvent>& event);
+    	std::vector<JPetEvent> buildEvents(std::vector<JPetHit> hitVec);
 };
 #endif /*  !EVENTFINDER_H */
