@@ -68,35 +68,46 @@ void EventCategorizer::init(const JPetTaskInterface::Options&){
 								100, -60.0, 60.0)
 		);
 		getStatistics().createHistogram(
-			new TH2F("hit_distanece_vs_time_diff",
+			new TH2F("hit_distance_vs_time_diff",
 								"Two Hit distance vs. abs time difference",
 								100, 0.0, 150.0,
 								100, 0.0, 6000.0)
 		);
 		getStatistics().createHistogram(
-			new TH2F("hit_distanece_vs_theta_diff",
+			new TH2F("hit_distance_vs_theta_diff",
 								"Two Hit distance vs. abs theta difference",
 								100, 0.0, 150.0,
 								360, -0.5, 359.5)
 		);
 		getStatistics().createHistogram(
-			new TH2F("hit_distanece_vs_time_diff_cut",
+			new TH2F("hit_distance_vs_time_diff_cut",
 								"Opposite Hits distance vs. abs time difference",
 								100, 0.0, 150.0,
 								100, 0.0, 6000.0)
 		);
 		getStatistics().createHistogram(
-			new TH2F("hit_distanece_vs_theta_diff_cut",
+			new TH2F("hit_distance_vs_theta_diff_cut",
 								"Opposite Hit distance vs. abs theta difference",
 								100, 0.0, 150.0,
 								360, -0.5, 359.5)
 		);
-
 		getStatistics().createHistogram(
 			new TH2F("3_hit_angles",
 								"3 Hit angles difference 1-2, 2-3",
 								360, -0.5, 359.5,
 								360, -0.5, 359.5)
+		);
+		getStatistics().createHistogram(
+			new TH2F("3_hit_distances",
+								"3 Hit distances 1-2, 2-3",
+								100, 0.0, 150.0,
+								100, 0.0, 150.0)
+		);
+		getStatistics().createHistogram(
+			new TH2F("3_hit_angles_2",
+								"3 Hit angles difference",
+								180, -0.5, 179.5,
+								180, -0.5, 179.5)
 		);
 	}
 }
@@ -114,8 +125,8 @@ void EventCategorizer::exec(){
           JPetHit firstHit = hits.at(i);
 			    JPetHit secondHit = hits.at(j);
 
-          if(firstHit.getBarrelSlot().getLayer().getID()!=3
-            && secondHit.getBarrelSlot().getLayer().getID()!=3){
+         // if(firstHit.getBarrelSlot().getLayer().getID()!=3
+           // && secondHit.getBarrelSlot().getLayer().getID()!=3){
 
             float thetaDiff = fabs(firstHit.getBarrelSlot().getTheta()
               -secondHit.getBarrelSlot().getTheta());
@@ -139,12 +150,13 @@ void EventCategorizer::exec(){
                 .Fill(secondHit.getPosY());
               getStatistics().getHisto1D("hits_z_pos")
                 .Fill(secondHit.getPosZ());
-              getStatistics().getHisto2D("hit_distanece_vs_time_diff")
+              getStatistics().getHisto2D("hit_distance_vs_time_diff")
                 .Fill(distance,timeDiff);
-              getStatistics().getHisto2D("hit_distanece_vs_theta_diff")
+              getStatistics().getHisto2D("hit_distance_vs_theta_diff")
                 .Fill(distance,thetaDiff);
               if(thetaDiff>=180.0 && thetaDiff<181.0){
-                getStatistics().getHisto1D("two_hit_event_theta_diff_cut")
+
+               getStatistics().getHisto1D("two_hit_event_theta_diff_cut")
                   .Fill(thetaDiff);
                getStatistics().getHisto1D("hits_x_pos_cut")
                  .Fill(firstHit.getPosX());
@@ -158,18 +170,18 @@ void EventCategorizer::exec(){
                   .Fill(secondHit.getPosY());
                 getStatistics().getHisto1D("hits_z_pos_cut")
                   .Fill(secondHit.getPosZ());
-                getStatistics().getHisto2D("hit_distanece_vs_time_diff_cut")
+                getStatistics().getHisto2D("hit_distance_vs_time_diff_cut")
                   .Fill(distance,timeDiff);
-                getStatistics().getHisto2D("hit_distanece_vs_theta_diff_cut")
+                getStatistics().getHisto2D("hit_distance_vs_theta_diff_cut")
                   .Fill(distance,thetaDiff);
               }
             }
-          }
+          //}
 		    }
 		  }
 		}
 
-		if(event->getHits().size() == 3){
+    if(event->getHits().size() == 3){
           JPetHit firstHit = event->getHits().at(0);
           JPetHit secondHit = event->getHits().at(1);
           JPetHit thirdHit = event->getHits().at(2);
@@ -178,9 +190,38 @@ void EventCategorizer::exec(){
             -secondHit.getBarrelSlot().getTheta());
           float theta_2_3 = fabs(secondHit.getBarrelSlot().getTheta()
             -thirdHit.getBarrelSlot().getTheta());
+          //float theta_3_1 = fabs(thirdHit.getBarrelSlot().getTheta()
+          //  -firstHit.getBarrelSlot().getTheta());
+
+          float distance_1_2 = sqrt(pow(firstHit.getPosX()-secondHit.getPosX(),2)
+            +pow(firstHit.getPosY()-secondHit.getPosY(),2)
+            +pow(firstHit.getPosZ()-secondHit.getPosZ(),2));
+
+          float distance_2_3 = sqrt(pow(secondHit.getPosX()-thirdHit.getPosX(),2)
+            +pow(secondHit.getPosY()-thirdHit.getPosY(),2)
+            +pow(secondHit.getPosZ()-thirdHit.getPosZ(),2));
 
           getStatistics().getHisto2D("3_hit_angles")
                   .Fill(theta_1_2,theta_2_3);
+
+          getStatistics().getHisto2D("3_hit_distances")
+                  .Fill(distance_1_2,distance_2_3);
+
+          vector<float> thetas;
+          thetas.push_back(firstHit.getBarrelSlot().getTheta());
+          thetas.push_back(secondHit.getBarrelSlot().getTheta());
+          thetas.push_back(thirdHit.getBarrelSlot().getTheta());
+          sort(thetas.begin(),thetas.end());
+
+          vector<float> tDiffs;
+          tDiffs.push_back(thetas.at(1)-thetas.at(0));
+          tDiffs.push_back(thetas.at(2)-thetas.at(1));
+          tDiffs.push_back(360.0-thetas.at(2)+thetas.at(0));
+          sort(tDiffs.begin(),tDiffs.end());
+
+          getStatistics().getHisto2D("3_hit_angles_2")
+                  .Fill(tDiffs.at(0),tDiffs.at(1));
+
 		}
 	}
 }

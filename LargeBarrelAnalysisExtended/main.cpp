@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
     );
   });
 
-  ////Fourth task - Reco & Phys signal creation
+  //Fourth task - Reco & Phys signal creation
   manager.registerTask([]() {
     return new JPetTaskLoader("raw.sig", "phys.sig",
       new SignalTransformer(
@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
     );
   });
 
-  ////Fifth task - Hit construction
+  //Fifth task - Hit construction
   manager.registerTask([]() {
     return new JPetTaskLoader("phys.sig", "hits",
       new HitFinder(
@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
     );
   });
 
-  ////Sixth task - unknown Event construction
+  //Sixth task - unknown Event construction
   manager.registerTask([]() {
     return new JPetTaskLoader("hits", "unk.evt",
       new EventFinder(
