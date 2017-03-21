@@ -29,33 +29,6 @@ void TaskC::init(const JPetTaskInterface::Options& opts)
 {
 }
 
-
-void TaskC::exec()
-{
-  //getting the data from event in propriate format
-  if (auto currSignal = dynamic_cast<const JPetRawSignal* const>(getEvent())) {
-    getStatistics().getCounter("No. initial signals")++;
-    if (fSignals.empty()) {
-      fSignals.push_back(*currSignal);
-    } else {
-      if (fSignals[0].getTimeWindowIndex() == currSignal->getTimeWindowIndex()) {
-        fSignals.push_back(*currSignal);
-      } else {
-
-        vector<JPetHit> hits = createHits(fSignals);
-        hits = JPetAnalysisTools::getHitsOrderedByTime(hits);
-        // uncomment this in order to fill histograms
-        // of time differences for subsequent hist
-        studyTimeWindow(hits);
-        saveHits(hits);
-
-        fSignals.clear();
-        fSignals.push_back(*currSignal);
-      }
-    }
-  }
-}
-
 void TaskC::exec()
 {
   //getting the data from event in propriate format
@@ -180,7 +153,6 @@ void TaskC::studyTimeWindow(const vector<JPetHit>& hits)
 
   // plot time differences for subsequent hits at each threshold separately
   for (int i = 1; i < hits.size(); ++i) {
-    >>> >>> > Use hit sorting from framework library
     for (int k = 1; k <= 4; ++k) {
       double t2 = 0.5 * (hits.at(i).getSignalA().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).at(k) + hits.at(i).getSignalB().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).at(k));
       double t1 = 0.5 * (hits.at(i - 1).getSignalA().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).at(k) + hits.at(i - 1).getSignalB().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).at(k));
@@ -201,4 +173,9 @@ void TaskC::saveHits(const vector<JPetHit>& hits)
     // without checking anything
     fWriter->write(hit);
   }
+}
+
+void TaskC::setWriter(JPetWriter* writer)
+{
+  fWriter = writer;
 }
