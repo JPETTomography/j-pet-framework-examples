@@ -13,10 +13,13 @@ DIR_SLE=ScopeLoaderExample
 #large barrel example
 DIR_LBE=LargeBarrelExample
 
+#large barrel example
+DIR_LBAE=LargeBarrelAnalysisExtended
+
 #framework examples
 DIR_FE=FrameworkExample
 
-HTTP_PATH="http://koza.if.uj.edu.pl/framework/Examples"
+HTTP_PATH="http://sphinx.if.uj.edu.pl/framework/Examples"
 WGET_OUTPUT="./"
 # -r  means recursive, 
 # --cut-dirs=1 ignore given level of directories (e.g. remove framework from path) 
@@ -52,5 +55,10 @@ wget "${WGET_INPUT}" "${WGET_FLAGS[@]}" -P "${WGET_OUTPUT}"
 
 WGET_DIR=${DIR_FE}
 WGET_INPUT=${HTTP_PATH}/${DIR_FE}
+#downloading test data via wget
+wget "${WGET_INPUT}" "${WGET_FLAGS[@]}" -P "${WGET_OUTPUT}" 
+
+WGET_DIR=${DIR_LBAE}
+WGET_INPUT=${HTTP_PATH}/${DIR_LBAE}
 #downloading test data via wget
 wget "${WGET_INPUT}" "${WGET_FLAGS[@]}" -P "${WGET_OUTPUT}" 

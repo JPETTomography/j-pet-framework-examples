@@ -10,21 +10,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file TaskA.cpp
+ *  @file TimeWindowCreator.cpp
  */
 #include <Unpacker2/Unpacker2/EventIII.h>
 #include <JPetWriter/JPetWriter.h>
-#include "TaskA.h"
-TaskA::TaskA(const char* name, const char* description)
-  : JPetTask(name, description), fCurrEventNumber(0) {}
-void TaskA::init(const JPetTaskInterface::Options& )
+#include "TimeWindowCreator.h"
+
+TimeWindowCreator::TimeWindowCreator(const char* name, const char* description):
+  JPetTask(name, description) {}
+
+void TimeWindowCreator::init(const JPetTaskInterface::Options& opts)
 {
+  /// Reading values from the user options if available
+  if (opts.count(kMaxTimeParamKey)) {
+    fMaxTime = std::atof(opts.at(kMaxTimeParamKey).c_str());
+  }
+  if (opts.count(kMinTimeParamKey)) {
+    fMinTime = std::atof(opts.at(kMinTimeParamKey).c_str());
+  }
   getStatistics().createHistogram( new TH1F("HitsPerEvtCh", "Hits per channel in one event", 50, -0.5, 49.5) );
   getStatistics().createHistogram( new TH1F("ChannelsPerEvt", "Channels fired in one event", 200, -0.5, 199.5) );
 }
 
-TaskA::~TaskA() {}
-void TaskA::exec()
+TimeWindowCreator::~TimeWindowCreator() {}
+
+void TimeWindowCreator::exec()
 {
   //getting the data from event in apropriate format
   //const is commented because this class has inproper architecture:
@@ -55,14 +65,14 @@ void TaskA::exec()
       const int kNumHits = tdcChannel->GetHitsNum();
       for (int j = 0; j < kNumHits; ++j) {
 
-        // check for unreasable times
+        // check for unreasonable times
         // the times should be negative (measured w.r.t end of time window)
         // and not smaller than -1*timeWindowWidth (which can vary for different)
         // data but shoudl not exceed 1 ms, i.e. 1.e6 ns)
-        if ( tdcChannel->GetLeadTime(j) > kMaxTime ||
-             tdcChannel->GetLeadTime(j) < kMinTime )continue;
-        if ( tdcChannel->GetTrailTime(j) > kMaxTime ||
-             tdcChannel->GetTrailTime(j) < kMinTime )continue;
+        if ( tdcChannel->GetLeadTime(j) > fMaxTime ||
+             tdcChannel->GetLeadTime(j) < fMinTime )continue;
+        if ( tdcChannel->GetTrailTime(j) > fMaxTime ||
+             tdcChannel->GetTrailTime(j) < fMinTime )continue;
 
         JPetSigCh sigChTmpLead = generateSigCh(tomb_channel, JPetSigCh::Leading);
         JPetSigCh sigChTmpTrail = generateSigCh(tomb_channel, JPetSigCh::Trailing);
@@ -79,29 +89,32 @@ void TaskA::exec()
   }
 }
 
-void TaskA::terminate() {}
-void TaskA::saveTimeWindow( JPetTimeWindow slot)
+void TimeWindowCreator::terminate() {}
+
+void TimeWindowCreator::saveTimeWindow(const JPetTimeWindow& slot)
 {
   assert(fWriter);
   fWriter->write(slot);
 }
-void TaskA::setWriter(JPetWriter* writer)
+
+void TimeWindowCreator::setWriter(JPetWriter* writer)
 {
   fWriter = writer;
 }
-void TaskA::setParamManager(JPetParamManager* paramManager)
+
+void TimeWindowCreator::setParamManager(JPetParamManager* paramManager)
 {
   fParamManager = paramManager;
 }
-const JPetParamBank& TaskA::getParamBank()const
+
+const JPetParamBank& TimeWindowCreator::getParamBank() const
 {
   assert(fParamManager);
   return fParamManager->getParamBank();
 }
 
-JPetSigCh TaskA::generateSigCh(const JPetTOMBChannel& channel, JPetSigCh::EdgeType edge) const
+JPetSigCh TimeWindowCreator::generateSigCh(const JPetTOMBChannel& channel, JPetSigCh::EdgeType edge) const
 {
-
   JPetSigCh sigch;
   sigch.setDAQch(channel.getChannel());
   sigch.setType(edge);
@@ -111,6 +124,6 @@ JPetSigCh TaskA::generateSigCh(const JPetTOMBChannel& channel, JPetSigCh::EdgeTy
   sigch.setFEB(channel.getFEB());
   sigch.setTRB(channel.getTRB());
   sigch.setTOMBChannel(channel);
-
   return sigch;
 }
+
