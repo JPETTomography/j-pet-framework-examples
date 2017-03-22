@@ -48,7 +48,7 @@ void TimeCalibLoader::exec()
     auto newSigChs = oldTimeWindow->getSigChVect();
     for (auto & sigCh : newSigChs) {
       /// Calibration time is ns so we should change it to ps, cause all the time is in ps.
-      sigCh.setValue(sigCh.getValue() - 1000. * TimeCalibTools::getTimeCalibCorrection(fTimeCalibration, sigCh.getTOMBChannel().getChannel()));
+      sigCh.setValue(sigCh.getValue() + 1000. * TimeCalibTools::getTimeCalibCorrection(fTimeCalibration, sigCh.getTOMBChannel().getChannel()));
       correctedWindow.addCh(sigCh);
     }
     correctedWindow.setIndex(oldTimeWindow->getIndex());

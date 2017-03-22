@@ -34,7 +34,7 @@
  * "TimeCalibLoader_ConfigFile":"path_and_filename_with_calib_constants"
  * The default file name "timeCalib.txt" will be used if the user option
  * is not set.
- * The current correction has a following formula: raw_time - 1000 * correction_constant
+ * The current correction has a following formula: raw_time + 1000 * correction_constant
  * 1000 factor is needed because current calib constants are expressed in ns, while
  * JPetSigCh time is in ps.
  * If a calibration constant is missing for a given channel, then the 0 is returned.
