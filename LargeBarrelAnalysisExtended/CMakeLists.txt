@@ -18,7 +18,7 @@ set(AUXILLIARY_FILES
   conf_trb3.xml
   resultsForThresholda.txt
   large_barrel.json
-  TimeConstants_Layer1_2.txt
+  TimeConstants.txt
   userParams.json
   README
   )
