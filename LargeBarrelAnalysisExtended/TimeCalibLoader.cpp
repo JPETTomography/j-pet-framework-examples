@@ -28,6 +28,8 @@ TimeCalibLoader::~TimeCalibLoader() {}
 
 void TimeCalibLoader::init(const JPetTaskInterface::Options& opts)
 {
+  fOutputEvents = new JPetTimeWindow("JPetSigCh");
+
   auto calibFile =  std::string("timeCalib.txt");
   if (opts.count(fConfigFileParamKey)) {
     calibFile = opts.at(fConfigFileParamKey);
@@ -44,31 +46,22 @@ void TimeCalibLoader::init(const JPetTaskInterface::Options& opts)
 void TimeCalibLoader::exec()
 {
   if (auto oldTimeWindow = dynamic_cast<const JPetTimeWindow* const>(getEvent())) {
-    JPetTimeWindow correctedWindow;
-    auto newSigChs = oldTimeWindow->getSigChVect();
-    for (auto & sigCh : newSigChs) {
-      /// Calibration time is ns so we should change it to ps, cause all the time is in ps.
-      sigCh.setValue(sigCh.getValue() + 1000. * TimeCalibTools::getTimeCalibCorrection(fTimeCalibration, sigCh.getTOMBChannel().getChannel()));
-      correctedWindow.addCh(sigCh);
-    }
-    correctedWindow.setIndex(oldTimeWindow->getIndex());
-    saveTimeWindow(correctedWindow);
-  }
-}
 
-void TimeCalibLoader::saveTimeWindow(const JPetTimeWindow& window)
-{
-  assert(fWriter);
-  fWriter->write(window);
+    //    auto newSigChs = oldTimeWindow->getSigChVect();
+    //    for (auto & sigCh : newSigChs) {
+    auto n = oldTimeWindow->getNumberOfEvents();
+    for(uint i=0;i<n;++i){
+
+      JPetSigCh sigCh = dynamic_cast<const JPetSigCh&>(oldTimeWindow->operator[](i));
+    /// Calibration time is ns so we should change it to ps, cause all the time is in ps.
+      sigCh.setValue(sigCh.getValue() + 1000. * TimeCalibTools::getTimeCalibCorrection(fTimeCalibration, sigCh.getTOMBChannel().getChannel()));
+      fOutputEvents->Add<JPetSigCh>(sigCh);
+    }
+  }
 }
 
 void TimeCalibLoader::terminate()
 {
-}
-
-void TimeCalibLoader::setWriter(JPetWriter* writer)
-{
-  fWriter = writer;
 }
 
 void TimeCalibLoader::setParamManager(JPetParamManager* paramManager)
