@@ -27,7 +27,9 @@ HitFinder::~HitFinder() {}
 
 void HitFinder::init(const JPetTaskInterface::Options& opts)
 {
-	INFO("Reading velocities.");
+  fOutputEvents = new JPetTimeWindow("JPetHit");
+  
+  INFO("Reading velocities.");
 	fVelocityMap = readVelocityFile();
 
   getStatistics().createHistogram(
@@ -62,30 +64,21 @@ void HitFinder::init(const JPetTaskInterface::Options& opts)
 
 void HitFinder::exec()
 {
-
-	//getting the data from event in apropriate format
-	if (auto currSignal = dynamic_cast<const JPetPhysSignal* const>(getEvent())) {
-		if (kFirstTime) {
-			kTimeSlotIndex = currSignal->getTimeWindowIndex();
-			fillSignalsMap(*currSignal);
-			kFirstTime = false;
-		} else {
-			if (kTimeSlotIndex == currSignal->getTimeWindowIndex()) {
-				fillSignalsMap(*currSignal);
-			} else {
-        vector<JPetHit> hits = HitTools.createHits(
-          getStatistics(),
-          fAllSignalsInTimeWindow,
-          kTimeWindowWidth,
-          fVelocityMap);
-        saveHits(hits);
-        getStatistics().getHisto1D("hits_per_time_window").Fill(hits.size());
-        fAllSignalsInTimeWindow.clear();
-        kTimeSlotIndex = currSignal->getTimeWindowIndex();
-        fillSignalsMap(*currSignal);
-			}
-		}
-	}
+  if(auto & timeWindow = dynamic_cast<const JPetTimeWindow* const>(getEvent())) {
+    uint n = timeWindow->getNumberOfEvents();
+    for(uint i=0;i<n;++i){
+      fillSignalsMap(dynamic_cast<const JPetPhysSignal&>(timeWindow->operator[](i)));
+    }
+    
+    vector<JPetHit> hits = HitTools.createHits(
+					       getStatistics(),
+					       fAllSignalsInTimeWindow,
+					       kTimeWindowWidth,
+					       fVelocityMap);
+    saveHits(hits);
+    getStatistics().getHisto1D("hits_per_time_window").Fill(hits.size());
+    fAllSignalsInTimeWindow.clear();
+  }
 }
 
 
@@ -98,20 +91,14 @@ void HitFinder::terminate()
 
 void HitFinder::saveHits(const vector<JPetHit>& hits)
 {
-	assert(fWriter);
 	auto sortedHits = JPetAnalysisTools::getHitsOrderedByTime(hits);
 
 	for (const auto & hit : sortedHits) {
-		fWriter->write(hit);
+	  fOutputEvents->add<JPetHit>(hit);
 	}
 }
 
-void HitFinder::setWriter(JPetWriter* writer)
-{
-	fWriter = writer;
-}
-
-void HitFinder::fillSignalsMap(JPetPhysSignal signal)
+void HitFinder::fillSignalsMap(const JPetPhysSignal signal)
 {
 	auto scinId = signal.getPM().getScin().getID();
 	if (signal.getPM().getSide() == JPetPM::SideA) {
