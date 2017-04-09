@@ -25,9 +25,9 @@ map<int, vector<JPetSigCh>> SignalFinderTools::getSigChsPMMapById(const JPetTime
 	}
 
 	//map Signal Channels in this Time window according to PM they belong to
-	const unsigned int nSigChs = timeWindow->getNumberOfSigCh();
+	const unsigned int nSigChs = timeWindow->getNumberOfEvents();
 	for(unsigned int i = 0; i < nSigChs; i++) {
-		JPetSigCh sigCh = timeWindow->operator[](i);
+	  JPetSigCh sigCh = dynamic_cast<const JPetSigCh &>(timeWindow->operator[](i));
 		int pmt_id = sigCh.getPM().getID();
 		auto search = sigChsPMMap.find(pmt_id);
 		if (search == sigChsPMMap.end()) {
@@ -43,7 +43,7 @@ map<int, vector<JPetSigCh>> SignalFinderTools::getSigChsPMMapById(const JPetTime
 }
 
 //method with loop of building raw signals for whole PM map
-vector<JPetRawSignal> SignalFinderTools::buildAllSignals(Int_t timeWindowIndex,
+vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
 					map<int, vector<JPetSigCh>> sigChsPMMap,
 					int numOfThresholds,
 					JPetStatistics& stats,
@@ -55,7 +55,7 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(Int_t timeWindowIndex,
 	vector<JPetRawSignal> allSignals;
 
 	for (auto & sigChPair : sigChsPMMap) {
-		vector<JPetRawSignal> currentSignals = buildRawSignals(timeWindowIndex, sigChPair.second, numOfThresholds, stats, saveControlHistos, sigChEdgeMaxTime, sigChLeadTrailMaxTime);
+		vector<JPetRawSignal> currentSignals = buildRawSignals(sigChPair.second, numOfThresholds, stats, saveControlHistos, sigChEdgeMaxTime, sigChLeadTrailMaxTime);
 		allSignals.insert(allSignals.end(), currentSignals.begin(), currentSignals.end());
 	}
 
@@ -69,7 +69,7 @@ bool sortByTimeValue(JPetSigCh sig1, JPetSigCh sig2)
 }
 
 //method creating Raw signals form vector of Signal Channels
-vector<JPetRawSignal> SignalFinderTools::buildRawSignals(Int_t timeWindowIndex,
+vector<JPetRawSignal> SignalFinderTools::buildRawSignals(
 					const vector<JPetSigCh>& sigChFromSamePM,
 					int numOfThresholds,
 					JPetStatistics& stats,
@@ -121,7 +121,6 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(Int_t timeWindowIndex,
 	while (thresholdSigCh.at(0).size() > 0) {
 
 		JPetRawSignal rawSig;
-		rawSig.setTimeWindowIndex(timeWindowIndex);
 		rawSig.setPM(thresholdSigCh.at(0).at(0).getPM());
 		rawSig.setBarrelSlot(thresholdSigCh.at(0).at(0).getPM().getBarrelSlot());
 

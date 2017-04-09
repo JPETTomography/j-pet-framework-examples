@@ -35,6 +35,8 @@ void SignalFinder::init(const JPetTaskInterface::Options& opts)
 {
 	INFO("Signal finding started.");
 
+	fOutputEvents = new JPetTimeWindow("JPetRawSignal");
+	
 	if (opts.count(fEdgeMaxTimeParamKey)) {
 		kSigChEdgeMaxTime = std::atof(opts.at(fEdgeMaxTimeParamKey).c_str());
 	}
@@ -67,7 +69,6 @@ void SignalFinder::exec()
 
 		//building signals method invocation
 		vector<JPetRawSignal> allSignals = SignalFinderTools::buildAllSignals(
-							timeWindow->getIndex(),
     							sigChsPMMap,
     							kNumOfThresholds ,
     							getStatistics(),
@@ -91,13 +92,8 @@ void SignalFinder::terminate()
 //saving method
 void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& sigChVec)
 {
-	assert(fWriter);
-	for (const auto & sigCh : sigChVec) {
-		fWriter->write(sigCh);
+	for (auto & sigCh : sigChVec) {
+	  fOutputEvents->add<JPetRawSignal>(sigCh);
 	}
 }
 
-void SignalFinder::setWriter(JPetWriter* writer)
-{
-	fWriter = writer;
-}
