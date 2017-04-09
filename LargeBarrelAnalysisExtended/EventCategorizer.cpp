@@ -26,6 +26,8 @@ void EventCategorizer::init(const JPetTaskInterface::Options&){
 	INFO("Event categorization started.");
 	INFO("Looking at two hit Events on Layer 1&2 only - creating only control histograms");
 
+	fOutputEvents = new JPetTimeWindow("JPetEvent");
+	
 	if (fSaveControlHistos){
 		getStatistics().createHistogram(
 			new TH1F("two_hit_event_theta_diff",
@@ -105,10 +107,15 @@ void EventCategorizer::exec(){
 
 	//Analysis of Events consisting of two hits that come from Layer 1 or 2
 	//Layer 3 is ignored, since it is not callibrated
-	if(auto event = dynamic_cast<const JPetEvent*const>(getEvent())){
-		if(event->getHits().size() > 1){
+	if(auto timeWindow = dynamic_cast<const JPetTimeWindow*const>(getEvent())){
+	  uint n = timeWindow->getNumberOfEvents();
+	  for(uint i=0;i<n;++i){
 
-		  vector<JPetHit> hits = event->getHits();
+	    const auto & event = dynamic_cast<const JPetEvent&>(timeWindow->operator[](i));
+	    
+		if(event.getHits().size() > 1){
+
+		  vector<JPetHit> hits = event.getHits();
 		  for(int i=0;i<hits.size();i++){
 		    for(int j=i+1;j<hits.size();j++){
           JPetHit firstHit = hits.at(i);
@@ -169,10 +176,10 @@ void EventCategorizer::exec(){
 		  }
 		}
 
-		if(event->getHits().size() == 3){
-          JPetHit firstHit = event->getHits().at(0);
-          JPetHit secondHit = event->getHits().at(1);
-          JPetHit thirdHit = event->getHits().at(2);
+		if(event.getHits().size() == 3){
+          JPetHit firstHit = event.getHits().at(0);
+          JPetHit secondHit = event.getHits().at(1);
+          JPetHit thirdHit = event.getHits().at(2);
 
           float theta_1_2 = fabs(firstHit.getBarrelSlot().getTheta()
             -secondHit.getBarrelSlot().getTheta());
@@ -183,6 +190,7 @@ void EventCategorizer::exec(){
                   .Fill(theta_1_2,theta_2_3);
 		}
 	}
+	}
 }
 
 void EventCategorizer::terminate(){
@@ -191,12 +199,9 @@ void EventCategorizer::terminate(){
 
 }
 
-void EventCategorizer::setWriter(JPetWriter* writer) { fWriter = writer; }
-
 void EventCategorizer::saveEvents(const vector<JPetEvent>& events)
 {
-	assert(fWriter);
 	for (const auto & event : events) {
-		fWriter->write(event);
+	  fOutputEvents->add<JPetEvent>(event);
 	}
 }

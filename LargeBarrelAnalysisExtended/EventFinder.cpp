@@ -25,6 +25,8 @@ void EventFinder::init(const JPetTaskInterface::Options& opts){
 
 	INFO("Event finding started.");
 
+	fOutputEvents = new JPetTimeWindow("JPetEvent");
+	
 	if (opts.count(fEventTimeParamKey))
 		kEventTimeWindow = std::atof(opts.at(fEventTimeParamKey).c_str());
 
@@ -36,27 +38,18 @@ void EventFinder::init(const JPetTaskInterface::Options& opts){
 
 void EventFinder::exec(){
 
-	if(auto hit = dynamic_cast<const JPetHit*const>(getEvent())){
-		if(hit->isSignalASet() && hit->isSignalBSet()){
-			if(hit->getSignalA().getTimeWindowIndex() == hit->getSignalB().getTimeWindowIndex()){
-				if(kFirstTime){
-					kTimeSlotIndex = hit->getSignalA().getTimeWindowIndex();
-					fHitVector.push_back(*hit);
-					kFirstTime = false;
-				}else{
-					if(kTimeSlotIndex == hit->getSignalA().getTimeWindowIndex()){
-						fHitVector.push_back(*hit);
-					}else{
-						vector<JPetEvent> events = buildEvents(fHitVector);
-						saveEvents(events);
-						fHitVector.clear();
-						kTimeSlotIndex = hit->getSignalA().getTimeWindowIndex();
-						fHitVector.push_back(*hit);
-					}
-				}
-			}
-		}
-	}
+  if(auto & timeWindow = dynamic_cast<const JPetTimeWindow* const>(getEvent())) {
+    uint n = timeWindow->getNumberOfEvents();
+    for(uint i=0;i<n;++i){
+      fHitVector.push_back(dynamic_cast<const JPetHit&>(timeWindow->operator[](i)));
+    }
+    
+    vector<JPetEvent> events = buildEvents(fHitVector);
+
+    saveEvents(events);
+
+    fHitVector.clear();
+  }
 }
 
 //sorting method
@@ -102,12 +95,9 @@ vector<JPetEvent> EventFinder::buildEvents(vector<JPetHit> hitVec){
 	return eventVec;
 }
 
-void EventFinder::setWriter(JPetWriter* writer) { fWriter = writer; }
-
 void EventFinder::saveEvents(const vector<JPetEvent>& events)
 {
-  assert(fWriter);
   for (const auto & event : events) {
-    fWriter->write(event);
+    fOutputEvents->add<JPetEvent>(event);
   }
 }
