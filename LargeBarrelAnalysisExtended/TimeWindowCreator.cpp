@@ -21,6 +21,8 @@ TimeWindowCreator::TimeWindowCreator(const char* name, const char* description):
 
 void TimeWindowCreator::init(const JPetTaskInterface::Options& opts)
 {
+  fOutputEvents = new JPetTimeWindow("JPetSigCh");
+  
   /// Reading values from the user options if available
   if (opts.count(kMaxTimeParamKey)) {
     fMaxTime = std::atof(opts.at(kMaxTimeParamKey).c_str());
@@ -42,8 +44,7 @@ void TimeWindowCreator::exec()
   if (auto evt = dynamic_cast </*const*/ EventIII * const > (getEvent())) {
     int ntdc = evt->GetTotalNTDCChannels();
     getStatistics().getHisto1D("ChannelsPerEvt").Fill( ntdc );
-    JPetTimeWindow tslot;
-    tslot.setIndex(fCurrEventNumber);
+
     auto tdcHits = evt->GetTDCChannelsArray();
     for (int i = 0; i < ntdc; ++i) {
       //const is commented because this class has inproper architecture:
@@ -80,27 +81,17 @@ void TimeWindowCreator::exec()
         // finally, set the times in ps [raw times are in ns]
         sigChTmpLead.setValue(tdcChannel->GetLeadTime(j) * 1000.);
         sigChTmpTrail.setValue(tdcChannel->GetTrailTime(j) * 1000.);
-        tslot.addCh(sigChTmpLead);
-        tslot.addCh(sigChTmpTrail);
+	fOutputEvents->Add<JPetSigCh>(sigChTmpLead);
+	fOutputEvents->Add<JPetSigCh>(sigChTmpTrail);
       }
     }
-    saveTimeWindow(tslot);
+
     fCurrEventNumber++;
   }
 }
 
 void TimeWindowCreator::terminate() {}
 
-void TimeWindowCreator::saveTimeWindow(const JPetTimeWindow& slot)
-{
-  assert(fWriter);
-  fWriter->write(slot);
-}
-
-void TimeWindowCreator::setWriter(JPetWriter* writer)
-{
-  fWriter = writer;
-}
 
 void TimeWindowCreator::setParamManager(JPetParamManager* paramManager)
 {
