@@ -33,7 +33,6 @@ public:
 	//Method reconstructs all signals based on the signal channels
 	//from the SigChPMMap
 	static std::vector<JPetRawSignal> buildAllSignals(
-  				Int_t timeWindowIndex,
 				std::map<int, std::vector<JPetSigCh>> sigChsPMMap,
 				int numOfThresholds,
 				JPetStatistics& stats,
@@ -44,7 +43,7 @@ public:
 
 	//Method reconstructs signals based on the signal channels
 	//from the sigChFromSamePM container
-	static std::vector<JPetRawSignal> buildRawSignals(Int_t timeWindowIndex,
+	static std::vector<JPetRawSignal> buildRawSignals(
 				const std::vector<JPetSigCh>& sigChFromSamePM,
 				int numOfThresholds,
 				JPetStatistics& stats,
