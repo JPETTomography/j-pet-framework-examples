@@ -55,7 +55,7 @@ void TimeCalibLoader::exec()
       JPetSigCh sigCh = dynamic_cast<const JPetSigCh&>(oldTimeWindow->operator[](i));
     /// Calibration time is ns so we should change it to ps, cause all the time is in ps.
       sigCh.setValue(sigCh.getValue() + 1000. * TimeCalibTools::getTimeCalibCorrection(fTimeCalibration, sigCh.getTOMBChannel().getChannel()));
-      fOutputEvents->Add<JPetSigCh>(sigCh);
+      fOutputEvents->add<JPetSigCh>(sigCh);
     }
   }
 }

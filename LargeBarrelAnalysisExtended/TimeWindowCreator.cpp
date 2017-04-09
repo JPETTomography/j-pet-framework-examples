@@ -81,8 +81,8 @@ void TimeWindowCreator::exec()
         // finally, set the times in ps [raw times are in ns]
         sigChTmpLead.setValue(tdcChannel->GetLeadTime(j) * 1000.);
         sigChTmpTrail.setValue(tdcChannel->GetTrailTime(j) * 1000.);
-	fOutputEvents->Add<JPetSigCh>(sigChTmpLead);
-	fOutputEvents->Add<JPetSigCh>(sigChTmpTrail);
+	fOutputEvents->add<JPetSigCh>(sigChTmpLead);
+	fOutputEvents->add<JPetSigCh>(sigChTmpTrail);
       }
     }
 
