@@ -22,19 +22,29 @@ SignalTransformer::SignalTransformer(const char* name, const char* description):
 void SignalTransformer::init(const JPetTaskInterface::Options& opts)
 {
 	  INFO("Signal transforming started: Raw to Reco and Phys");
+	  
+	  fOutputEvents = new JPetTimeWindow("JPetPhysSignal");
 }
 
 
 void SignalTransformer::exec()
 {
-	//Read Raw signal from Tree
-	auto currSignal = (JPetRawSignal&) (*getEvent());
+  if(auto & timeWindow = dynamic_cast<const JPetTimeWindow* const>(getEvent())) {
 
-	//Make Reco Signal from Raw Signal
-	auto recoSignal = createRecoSignal(currSignal);
+    uint n = timeWindow->getNumberOfEvents();
 
-	//Make Phys Signal from Reco Signal and save
-	savePhysSignal(createPhysSignal(recoSignal));
+    for(uint i=0;i<n;++i){
+      const JPetRawSignal & currSignal = dynamic_cast<const JPetRawSignal&>(timeWindow->operator[](i));
+
+      //Make Reco Signal from Raw Signal
+      auto recoSignal = createRecoSignal(currSignal);
+
+      //Make Phys Signal from Reco Signal and save
+      auto physSignal = createPhysSignal(recoSignal);
+      fOutputEvents->add<JPetPhysSignal>(physSignal);
+    }    
+  }
+
 }
 
 void SignalTransformer::terminate()
@@ -42,7 +52,7 @@ void SignalTransformer::terminate()
 	  INFO("Signal transforming finished");
 }
 
-JPetRecoSignal SignalTransformer::createRecoSignal(JPetRawSignal& rawSignal)
+JPetRecoSignal SignalTransformer::createRecoSignal(const JPetRawSignal& rawSignal)
 {
 	JPetRecoSignal recoSignal;
 
@@ -78,7 +88,7 @@ JPetRecoSignal SignalTransformer::createRecoSignal(JPetRawSignal& rawSignal)
 	return recoSignal;
 }
 
-JPetPhysSignal SignalTransformer::createPhysSignal(JPetRecoSignal& recoSignal)
+JPetPhysSignal SignalTransformer::createPhysSignal(const JPetRecoSignal& recoSignal)
 {
 	JPetPhysSignal physSignal;
 
@@ -100,10 +110,3 @@ JPetPhysSignal SignalTransformer::createPhysSignal(JPetRecoSignal& recoSignal)
 	physSignal.setRecoSignal(recoSignal);
 	return physSignal;
 }
-
-void SignalTransformer::savePhysSignal(JPetPhysSignal sig)
-{
-	assert(fWriter);
-	fWriter->write(sig);
-}
-
