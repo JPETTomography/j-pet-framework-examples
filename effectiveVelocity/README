@@ -1,0 +1,45 @@
+Aim
+---
+This is a program for producing input needed for effective velocity calculation from measurements with collimator
+
+Expected output
+---------------
+Since it is based on LargeBarrelAnalysis example file extensions from framework will be the same.
+Additionally  output files containing time difference spectra, in PNG format,
+ based on harcoded <int> in file TaskDVelocity.cpp in line 64 will be created with in:
+Results/position_<int>/*.png
+
+In workidir a result.txt file will be created with results needed for calculations in format:
+| slot | <int> | threshold label | gaus mean | gaus mean error | chi2 | NDF | 
+
+each line contains result for each slot and each threshold label.
+The file will be updated after analysing file from each irradiation position.
+
+Input Data
+-----------
+User must provide their own data file(s) collected with the big barrel, with collimator.
+For each file one has to manually write down position in TaskDVelocity.cpp in line 64.
+
+Description
+--------------
+The analysis has the same modules A - C as LargeBarrelAnalysis, in module D two modifications are added: gaussian fitting  and output to file "results.txt".
+One has recompile the program and start it manually for each datafile. After all files have been analysed "results.txt" is used by standalone program called
+
+
+Additional info
+--------------
+
+Compiling 
+------------
+make
+
+Running
+------------
+The script run.sh contains an example of running the analysis. Note, however, that
+the user must fill the input data file name and the number of run
+
+
+Author
+------------
+Monika Pawlik-Niedzwiecka, Szymon Niedzwiecki
+Please report any bugs and suggestions of corrections to: <wictusn@gmail.com>

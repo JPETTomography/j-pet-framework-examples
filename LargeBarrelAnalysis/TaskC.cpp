@@ -146,7 +146,66 @@ void TaskC::terminate()
       );
 }
 
+void TaskC::exec(){
+	//getting the data from event in propriate format
+	if(auto currSignal = dynamic_cast<const JPetRawSignal*const>(getEvent())){
+		getStatistics().getCounter("No. initial signals")++;
+		if (fSignals.empty()) {
+			fSignals.push_back(*currSignal);
+		} else {
+			if (fSignals[0].getTimeWindowIndex() == currSignal->getTimeWindowIndex()) {
+				fSignals.push_back(*currSignal);
+			} else {
 
+			  vector<JPetHit> hits = createHits(fSignals);
+			  hits = JPetAnalysisTools::getHitsOrderedByTime(hits);
+			  // uncomment this in order to fill histograms
+			  // of time differences for subsequent hist
+			  studyTimeWindow(hits);
+			  
+			  saveHits(hits);
+			  
+			  fSignals.clear();
+			  fSignals.push_back(*currSignal);
+			}
+		}
+	}
+}
+vector<JPetHit> TaskC::createHits(const vector<JPetRawSignal>&signals){
+	vector<JPetHit> hits;
+	for (auto i = signals.begin(); i != signals.end(); ++i) {
+		for (auto j = i; ++j != signals.end();) {
+			if (i->getPM().getScin() == j->getPM().getScin()) {
+				// found 2 signals from the same scintillator
+				// wrap the RawSignal objects into RecoSignal and PhysSignal
+				// for now this is just wrapping opne object into another
+				// in the future analyses it will involve more logic like
+				// reconstructing the signal's shape, charge, amplitude etc.
+				JPetRecoSignal recoSignalA;
+				JPetRecoSignal recoSignalB;
+				JPetPhysSignal physSignalA;
+				JPetPhysSignal physSignalB;
+				// assign sides A and B properly
+				if( 
+					(i->getPM().getSide() == JPetPM::SideA)
+					&&(j->getPM().getSide() == JPetPM::SideB)
+				){
+					recoSignalA.setRawSignal(*i);
+					recoSignalB.setRawSignal(*j);
+				} else if(
+					(j->getPM().getSide() == JPetPM::SideA)
+					&&(i->getPM().getSide() == JPetPM::SideB)
+				){
+					recoSignalA.setRawSignal(*j);
+					recoSignalB.setRawSignal(*i);
+				} else {
+					// if two hits on the same side, ignore
+					WARNING("TWO hits on the same scintillator side we ignore it");         
+					continue;
+				}
+				
+				if( recoSignalA.getRawSignal().getNumberOfPoints(JPetSigCh::Leading) < kNumOfThresholds ) continue;
+				if( recoSignalB.getRawSignal().getNumberOfPoints(JPetSigCh::Leading) < kNumOfThresholds ) continue;
 
 void TaskC::studyTimeWindow(const vector<JPetHit>& hits)
 {
