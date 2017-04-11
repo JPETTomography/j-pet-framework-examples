@@ -33,8 +33,6 @@ project(${projectName} CXX) # using only C++
 
 file(GLOB HEADERS *.h)
 file(GLOB SOURCES *.cpp)
-file(GLOB UNIT_TEST_SOURCES *Test.cpp)
-list(REMOVE_ITEM SOURCES ${UNIT_TEST_SOURCES})
 
 include_directories(${Framework_INCLUDE_DIRS})
 add_definitions(${Framework_DEFINITIONS})
