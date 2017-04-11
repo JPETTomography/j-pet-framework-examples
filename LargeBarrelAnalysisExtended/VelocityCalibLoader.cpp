@@ -59,7 +59,6 @@ JPetHit VelocityCalibLoader::createCorrectedHit(const JPetHit& oldHit)
   hitWithInteractionPoint.setPosZ( oldHit.getPosZ() );
     
   hitWithInteractionPoint.setBarrelSlot( const_cast<JPetBarrelSlot&>(oldHit.getBarrelSlot()) );
-  hitWithInteractionPoint.setScinID( oldHit.getScinID() );
   hitWithInteractionPoint.setScintillator( const_cast<JPetScin&> (oldHit.getScintillator()) );    
     
   hitWithInteractionPoint.setEnergy( oldHit.getEnergy());
