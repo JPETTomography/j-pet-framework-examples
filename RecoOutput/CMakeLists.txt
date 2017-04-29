@@ -48,8 +48,6 @@ list(REMOVE_ITEM SOURCES ${UNIT_TEST_LBAE_SOURCES})
 list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${MAIN_CPP})
 list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${LBAE_MAIN_CPP})
 
-message(${SOURCES})
-
 include_directories(${Framework_INCLUDE_DIRS})
 add_definitions(${Framework_DEFINITIONS})
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})
