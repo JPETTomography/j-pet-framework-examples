@@ -23,6 +23,7 @@
 #include "../LargeBarrelAnalysisExtended/HitFinder.h"
 #include "../LargeBarrelAnalysisExtended/EventFinder.h"
 #include "../LargeBarrelAnalysisExtended/EventCategorizer.h"
+#include "recoOutput.h"
 
 using namespace std;
 
@@ -104,6 +105,16 @@ int main(int argc, char* argv[])
         "Categorize Events"
       )
     );
+  });
+
+  //Eighth task - Reconstruction Output
+  manager.registerTask([]() {
+      return new JPetTaskLoader("cat.evt","out.evt",
+        new RecoOutput(
+          "RecoOutput",
+          "Prepare data for reconstruction"
+        )
+      );
   });
 
   manager.run();
