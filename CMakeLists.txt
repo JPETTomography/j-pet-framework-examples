@@ -36,4 +36,4 @@ add_subdirectory(ScopeLoaderExample)
 add_subdirectory(ScopeAnalysis)
 add_subdirectory(LargeBarrelAnalysis)
 add_subdirectory(LargeBarrelAnalysisExtended)
-
+add_subdirectory(RecoOutput)
