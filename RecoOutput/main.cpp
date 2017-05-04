@@ -37,6 +37,7 @@ int main(int argc, char* argv[])
   manager.parseCmdLine(argc, argv);
 
   //First task - unpacking
+
   manager.registerTask([]() {
     return new JPetTaskLoader("hld", "tslot.raw",
       new TimeWindowCreator(
@@ -45,7 +46,6 @@ int main(int argc, char* argv[])
       )
     );
   });
-
   //Second task - Signal Channel calibration
   manager.registerTask([]() {
     return new JPetTaskLoader("tslot.raw", "tslot.calib",
@@ -86,6 +86,7 @@ int main(int argc, char* argv[])
       )
     );
   });
+  
 
   ////Sixth task - unknown Event construction
   manager.registerTask([]() {
@@ -97,6 +98,7 @@ int main(int argc, char* argv[])
     );
   });
 
+
   //Seventh task - Event Categorization
   manager.registerTask([]() {
     return new JPetTaskLoader("unk.evt", "cat.evt",
@@ -107,15 +109,16 @@ int main(int argc, char* argv[])
     );
   });
 
+
   //Eighth task - Reconstruction Output
   manager.registerTask([]() {
-      return new JPetTaskLoader("cat.evt","out.evt",
+      return new JPetTaskLoader("unk.evt","out.evt",
         new RecoOutput(
           "RecoOutput",
           "Prepare data for reconstruction"
         )
       );
   });
-
+*/
   manager.run();
 }

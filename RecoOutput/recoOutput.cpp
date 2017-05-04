@@ -50,5 +50,7 @@ void RecoOutput::setWriter(JPetWriter* writer) { fWriter = writer; }
 void RecoOutput::saveEventToOutput(const JPetEvent& event)
 {
     fOutput << event.getHits().at(0).getPosX() << "\t" << event.getHits().at(0).getPosY() 
-    << "\t" << event.getHits().at(0).getPosZ() << "\t" << event.getHits().at(0).getTime() << endl;
+    << "\t" << event.getHits().at(0).getPosZ() << "\t" << event.getHits().at(0).getTime()*1000 << "\t"
+    << event.getHits().at(1).getPosX() << "\t" << event.getHits().at(1).getPosY() 
+    << "\t" << event.getHits().at(1).getPosZ() << "\t" << event.getHits().at(1).getTime()*1000 << endl;
 }
