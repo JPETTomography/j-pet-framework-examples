@@ -41,6 +41,6 @@ protected:
     	std::vector<JPetHit> fHitVector;
   	bool fSaveControlHistos = true;
 	void saveEvents(const std::vector<JPetEvent>& event);
-	std::vector<JPetEvent> buildEvents(std::vector<JPetHit> hitVec);
+	std::vector<JPetEvent> buildEvents(const JPetTimeWindow & hits);
 };
 #endif /*  !EVENTFINDER_H */
