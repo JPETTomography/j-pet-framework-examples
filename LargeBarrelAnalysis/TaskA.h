@@ -35,13 +35,10 @@ public:
   virtual void init(const JPetTaskInterface::Options& opts)override;
   virtual void exec()override;
   virtual void terminate()override;
-  virtual void setWriter(JPetWriter* writer)override;
   virtual void setParamManager(JPetParamManager* paramManager)override;
   const JPetParamBank& getParamBank()const;
 protected:
-  void saveTimeWindow( JPetTimeWindow slot);
   JPetSigCh generateSigCh(const JPetTOMBChannel & channel, JPetSigCh::EdgeType edge) const;
-  JPetWriter* fWriter;
   JPetParamManager* fParamManager;
   long long int fCurrEventNumber;
   const double kMaxTime = 0.;
