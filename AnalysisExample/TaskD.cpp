@@ -26,6 +26,8 @@ TaskD::TaskD(const char * name, const char * description):
 
 void TaskD::init(const JPetTaskInterface::Options& opts)
 {
+  fOutputEvents = new JPetTimeWindow("JPetHit");
+
   getStatistics().createHistogram( new TH1F("No. signals in TSlot", "Signals multiplicity per TSlot", 10,
 					    -0.5, 9.5) );
   getStatistics().createHistogram( new TH1F("Scins multiplicity", "scintillators multiplicity", 65, 5.5,
@@ -48,50 +50,43 @@ void TaskD::init(const JPetTaskInterface::Options& opts)
 void TaskD::exec()
 {
   // A dummy analysis example:
-  JPetPhysSignal currSignal = (JPetPhysSignal&) (*getEvent());
+  auto & timeWindow = *(dynamic_cast<JPetTimeWindow* const>(getEvent()));
   
-  // increment the counter of signals
-  getStatistics().getCounter("No. initial signals")++;
-
-  if (fSignals.empty()) {
-    fSignals.push_back(currSignal);
-  } else {
-    if (fSignals[0].getTimeWindowIndex() == currSignal.getTimeWindowIndex()) {
-      fSignals.push_back(currSignal);
-    } else {
-      getStatistics().getHisto1D("No. signals in TSlot").Fill(fSignals.size());
-      saveHits(createHits(fSignals)); //create LORs from previously saved signals
-      fSignals.clear();
-      fSignals.push_back(currSignal);
-    }
-  }
+  getStatistics().getCounter("No. initial signals") += timeWindow.getNumberOfEvents();
+  getStatistics().getHisto1D("No. signals in TSlot").Fill(timeWindow.getNumberOfEvents());
+  
+  createHits(timeWindow);
 }
 
-std::vector<JPetHit> TaskD::createHits(std::vector<JPetPhysSignal>& signals)
+void TaskD::createHits(JPetTimeWindow & signals)
 {
   std::vector<JPetHit> hits;
-  for (auto i = signals.begin(); i != signals.end(); ++i) {
-    for (auto j = i; ++j != signals.end(); /**/) {
-      if (i->getPM().getScin() == j->getPM().getScin()) {
+  int nsignals = signals.getNumberOfEvents();
+
+  for(int i = 0; i < nsignals; ++i){
+    for(int j=i+1; j< nsignals; ++j){
+      const JPetPhysSignal & signalA = dynamic_cast<const JPetPhysSignal&>(signals[i]);
+      const JPetPhysSignal & signalB = dynamic_cast<const JPetPhysSignal&>(signals[j]);
+      if (signalA.getPM().getScin() == signalB.getPM().getScin()) {
         // found 2 signals from the same scintillator
         JPetHit hit;
-        if (i->getPM().getSide() == JPetPM::SideA
-            && j->getPM().getSide() == JPetPM::SideB) {
-          hit.setSignalA(*i);
-          hit.setSignalB(*j);
-        } else if (j->getPM().getSide() == JPetPM::SideA
-                   && i->getPM().getSide() == JPetPM::SideB) {
-          hit.setSignalA(*j);
-          hit.setSignalB(*i);
+        if (signalA.getPM().getSide() == JPetPM::SideA
+            && signalB.getPM().getSide() == JPetPM::SideB) {
+          hit.setSignalA(signalA);
+          hit.setSignalB(signalB);
+        } else if (signalB.getPM().getSide() == JPetPM::SideA
+                   && signalA.getPM().getSide() == JPetPM::SideB) {
+          hit.setSignalA(signalB);
+          hit.setSignalB(signalA);
         } else {
           WARNING("TWO hits on the same scintillator side we ignore it");
           // if two hits on the same side, ignore
           continue;
         }
 
-        hit.setScintillator(i->getPM().getScin());
+        hit.setScintillator(signalA.getPM().getScin());
 
-        getStatistics().getHisto1D("Scins multiplicity").Fill((*i).getPM().getScin().getID());
+        getStatistics().getHisto1D("Scins multiplicity").Fill(signalA.getPM().getScin().getID());
 
         double dt = hit.getSignalA().getTime() - hit.getSignalB().getTime();
         hit.setTimeDiff(dt);
@@ -106,13 +101,12 @@ std::vector<JPetHit> TaskD::createHits(std::vector<JPetPhysSignal>& signals)
 				    ).Fill(hit.getTimeDiff());
 
 
-        hits.push_back(hit);
+	fOutputEvents->add<JPetHit>(hit);
 	// increment the counter of found hits
 	getStatistics().getCounter("No. found hits")++;
       }
     }
   }
-  return hits;
 }
 
 void TaskD::terminate()
@@ -122,13 +116,4 @@ void TaskD::terminate()
 	     static_cast<int>(getStatistics().getCounter("No. initial signals")),
 	     static_cast<int>(getStatistics().getCounter("No. found hits")) )
 	);
-}
-
-
-void TaskD::saveHits(std::vector<JPetHit> hits)
-{
-  assert(fWriter);
-  for (auto hit : hits) { 
-    fWriter->write(hit);
-  }
 }

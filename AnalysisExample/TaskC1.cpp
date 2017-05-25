@@ -25,8 +25,10 @@ TaskC1::TaskC1(const char * name, const char * description):
 {
 }
 
-void TaskC1::init(const JPetTaskInterface::Options& opts)
+void TaskC1::init(const JPetTaskInterface::Options&)
 {
+  fOutputEvents = new JPetTimeWindow("JPetRawSignal");
+
   getStatistics().createHistogram( new TH1F("No. leading points", "Leading edge points per signal", 
 					    5, -0.5, 4.5) );
   getStatistics().createHistogram( new TH1F("No. trailing points", "Trailing edge points per signal", 
@@ -41,14 +43,14 @@ void TaskC1::init(const JPetTaskInterface::Options& opts)
 void TaskC1::exec()
 {
   // A dummy analysis example:
-  auto tslot = (JPetTimeWindow&) (*getEvent());
+  auto & timeWindow = *(dynamic_cast<const JPetTimeWindow* const>(getEvent()));
   std::unordered_map<int,JPetRawSignal> signals; // map PMT number to RawSignal
 
-  // get number of SigCh's in a tslot
-  const auto nSigChs = tslot.getNumberOfSigCh();
-  // iterate over SigCh's in the Tslot and join them in signals
+  // get number of SigCh's in a TimeWindow
+  const auto nSigChs = timeWindow.getNumberOfEvents();
+  // iterate over SigCh's in the TimeWindow and join them in signals
   for (auto i = 0; i < nSigChs; i++) {
-    JPetSigCh sigch = tslot[i];
+    const JPetSigCh & sigch = dynamic_cast<const JPetSigCh&>(timeWindow[i]);
 
     signals[sigch.getPM().getID()].addPoint(sigch);
   }
@@ -65,7 +67,6 @@ void TaskC1::exec()
     }
     nPMs++; // count how many PM-s fired in one TimeWindow
 
-    sig.setTimeWindowIndex(tslot.getIndex());
     sig.setPM(getParamBank().getPM(pmSignalPair.first));
 
     // keep some statistics
@@ -82,8 +83,8 @@ void TaskC1::exec()
     if (sig.getNumberOfPoints(JPetSigCh::Leading) >= 2
         && sig.getNumberOfPoints(JPetSigCh::Trailing) >= 2) {
 
-      // if the signal is worth keeping, write the signal to output tree
-      saveRawSignal(sig);
+      // if the signal is worth keeping, add it to the output time window
+      fOutputEvents->add<JPetRawSignal>(sig);
     }
   }
 
@@ -92,11 +93,4 @@ void TaskC1::exec()
 
 void TaskC1::terminate()
 {
-}
-
-
-void TaskC1::saveRawSignal( JPetRawSignal sig)
-{
-  assert(fWriter);
-  fWriter->write(sig);
 }

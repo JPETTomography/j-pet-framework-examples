@@ -29,11 +29,10 @@ class TaskA: public JPetTask
 {
 public:
   TaskA(const char * name, const char * description);
+  virtual void init(const JPetTaskInterface::Options& opts) override;
   virtual void exec();
   virtual void terminate();
-  virtual void setWriter(JPetWriter* writer) {
-    fWriter = writer;
-  }
+
   void setParamManager(JPetParamManager* paramManager) {
     fParamManager = paramManager;
   }
@@ -42,13 +41,8 @@ public:
     return fParamManager->getParamBank();
   }
 protected:
-  void saveTimeWindow( JPetTimeWindow slot);
-
-  JPetWriter* fWriter;
   JPetParamManager* fParamManager;
   int fCurrEventNumber;
-
-  //ClassDef(TaskA, 1);
   
 };
 #endif /*  !TASKA_H */

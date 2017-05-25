@@ -14,7 +14,6 @@
  */
 
 #include "./TaskE.h"
-#include "JPetWriter/JPetWriter.h"
 
 //ClassImp(TaskE);
 
@@ -23,8 +22,10 @@ TaskE::TaskE(const char * name, const char * description):
 {
 }
 
-void TaskE::init(const JPetTaskInterface::Options& opts)
+void TaskE::init(const JPetTaskInterface::Options&)
 {
+  fOutputEvents = new JPetTimeWindow("JPetLOR");
+  
   // initialize some scalar counters
   getStatistics().createCounter("No. initial hits");
   getStatistics().createCounter("No. found LORs");
@@ -34,65 +35,51 @@ void TaskE::init(const JPetTaskInterface::Options& opts)
 void TaskE::exec()
 {
   // A dummy analysis example:
-  JPetHit currHit = (JPetHit&) (*getEvent());
-  getStatistics().getCounter("No. initial hits")++;
+  auto & timeWindow = *(dynamic_cast<const JPetTimeWindow* const>(getEvent()));
+  getStatistics().getCounter("No. initial hits") += timeWindow.getNumberOfEvents();
 
-  if (fHits.empty()) {
-    fHits.push_back(currHit);
-  } else {
-    if (fHits[0].getTimeWindowIndex() == currHit.getSignalB().getTimeWindowIndex()) {
-      fHits.push_back(currHit);
-    } else {
-      saveLORs(createLORs(fHits)); //create LORs from previously saved signals
-      fHits.clear();
-      fHits.push_back(currHit);
-    }
-  }
+  createLORs(timeWindow);
+
 }
 
 void TaskE::terminate()
 {
-  saveLORs(createLORs(fHits)); //if there is something left
-
   INFO( Form("From %d initial hits %d LORs were paired.", 
 	     static_cast<int>(getStatistics().getCounter("No. initial hits")),
 	     static_cast<int>(getStatistics().getCounter("No. found LORs")) )
 	);
 }
 
-std::vector<JPetLOR> TaskE::createLORs(std::vector<JPetHit>& hits)
+void TaskE::createLORs(const JPetTimeWindow & hits)
 {
-  std::vector<JPetLOR> lors;
-  for (auto i = hits.begin(); i != hits.end(); ++i) {
-    for (auto j = i; ++j != hits.end(); /**/) {
-      if (i->getScintillator() != j->getScintillator()) {
+  int nhits = hits.getNumberOfEvents();
+    
+  for(int i = 0; i < nhits; ++i){
+    for(int j=i; j< nhits; ++j){
+
+      const JPetHit & hit1 = dynamic_cast<const JPetHit&>(hits[i]);
+      const JPetHit & hit2 = dynamic_cast<const JPetHit&>(hits[j]);
+
+      if (hit1.getScintillator() != hit2.getScintillator()) {
         // found 2 hits in different scintillators -> an event!
 
         // create an event object
         JPetLOR event;
         // convention: "first hit" is the one with earlier time
-        if (i->getTime() < j->getTime()) {
-          event.setFirstHit(*i);
-          event.setSecondHit(*j);
+        if (hit1.getTime() < hit2.getTime()) {
+          event.setFirstHit(hit1);
+          event.setSecondHit(hit2);
         } else {
 
-          event.setFirstHit(*j);
-          event.setSecondHit(*i);
+          event.setFirstHit(hit2);
+          event.setSecondHit(hit1);
         }
         double dt = event.getFirstHit().getTime()
                     - event.getSecondHit().getTime();
         event.setTimeDiff(dt);
-        lors.push_back(event);
+	fOutputEvents->add<JPetLOR>(event);
 	getStatistics().getCounter("No. found LORs")++;
       }
     }
-  }
-  return lors;
-}
-
-void TaskE::saveLORs(std::vector<JPetLOR> lors)
-{
-  for (auto lor : lors) {
-    fWriter->write(lor);
   }
 }

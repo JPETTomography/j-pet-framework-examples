@@ -24,8 +24,6 @@
 #include "JPetParamBank/JPetParamBank.h"
 #include "JPetParamManager/JPetParamManager.h"
 
-class JPetWriter;
-
 class TaskC1: public JPetTask
 {
 public:
@@ -33,9 +31,6 @@ public:
   virtual void init(const JPetTaskInterface::Options& opts);
   virtual void exec();
   virtual void terminate();
-  virtual void setWriter(JPetWriter* writer) {
-    fWriter = writer;
-  }
   void setParamManager(JPetParamManager* paramManager) {
     fParamManager = paramManager;
   }
@@ -43,11 +38,6 @@ public:
     return fParamManager->getParamBank();
   }
 protected:
-  void saveRawSignal( JPetRawSignal sig);
-
-  JPetWriter* fWriter;
   JPetParamManager* fParamManager;
-
-  //ClassDef(TaskC1, 1);
 };
 #endif /*  !TASKC1_H */
