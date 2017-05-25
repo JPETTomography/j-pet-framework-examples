@@ -14,32 +14,33 @@
  */
 
 #include "./TaskC3.h"
-#include "JPetWriter/JPetWriter.h"
-
-//ClassImp(TaskC3);
 
 TaskC3::TaskC3(const char * name, const char * description):
   JPetTask(name, description)
 {
 }
 
-void TaskC3::init(const JPetTaskInterface::Options& opts)
+void TaskC3::init(const JPetTaskInterface::Options&)
 {
+  fOutputEvents = new JPetTimeWindow("JPetPhysSignal");
 }
 
 
 void TaskC3::exec()
 {
   // A dummy analysis example:
-  auto currSignal = (JPetRecoSignal&) (*getEvent());
-  savePhysSignal(createPhysSignal(currSignal));
+  auto & timeWindow = *(dynamic_cast<const JPetTimeWindow* const>(getEvent()));
+  for(int i=0;i<timeWindow.getNumberOfEvents();++i){
+    const JPetRecoSignal & currSignal = dynamic_cast<const JPetRecoSignal&>(timeWindow[i]);
+    fOutputEvents->add<JPetPhysSignal>(createPhysSignal(currSignal));
+  }
 }
 
 void TaskC3::terminate()
 {
 }
 
-JPetPhysSignal TaskC3::createPhysSignal(JPetRecoSignal& recoSignal)
+JPetPhysSignal TaskC3::createPhysSignal(JPetRecoSignal recoSignal)
 {
   // create a Phys Signal
   JPetPhysSignal physSignal;
@@ -60,10 +61,4 @@ JPetPhysSignal TaskC3::createPhysSignal(JPetRecoSignal& recoSignal)
   // store the original JPetRecoSignal in the PhysSignal as a processing history
   physSignal.setRecoSignal(recoSignal);
   return physSignal;
-}
-
-void TaskC3::savePhysSignal( JPetPhysSignal sig)
-{
-  assert(fWriter);
-  fWriter->write(sig);
 }

@@ -34,9 +34,7 @@ public:
   virtual void init(const JPetTaskInterface::Options& opts);
   virtual void exec();
   virtual void terminate();
-  virtual void setWriter(JPetWriter* writer) {
-    fWriter = writer;
-  }
+
   void setParamManager(JPetParamManager* paramManager) {
     fParamManager = paramManager;
   }
@@ -44,12 +42,7 @@ public:
     return fParamManager->getParamBank();
   }
 protected:
-
-  void saveTimeWindow( JPetTimeWindow slot);
-
-  JPetWriter* fWriter;
   JPetParamManager* fParamManager;
 
-  //ClassDef(TaskB, 1);
 };
 #endif /*  !TASKB_H */
