@@ -31,10 +31,9 @@ public:
 	virtual void init(const JPetTaskInterface::Options& opts)override;
 	virtual void exec()override;
 	virtual void terminate()override;
-	virtual void setWriter(JPetWriter* writer)override;
 protected:
 	const char * formatUniqueSlotDescription(const JPetBarrelSlot & slot, int threshold,const char * prefix);
-	void fillCoincidenceHistos(const std::vector<JPetHit>& hits);
+	void fillCoincidenceHistos(const JPetTimeWindow& hits);
 	void fillDeltaIDhisto(int delta_ID, int threshold, const JPetLayer & layer);
 	void fillTOFvsDeltaIDhisto(int delta_ID, int threshold, const JPetHit & hit1, const JPetHit & hit2);
 	bool isGoodTimeDiff(const JPetHit & hit, int thr);
@@ -42,6 +41,5 @@ protected:
 private:
 	LargeBarrelMapping fBarrelMap;
 	std::vector<JPetHit> fHits;
-	JPetWriter* fWriter;
 };
 #endif /*  !TASKE_H */

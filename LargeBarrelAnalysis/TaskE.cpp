@@ -14,14 +14,15 @@
  */
 
 #include <iostream>
-#include <JPetWriter/JPetWriter.h>
 #include <JPetHitUtils/JPetHitUtils.h>
 #include "TaskE.h"
 using namespace std;
 TaskE::TaskE(const char* name, const char* description): JPetTask(name, description) {}
 TaskE::~TaskE() {}
-void TaskE::init(const JPetTaskInterface::Options& opts)
+void TaskE::init(const JPetTaskInterface::Options&)
 {
+  fOutputEvents = new JPetTimeWindow("JPetEvent");
+  
   fBarrelMap.buildMappings(getParamBank());
   for (auto & layer : getParamBank().getLayers()) {
     for (int thr = 1; thr <= 4; thr++) {
@@ -63,28 +64,25 @@ void TaskE::init(const JPetTaskInterface::Options& opts)
 void TaskE::exec()
 {
   //getting the data from event in propriate format
-  if (auto currHit = dynamic_cast<const JPetHit* const>(getEvent())) {
-    if (fHits.empty()) {
-      fHits.push_back(*currHit);
-    } else {
-      if (fHits[0].getTimeWindowIndex() == currHit->getSignalB().getTimeWindowIndex()) {
-        fHits.push_back(*currHit);
-      } else {
-        fillCoincidenceHistos(fHits);
-        fHits.clear();
-        fHits.push_back(*currHit);
-      }
-    }
+  if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(getEvent())) {
+
+    fillCoincidenceHistos(*timeWindow);
+
   }
 }
+
 // this method considers all possible 2-strip coincidences
 // among the hits from a single time window
-void TaskE::fillCoincidenceHistos(const vector<JPetHit>& hits)
+void TaskE::fillCoincidenceHistos(const JPetTimeWindow & hits)
 {
-  for (auto i = hits.begin(); i != hits.end(); ++i) {
-    for (auto j = i; ++j != hits.end(); /**/) {
-      auto& hit1 = *i;
-      auto& hit2 = *j;
+  uint nhits = hits.getNumberOfEvents();
+
+  for(uint i = 0; i < nhits; ++i){
+    for(uint j=i; j< nhits; ++j){
+      
+      const JPetHit & hit1 = dynamic_cast<const JPetHit&>(hits[i]);
+      const JPetHit & hit2 = dynamic_cast<const JPetHit&>(hits[j]);
+      
       // if there are two hits from the same layer but different scintillators
       if (
         (hit1.getBarrelSlot().getLayer() == hit2.getBarrelSlot().getLayer()) &&
@@ -188,8 +186,4 @@ void TaskE::fillTOTvsTOThisto(int delta_ID, int thr, const JPetHit& hit1, const 
                     fBarrelMap.getLayerNumber(hit1.getBarrelSlot().getLayer()), thr);
   getStatistics().getHisto2D(histo_name).Fill(totB1 / 1000., totB2 / 1000.);
 
-}
-void TaskE::setWriter(JPetWriter* writer)
-{
-  fWriter = writer;
 }
