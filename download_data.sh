@@ -62,3 +62,9 @@ WGET_DIR=${DIR_LBAE}
 WGET_INPUT=${HTTP_PATH}/${DIR_LBAE}
 #downloading test data via wget
 wget "${WGET_INPUT}" "${WGET_FLAGS[@]}" -P "${WGET_OUTPUT}" 
+
+#calibration files
+DIR_CAL=CalibrationFiles
+WGET_DIR=${DIR_CAL}
+WGET_INPUT=${HTTP_PATH}/${DIR_CAL}
+wget "${WGET_INPUT}" "${WGET_FLAGS[@]}" -P "${WGET_OUTPUT}" 
