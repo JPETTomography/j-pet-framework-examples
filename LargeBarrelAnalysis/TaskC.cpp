@@ -146,8 +146,6 @@ void TaskC::terminate()
       );
 }
 
-
-
 void TaskC::studyTimeWindow(const vector<JPetHit>& hits)
 {
 

@@ -11,11 +11,10 @@ cmake_minimum_required(VERSION 2.6)
 ### when creating a new project,
 ### set this section appropriately for your project
 ######################################################################
-set(projectName LargeBarrelAnalysis)
+set(projectName estimateVelocity)
 
 set(AUXILLIARY_FILES
   run.sh
-  conf_trb3.xml
   README
   )
 
@@ -37,10 +36,10 @@ file(GLOB SOURCES *.cpp)
 include_directories(${Framework_INCLUDE_DIRS})
 add_definitions(${Framework_DEFINITIONS})
 
-add_executable(${projectBinary} ${SOURCES} ${HEADERS})
+add_executable(${projectBinary} ${SOURCES} ${HEADERS} ${DICTIONARIES})
 target_link_libraries(${projectBinary} JPetFramework)
 
-add_custom_target(clean_data_largebarrel
+add_custom_target(clean_data_estimateVelocity
   COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root)
 
 # copy the DB config file to an expected location
