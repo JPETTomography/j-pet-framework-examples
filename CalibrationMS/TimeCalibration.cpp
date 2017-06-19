@@ -49,7 +49,7 @@ void TimeCalibration::init(const JPetTaskInterface::Options& opts){
 	time(&time_calib);
 	//
 	std::ofstream output;
-	output.open(OutputFile,std::ios::app); //file will be overwritten           
+	output.open(OutputFile,std::ios::app);         
 	 if(output.tellp()==0){
 	  output << "# Time calibration constants" << std::endl;
 	  output << "# For side A we apply only the correction from refference detector, for side B the correction is equal to the sum of the A-B" << std::endl;
@@ -70,16 +70,20 @@ void TimeCalibration::init(const JPetTaskInterface::Options& opts){
 //histos for leading edge
 			const char * histo_name_l = formatUniqueSlotDescription(scin.second->getBarrelSlot(), thr, "timeDiffAB_leading_");
 			getStatistics().createHistogram( new TH1F(histo_name_l, histo_name_l, 400, -20., 20.) );
+			//                        getStatistics().createHistogram( new TH1F(histo_name_l, histo_name_l, 400, -20., 20.) );
 //histograms for leading edge refference detector time difference
                         const char * histo_name_Ref_l = formatUniqueSlotDescription(scin.second->getBarrelSlot(), thr, "timeDiffRef_leading_");
-			getStatistics().createHistogram( new TH1F(histo_name_Ref_l, histo_name_Ref_l, 600,-30.,30.) );
+			getStatistics().createHistogram( new TH1F(histo_name_Ref_l, histo_name_Ref_l, 800,-80.,80.) );
+			//			getStatistics().createHistogram( new TH1F(histo_name_Ref_l, histo_name_Ref_l, 600,-30.,30.) );
 			
 //histos for trailing edge			
 			const char * histo_name_t = formatUniqueSlotDescription(scin.second->getBarrelSlot(), thr, "timeDiffAB_trailing_");
 			getStatistics().createHistogram( new TH1F(histo_name_t, histo_name_t, 400, -20., 20.) );
+			//			getStatistics().createHistogram( new TH1F(histo_name_t, histo_name_t, 400, -20., 20.) );
 //histograms for leading edge refference detector time difference
                         const char * histo_name_Ref_t = formatUniqueSlotDescription(scin.second->getBarrelSlot(), thr, "timeDiffRef_trailing_");
-			getStatistics().createHistogram( new TH1F(histo_name_Ref_t, histo_name_Ref_t, 600,-30.,30.) );
+			getStatistics().createHistogram( new TH1F(histo_name_Ref_t, histo_name_Ref_t, 800,-80.,80.) );
+			//			getStatistics().createHistogram( new TH1F(histo_name_Ref_t, histo_name_Ref_t, 600,-30.,30.) );
 		}
 	}
 
@@ -183,7 +187,7 @@ void TimeCalibration::exec(){
       	  if(PMid==kPMidRef){
 	      fhitsCalib.push_back(*hit);
 	  fWriter->write(*hit);
-	}	
+	  }	
 	
 
 	}  
@@ -221,7 +225,7 @@ int min_ev = 10;     //minimal number of events for a distribution to be fitted
 //create output txt file with calibration parameters 
 //
 	std::ofstream results_fit;
-        results_fit.open(OutputFile, std::ios::app); 
+        results_fit.open(OutputFile, std::ios::app); //file will be overwritten
 
 	for(auto & scin : getParamBank().getScintillators()){
 
@@ -258,6 +262,8 @@ int min_ev = 10;     //minimal number of events for a distribution to be fitted
 			auto scintillator_barrel = scin.second->getBarrelSlot().getID();
 			int LayerId = vectorOfNumbers[2];
 			int ScintId = 10*vectorOfNumbers[1]+vectorOfNumbers[0];
+			//Temporary solution to match the old and new naming schema 
+			ScintId = ScintId + (LayerId-1)*48;
 			//
 //For run I we calibrate L3 with data taken for L1, for the rest of runs we had L3 irradiated
 //so we can do direct calibration
@@ -267,13 +273,13 @@ int min_ev = 10;     //minimal number of events for a distribution to be fitted
 			//
 			if(CalibRun<2 && LayerId==1) {
 
-			  ScintL3_1 = 2*ScintId -2;
-			  ScintL3_2 = 2*ScintId -1;
+			  ScintL3_1 = 96 + 2*ScintId -2;
+			  ScintL3_2 = 96 + 2*ScintId -1;
 
-			    if(ScintL3_1 < 1 || ScintL3_2 < 1){
+			    if(ScintL3_1 < 97 || ScintL3_2 < 97){
 
-			      ScintL3_1 = 48;
-			      ScintL3_2 = 1;
+			      ScintL3_1 = 192;
+			      ScintL3_2 = 97;
 			    }
 			}  
 			//
@@ -365,23 +371,27 @@ int min_ev = 10;     //minimal number of events for a distribution to be fitted
 // writing to apropriate format (txt file)
 //We assume that all the corrections will be ADDED to the times of channels
 //side A
-//offset = C2 (ref. det) - C1/2 (AB calib)
-			float CAl = (position_peak_Ref_l-Cl[layer_barrel]) + position_peak_l/2.;
-			float SigCAl = sqrt(pow(position_peak_error_Ref_l/2.,2) + pow(position_peak_error_l,2) + pow(SigCl[layer_barrel],2));
-			float CAt = position_peak_t/2. + position_peak_Ref_t;
-			float SigCAt = sqrt(pow(position_peak_error_Ref_t/2.,2) + pow(position_peak_error_t,2) + pow(SigCl[layer_barrel],2));
-			//
-			float CBl = (position_peak_Ref_l-Cl[layer_barrel]) - position_peak_l/2.;
-			float SigCBl = SigCAl;
-			float CBt = position_peak_Ref_t - position_peak_t/2.;
-                        float SigCBt = SigCAt;
-			scintillator_barrel = scintillator_barrel - (layer_barrel-1)*48;    //to match the convension during the calibration loading 
+//C2 = C2 - Cl(layer_barrel-1) (we correct the correction with respect to ref. detector only for L2 and L3
+//offset = -C2 (ref. det) + C1/2 (AB calib)
 			
+			float CAl = -(position_peak_Ref_l-Cl[layer_barrel-1]) + position_peak_l/2.;
+			float SigCAl = sqrt(pow(position_peak_error_Ref_l/2.,2) + pow(position_peak_error_l,2) + pow(SigCl[layer_barrel-1],2));
+			float CAt = -(position_peak_Ref_t -Cl[layer_barrel-1]) + position_peak_t/2.;
+			float SigCAt = sqrt(pow(position_peak_error_Ref_t/2.,2) + pow(position_peak_error_t,2) + pow(SigCl[layer_barrel-1],2));
+			//
+//side B
+//C2 = C2 - Cl(layer_barrel-1) (we correct the correction with respect to ref. detector only for L2 and L3
+//offset = -C2 (ref. det) -C1/2 (AB calib)        
+			float CBl = -(position_peak_Ref_l-Cl[layer_barrel-1]) - position_peak_l/2.;
+			float SigCBl = SigCAl;
+			float CBt = -(position_peak_Ref_t-Cl[layer_barrel-1]) - position_peak_t/2.;
+                        float SigCBt = SigCAt;
+			//temorary solution
+			scintillator_barrel = scintillator_barrel - (layer_barrel-1)*48;    //to match the new convension during the calibration loading 
+			//
 			results_fit << layer_barrel << "\t" << scintillator_barrel<< "\t" << "A" << "\t" << thr << "\t" << CAl << "\t" << SigCAl << "\t" << CAt << "\t" << SigCAt << "\t" << sigma_peak_Ref_l
                         << "\t" <<sigma_peak_Ref_t << "\t"  <<chi2_ndf_Ref_l << "\t" <<chi2_ndf_Ref_t <<endl;
-
-//side B
-//offset = C2 (ref. det) -C1/2 (AB calib) 
+			//
                         results_fit << layer_barrel << "\t" << scintillator_barrel << "\t" << "B" << "\t" << thr << "\t" <<CBl << "\t" << SigCBl << "\t" << CBt << "\t" << SigCBt << "\t" << sigma_peak_l
                         << "\t" << sigma_peak_t <<"\t" << chi2_ndf_l << "\t" <<chi2_ndf_t <<endl;
 		       }
@@ -410,7 +420,7 @@ void TimeCalibration::fillHistosForHit(const JPetHit & hit, const std::vector<do
 
 		if( lead_times_B.count(thr) > 0 ){ // if there was leading time at the same threshold at opposite side
 
-			double timeDiffAB_l = lead_times_A[thr] - lead_times_B[thr];
+			double timeDiffAB_l = lead_times_B[thr] - lead_times_A[thr];
 			timeDiffAB_l*= 0.001; // we want the plots in ns instead of ps
 
 			// fill the appropriate histogram
@@ -428,7 +438,7 @@ void TimeCalibration::fillHistosForHit(const JPetHit & hit, const std::vector<do
 			double timeDiffLmin=10000000000000.;
 			for(unsigned int i = 0; i < fRefTimesL.size();i++) { 
 			double timeDiffHit_L = (lead_times_A[thr] + lead_times_B[thr])/2. -fRefTimesL[i];
-			 timeDiffHit_L = 0.001*timeDiffHit_L;//ps -> ns
+			 timeDiffHit_L = timeDiffHit_L*0.001;//ps -> ns
 			 if(fabs(timeDiffHit_L) < timeDiffLmin){
 			  timeDiffLmin = timeDiffHit_L;
 			 }
@@ -446,7 +456,7 @@ void TimeCalibration::fillHistosForHit(const JPetHit & hit, const std::vector<do
 
 		if( trail_times_B.count(thr) > 0 ){ // if there was trailing time at the same threshold at opposite side
 
-			double timeDiffAB_t = trail_times_A[thr] - trail_times_B[thr];
+			double timeDiffAB_t = trail_times_B[thr] - trail_times_A[thr];
 			timeDiffAB_t*= 0.001; // we want the plots in ns instead of ps
 
 			// fill the appropriate histogram
@@ -463,7 +473,7 @@ void TimeCalibration::fillHistosForHit(const JPetHit & hit, const std::vector<do
 			double timeDiffTmin=10000000000000.;
 			for(unsigned int i = 0; i < fRefTimesT.size();i++) { 
                             double timeDiffHit_T = (trail_times_A[thr] + trail_times_B[thr])/2. -fRefTimesT[i];
-			    timeDiffHit_T = 0.001*timeDiffHit_T; //ps->ns
+			    timeDiffHit_T = timeDiffHit_T*0.001; //ps->ns
 			  if(fabs(timeDiffHit_T) < timeDiffTmin){
 			    timeDiffTmin = timeDiffHit_T;
 			  }
@@ -484,4 +494,3 @@ const char * TimeCalibration::formatUniqueSlotDescription(const JPetBarrelSlot &
 
 }
 void TimeCalibration::setWriter(JPetWriter* writer){fWriter =writer;}
-

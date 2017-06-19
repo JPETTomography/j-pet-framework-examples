@@ -18,7 +18,7 @@
 
 #include <JPetHit/JPetHit.h>
 #include <JPetStatistics/JPetStatistics.h>
-
+#include <TMath.h>
 #include <vector>
 
 class HitFinderTools

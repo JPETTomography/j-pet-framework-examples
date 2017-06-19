@@ -13,6 +13,7 @@
  *  @file HitFinderTools.h
  */
 
+#include "TMath.h"
 #include "HitFinderTools.h"
 
 using namespace std;
