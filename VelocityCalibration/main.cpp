@@ -21,8 +21,6 @@
 #include "../LargeBarrelAnalysisExtended/SignalFinder.h"
 #include "../LargeBarrelAnalysisExtended/SignalTransformer.h"
 #include "../LargeBarrelAnalysisExtended/HitFinder.h"
-#include "../LargeBarrelAnalysisExtended/EventFinder.h"
-#include "../LargeBarrelAnalysisExtended/EventCategorizer.h"
 
 using namespace std;
 
@@ -82,26 +80,6 @@ int main(int argc, char* argv[])
       new HitFinder(
         "HitFinder",
         "Create hits from physical signals"
-      )
-    );
-  });
-
-  ////Sixth task - unknown Event construction
-  manager.registerTask([]() {
-    return new JPetTaskLoader("hits", "unk.evt",
-      new EventFinder(
-        "EventFinder",
-        "Create Events as group of Hits"
-      )
-    );
-  });
-
-  //Seventh task - Event Categorization
-  manager.registerTask([]() {
-    return new JPetTaskLoader("unk.evt", "cat.evt",
-      new EventCategorizer(
-        "EventCategorizer",
-        "Categorize Events"
       )
     );
   });
