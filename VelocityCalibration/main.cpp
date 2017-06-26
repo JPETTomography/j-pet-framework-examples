@@ -21,6 +21,7 @@
 #include "../LargeBarrelAnalysisExtended/SignalFinder.h"
 #include "../LargeBarrelAnalysisExtended/SignalTransformer.h"
 #include "../LargeBarrelAnalysisExtended/HitFinder.h"
+#include "DeltaTFinder.h"
 
 using namespace std;
 
