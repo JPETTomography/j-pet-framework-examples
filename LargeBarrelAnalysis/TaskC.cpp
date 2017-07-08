@@ -137,7 +137,6 @@ void TaskC::terminate()
 
 void TaskC::saveHits(const vector<JPetHit>& hits)
 {
-  assert(fWriter);
   for (auto hit : hits) {
     // here one can impose any conditions on hits that should be
     // saved or skipped
