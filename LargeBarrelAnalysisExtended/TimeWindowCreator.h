@@ -21,6 +21,7 @@
 #include <JPetParamBank/JPetParamBank.h>
 #include <JPetParamManager/JPetParamManager.h>
 #include <JPetTOMBChannel/JPetTOMBChannel.h>
+#include <set>
 
 class JPetWriter;
 
@@ -45,11 +46,16 @@ public:
   const JPetParamBank& getParamBank() const;
 
 protected:
+  bool filter(const JPetTOMBChannel& channel) const;
   JPetSigCh generateSigCh(const JPetTOMBChannel& channel, JPetSigCh::EdgeType edge) const;
   JPetParamManager* fParamManager = nullptr;
   long long int fCurrEventNumber = 0;
   const std::string kMaxTimeParamKey = "TimeWindowCreator_MaxTime";
   const std::string kMinTimeParamKey = "TimeWindowCreator_MinTime";
+  const std::string kMainStripKey = "TimeWindowCreator_MainStrip";
+  std::pair<int,int> fMainStrip;
+  bool fMainStripSet = false;
+  std::set<int> fAllowedChannels;
   double fMaxTime = 0.;
   double fMinTime = -1.e6;
 };
