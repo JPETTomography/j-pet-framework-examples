@@ -76,8 +76,8 @@ void HitFinder::exec()
 					       kTimeWindowWidth,
 					       fVelocityMap);
     saveHits(hits);
-   /* getStatistics().getHisto1D("hits_per_time_window").Fill(hits.size());
-    fAllSignalsInTimeWindow.clear();*/
+    /* getStatistics().getHisto1D("hits_per_time_window").Fill(hits.size()); */
+    fAllSignalsInTimeWindow.clear();
   }
 }
 
