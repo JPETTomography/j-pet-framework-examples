@@ -20,7 +20,6 @@
 using namespace std;
 int main(int argc, char* argv[])
 {
-	DB::SERVICES::DBHandler::createDBConnection("../DBConfig/configDB.cfg");
   JPetManager& manager = JPetManager::getManager();
   manager.parseCmdLine(argc, argv);
   manager.run();
