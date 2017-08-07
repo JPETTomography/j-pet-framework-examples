@@ -1,0 +1,8 @@
+{
+ "localDB":"detectorSetupFileName.json",
+ "TimeCalibLoader_ConfigFile":"timeSynchronisationFileName.txt",
+ "SignalFinder_EdgeMaxTime":"20000",
+ "SignalFinder_LeadTrailMaxTime":"300000",
+ "HitFinder_TimeWindowWidth":"25000",
+ "EventFinder_EventTime":"5000"
+}
