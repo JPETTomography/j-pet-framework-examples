@@ -9,12 +9,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ * This program draw deltaT histograms for each strip. To each histogram a gaussian function is fited. 
+ * Program saved to results.txt following data: slot_ID position threshold Mean_of_Gaussian_fit Error_of_Gaussian_fit Chi_Square NDF  
  *
- *  @file EventFinder.cpp
+ *  @file DeltaTFinder.cpp
  */
 
 #include <iostream>
-#include <JPetWriter/JPetWriter.h>
+
 #include "DeltaTFinder.h"
 
 
@@ -25,6 +28,7 @@ DeltaTFinder::DeltaTFinder(const char * name, const char * description):JPetTask
 void DeltaTFinder::init(const JPetTaskInterface::Options& opts){
 
 	INFO("DeltaT extraction started.");
+
 
 	if (fSaveControlHistos)
 	{
@@ -46,6 +50,25 @@ void DeltaTFinder::init(const JPetTaskInterface::Options& opts){
 								  120, -20., 20.) );
 		}
 	}
+	}
+	
+	std::string input_file_key = "inputFile";
+	std::string file_path;
+
+	if (opts.count( input_file_key )) {
+			file_path = opts.at(input_file_key);
+	}  
+	std::cout << file_path << std::endl; 
+	for(int i = 1; i < 50;i++)
+	{
+		std::string pos = fPosition;
+		pos+= boost::lexical_cast<std::string>(i);
+		
+		if (opts.count(pos)) {
+			auto res = retrievePositionAndFileName( opts.at(pos).c_str() );
+			if( file_path == res.second )
+				fPos = res.first;
+		}
 	}
 }
 
@@ -75,9 +98,12 @@ void DeltaTFinder::terminate(){
 	thresholdConversionMap[2] = 'b';
 	thresholdConversionMap[3] = 'c';
 	thresholdConversionMap[4] = 'd';
-	int position = 200;
 	
-	TString results_folder_name = ("Results/position_"+std::to_string(position)).c_str();
+	
+	
+	TString results_folder_name = ("Results/position_"+boost::lexical_cast<std::string>(fPos)).c_str();
+	std::cout << fPos << std:: endl;
+	std::cout << results_folder_name << std::endl;
 	system("mkdir -p "+ results_folder_name);
 
 	for(auto & slot : getParamBank().getBarrelSlots()){
@@ -90,12 +116,12 @@ void DeltaTFinder::terminate(){
 			histoToSave->Fit("gaus","","", highestBin-2, highestBin+2);
 			TCanvas* c = new TCanvas();
 			histoToSave->Draw();
-			std::string sHistoName = "Results/position_"+std::to_string(position)+"/"+histo_name; sHistoName+="_position_"+std::to_string(position)+".png"; 
+			std::string sHistoName = "Results/position_"+boost::lexical_cast<std::string>(fPos)+"/"+histo_name; sHistoName+="_position_"+boost::lexical_cast<std::string>(fPos)+".png"; 
 			c->SaveAs( (sHistoName).c_str() );
 			if( histoToSave->GetEntries() != 0 )
 			{
 				TF1 *fit = histoToSave->GetFunction("gaus");
-				kiko << slot.first << "\t" << position << "\t" << thresholdConversionMap[thr] << "\t" << fit->GetParameter(1)   
+				kiko << slot.first << "\t" << fPos << "\t" << thresholdConversionMap[thr] << "\t" << fit->GetParameter(1)   
 				     <<"\t" << fit->GetParError(1) << "\t" << fit->GetChisquare() << "\t" << fit->GetNDF() << std::endl;
 			}
 			
@@ -126,4 +152,26 @@ void DeltaTFinder::fillHistosForHit(const JPetHit & hit){
 														  timeDiffAB);
 		}
 	}
+}
+
+
+std::vector<std::string> DeltaTFinder::split(const std::string& inString)
+{
+  std::istringstream iss(inString);
+  using StrIt = std::istream_iterator<std::string>;
+  std::vector<std::string> container{StrIt{iss}, StrIt{}};
+  return container;
+}
+
+std::pair<int, std::string> DeltaTFinder::retrievePositionAndFileName(const std::string& inString)
+{
+  auto res = split(inString);
+  if (res.size() != 2) {
+    ///dodajcie tu error
+    return std::make_pair(-1, "");
+  } else {
+    auto pos = std::stoi(res[0]);
+    return std::make_pair(pos, res[1]);
+  }
+
 }

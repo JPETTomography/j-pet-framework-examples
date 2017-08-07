@@ -18,11 +18,16 @@
 
 #include <vector>
 #include <map>
+#include <boost/lexical_cast.hpp>
 #include "TF1.h"
 #include <JPetTask/JPetTask.h>
 #include <JPetHit/JPetHit.h>
 #include <JPetEvent/JPetEvent.h>
+#include <JPetWriter/JPetWriter.h>
+#include <JPetReader/JPetReader.h>
+#include <JPetTreeHeader/JPetTreeHeader.h>
 #include "../LargeBarrelAnalysisExtended/LargeBarrelMapping.h"
+
 
 class JPetWriter;
 
@@ -39,10 +44,15 @@ public:
 	virtual void terminate()override;
 	virtual void setWriter(JPetWriter* writer)override;
 protected:
+	std::vector<std::string> split(const std::string& inString);
+	std::pair<int, std::string> retrievePositionAndFileName(const std::string& inString);
 	const char * formatUniqueSlotDescription(const JPetBarrelSlot & slot, int threshold,const char * prefix);
 	void fillHistosForHit(const JPetHit& hit);
 	LargeBarrelMapping fBarrelMap;
   	bool fSaveControlHistos = true;
 	JPetWriter* fWriter;
+	JPetReader* fReader;
+	const std::string fPosition = "DeltaTFinder_Position";
+	double fPos = 999;
 };
 #endif /*  !DELTATFINDER_H */
