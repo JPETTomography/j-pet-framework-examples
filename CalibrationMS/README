@@ -1,0 +1,47 @@
+Aim
+---
+This example is created for time calibration and synchronization of the whole detection system based on the measurements performed with a radioactive source and a reference detector.
+
+Expected output
+---------------
+No output to stdout.
+JPet.log file appears with the log of the processing and ROOT files with the following etensions are produced:
+ *.tslot.raw.root
+ *.tslot.calib.root
+ *.raw.sig.root
+ *.phys.sig.root
+ *.hits.root
+ *.calib.root
+
+where "*" stands for the name of the input file
+
+Input Data
+-----------
+For this example, user must provide data file(s) collected with the big barrel for the measurements performed with a radioactive source and a reference detector. For the purpose of calibration data files names should be following: LayerX_SlotY.hld, where X and Y correspond to irradiated Slot in proper layer. 
+
+Description
+--------------
+The analysis is split into tasks.
+
+
+Additional info
+--------------
+
+The filtering of signals is added in the TimeWindowCreator module -> only signals from the irradiated strip are processed further. In order to use it, one must add the following parameter to user options (e.g. in userParams.json):
+"TimeWindowCreator_MainStrip":"XXX"
+where XXX are the coordinates of the irradiated strip encded as a single integer number in the following way:
+layer number * 100 + slot number
+e.g. for processing data from reference detector at slot 43 in layer 2 XXX=243 
+
+Compiling 
+------------
+make
+
+Running
+------------
+The script run.sh contains an example of running the analysis (for RUN1). 
+
+Author
+------------
+Aleksander Gajos
+Please report any bugs and suggestions of corrections to: <alek.gajos@gmail.com>
