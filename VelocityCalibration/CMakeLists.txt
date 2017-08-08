@@ -37,20 +37,25 @@ file(GLOB LBAE_MAIN_CPP ../LargeBarrelAnalysisExtended/main.cpp)
 file(GLOB MAIN_CPP main.cpp)
 file(GLOB UNIT_TEST_SOURCES *Test.cpp)
 file(GLOB UNIT_TEST_LBAE_SOURCES ../LargeBarrelAnalysisExtended/*Test.cpp)
+file(GLOB ESTVEL_SOURCE estimateVelocity.cpp)
 list(REMOVE_ITEM SOURCES ${UNIT_TEST_SOURCES})
 
 file(GLOB SOURCES_WITHOUT_MAIN *.cpp)
 list(REMOVE_ITEM SOURCES ${LBAE_MAIN_CPP})
+list(REMOVE_ITEM SOURCES ${ESTVEL_SOURCE})
 list(REMOVE_ITEM SOURCES ${UNIT_TEST_LBAE_SOURCES})
 list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${UNIT_TEST_SOURCES})
 list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${MAIN_CPP})
 list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${LBAE_MAIN_CPP})
 
 include_directories(${Framework_INCLUDE_DIRS})
-add_definitions(${Framework_DEFINITIONS})
+add_definitions(${Framework_DEFINITIONS} )
 
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})
 target_link_libraries(${projectBinary} JPetFramework)
+
+add_executable(estimateVelocity ${ESTVEL_SOURCE})
+target_link_libraries(estimateVelocity JPetFramework)
 
 add_custom_target(clean_data_velocitycalibration
   COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root)
