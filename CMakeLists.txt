@@ -33,4 +33,10 @@ add_subdirectory(ScopeLoaderExample)
 add_subdirectory(ScopeAnalysis)
 add_subdirectory(LargeBarrelAnalysis)
 add_subdirectory(LargeBarrelAnalysisExtended)
+<<<<<<< HEAD
 add_subdirectory(VelocityCalibration)
+=======
+#
+add_subdirectory(TimeCalibration)
+#add_subdirectory(NewAnalysisTemplate)
+>>>>>>> Time Calibration code
