@@ -37,4 +37,5 @@ add_subdirectory(AnalysisExample)
 add_subdirectory(LargeBarrelAnalysis)
 add_subdirectory(LargeBarrelAnalysisExtended)
 #
-add_subdirectory(NewAnalysisTemplate)
+add_subdirectory(TimeCalibration)
+#add_subdirectory(NewAnalysisTemplate)
