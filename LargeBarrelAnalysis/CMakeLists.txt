@@ -15,7 +15,6 @@ set(projectName LargeBarrelAnalysis)
 
 set(AUXILLIARY_FILES
   run.sh
-  conf_trb3.xml
   README
   )
 
