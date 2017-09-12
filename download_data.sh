@@ -3,68 +3,48 @@
 #e.g. download_data.sh /blabla/path
 #will write the output to /blabla/path 
 
-
-#analysis example
-DIR_AE=AnalysisExample
-
-#scope loader example
-DIR_SLE=ScopeLoaderExample
-
-#large barrel example
-DIR_LBE=LargeBarrelExample
-
-#large barrel example
-DIR_LBAE=LargeBarrelAnalysisExtended
-
-#framework examples
-DIR_FE=FrameworkExample
-
-HTTP_PATH="http://sphinx.if.uj.edu.pl/framework/Examples"
-WGET_OUTPUT="./"
-# -r  means recursive, 
-# --cut-dirs=1 ignore given level of directories (e.g. remove framework from path) 
-# -nH  Disable generation of host-prefixed directories (so save only what is inside Examples and not full path)
-# -np no parents
-# --reject="index.html*" - do not store all index.html files
-# -e robots=off - remove some robot generated files
-declare -a WGET_FLAGS=(-r -nH -np --cut-dirs=2 --reject="index.html*" -e robots=off)
-
 #if there is an extra argument treat it as the output path 
 #if the argument is empty set some default paths
-if [ -z $1 ]; then
-  WGET_OUTPUT=.
-else
-  WGET_OUTPUT=$1
+BASE_PATH=.
+if [ ! -z $1 ]; then
+  BASE_PATH=$1
 fi
 
 
-WGET_DIR=${DIR_AE}
-WGET_INPUT=${HTTP_PATH}/${DIR_AE}
-#downloading test data via wget
-wget "${WGET_INPUT}" "${WGET_FLAGS[@]}" -P "${WGET_OUTPUT}" 
+function check_sums {
+	local CUR_DIR=$PWD
+	cd $BASE_PATH
+	shasum -c $1
+	cd $CUR_DIR
+}
+CHECKSUM_COMMAND="check_sums"
 
-WGET_DIR=${DIR_SLE}
-WGET_INPUT=${HTTP_PATH}/${DIR_SLE}
-#downloading test data via wget
-wget "${WGET_INPUT}" "${WGET_FLAGS[@]}" -P "${WGET_OUTPUT}" 
+#for wget
+TEST_CHECKSUM_FILE="examples.sha"
+TEST_BASE_URL="http://sphinx.if.uj.edu.pl/framework"
+TEST_CHECKSUM_URL=$TEST_BASE_URL/$TEST_CHECKSUM_FILE
+TEST_OUTPUT=$BASE_PATH
+LOCAL_TEST_CHECKSUM_FILE=$TEST_OUTPUT/$TEST_CHECKSUM_FILE
+# -x create subdirectories,
+# -nH  Disable generation of host-prefixed directories (so save only subdirectories and not full path)
+# --cut-dirs=1 ignore given level of directories (i.e. remove framework from path)
+declare -a WGET_FLAGS=(-x -nH --cut-dirs=1)
 
-WGET_DIR=${DIR_LBE}
-WGET_INPUT=${HTTP_PATH}/${DIR_LBE}
+# We want the directory structure to be flatter than on sphinx, so here is some magic allowing for that.
+ln -s $BASE_PATH $BASE_PATH/Examples
 #downloading test data via wget
-wget "${WGET_INPUT}" "${WGET_FLAGS[@]}" -P "${WGET_OUTPUT}" 
-
-WGET_DIR=${DIR_FE}
-WGET_INPUT=${HTTP_PATH}/${DIR_FE}
-#downloading test data via wget
-wget "${WGET_INPUT}" "${WGET_FLAGS[@]}" -P "${WGET_OUTPUT}" 
-
-WGET_DIR=${DIR_LBAE}
-WGET_INPUT=${HTTP_PATH}/${DIR_LBAE}
-#downloading test data via wget
-wget "${WGET_INPUT}" "${WGET_FLAGS[@]}" -P "${WGET_OUTPUT}" 
-
-#calibration files
-DIR_CAL=CalibrationFiles
-WGET_DIR=${DIR_CAL}
-WGET_INPUT=${HTTP_PATH}/${DIR_CAL}
-wget "${WGET_INPUT}" "${WGET_FLAGS[@]}" -P "${WGET_OUTPUT}" 
+# first get and check the checksums
+wget "${TEST_CHECKSUM_URL}" "${WGET_FLAGS[@]}" -P "${TEST_OUTPUT}"
+for FILE in $($CHECKSUM_COMMAND $LOCAL_TEST_CHECKSUM_FILE | grep 'FAIL' | sed 's/:.*//'); do
+  TEST_FILE_URL=$TEST_BASE_URL/$FILE
+  wget "${TEST_FILE_URL}" "${WGET_FLAGS[@]}" -P "${TEST_OUTPUT}"
+done
+if $CHECKSUM_COMMAND $LOCAL_TEST_CHECKSUM_FILE | grep 'FAIL'; then
+  echo "The downloaded data does not match the checksum!"
+  exit 1
+else
+  echo "All unit test data OK."
+fi
+rm $LOCAL_TEST_CHECKSUM_FILE
+# Undo the magic.
+unlink $BASE_PATH/Examples
