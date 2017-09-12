@@ -1,0 +1,62 @@
+Aim
+---
+This example reuses LargeBarrelExtended example and shows how to prepare output for 3D hybrid reconstruction frm the J-PET big barrel. 
+
+Expected output
+---------------
+No output to stdout.
+JPet.log file appears with the log of the processing and ROOT files with the following etensions are produced:
+ *.tslot.raw.root
+ *.tslot.calib.root
+ *.raw.sig.root
+ *.phys.sig.root
+ *.hit.root
+ *.unk.evt.root
+ *.cat.evt.root
+ output.txt
+
+where "*" stands for the name of the input file and "output.txt" contains data needed for reconstruction in form of
+X,Y,Z,T coordinates for both hits from LOR line.
+
+Input Data
+-----------
+For this example, user must provide their own data file(s) collected with the big barrel. Please note, that
+reconstruction does not cope well with data containing a lot of noise from scattered events and they should be
+suppressed.
+
+Description
+--------------
+The analysis is split into tasks as in LargeBarrelAnalysis. Last module in analysis chain goes through all events and
+selects those which contain only two hits and outputs their space and time coordinates into output.txt file.
+
+Additional info
+--------------
+To use data from this example in analysis one has to use 3d_convert_tool with --warsaw flag and run reconstruction as specified in reports 5 and 6 from 2016. 
+In case of problems with 3d_convert_tool / reconstruction contact prof. Piotr Białas.
+
+In case of data from Big Barrel one has to produce output.txt from framework using this example and then:
+1. Produce system matrix using reconstruction libraries:
+./2d_barrel_matrix -c ./config/big.cfg -e 1m -p 0.004 --full -o f_big -v
+
+2. Convert output.txt to reconstruction format:
+./3d_tool_convert -c config/big.cfg --warsaw output.txt > output_new.txt
+
+3. Run reconstruction:
+./3d_hybrid_reconstruction output_new.txt --system f_big -i 20 -o result -v --s-z 0.05 --s-dl 0.1
+
+PLEASE NOTE THAT ALL NUMERICAL VALUES ARE (e.q. --s-z 0.05) MORE OR LESS ARBITRARY AND SHOULD BE EVALUATED!
+
+Compiling 
+------------
+make
+
+Running
+------------
+The script run.sh contains an example of running the analysis. Note, however, that
+the user must fill the input data file name and the number of run
+
+
+Author
+------------
+Szymon Niedźwiecki
+Please report any bugs and suggestions of corrections to: <szymon.niedzwiecki@googlemail.com>
