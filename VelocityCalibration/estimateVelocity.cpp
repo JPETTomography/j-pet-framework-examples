@@ -29,7 +29,7 @@ struct scintData{
 };
 
 std::vector<scintData> takeData(const std::string file);
-void velocityCalc(std::vector<scintData>& data,const char thrLabel);
+void velocityCalc(std::vector<scintData>& data, const char thrLabel, const std::string& outPath);
 void parserTest(std::vector<scintData>& data, const char thrLabel);
 
 int main(int argc, char** argv)
@@ -37,10 +37,20 @@ int main(int argc, char** argv)
 	gStyle->SetOptFit(1);
 	
 	std::vector<scintData> data;
+	std::string outPath = "";
 	if(argc == 1)
+	{
 	  data = takeData("results.txt");
+	}
 	else if (argc == 2)
+	{
 	  data = takeData(std::string(argv[1]));
+	}
+	else if (argc == 3)
+	{
+	  data = takeData(std::string(argv[1]));
+	  outPath = argv[2];
+	}
 	
 	if(data.size() == 0 )
 	{
@@ -52,10 +62,10 @@ int main(int argc, char** argv)
 	
 	//~ parserTest(data, 'a');
 	//velocityCalc( data , 'a');
-	velocityCalc( data , 'a');
-	velocityCalc( data , 'b');
-	velocityCalc( data , 'c');
-	velocityCalc( data , 'd');
+	velocityCalc( data , 'a', outPath);
+	velocityCalc( data , 'b', outPath);
+	velocityCalc( data , 'c', outPath);
+	velocityCalc( data , 'd', outPath);
 
 	return 0;
 }
@@ -81,11 +91,11 @@ void parserTest(std::vector<scintData>& data, const char thrLabel)
 }
 
 
-void velocityCalc(std::vector<scintData>& data, const char thrLabel)
+void velocityCalc(std::vector<scintData>& data, const char thrLabel, const std::string& outPath)
 {
 
 	std::ofstream results;
-	std::string title = "resultsForThreshold";
+	std::string title = outPath+"resultsForThreshold";
 	title+= thrLabel;
 	title+= ".txt";
 	results.open( title.c_str() );
