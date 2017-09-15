@@ -58,10 +58,6 @@ int main(int argc, char** argv)
 	  return 1;
 	}
 	
-	std::cout << data.size() << std::endl;
-	
-	//~ parserTest(data, 'a');
-	//velocityCalc( data , 'a');
 	velocityCalc( data , 'a', outPath);
 	velocityCalc( data , 'b', outPath);
 	velocityCalc( data , 'c', outPath);
@@ -139,7 +135,6 @@ std::pair<double,double> plotVelocity(std::vector<double> positions, std::vector
 	std::stringstream buf;
 	buf << strip << "_" << thresholdLabel;
 	c->SaveAs( (buf.str() + ".png").c_str() );
-	std::cout << fit->GetParameter(1);
 	std::pair<double,double> resultOfFit = std::make_pair<double,double> ( (fit->GetParameter(1))*-0.2,  (fit->GetParError(1))*-0.2 );
 	return resultOfFit;
 }
