@@ -54,6 +54,7 @@ protected:
 	JPetReader* fReader;
 	const std::string fPosition = "DeltaTFinder_Position";
 	std::string fOutputPath = "";
+	std::string fOutputVelocityCalibName = "";
 	double fPos = 999;
 };
 #endif /*  !DELTATFINDER_H */

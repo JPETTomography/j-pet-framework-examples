@@ -83,6 +83,11 @@ void DeltaTFinder::init(const JPetTaskInterface::Options& opts){
 
 	if (opts.count( outputPath_key )) 
 			fOutputPath = opts.at(outputPath_key);
+
+	std::string velocityCalibFile_key = "velocityCalibFile";
+	if (opts.count( velocityCalibFile_key ) )
+			fOutputVelocityCalibName = opts.at( velocityCalibFile_key );
+
 }
 
 const char* DeltaTFinder::formatUniqueSlotDescription(const JPetBarrelSlot & slot, int threshold, const char * prefix = ""){
@@ -104,7 +109,7 @@ void DeltaTFinder::exec(){
 
 void DeltaTFinder::terminate(){
 	std::ofstream outStream;
-	outStream.open( (fOutputPath+"results.txt").c_str() ,std::ios_base::app);
+	outStream.open( (fOutputPath+fOutputVelocityCalibName).c_str() ,std::ios_base::app);
 	std::map<int, char> thresholdConversionMap;
 	thresholdConversionMap[1] = 'a';
 	thresholdConversionMap[2] = 'b';
