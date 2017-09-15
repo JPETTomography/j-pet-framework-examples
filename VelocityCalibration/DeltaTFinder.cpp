@@ -103,8 +103,8 @@ void DeltaTFinder::exec(){
 }
 
 void DeltaTFinder::terminate(){
-	std::ofstream kiko;
-	kiko.open("results.txt",std::ios_base::app);
+	std::ofstream outStream;
+	outStream.open( (fOutputPath+"results.txt").c_str() ,std::ios_base::app);
 	std::map<int, char> thresholdConversionMap;
 	thresholdConversionMap[1] = 'a';
 	thresholdConversionMap[2] = 'b';
@@ -130,13 +130,13 @@ void DeltaTFinder::terminate(){
 			if( histoToSave->GetEntries() != 0 )
 			{
 				TF1 *fit = histoToSave->GetFunction("gaus");
-				kiko << slot.first << "\t" << fPos << "\t" << thresholdConversionMap[thr] << "\t" << fit->GetParameter(1)   
+				outStream << slot.first << "\t" << fPos << "\t" << thresholdConversionMap[thr] << "\t" << fit->GetParameter(1)   
 				     <<"\t" << fit->GetParError(1) << "\t" << fit->GetChisquare() << "\t" << fit->GetNDF() << std::endl;
 			}
 			
 		}
 	}
-	kiko.close();
+	outStream.close();
 
 	INFO("DeltaT extraction ended.");
 }
