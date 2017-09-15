@@ -48,7 +48,7 @@ protected:
 	static std::pair<int, std::string> retrievePositionAndFileName(const std::string& inString);
 	const char * formatUniqueSlotDescription(const JPetBarrelSlot & slot, int threshold,const char * prefix);
 	void fillHistosForHit(const JPetHit& hit);
-	JPetGeomMapping fBarrelMap;
+	JPetGeomMapping* fBarrelMap = nullptr;
 	JPetParamManager* fParamManager = nullptr;
   	bool fSaveControlHistos = true;
 	JPetWriter* fWriter;
