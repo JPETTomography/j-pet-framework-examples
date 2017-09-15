@@ -26,8 +26,7 @@
 #include <JPetWriter/JPetWriter.h>
 #include <JPetReader/JPetReader.h>
 #include <JPetTreeHeader/JPetTreeHeader.h>
-#include "../LargeBarrelAnalysisExtended/LargeBarrelMapping.h"
-
+#include <JPetGeomMapping/JPetGeomMapping.h>
 
 class JPetWriter;
 
@@ -38,17 +37,19 @@ class JPetWriter;
 class DeltaTFinder : public JPetTask{
 public:
 	DeltaTFinder(const char * name, const char * description);
-	virtual ~DeltaTFinder(){}
+	virtual ~DeltaTFinder(){};
 	virtual void init(const JPetTaskInterface::Options& opts)override;
 	virtual void exec()override;
 	virtual void terminate()override;
 	virtual void setWriter(JPetWriter* writer)override;
 protected:
+	void setParamManager( JPetParamManager* paramManager);
 	static std::vector<std::string> split(const std::string& inString);
 	static std::pair<int, std::string> retrievePositionAndFileName(const std::string& inString);
 	const char * formatUniqueSlotDescription(const JPetBarrelSlot & slot, int threshold,const char * prefix);
 	void fillHistosForHit(const JPetHit& hit);
-	LargeBarrelMapping fBarrelMap;
+	JPetGeomMapping fBarrelMap;
+	JPetParamManager* fParamManager = nullptr;
   	bool fSaveControlHistos = true;
 	JPetWriter* fWriter;
 	JPetReader* fReader;

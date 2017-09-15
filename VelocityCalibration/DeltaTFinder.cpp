@@ -23,16 +23,22 @@
 
 using namespace std;
 
-DeltaTFinder::DeltaTFinder(const char * name, const char * description):JPetTask(name, description){}
+DeltaTFinder::DeltaTFinder(const char * name, const char * description):JPetTask(name, description), fBarrelMap( JPetParamBank() ){
+	
+}
+
+void DeltaTFinder::setParamManager( JPetParamManager* paramManager )
+{
+	fParamManager = paramManager;
+}
 
 void DeltaTFinder::init(const JPetTaskInterface::Options& opts){
 
 	INFO("DeltaT extraction started.");
-
+	fBarrelMap = JPetGeomMapping(getParamBank());
 
 	if (fSaveControlHistos)
 	{
-		fBarrelMap.buildMappings(getParamBank());
 	// create histograms for time differences at each slot and each threshold
 	for(auto & scin : getParamBank().getScintillators()){
 		for (int thr=1;thr<=4;thr++){
@@ -43,9 +49,9 @@ void DeltaTFinder::init(const JPetTaskInterface::Options& opts){
 	// create histograms for time diffrerence vs slot ID
 	for(auto & layer : getParamBank().getLayers()){
 		for (int thr=1;thr<=4;thr++){
-			const char * histo_name = Form("TimeDiffVsID_layer_%d_thr_%d", fBarrelMap.getLayerNumber(*layer.second), thr);
+			const char * histo_name = Form("TimeDiffVsID_layer_%d_thr_%d", (int)fBarrelMap.getLayerNumber(*layer.second), thr);
 			const char * histo_titile = Form("%s;Slot ID; TimeDiffAB [ns]", histo_name); 
-			int n_slots_in_layer = fBarrelMap.getNumberOfSlots(*layer.second);
+			int n_slots_in_layer = fBarrelMap.getSlotsCount(*layer.second);
 			getStatistics().createHistogram( new TH2F(histo_name, histo_titile, n_slots_in_layer, 0.5, n_slots_in_layer+0.5,
 								  120, -20., 20.) );
 		}
