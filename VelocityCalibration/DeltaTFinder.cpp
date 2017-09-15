@@ -182,7 +182,7 @@ std::pair<int, std::string> DeltaTFinder::retrievePositionAndFileName(const std:
 {
   auto res = split(inString);
   if (res.size() != 2) {
-    ///dodajcie tu error
+    ERROR( "Problem with reading options file line: " + inString );
     return std::make_pair(-1, "");
   } else {
     auto pos = std::stoi(res[0]);
