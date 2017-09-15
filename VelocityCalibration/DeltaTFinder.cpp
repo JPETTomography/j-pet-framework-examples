@@ -130,7 +130,8 @@ void DeltaTFinder::terminate(){
 			histoToSave->Fit("gaus","","", highestBin-2, highestBin+2);
 			TCanvas* c = new TCanvas();
 			histoToSave->Draw();
-			std::string sHistoName = "Results/position_"+boost::lexical_cast<std::string>(fPos)+"/"+histo_name; sHistoName+="_position_"+boost::lexical_cast<std::string>(fPos)+".png"; 
+			std::string sHistoName = results_folder_name; 
+			sHistoName+="_position_"+boost::lexical_cast<std::string>(fPos)+".png"; 
 			c->SaveAs( (sHistoName).c_str() );
 			if( histoToSave->GetEntries() != 0 )
 			{
