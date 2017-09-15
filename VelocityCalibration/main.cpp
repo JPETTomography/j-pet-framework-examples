@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2016 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2017 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -44,19 +44,11 @@ int main(int argc, char* argv[])
     );
   });
 
-  //Second task - Signal Channel calibration
-  manager.registerTask([]() {
-    return new JPetTaskLoader("tslot.raw", "tslot.calib",
-      new TimeCalibLoader(
-        "TimeCalibLoader",
-        "Apply time corrections from prepared calibrations"
-      )
-    );
-  });
+  //There is no second task - calibration of time difference is not needed in this analysis
 
   //Third task - Raw Signal Creation
   manager.registerTask([]() {
-    return new JPetTaskLoader("tslot.calib", "raw.sig",
+    return new JPetTaskLoader("tslot.raw", "raw.sig",
       new SignalFinder(
         "SignalFinder",
         "Create Raw Signals, optional - draw control histograms",
@@ -75,12 +67,21 @@ int main(int argc, char* argv[])
     );
   });
 
-  ////Fifth task - Hit construction
+ ////Fifth task - Hit construction
   manager.registerTask([]() {
     return new JPetTaskLoader("phys.sig", "hits",
       new HitFinder(
         "HitFinder",
         "Create hits from physical signals"
+      )
+    );
+  });
+
+   manager.registerTask([]() {
+    return new JPetTaskLoader("hits", "deltaT",
+      new DeltaTFinder(
+        "DeltaTFinder",
+        "Looking for deltaT AB"
       )
     );
   });
