@@ -103,7 +103,6 @@ void DeltaTFinder::exec(){
 }
 
 void DeltaTFinder::terminate(){
-	getAuxilliaryData().createMap("timeDiffAB mean values");
 	std::ofstream kiko;
 	kiko.open("results.txt",std::ios_base::app);
 	std::map<int, char> thresholdConversionMap;
@@ -121,7 +120,6 @@ void DeltaTFinder::terminate(){
 		for (int thr=1;thr<=4;thr++){
 			const char * histo_name = formatUniqueSlotDescription(*(slot.second), thr, "timeDiffAB_");
 			double mean = getStatistics().getHisto1D(histo_name).GetMean();
-			getAuxilliaryData().setValue("timeDiffAB mean values", histo_name, mean);
 			TH1F* histoToSave = &(getStatistics().getHisto1D(histo_name) );
 			int highestBin = histoToSave->GetBinCenter( histoToSave->GetMaximumBin() );
 			histoToSave->Fit("gaus","","", highestBin-2, highestBin+2);
