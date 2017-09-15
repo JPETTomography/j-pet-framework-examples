@@ -70,6 +70,11 @@ void DeltaTFinder::init(const JPetTaskInterface::Options& opts){
 				fPos = res.first;
 		}
 	}
+
+	std::string outputPath_key = "outputPath";
+
+	if (opts.count( outputPath_key )) 
+			fOutputPath = opts.at(outputPath_key);
 }
 
 const char* DeltaTFinder::formatUniqueSlotDescription(const JPetBarrelSlot & slot, int threshold, const char * prefix = ""){
@@ -101,7 +106,7 @@ void DeltaTFinder::terminate(){
 	
 	
 	
-	TString results_folder_name = ("Results/position_"+boost::lexical_cast<std::string>(fPos)).c_str();
+	TString results_folder_name = (fOutputPath+"Results/position_"+boost::lexical_cast<std::string>(fPos)).c_str();
 	std::cout << fPos << std:: endl;
 	std::cout << results_folder_name << std::endl;
 	system("mkdir -p "+ results_folder_name);

@@ -53,6 +53,7 @@ protected:
 	JPetWriter* fWriter;
 	JPetReader* fReader;
 	const std::string fPosition = "DeltaTFinder_Position";
+	std::string fOutputPath = "";
 	double fPos = 999;
 };
 #endif /*  !DELTATFINDER_H */
