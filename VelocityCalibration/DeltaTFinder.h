@@ -56,5 +56,6 @@ protected:
 	std::string fOutputPath = "";
 	std::string fOutputVelocityCalibName = "";
 	double fPos = 999;
+	int fRangeAroundMaximumBin = 2;
 };
 #endif /*  !DELTATFINDER_H */

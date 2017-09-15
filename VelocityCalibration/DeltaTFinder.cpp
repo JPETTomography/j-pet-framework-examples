@@ -127,7 +127,7 @@ void DeltaTFinder::terminate(){
 			double mean = getStatistics().getHisto1D(histo_name).GetMean();
 			TH1F* histoToSave = &(getStatistics().getHisto1D(histo_name) );
 			int highestBin = histoToSave->GetBinCenter( histoToSave->GetMaximumBin() );
-			histoToSave->Fit("gaus","","", highestBin-2, highestBin+2);
+			histoToSave->Fit("gaus","","", highestBin-fRangeAroundMaximumBin, highestBin+fRangeAroundMaximumBin);
 			TCanvas* c = new TCanvas();
 			histoToSave->Draw();
 			std::string sHistoName = results_folder_name; 
