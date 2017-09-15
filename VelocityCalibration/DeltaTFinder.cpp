@@ -57,9 +57,17 @@ void DeltaTFinder::init(const JPetTaskInterface::Options& opts){
 
 	if (opts.count( input_file_key )) {
 			file_path = opts.at(input_file_key);
-	}  
-	std::cout << file_path << std::endl; 
-	for(int i = 1; i < 50;i++)
+	}
+
+	std::string numberOfPositionsKey = "numberOfPositions";
+	std::string sPos = "";
+
+	if( opts.count( numberOfPositionsKey ) )
+		sPos = opts.at( numberOfPositionsKey );
+
+	int positions = std::stoi(sPos);
+  
+	for(int i = 1; i < positions;i++)
 	{
 		std::string pos = fPosition;
 		pos+= boost::lexical_cast<std::string>(i);
@@ -107,8 +115,6 @@ void DeltaTFinder::terminate(){
 	
 	
 	TString results_folder_name = (fOutputPath+"Results/position_"+boost::lexical_cast<std::string>(fPos)).c_str();
-	std::cout << fPos << std:: endl;
-	std::cout << results_folder_name << std::endl;
 	system("mkdir -p "+ results_folder_name);
 
 	for(auto & slot : getParamBank().getBarrelSlots()){
