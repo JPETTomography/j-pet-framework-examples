@@ -35,16 +35,13 @@ file(GLOB HEADERS *.h ../LargeBarrelAnalysisExtended/*.h)
 file(GLOB SOURCES *.cpp ../LargeBarrelAnalysisExtended/*.cpp)
 file(GLOB LBAE_MAIN_CPP ../LargeBarrelAnalysisExtended/main.cpp)
 file(GLOB MAIN_CPP main.cpp)
-file(GLOB UNIT_TEST_SOURCES *Test.cpp)
 file(GLOB UNIT_TEST_LBAE_SOURCES ../LargeBarrelAnalysisExtended/*Test.cpp)
 file(GLOB ESTVEL_SOURCE estimateVelocity.cpp)
-list(REMOVE_ITEM SOURCES ${UNIT_TEST_SOURCES})
 
 file(GLOB SOURCES_WITHOUT_MAIN *.cpp)
 list(REMOVE_ITEM SOURCES ${LBAE_MAIN_CPP})
 list(REMOVE_ITEM SOURCES ${ESTVEL_SOURCE})
 list(REMOVE_ITEM SOURCES ${UNIT_TEST_LBAE_SOURCES})
-list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${UNIT_TEST_SOURCES})
 list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${MAIN_CPP})
 list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${LBAE_MAIN_CPP})
 
@@ -100,21 +97,3 @@ endforeach( file_i )
 add_custom_target(copy_files_velocity DEPENDS ${copy_depends}) #add new target that depends on copied files
 add_dependencies(${projectBinary} copy_files_velocity) #add dependencies between building project and copy files
 
-# unit tests
-set(TESTS_DIR ${CMAKE_CURRENT_BINARY_DIR}/tests)
-file(MAKE_DIRECTORY ${TESTS_DIR})
-foreach(test_source ${UNIT_TEST_SOURCES})
-  get_filename_component(test ${test_source} NAME_WE)
-  generate_root_dictionaries(test_dictionaries SOURCES ${test_source})
-  list(APPEND test_binaries ${test}.x)
-  add_executable(${test}.x EXCLUDE_FROM_ALL ${test_source} ${SOURCES_WITHOUT_MAIN}
-    ${test_dictionaries}
-    )
-  set_target_properties(${test}.x PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TESTS_DIR} )
-  target_link_libraries(${test}.x
-    JPetFramework
-    ${Boost_LIBRARIES}
-    )
-endforeach()
-
-add_custom_target(tests_VelocityCalibration DEPENDS ${test_binaries} )
