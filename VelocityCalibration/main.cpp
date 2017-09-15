@@ -28,9 +28,6 @@ using namespace std;
 int main(int argc, char* argv[])
 {
 
-  //Connection to the remote database disabled for the moment
-  //DB::SERVICES::DBHandler::createDBConnection("../DBConfig/configDB.cfg");
-
   JPetManager& manager = JPetManager::getManager();
   manager.parseCmdLine(argc, argv);
 
