@@ -15,12 +15,15 @@
 #include <Unpacker2/Unpacker2/EventIII.h>
 #include <JPetWriter/JPetWriter.h>
 #include "TimeWindowCreator.h"
+#include <JPetGeomMapping/JPetGeomMapping.h>
 
 TimeWindowCreator::TimeWindowCreator(const char* name, const char* description):
   JPetTask(name, description) {}
 
 void TimeWindowCreator::init(const JPetTaskInterface::Options& opts)
 {
+  fOutputEvents = new JPetTimeWindow("JPetSigCh");
+  
   /// Reading values from the user options if available
   if (opts.count(kMaxTimeParamKey)) {
     fMaxTime = std::atof(opts.at(kMaxTimeParamKey).c_str());
@@ -28,6 +31,34 @@ void TimeWindowCreator::init(const JPetTaskInterface::Options& opts)
   if (opts.count(kMinTimeParamKey)) {
     fMinTime = std::atof(opts.at(kMinTimeParamKey).c_str());
   }
+
+  // take coordinates of the main (irradiated strip) from user parameters
+  if (opts.count(kMainStripKey)) {
+    fMainStripSet = true;
+    int code = std::atoi(opts.at(kMainStripKey).c_str());
+    fMainStrip.first = code / 100;  // layer number
+    fMainStrip.second = code % 100; // strip number
+    
+    // build a list of allowed channels
+    JPetGeomMapping mapper(fParamManager->getParamBank());
+    
+    for(int thr=1;thr<=4;++thr){
+      int tomb_number = mapper.getTOMB(fMainStrip.first, fMainStrip.second, JPetPM::SideA, thr);
+      fAllowedChannels.insert(tomb_number);
+      tomb_number = mapper.getTOMB(fMainStrip.first, fMainStrip.second, JPetPM::SideB, thr);
+      fAllowedChannels.insert(tomb_number);
+    }
+    
+    // add all reference detector channels to allowed channels list
+    for(int thr=1;thr<=4;++thr){
+      int tomb_number = mapper.getTOMB(4, 1, JPetPM::SideA, thr);
+      fAllowedChannels.insert(tomb_number);
+      tomb_number = mapper.getTOMB(4, 1, JPetPM::SideB, thr);
+      fAllowedChannels.insert(tomb_number);
+    }
+    
+  }
+  
   getStatistics().createHistogram( new TH1F("HitsPerEvtCh", "Hits per channel in one event", 50, -0.5, 49.5) );
   getStatistics().createHistogram( new TH1F("ChannelsPerEvt", "Channels fired in one event", 200, -0.5, 199.5) );
 }
@@ -42,8 +73,7 @@ void TimeWindowCreator::exec()
   if (auto evt = dynamic_cast </*const*/ EventIII * const > (getEvent())) {
     int ntdc = evt->GetTotalNTDCChannels();
     getStatistics().getHisto1D("ChannelsPerEvt").Fill( ntdc );
-    JPetTimeWindow tslot;
-    tslot.setIndex(fCurrEventNumber);
+
     auto tdcHits = evt->GetTDCChannelsArray();
     for (int i = 0; i < ntdc; ++i) {
       //const is commented because this class has inproper architecture:
@@ -58,6 +88,14 @@ void TimeWindowCreator::exec()
         continue;
       }
       JPetTOMBChannel& tomb_channel = getParamBank().getTOMBChannel(tomb_number);
+
+      // ignore irrelevant channels
+      // (for time calibration)
+      if ( !filter(tomb_channel) ){
+	continue;
+      }
+      
+
       // one TDC channel may record multiple signals in one TSlot
       // iterate over all signals from one TDC channel
       // analyze number of hits per channel
@@ -80,27 +118,17 @@ void TimeWindowCreator::exec()
         // finally, set the times in ps [raw times are in ns]
         sigChTmpLead.setValue(tdcChannel->GetLeadTime(j) * 1000.);
         sigChTmpTrail.setValue(tdcChannel->GetTrailTime(j) * 1000.);
-        tslot.addCh(sigChTmpLead);
-        tslot.addCh(sigChTmpTrail);
+	fOutputEvents->add<JPetSigCh>(sigChTmpLead);
+	fOutputEvents->add<JPetSigCh>(sigChTmpTrail);
       }
     }
-    saveTimeWindow(tslot);
+
     fCurrEventNumber++;
   }
 }
 
 void TimeWindowCreator::terminate() {}
 
-void TimeWindowCreator::saveTimeWindow(const JPetTimeWindow& slot)
-{
-  assert(fWriter);
-  fWriter->write(slot);
-}
-
-void TimeWindowCreator::setWriter(JPetWriter* writer)
-{
-  fWriter = writer;
-}
 
 void TimeWindowCreator::setParamManager(JPetParamManager* paramManager)
 {
@@ -125,5 +153,21 @@ JPetSigCh TimeWindowCreator::generateSigCh(const JPetTOMBChannel& channel, JPetS
   sigch.setTRB(channel.getTRB());
   sigch.setTOMBChannel(channel);
   return sigch;
+}
+
+/**
+ * Returns true if signal from the channel given as argument should be passed
+ */
+bool TimeWindowCreator::filter(const JPetTOMBChannel& channel) const{
+
+  if( !fMainStripSet ){ // if main strip was not defined, pass all channels
+    return true;
+  }
+
+  if( fAllowedChannels.find(channel.getChannel()) != fAllowedChannels.end() ){
+    return true;
+  }
+  
+  return false;
 }
 

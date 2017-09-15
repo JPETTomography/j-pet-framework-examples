@@ -35,16 +35,12 @@ public:
 	virtual void init(const JPetTaskInterface::Options& opts)override;
 	virtual void exec()override;
 	virtual void terminate()override;
-	virtual void setWriter(JPetWriter* writer)override;
 protected:
-  	int kTimeSlotIndex;
-  	bool kFirstTime = true;
   	double kEventTimeWindow = 5000.0; //ps
 	const std::string fEventTimeParamKey = "EventFinder_EventTime";
     	std::vector<JPetHit> fHitVector;
   	bool fSaveControlHistos = true;
-	JPetWriter* fWriter;
 	void saveEvents(const std::vector<JPetEvent>& event);
-	std::vector<JPetEvent> buildEvents(std::vector<JPetHit> hitVec);
+	std::vector<JPetEvent> buildEvents(const JPetTimeWindow & hits);
 };
 #endif /*  !EVENTFINDER_H */

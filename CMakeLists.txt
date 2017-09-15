@@ -32,8 +32,10 @@ if(NOT DOWNLOAD_EXAMPLE_DATA_HAPPENED)
   set(DOWNLOAD_EXAMPLE_DATA_HAPPENED TRUE CACHE BOOL "Has the download data happened?" FORCE)
 endif() 
 add_subdirectory(AnalysisExample)
-add_subdirectory(ScopeLoaderExample)
-add_subdirectory(ScopeAnalysis)
+#add_subdirectory(ScopeLoaderExample)
+#add_subdirectory(ScopeAnalysis)
 add_subdirectory(LargeBarrelAnalysis)
 add_subdirectory(LargeBarrelAnalysisExtended)
-
+#
+add_subdirectory(TimeCalibration)
+#add_subdirectory(NewAnalysisTemplate)

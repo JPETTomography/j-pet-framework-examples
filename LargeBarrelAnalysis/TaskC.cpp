@@ -14,7 +14,6 @@
  */
 
 #include <iostream>
-#include <JPetWriter/JPetWriter.h>
 #include <JPetAnalysisTools/JPetAnalysisTools.h>
 #include "TaskC.h"
 #include <algorithm>
@@ -25,42 +24,33 @@ using namespace std;
 TaskC::TaskC(const char* name, const char* description): JPetTask(name, description) {}
 TaskC::~TaskC() {}
 
-void TaskC::init(const JPetTaskInterface::Options& opts)
-{
+void TaskC::init(const JPetTaskInterface::Options&)
+{ 
+  fOutputEvents = new JPetTimeWindow("JPetHit");
 }
 
 void TaskC::exec()
 {
   //getting the data from event in propriate format
-  if (auto currSignal = dynamic_cast<const JPetRawSignal* const>(getEvent())) {
-    getStatistics().getCounter("No. initial signals")++;
-    if (fSignals.empty()) {
-      fSignals.push_back(*currSignal);
-    } else {
-      if (fSignals[0].getTimeWindowIndex() == currSignal->getTimeWindowIndex()) {
-        fSignals.push_back(*currSignal);
-      } else {
+  if (auto timeWindow = dynamic_cast<JPetTimeWindow* const>(getEvent())) {
+    getStatistics().getCounter("No. initial signals") += timeWindow->getNumberOfEvents();
 
-        vector<JPetHit> hits = createHits(fSignals);
-        hits = JPetAnalysisTools::getHitsOrderedByTime(hits);
-        // uncomment this in order to fill histograms
-        // of time differences for subsequent hist
-        studyTimeWindow(hits);
+    vector<JPetHit> hits = createHits(*timeWindow);
+    hits = JPetAnalysisTools::getHitsOrderedByTime(hits);
 
-        saveHits(hits);
-
-        fSignals.clear();
-        fSignals.push_back(*currSignal);
-      }
-    }
+    saveHits(hits);
   }
 }
-vector<JPetHit> TaskC::createHits(const vector<JPetRawSignal>& signals)
+vector<JPetHit> TaskC::createHits(const JPetTimeWindow & signals)
 {
+  uint nsignals = signals.getNumberOfEvents();
+  
   vector<JPetHit> hits;
-  for (auto i = signals.begin(); i != signals.end(); ++i) {
-    for (auto j = i; ++j != signals.end();) {
-      if (i->getPM().getScin() == j->getPM().getScin()) {
+  for(uint i = 0; i < nsignals; ++i){
+    for(uint j=i+1; j< nsignals; ++j){
+      const JPetRawSignal & rawSignalA = dynamic_cast<const JPetRawSignal&>(signals[i]);
+      const JPetRawSignal & rawSignalB = dynamic_cast<const JPetRawSignal&>(signals[j]);
+      if (rawSignalA.getPM().getScin() == rawSignalB.getPM().getScin()) {
         // found 2 signals from the same scintillator
         // wrap the RawSignal objects into RecoSignal and PhysSignal
         // for now this is just wrapping opne object into another
@@ -72,17 +62,17 @@ vector<JPetHit> TaskC::createHits(const vector<JPetRawSignal>& signals)
         JPetPhysSignal physSignalB;
         // assign sides A and B properly
         if (
-          (i->getPM().getSide() == JPetPM::SideA)
-          && (j->getPM().getSide() == JPetPM::SideB)
+          (rawSignalA.getPM().getSide() == JPetPM::SideA)
+          && (rawSignalB.getPM().getSide() == JPetPM::SideB)
         ) {
-          recoSignalA.setRawSignal(*i);
-          recoSignalB.setRawSignal(*j);
+          recoSignalA.setRawSignal(rawSignalA);
+          recoSignalB.setRawSignal(rawSignalB);
         } else if (
-          (j->getPM().getSide() == JPetPM::SideA)
-          && (i->getPM().getSide() == JPetPM::SideB)
+          (rawSignalB.getPM().getSide() == JPetPM::SideA)
+          && (rawSignalA.getPM().getSide() == JPetPM::SideB)
         ) {
-          recoSignalA.setRawSignal(*j);
-          recoSignalB.setRawSignal(*i);
+          recoSignalA.setRawSignal(rawSignalB);
+          recoSignalB.setRawSignal(rawSignalA);
         } else {
           // if two hits on the same side, ignore
           WARNING("TWO hits on the same scintillator side we ignore it");
@@ -93,7 +83,7 @@ vector<JPetHit> TaskC::createHits(const vector<JPetRawSignal>& signals)
         if ( recoSignalB.getRawSignal().getNumberOfPoints(JPetSigCh::Leading) < 4 ) continue;
 
         bool thresholds_ok = true;
-        for (int i = 1; i <= 4; ++i) {
+        for (uint i = 1; i <= 4; ++i) {
           if ( recoSignalA.getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).count(i) < 1 ) {
             thresholds_ok = false;
           }
@@ -121,8 +111,8 @@ vector<JPetHit> TaskC::createHits(const vector<JPetRawSignal>& signals)
         JPetHit hit;
         hit.setSignalA(physSignalA);
         hit.setSignalB(physSignalB);
-        hit.setScintillator(i->getPM().getScin());
-        hit.setBarrelSlot(i->getPM().getScin().getBarrelSlot());
+        hit.setScintillator(rawSignalA.getPM().getScin());
+        hit.setBarrelSlot(rawSignalA.getPM().getScin().getBarrelSlot());
 
         physSignalA.setTime(physSignalA.getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).at(1));
         physSignalB.setTime(physSignalB.getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).at(1));
@@ -139,43 +129,19 @@ vector<JPetHit> TaskC::createHits(const vector<JPetRawSignal>& signals)
 
 void TaskC::terminate()
 {
-  //	saveHits(createHits(fSignals)); //if there is something left
   INFO( Form("From %d initial signals %d hits were paired.",
              static_cast<int>(getStatistics().getCounter("No. initial signals")),
              static_cast<int>(getStatistics().getCounter("No. found hits")) )
       );
 }
 
-
-
-void TaskC::studyTimeWindow(const vector<JPetHit>& hits)
-{
-
-  // plot time differences for subsequent hits at each threshold separately
-  for (int i = 1; i < hits.size(); ++i) {
-    for (int k = 1; k <= 4; ++k) {
-      double t2 = 0.5 * (hits.at(i).getSignalA().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).at(k) + hits.at(i).getSignalB().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).at(k));
-      double t1 = 0.5 * (hits.at(i - 1).getSignalA().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).at(k) + hits.at(i - 1).getSignalB().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading).at(k));
-      double dt = t2 - t1;
-      getStatistics().getHisto1D(Form("timeSepSmall_thr_%d", k)).Fill(dt / 1000.); // we fill the histo in [ns]
-      getStatistics().getHisto1D(Form("timeSepLarge_thr_%d", k)).Fill(dt / 1000.); // we fill the histo in [ns]
-    }
-  }
-}
-
 void TaskC::saveHits(const vector<JPetHit>& hits)
 {
-  assert(fWriter);
   for (auto hit : hits) {
     // here one can impose any conditions on hits that should be
     // saved or skipped
     // for now, all hits are written to the output file
     // without checking anything
-    fWriter->write(hit);
+    fOutputEvents->add<JPetHit>(hit);
   }
-}
-
-void TaskC::setWriter(JPetWriter* writer)
-{
-  fWriter = writer;
 }

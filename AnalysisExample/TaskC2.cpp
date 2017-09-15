@@ -25,6 +25,8 @@ TaskC2::TaskC2(const char * name, const char * description):
 
 void TaskC2::init(const JPetTaskInterface::Options& opts)
 {
+  fOutputEvents = new JPetTimeWindow("JPetRecoSignal");
+
   getStatistics().createHistogram( new TH1F("tot", "Time over threshold", 100, 0., 5000.) );
 }
 
@@ -32,15 +34,18 @@ void TaskC2::init(const JPetTaskInterface::Options& opts)
 void TaskC2::exec()
 {
   // A dummy analysis example:
-  auto currSignal = (JPetRawSignal&) (*getEvent());
-  saveRecoSignal(createRecoSignal(currSignal));
+  auto & timeWindow = *(dynamic_cast<const JPetTimeWindow* const>(getEvent()));
+  for(int i=0;i<timeWindow.getNumberOfEvents();++i){
+    auto & currSignal = dynamic_cast<const JPetRawSignal&>(timeWindow[i]);
+    fOutputEvents->add<JPetRecoSignal>(createRecoSignal(currSignal));
+  }
 }
 
 void TaskC2::terminate()
 {
 }
 
-JPetRecoSignal TaskC2::createRecoSignal(JPetRawSignal& rawSignal)
+JPetRecoSignal TaskC2::createRecoSignal(const JPetRawSignal& rawSignal)
 {
   // create a Reco Signal
   JPetRecoSignal recoSignal;
@@ -97,10 +102,4 @@ JPetRecoSignal TaskC2::createRecoSignal(JPetRawSignal& rawSignal)
   // store the original JPetRawSignal in the RecoSignal as a processing history
   recoSignal.setRawSignal(rawSignal);
   return recoSignal;
-}
-
-void TaskC2::saveRecoSignal( JPetRecoSignal signal)
-{
-  assert(fWriter);
-  fWriter->write(signal);
 }

@@ -26,6 +26,11 @@ TaskA::TaskA(const char * name, const char * description):
 {
 }
 
+void TaskA::init(const JPetTaskInterface::Options& opts){
+
+  fOutputEvents = new JPetTimeWindow("JPetSigCh");
+  
+}
 
 void TaskA::exec()
 {  
@@ -36,9 +41,6 @@ void TaskA::exec()
 
   // get number of TDC channels which fired in one TSlot
   int ntdc = evt->GetTotalNTDCChannels();
-
-  JPetTimeWindow tslot;
-  tslot.setIndex(fCurrEventNumber);
 
   // Get the array of TDC channels which fired
   TClonesArray* tdcHits = evt->GetTDCChannelsArray();
@@ -99,25 +101,16 @@ void TaskA::exec()
       sigChTmpTrail.setValue(tdcChannel->GetTrailTime(j) * 1000.);
 
       // and add the sigCh-s to TSlot
-      tslot.addCh(sigChTmpLead);
-      tslot.addCh(sigChTmpTrail);
+      fOutputEvents->add<JPetSigCh>(sigChTmpLead);
+      fOutputEvents->add<JPetSigCh>(sigChTmpTrail);
+
     }
     
   }
-  
-  saveTimeWindow(tslot);
   
   fCurrEventNumber++;
 }
 
 void TaskA::terminate()
 {
-}
-
-
-
-void TaskA::saveTimeWindow( JPetTimeWindow slot)
-{
-  assert(fWriter);
-  fWriter->write(slot);
 }

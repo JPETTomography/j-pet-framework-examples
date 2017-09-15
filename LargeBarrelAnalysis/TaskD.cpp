@@ -19,7 +19,10 @@
 
 TaskD::TaskD(const char * name, const char * description):JPetTask(name, description){}
 void TaskD::init(const JPetTaskInterface::Options&){
-	fBarrelMap.buildMappings(getParamBank());
+
+  fOutputEvents = new JPetTimeWindow("JPetHit");
+  
+  fBarrelMap.buildMappings(getParamBank());
 	// create histograms for time differences at each slot and each threshold
 	for(auto & scin : getParamBank().getScintillators()){
 		for (int thr=1;thr<=4;thr++){
@@ -39,11 +42,16 @@ void TaskD::init(const JPetTaskInterface::Options&){
 	}
 }
 void TaskD::exec(){
-	//getting the data from event in propriate format
-	if(auto hit =dynamic_cast<const JPetHit*const>(getEvent())){
-		fillHistosForHit(*hit);
-		fWriter->write(*hit);
-	}
+  //getting the data from event in propriate format
+  if(auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(getEvent())) {
+    uint n = timeWindow->getNumberOfEvents();
+
+    for(uint i=0;i<n;++i){
+      const JPetHit & hit = dynamic_cast<const JPetHit &>(timeWindow->operator[](i));
+      fillHistosForHit(hit);
+      fOutputEvents->add<JPetHit>(hit);
+    }
+  }
 }
 
 
@@ -91,4 +99,3 @@ const char * TaskD::formatUniqueSlotDescription(const JPetBarrelSlot & slot, int
 		threshold
 	);
 }
-void TaskD::setWriter(JPetWriter* writer){fWriter =writer;}

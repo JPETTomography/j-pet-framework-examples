@@ -19,6 +19,8 @@ TaskA::TaskA(const char* name, const char* description)
   : JPetTask(name, description), fCurrEventNumber(0) {}
 void TaskA::init(const JPetTaskInterface::Options& )
 {
+  fOutputEvents = new JPetTimeWindow("JPetSigCh");
+
   getStatistics().createHistogram( new TH1F("HitsPerEvtCh", "Hits per channel in one event", 50, -0.5, 49.5) );
   getStatistics().createHistogram( new TH1F("ChannelsPerEvt", "Channels fired in one event", 200, -0.5, 199.5) );
 }
@@ -32,8 +34,7 @@ void TaskA::exec()
   if (auto evt = dynamic_cast </*const*/ EventIII * const > (getEvent())) {
     int ntdc = evt->GetTotalNTDCChannels();
     getStatistics().getHisto1D("ChannelsPerEvt").Fill( ntdc );
-    JPetTimeWindow tslot;
-    tslot.setIndex(fCurrEventNumber);
+
     auto tdcHits = evt->GetTDCChannelsArray();
     for (int i = 0; i < ntdc; ++i) {
       //const is commented because this class has inproper architecture:
@@ -48,7 +49,7 @@ void TaskA::exec()
         continue;
       }
       JPetTOMBChannel& tomb_channel = getParamBank().getTOMBChannel(tomb_number);
-      // one TDC channel may record multiple signals in one TSlot
+      // one TDC channel may record multiple signals in one TimeWindow
       // iterate over all signals from one TDC channel
       // analyze number of hits per channel
       getStatistics().getHisto1D("HitsPerEvtCh").Fill( tdcChannel->GetHitsNum() );
@@ -70,25 +71,16 @@ void TaskA::exec()
         // finally, set the times in ps [raw times are in ns]
         sigChTmpLead.setValue(tdcChannel->GetLeadTime(j) * 1000.);
         sigChTmpTrail.setValue(tdcChannel->GetTrailTime(j) * 1000.);
-        tslot.addCh(sigChTmpLead);
-        tslot.addCh(sigChTmpTrail);
+	fOutputEvents->add<JPetSigCh>(sigChTmpLead);
+	fOutputEvents->add<JPetSigCh>(sigChTmpTrail);
       }
     }
-    saveTimeWindow(tslot);
     fCurrEventNumber++;
   }
 }
 
 void TaskA::terminate() {}
-void TaskA::saveTimeWindow( JPetTimeWindow slot)
-{
-  assert(fWriter);
-  fWriter->write(slot);
-}
-void TaskA::setWriter(JPetWriter* writer)
-{
-  fWriter = writer;
-}
+
 void TaskA::setParamManager(JPetParamManager* paramManager)
 {
   fParamManager = paramManager;
