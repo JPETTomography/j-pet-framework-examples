@@ -5,7 +5,7 @@
  "SignalFinder_LeadTrailMaxTime":"300000",
  "HitFinder_TimeWindowWidth":"25000",
  "EventFinder_EventTime":"5000",
- "numberOfPositions" : "5",
+ "DeltaTFinder_numberOfPositions" : "5",
  "DeltaTFinder_Position1":"0 /home/monika/Analysis/run_4/collimator/position_0/dabc_17207043432.hld",
  "DeltaTFinder_Position2":"50 /home/monika/Analysis/run_4/collimator/position_50/dabc_17207020324.hld",
  "DeltaTFinder_Position3":"100 /home/monika/Analysis/run_4/collimator/position_100/dabc_17206233216.hld",
