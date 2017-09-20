@@ -66,11 +66,10 @@ void DeltaTFinder::init(const JPetTaskInterface::Options& opts){
 			file_path = opts.at(input_file_key);
 	}
 
-	std::string numberOfPositionsKey = "numberOfPositions";
 	std::string sPos = "";
 
-	if( opts.count( numberOfPositionsKey ) )
-		sPos = opts.at( numberOfPositionsKey );
+	if( opts.count( fNumberOfPositionsKey ) )
+		sPos = opts.at( fNumberOfPositionsKey );
 
 	int positions = std::stoi(sPos);
   
@@ -86,14 +85,13 @@ void DeltaTFinder::init(const JPetTaskInterface::Options& opts){
 		}
 	}
 
-	std::string outputPath_key = "outputPath";
+	std::string fOutputPath_key = "outputPath";
 
-	if (opts.count( outputPath_key )) 
-			fOutputPath = opts.at(outputPath_key);
+	if (opts.count( fOutputPath_key )) 
+			fOutputPath = opts.at( fOutputPath_key );
 
-	std::string velocityCalibFile_key = "velocityCalibFile";
-	if (opts.count( velocityCalibFile_key ) )
-			fOutputVelocityCalibName = opts.at( velocityCalibFile_key );
+	if (opts.count( fVelocityCalibFile_key ) )
+			fOutputVelocityCalibName = opts.at( fVelocityCalibFile_key );
 
 }
 

@@ -54,6 +54,9 @@ protected:
 	JPetWriter* fWriter;
 	JPetReader* fReader;
 	const std::string fPosition = "DeltaTFinder_Position";
+	const std::string fNumberOfPositionsKey = "numberOfPositions";
+	const std::string fOutputPath_key = "outputPath";
+	const std::string fVelocityCalibFile_key = "velocityCalibFile";
 	std::string fOutputPath = "";
 	std::string fOutputVelocityCalibName = "";
 	double fPos = 999;
