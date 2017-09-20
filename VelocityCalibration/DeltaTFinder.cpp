@@ -59,11 +59,10 @@ void DeltaTFinder::init(const JPetTaskInterface::Options& opts){
 	}
 	}
 	
-	std::string input_file_key = "inputFile";
-	std::string file_path;
+	std::string file_path = "";
 
-	if (opts.count( input_file_key )) {
-			file_path = opts.at(input_file_key);
+	if (opts.count( fInput_file_key )) {
+			file_path = opts.at(fInput_file_key);
 	}
 
 	std::string sPos = "";
@@ -129,7 +128,6 @@ void DeltaTFinder::terminate(){
 	for(auto & slot : getParamBank().getBarrelSlots()){
 		for (int thr=1;thr<=4;thr++){
 			const char * histo_name = formatUniqueSlotDescription(*(slot.second), thr, "timeDiffAB_");
-			double mean = getStatistics().getHisto1D(histo_name).GetMean();
 			TH1F* histoToSave = &(getStatistics().getHisto1D(histo_name) );
 			int highestBin = histoToSave->GetBinCenter( histoToSave->GetMaximumBin() );
 			histoToSave->Fit("gaus","","", highestBin-fRangeAroundMaximumBin, highestBin+fRangeAroundMaximumBin);

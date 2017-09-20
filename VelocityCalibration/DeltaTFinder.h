@@ -53,6 +53,7 @@ protected:
   	bool fSaveControlHistos = true;
 	JPetWriter* fWriter;
 	JPetReader* fReader;
+	const std::string fInput_file_key = "inputFile";
 	const std::string fPosition = "DeltaTFinder_Position";
 	const std::string fNumberOfPositionsKey = "numberOfPositions";
 	const std::string fOutputPath_key = "outputPath";
