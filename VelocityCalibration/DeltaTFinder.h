@@ -44,8 +44,8 @@ public:
 	virtual void setWriter(JPetWriter* writer)override;
 protected:
 	void setParamManager( JPetParamManager* paramManager);
-	static std::vector<std::string> split(const std::string& inString);
-	static std::pair<int, std::string> retrievePositionAndFileName(const std::string& inString);
+	static std::vector<std::string> split(const std::string inString);
+	static std::pair<int, std::string> retrievePositionAndFileName(const std::string inString);
 	const char * formatUniqueSlotDescription(const JPetBarrelSlot & slot, int threshold,const char * prefix);
 	void fillHistosForHit(const JPetHit& hit);
 	JPetGeomMapping* fBarrelMap = nullptr;

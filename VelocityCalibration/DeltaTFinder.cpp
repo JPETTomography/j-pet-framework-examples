@@ -176,7 +176,7 @@ void DeltaTFinder::fillHistosForHit(const JPetHit & hit){
 }
 
 
-std::vector<std::string> DeltaTFinder::split(const std::string& inString)
+std::vector<std::string> DeltaTFinder::split(const std::string inString)
 {
   std::istringstream iss(inString);
   using StrIt = std::istream_iterator<std::string>;
@@ -184,7 +184,7 @@ std::vector<std::string> DeltaTFinder::split(const std::string& inString)
   return container;
 }
 
-std::pair<int, std::string> DeltaTFinder::retrievePositionAndFileName(const std::string& inString)
+std::pair<int, std::string> DeltaTFinder::retrievePositionAndFileName(const std::string inString)
 {
   auto res = split(inString);
   if (res.size() != 2) {
