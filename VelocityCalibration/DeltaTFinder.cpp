@@ -134,7 +134,7 @@ void DeltaTFinder::terminate(){
 			TCanvas* c = new TCanvas();
 			histoToSave->Draw();
 			std::string sHistoName = (std::string)results_folder_name; 
-			sHistoName+="_position_"+boost::lexical_cast<std::string>(fPos)+".png"; 
+			sHistoName+="/"+std::string(histo_name)+"_position_"+boost::lexical_cast<std::string>(fPos)+".png"; 
 			c->SaveAs( (sHistoName).c_str() );
 			if( histoToSave->GetEntries() != 0 )
 			{
