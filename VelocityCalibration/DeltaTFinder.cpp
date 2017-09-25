@@ -36,19 +36,19 @@ void DeltaTFinder::init(const JPetTaskInterface::Options& opts){
 
 	INFO("DeltaT extraction started.");
 
-	fBarrelMap = new JPetGeomMapping( getParamBank() );
+	fBarrelMap = new JPetGeomMapping( fParamManager->getParamBank() );
 
 	if (fSaveControlHistos)
 	{
 	// create histograms for time differences at each slot and each threshold
-	for(auto & scin : getParamBank().getScintillators()){
+	for(auto & scin : fParamManager->getParamBank().getScintillators()){
 		for (int thr=1;thr<=4;thr++){
 			const char * histo_name = formatUniqueSlotDescription(scin.second->getBarrelSlot(), thr, "timeDiffAB_");
 			getStatistics().createHistogram( new TH1F(histo_name, histo_name, 400, -20., 20.) );
 		}
 	}
 	// create histograms for time diffrerence vs slot ID
-	for(auto & layer : getParamBank().getLayers()){
+	for(auto & layer : fParamManager->getParamBank().getLayers()){
 		for (int thr=1;thr<=4;thr++){
 			const char * histo_name = Form("TimeDiffVsID_layer_%d_thr_%d", (int)fBarrelMap->getLayerNumber(*layer.second), thr);
 			const char * histo_titile = Form("%s;Slot ID; TimeDiffAB [ns]", histo_name); 
@@ -76,7 +76,7 @@ void DeltaTFinder::init(const JPetTaskInterface::Options& opts){
 	{
 		std::string pos = fPosition;
 		pos+= boost::lexical_cast<std::string>(i);
-		
+
 		if (opts.count(pos)) {
 			auto res = retrievePositionAndFileName( opts.at(pos).c_str() );
 			if( file_path == res.second )
@@ -125,7 +125,7 @@ void DeltaTFinder::terminate(){
 	TString results_folder_name = (fOutputPath+"Results/position_"+boost::lexical_cast<std::string>(fPos)).c_str();
 	system("mkdir -p "+ results_folder_name);
 
-	for(auto & slot : getParamBank().getBarrelSlots()){
+	for(auto & slot : fParamManager->getParamBank().getBarrelSlots()){
 		for (int thr=1;thr<=4;thr++){
 			const char * histo_name = formatUniqueSlotDescription(*(slot.second), thr, "timeDiffAB_");
 			TH1F* histoToSave = &(getStatistics().getHisto1D(histo_name) );

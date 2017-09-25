@@ -26,6 +26,7 @@
 #include <JPetWriter/JPetWriter.h>
 #include <JPetReader/JPetReader.h>
 #include <JPetTreeHeader/JPetTreeHeader.h>
+#include <JPetParamManager/JPetParamManager.h>
 #include <JPetGeomMapping/JPetGeomMapping.h>
 
 class JPetWriter;
@@ -53,7 +54,7 @@ protected:
   	bool fSaveControlHistos = true;
 	JPetWriter* fWriter;
 	JPetReader* fReader;
-	const std::string fInput_file_key = "DeltaTFinder_inputFile";
+	const std::string fInput_file_key = "inputFile";
 	const std::string fPosition = "DeltaTFinder_Position";
 	const std::string fNumberOfPositionsKey = "DeltaTFinder_numberOfPositions";
 	const std::string fOutputPath_key = "DeltaTFinder_outputPath";
