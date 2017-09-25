@@ -72,7 +72,7 @@ void DeltaTFinder::init(const JPetTaskInterface::Options& opts){
 
 	int positions = std::stoi(sPos);
   
-	for(int i = 1; i < positions;i++)
+	for(int i = 1; i <= positions;i++)
 	{
 		std::string pos = fPosition;
 		pos+= boost::lexical_cast<std::string>(i);
