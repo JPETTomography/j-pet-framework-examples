@@ -11,6 +11,7 @@
  "DeltaTFinder_Position3":"100 /home/monika/Analysis/run_4/collimator/position_100/dabc_17206233216.hld",
  "DeltaTFinder_Position4":"-50 /home/monika/Analysis/run_4/collimator/position_-50/dabc_17207070540.hld",
  "DeltaTFinder_Position5":"-100 /home/monika/Analysis/run_4/collimator/position_-100/dabc_17207093648.hld",
- "outputPath":"",
- "velocityCalibFile":"results.txt"
+ "DeltaTFinder_outputPath":"",
+ "DeltaTFinder_inputPath":"",
+ "DeltaTFinder_velocityCalibFile":"results.txt"
 }

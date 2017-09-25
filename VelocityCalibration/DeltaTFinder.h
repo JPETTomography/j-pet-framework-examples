@@ -53,11 +53,11 @@ protected:
   	bool fSaveControlHistos = true;
 	JPetWriter* fWriter;
 	JPetReader* fReader;
-	const std::string fInput_file_key = "inputFile";
+	const std::string fInput_file_key = "DeltaTFinder_inputFile";
 	const std::string fPosition = "DeltaTFinder_Position";
-	const std::string fNumberOfPositionsKey = "numberOfPositions";
-	const std::string fOutputPath_key = "outputPath";
-	const std::string fVelocityCalibFile_key = "velocityCalibFile";
+	const std::string fNumberOfPositionsKey = "DeltaTFinder_numberOfPositions";
+	const std::string fOutputPath_key = "DeltaTFinder_outputPath";
+	const std::string fVelocityCalibFile_key = "DeltaTFinder_velocityCalibFile";
 	std::string fOutputPath = "";
 	std::string fOutputVelocityCalibName = "";
 	double fPos = 999;
