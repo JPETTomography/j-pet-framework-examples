@@ -19,9 +19,9 @@
 
 using namespace std;
 
-EventCategorizer::EventCategorizer(const char * name, const char * description):JPetTask(name, description){}
+EventCategorizer::EventCategorizer(const char * name):JPetUserTask(name){}
 
-void EventCategorizer::init(const JPetTaskInterface::Options&){
+bool EventCategorizer::init(){
 
 	INFO("Event categorization started.");
 	INFO("Looking at two hit Events on Layer 1&2 only - creating only control histograms");
@@ -101,13 +101,14 @@ void EventCategorizer::init(const JPetTaskInterface::Options&){
 								360, -0.5, 359.5)
 		);
 	}
+	return true;
 }
 
-void EventCategorizer::exec(){
+bool EventCategorizer::exec(){
 
 	//Analysis of Events consisting of two hits that come from Layer 1 or 2
 	//Layer 3 is ignored, since it is not callibrated
-	if(auto timeWindow = dynamic_cast<const JPetTimeWindow*const>(getEvent())){
+  if(auto timeWindow = dynamic_cast<const JPetTimeWindow*const>(fEvent)){
 	  uint n = timeWindow->getNumberOfEvents();
 	  for(uint i=0;i<n;++i){
 
@@ -190,18 +191,21 @@ void EventCategorizer::exec(){
                   .Fill(theta_1_2,theta_2_3);
 		}
 	}
-	}
+  }else{
+    return false;
+  }
+  return true;
 }
 
-void EventCategorizer::terminate(){
-
-	INFO("More than one hit Events done. Writing conrtrol histograms.");
-
+bool EventCategorizer::terminate(){
+  
+  INFO("More than one hit Events done. Writing conrtrol histograms.");
+  return true;
 }
 
 void EventCategorizer::saveEvents(const vector<JPetEvent>& events)
 {
-	for (const auto & event : events) {
-	  fOutputEvents->add<JPetEvent>(event);
-	}
+  for (const auto & event : events) {
+    fOutputEvents->add<JPetEvent>(event);
+  }
 }
