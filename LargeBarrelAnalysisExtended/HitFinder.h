@@ -18,7 +18,7 @@
 
 #include <map>
 #include <vector>
-#include <JPetTask/JPetTask.h>
+#include <JPetUserTask/JPetUserTask.h>
 #include <JPetHit/JPetHit.h>
 #include <JPetRawSignal/JPetRawSignal.h>
 #include "HitFinderTools.h"
@@ -42,15 +42,15 @@ class JPetWriter;
  * of those two signals needs to be less then specified time difference (kTimeWindowWidth)
  *
  */
-class HitFinder: public JPetTask
+class HitFinder: public JPetUserTask
 {
 
 public:
-	HitFinder(const char* name, const char* description);
+	HitFinder(const char* name);
 	virtual ~HitFinder();
-	virtual void init(const JPetTaskInterface::Options& opts)override;
-	virtual void exec()override;
-	virtual void terminate()override;
+	virtual bool init() override;
+	virtual bool exec() override;
+	virtual bool terminate() override;
 	std::map<int, std::vector<double>> fVelocityMap;
 
 protected:

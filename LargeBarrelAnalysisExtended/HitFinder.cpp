@@ -21,11 +21,11 @@
 
 using namespace std;
 
-HitFinder::HitFinder(const char* name, const char* description): JPetTask(name, description) {}
+HitFinder::HitFinder(const char* name): JPetUserTask(name) {}
 
 HitFinder::~HitFinder() {}
 
-void HitFinder::init(const JPetTaskInterface::Options& opts)
+bool HitFinder::init()
 {
   fOutputEvents = new JPetTimeWindow("JPetHit");
   
@@ -55,16 +55,18 @@ void HitFinder::init(const JPetTaskInterface::Options& opts)
     )
   );
 
-	if (opts.count(fTimeWindowWidthParamKey )) {
-		kTimeWindowWidth = atof(opts.at(fTimeWindowWidthParamKey).c_str());
-	}
-
-		INFO("Hit finding started.");
+  if (fParams.getOptions().count(fTimeWindowWidthParamKey )) {
+    kTimeWindowWidth = boost::any_cast<float>(fParams.getOptions().at(fTimeWindowWidthParamKey));
+  }
+  
+  INFO("Hit finding started.");
+  
+  return true;
 }
 
-void HitFinder::exec()
+bool HitFinder::exec()
 {
-  if(auto & timeWindow = dynamic_cast<const JPetTimeWindow* const>(getEvent())) {
+  if(auto & timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     uint n = timeWindow->getNumberOfEvents();
     for(uint i=0;i<n;++i){
       fillSignalsMap(dynamic_cast<const JPetPhysSignal&>(timeWindow->operator[](i)));
@@ -78,14 +80,18 @@ void HitFinder::exec()
     saveHits(hits);
     getStatistics().getHisto1D("hits_per_time_window").Fill(hits.size());
     fAllSignalsInTimeWindow.clear();
+  }else{
+    return false;
   }
+  return true;
 }
 
 
 
-void HitFinder::terminate()
+bool HitFinder::terminate()
 {
-	INFO("Hit finding ended.");
+  INFO("Hit finding ended.");
+  return true;
 }
 
 
