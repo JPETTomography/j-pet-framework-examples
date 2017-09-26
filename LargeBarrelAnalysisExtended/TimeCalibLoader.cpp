@@ -18,21 +18,18 @@
 #include "JPetGeomMapping/JPetGeomMapping.h"
 #include <JPetParamManager/JPetParamManager.h>
 
-TimeCalibLoader::TimeCalibLoader(const char* name, const char* description):
-  JPetTask(name, description)
-{
-  /**/
-}
+TimeCalibLoader::TimeCalibLoader(const char* name):
+  JPetUserTask(name) {}
 
 TimeCalibLoader::~TimeCalibLoader() {}
 
-void TimeCalibLoader::init(const JPetTaskInterface::Options& opts)
+bool TimeCalibLoader::init()
 {
   fOutputEvents = new JPetTimeWindow("JPetSigCh");
 
   auto calibFile =  std::string("timeCalib.txt");
-  if (opts.count(fConfigFileParamKey)) {
-    calibFile = opts.at(fConfigFileParamKey);
+  if (fParams.getOptions().count(fConfigFileParamKey)) {
+    calibFile = boost::any_cast<std::string>(fParams.getOptions().at(fConfigFileParamKey));
   }
   assert(fParamManager);
   JPetGeomMapping mapper(fParamManager->getParamBank());
@@ -41,14 +38,14 @@ void TimeCalibLoader::init(const JPetTaskInterface::Options& opts)
   if (fTimeCalibration.empty()) {
     ERROR("Time calibration seems to be empty");
   }
+
+  return true;
 }
 
-void TimeCalibLoader::exec()
+bool TimeCalibLoader::exec()
 {
-  if (auto oldTimeWindow = dynamic_cast<const JPetTimeWindow* const>(getEvent())) {
+  if (auto oldTimeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
 
-    //    auto newSigChs = oldTimeWindow->getSigChVect();
-    //    for (auto & sigCh : newSigChs) {
     auto n = oldTimeWindow->getNumberOfEvents();
     for(uint i=0;i<n;++i){
 
@@ -57,14 +54,14 @@ void TimeCalibLoader::exec()
       sigCh.setValue(sigCh.getValue() + 1000. * TimeCalibTools::getTimeCalibCorrection(fTimeCalibration, sigCh.getTOMBChannel().getChannel()));
       fOutputEvents->add<JPetSigCh>(sigCh);
     }
+  }else{
+    return false;
   }
+  return true;
 }
 
-void TimeCalibLoader::terminate()
+bool TimeCalibLoader::terminate()
 {
+  return true;
 }
 
-void TimeCalibLoader::setParamManager(JPetParamManager* paramManager)
-{
-  fParamManager = paramManager;
-}
