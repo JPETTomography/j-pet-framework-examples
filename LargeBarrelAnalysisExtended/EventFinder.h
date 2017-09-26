@@ -18,7 +18,7 @@
 
 #include <vector>
 #include <map>
-#include <JPetTask/JPetTask.h>
+#include <JPetUserTask/JPetUserTask.h>
 #include <JPetHit/JPetHit.h>
 #include <JPetEvent/JPetEvent.h>
 
@@ -28,13 +28,13 @@ class JPetWriter;
 #	define override
 #endif
 
-class EventFinder : public JPetTask{
+class EventFinder : public JPetUserTask{
 public:
-	EventFinder(const char * name, const char * description);
+	EventFinder(const char * name);
 	virtual ~EventFinder(){}
-	virtual void init(const JPetTaskInterface::Options& opts)override;
-	virtual void exec()override;
-	virtual void terminate()override;
+	virtual bool init() override;
+	virtual bool exec() override;
+	virtual bool terminate() override;
 protected:
   	double kEventTimeWindow = 5000.0; //ps
 	const std::string fEventTimeParamKey = "EventFinder_EventTime";

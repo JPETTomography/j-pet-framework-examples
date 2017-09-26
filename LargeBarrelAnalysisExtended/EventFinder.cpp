@@ -19,26 +19,27 @@
 
 using namespace std;
 
-EventFinder::EventFinder(const char * name, const char * description):JPetTask(name, description){}
+EventFinder::EventFinder(const char * name):JPetUserTask(name){}
 
-void EventFinder::init(const JPetTaskInterface::Options& opts){
+bool EventFinder::init(){
 
 	INFO("Event finding started.");
 
 	fOutputEvents = new JPetTimeWindow("JPetEvent");
 	
-	if (opts.count(fEventTimeParamKey))
-		kEventTimeWindow = std::atof(opts.at(fEventTimeParamKey).c_str());
+	if (fParams.getOptions().count(fEventTimeParamKey))
+	  kEventTimeWindow = boost::any_cast<float>(fParams.getOptions().at(fEventTimeParamKey));
 
 	if (fSaveControlHistos)
 		getStatistics().createHistogram(
 			new TH1F("hits_per_event","Number of Hits in Event",20, 0.5, 20.5)
 		);
+	return true;
 }
 
-void EventFinder::exec(){
+bool EventFinder::exec(){
 
-  if(auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(getEvent())) {
+  if(auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     uint n = timeWindow->getNumberOfEvents();
     // for(uint i=0;i<n;++i){
     //   fHitVector.push_back(dynamic_cast<const JPetHit&>(timeWindow->operator[](i)));
@@ -49,7 +50,10 @@ void EventFinder::exec(){
     saveEvents(events);
 
     fHitVector.clear();
+  }else{
+    return false;
   }
+  return true;
 }
 
 //sorting method
@@ -58,8 +62,9 @@ bool sortByTimeValue(JPetHit hit1, JPetHit hit2) {
 }
 
 
-void EventFinder::terminate(){
-	INFO("Event fiding ended.");
+bool EventFinder::terminate(){
+  INFO("Event fiding ended.");
+  return true;
 }
 
 vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow & hits){
