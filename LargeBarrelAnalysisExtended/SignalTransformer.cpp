@@ -16,20 +16,20 @@
 #include "SignalTransformer.h"
 #include "JPetWriter/JPetWriter.h"
 
-SignalTransformer::SignalTransformer(const char* name, const char* description):
-	JPetTask(name, description) { }
+SignalTransformer::SignalTransformer(const char* name):
+	JPetUserTask(name) { }
 
-void SignalTransformer::init(const JPetTaskInterface::Options& opts)
+bool SignalTransformer::init()
 {
-	  INFO("Signal transforming started: Raw to Reco and Phys");
-	  
+	  INFO("Signal transforming started: Raw to Reco and Phys");	  
 	  fOutputEvents = new JPetTimeWindow("JPetPhysSignal");
+	  return true;
 }
 
 
-void SignalTransformer::exec()
+bool SignalTransformer::exec()
 {
-  if(auto & timeWindow = dynamic_cast<const JPetTimeWindow* const>(getEvent())) {
+  if(auto & timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
 
     uint n = timeWindow->getNumberOfEvents();
 
@@ -43,13 +43,16 @@ void SignalTransformer::exec()
       auto physSignal = createPhysSignal(recoSignal);
       fOutputEvents->add<JPetPhysSignal>(physSignal);
     }    
+  }else{
+    return false;
   }
-
+  return true;
 }
 
-void SignalTransformer::terminate()
+bool SignalTransformer::terminate()
 {
-	  INFO("Signal transforming finished");
+  INFO("Signal transforming finished");
+  return true;
 }
 
 JPetRecoSignal SignalTransformer::createRecoSignal(const JPetRawSignal& rawSignal)
