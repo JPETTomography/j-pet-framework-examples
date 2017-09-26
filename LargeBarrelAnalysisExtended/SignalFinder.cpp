@@ -22,8 +22,8 @@ using namespace std;
 #include "SignalFinderTools.h"
 #include "SignalFinder.h"
 
-SignalFinder::SignalFinder(const char* name, const char* description, bool saveControlHistos)
-	: JPetTask(name, description)
+SignalFinder::SignalFinder(const char* name, bool saveControlHistos)
+	: JPetUserTask(name)
 {
 	fSaveControlHistos = saveControlHistos;
 }
@@ -31,18 +31,18 @@ SignalFinder::SignalFinder(const char* name, const char* description, bool saveC
 SignalFinder::~SignalFinder() {}
 
 //SignalFinder init method
-void SignalFinder::init(const JPetTaskInterface::Options& opts)
+bool SignalFinder::init()
 {
 	INFO("Signal finding started.");
 
 	fOutputEvents = new JPetTimeWindow("JPetRawSignal");
 	
-	if (opts.count(fEdgeMaxTimeParamKey)) {
-		kSigChEdgeMaxTime = std::atof(opts.at(fEdgeMaxTimeParamKey).c_str());
+	if (fParams.getOptions().count(fEdgeMaxTimeParamKey)) {
+	  kSigChEdgeMaxTime = boost::any_cast<float>(fParams.getOptions().at(fEdgeMaxTimeParamKey));
 	}
 
-	if (opts.count(fLeadTrailMaxTimeParamKey)) {
-		kSigChLeadTrailMaxTime = std::atof(opts.at(fLeadTrailMaxTimeParamKey).c_str());
+	if (fParams.getOptions().count(fLeadTrailMaxTimeParamKey)) {
+	  kSigChLeadTrailMaxTime = boost::any_cast<float>(fParams.getOptions().at(fLeadTrailMaxTimeParamKey));
 	}
 
 	if (fSaveControlHistos) {
@@ -55,14 +55,15 @@ void SignalFinder::init(const JPetTaskInterface::Options& opts)
 				"Remainig Trailing Signal Channels",
 				4, 0.5, 4.5));
 	}
+	return true;
 }
 
 //SignalFinder execution method
-void SignalFinder::exec()
+bool SignalFinder::exec()
 {
 
 	//getting the data from event in apropriate format
-	if(auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(getEvent())) {
+	if(auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
 
 		//mapping method invocation
 		map<int, vector<JPetSigCh>> sigChsPMMap = SignalFinderTools::getSigChsPMMapById(timeWindow);
@@ -79,13 +80,17 @@ void SignalFinder::exec()
 		//saving method invocation
 		saveRawSignals(allSignals);
 
+	}else{
+	  return false;
 	}
+	return true;
 }
 
 //SignalFinder finish method
-void SignalFinder::terminate()
+bool SignalFinder::terminate()
 {
 	INFO("Signal finding ended.");
+	return true;
 }
 
 

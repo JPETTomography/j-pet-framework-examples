@@ -17,7 +17,7 @@
 #define SIGNALFINDER_H
 
 #include <vector>
-#include <JPetTask/JPetTask.h>
+#include <JPetUserTask/JPetUserTask.h>
 #include <JPetRawSignal/JPetRawSignal.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
 
@@ -27,14 +27,14 @@ class JPetWriter;
 #define override
 #endif
 
-class SignalFinder: public JPetTask
+class SignalFinder: public JPetUserTask
 {
 public:
-  SignalFinder(const char* name, const char* description, bool printStats);
+  SignalFinder(const char* name, bool printStats);
   virtual ~SignalFinder();
-  virtual void init(const JPetTaskInterface::Options& opts) override;
-  virtual void exec() override;
-  virtual void terminate() override;
+  virtual bool init() override;
+  virtual bool exec() override;
+  virtual bool terminate() override;
   bool fSaveControlHistos = true;
 
 protected:
