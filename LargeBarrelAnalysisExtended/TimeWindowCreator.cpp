@@ -17,25 +17,25 @@
 #include "TimeWindowCreator.h"
 #include <JPetGeomMapping/JPetGeomMapping.h>
 
-TimeWindowCreator::TimeWindowCreator(const char* name, const char* description):
-  JPetTask(name, description) {}
+TimeWindowCreator::TimeWindowCreator(const char* name):
+  JPetUserTask(name) {}
 
-void TimeWindowCreator::init(const JPetTaskInterface::Options& opts)
+bool TimeWindowCreator::init()
 {
   fOutputEvents = new JPetTimeWindow("JPetSigCh");
   
   /// Reading values from the user options if available
-  if (opts.count(kMaxTimeParamKey)) {
-    fMaxTime = std::atof(opts.at(kMaxTimeParamKey).c_str());
+  if (fParams.getOptions().count(kMaxTimeParamKey)) {
+    fMaxTime = boost::any_cast<float>(fParams.getOptions().at(kMaxTimeParamKey));
   }
-  if (opts.count(kMinTimeParamKey)) {
-    fMinTime = std::atof(opts.at(kMinTimeParamKey).c_str());
+  if (fParams.getOptions().count(kMinTimeParamKey)) {
+    fMinTime = boost::any_cast<float>(fParams.getOptions().at(kMinTimeParamKey));
   }
 
   // take coordinates of the main (irradiated strip) from user parameters
-  if (opts.count(kMainStripKey)) {
+  if (fParams.getOptions().count(kMainStripKey)) {
     fMainStripSet = true;
-    int code = std::atoi(opts.at(kMainStripKey).c_str());
+    int code = boost::any_cast<int>(fParams.getOptions().at(kMainStripKey));
     fMainStrip.first = code / 100;  // layer number
     fMainStrip.second = code % 100; // strip number
     
@@ -61,16 +61,15 @@ void TimeWindowCreator::init(const JPetTaskInterface::Options& opts)
   
   getStatistics().createHistogram( new TH1F("HitsPerEvtCh", "Hits per channel in one event", 50, -0.5, 49.5) );
   getStatistics().createHistogram( new TH1F("ChannelsPerEvt", "Channels fired in one event", 200, -0.5, 199.5) );
+
+  return true;
 }
 
 TimeWindowCreator::~TimeWindowCreator() {}
 
-void TimeWindowCreator::exec()
+bool TimeWindowCreator::exec()
 {
-  //getting the data from event in apropriate format
-  //const is commented because this class has inproper architecture:
-  // all get-methods aren't tagged with const modifier
-  if (auto evt = dynamic_cast </*const*/ EventIII * const > (getEvent())) {
+  if (auto evt = dynamic_cast <EventIII * const > (fEvent)) {
     int ntdc = evt->GetTotalNTDCChannels();
     getStatistics().getHisto1D("ChannelsPerEvt").Fill( ntdc );
 
@@ -124,21 +123,15 @@ void TimeWindowCreator::exec()
     }
 
     fCurrEventNumber++;
+
+  }else{
+    return false;
   }
+  return true;
 }
 
-void TimeWindowCreator::terminate() {}
-
-
-void TimeWindowCreator::setParamManager(JPetParamManager* paramManager)
-{
-  fParamManager = paramManager;
-}
-
-const JPetParamBank& TimeWindowCreator::getParamBank() const
-{
-  assert(fParamManager);
-  return fParamManager->getParamBank();
+bool TimeWindowCreator::terminate() {
+  return true;
 }
 
 JPetSigCh TimeWindowCreator::generateSigCh(const JPetTOMBChannel& channel, JPetSigCh::EdgeType edge) const

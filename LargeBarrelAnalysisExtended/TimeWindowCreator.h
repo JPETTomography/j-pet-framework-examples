@@ -16,7 +16,7 @@
 #ifndef TimeWindowCreator_H
 #define TimeWindowCreator_H
 
-#include <JPetTask/JPetTask.h>
+#include <JPetUserTask/JPetUserTask.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
 #include <JPetParamBank/JPetParamBank.h>
 #include <JPetParamManager/JPetParamManager.h>
@@ -34,16 +34,14 @@ class JPetWriter;
 /// Task to translate EventIII Unpacker data to JPetTimeWindow.
 /// Also, some basic filtering can be done
 
-class TimeWindowCreator: public JPetTask
+class TimeWindowCreator: public JPetUserTask
 {
 public:
-  TimeWindowCreator(const char* name, const char* description);
+  TimeWindowCreator(const char* name);
   virtual ~TimeWindowCreator();
-  virtual void init(const JPetTaskInterface::Options& opts) override;
-  virtual void exec() override;
-  virtual void terminate() override;
-  virtual void setParamManager(JPetParamManager* paramManager) override;
-  const JPetParamBank& getParamBank() const;
+  virtual bool init() override;
+  virtual bool exec() override;
+  virtual bool terminate() override;
 
 protected:
   bool filter(const JPetTOMBChannel& channel) const;
