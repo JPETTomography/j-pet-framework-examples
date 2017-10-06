@@ -31,8 +31,8 @@ bool TimeCalibLoader::init()
   if (fParams.getOptions().count(fConfigFileParamKey)) {
     calibFile = boost::any_cast<std::string>(fParams.getOptions().at(fConfigFileParamKey));
   }
-  assert(fParamManager);
-  JPetGeomMapping mapper(fParamManager->getParamBank());
+
+  JPetGeomMapping mapper(getParamBank());
   auto tombMap = mapper.getTOMBMapping();
   fTimeCalibration = TimeCalibTools::loadTimeCalibration(calibFile, tombMap);
   if (fTimeCalibration.empty()) {
