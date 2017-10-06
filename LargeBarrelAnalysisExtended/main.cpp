@@ -26,85 +26,27 @@
 
 using namespace std;
 
-int main(int argc, char* argv[])
+int main(int argc, const char* argv[])
 {
-
-  //Connection to the remote database disabled for the moment
-  //DB::SERVICES::DBHandler::createDBConnection("../DBConfig/configDB.cfg");
 
   JPetManager& manager = JPetManager::getManager();
   manager.parseCmdLine(argc, argv);
 
-  //First task - unpacking
-  manager.registerTask([]() {
-    return new JPetTaskLoader("hld", "tslot.raw",
-      new TimeWindowCreator(
-        "TimeWindowCreator",
-        "Process unpacked HLD file into a tree of JPetTimeWindow objects"
-      )
-    );
-  });
-
-  //Second task - Signal Channel calibration
-  manager.registerTask([]() {
-    return new JPetTaskLoader("tslot.raw", "tslot.calib",
-      new TimeCalibLoader(
-        "TimeCalibLoader",
-        "Apply time corrections from prepared calibrations"
-      )
-    );
-  });
-
-  //Third task - Raw Signal Creation
-  manager.registerTask([]() {
-    return new JPetTaskLoader("tslot.calib", "raw.sig",
-      new SignalFinder(
-        "SignalFinder",
-        "Create Raw Signals, optional - draw control histograms",
-        true
-      )
-    );
-  });
-
-  ////Fourth task - Reco & Phys signal creation
-  manager.registerTask([]() {
-    return new JPetTaskLoader("raw.sig", "phys.sig",
-      new SignalTransformer(
-        "SignalTransformer",
-        "Create Reco & Phys Signals"
-      )
-    );
-  });
-
-  ////Fifth task - Hit construction
-  manager.registerTask([]() {
-    return new JPetTaskLoader("phys.sig", "hits",
-      new HitFinder(
-        "HitFinder",
-        "Create hits from physical signals"
-      )
-    );
-  });
-
-  ////Sixth task - unknown Event construction
-  manager.registerTask([]() {
-    return new JPetTaskLoader("hits", "unk.evt",
-      new EventFinder(
-        "EventFinder",
-        "Create Events as group of Hits"
-      )
-    );
-  });
-
-  //Seventh task - Event Categorization
-  manager.registerTask([]() {
-    return new JPetTaskLoader("unk.evt", "cat.evt",
-      new EventCategorizer(
-        "EventCategorizer",
-        "Categorize Events"
-      )
-    );
-  });
-
-  manager.run();
+  manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
+  manager.registerTask<TimeCalibLoader>("TimeCalibLoader");
+  manager.registerTask<SignalFinder>("SignalFinder");
+  manager.registerTask<SignalTransformer>("SignalTransformer"); 
+  manager.registerTask<HitFinder>("HitFinder"); 
+  manager.registerTask<EventFinder>("EventFinder"); 
+  manager.registerTask<EventCategorizer>("EventCategorizer"); 
+  
+  manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
+  manager.useTask("TimeCalibLoader", "tslot.raw", "tslot.calib");
+  manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
+  manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
+  manager.useTask("HitFinder", "phys.sig", "hits");
+  manager.useTask("EventFinder", "hits", "unk.evt");
+  manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
+  
+  manager.run(argc, argv);
 }
