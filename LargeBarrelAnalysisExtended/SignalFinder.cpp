@@ -22,10 +22,10 @@ using namespace std;
 #include "SignalFinderTools.h"
 #include "SignalFinder.h"
 
-SignalFinder::SignalFinder(const char* name, bool saveControlHistos)
+SignalFinder::SignalFinder(const char* name)
 	: JPetUserTask(name)
 {
-	fSaveControlHistos = saveControlHistos;
+  //	fSaveControlHistos = saveControlHistos;
 }
 
 SignalFinder::~SignalFinder() {}
