@@ -16,8 +16,11 @@
 #include <iostream>
 #include <JPetWriter/JPetWriter.h>
 #include <JPetAnalysisTools/JPetAnalysisTools.h>
+#include <JPetOptionsTools/JPetOptionsTools.h>
 #include "HitFinder.h"
 #include "HitFinderTools.h"
+
+using namespace jpet_options_tools;
 
 using namespace std;
 
@@ -55,8 +58,8 @@ bool HitFinder::init()
     )
   );
 
-  if (fParams.getOptions().count(fTimeWindowWidthParamKey )) {
-    kTimeWindowWidth = boost::any_cast<float>(fParams.getOptions().at(fTimeWindowWidthParamKey));
+  if (isOptionSet(fParams.getOptions(), fTimeWindowWidthParamKey)) {
+    kTimeWindowWidth = getOptionAsFloat(fParams.getOptions(), fTimeWindowWidthParamKey);
   }
   
   INFO("Hit finding started.");
