@@ -30,7 +30,6 @@ int main(int argc, const char* argv[])
 {
 
   JPetManager& manager = JPetManager::getManager();
-  manager.parseCmdLine(argc, argv);
 
   manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
   manager.registerTask<TimeCalibLoader>("TimeCalibLoader");
