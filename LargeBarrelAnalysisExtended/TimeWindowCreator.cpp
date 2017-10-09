@@ -16,6 +16,9 @@
 #include <JPetWriter/JPetWriter.h>
 #include "TimeWindowCreator.h"
 #include <JPetGeomMapping/JPetGeomMapping.h>
+#include <JPetOptionsTools/JPetOptionsTools.h>
+
+using namespace jpet_options_tools;
 
 TimeWindowCreator::TimeWindowCreator(const char* name):
   JPetUserTask(name) {}
@@ -25,11 +28,11 @@ bool TimeWindowCreator::init()
   fOutputEvents = new JPetTimeWindow("JPetSigCh");
   
   /// Reading values from the user options if available
-  if (fParams.getOptions().count(kMaxTimeParamKey)) {
-    fMaxTime = boost::any_cast<float>(fParams.getOptions().at(kMaxTimeParamKey));
+  if (isOptionSet(fParams.getOptions(), kMaxTimeParamKey)) {
+    fMaxTime = getOptionAsDouble(fParams.getOptions(), kMaxTimeParamKey);
   }
-  if (fParams.getOptions().count(kMinTimeParamKey)) {
-    fMinTime = boost::any_cast<float>(fParams.getOptions().at(kMinTimeParamKey));
+  if (isOptionSet(fParams.getOptions(), kMinTimeParamKey)) {
+    fMinTime = getOptionAsDouble(fParams.getOptions(), kMinTimeParamKey);
   }
 
   // take coordinates of the main (irradiated strip) from user parameters
