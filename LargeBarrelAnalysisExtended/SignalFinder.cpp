@@ -21,6 +21,9 @@ using namespace std;
 #include <JPetWriter/JPetWriter.h>
 #include "SignalFinderTools.h"
 #include "SignalFinder.h"
+#include <JPetOptionsTools/JPetOptionsTools.h>
+
+using namespace jpet_options_tools;
 
 SignalFinder::SignalFinder(const char* name)
 	: JPetUserTask(name)
@@ -37,12 +40,12 @@ bool SignalFinder::init()
 
 	fOutputEvents = new JPetTimeWindow("JPetRawSignal");
 	
-	if (fParams.getOptions().count(fEdgeMaxTimeParamKey)) {
-	  kSigChEdgeMaxTime = boost::any_cast<float>(fParams.getOptions().at(fEdgeMaxTimeParamKey));
+	if (isOptionSet(fParams.getOptions(), fEdgeMaxTimeParamKey)) {
+	  kSigChEdgeMaxTime = getOptionAsFloat(fParams.getOptions(), fEdgeMaxTimeParamKey);
 	}
 
-	if (fParams.getOptions().count(fLeadTrailMaxTimeParamKey)) {
-	  kSigChLeadTrailMaxTime = boost::any_cast<float>(fParams.getOptions().at(fLeadTrailMaxTimeParamKey));
+	if (isOptionSet(fParams.getOptions(), fLeadTrailMaxTimeParamKey)) {
+	  kSigChLeadTrailMaxTime = getOptionAsFloat(fParams.getOptions(), fLeadTrailMaxTimeParamKey);
 	}
 
 	if (fSaveControlHistos) {
