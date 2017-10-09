@@ -36,11 +36,14 @@ bool TimeWindowCreator::init()
   }
 
   // take coordinates of the main (irradiated strip) from user parameters
-  if (fParams.getOptions().count(kMainStripKey)) {
+  if (isOptionSet(fParams.getOptions(), kMainStripKey)) {
     fMainStripSet = true;
-    int code = boost::any_cast<int>(fParams.getOptions().at(kMainStripKey));
+    int code = getOptionAsInt(fParams.getOptions(), kMainStripKey);
     fMainStrip.first = code / 100;  // layer number
     fMainStrip.second = code % 100; // strip number
+
+    INFO(Form("Filtering of SigCh-s was requested. Only data from strip %d in layer %d will be used.",
+	      fMainStrip.second, fMainStrip.first));
     
     // build a list of allowed channels
     JPetGeomMapping mapper(fParamManager->getParamBank());
