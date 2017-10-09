@@ -16,6 +16,9 @@
 #include <iostream>
 #include <JPetWriter/JPetWriter.h>
 #include "EventFinder.h"
+#include <JPetOptionsTools/JPetOptionsTools.h>
+
+using namespace jpet_options_tools;
 
 using namespace std;
 
@@ -27,8 +30,8 @@ bool EventFinder::init(){
 
 	fOutputEvents = new JPetTimeWindow("JPetEvent");
 	
-	if (fParams.getOptions().count(fEventTimeParamKey))
-	  kEventTimeWindow = boost::any_cast<float>(fParams.getOptions().at(fEventTimeParamKey));
+	if (isOptionSet(fParams.getOptions(), fEventTimeParamKey))
+	  kEventTimeWindow = getOptionAsFloat(fParams.getOptions(), fEventTimeParamKey);
 
 	if (fSaveControlHistos)
 		getStatistics().createHistogram(
