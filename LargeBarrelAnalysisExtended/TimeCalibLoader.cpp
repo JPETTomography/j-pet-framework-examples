@@ -17,6 +17,9 @@
 #include "TimeCalibTools.h"
 #include "JPetGeomMapping/JPetGeomMapping.h"
 #include <JPetParamManager/JPetParamManager.h>
+#include <JPetOptionsTools/JPetOptionsTools.h>
+
+using namespace jpet_options_tools;
 
 TimeCalibLoader::TimeCalibLoader(const char* name):
   JPetUserTask(name) {}
@@ -28,8 +31,10 @@ bool TimeCalibLoader::init()
   fOutputEvents = new JPetTimeWindow("JPetSigCh");
 
   auto calibFile =  std::string("timeCalib.txt");
-  if (fParams.getOptions().count(fConfigFileParamKey)) {
-    calibFile = boost::any_cast<std::string>(fParams.getOptions().at(fConfigFileParamKey));
+  if (isOptionSet(fParams.getOptions(),fConfigFileParamKey)) {
+    calibFile = getOptionAsString(fParams.getOptions(),fConfigFileParamKey);
+  }else{
+    WARNING("No path to the time calibration file was provided in user options.");
   }
 
   JPetGeomMapping mapper(getParamBank());
