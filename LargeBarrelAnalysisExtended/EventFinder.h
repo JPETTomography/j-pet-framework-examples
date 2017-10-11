@@ -37,7 +37,7 @@ public:
 	virtual bool terminate() override;
 protected:
   	double kEventTimeWindow = 5000.0; //ps
-	const std::string fEventTimeParamKey = "EventFinder_EventTime";
+	const std::string fEventTimeParamKey = "EventFinder_EventTime_float";
     	std::vector<JPetHit> fHitVector;
   	bool fSaveControlHistos = true;
 	void saveEvents(const std::vector<JPetEvent>& event);

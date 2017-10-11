@@ -61,7 +61,7 @@ protected:
   	std::map<int, std::vector<double>> readVelocityFile();
 	void fillSignalsMap(const JPetPhysSignal signal);
 	void saveHits(const std::vector<JPetHit>& hits);
-	const std::string fTimeWindowWidthParamKey = "HitFinder_TimeWindowWidth";
+	const std::string fTimeWindowWidthParamKey = "HitFinder_TimeWindowWidth_float";
 	double kTimeWindowWidth = 50000; /// in ps -> 50ns. Maximal time difference between signals
 
 };

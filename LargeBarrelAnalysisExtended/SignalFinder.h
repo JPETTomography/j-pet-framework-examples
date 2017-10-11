@@ -39,8 +39,8 @@ public:
 
 protected:
   void saveRawSignals(const std::vector<JPetRawSignal>& sigChVec);
-  const std::string fEdgeMaxTimeParamKey = "SignalFinder_EdgeMaxTime"; 
-  const std::string fLeadTrailMaxTimeParamKey = "SignalFinder_LeadTrailMaxTime";
+  const std::string fEdgeMaxTimeParamKey = "SignalFinder_EdgeMaxTime_float"; 
+  const std::string fLeadTrailMaxTimeParamKey = "SignalFinder_LeadTrailMaxTime_float";
   Float_t kSigChEdgeMaxTime = 20000; //[ps]
   Float_t kSigChLeadTrailMaxTime = 300000; //[ps]
   const int kNumOfThresholds = 4;

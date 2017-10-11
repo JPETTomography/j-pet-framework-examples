@@ -48,9 +48,9 @@ protected:
   JPetSigCh generateSigCh(const JPetTOMBChannel& channel, JPetSigCh::EdgeType edge) const;
   JPetParamManager* fParamManager = nullptr;
   long long int fCurrEventNumber = 0;
-  const std::string kMaxTimeParamKey = "TimeWindowCreator_MaxTime";
-  const std::string kMinTimeParamKey = "TimeWindowCreator_MinTime";
-  const std::string kMainStripKey = "TimeWindowCreator_MainStrip";
+  const std::string kMaxTimeParamKey = "TimeWindowCreator_MaxTime_double";
+  const std::string kMinTimeParamKey = "TimeWindowCreator_MinTime_double";
+  const std::string kMainStripKey = "TimeWindowCreator_MainStrip_int";
   std::pair<int,int> fMainStrip;
   bool fMainStripSet = false;
   std::set<int> fAllowedChannels;

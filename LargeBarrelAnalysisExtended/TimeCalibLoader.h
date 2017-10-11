@@ -51,7 +51,7 @@ public:
   virtual bool exec() override;
   virtual bool terminate() override;
 protected:
-  const std::string fConfigFileParamKey = "TimeCalibLoader_ConfigFile";  ///Name of the option for which the value would correspond to the time calibration file name.
+  const std::string fConfigFileParamKey = "TimeCalibLoader_ConfigFile_std::string";  ///Name of the option for which the value would correspond to the time calibration file name.
   JPetParamManager* fParamManager = nullptr;
   std::map<unsigned int, double> fTimeCalibration;
 };
