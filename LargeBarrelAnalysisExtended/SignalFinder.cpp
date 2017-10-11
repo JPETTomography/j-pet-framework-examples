@@ -37,15 +37,19 @@ SignalFinder::~SignalFinder() {}
 bool SignalFinder::init()
 {
 	INFO("Signal finding started.");
-
-	fOutputEvents = new JPetTimeWindow("JPetRawSignal");
 	
+	fOutputEvents = new JPetTimeWindow("JPetRawSignal");
+
 	if (isOptionSet(fParams.getOptions(), fEdgeMaxTimeParamKey)) {
 	  kSigChEdgeMaxTime = getOptionAsFloat(fParams.getOptions(), fEdgeMaxTimeParamKey);
+	}else{
+	  WARNING(Form("No value of the %s parameter provided by the user. Using default valu of %lf.", fEdgeMaxTimeParamKey.c_str(), kSigChEdgeMaxTime));
 	}
 
 	if (isOptionSet(fParams.getOptions(), fLeadTrailMaxTimeParamKey)) {
 	  kSigChLeadTrailMaxTime = getOptionAsFloat(fParams.getOptions(), fLeadTrailMaxTimeParamKey);
+	}else{
+	  WARNING(Form("No value of the %s parameter provided by the user. Using default valu of %lf.", fLeadTrailMaxTimeParamKey.c_str(), kSigChLeadTrailMaxTime));
 	}
 
 	if (fSaveControlHistos) {

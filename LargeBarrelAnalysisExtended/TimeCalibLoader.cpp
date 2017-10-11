@@ -31,6 +31,7 @@ bool TimeCalibLoader::init()
   fOutputEvents = new JPetTimeWindow("JPetSigCh");
 
   auto calibFile =  std::string("timeCalib.txt");
+
   if (isOptionSet(fParams.getOptions(),fConfigFileParamKey)) {
     calibFile = getOptionAsString(fParams.getOptions(),fConfigFileParamKey);
   }else{
