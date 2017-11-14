@@ -13,14 +13,12 @@
  *  @file main.cpp
  */
 
-#include <DBHandler/HeaderFiles/DBHandler.h>
 #include <JPetManager/JPetManager.h>
-#include <JPetTaskLoader/JPetTaskLoader.h>
 #include "../LargeBarrelAnalysisExtended/TimeWindowCreator.h"
 #include "../LargeBarrelAnalysisExtended/TimeCalibLoader.h"
 #include "../LargeBarrelAnalysisExtended/SignalFinder.h"
 #include "../LargeBarrelAnalysisExtended/SignalTransformer.h"
-#include "HitFinder.h"
+#include "../LargeBarrelAnalysisExtended/HitFinder.h"
 #include "../LargeBarrelAnalysisExtended/EventFinder.h"
 #include "../LargeBarrelAnalysisExtended/EventCategorizer.h"
 #include "TimeCalibration.h"
