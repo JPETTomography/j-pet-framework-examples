@@ -19,7 +19,7 @@
 #include <JPetUserTask/JPetUserTask.h>
 #include <JPetHit/JPetHit.h>
 #include <JPetRawSignal/JPetRawSignal.h>
-#include "LargeBarrelMapping.h"
+#include <JPetGeomMapping/JPetGeomMapping.h>
 class JPetWriter;
 #ifdef __CINT__
 //when cint is used instead of compiler, override word is not recognized
@@ -29,14 +29,14 @@ class JPetWriter;
 class TimeCalibration:public JPetUserTask{
 public:
 	TimeCalibration(const char * name);
-	virtual ~TimeCalibration(){}
+  virtual ~TimeCalibration();
 	virtual bool init()override;
 	virtual bool exec()override;
 	virtual bool terminate()override;
 protected:
 	const char * formatUniqueSlotDescription(const JPetBarrelSlot & slot, int threshold,const char * prefix);
 	void fillHistosForHit(const JPetHit & hit,const std::vector<double> &RefTimesL,const std::vector<double> & RefTimesT);
-	LargeBarrelMapping fBarrelMap;
+	JPetGeomMapping* fBarrelMap;
 	std::string OutputFile = "TimeConstantsCalib.txt";
 	const float Cl[3] = {0.,0.1418,0.5003};    //[ns]
 	const float SigCl[3] = {0.,0.0033,0.0033}; //[ns]

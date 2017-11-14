@@ -34,11 +34,16 @@ using namespace std;
 
 TimeCalibration::TimeCalibration(const char * name):JPetUserTask(name){}
 
+TimeCalibration::~TimeCalibration(){
+  delete fBarrelMap;
+}
+
 bool TimeCalibration::init(){
   time_t local_time;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	fBarrelMap.buildMappings(getParamBank());
+  fBarrelMap = new JPetGeomMapping(getParamBank());
+  
 	fOutputEvents = new JPetTimeWindow("JPetEvent");//This line has to be added since starting from v6 we use cointainers
 	                                                //for TimeWindows and we need to specify which type of data will be stored
 	                                                //in the root tree. For now we do not need to save tree after the calibration
@@ -434,8 +439,8 @@ void TimeCalibration::fillHistosForHit(const JPetHit & hit, const std::vector<do
 
 const char * TimeCalibration::formatUniqueSlotDescription(const JPetBarrelSlot & slot, int threshold, const char * prefix = ""){
 
-	int slot_number = fBarrelMap.getSlotNumber(slot);
-	int layer_number = fBarrelMap.getLayerNumber(slot.getLayer()); 
+	int slot_number = fBarrelMap->getSlotNumber(slot);
+	int layer_number = fBarrelMap->getLayerNumber(slot.getLayer()); 
 
 	return Form("%slayer_%d_slot_%d_thr_%d",prefix,layer_number,slot_number,threshold);
 
