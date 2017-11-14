@@ -14,14 +14,14 @@
  */
 
 #include <JPetManager/JPetManager.h>
-#include "TimeWindowCreator.h"
-#include "TimeCalibLoader.h"
-#include "SignalFinder.h"
-#include "SignalTransformer.h"
-#include "HitFinder.h"
-#include "EventFinder.h"
-#include "EventCategorizer.h"
-
+#include "../LargeBarrelAnalysisExtended/TimeWindowCreator.h"
+#include "../LargeBarrelAnalysisExtended/TimeCalibLoader.h"
+#include "../LargeBarrelAnalysisExtended/SignalFinder.h"
+#include "../LargeBarrelAnalysisExtended/SignalTransformer.h"
+#include "../LargeBarrelAnalysisExtended/HitFinder.h"
+#include "../LargeBarrelAnalysisExtended/EventFinder.h"
+#include "../LargeBarrelAnalysisExtended/EventCategorizer.h"
+#include "TimeCalibration.h"
 using namespace std;
 
 int main(int argc, const char* argv[])
@@ -34,16 +34,15 @@ int main(int argc, const char* argv[])
   manager.registerTask<SignalFinder>("SignalFinder");
   manager.registerTask<SignalTransformer>("SignalTransformer"); 
   manager.registerTask<HitFinder>("HitFinder"); 
-  manager.registerTask<EventFinder>("EventFinder"); 
-  manager.registerTask<EventCategorizer>("EventCategorizer"); 
+  manager.registerTask<TimeCalibration>("TimeCalibration"); 
   
   manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
   manager.useTask("TimeCalibLoader", "tslot.raw", "tslot.calib");
   manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
   manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
   manager.useTask("HitFinder", "phys.sig", "hits");
-  manager.useTask("EventFinder", "hits", "unk.evt");
-  manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
-  
+  manager.useTask("TimeCalibration", "hits", "calib");
+
   manager.run(argc, argv);
+  
 }

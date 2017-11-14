@@ -21,26 +21,35 @@ using namespace std;
 #include <JPetWriter/JPetWriter.h>
 #include "SignalFinderTools.h"
 #include "SignalFinder.h"
+#include <JPetOptionsTools/JPetOptionsTools.h>
 
-SignalFinder::SignalFinder(const char* name, const char* description, bool saveControlHistos)
-	: JPetTask(name, description)
+using namespace jpet_options_tools;
+
+SignalFinder::SignalFinder(const char* name)
+	: JPetUserTask(name)
 {
-	fSaveControlHistos = saveControlHistos;
+  //	fSaveControlHistos = saveControlHistos;
 }
 
 SignalFinder::~SignalFinder() {}
 
 //SignalFinder init method
-void SignalFinder::init(const JPetTaskInterface::Options& opts)
+bool SignalFinder::init()
 {
 	INFO("Signal finding started.");
+	
+	fOutputEvents = new JPetTimeWindow("JPetRawSignal");
 
-	if (opts.count(fEdgeMaxTimeParamKey)) {
-		kSigChEdgeMaxTime = std::atof(opts.at(fEdgeMaxTimeParamKey).c_str());
+	if (isOptionSet(fParams.getOptions(), fEdgeMaxTimeParamKey)) {
+	  kSigChEdgeMaxTime = getOptionAsFloat(fParams.getOptions(), fEdgeMaxTimeParamKey);
+	}else{
+	  WARNING(Form("No value of the %s parameter provided by the user. Using default valu of %lf.", fEdgeMaxTimeParamKey.c_str(), kSigChEdgeMaxTime));
 	}
 
-	if (opts.count(fLeadTrailMaxTimeParamKey)) {
-		kSigChLeadTrailMaxTime = std::atof(opts.at(fLeadTrailMaxTimeParamKey).c_str());
+	if (isOptionSet(fParams.getOptions(), fLeadTrailMaxTimeParamKey)) {
+	  kSigChLeadTrailMaxTime = getOptionAsFloat(fParams.getOptions(), fLeadTrailMaxTimeParamKey);
+	}else{
+	  WARNING(Form("No value of the %s parameter provided by the user. Using default valu of %lf.", fLeadTrailMaxTimeParamKey.c_str(), kSigChLeadTrailMaxTime));
 	}
 
 	if (fSaveControlHistos) {
@@ -53,21 +62,21 @@ void SignalFinder::init(const JPetTaskInterface::Options& opts)
 				"Remainig Trailing Signal Channels",
 				4, 0.5, 4.5));
 	}
+	return true;
 }
 
 //SignalFinder execution method
-void SignalFinder::exec()
+bool SignalFinder::exec()
 {
 
 	//getting the data from event in apropriate format
-	if(auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(getEvent())) {
+	if(auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
 
 		//mapping method invocation
 		map<int, vector<JPetSigCh>> sigChsPMMap = SignalFinderTools::getSigChsPMMapById(timeWindow);
 
 		//building signals method invocation
 		vector<JPetRawSignal> allSignals = SignalFinderTools::buildAllSignals(
-							timeWindow->getIndex(),
     							sigChsPMMap,
     							kNumOfThresholds ,
     							getStatistics(),
@@ -78,26 +87,25 @@ void SignalFinder::exec()
 		//saving method invocation
 		saveRawSignals(allSignals);
 
+	}else{
+	  return false;
 	}
+	return true;
 }
 
 //SignalFinder finish method
-void SignalFinder::terminate()
+bool SignalFinder::terminate()
 {
 	INFO("Signal finding ended.");
+	return true;
 }
 
 
 //saving method
 void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& sigChVec)
 {
-	assert(fWriter);
-	for (const auto & sigCh : sigChVec) {
-		fWriter->write(sigCh);
+	for (auto & sigCh : sigChVec) {
+	  fOutputEvents->add<JPetRawSignal>(sigCh);
 	}
 }
 
-void SignalFinder::setWriter(JPetWriter* writer)
-{
-	fWriter = writer;
-}

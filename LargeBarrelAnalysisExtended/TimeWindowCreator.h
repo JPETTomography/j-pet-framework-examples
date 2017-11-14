@@ -16,11 +16,12 @@
 #ifndef TimeWindowCreator_H
 #define TimeWindowCreator_H
 
-#include <JPetTask/JPetTask.h>
+#include <JPetUserTask/JPetUserTask.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
 #include <JPetParamBank/JPetParamBank.h>
 #include <JPetParamManager/JPetParamManager.h>
 #include <JPetTOMBChannel/JPetTOMBChannel.h>
+#include <set>
 
 class JPetWriter;
 
@@ -33,26 +34,26 @@ class JPetWriter;
 /// Task to translate EventIII Unpacker data to JPetTimeWindow.
 /// Also, some basic filtering can be done
 
-class TimeWindowCreator: public JPetTask
+class TimeWindowCreator: public JPetUserTask
 {
 public:
-  TimeWindowCreator(const char* name, const char* description);
+  TimeWindowCreator(const char* name);
   virtual ~TimeWindowCreator();
-  virtual void init(const JPetTaskInterface::Options& opts) override;
-  virtual void exec() override;
-  virtual void terminate() override;
-  virtual void setWriter(JPetWriter* writer) override;
-  virtual void setParamManager(JPetParamManager* paramManager) override;
-  const JPetParamBank& getParamBank() const;
+  virtual bool init() override;
+  virtual bool exec() override;
+  virtual bool terminate() override;
 
 protected:
-  void saveTimeWindow(const JPetTimeWindow& slot);
+  bool filter(const JPetTOMBChannel& channel) const;
   JPetSigCh generateSigCh(const JPetTOMBChannel& channel, JPetSigCh::EdgeType edge) const;
-  JPetWriter* fWriter = nullptr;
   JPetParamManager* fParamManager = nullptr;
   long long int fCurrEventNumber = 0;
-  const std::string kMaxTimeParamKey = "TimeWindowCreator_MaxTime";
-  const std::string kMinTimeParamKey = "TimeWindowCreator_MinTime";
+  const std::string kMaxTimeParamKey = "TimeWindowCreator_MaxTime_double";
+  const std::string kMinTimeParamKey = "TimeWindowCreator_MinTime_double";
+  const std::string kMainStripKey = "TimeWindowCreator_MainStrip_int";
+  std::pair<int,int> fMainStrip;
+  bool fMainStripSet = false;
+  std::set<int> fAllowedChannels;
   double fMaxTime = 0.;
   double fMinTime = -1.e6;
 };

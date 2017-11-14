@@ -18,7 +18,7 @@
 
 #include <vector>
 #include <map>
-#include <JPetTask/JPetTask.h>
+#include <JPetUserTask/JPetUserTask.h>
 #include <JPetHit/JPetHit.h>
 #include <JPetEvent/JPetEvent.h>
 
@@ -28,16 +28,15 @@ class JPetWriter;
 #	define override
 #endif
 
-class EventCategorizer : public JPetTask{
+class EventCategorizer : public JPetUserTask{
 public:
-	EventCategorizer(const char * name, const char * description);
+	EventCategorizer(const char * name);
 	virtual ~EventCategorizer(){}
-	virtual void init(const JPetTaskInterface::Options& opts)override;
-	virtual void exec()override;
-	virtual void terminate()override;
-	virtual void setWriter(JPetWriter* writer)override;
+	virtual bool init() override;
+	virtual bool exec() override;
+	virtual bool terminate() override;
+
 protected:
-	JPetWriter* fWriter;
 	void saveEvents(const std::vector<JPetEvent>& event);
 	bool fSaveControlHistos = true;
 };

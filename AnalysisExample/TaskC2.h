@@ -19,22 +19,14 @@
 #include "JPetTask/JPetTask.h"
 #include "JPetRecoSignal/JPetRecoSignal.h"
 
-class JPetWriter;
-
 class TaskC2:public JPetTask {
  public:
   TaskC2(const char * name, const char * description);
   virtual void init(const JPetTaskInterface::Options& opts);
   virtual void exec();
   virtual void terminate();
-  virtual void setWriter(JPetWriter* writer) {fWriter =writer;}
  protected:
-  JPetRecoSignal createRecoSignal(JPetRawSignal& rawSignal);
-  void saveRecoSignal( JPetRecoSignal signal);
-  // for statistics of the processing:
+  JPetRecoSignal createRecoSignal(const JPetRawSignal& rawSignal);
   
-  JPetWriter* fWriter;
-
-  //ClassDef(TaskC2, 1);
 };
 #endif /*  !TASKC2_H */

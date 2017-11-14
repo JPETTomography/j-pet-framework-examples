@@ -17,7 +17,7 @@
 #define SIGNALFINDER_H
 
 #include <vector>
-#include <JPetTask/JPetTask.h>
+#include <JPetUserTask/JPetUserTask.h>
 #include <JPetRawSignal/JPetRawSignal.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
 
@@ -27,22 +27,20 @@ class JPetWriter;
 #define override
 #endif
 
-class SignalFinder: public JPetTask
+class SignalFinder: public JPetUserTask
 {
 public:
-  SignalFinder(const char* name, const char* description, bool printStats);
+  SignalFinder(const char* name);
   virtual ~SignalFinder();
-  virtual void init(const JPetTaskInterface::Options& opts) override;
-  virtual void exec() override;
-  virtual void terminate() override;
-  virtual void setWriter(JPetWriter* writer) override;
+  virtual bool init() override;
+  virtual bool exec() override;
+  virtual bool terminate() override;
   bool fSaveControlHistos = true;
 
 protected:
-  JPetWriter* fWriter;
   void saveRawSignals(const std::vector<JPetRawSignal>& sigChVec);
-  const std::string fEdgeMaxTimeParamKey = "SignalFinder_EdgeMaxTime"; 
-  const std::string fLeadTrailMaxTimeParamKey = "SignalFinder_LeadTrailMaxTime";
+  const std::string fEdgeMaxTimeParamKey = "SignalFinder_EdgeMaxTime_float"; 
+  const std::string fLeadTrailMaxTimeParamKey = "SignalFinder_LeadTrailMaxTime_float";
   Float_t kSigChEdgeMaxTime = 20000; //[ps]
   Float_t kSigChLeadTrailMaxTime = 300000; //[ps]
   const int kNumOfThresholds = 4;

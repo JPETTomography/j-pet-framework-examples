@@ -19,6 +19,29 @@
 
 using namespace std;
 
+JPetHit HitFinderTools::createDummyRefDefHit(const JPetPhysSignal& signalB,
+					     const std::map<int, std::vector<double>> velMap){
+
+  JPetHit hit;
+  hit.setSignalB(signalB);
+  hit.setTime(signalB.getTime());
+  hit.setQualityOfTime(-1.0);
+  hit.setTimeDiff(0.0);
+  hit.setQualityOfTimeDiff(-1.0);
+  hit.setEnergy(-1.0);
+  hit.setQualityOfEnergy(-1.0);
+  hit.setScintillator(signalB.getPM().getScin());
+  hit.setBarrelSlot(signalB.getPM().getBarrelSlot());
+  auto radius = hit.getBarrelSlot().getLayer().getRadius();
+  auto theta = TMath::DegToRad() * hit.getBarrelSlot().getTheta();
+  hit.setPosX(radius * std::cos(theta));
+  hit.setPosY(radius * std::sin(theta));
+
+  auto search = velMap.find(hit.getBarrelSlot().getID());
+  if(search != velMap.end()) hit.setPosZ(-1000000.0);
+  
+}
+
 vector<JPetHit> HitFinderTools::createHits(JPetStatistics& stats,
     const SignalsContainer& allSignalsInTimeWindow,
     const double timeDifferenceWindow,
@@ -31,6 +54,21 @@ vector<JPetHit> HitFinderTools::createHits(JPetStatistics& stats,
     auto sideA = scintillator.second.first;
     auto sideB = scintillator.second.second;
 
+    // Handling the special case of reference detector signals,
+    // which are defined as coming only from sideB,
+    // scintillator no. 193 in layer no. 4
+    // and do not correspond to a full hit
+
+    if (sideA.size() == 0 && sideB.size() > 0) {
+      auto scinID = sideB.at(0).getPM().getScin().getID();
+      auto layerID = sideB.at(0).getBarrelSlot().getLayer().getID();
+      if (scinID == 193 && layerID == 4){
+	for (auto signalB : sideB) {
+	  hits.push_back(createDummyRefDefHit(signalB, velMap));
+	}
+      }
+    }
+    
     if (sideA.size() > 0 && sideB.size() > 0) {
 
       std::sort(sideA.begin(),

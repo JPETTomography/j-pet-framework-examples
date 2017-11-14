@@ -23,8 +23,10 @@ TaskB::TaskB(const char * name, const char * description):
 {
 }
 
-void TaskB::init(const JPetTaskInterface::Options& opts)
+void TaskB::init(const JPetTaskInterface::Options&)
 {
+  fOutputEvents = new JPetTimeWindow("JPetSigCh");
+
   getStatistics().createHistogram( new TH1F("single threshold multiplicity",
 					    "Single threshold multipicity within single time window",
 					    10, -0.5, 9.5)
@@ -34,21 +36,18 @@ void TaskB::init(const JPetTaskInterface::Options& opts)
 
 void TaskB::exec()
 {
-  auto tslotRaw = (JPetTimeWindow&) (*getEvent());
+  auto & timeWindow = *(dynamic_cast<const JPetTimeWindow* const>(getEvent()));
 
   // get number of SigCh-s in a tslot
-  auto nSigChs = tslotRaw.getNumberOfSigCh();
-  // create an object for the CALIBRATED tslot
-  JPetTimeWindow tslotCal;
-  tslotCal.setIndex(tslotRaw.getIndex());
+  auto nSigChs = timeWindow.getNumberOfEvents();
 
   // we would like to check if a signal from one DAQ channel can occur more than once
   // during one Time Slot, so we will create a map(channel, No. of occurences) to count multiplicities
   std::map<int,int> channelMultiplicities;
 
-  // iterate over SigCh's in the tslot and calibrate their times
+  // iterate over SigCh's in the time window and calibrate their times
   for (int i = 0; i < nSigChs; i++) {
-    JPetSigCh sigchRaw = tslotRaw[i];
+    const JPetSigCh & sigchRaw = dynamic_cast<const JPetSigCh&>(timeWindow[i]);
     JPetSigCh sigchCal = sigchRaw; // start the calibrated SigCh as a copy of the raw one
 
     // do our multiplicity counting
@@ -61,10 +60,9 @@ void TaskB::exec()
     sigchCal.setValue(time);
 
     // insert the calibrated SigCh into calibrated TimeWindow
-    tslotCal.addCh(sigchCal);
+    fOutputEvents->add<JPetSigCh>(sigchCal);
   }
-  saveTimeWindow(tslotCal);
-  
+
   // write all non-zero multiplicities to a histogram
   for (std::map<int,int>::iterator it=channelMultiplicities.begin(); it!=channelMultiplicities.end(); ++it){
     if( it->second > 0 ){
@@ -76,10 +74,4 @@ void TaskB::exec()
 
 void TaskB::terminate()
 {
-}
-
-void TaskB::saveTimeWindow( JPetTimeWindow slot)
-{
-  assert(fWriter);
-  fWriter->write(slot);
 }

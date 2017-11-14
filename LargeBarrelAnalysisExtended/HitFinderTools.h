@@ -40,6 +40,8 @@ public:
     const double timeDifferenceWindow,
     const std::map<int, std::vector<double>> velMap
   );
+  JPetHit createDummyRefDefHit(const JPetPhysSignal& signalB,
+			       const std::map<int, std::vector<double>> velMap);
 };
 
 #endif /*  !HITFINDERTOOLS_H */

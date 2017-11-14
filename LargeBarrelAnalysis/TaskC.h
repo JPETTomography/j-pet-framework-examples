@@ -19,7 +19,7 @@
 #include <JPetTask/JPetTask.h>
 #include <JPetHit/JPetHit.h>
 #include <JPetRawSignal/JPetRawSignal.h>
-class JPetWriter;
+
 #ifdef __CINT__
 //when cint is used instead of compiler, override word is not recognized
 //nevertheless it's needed for checking if the structure of project is correct
@@ -33,13 +33,9 @@ public:
   virtual void init(const JPetTaskInterface::Options& opts)override;
   virtual void exec()override;
   virtual void terminate()override;
-  virtual void setWriter(JPetWriter* writer)override;
 protected:
-  std::vector<JPetHit> createHits(const std::vector<JPetRawSignal>& signals);
+  std::vector<JPetHit> createHits(const JPetTimeWindow & signals);
   void saveHits(const std::vector<JPetHit>& hits);
-  void studyTimeWindow(const std::vector<JPetHit>& hits);
-  std::vector<JPetRawSignal> fSignals;
-  JPetWriter* fWriter;
   const int kNumOfThresholds = 4;
 };
 #endif /*  !TASKD_H */

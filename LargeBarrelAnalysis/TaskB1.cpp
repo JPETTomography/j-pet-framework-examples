@@ -23,7 +23,10 @@ JPetTask(name, description){}
 TaskB1::~TaskB1(){}
 
 void TaskB1::init(const JPetTaskInterface::Options&){
-	fBarrelMap.buildMappings(getParamBank());
+
+  fOutputEvents = new JPetTimeWindow("JPetRawSignal");
+
+  fBarrelMap.buildMappings(getParamBank());
 	// create histograms for TOT - one for each DAQ channel
 	for(auto & tomb : getParamBank().getTOMBChannels()){
 		
@@ -51,13 +54,13 @@ void TaskB1::init(const JPetTaskInterface::Options&){
 
 void TaskB1::exec(){
 	//getting the data from event in propriate format
-	if(auto timeWindow = dynamic_cast<const JPetTimeWindow*const>(getEvent())){
+  if(auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(getEvent())){
 		map<int,JPetSigCh> leadSigChs;
 		map<int,JPetSigCh> trailSigChs;
 		map<int, JPetRawSignal> signals; 
-		const unsigned int nSigChs = timeWindow->getNumberOfSigCh();
+		const unsigned int nSigChs = timeWindow->getNumberOfEvents();
 		for (unsigned int i = 0; i < nSigChs; i++) {
-			JPetSigCh sigch = timeWindow->operator[](i);
+		  const JPetSigCh & sigch = dynamic_cast<const JPetSigCh&>(timeWindow->operator[](i));
 			int daq_channel = sigch.getChannel();
 			if( sigch.getType() == JPetSigCh::Leading )
 				leadSigChs[ daq_channel ] = sigch;
@@ -97,19 +100,14 @@ void TaskB1::exec(){
 		}    
 		for(auto & pmSignalPair : signals){
 			auto & signal = pmSignalPair.second;
-			signal.setTimeWindowIndex( timeWindow->getIndex() );
 			const auto & pmt = getParamBank().getPM(pmSignalPair.first);
 			signal.setPM(pmt);
 			signal.setBarrelSlot(pmt.getBarrelSlot());
-			fWriter->write(signal);
+			fOutputEvents->add<JPetRawSignal>(signal);
 		}
 	}
 }
 void TaskB1::terminate(){}
-void TaskB1::saveRawSignal( JPetRawSignal sig){
-	assert(fWriter);
-	fWriter->write(sig);
-}
 
 const char * TaskB1::formatUniqueChannelDescription(const JPetTOMBChannel & channel, const char * prefix = "") const {
 	
@@ -144,9 +142,7 @@ int TaskB1::calcGlobalPMTNumber(const JPetPM & pmt) const {
 	
 	return pmt_no;
 }
-void TaskB1::setWriter(JPetWriter* writer) {
-	fWriter = writer;
-}
+
 void TaskB1::setParamManager(JPetParamManager* paramManager) {
 	fParamManager = paramManager;
 }

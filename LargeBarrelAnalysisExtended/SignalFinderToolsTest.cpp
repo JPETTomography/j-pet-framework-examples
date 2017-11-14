@@ -31,9 +31,9 @@ BOOST_AUTO_TEST_CASE( getSigChsPMMapById )
   sigCh2.setPM(pm2);
   sigCh3.setPM(pm2);
 
-  window.addCh(sigCh1);
-  window.addCh(sigCh2);
-  window.addCh(sigCh3);
+  window.add<JPetSigCh>(sigCh1);
+  window.add<JPetSigCh>(sigCh2);
+  window.add<JPetSigCh>(sigCh3);
 
   auto results =  SignalFinderTools::getSigChsPMMapById(&window);
   BOOST_REQUIRE_EQUAL(results.size(), 2);
@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE( buildRawSignals_empty )
 {
   JPetStatistics stats;
   std::vector<JPetSigCh> sigChFromSamePM;
-  auto results =  SignalFinderTools::buildRawSignals(4, sigChFromSamePM, 1, stats, false, 5, 5);
+  auto results =  SignalFinderTools::buildRawSignals(sigChFromSamePM, 1, stats, false, 5, 5);
   BOOST_REQUIRE(results.empty());
 }
 
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE( buildRawSignals_wrong_one_signal_NumOfThresholdsNot4 )
 
   std::vector<JPetSigCh> sigChFromSamePM = {sigCh1};
   auto numOfThresholds = 1;
-  auto results =  SignalFinderTools::buildRawSignals(4, sigChFromSamePM, numOfThresholds, stats, false, 5, 5);
+  auto results =  SignalFinderTools::buildRawSignals(sigChFromSamePM, numOfThresholds, stats, false, 5, 5);
   BOOST_REQUIRE(results.empty());
 }
 
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE( buildRawSignals_one_signal )
   bool saveControlHistos = false;
   double sigChEdgeMaxTime = 5;
   double sigChLeadTrailMaxTime = 5;
-  auto results =  SignalFinderTools::buildRawSignals(4, sigChFromSamePM, numOfThresholds, stats, saveControlHistos, sigChEdgeMaxTime , sigChLeadTrailMaxTime);
+  auto results =  SignalFinderTools::buildRawSignals(sigChFromSamePM, numOfThresholds, stats, saveControlHistos, sigChEdgeMaxTime , sigChLeadTrailMaxTime);
   BOOST_REQUIRE_EQUAL(results.size(), 1);
   auto points_trail = results.at(0).getPoints(JPetSigCh::Trailing);
   auto points_lead = results.at(0).getPoints(JPetSigCh::Leading);
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(buildRawSignals_2)
   bool saveControlHistos = false;
   double sigChEdgeMaxTime = 5;
   double sigChLeadTrailMaxTime = 5;
-  auto results =  SignalFinderTools::buildRawSignals(4, sigChFromSamePM, numOfThresholds, stats, saveControlHistos, sigChEdgeMaxTime , sigChLeadTrailMaxTime);
+  auto results =  SignalFinderTools::buildRawSignals(sigChFromSamePM, numOfThresholds, stats, saveControlHistos, sigChEdgeMaxTime , sigChLeadTrailMaxTime);
   BOOST_REQUIRE_EQUAL(results.size(), 1);
   auto points_trail = results.at(0).getPoints(JPetSigCh::Trailing);
   auto points_lead = results.at(0).getPoints(JPetSigCh::Leading);

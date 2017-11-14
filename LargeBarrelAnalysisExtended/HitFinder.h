@@ -18,7 +18,7 @@
 
 #include <map>
 #include <vector>
-#include <JPetTask/JPetTask.h>
+#include <JPetUserTask/JPetUserTask.h>
 #include <JPetHit/JPetHit.h>
 #include <JPetRawSignal/JPetRawSignal.h>
 #include "HitFinderTools.h"
@@ -42,30 +42,26 @@ class JPetWriter;
  * of those two signals needs to be less then specified time difference (kTimeWindowWidth)
  *
  */
-class HitFinder: public JPetTask
+class HitFinder: public JPetUserTask
 {
 
 public:
-	HitFinder(const char* name, const char* description);
+	HitFinder(const char* name);
 	virtual ~HitFinder();
-	virtual void init(const JPetTaskInterface::Options& opts)override;
-	virtual void exec()override;
-	virtual void terminate()override;
-	virtual void setWriter(JPetWriter* writer)override;
+	virtual bool init() override;
+	virtual bool exec() override;
+	virtual bool terminate() override;
 	std::map<int, std::vector<double>> fVelocityMap;
 
 protected:
 
-  	//Index that defines a given DAQ time window (defined at the hardware level)
-	int kTimeSlotIndex;
 	bool kFirstTime = true;
 	HitFinderTools::SignalsContainer fAllSignalsInTimeWindow;
 	HitFinderTools HitTools;
   	std::map<int, std::vector<double>> readVelocityFile();
-	void fillSignalsMap(JPetPhysSignal signal);
+	void fillSignalsMap(const JPetPhysSignal signal);
 	void saveHits(const std::vector<JPetHit>& hits);
-	JPetWriter* fWriter;
-	const std::string fTimeWindowWidthParamKey = "HitFinder_TimeWindowWidth";
+	const std::string fTimeWindowWidthParamKey = "HitFinder_TimeWindowWidth_float";
 	double kTimeWindowWidth = 50000; /// in ps -> 50ns. Maximal time difference between signals
 
 };

@@ -22,7 +22,7 @@
 #	define override
 #endif
 
-#include <JPetTask/JPetTask.h>
+#include <JPetUserTask/JPetUserTask.h>
 #include <map>
 
 /**
@@ -42,21 +42,16 @@
  * The calibration is applied based on the TOMB identifier.
  *
  */
-class TimeCalibLoader : public JPetTask
+class TimeCalibLoader : public JPetUserTask
 {
 public:
-  TimeCalibLoader(const char* name, const char* description);
+  TimeCalibLoader(const char* name);
   virtual ~TimeCalibLoader();
-  virtual void init(const JPetTaskInterface::Options& opts) override;
-  virtual void exec() override;
-  virtual void terminate() override;
-  virtual void setWriter(JPetWriter* writer) override;
-  virtual void setParamManager(JPetParamManager* paramManager) override;
+  virtual bool init() override;
+  virtual bool exec() override;
+  virtual bool terminate() override;
 protected:
-  void saveTimeWindow(const JPetTimeWindow& window);
-
-  const std::string fConfigFileParamKey = "TimeCalibLoader_ConfigFile";  ///Name of the option for which the value would correspond to the time calibration file name.
-  JPetWriter* fWriter = nullptr;
+  const std::string fConfigFileParamKey = "TimeCalibLoader_ConfigFile_std::string";  ///Name of the option for which the value would correspond to the time calibration file name.
   JPetParamManager* fParamManager = nullptr;
   std::map<unsigned int, double> fTimeCalibration;
 };

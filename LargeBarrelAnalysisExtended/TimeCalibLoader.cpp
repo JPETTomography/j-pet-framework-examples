@@ -17,61 +17,57 @@
 #include "TimeCalibTools.h"
 #include "JPetGeomMapping/JPetGeomMapping.h"
 #include <JPetParamManager/JPetParamManager.h>
+#include <JPetOptionsTools/JPetOptionsTools.h>
 
-TimeCalibLoader::TimeCalibLoader(const char* name, const char* description):
-  JPetTask(name, description)
-{
-  /**/
-}
+using namespace jpet_options_tools;
+
+TimeCalibLoader::TimeCalibLoader(const char* name):
+  JPetUserTask(name) {}
 
 TimeCalibLoader::~TimeCalibLoader() {}
 
-void TimeCalibLoader::init(const JPetTaskInterface::Options& opts)
+bool TimeCalibLoader::init()
 {
+  fOutputEvents = new JPetTimeWindow("JPetSigCh");
+
   auto calibFile =  std::string("timeCalib.txt");
-  if (opts.count(fConfigFileParamKey)) {
-    calibFile = opts.at(fConfigFileParamKey);
+
+  if (isOptionSet(fParams.getOptions(),fConfigFileParamKey)) {
+    calibFile = getOptionAsString(fParams.getOptions(),fConfigFileParamKey);
+  }else{
+    WARNING("No path to the time calibration file was provided in user options.");
   }
-  assert(fParamManager);
-  JPetGeomMapping mapper(fParamManager->getParamBank());
+
+  JPetGeomMapping mapper(getParamBank());
   auto tombMap = mapper.getTOMBMapping();
   fTimeCalibration = TimeCalibTools::loadTimeCalibration(calibFile, tombMap);
   if (fTimeCalibration.empty()) {
     ERROR("Time calibration seems to be empty");
   }
+
+  return true;
 }
 
-void TimeCalibLoader::exec()
+bool TimeCalibLoader::exec()
 {
-  if (auto oldTimeWindow = dynamic_cast<const JPetTimeWindow* const>(getEvent())) {
-    JPetTimeWindow correctedWindow;
-    auto newSigChs = oldTimeWindow->getSigChVect();
-    for (auto & sigCh : newSigChs) {
-      /// Calibration time is ns so we should change it to ps, cause all the time is in ps.
+  if (auto oldTimeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
+
+    auto n = oldTimeWindow->getNumberOfEvents();
+    for(uint i=0;i<n;++i){
+
+      JPetSigCh sigCh = dynamic_cast<const JPetSigCh&>(oldTimeWindow->operator[](i));
+    /// Calibration time is ns so we should change it to ps, cause all the time is in ps.
       sigCh.setValue(sigCh.getValue() + 1000. * TimeCalibTools::getTimeCalibCorrection(fTimeCalibration, sigCh.getTOMBChannel().getChannel()));
-      correctedWindow.addCh(sigCh);
+      fOutputEvents->add<JPetSigCh>(sigCh);
     }
-    correctedWindow.setIndex(oldTimeWindow->getIndex());
-    saveTimeWindow(correctedWindow);
+  }else{
+    return false;
   }
+  return true;
 }
 
-void TimeCalibLoader::saveTimeWindow(const JPetTimeWindow& window)
+bool TimeCalibLoader::terminate()
 {
-  assert(fWriter);
-  fWriter->write(window);
+  return true;
 }
 
-void TimeCalibLoader::terminate()
-{
-}
-
-void TimeCalibLoader::setWriter(JPetWriter* writer)
-{
-  fWriter = writer;
-}
-
-void TimeCalibLoader::setParamManager(JPetParamManager* paramManager)
-{
-  fParamManager = paramManager;
-}

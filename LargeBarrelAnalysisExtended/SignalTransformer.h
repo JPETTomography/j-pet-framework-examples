@@ -16,7 +16,7 @@
 #ifndef SIGNALTRANSFORMER_H
 #define SIGNALTRANSFORMER_H
 
-#include "JPetTask/JPetTask.h"
+#include "JPetUserTask/JPetUserTask.h"
 #include "JPetRecoSignal/JPetRecoSignal.h"
 
 #ifdef __CINT__
@@ -25,22 +25,17 @@
 
 class JPetWriter;
 
-class SignalTransformer: public JPetTask
+class SignalTransformer: public JPetUserTask
 {
 
 public:
-	SignalTransformer(const char* name, const char* description);
-	virtual void init(const JPetTaskInterface::Options& opts)override;
-	virtual void exec()override;
-	virtual void terminate()override;
-	virtual void setWriter(JPetWriter* writer) override{
-		fWriter = writer;
-	}
+	SignalTransformer(const char* name);
+	virtual bool init() override;
+	virtual bool exec() override;
+	virtual bool terminate() override;
 
 protected:
-	JPetRecoSignal createRecoSignal(JPetRawSignal& rawSignal);
-	JPetPhysSignal createPhysSignal(JPetRecoSignal& signals);
-	void savePhysSignal( JPetPhysSignal signal);
-	JPetWriter* fWriter;
+	JPetRecoSignal createRecoSignal(const JPetRawSignal& rawSignal);
+	JPetPhysSignal createPhysSignal(const JPetRecoSignal& signals);
 };
 #endif /*  !SIGNALTRANSFORMER_H */
