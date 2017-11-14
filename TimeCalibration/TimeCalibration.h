@@ -16,7 +16,7 @@
 
 #ifndef TimeCalibration_H 
 #define TimeCalibration_H 
-#include <JPetTask/JPetTask.h>
+#include <JPetUserTask/JPetUserTask.h>
 #include <JPetHit/JPetHit.h>
 #include <JPetRawSignal/JPetRawSignal.h>
 #include "LargeBarrelMapping.h"
@@ -26,18 +26,16 @@ class JPetWriter;
 //nevertheless it's needed for checking if the structure of project is correct
 #	define override
 #endif
-class TimeCalibration:public JPetTask{
+class TimeCalibration:public JPetUserTask{
 public:
-	TimeCalibration(const char * name, const char * description);
+	TimeCalibration(const char * name);
 	virtual ~TimeCalibration(){}
-	virtual void init(const JPetTaskInterface::Options& opts)override;
-	virtual void exec()override;
-	virtual void terminate()override;
-	virtual void setWriter(JPetWriter* writer)override;
+	virtual bool init()override;
+	virtual bool exec()override;
+	virtual bool terminate()override;
 protected:
 	const char * formatUniqueSlotDescription(const JPetBarrelSlot & slot, int threshold,const char * prefix);
 	void fillHistosForHit(const JPetHit & hit,const std::vector<double> &RefTimesL,const std::vector<double> & RefTimesT);
-	JPetWriter* fWriter;
 	LargeBarrelMapping fBarrelMap;
 	std::string OutputFile = "TimeConstantsCalib.txt";
 	const float Cl[3] = {0.,0.1418,0.5003};    //[ns]

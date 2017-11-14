@@ -19,7 +19,6 @@
 #include <string>
 #include <sstream>
 #include <cctype>
-#include <JPetWriter/JPetWriter.h>
 #include "TimeCalibration.h"
 #include "TF1.h"
 #include "TString.h"
@@ -28,11 +27,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <JPetOptionsTools/JPetOptionsTools.h>
+
+using namespace jpet_options_tools;
 using namespace std;
 
-TimeCalibration::TimeCalibration(const char * name, const char * description):JPetTask(name, description){}
+TimeCalibration::TimeCalibration(const char * name):JPetUserTask(name){}
 
-void TimeCalibration::init(const JPetTaskInterface::Options& opts){
+bool TimeCalibration::init(){
   time_t local_time;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -42,45 +44,30 @@ void TimeCalibration::init(const JPetTaskInterface::Options& opts){
 	                                                //in the root tree. For now we do not need to save tree after the calibration
 	                                                //so I left the JPetEvent class. For more info ask Alek or Wojtek
 //------Calibration run number from options file
-        if (opts.count(fCalibRunKey)) {
-	  CalibRun= atof(opts.at(fCalibRunKey).c_str());
+	if( isOptionSet(fParams.getOptions(), fCalibRunKey)) {
+	  CalibRun = getOptionAsInt(fParams.getOptions(), fCalibRunKey); 
+	}
+	
+	if (isOptionSet(fParams.getOptions(), fTOTcutLow)) {
+          TOTcut[0] = getOptionAsFloat(fParams.getOptions(), fTOTcutLow);
         }
-         if (opts.count(fTOTcutLow)) {
-          TOTcut[0] = atof(opts.at(fTOTcutLow).c_str());
+
+	if (isOptionSet(fParams.getOptions(), fTOTcutHigh)) {
+          TOTcut[1] = getOptionAsFloat(fParams.getOptions(), fTOTcutHigh);
         }
-        if (opts.count(fTOTcutHigh)) {
-          TOTcut[1] = atof(opts.at(fTOTcutHigh).c_str());
-        }
-	if (opts.count(kMainStripKey)) {
-	  int code = std::atoi(opts.at(kMainStripKey).c_str());
-	  LayerToCalib = code / 100;  // layer number
+
+	if (isOptionSet(fParams.getOptions(), kMainStripKey)) {
+	  int code = getOptionAsInt(fParams.getOptions(), kMainStripKey);
+	  LayerToCalib = code / 100; // layer number
 	  StripToCalib = code % 100; // strip number
 	}  
-	std::cout << "WE ARE GOING TO CALIBRATE SCINTILLATOR "<<StripToCalib << " FROM LAYER "<< LayerToCalib <<std::endl; 
+
+	INFO(Form("Calibrating scintillator %d from layer %d.", StripToCalib, LayerToCalib));
+
 	time(&local_time); //get the local time at which we start calibration
 	//
 	std::ofstream output;
-	  /*,output_tmp;
-	output_tmp.open(OutputFile+"Tmp",std::ios::app); //open temporary output file in append mode
-	if(output_tmp.tellp()==0){
-	 INFO("#############");
-	 INFO("CALIB_INIT:The temporary file with calibration constants is empty, we calibrate from scratch");
-	 INFO("#############");
-	}
-	else
-	{
-	  int LayerTmp,StripTmp,thrTmp;
-	  char SideTmp;
-	  float SigRef_l,SigRef_t,chi2Ref_l,chi2Ref_t;
-	  string line;
-	  for(int i=0;i<4;i++){
-	    getline(output_tmp,line);
-	    line  >> LayerTmp >> StripTmp >> SideTmp >> thrTmp >> CAlTmp[i] >> SigCAlTmp[i] >> CAtTmp[i] >> SigCAtTmp[i] >> SigRef_l >> SigRef_t >> chi2Ref_l >> chi2Ref_t;
-	    getline(output_tmp,line);
-	    line>> LayerTmp >> StripTmp >> SideTmp >> thrTmp >> CBlTmp[i] >> SigCBlTmp[i] >> CBtTmp[i] >> SigCBtTmp[i];
-	  }
-	}
-	  */
+
 	output.open(OutputFile,std::ios::app); //open the final output file in append mode           
 	if(output.tellp()==0){                 //if the file is empty/new write the header
 	  output << "# Time calibration constants" << std::endl;
@@ -119,12 +106,14 @@ void TimeCalibration::init(const JPetTaskInterface::Options& opts){
  INFO("#############");       
  INFO("CALIB_INIT: INITIALIZATION DONE!");       
  INFO("#############");
+
+ return true;
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void TimeCalibration::exec(){
+bool TimeCalibration::exec(){
   double RefTimeLead[4]={-1.e43,-1.e43,-1.e43,-1.e43};
   double RefTimeTrail[4]={-1.e43,-1.e43,-1.e43,-1.e43};
   std::vector <JPetHit> fhitsCalib;
@@ -133,7 +122,7 @@ void TimeCalibration::exec(){
 
   const int kPMidRef = 385;  
   //getting the data from event in propriate format
-  if(auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(getEvent())) {
+  if(auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     uint n = timeWindow->getNumberOfEvents();
     //
     for(uint i=0;i<n;++i){
@@ -172,18 +161,20 @@ void TimeCalibration::exec(){
      fhitsCalib.clear();
      fRefTimesL.clear();
      fRefTimesT.clear();
+
+  }else{
+    return false;
   } 
+
+  return true;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void TimeCalibration::terminate(){
+bool TimeCalibration::terminate(){
 
-// save timeDiffAB mean values for each slot and each threshold in a JPetAuxilliaryData object
-// so that they are available to the consecutive modules
-	getAuxilliaryData().createMap("timeDiffAB mean values");
-//
-//create output txt file with calibration parameters 
-//
+  //
+  //create output txt file with calibration parameters 
+  //
 	std::ofstream results_fit;
         results_fit.open(OutputFile, std::ios::app);
 	//
@@ -192,24 +183,20 @@ void TimeCalibration::terminate(){
 //
 		  const char * histo_name_l = Form("%slayer_%d_slot_%d_thr_%d","timeDiffAB_leading_",LayerToCalib,StripToCalib,thr);
 			double mean_l = getStatistics().getHisto1D(histo_name_l).GetMean();
-			getAuxilliaryData().setValue("timeDiffAB mean values", histo_name_l, mean_l);
 			TH1F* histoToSave_leading = &(getStatistics().getHisto1D(histo_name_l));
 			//
 			const char * histo_name_t = Form("%slayer_%d_slot_%d_thr_%d","timeDiffAB_trailing_",LayerToCalib,StripToCalib,thr);
 			double mean_t = getStatistics().getHisto1D(histo_name_t).GetMean();
-			getAuxilliaryData().setValue("timeDiffAB mean values", histo_name_t, mean_t);
 
 			TH1F* histoToSave_trailing = &(getStatistics().getHisto1D(histo_name_t));
 //reference detector
 			//
 			const char * histo_name_Ref_l = Form("%slayer_%d_slot_%d_thr_%d","timeDiffRef_leading_",LayerToCalib,StripToCalib,thr);
 			double mean_Ref_l = getStatistics().getHisto1D(histo_name_Ref_l).GetMean();
-			getAuxilliaryData().setValue("timeDiffRef mean values", histo_name_Ref_l, mean_Ref_l);
 			TH1F* histoToSave_Ref_leading = &(getStatistics().getHisto1D(histo_name_Ref_l));
 			//
 			const char * histo_name_Ref_t = Form("%slayer_%d_slot_%d_thr_%d","timeDiffRef_trailing_",LayerToCalib,StripToCalib,thr);
 			double mean_Ref_t = getStatistics().getHisto1D(histo_name_Ref_t).GetMean();
-			getAuxilliaryData().setValue("timeDiffref mean values", histo_name_Ref_t, mean_Ref_t);
 			TH1F* histoToSave_Ref_trailing = &(getStatistics().getHisto1D(histo_name_Ref_t));
 //
 			//
@@ -332,6 +319,8 @@ void TimeCalibration::terminate(){
 			
 	       }
 	results_fit.close();
+
+	return true;
 }
 
 //////////////////////////////////
@@ -451,4 +440,3 @@ const char * TimeCalibration::formatUniqueSlotDescription(const JPetBarrelSlot &
 	return Form("%slayer_%d_slot_%d_thr_%d",prefix,layer_number,slot_number,threshold);
 
 }
-void TimeCalibration::setWriter(JPetWriter* writer){fWriter =writer;}
