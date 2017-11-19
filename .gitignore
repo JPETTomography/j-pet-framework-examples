@@ -40,8 +40,6 @@ ScopeLoaderExample/cfg/data/1/
 
 LargeBarrelExample
 
-*.txt
-
 build/
 
 *.json
