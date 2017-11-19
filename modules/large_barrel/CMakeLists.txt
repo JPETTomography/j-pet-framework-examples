@@ -36,9 +36,8 @@ foreach(test_source ${UNIT_TEST_SOURCES})
     )
 endforeach()
 
-add_custom_target(tests_create_ln DEPENDS ${test_binaries} ${TESTS_DIR}/unitTestData)
 add_custom_command(OUTPUT ${TESTS_DIR}/unitTestData
   COMMAND ln -s ${CMAKE_SOURCE_DIR}/unitTestData ${TESTS_DIR}/unitTestData
 )
 
-add_custom_target(tests_large_barrel DEPENDS ${test_binaries} )
+add_custom_target(tests_large_barrel DEPENDS ${test_binaries} ${TESTS_DIR}/unitTestData)
