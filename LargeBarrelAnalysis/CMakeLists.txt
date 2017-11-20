@@ -11,7 +11,7 @@ cmake_minimum_required(VERSION 2.6)
 ### when creating a new project,
 ### set this section appropriately for your project
 ######################################################################
-set(projectName LargeBarrelAnalysisExtended)
+set(projectName LargeBarrelAnalysis)
 
 set(AUXILLIARY_FILES
   run.sh
@@ -53,15 +53,6 @@ target_link_libraries(${projectBinary} JPetFramework)
 
 add_custom_target(clean_data_largebarrelextended
   COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root)
-
-# copy the DB config file to an expected location
-set(db_config_dir ${CMAKE_CURRENT_BINARY_DIR}/../DBConfig)
-
-add_custom_command(TARGET ${projectBinary}
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND}
-  ARGS -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/../j-pet-framework/DBHandler/Config ${db_config_dir}
-)
 
 set(copy_depends) #create variable for list with depends files path
 
@@ -111,4 +102,4 @@ foreach(test_source ${UNIT_TEST_SOURCES})
     )
 endforeach()
 
-add_custom_target(tests_LargeBarrelExtended DEPENDS ${test_binaries} )
+add_custom_target(tests_LargeBarrel DEPENDS ${test_binaries} )

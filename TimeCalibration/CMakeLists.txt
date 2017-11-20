@@ -14,7 +14,7 @@ cmake_minimum_required(VERSION 2.6)
 set(projectName TimeCalibration)
 
 # files to be copied from some other example directory, if any
-set(USE_AUX_FILES_FROM LargeBarrelAnalysisExtended)
+set(USE_AUX_FILES_FROM LargeBarrelAnalysis)
 
 set(AUXILLIARY_FILES
   run.sh
@@ -39,14 +39,14 @@ file(GLOB HEADERS *.h)
 file(GLOB SOURCES *.cpp)
 
 ######################################################################
-### Use source files of modules from LargeBarrelAnalysisExtended
+### Use source files of modules from LargeBarrelAnalysis
 ###
 ### If you are using your own version of some module which
-### is also presenr in LargeBarrelAnalysisExtended,
+### is also presenr in LargeBarrelAnalysis,
 ### comment out the respective lines below so as not to use
-### this module's source from LargeBarrelAnalysisExtended.
+### this module's source from LargeBarrelAnalysis.
 ######################################################################
-set(use_modules_from ../LargeBarrelAnalysisExtended)
+set(use_modules_from ../LargeBarrelAnalysis)
 #
 list(APPEND HEADERS ${use_modules_from}/TimeWindowCreator.h)
 list(APPEND SOURCES ${use_modules_from}/TimeWindowCreator.cpp)

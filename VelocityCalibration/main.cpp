@@ -15,11 +15,11 @@
 
 #include <DBHandler/HeaderFiles/DBHandler.h>
 #include <JPetManager/JPetManager.h>
-#include "../LargeBarrelAnalysisExtended/TimeWindowCreator.h"
-#include "../LargeBarrelAnalysisExtended/TimeCalibLoader.h"
-#include "../LargeBarrelAnalysisExtended/SignalFinder.h"
-#include "../LargeBarrelAnalysisExtended/SignalTransformer.h"
-#include "../LargeBarrelAnalysisExtended/HitFinder.h"
+#include "../LargeBarrelAnalysis/TimeWindowCreator.h"
+#include "../LargeBarrelAnalysis/TimeCalibLoader.h"
+#include "../LargeBarrelAnalysis/SignalFinder.h"
+#include "../LargeBarrelAnalysis/SignalTransformer.h"
+#include "../LargeBarrelAnalysis/HitFinder.h"
 #include "DeltaTFinder.h"
 
 using namespace std;
