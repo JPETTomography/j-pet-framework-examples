@@ -35,6 +35,10 @@ script:
     - sed -i 's/manager.useTask("TimeCalibLoader", "tslot.raw", "tslot.calib");//' ../../LargeBarrelAnalysisExtended/main.cpp
     - make
     - ./LargeBarrelAnalysisExtended.x -t root -f dabc_17025151847.tslot.calib.root   -r 0 100
+    - cd ../TimeCalibration
+    - make
+    - cd ../VelocityCalibration
+    - make
 notifications:
   email:
     - aleksander.gajos@doctoral.uj.edu.pl
