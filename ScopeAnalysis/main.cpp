@@ -13,67 +13,35 @@
  *  @file main.cpp
  */
 
-#include <DBHandler/HeaderFiles/DBHandler.h>
 #include <JPetManager/JPetManager.h>
-#include <JPetTaskLoader/JPetTaskLoader.h>
-#include <modules/JPetRecoOffsetCalc/SDARecoOffsetsCalc.h>
-#include <modules/JPetRecoChargeCalc/SDARecoChargeCalc.h>
-#include <modules/JPetRecoAmplitudeCalc/SDARecoAmplitudeCalc.h>
-#include <modules/JPetRecoDrawAllCharges/SDARecoDrawAllCharges.h>
-#include <modules/JPetMakePhysSignal/SDAMakePhysSignals.h>
-#include <modules/JPetMatchHits/SDAMatchHits.h>
-#include <modules/JPetMatchLORs/SDAMatchLORs.h>
+#include <JPetRecoOffsetCalc/SDARecoOffsetsCalc.h>
+#include <JPetRecoChargeCalc/SDARecoChargeCalc.h>
+#include <JPetRecoAmplitudeCalc/SDARecoAmplitudeCalc.h>
+#include <JPetRecoDrawAllCharges/SDARecoDrawAllCharges.h>
+#include <JPetMakePhysSignal/SDAMakePhysSignals.h>
+#include <JPetMatchHits/SDAMatchHits.h>
+#include <JPetMatchLORs/SDAMatchLORs.h>
 
 using namespace std;
-int main(int argc, char* argv[])
+
+int main(int argc, const char* argv[])
 {
-	DB::SERVICES::DBHandler::createDBConnection("../DBConfig/configDB.cfg");
   JPetManager& manager = JPetManager::getManager();
-  manager.parseCmdLine(argc, argv);
 
-  manager.registerTask([](){
-      return new JPetTaskLoader("reco.sig", "reco.sig.offsets",
-				new SDARecoOffsetsCalc("RecoSigOffsetsCalc",
-							"Calculate offsets for signals from SDA"));
-    });
+  manager.registerTask<SDARecoChargeCalc>("SDARecoChargeCalc");
+  manager.registerTask<SDARecoAmplitudeCalc>("SDARecoAmplitudeCalc");
+  manager.registerTask<SDARecoDrawAllCharges>("SDARecoDrawAllCharges");
+  manager.registerTask<SDAMakePhysSignals>("SDAMakePhysSignals");
+  manager.registerTask<SDAMatchHits>("SDAMatchHits");
+  manager.registerTask<SDAMatchLORs>("SDAMatchLORs");
 
-  manager.registerTask([](){
-      return new JPetTaskLoader("reco.sig.offsets", "reco.sig.offsets.charges",
-  				new SDARecoChargeCalc("RecoSigChargeCalc",
-  							"Calculate charges for signals from SDA"));
-    });
-
-  manager.registerTask([](){
-      return new JPetTaskLoader("reco.sig.offsets.charges", "reco.sig.offsets.charges.ampl",
-  				new SDARecoAmplitudeCalc("RecoSigAmplitudeCalc",
-						      "Calculate amplitides for signals from SDA"));
-    });
-  
-  manager.registerTask([](){
-      return new JPetTaskLoader("reco.sig.offsets.charges.ampl", "reco.sig.offsets.charges.ampl.draw",
-  				new SDARecoDrawAllCharges("RecoDrawAllCharges",
-							 "Draw the charge spaectra for each photomultiplier"));
-    });
-  
-  manager.registerTask([](){
-      return new JPetTaskLoader("reco.sig.offsets.charges.ampl", "phys.sig",
-  				new SDAMakePhysSignals("MakePhysSig",
-  						       "Transform reco signals to physical signals"));
-    });
-
-    manager.registerTask([](){
-      return new JPetTaskLoader("phys.sig", "phys.hit",
-  				new SDAMatchHits("MatchHits",
-  						       "Assemble pairs of phys signals into hits"));
-    });
-
-      manager.registerTask([](){
-      return new JPetTaskLoader("phys.hit", "phys.lor",
-  				new SDAMatchLORs("MatchLORs",
-  						       "Assemble pairs of hits into Lines Of Response"));
-    });
+  manager.useTask("SDARecoChargeCalc", "reco.sig.offsets", "reco.sig.offsets.charges");
+  manager.useTask("SDARecoAmplitudeCalc", "reco.sig.offsets.charges", "reco.sig.offsets.charges.ampl");
+  manager.useTask("SDARecoDrawAllCharges", "reco.sig.offsets.charges.ampl", "reco.sig.offsets.charges.ampl.draw");
+  manager.useTask("SDAMakePhysSignals", "reco.sig.offsets.charges.ampl", "phys.sig");
+  manager.useTask("SDAMatchHits", "phys.sig", "phys.hit");
+  manager.useTask("SDAMatchLORs", "phys.hit", "phys.lor");
 
 
-
-  manager.run();
+  manager.run(argc, argv);
 }

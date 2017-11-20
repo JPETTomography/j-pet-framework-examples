@@ -20,7 +20,7 @@
 #define _JPETANALYSISMODULE_SDACHARGE_H_
 
 #include <TCanvas.h>
-#include "../../JPetUserTask/JPetUserTask.h"
+#include "JPetUserTask/JPetUserTask.h"
 
 class SDARecoChargeCalc: public JPetUserTask
 {

@@ -20,7 +20,7 @@
 #define _JPETANALYSISMODULE_SDARECOOFFSETCALC_H_
 
 #include <TCanvas.h>
-#include "../../JPetUserTask/JPetUserTask.h"
+#include "JPetUserTask/JPetUserTask.h"
 class SDARecoOffsetsCalc: public JPetUserTask
 {
 public:

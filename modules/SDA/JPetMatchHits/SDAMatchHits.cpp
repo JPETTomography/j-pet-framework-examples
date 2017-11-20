@@ -36,20 +36,21 @@ bool SDAMatchHits::init()
 
 bool SDAMatchHits::exec()
 {
-  if (auto currSignal = dynamic_cast<const JPetPhysSignal* const>(fEvent)) {
-    if (fSignalsArray.empty()) {
-      fSignalsArray.push_back(*currSignal);
-    } else {
-      if (fSignalsArray[0].getTimeWindowIndex() == currSignal->getTimeWindowIndex()) {
-        fSignalsArray.push_back(*currSignal);
-      } else {
-        saveHits(createHits(fSignalsArray)); //create Hits from previously saved signals
-        fSignalsArray.clear();
-        fSignalsArray.push_back(*currSignal);
-      }
-    }
-    fCurrentEventNumber++;
-  }
+  /// @todo add it
+  //if (auto currSignal = dynamic_cast<const JPetPhysSignal* const>(fEvent)) {
+    //if (fSignalsArray.empty()) {
+      //fSignalsArray.push_back(*currSignal);
+    //} else {
+      //if (fSignalsArray[0].getTimeWindowIndex() == currSignal->getTimeWindowIndex()) {
+        //fSignalsArray.push_back(*currSignal);
+      //} else {
+        //saveHits(createHits(fSignalsArray)); //create Hits from previously saved signals
+        //fSignalsArray.clear();
+        //fSignalsArray.push_back(*currSignal);
+      //}
+    //}
+    //fCurrentEventNumber++;
+  //}
   return true;
 }
 

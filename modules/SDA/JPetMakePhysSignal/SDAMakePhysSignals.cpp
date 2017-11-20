@@ -16,22 +16,34 @@
 #include "../../tools/JPetRecoSignalTools/JPetRecoSignalTools.h"
 #include "SDAMakePhysSignals.h"
 
-SDAMakePhysSignals::SDAMakePhysSignals(const char* name) 
-: JPetUserTask(name)
+SDAMakePhysSignals::SDAMakePhysSignals(const char* name)
+  : JPetUserTask(name)
 {}
 
-SDAMakePhysSignals::~SDAMakePhysSignals(){}
-bool SDAMakePhysSignals::exec(){
-	if(auto signal=dynamic_cast<const JPetRecoSignal*const>(fEvent)){
-		JPetPhysSignal physSignal;
-		physSignal.setRecoSignal(*signal);
-		// NOTE: This module currently sets number of photoelectrons
-		// equal to charge of JPetRecoSignal
-		physSignal.setPhe(physSignal.getRecoSignal().getCharge() );
-		// @todo: replace by fOutputEvents
-		//		fWriter->write(physSignal);
-	}
-	return true;
+SDAMakePhysSignals::~SDAMakePhysSignals() {}
+
+bool SDAMakePhysSignals::init()
+{
+  return true;
 }
 
+
+bool SDAMakePhysSignals::exec()
+{
+  if (auto signal = dynamic_cast<const JPetRecoSignal* const>(fEvent)) {
+    JPetPhysSignal physSignal;
+    physSignal.setRecoSignal(*signal);
+    // NOTE: This module currently sets number of photoelectrons
+    // equal to charge of JPetRecoSignal
+    physSignal.setPhe(physSignal.getRecoSignal().getCharge() );
+    // @todo: replace by fOutputEvents
+    //		fWriter->write(physSignal);
+  }
+  return true;
+}
+
+bool SDAMakePhysSignals::terminate()
+{
+  return true;
+}
 

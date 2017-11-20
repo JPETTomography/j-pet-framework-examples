@@ -19,7 +19,7 @@
 #define _JPETANALYSISMODULE_DRAWALLOFFSETS_H_
 
 #include <TCanvas.h>
-#include "../../JPetUserTask/JPetUserTask.h"
+#include "JPetUserTask/JPetUserTask.h"
 
 class SDARecoDrawAllOffsets: public JPetUserTask{
 public:

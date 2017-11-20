@@ -32,20 +32,21 @@ bool SDAMatchLORs::init()
 }
 
 bool SDAMatchLORs::exec(){
-	if(auto currHit = dynamic_cast<const JPetHit*const>(fEvent)){
-		if (fHitsArray.empty()) {
-			fHitsArray.push_back(*currHit);
-		} else {
-			if (fHitsArray[0].getTimeWindowIndex() == currHit->getTimeWindowIndex()) {
-				fHitsArray.push_back(*currHit);
-			} else {
-				saveLORs(createLORs(fHitsArray)); //create LORs from Hits from the same Time Window
-				fHitsArray.clear();
-				fHitsArray.push_back(*currHit);
-			}
-		}
-		fCurrentEventNumber++;
-	}
+	/// @todo change it back
+	//if(auto currHit = dynamic_cast<const JPetHit*const>(fEvent)){
+		//if (fHitsArray.empty()) {
+			//fHitsArray.push_back(*currHit);
+		//} else {
+			//if (fHitsArray[0].getTimeWindowIndex() == currHit->getTimeWindowIndex()) {
+				//fHitsArray.push_back(*currHit);
+			//} else {
+				//saveLORs(createLORs(fHitsArray)); //create LORs from Hits from the same Time Window
+				//fHitsArray.clear();
+				//fHitsArray.push_back(*currHit);
+			//}
+		//}
+		//fCurrentEventNumber++;
+	//}
 	return true;
 }
 
