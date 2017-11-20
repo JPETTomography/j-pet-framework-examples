@@ -20,7 +20,7 @@
 #include <map>
 #include <boost/lexical_cast.hpp>
 #include "TF1.h"
-#include <JPetTask/JPetTask.h>
+#include <JPetUserTask/JPetUserTask.h>
 #include <JPetHit/JPetHit.h>
 #include <JPetEvent/JPetEvent.h>
 #include <JPetWriter/JPetWriter.h>
@@ -35,16 +35,14 @@ class JPetWriter;
 #	define override
 #endif
 
-class DeltaTFinder : public JPetTask{
+class DeltaTFinder : public JPetUserTask{
 public:
-	DeltaTFinder(const char * name, const char * description);
+	DeltaTFinder(const char * name);
 	virtual ~DeltaTFinder(){};
-	virtual void init(const JPetTaskInterface::Options& opts)override;
-	virtual void exec()override;
-	virtual void terminate()override;
-	virtual void setWriter(JPetWriter* writer)override;
+	virtual bool init()override;
+	virtual bool exec()override;
+	virtual bool terminate()override;
 protected:
-	void setParamManager( JPetParamManager* paramManager);
 	static std::vector<std::string> split(const std::string inString);
 	static std::pair<int, std::string> retrievePositionAndFileName(const std::string inString);
 	const char * formatUniqueSlotDescription(const JPetBarrelSlot & slot, int threshold,const char * prefix);
@@ -52,8 +50,6 @@ protected:
 	JPetGeomMapping* fBarrelMap = nullptr;
 	JPetParamManager* fParamManager = nullptr;
   	bool fSaveControlHistos = true;
-	JPetWriter* fWriter;
-	JPetReader* fReader;
 	const std::string fInput_file_key = "inputFile";
 	const std::string fPosition = "DeltaTFinder_Position";
 	const std::string fNumberOfPositionsKey = "DeltaTFinder_numberOfPositions";
