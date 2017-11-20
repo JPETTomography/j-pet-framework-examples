@@ -39,6 +39,8 @@ script:
     - make
     - cd ../VelocityCalibration
     - make
+    - cd ../NewAnalysisTemplate
+    - make
 notifications:
   email:
     - aleksander.gajos@doctoral.uj.edu.pl
