@@ -40,8 +40,13 @@ ScopeLoaderExample/cfg/data/1/
 
 LargeBarrelExample
 
-*.txt
-
 build/
 
 *.json
+
+unitTestData/*
+AnalysisExample/*.root.old
+CalibrationFiles/*
+LargeBarrelAnalysisExtended/*.txt
+!LargeBarrelAnalysisExtended/CMakeLists.txt
+ScopeLoaderExample/cfg/
