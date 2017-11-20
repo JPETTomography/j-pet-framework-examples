@@ -1,0 +1,41 @@
+language: cpp
+sudo: required
+dist: trusty
+compiler:
+- gcc
+os:
+- linux
+addons:
+  apt:
+    packages:
+      - sshpass
+install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y git
+  - sudo apt-get install -y libboost-all-dev 
+  - sudo apt-get install -y libpqxx-3.1 libpqxx3-dev 
+  - sudo apt-get install -y cmake 
+  - sudo apt-get install -y libtinyxml2-dev
+  - sudo apt-get install -y doxygen
+  - sudo apt-get install -y root-system
+  - sudo apt-get install -y libfftw3-3 libfftw3-dev
+script:
+    - mkdir build
+    - cd build
+    - cmake ..
+    - cd LargeBarrelAnalysisExtended
+    - make
+    - wget http://sphinx.if.uj.edu.pl/~alek/framework_integration_tests/dabc_17025151847.hld
+    - wget http://sphinx.if.uj.edu.pl/~alek/framework_integration_tests/setupRun3.json
+    - ./LargeBarrelAnalysisExtended.x -t hld -f dabc_17025151847.hld -l setupRun3.json -i 3 -r 0 100
+    - mkdir outdir
+    - ./LargeBarrelAnalysisExtended.x -t hld -f dabc_17025151847.hld -l setupRun3.json -i 3 -r 0 100 -o outdir
+    - ./LargeBarrelAnalysisExtended.x -t root -f dabc_17025151847.hld.root -l setupRun3.json -i 3 -r 0 100
+    - sed -i 's/manager.useTask("TimeWindowCreator", "hld", "tslot.raw");//' ../../LargeBarrelAnalysisExtended/main.cpp
+    - sed -i 's/manager.useTask("TimeCalibLoader", "tslot.raw", "tslot.calib");//' ../../LargeBarrelAnalysisExtended/main.cpp
+    - make
+    - ./LargeBarrelAnalysisExtended.x -t root -f dabc_17025151847.tslot.calib.root   -r 0 100
+notifications:
+  email:
+    - aleksander.gajos@doctoral.uj.edu.pl
+    - wojciech.krzemien@ncbj.gov.pl
