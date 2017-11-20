@@ -19,7 +19,7 @@
 
 #include <map>
 #include <string>
-#include "../j-pet-framework/JPetPM/JPetPM.h" /// for JPetPM::Side
+#include "JPetPM/JPetPM.h" /// for JPetPM::Side
 
 /// POD helper structure that stores time calibration parameters for one element.
 /// It is not initialized by default!!! User is responsible for the proper initialization.
