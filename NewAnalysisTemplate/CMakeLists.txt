@@ -11,7 +11,7 @@ cmake_minimum_required(VERSION 2.6)
 ### when creating a new project,
 ### set this section appropriately for your project
 ######################################################################
-set(projectName TimeCalibration)
+set(projectName NewProjectName)
 
 # files to be copied from some other example directory, if any
 set(USE_AUX_FILES_FROM LargeBarrelAnalysis)
@@ -75,9 +75,6 @@ list(APPEND SOURCES ${use_modules_from}/EventFinder.cpp)
 list(APPEND HEADERS ${use_modules_from}/EventCategorizer.h)
 list(APPEND SOURCES ${use_modules_from}/EventCategorizer.cpp)
 
-message(STATUS "S: " ${SOURCES})
-message(STATUS "H: " ${HEADERS})
-
 include_directories(${Framework_INCLUDE_DIRS})
 add_definitions(${Framework_DEFINITIONS})
 
@@ -86,15 +83,6 @@ target_link_libraries(${projectBinary} JPetFramework)
 
 add_custom_target(clean_data_${projectName}
   COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root)
-
-# copy the DB config file to an expected location
-set(db_config_dir ${CMAKE_CURRENT_BINARY_DIR}/../DBConfig)
-
-add_custom_command(TARGET ${projectBinary}
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND}
-  ARGS -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/../j-pet-framework/DBHandler/Config ${db_config_dir}
-)
 
 set(copy_depends) #create variable for list with depends files path
 

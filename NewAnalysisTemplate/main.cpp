@@ -13,20 +13,18 @@
  *  @file main.cpp
  */
 
-#include <DBHandler/HeaderFiles/DBHandler.h>
 #include <JPetManager/JPetManager.h>
 #include "../LargeBarrelAnalysis/TimeWindowCreator.h"
 #include "../LargeBarrelAnalysis/TimeCalibLoader.h"
 #include "../LargeBarrelAnalysis/SignalFinder.h"
 #include "../LargeBarrelAnalysis/SignalTransformer.h"
 #include "../LargeBarrelAnalysis/HitFinder.h"
-#include "DeltaTFinder.h"
-
+#include "../LargeBarrelAnalysis/EventFinder.h"
+#include "../LargeBarrelAnalysis/EventCategorizer.h"
 using namespace std;
 
 int main(int argc, const char* argv[])
 {
-
   JPetManager& manager = JPetManager::getManager();
 
   manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
@@ -34,15 +32,16 @@ int main(int argc, const char* argv[])
   manager.registerTask<SignalFinder>("SignalFinder");
   manager.registerTask<SignalTransformer>("SignalTransformer"); 
   manager.registerTask<HitFinder>("HitFinder"); 
-  manager.registerTask<DeltaTFinder>("DeltaTFinder"); 
+  manager.registerTask<EventFinder>("EventFinder");
+  manager.registerTask<EventCategorizer>("EventCategorizer");
   
   manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
   manager.useTask("TimeCalibLoader", "tslot.raw", "tslot.calib");
   manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
   manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
   manager.useTask("HitFinder", "phys.sig", "hits");
-  manager.useTask("DeltaTFinder", "hits", "deltaT");
-
-  manager.run(argc, argv);
+  manager.useTask("EventFinder", "hits", "unk.evt");
+  manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
   
+  manager.run(argc, argv);
 }
