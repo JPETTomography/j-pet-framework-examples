@@ -28,7 +28,8 @@ LOCAL_TEST_CHECKSUM_FILE=$TEST_OUTPUT/$TEST_CHECKSUM_FILE
 # -x create subdirectories,
 # -nH  Disable generation of host-prefixed directories (so save only subdirectories and not full path)
 # --cut-dirs=1 ignore given level of directories (i.e. remove framework from path)
-declare -a WGET_FLAGS=(-x -nH --cut-dirs=1)
+# -nv not verbose
+declare -a WGET_FLAGS=(-x -nH -nv --cut-dirs=1)
 
 # We want the directory structure to be flatter than on sphinx, so here is some magic allowing for that.
 ln -s $BASE_PATH $BASE_PATH/Examples

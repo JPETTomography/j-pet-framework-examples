@@ -31,11 +31,11 @@ set(projectBinary ${projectName}.x)
 
 project(${projectName} CXX) # using only C++
 
-file(GLOB HEADERS *.h ../LargeBarrelAnalysisExtended/*.h)
-file(GLOB SOURCES *.cpp ../LargeBarrelAnalysisExtended/*.cpp)
-file(GLOB LBAE_MAIN_CPP ../LargeBarrelAnalysisExtended/main.cpp)
+file(GLOB HEADERS *.h ../LargeBarrelAnalysis/*.h)
+file(GLOB SOURCES *.cpp ../LargeBarrelAnalysis/*.cpp)
+file(GLOB LBAE_MAIN_CPP ../LargeBarrelAnalysis/main.cpp)
 file(GLOB MAIN_CPP main.cpp)
-file(GLOB UNIT_TEST_LBAE_SOURCES ../LargeBarrelAnalysisExtended/*Test.cpp)
+file(GLOB UNIT_TEST_LBAE_SOURCES ../LargeBarrelAnalysis/*Test.cpp)
 file(GLOB ESTVEL_SOURCE estimateVelocity.cpp)
 
 file(GLOB SOURCES_WITHOUT_MAIN *.cpp)

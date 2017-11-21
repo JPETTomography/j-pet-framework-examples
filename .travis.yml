@@ -23,21 +23,23 @@ script:
     - mkdir build
     - cd build
     - cmake ..
-    - cd LargeBarrelAnalysisExtended
+    - cd LargeBarrelAnalysis
     - make
     - wget http://sphinx.if.uj.edu.pl/~alek/framework_integration_tests/dabc_17025151847.hld
     - wget http://sphinx.if.uj.edu.pl/~alek/framework_integration_tests/setupRun3.json
-    - ./LargeBarrelAnalysisExtended.x -t hld -f dabc_17025151847.hld -l setupRun3.json -i 3 -r 0 100
+    - ./LargeBarrelAnalysis.x -t hld -f dabc_17025151847.hld -l setupRun3.json -i 3 -r 0 100
     - mkdir outdir
-    - ./LargeBarrelAnalysisExtended.x -t hld -f dabc_17025151847.hld -l setupRun3.json -i 3 -r 0 100 -o outdir
-    - ./LargeBarrelAnalysisExtended.x -t root -f dabc_17025151847.hld.root -l setupRun3.json -i 3 -r 0 100
-    - sed -i 's/manager.useTask("TimeWindowCreator", "hld", "tslot.raw");//' ../../LargeBarrelAnalysisExtended/main.cpp
-    - sed -i 's/manager.useTask("TimeCalibLoader", "tslot.raw", "tslot.calib");//' ../../LargeBarrelAnalysisExtended/main.cpp
+    - ./LargeBarrelAnalysis.x -t hld -f dabc_17025151847.hld -l setupRun3.json -i 3 -r 0 100 -o outdir
+    - ./LargeBarrelAnalysis.x -t root -f dabc_17025151847.hld.root -l setupRun3.json -i 3 -r 0 100
+    - sed -i 's/manager.useTask("TimeWindowCreator", "hld", "tslot.raw");//' ../../LargeBarrelAnalysis/main.cpp
+    - sed -i 's/manager.useTask("TimeCalibLoader", "tslot.raw", "tslot.calib");//' ../../LargeBarrelAnalysis/main.cpp
     - make
-    - ./LargeBarrelAnalysisExtended.x -t root -f dabc_17025151847.tslot.calib.root   -r 0 100
+    - ./LargeBarrelAnalysis.x -t root -f dabc_17025151847.tslot.calib.root   -r 0 100
     - cd ../TimeCalibration
     - make
     - cd ../VelocityCalibration
+    - make
+    - cd ../NewAnalysisTemplate
     - make
 notifications:
   email:
