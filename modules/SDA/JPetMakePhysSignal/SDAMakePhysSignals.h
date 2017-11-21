@@ -20,7 +20,7 @@
 #define _JPETANALYSISMODULE_SDAMAKEPHYSSIGNALS_H_
 
 #include <TCanvas.h>
-#include "../../JPetUserTask/JPetUserTask.h"
+#include "JPetUserTask/JPetUserTask.h"
 
 class SDAMakePhysSignals: public JPetUserTask
 {

@@ -19,9 +19,9 @@
 #define _JPETANALYSISMODULE_SDAMATCHLORS_H_
 
 #include <TCanvas.h>
-#include "../../JPetUserTask/JPetUserTask.h"
-#include "../../JPetLOR/JPetLOR.h"
-#include "../../JPetHit/JPetHit.h"
+#include "JPetUserTask/JPetUserTask.h"
+#include "JPetLOR/JPetLOR.h"
+#include "JPetHit/JPetHit.h"
 
 class SDAMatchLORs: public JPetUserTask
 {
