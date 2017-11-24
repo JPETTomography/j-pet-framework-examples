@@ -20,7 +20,8 @@
 using namespace std;
 
 JPetHit HitFinderTools::createDummyRefDefHit(const JPetPhysSignal& signalB,
-					     const std::map<int, std::vector<double>> velMap){
+    const std::map<int, std::vector<double>> velMap)
+{
 
   JPetHit hit;
   hit.setSignalB(signalB);
@@ -38,8 +39,9 @@ JPetHit HitFinderTools::createDummyRefDefHit(const JPetPhysSignal& signalB,
   hit.setPosY(radius * std::sin(theta));
 
   auto search = velMap.find(hit.getBarrelSlot().getID());
-  if(search != velMap.end()) hit.setPosZ(-1000000.0);
-  
+  if (search != velMap.end()) hit.setPosZ(-1000000.0);
+
+  return hit;
 }
 
 vector<JPetHit> HitFinderTools::createHits(JPetStatistics& stats,
@@ -62,13 +64,13 @@ vector<JPetHit> HitFinderTools::createHits(JPetStatistics& stats,
     if (sideA.size() == 0 && sideB.size() > 0) {
       auto scinID = sideB.at(0).getPM().getScin().getID();
       auto layerID = sideB.at(0).getBarrelSlot().getLayer().getID();
-      if (scinID == 193 && layerID == 4){
-	for (auto signalB : sideB) {
-	  hits.push_back(createDummyRefDefHit(signalB, velMap));
-	}
+      if (scinID == 193 && layerID == 4) {
+        for (auto signalB : sideB) {
+          hits.push_back(createDummyRefDefHit(signalB, velMap));
+        }
       }
     }
-    
+
     if (sideA.size() > 0 && sideB.size() > 0) {
 
       std::sort(sideA.begin(),
