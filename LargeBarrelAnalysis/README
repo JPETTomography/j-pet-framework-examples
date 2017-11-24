@@ -38,7 +38,7 @@ The script run.sh contains an example of running the analysis. Note, however, th
 the user must fill the input data file name and the number of run
 
 
-Author
+Authors
 ------------
-Aleksander Gajos
+Aleksander Gajos, Krzysztof Kacprzak, Nikodem Krawczyk
 Please report any bugs and suggestions of corrections to: <alek.gajos@gmail.com>
