@@ -28,6 +28,7 @@ int main(int argc, const char* argv[])
 {
   JPetManager& manager = JPetManager::getManager();
 
+  manager.registerTask<SDARecoOffsetsCalc>("SDARecoOffsetsCalc");
   manager.registerTask<SDARecoChargeCalc>("SDARecoChargeCalc");
   manager.registerTask<SDARecoAmplitudeCalc>("SDARecoAmplitudeCalc");
   manager.registerTask<SDARecoDrawAllCharges>("SDARecoDrawAllCharges");
@@ -35,13 +36,13 @@ int main(int argc, const char* argv[])
   manager.registerTask<SDAMatchHits>("SDAMatchHits");
   manager.registerTask<SDAMatchLORs>("SDAMatchLORs");
 
+  manager.useTask("SDARecoOffsetsCalc", "reco.sig", "reco.sig.offsets");
   manager.useTask("SDARecoChargeCalc", "reco.sig.offsets", "reco.sig.offsets.charges");
   manager.useTask("SDARecoAmplitudeCalc", "reco.sig.offsets.charges", "reco.sig.offsets.charges.ampl");
   manager.useTask("SDARecoDrawAllCharges", "reco.sig.offsets.charges.ampl", "reco.sig.offsets.charges.ampl.draw");
   manager.useTask("SDAMakePhysSignals", "reco.sig.offsets.charges.ampl", "phys.sig");
   manager.useTask("SDAMatchHits", "phys.sig", "phys.hit");
   manager.useTask("SDAMatchLORs", "phys.hit", "phys.lor");
-
 
   manager.run(argc, argv);
 }

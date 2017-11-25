@@ -10,6 +10,8 @@ cmake_minimum_required(VERSION 2.6)
 set(projectName ScopeAnalysis)
 
 set(AUXILLIARY_FILES
+  run.sh
+  README
   )
 
 ######################################################################

@@ -30,9 +30,9 @@ public:
   virtual bool exec()override;
   virtual bool terminate() override;
 private:
-  int fCurrentEventNumber;
-  double fOffset;
-  int fBadSignals;
+  double fOffset = 0;
+  int fBadSignals = 0;
+  int fCurrentEventNumber = 0; 
 };
 
 #endif

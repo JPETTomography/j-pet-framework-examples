@@ -24,20 +24,26 @@ SDAMakePhysSignals::~SDAMakePhysSignals() {}
 
 bool SDAMakePhysSignals::init()
 {
+  fOutputEvents = new JPetTimeWindow("JPetPhysSignal");
   return true;
 }
 
 
 bool SDAMakePhysSignals::exec()
 {
-  if (auto signal = dynamic_cast<const JPetRecoSignal* const>(fEvent)) {
-    JPetPhysSignal physSignal;
-    physSignal.setRecoSignal(*signal);
-    // NOTE: This module currently sets number of photoelectrons
-    // equal to charge of JPetRecoSignal
-    physSignal.setPhe(physSignal.getRecoSignal().getCharge() );
-    // @todo: replace by fOutputEvents
-    //		fWriter->write(physSignal);
+  if (auto oldTimeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
+    auto n = oldTimeWindow->getNumberOfEvents();
+    for (uint i = 0; i < n; ++i) {
+      auto signal = dynamic_cast<const JPetRecoSignal&>(oldTimeWindow->operator[](i));
+      JPetPhysSignal physSignal;
+      physSignal.setRecoSignal(signal);
+      // NOTE: This module currently sets number of photoelectrons
+      // equal to charge of JPetRecoSignal
+      physSignal.setPhe(physSignal.getRecoSignal().getCharge() );
+      fOutputEvents->add<JPetPhysSignal>(physSignal);
+    }
+  } else {
+    return false;
   }
   return true;
 }
@@ -46,4 +52,3 @@ bool SDAMakePhysSignals::terminate()
 {
   return true;
 }
-
