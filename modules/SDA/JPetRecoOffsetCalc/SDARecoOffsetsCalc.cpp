@@ -24,26 +24,32 @@ SDARecoOffsetsCalc::~SDARecoOffsetsCalc() {}
 
 bool SDARecoOffsetsCalc::init()
 {
-  fBadSignals = 0;
+  fOutputEvents = new JPetTimeWindow("JPetRecoSignal");
   return true;
 }
 
 bool SDARecoOffsetsCalc::exec()
 {
-  if (auto signal = dynamic_cast<const JPetRecoSignal* const>(fEvent)) {
-    fOffset = JPetRecoSignalTools::calculateOffset(*signal);
-    if ( fOffset == JPetRecoSignalTools::ERRORS::badOffset ) {
-      WARNING( Form("Problem with calculating fOffset for event: %d", fCurrentEventNumber) );
-      JPetRecoSignalTools::saveBadSignalIntoRootFile(*signal, fBadSignals, "badOffsets.root");
-      fBadSignals++;
-    } else {
-      auto signalWithOffset = *signal;
-      signalWithOffset.setOffset(fOffset);
-      // @todo: replace with fOutputEvents
-      //      fWriter->write(signalWithOffset);
+  if (auto oldTimeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
+    auto n = oldTimeWindow->getNumberOfEvents();
+    for (uint i = 0; i < n; ++i) {
+      auto signal = dynamic_cast<const JPetRecoSignal&>(oldTimeWindow->operator[](i));
+      fOffset = JPetRecoSignalTools::calculateOffset(signal);
+      if ( fOffset == JPetRecoSignalTools::ERRORS::badOffset ) {
+        WARNING( Form("Problem with calculating fOffset for event: %d", fCurrentEventNumber) );
+        JPetRecoSignalTools::saveBadSignalIntoRootFile(signal, fBadSignals, "badOffsets.root");
+        fBadSignals++;
+      } else {
+        auto signalWithOffset = signal;
+        signalWithOffset.setOffset(fOffset);
+        fOutputEvents->add<JPetRecoSignal>(signalWithOffset);
+      }
+      fCurrentEventNumber++;
     }
-    fCurrentEventNumber++;
+  } else {
+    return false;
   }
+
   return true;
 }
 

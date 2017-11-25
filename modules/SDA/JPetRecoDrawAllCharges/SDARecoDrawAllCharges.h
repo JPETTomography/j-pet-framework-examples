@@ -20,7 +20,7 @@
 
 #include <map>
 #include <TCanvas.h>
-#include "../../JPetUserTask/JPetUserTask.h"
+#include "JPetUserTask/JPetUserTask.h"
 
 class SDARecoDrawAllCharges: public JPetUserTask
 {

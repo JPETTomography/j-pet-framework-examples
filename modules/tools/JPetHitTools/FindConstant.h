@@ -16,7 +16,7 @@
 #ifndef FINDCONSTANT_H
 #define FINDCONSTANT_H
 
-#include "../../JPetLoggerInclude.h"
+#include "JPetLoggerInclude.h"
 #include <vector>
 #include <TString.h>
 #include <TF1.h>

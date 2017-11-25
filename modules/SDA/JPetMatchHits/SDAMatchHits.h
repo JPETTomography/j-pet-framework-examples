@@ -21,9 +21,9 @@
 
 #include <map>
 #include <TCanvas.h>
-#include "../../JPetUserTask/JPetUserTask.h"
-#include "../../JPetHit/JPetHit.h"
-#include "../../JPetPhysSignal/JPetPhysSignal.h"
+#include "JPetUserTask/JPetUserTask.h"
+#include "JPetHit/JPetHit.h"
+#include "JPetPhysSignal/JPetPhysSignal.h"
 
 class SDAMatchHits: public JPetUserTask
 {

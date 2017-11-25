@@ -19,7 +19,7 @@
 #ifndef _JPETANALYSISMODULE_SDAAMPLITIDE_H_
 #define _JPETANALYSISMODULE_SDAAMPLITIDE_H_
 
-#include "../../JPetUserTask/JPetUserTask.h"
+#include "JPetUserTask/JPetUserTask.h"
 
 class SDARecoAmplitudeCalc: public JPetUserTask
 {

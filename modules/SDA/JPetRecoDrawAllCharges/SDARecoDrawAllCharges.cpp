@@ -24,26 +24,36 @@ SDARecoDrawAllCharges::~SDARecoDrawAllCharges() {}
 
 bool SDARecoDrawAllCharges::init()
 {
+  DEBUG("bool SDARecoDrawAllCharges::init");
   const auto& paramBank = getParamBank();
   fNumberOfPMTs = paramBank.getPMsSize();
-  cout << "Found " << fNumberOfPMTs << " PMTs in paramBank" << endl;
   for (const auto& id_pm_pair : getParamBank().getPMs() ) {
     fIDs.push_back( id_pm_pair.first);
     std::vector<double> k;
     fCharges[id_pm_pair.first] = k;
   }
+  fOutputEvents = new JPetTimeWindow("JPetRecoSignal");
   return true;
 }
 
 bool SDARecoDrawAllCharges::exec()
 {
-  if (auto signal = dynamic_cast<const JPetRecoSignal* const>(fEvent))
-    fCharges[signal->getPM().getID()].push_back(signal->getCharge());
+  DEBUG("bool SDARecoDrawAllCharges::exec");
+  if (auto oldTimeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
+    auto n = oldTimeWindow->getNumberOfEvents();
+    for (uint i = 0; i < n; ++i) {
+      auto signal = dynamic_cast<const JPetRecoSignal&>(oldTimeWindow->operator[](i));
+      fCharges[signal.getPM().getID()].push_back(signal.getCharge());
+    }
+  } else {
+    return false;
+  }
   return true;
 }
 
 bool SDARecoDrawAllCharges::terminate()
 {
+  DEBUG("bool SDARecoDrawAllCharges::terminate");
   auto c1 = new TCanvas();
   //looking for max and min value for all offsets
   double maximum = -1.e20;
