@@ -39,8 +39,11 @@ Please see the file called INSTALL.
 Authors
 -------
 
-J-PET Analysis Framework is being developed by Wojciech Krzemien, Aleksander Gajos, Szymon Niedźwiecki, Oleksandr Rundel, Tomasz Kisielewski, Nikodem Krawczyk and Klara Muzalewska.
-The former developers are Karol Stola, Damian Trybek and Andrzej Gruntowski.
+J-PET Analysis Framework Examples are being maintained by Aleksander Gajos, Wojciech Krzemien and Kamil Rakoczy.  
+Contributors: Szymon Niedźwiecki, Oleksandr Rundel, Tomasz Kisielewski, Nikodem Krawczyk, Klara Muzalewska, Monika Pawlik-Niedźwiecka, Kamil Dulski, Michał Silarski, Magdalena
+Skurzok, Krzysztof Kacprzak.
+
+Authors of the J-Pet Analysis Framework core are listed in the README of the Framework repository.
 
 
 Bug Reporting & Contact
