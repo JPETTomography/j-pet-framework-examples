@@ -30,26 +30,26 @@ bool SDAMatchHits::init()
 {
   fMatched = 0;
   fCurrentEventNumber = 0;
+  fOutputEvents = new JPetTimeWindow("JPetHit");
 
   return true;
 }
 
 bool SDAMatchHits::exec()
 {
-  if (auto currSignal = dynamic_cast<const JPetPhysSignal* const>(fEvent)) {
-    if (fSignalsArray.empty()) {
-      fSignalsArray.push_back(*currSignal);
-    } else {
-      if (fSignalsArray[0].getTimeWindowIndex() == currSignal->getTimeWindowIndex()) {
-        fSignalsArray.push_back(*currSignal);
-      } else {
-        saveHits(createHits(fSignalsArray)); //create Hits from previously saved signals
-        fSignalsArray.clear();
-        fSignalsArray.push_back(*currSignal);
-      }
+  fSignalsArray.clear();
+  if (auto oldTimeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
+    auto n = oldTimeWindow->getNumberOfEvents();
+    for (uint i = 0; i < n; ++i) {
+      auto signal = dynamic_cast<const JPetPhysSignal&>(oldTimeWindow->operator[](i));
+      fSignalsArray.push_back(signal);
     }
     fCurrentEventNumber++;
+    saveHits(createHits(fSignalsArray));
+  } else {
+    return false;
   }
+
   return true;
 }
 
@@ -122,8 +122,7 @@ std::vector<JPetHit> SDAMatchHits::matchHitsWithinSlot(std::vector<JPetPhysSigna
 void SDAMatchHits::saveHits(std::vector<JPetHit> hits)
 {
   fMatched += hits.size();
-  for (auto hit : hits)
-    // @todo: replace with fOutputEvents
-    ;
-    //    fWriter->write(hit);
+  for (auto hit : hits) {
+    fOutputEvents->add<JPetHit>(hit);
+  }
 }

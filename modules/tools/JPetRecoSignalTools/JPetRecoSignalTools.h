@@ -18,7 +18,7 @@
 #ifndef JPETRECOSIGNALTOOLS_H
 #define JPETRECOSIGNALTOOLS_H
 
-#include "../../JPetRecoSignal/JPetRecoSignal.h"
+#include "JPetRecoSignal/JPetRecoSignal.h"
 #include <vector>
 #include <string>
 

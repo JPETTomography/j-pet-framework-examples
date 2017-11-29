@@ -27,25 +27,32 @@ SDARecoAmplitudeCalc::~SDARecoAmplitudeCalc() {}
 bool SDARecoAmplitudeCalc::init()
 {
   INFO(Form("Starting amplitude calculation"));
+  fOutputEvents = new JPetTimeWindow("JPetRecoSignal");
   fBadSignals = 0;
+  fCurrentEventNumber = 0;
   return true;
 }
 
 bool SDARecoAmplitudeCalc::exec()
 {
-  if (auto signal = dynamic_cast<const JPetRecoSignal* const>(fEvent)) {
-    double amplitude = JPetRecoSignalTools::calculateAmplitude(*signal);
-    if (amplitude == JPetRecoSignalTools::ERRORS::badAmplitude) {
-      WARNING( Form("Something went wrong when calculating charge for event: %d", fCurrentEventNumber) );
-      JPetRecoSignalTools::saveBadSignalIntoRootFile(*signal, fBadSignals, "badAmplitudes.root");
-      fBadSignals++;
-    } else {
-      auto signalWithAmplitude = *signal;
-      signalWithAmplitude.setAmplitude(amplitude);
-      // @todo: replace by fOutputEvents
-      //      fWriter->write(signalWithAmplitude);
+  if (auto oldTimeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
+    auto n = oldTimeWindow->getNumberOfEvents();
+    for (uint i = 0; i < n; ++i) {
+      auto signal = dynamic_cast<const JPetRecoSignal&>(oldTimeWindow->operator[](i));
+      double amplitude = JPetRecoSignalTools::calculateAmplitude(signal);
+      if (amplitude == JPetRecoSignalTools::ERRORS::badAmplitude) {
+        WARNING( Form("Something went wrong when calculating charge for event: %d", fCurrentEventNumber) );
+        JPetRecoSignalTools::saveBadSignalIntoRootFile(signal, fBadSignals, "badAmplitudes.root");
+        fBadSignals++;
+      } else {
+        auto signalWithAmplitude = signal;
+        signalWithAmplitude.setAmplitude(amplitude);
+        fOutputEvents->add<JPetRecoSignal>(signalWithAmplitude);
+      }
+      fCurrentEventNumber++;
     }
-    fCurrentEventNumber++;
+  } else {
+    return false;
   }
   return true;
 }
@@ -53,7 +60,10 @@ bool SDARecoAmplitudeCalc::exec()
 bool SDARecoAmplitudeCalc::terminate()
 {
   int fEventNb = fCurrentEventNumber;
-  double goodPercent = (fEventNb - fBadSignals) * 100.0 / fEventNb;
+  double goodPercent = 0;
+  if (fEventNb != 0) {
+    goodPercent = (fEventNb - fBadSignals) * 100.0 / fEventNb;
+  }
   INFO(Form("Amplitude calculation complete \nAmount of bad signals: %d \n %f %% of data is good" , fBadSignals, goodPercent) );
   return true;
 }

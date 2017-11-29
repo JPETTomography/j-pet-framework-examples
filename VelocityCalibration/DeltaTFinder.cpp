@@ -17,22 +17,18 @@
  */
 
 #include <iostream>
-
+#include <JPetOptionsTools/JPetOptionsTools.h>
 #include "DeltaTFinder.h"
 
 
 using namespace std;
+using namespace jpet_options_tools;
 
-DeltaTFinder::DeltaTFinder(const char * name, const char * description):JPetTask(name, description){
+DeltaTFinder::DeltaTFinder(const char * name):JPetUserTask(name){
 	
 }
 
-void DeltaTFinder::setParamManager( JPetParamManager* paramManager )
-{
-	fParamManager = paramManager;
-}
-
-void DeltaTFinder::init(const JPetTaskInterface::Options& opts){
+bool DeltaTFinder::init(){
 
 	INFO("DeltaT extraction started.");
 
@@ -61,37 +57,39 @@ void DeltaTFinder::init(const JPetTaskInterface::Options& opts){
 	
 	std::string file_path = "";
 
-	if (opts.count( fInput_file_key )) {
-			file_path = opts.at(fInput_file_key);
+	if (isOptionSet(fParams.getOptions(), fInput_file_key )) {
+	  file_path = getOptionAsString(fParams.getOptions(), fInput_file_key );
 	}
 
 	std::string sPos = "";
 
-	if( opts.count( fNumberOfPositionsKey ) )
-		sPos = opts.at( fNumberOfPositionsKey );
+	if( isOptionSet(fParams.getOptions(), fNumberOfPositionsKey ) ){
+	  sPos = getOptionAsString(fParams.getOptions(), fNumberOfPositionsKey);
+	}
 
 	int positions = std::stoi(sPos);
   
 	for(int i = 1; i <= positions;i++)
 	{
-		std::string pos = fPosition;
-		pos+= boost::lexical_cast<std::string>(i);
-
-		if (opts.count(pos)) {
-			auto res = retrievePositionAndFileName( opts.at(pos).c_str() );
-			if( file_path == res.second )
-				fPos = res.first;
-		}
+	  std::string pos = fPosition;
+	  pos+= boost::lexical_cast<std::string>(i);
+	  
+	  if (isOptionSet(fParams.getOptions(), pos)) {
+	    auto res = retrievePositionAndFileName(getOptionAsString(fParams.getOptions(), pos));
+	    if( file_path == res.second )
+	      fPos = res.first;
+	  }
 	}
 
 	std::string fOutputPath_key = "outputPath";
 
-	if (opts.count( fOutputPath_key )) 
-			fOutputPath = opts.at( fOutputPath_key );
-
-	if (opts.count( fVelocityCalibFile_key ) )
-			fOutputVelocityCalibName = opts.at( fVelocityCalibFile_key );
-
+	if (isOptionSet(fParams.getOptions(),  fOutputPath_key )) 
+	  fOutputPath = getOptionAsString(fParams.getOptions(),  fOutputPath_key );
+	
+	if (isOptionSet(fParams.getOptions(), fVelocityCalibFile_key ) )
+	  fOutputVelocityCalibName = getOptionAsString(fParams.getOptions(),  fOutputPath_key );
+	
+	return true;
 }
 
 const char* DeltaTFinder::formatUniqueSlotDescription(const JPetBarrelSlot & slot, int threshold, const char * prefix = ""){
@@ -105,13 +103,17 @@ const char* DeltaTFinder::formatUniqueSlotDescription(const JPetBarrelSlot & slo
 	);
 }
 
-void DeltaTFinder::exec(){
+bool DeltaTFinder::exec(){
 
-	if(auto hit = dynamic_cast<const JPetHit*const>(getEvent()))
-		fillHistosForHit(*hit);
+  if(auto hit = dynamic_cast<const JPetHit*const>(fEvent)){
+    fillHistosForHit(*hit);
+  }else{
+    return false;
+  }
+  return true;
 }
 
-void DeltaTFinder::terminate(){
+bool DeltaTFinder::terminate(){
 	std::ofstream outStream;
 	outStream.open( (fOutputPath+fOutputVelocityCalibName).c_str() ,std::ios_base::app);
 	std::map<int, char> thresholdConversionMap;
@@ -149,9 +151,9 @@ void DeltaTFinder::terminate(){
 	delete fBarrelMap;
 
 	INFO("DeltaT extraction ended.");
-}
 
-void DeltaTFinder::setWriter(JPetWriter* writer) { fWriter = writer; }
+	return true;
+}
 
 void DeltaTFinder::fillHistosForHit(const JPetHit & hit){
 	auto lead_times_A = hit.getSignalA().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading);

@@ -13,54 +13,37 @@
  *  @file main.cpp
  */
 
-#include <DBHandler/HeaderFiles/DBHandler.h>
 #include <JPetManager/JPetManager.h>
-#include <JPetTaskLoader/JPetTaskLoader.h>
-#include "TaskA.h"
-#include "TaskB1.h"
-#include "TaskC.h"
-#include "TaskD.h"
-#include "TaskE.h"
+#include "TimeWindowCreator.h"
+#include "TimeCalibLoader.h"
+#include "SignalFinder.h"
+#include "SignalTransformer.h"
+#include "HitFinder.h"
+#include "EventFinder.h"
+#include "EventCategorizer.h"
 
 using namespace std;
 
-int main(int argc, char* argv[])
+int main(int argc, const char* argv[])
 {
-  DB::SERVICES::DBHandler::createDBConnection("../DBConfig/configDB.cfg");
+
   JPetManager& manager = JPetManager::getManager();
-  manager.parseCmdLine(argc, argv);
 
-  // Here create all analysis modules to be used:
-
-  manager.registerTask([](){
-      return new JPetTaskLoader("hld", "tslot.raw",
-  				  new TaskA("Module A: Unp to TSlot Raw",
-  					    "Process unpacked HLD file into a tree of JPetTSlot objects"));
-    });
+  manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
+  manager.registerTask<TimeCalibLoader>("TimeCalibLoader");
+  manager.registerTask<SignalFinder>("SignalFinder");
+  manager.registerTask<SignalTransformer>("SignalTransformer"); 
+  manager.registerTask<HitFinder>("HitFinder"); 
+  manager.registerTask<EventFinder>("EventFinder"); 
+  manager.registerTask<EventCategorizer>("EventCategorizer"); 
   
-  manager.registerTask([](){
-      return new JPetTaskLoader("tslot.raw", "raw.sig",
-  				new TaskB1("Module B1: Make TOT histos and assemble signals",
-					   "Assemble signals and create TOT historgrams"));
-    });
-
-   manager.registerTask([](){ 
-       return new JPetTaskLoader("raw.sig", "phys.hit", 
-				 new TaskC("Module C: Pair signals", 
-					   "Create hits from pairs of signals")); 
-     }); 
-
-  manager.registerTask([](){
-      return new JPetTaskLoader("phys.hit", "phys.hit.means",
-				new TaskD("Module D: Make histograms for hits",
-					  "Only make timeDiff histos and produce mean timeDiff value for each threshold and slot to be used by the next module"));
-    });
+  manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
+  manager.useTask("TimeCalibLoader", "tslot.raw", "tslot.calib");
+  manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
+  manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
+  manager.useTask("HitFinder", "phys.sig", "hits");
+  manager.useTask("EventFinder", "hits", "unk.evt");
+  manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
   
-  manager.registerTask([](){
-      return new JPetTaskLoader("phys.hit.means", "phys.hit.coincplots",
-  				new TaskE("Module E: Filter hits",
-  					  "Pass only hits with time diffrerence close to the peak"));
-    });
-
-  manager.run();
+  manager.run(argc, argv);
 }

@@ -27,7 +27,9 @@ class SDAMakePhysSignals: public JPetUserTask
 public:
   SDAMakePhysSignals(const char* name);
   virtual ~SDAMakePhysSignals();
-  virtual bool exec() override;
+  virtual bool init() override;
+  virtual bool exec()override;
+  virtual bool terminate() override;
 private:
 };
 
