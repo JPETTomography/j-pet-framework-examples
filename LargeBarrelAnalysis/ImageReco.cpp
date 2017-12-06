@@ -63,12 +63,13 @@ bool ImageReco::init()
                                   "Number of hits filtered by condition",
                                   numberOfConditions, 0, numberOfConditions));
 
+  //it is not really nessesery, but it is creating labels in given order
   getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on Z", 1);
   getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on LOR distance", 1);
   getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on delta angle", 1);
-  getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on first hit TOT", 3);
-  getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on second hit TOT", 4);
-  getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on annihilation point Z", 5);
+  getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on first hit TOT", 1);
+  getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on second hit TOT", 1);
+  getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on annihilation point Z", 1);
 
   return true;
 }
