@@ -26,6 +26,7 @@ const int yRange = 100;
 const int zRange = 50;
 
 const int numberOfHitsInEventHisto = 10;
+const int numberOfConditions = 6;
 
 int CUT_ON_Z_VALUE = 23;
 int CUT_ON_LOR_DISTANCE_FROM_CENTER = 25;
@@ -58,6 +59,17 @@ bool ImageReco::init()
   getStatistics().createHistogram(new TH1I("number_of_events",
                                   "Number of events with n hits",
                                   numberOfHitsInEventHisto, 0, numberOfHitsInEventHisto));
+  getStatistics().createHistogram(new TH1I("number_of_hits_filtered_by_condition",
+                                  "Number of hits filtered by condition",
+                                  numberOfConditions, 0, numberOfConditions));
+
+  getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on Z", 1);
+  getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on LOR distance", 1);
+  getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on delta angle", 1);
+  getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on first hit TOT", 3);
+  getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on second hit TOT", 4);
+  getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on annihilation point Z", 5);
+
   return true;
 }
 
@@ -89,33 +101,42 @@ bool ImageReco::exec()
 
 bool ImageReco::terminate()
 {
-  //getStatistics().getHisto<TH3D>("hits_pos").SetShowProjection("yx Col", 100);
   return true;
 }
 
 bool ImageReco::checkConditions(const JPetHit& first, const JPetHit& second)
 {
-  if (!cutOnZ(first, second))
+  if (!cutOnZ(first, second)) {
+    getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on Z", 1);
     return false;
-  if (!cutOnLORDistanceFromCenter(first, second))
+  }
+  if (!cutOnLORDistanceFromCenter(first, second)) {
+    getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on LOR distance", 1);
     return false;
-  if (angleDelta(first, second) < ANGLE_DELTA_MIN_VALUE)
+  }
+  if (angleDelta(first, second) < ANGLE_DELTA_MIN_VALUE) {
+    getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on delta angle", 1);
     return false;
+  }
 
   double totOfFirstHit = calculateSumOfTOTsOfHit(first);
-  if (totOfFirstHit < TOT_MIN_VALUE || totOfFirstHit > TOT_MAX_VALUE)
+  if (totOfFirstHit < TOT_MIN_VALUE || totOfFirstHit > TOT_MAX_VALUE) {
+    getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on first hit TOT", 3);
     return false;
+  }
 
   double totOfSecondHit = calculateSumOfTOTsOfHit(second);
-  if (totOfSecondHit < TOT_MIN_VALUE || totOfSecondHit > TOT_MAX_VALUE)
+  if (totOfSecondHit < TOT_MIN_VALUE || totOfSecondHit > TOT_MAX_VALUE) {
+    getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on second hit TOT", 4);
     return false;
+  }
 
   return true;
 }
 
 bool ImageReco::cutOnZ(const JPetHit& first, const JPetHit& second)
 {
-  return std::fabs(first.getPosZ()) < CUT_ON_Z_VALUE && fabs(second.getPosZ()) < CUT_ON_Z_VALUE;
+  return (std::fabs(first.getPosZ()) < CUT_ON_Z_VALUE) && (fabs(second.getPosZ()) < CUT_ON_Z_VALUE);
 }
 
 bool ImageReco::cutOnLORDistanceFromCenter(const JPetHit& first, const JPetHit& second)
@@ -192,6 +213,8 @@ bool ImageReco::calculateReconstructedPosition(const JPetHit& firstHit, const JP
   if (z > -ANNIHILATION_POINT_Z && z < ANNIHILATION_POINT_Z) {
     getStatistics().getHisto<TH3D>("hits_pos").Fill(x, y, z);
     return true;
+  } else {
+    getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on annihilation point Z", 5);
   }
   return false;
 }
