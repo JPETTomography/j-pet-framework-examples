@@ -122,13 +122,13 @@ bool ImageReco::checkConditions(const JPetHit& first, const JPetHit& second)
 
   double totOfFirstHit = calculateSumOfTOTsOfHit(first);
   if (totOfFirstHit < TOT_MIN_VALUE || totOfFirstHit > TOT_MAX_VALUE) {
-    getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on first hit TOT", 3);
+    getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on first hit TOT", 1);
     return false;
   }
 
   double totOfSecondHit = calculateSumOfTOTsOfHit(second);
   if (totOfSecondHit < TOT_MIN_VALUE || totOfSecondHit > TOT_MAX_VALUE) {
-    getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on second hit TOT", 4);
+    getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on second hit TOT", 1);
     return false;
   }
 
@@ -215,7 +215,7 @@ bool ImageReco::calculateReconstructedPosition(const JPetHit& firstHit, const JP
     getStatistics().getHisto<TH3D>("hits_pos").Fill(x, y, z);
     return true;
   } else {
-    getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on annihilation point Z", 5);
+    getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on annihilation point Z", 1);
   }
   return false;
 }
