@@ -31,8 +31,8 @@ const int numberOfConditions = 6;
 int CUT_ON_Z_VALUE = 23;
 int CUT_ON_LOR_DISTANCE_FROM_CENTER = 25;
 int ANNIHILATION_POINT_Z = 23;
-int TOT_MIN_VALUE = 15;
-int TOT_MAX_VALUE = 25;
+int TOT_MIN_VALUE_IN_NS = 15;
+int TOT_MAX_VALUE_IN_NS = 25;
 int ANGLE_DELTA_MIN_VALUE = 20;
 
 ImageReco::ImageReco(const char* name) : JPetUserTask(name) {}
@@ -45,8 +45,8 @@ bool ImageReco::init()
   CUT_ON_Z_VALUE = getOptionAsInt(opts, "ImageReco_CUT_ON_Z_VALUE_int");
   CUT_ON_LOR_DISTANCE_FROM_CENTER = getOptionAsInt(opts, "ImageReco_CUT_ON_LOR_DISTANCE_FROM_CENTER_int");
   ANNIHILATION_POINT_Z = getOptionAsInt(opts, "ImageReco_ANNIHILATION_POINT_Z_int");
-  TOT_MIN_VALUE = getOptionAsInt(opts, "ImageReco_TOT_MIN_VALUE_int");
-  TOT_MAX_VALUE = getOptionAsInt(opts, "ImageReco_TOT_MAX_VALUE_int");
+  TOT_MIN_VALUE_IN_NS = getOptionAsInt(opts, "ImageReco_TOT_MIN_VALUE_IN_NS_int");
+  TOT_MAX_VALUE_IN_NS = getOptionAsInt(opts, "ImageReco_TOT_MAX_VALUE_IN_NS_int");
   ANGLE_DELTA_MIN_VALUE = getOptionAsInt(opts, "ImageReco_ANGLE_DELTA_MIN_VALUE_int");
 
   fOutputEvents = new JPetTimeWindow("JPetEvent");
@@ -121,13 +121,13 @@ bool ImageReco::checkConditions(const JPetHit& first, const JPetHit& second)
   }
 
   double totOfFirstHit = calculateSumOfTOTsOfHit(first);
-  if (totOfFirstHit < TOT_MIN_VALUE || totOfFirstHit > TOT_MAX_VALUE) {
+  if (totOfFirstHit < TOT_MIN_VALUE_IN_NS || totOfFirstHit > TOT_MAX_VALUE_IN_NS) {
     getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on first hit TOT", 1);
     return false;
   }
 
   double totOfSecondHit = calculateSumOfTOTsOfHit(second);
-  if (totOfSecondHit < TOT_MIN_VALUE || totOfSecondHit > TOT_MAX_VALUE) {
+  if (totOfSecondHit < TOT_MIN_VALUE_IN_NS || totOfSecondHit > TOT_MAX_VALUE_IN_NS) {
     getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on second hit TOT", 1);
     return false;
   }
@@ -157,7 +157,7 @@ bool ImageReco::cutOnLORDistanceFromCenter(const JPetHit& first, const JPetHit& 
 float ImageReco::angleDelta(const JPetHit& first, const JPetHit& second)
 {
   float delta = fabs(first.getBarrelSlot().getTheta() - second.getBarrelSlot().getTheta());
-  return std::min(delta, 360 - delta);
+  return std::min(delta, (float)360 - delta);
 }
 
 double ImageReco::calculateSumOfTOTsOfHit(const JPetHit& hit)
@@ -176,9 +176,9 @@ double ImageReco::calculateSumOfTOTs(const JPetPhysSignal& signal)
     auto trailSearch = trailingPoints.find(i);
 
     if (leadSearch != leadingPoints.end() && trailSearch != trailingPoints.end())
-      tot += (trailSearch->second - leadSearch->second) / 1000;
+      tot += (trailSearch->second - leadSearch->second);
   }
-  return tot;
+  return tot / 1000.;
 }
 
 bool ImageReco::calculateReconstructedPosition(const JPetHit& firstHit, const JPetHit& secondHit)
