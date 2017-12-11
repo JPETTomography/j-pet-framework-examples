@@ -40,12 +40,13 @@ public:
     const std::map<int, std::vector<double>>& velMap
   );
 
-  void addIfReferenceSignal(vector<JPetHit>& hits, const vector<JPetPhysSignal>& sideA, const vector<JPetPhysSignal>& sideB, const std::map<int, std::vector<double>>& velMap);
-  void sortByTime(vector<JPetPhysSignal>& side);
+  void addIfReferenceSignal(std::vector<JPetHit>& hits, const std::vector<JPetPhysSignal>& sideA, const std::vector<JPetPhysSignal>& sideB, const std::map<int, std::vector<double>>& velMap);
+  void sortByTime(std::vector<JPetPhysSignal>& side);
   void setHitXYPosition(JPetHit& hit);
   void setHitZPosition(JPetHit& hit, const std::map<int, std::vector<double>>& velMap);
   JPetHit createHit(const JPetPhysSignal& signalA, const JPetPhysSignal& signalB, const std::map<int, std::vector<double>>& velMap);
   JPetHit createDummyRefDefHit(const JPetPhysSignal& signalB, const std::map<int, std::vector<double>>& velMap);
+  bool checkIsDegreeOrRad(const std::vector<JPetHit>& hits);
 };
 
 #endif /*  !HITFINDERTOOLS_H */

@@ -162,5 +162,19 @@ vector<JPetHit> HitFinderTools::createHits(JPetStatistics& stats,
       }
     }
   }
+  if (!checkIsDegreeOrRad(hits))
+    WARNING("ALL barrel slots have theta < then 7, check is they have correct degree theta");
   return hits;
+}
+
+bool HitFinderTools::checkIsDegreeOrRad(const std::vector<JPetHit>& hits)
+{
+  bool isDegree = false;
+  for (const JPetHit& hit : hits) {
+    if (hit.getBarrelSlot().getTheta() > 7.) {
+      isDegree = true;
+      break;
+    }
+  }
+  return isDegree;
 }

@@ -58,9 +58,4 @@ BOOST_AUTO_TEST_CASE( checkZAxisConvention )
   BOOST_REQUIRE( hit[0].getPosZ() < 0 );
 }
 
-BOOST_AUTO_TEST_CASE( testCreateHit )
-{
-
-}
-
 BOOST_AUTO_TEST_SUITE_END()
