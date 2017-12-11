@@ -22,7 +22,7 @@
 
 using namespace jpet_options_tools;
 
-HitFinder::HitFinder(const char* name) : JPetUserTask(name), fHitTools(getStatistics()) { }
+HitFinder::HitFinder(const char* name) : JPetUserTask(name) { }
 
 HitFinder::~HitFinder() { }
 
@@ -44,6 +44,18 @@ bool HitFinder::init()
             )
   );
 
+  getStatistics().createHistogram(
+    new TH2F("time_diff_per_scin",
+             "Signals Time Difference per Scintillator ID",
+             200, -20000.0, 20000.0,
+             192, 1.0, 193.0));
+
+  getStatistics().createHistogram(
+    new TH2F("hit_pos_per_scin",
+             "Hit Position per Scintillator ID",
+             200, -150.0, 150.0,
+             192, 1.0, 193.0));
+
   if (isOptionSet(opts, fTimeWindowWidthParamKey)) {
     kTimeWindowWidth = getOptionAsFloat(opts, fTimeWindowWidthParamKey);
   }
@@ -62,6 +74,7 @@ bool HitFinder::exec()
     }
 
     std::vector<JPetHit> hits = fHitTools.createHits(
+                                  getStatistics(),
                                   fAllSignalsInTimeWindow,
                                   kTimeWindowWidth,
                                   fVelocityMap);
