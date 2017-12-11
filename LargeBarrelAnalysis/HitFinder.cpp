@@ -110,24 +110,10 @@ void HitFinder::fillSignalsMap(const JPetPhysSignal& signal)
   auto scinId = signal.getPM().getScin().getID();
   switch (signal.getPM().getSide()) {
   case JPetPM::SideA:
-    //if (fAllSignalsInTimeWindow.find(scinId) != fAllSignalsInTimeWindow.end())
-    fAllSignalsInTimeWindow[scinId].first.push_back(signal);
-    //else {
-    //  std::vector<JPetPhysSignal> sideA = {signal};
-    //  std::vector<JPetPhysSignal> sideB;
-    //  fAllSignalsInTimeWindow.insert(std::make_pair(scinId,
-    //                                 std::make_pair(sideA, sideB)));
-    //}
+    fAllSignalsInTimeWindow[scinId].first.push_back(signal); //if element in map do not exists, map is creating new element with default constructor
     break;
   case JPetPM::SideB:
-    //if (fAllSignalsInTimeWindow.find(scinId) != fAllSignalsInTimeWindow.end())
     fAllSignalsInTimeWindow[scinId].second.push_back(signal);
-    //else {
-    //  std::vector<JPetPhysSignal> sideA;
-    //  std::vector<JPetPhysSignal> sideB = {signal};
-    //  fAllSignalsInTimeWindow.insert(std::make_pair(scinId,
-    //                                 std::make_pair(sideA, sideB)));
-    //}
     break;
   default:
     ERROR("Unknow side in signal, should never happend");

@@ -24,19 +24,21 @@
 class HitFinderTools
 {
 public:
-  HitFinderTools(const JPetStatistics& statistics);
-  ~HitFinderTools() { }
   typedef std::map<int, std::pair<std::vector<JPetPhysSignal>, std::vector<JPetPhysSignal>>> SignalsContainer;
   typedef std::map<int, std::pair<double, double>> VelocityMap;
+
+  void setStatistics(const JPetStatistics& statistics);
+
   /**
-   * Map od all signals within a single DAQ time window.
-   * For each scintillator with at least one signal this container stores two vectors
-   * one for physical signals on photomultiplier on side A and second for signals on side B. Then
-   * for each signal on side A it searches for corresponding signal on side B - that is time difference of arrival
-   * of those two signals needs to be less then specified time difference (kTimeWindowWidth)
-   *
-   */
+  * Map od all signals within a single DAQ time window.
+  * For each scintillator with at least one signal this container stores two vectors
+  * one for physical signals on photomultiplier on side A and second for signals on side B. Then
+  * for each signal on side A it searches for corresponding signal on side B - that is time difference of arrival
+  * of those two signals needs to be less then specified time difference (kTimeWindowWidth)
+  *
+  */
   std::vector<JPetHit> createHits(
+    JPetStatistics& statistics,
     const SignalsContainer& allSignalsInTimeWindow,
     const double timeDifferenceWindow,
     const VelocityMap& velMap);
@@ -48,9 +50,6 @@ public:
   JPetHit createHit(const JPetPhysSignal& signalA, const JPetPhysSignal& signalB, const VelocityMap& velMap);
   JPetHit createDummyRefDefHit(const JPetPhysSignal& signalB, const VelocityMap& velMap);
   bool checkIsDegreeOrRad(const std::vector<JPetHit>& hits);
-
-private:
-  JPetStatistics fStats;
 };
 
 #endif /*  !HITFINDERTOOLS_H */

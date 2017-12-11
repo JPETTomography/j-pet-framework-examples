@@ -17,21 +17,6 @@
 #include <cmath> /// std::sin(), std::cos()
 #include <TMath.h> /// DegToRad()
 
-HitFinderTools::HitFinderTools(const JPetStatistics& statistics) : fStats(statistics)
-{
-  fStats.createHistogram(
-    new TH2F("time_diff_per_scin",
-             "Signals Time Difference per Scintillator ID",
-             200, -20000.0, 20000.0,
-             192, 1.0, 193.0));
-
-  fStats.createHistogram(
-    new TH2F("hit_pos_per_scin",
-             "Hit Position per Scintillator ID",
-             200, -150.0, 150.0,
-             192, 1.0, 193.0));
-}
-
 JPetHit HitFinderTools::createDummyRefDefHit(const JPetPhysSignal& signalB,
     const VelocityMap& velMap)
 {
@@ -123,6 +108,7 @@ JPetHit HitFinderTools::createHit(const JPetPhysSignal& signalA,
 }
 
 std::vector<JPetHit> HitFinderTools::createHits(
+  JPetStatistics& statistics,
   const SignalsContainer& allSignalsInTimeWindow,
   const double timeDifferenceWindow,
   const VelocityMap& velMap)
@@ -160,13 +146,13 @@ std::vector<JPetHit> HitFinderTools::createHits(
             JPetHit hit = createHit(signalA, signalB, velMap);
             hits.push_back(hit);
 
-            fStats.getHisto2D("time_diff_per_scin")
+            statistics.getHisto2D("time_diff_per_scin")
             .Fill(hit.getTimeDiff(),
-                  (float) (hit.getScintillator().getID()));
+                  (float)(hit.getScintillator().getID()));
 
-            fStats.getHisto2D("hit_pos_per_scin")
+            statistics.getHisto2D("hit_pos_per_scin")
             .Fill(hit.getPosZ(),
-                  (float) (hit.getScintillator().getID()));
+                  (float)(hit.getScintillator().getID()));
           }
         }
       }
