@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE( checkZAxisConvention )
   values.push_back(1.1);
   velMap[barrelSlotID] = values;
 
-  HitFinderTools HitTools;
+  HitFinderTools HitTools(stats);
   std::vector<JPetHit> hit = HitTools.createHits(stats, allSignalsInTimeWindow, timeDifferenceWindow, velMap);
   BOOST_REQUIRE( hit[0].getPosZ() > 0 );
 

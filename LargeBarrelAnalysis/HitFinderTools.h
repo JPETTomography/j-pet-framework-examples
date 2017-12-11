@@ -24,7 +24,10 @@
 class HitFinderTools
 {
 public:
+  HitFinderTools(const JPetStatistics& statistics);
+  ~HitFinderTools() { }
   typedef std::map<int, std::pair<std::vector<JPetPhysSignal>, std::vector<JPetPhysSignal>>> SignalsContainer;
+  typedef std::map<int, std::pair<double, double>> VelocityMap;
   /**
    * Map od all signals within a single DAQ time window.
    * For each scintillator with at least one signal this container stores two vectors
@@ -34,19 +37,20 @@ public:
    *
    */
   std::vector<JPetHit> createHits(
-    JPetStatistics& stats,
     const SignalsContainer& allSignalsInTimeWindow,
     const double timeDifferenceWindow,
-    const std::map<int, std::vector<double>>& velMap
-  );
+    const VelocityMap& velMap);
 
-  void addIfReferenceSignal(std::vector<JPetHit>& hits, const std::vector<JPetPhysSignal>& sideA, const std::vector<JPetPhysSignal>& sideB, const std::map<int, std::vector<double>>& velMap);
+  void addIfReferenceSignal(std::vector<JPetHit>& hits, const std::vector<JPetPhysSignal>& sideA, const std::vector<JPetPhysSignal>& sideB, const VelocityMap& velMap);
   void sortByTime(std::vector<JPetPhysSignal>& side);
   void setHitXYPosition(JPetHit& hit);
-  void setHitZPosition(JPetHit& hit, const std::map<int, std::vector<double>>& velMap);
-  JPetHit createHit(const JPetPhysSignal& signalA, const JPetPhysSignal& signalB, const std::map<int, std::vector<double>>& velMap);
-  JPetHit createDummyRefDefHit(const JPetPhysSignal& signalB, const std::map<int, std::vector<double>>& velMap);
+  void setHitZPosition(JPetHit& hit, const VelocityMap& velMap);
+  JPetHit createHit(const JPetPhysSignal& signalA, const JPetPhysSignal& signalB, const VelocityMap& velMap);
+  JPetHit createDummyRefDefHit(const JPetPhysSignal& signalB, const VelocityMap& velMap);
   bool checkIsDegreeOrRad(const std::vector<JPetHit>& hits);
+
+private:
+  JPetStatistics fStats;
 };
 
 #endif /*  !HITFINDERTOOLS_H */

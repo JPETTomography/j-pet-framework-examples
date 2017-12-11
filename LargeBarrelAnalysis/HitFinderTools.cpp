@@ -17,12 +17,24 @@
 #include <cmath> /// std::sin(), std::cos()
 #include <TMath.h> /// DegToRad()
 
-using namespace std;
+HitFinderTools::HitFinderTools(const JPetStatistics& statistics) : fStats(statistics)
+{
+  fStats.createHistogram(
+    new TH2F("time_diff_per_scin",
+             "Signals Time Difference per Scintillator ID",
+             200, -20000.0, 20000.0,
+             192, 1.0, 193.0));
+
+  fStats.createHistogram(
+    new TH2F("hit_pos_per_scin",
+             "Hit Position per Scintillator ID",
+             200, -150.0, 150.0,
+             192, 1.0, 193.0));
+}
 
 JPetHit HitFinderTools::createDummyRefDefHit(const JPetPhysSignal& signalB,
-    const std::map<int, std::vector<double>>& velMap)
+    const VelocityMap& velMap)
 {
-
   JPetHit hit;
   hit.setSignalB(signalB);
   hit.setTime(signalB.getTime());
@@ -33,10 +45,7 @@ JPetHit HitFinderTools::createDummyRefDefHit(const JPetPhysSignal& signalB,
   hit.setQualityOfEnergy(-1.0);
   hit.setScintillator(signalB.getPM().getScin());
   hit.setBarrelSlot(signalB.getPM().getBarrelSlot());
-  auto radius = hit.getBarrelSlot().getLayer().getRadius();
-  auto theta = TMath::DegToRad() * hit.getBarrelSlot().getTheta();
-  hit.setPosX(radius * std::cos(theta));
-  hit.setPosY(radius * std::sin(theta));
+  setHitXYPosition(hit);
 
   auto search = velMap.find(hit.getBarrelSlot().getID());
   if (search != velMap.end()) hit.setPosZ(-1000000.0);
@@ -44,10 +53,11 @@ JPetHit HitFinderTools::createDummyRefDefHit(const JPetPhysSignal& signalB,
   return hit;
 }
 
-void HitFinderTools::addIfReferenceSignal(vector<JPetHit>& hits,
-    const vector<JPetPhysSignal>& sideA,
-    const vector<JPetPhysSignal>& sideB,
-    const std::map<int, std::vector<double>>& velMap)
+void HitFinderTools::addIfReferenceSignal(
+  std::vector<JPetHit>& hits,
+  const std::vector<JPetPhysSignal>& sideA,
+  const std::vector<JPetPhysSignal>& sideB,
+  const VelocityMap& velMap)
 {
   if (sideA.size() == 0 && sideB.size() > 0) {
     auto scinID = sideB.at(0).getPM().getScin().getID();
@@ -60,7 +70,7 @@ void HitFinderTools::addIfReferenceSignal(vector<JPetHit>& hits,
   }
 }
 
-void HitFinderTools::sortByTime(vector<JPetPhysSignal>& side)
+void HitFinderTools::sortByTime(std::vector<JPetPhysSignal>& side)
 {
   std::sort(side.begin(),
             side.end(),
@@ -70,12 +80,12 @@ void HitFinderTools::sortByTime(vector<JPetPhysSignal>& side)
   });
 }
 
-void HitFinderTools::setHitZPosition(JPetHit& hit, const std::map<int, std::vector<double>>& velMap)
+void HitFinderTools::setHitZPosition(JPetHit& hit, const VelocityMap& velMap)
 {
   auto search = velMap.find(hit.getBarrelSlot().getID());
   if (search != velMap.end()) {
-    double vel = search->second.at(0);
-    double position = vel * hit.getTimeDiff() / 2000;
+    double vel = search->second.first;
+    double position = vel * hit.getTimeDiff() / 2000.;
     hit.setPosZ(position);
   } else {
     hit.setPosZ(-1000000.0);
@@ -92,7 +102,7 @@ void HitFinderTools::setHitXYPosition(JPetHit& hit)
 
 JPetHit HitFinderTools::createHit(const JPetPhysSignal& signalA,
                                   const JPetPhysSignal& signalB,
-                                  const std::map<int, std::vector<double>>& velMap)
+                                  const VelocityMap& velMap)
 {
   JPetHit hit;
   hit.setSignalA(signalA);
@@ -112,12 +122,12 @@ JPetHit HitFinderTools::createHit(const JPetPhysSignal& signalA,
   return hit;
 }
 
-vector<JPetHit> HitFinderTools::createHits(JPetStatistics& stats,
-    const SignalsContainer& allSignalsInTimeWindow,
-    const double timeDifferenceWindow,
-    const std::map<int, std::vector<double>>& velMap)
+std::vector<JPetHit> HitFinderTools::createHits(
+  const SignalsContainer& allSignalsInTimeWindow,
+  const double timeDifferenceWindow,
+  const VelocityMap& velMap)
 {
-  vector<JPetHit> hits;
+  std::vector<JPetHit> hits;
 
   for (auto scintillator : allSignalsInTimeWindow) {
 
@@ -150,11 +160,11 @@ vector<JPetHit> HitFinderTools::createHits(JPetStatistics& stats,
             JPetHit hit = createHit(signalA, signalB, velMap);
             hits.push_back(hit);
 
-            stats.getHisto2D("time_diff_per_scin")
+            fStats.getHisto2D("time_diff_per_scin")
             .Fill(hit.getTimeDiff(),
                   (float) (hit.getScintillator().getID()));
 
-            stats.getHisto2D("hit_pos_per_scin")
+            fStats.getHisto2D("hit_pos_per_scin")
             .Fill(hit.getPosZ(),
                   (float) (hit.getScintillator().getID()));
           }
