@@ -14,7 +14,6 @@
  */
 
 #include <JPetManager/JPetManager.h>
-//#include "HitFinder.h"
 #include "TimeCalibration_dev.h"
 #include "../LargeBarrelAnalysis/TimeWindowCreator.h"
 #include "../LargeBarrelAnalysis/TimeCalibLoader.h"
@@ -26,22 +25,9 @@
 
 using namespace std;
 
-int main(int argc, char* argv[])
+int main(int argc, const char* argv[])
 {
   JPetManager& manager = JPetManager::getManager();
-
-  /*
-  //Second task - Signal Channel calibration
-  manager.registerTask([]() {
-    return new JPetTaskLoader("tslot.raw", "tslot.calib",
-      new TimeCalibLoader(
-        "TimeCalibLoader",
-        "Apply time corrections from prepared calibrations"
-      )
-    );
-  });
-  */
-  //Third task - Raw Signal Creation
 
   manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
   manager.registerTask<TimeCalibLoader>("TimeCalibLoader");
@@ -51,7 +37,7 @@ int main(int argc, char* argv[])
   manager.registerTask<TimeCalibration>("TimeCalibration"); 
   
   manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
-//  manager.useTask("TimeCalibLoader", "tslot.raw", "tslot.calib");
+  manager.useTask("TimeCalibLoader", "tslot.raw", "tslot.calib");
   manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
   manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
   manager.useTask("HitFinder", "phys.sig", "hits");
