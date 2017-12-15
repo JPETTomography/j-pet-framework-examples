@@ -63,6 +63,30 @@ bool ImageReco::init()
                                   "Number of hits filtered by condition",
                                   numberOfConditions, 0, numberOfConditions));
 
+  getStatistics().createHistogram(new TH1D("distance_from_center",
+                                  "Distance from center",
+                                  zRange, -zRange, zRange));
+
+  getStatistics().createHistogram(new TH1D("cut_on_Z",
+                                  "Cut on Z",
+                                  zRange, -zRange, zRange));
+
+  getStatistics().createHistogram(new TH1D("angle_delta",
+                                  "Angle delta",
+                                  360, 0, 360));
+
+  getStatistics().createHistogram(new TH1D("first_hit_TOT",
+                                  "Cut on first hit TOT",
+                                  100, 0, 100));
+
+  getStatistics().createHistogram(new TH1D("second_hit_TOT",
+                                  "Cut on second hit TOT",
+                                  100, 0, 100));
+
+  getStatistics().createHistogram(new TH1D("annihilation_point_z",
+                                  "Annihilation point Z",
+                                  zRange, -zRange, zRange));
+
   //it is not really nessesery, but it is creating labels in given order
   getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on Z", 1);
   getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on LOR distance", 1);
@@ -121,12 +145,14 @@ bool ImageReco::checkConditions(const JPetHit& first, const JPetHit& second)
   }
 
   double totOfFirstHit = calculateSumOfTOTsOfHit(first);
+  getStatistics().getHisto<TH1D>("first_hit_TOT").Fill(totOfFirstHit);
   if (totOfFirstHit < TOT_MIN_VALUE_IN_NS || totOfFirstHit > TOT_MAX_VALUE_IN_NS) {
     getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on first hit TOT", 1);
     return false;
   }
 
   double totOfSecondHit = calculateSumOfTOTsOfHit(second);
+  getStatistics().getHisto<TH1D>("second_hit_TOT").Fill(totOfSecondHit);
   if (totOfSecondHit < TOT_MIN_VALUE_IN_NS || totOfSecondHit > TOT_MAX_VALUE_IN_NS) {
     getStatistics().getHisto<TH1I>("number_of_hits_filtered_by_condition").Fill("Cut on second hit TOT", 1);
     return false;
@@ -137,6 +163,8 @@ bool ImageReco::checkConditions(const JPetHit& first, const JPetHit& second)
 
 bool ImageReco::cutOnZ(const JPetHit& first, const JPetHit& second)
 {
+  getStatistics().getHisto<TH1D>("cut_on_Z").Fill(std::fabs(first.getPosZ()));
+  getStatistics().getHisto<TH1D>("cut_on_Z").Fill(std::fabs(second.getPosZ()));
   return (std::fabs(first.getPosZ()) < CUT_ON_Z_VALUE) && (fabs(second.getPosZ()) < CUT_ON_Z_VALUE);
 }
 
@@ -150,13 +178,14 @@ bool ImageReco::cutOnLORDistanceFromCenter(const JPetHit& first, const JPetHit& 
 
   double a = (y_a - y_b) / (x_a - x_b);
   double c = y_a - ((y_a - y_b) / (x_a - x_b)) * x_a;
-
+  getStatistics().getHisto<TH1D>("distance_from_center").Fill((std::fabs(c) / std::sqrt(a * a + 1)));
   return (std::fabs(c) / std::sqrt(a * a + 1)) < CUT_ON_LOR_DISTANCE_FROM_CENTER; //b is 1 and b*b is 1
 }
 
 float ImageReco::angleDelta(const JPetHit& first, const JPetHit& second)
 {
   float delta = fabs(first.getBarrelSlot().getTheta() - second.getBarrelSlot().getTheta());
+  getStatistics().getHisto<TH1D>("angle_delta").Fill(std::min(delta, (float)360 - delta));
   return std::min(delta, (float)360 - delta);
 }
 
@@ -211,6 +240,7 @@ bool ImageReco::calculateReconstructedPosition(const JPetHit& firstHit, const JP
   y = firstHit.getPosY() + ((vdy / 2.0) + (vdy / dd * mtof_a));
   z = s1_z + ((vdz / 2.0) + (vdz / dd * mtof_a));
   //x > -xRange && x < xRange && y > -yRange && y < yRange &&
+  getStatistics().getHisto<TH1D>("annihilation_point_z").Fill(z);
   if (z > -ANNIHILATION_POINT_Z && z < ANNIHILATION_POINT_Z) {
     getStatistics().getHisto<TH3D>("hits_pos").Fill(x, y, z);
     return true;
