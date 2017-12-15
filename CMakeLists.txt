@@ -34,7 +34,6 @@ if(APPLE)
     "${CMAKE_EXE_LINKER_FLAGS} -std=c++11 -Wl,-rpath,${ROOT_LIBRARY_DIR}"
     )
 endif()
-
 ################################################################################
 ## Download input and configuration files
 ## The script shouldn't do anything if the data is present and correct.
@@ -56,3 +55,4 @@ add_subdirectory(CosmicAnalysis)
 add_subdirectory(ScopeAnalysis)
 add_subdirectory(Imaging)
 add_subdirectory(modules)
+add_subdirectory(TimeCalibration_iter)
