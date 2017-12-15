@@ -46,7 +46,7 @@ bool TimeWindowCreator::init()
 	      fMainStrip.second, fMainStrip.first));
     
     // build a list of allowed channels
-    JPetGeomMapping mapper(fParamManager->getParamBank());
+    JPetGeomMapping mapper(getParamBank());
     
     for(int thr=1;thr<=4;++thr){
       int tomb_number = mapper.getTOMB(fMainStrip.first, fMainStrip.second, JPetPM::SideA, thr);

@@ -46,7 +46,6 @@ public:
 protected:
   bool filter(const JPetTOMBChannel& channel) const;
   JPetSigCh generateSigCh(const JPetTOMBChannel& channel, JPetSigCh::EdgeType edge) const;
-  JPetParamManager* fParamManager = nullptr;
   long long int fCurrEventNumber = 0;
   const std::string kMaxTimeParamKey = "TimeWindowCreator_MaxTime_double";
   const std::string kMinTimeParamKey = "TimeWindowCreator_MinTime_double";
