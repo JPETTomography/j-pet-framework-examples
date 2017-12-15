@@ -77,6 +77,6 @@ protected:
 	const std::string fConstantsLoadingFlag  = "ConstantsLoadingFlag";
 	int   NiterMax = 1;   //Max number of iterations for calibration of one strip
 	const std::string fMaxIterationNumber = "MaxIterationNumber";
-	bool CheckIfExitIter(float CAl[],float  SigCAl[], float CBl[], float  SigCBl[], float CAt[], float SigCAt[], float CBt[], float SigCBt[], int Niter);
+        bool CheckIfExitIter(float CAl[], float  SigCAl[], float CBl[], float  SigCBl[], float CAt[], float SigCAt[], float CBt[], float SigCBt[], int Niter, int NiterM );
 };
 #endif /*  !TimeCalibration_H */
