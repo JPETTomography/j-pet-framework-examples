@@ -130,7 +130,7 @@ bool DeltaTFinder::terminate(){
 	for(auto & slot : fParamManager->getParamBank().getBarrelSlots()){
 		for (int thr=1;thr<=4;thr++){
 			const char * histo_name = formatUniqueSlotDescription(*(slot.second), thr, "timeDiffAB_");
-			TH1F* histoToSave = &(getStatistics().getHisto1D(histo_name) );
+			TH1F* histoToSave = getStatistics().getHisto1D(histo_name);
 			int highestBin = histoToSave->GetBinCenter( histoToSave->GetMaximumBin() );
 			histoToSave->Fit("gaus","","", highestBin-fRangeAroundMaximumBin, highestBin+fRangeAroundMaximumBin);
 			TCanvas* c = new TCanvas();
@@ -165,11 +165,11 @@ void DeltaTFinder::fillHistosForHit(const JPetHit & hit){
 			timeDiffAB /= 1000.; // we want the plots in ns instead of ps
 			// fill the appropriate histogram
 			const char * histo_name = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffAB_");
-			getStatistics().getHisto1D(histo_name).Fill( timeDiffAB );
+			getStatistics().getHisto1D(histo_name)->Fill( timeDiffAB );
 			// fill the timeDiffAB vs slot ID histogram
 			int layer_number = fBarrelMap->getLayerNumber( hit.getBarrelSlot().getLayer() );
 			int slot_number = fBarrelMap->getSlotNumber( hit.getBarrelSlot() );
-			getStatistics().getHisto2D(Form("TimeDiffVsID_layer_%d_thr_%d", layer_number, thr)).Fill( slot_number,
+			getStatistics().getHisto2D(Form("TimeDiffVsID_layer_%d_thr_%d", layer_number, thr))->Fill( slot_number,
 														  timeDiffAB);
 		}
 	}
