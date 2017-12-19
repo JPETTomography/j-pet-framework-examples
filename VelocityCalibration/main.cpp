@@ -13,7 +13,6 @@
  *  @file main.cpp
  */
 
-#include <DBHandler/HeaderFiles/DBHandler.h>
 #include <JPetManager/JPetManager.h>
 #include "../LargeBarrelAnalysis/TimeWindowCreator.h"
 #include "../LargeBarrelAnalysis/TimeCalibLoader.h"
