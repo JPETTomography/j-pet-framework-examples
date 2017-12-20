@@ -1,0 +1,15 @@
+{
+ "TimeCalibLoader_ConfigFile_std::string":"TimeConstants_Run2.txt",
+ "SignalFinder_EdgeMaxTime_float":"4000",
+ "SignalFinder_LeadTrailMaxTime_float":"30000",
+ "HitFinder_TimeWindowWidth_float":"25000",
+ "EventFinder_EventTime_float":"200000",
+ "EventCategorizer_CosmicAnalysis_bool":"true",
+ "EventCategorizer_MinCosmicTOT_float":"55000",
+ "EventCategorizer_Imaging_bool":"true",
+ "EventCategorizer_MinAnnihilationTOT_float":"10000",
+ "EventCategorizer_MaxAnnihilationTOT_float":"25000",
+ "EventCategorizer_PhysicsAnalysis_bool":"true",
+ "EventCategorizer_MinDeexcitationTOT_float":"30000",
+ "EventCategorizer_MaxDeexcitationTOT_float":"50000"
+}
