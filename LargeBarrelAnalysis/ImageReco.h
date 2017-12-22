@@ -28,9 +28,9 @@
 /**
  * @brief Image reconstruction module which should be used for quick, rough data tests.
  *
- * It implements a simple image reconstruction algorithm adapted from G. Korcyl's code. 
- * It is equivalent to one back-projection without any filtering but including TOF information, 
- * with the assumption that TOF error = 0. Before reconstructruction, the data are preselected 
+ * It implements a simple image reconstruction algorithm adapted from G. Korcyl's code.
+ * It is equivalent to one back-projection without any filtering but including TOF information,
+ * with the assumption that TOF error = 0. Before reconstructruction, the data are preselected
  * based on the set of conditions defined in the json file such as:
  * - ImageReco_CUT_ON_Z_VALUE_float
  * - ImageReco_CUT_ON_LOR_DISTANCE_FROM_CENTER_float
@@ -55,6 +55,17 @@ public:
   virtual bool exec() override;
   virtual bool terminate() override;
 private:
+  /* Calculated as:
+  * x = hit1.X + (vdx / 2.0) + ((vdx / sqrt(|vdx^2 + vdy^2 + vdz^2|) * TOF))
+  * y = hit1.Y + (vdy / 2.0) + ((vdy / sqrt(|vdx^2 + vdy^2 + vdz^2|) * TOF))
+  * z = hit1.Z + (vdz / 2.0) + ((vdz / sqrt(|vdx^2 + vdy^2 + vdz^2|) * TOF))
+  *
+  * Where TOF is calculated as:
+  * if hit1.Y > hit2.Y
+  * TOF = ((hit1.timeA + hit1.timeB) / 2.0) - ((hit2.timeA + hit2.timeB) / 2.0) * 30
+  * else:
+  * TOF = ((hit2.timeA + hit2.timeB) / 2.0) - ((hit1.timeA + hit1.timeB) / 2.0) * 30
+  */
   bool calculateAnnihilationPoint(const JPetHit& firstHit, const JPetHit& secondHit);
   bool cutOnZ(const JPetHit& first, const JPetHit& second);
   bool cutOnLORDistanceFromCenter(const JPetHit& first, const JPetHit& second);
