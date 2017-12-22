@@ -27,46 +27,72 @@ ImageReco::~ImageReco() {}
 bool ImageReco::init()
 {
   auto opts = getOptions();
-  if (isOptionSet(opts, fCutOnZValueKey)) {
-    CUT_ON_Z_VALUE = getOptionAsFloat(opts, fCutOnZValueKey);
+
+  if (isOptionSet(opts, kCutOnZValueKey)) {
+    fCUT_ON_Z_VALUE = getOptionAsFloat(opts, kCutOnZValueKey);
   }
-  if (isOptionSet(opts, fCutOnLORDistanceKey)) {
-    CUT_ON_LOR_DISTANCE_FROM_CENTER = getOptionAsFloat(opts, fCutOnLORDistanceKey);
+  if (isOptionSet(opts, kCutOnLORDistanceKey)) {
+    fCUT_ON_LOR_DISTANCE_FROM_CENTER = getOptionAsFloat(opts, kCutOnLORDistanceKey);
   }
-  if (isOptionSet(opts, fCutOnAnnihilationPointZ)) {
-    ANNIHILATION_POINT_Z = getOptionAsFloat(opts, fCutOnAnnihilationPointZ);
+  if (isOptionSet(opts, kCutOnAnnihilationPointZKey)) {
+    fANNIHILATION_POINT_Z = getOptionAsFloat(opts, kCutOnAnnihilationPointZKey);
   }
-  if (isOptionSet(opts, fCutOnTOTMinValue)) {
-    TOT_MIN_VALUE_IN_NS = getOptionAsFloat(opts, fCutOnTOTMinValue);
+  if (isOptionSet(opts, kCutOnTOTMinValueKey)) {
+    fTOT_MIN_VALUE_IN_NS = getOptionAsFloat(opts, kCutOnTOTMinValueKey);
   }
-  if (isOptionSet(opts, fCutOnTOTMaxValue)) {
-    TOT_MAX_VALUE_IN_NS = getOptionAsFloat(opts, fCutOnTOTMaxValue);
+  if (isOptionSet(opts, kCutOnTOTMaxValueKey)) {
+    fTOT_MAX_VALUE_IN_NS = getOptionAsFloat(opts, kCutOnTOTMaxValueKey);
   }
-  if (isOptionSet(opts, fCutOnAngleDeltaMinValue)) {
-    ANGLE_DELTA_MIN_VALUE = getOptionAsFloat(opts, fCutOnAngleDeltaMinValue);
+  if (isOptionSet(opts, kCutOnAngleDeltaMinValueKey)) {
+    fANGLE_DELTA_MIN_VALUE = getOptionAsFloat(opts, kCutOnAngleDeltaMinValueKey);
+  }
+
+  if (isOptionSet(opts, kXRangeOn3DHistogramKey)) {
+    fXRange = getOptionAsInt(opts, kXRangeOn3DHistogramKey);
+  }
+
+  if (isOptionSet(opts, kYRangeOn3DHistogramKey)) {
+    fYRange = getOptionAsInt(opts, kYRangeOn3DHistogramKey);
+  }
+
+  if (isOptionSet(opts, kZRangeOn3DHistogramKey)) {
+    fZRange = getOptionAsInt(opts, kZRangeOn3DHistogramKey);
+  }
+
+  if (isOptionSet(opts, kBinMultiplierKey)) {
+    fBinMultiplier = getOptionAsDouble(opts, kBinMultiplierKey);
+    if ((std::floor(fBinMultiplier * fXRange) *
+         std::floor(fBinMultiplier * fYRange) *
+         std::floor(fBinMultiplier * fZRange)) > 1073741822) {
+      fBinMultiplier = 6;
+      WARNING("TBufferFile can only write up to 1073741822 bytes, bin multiplier is too big, reseted to 6");
+    }
+    fNumberOfBinsX = fXRange * fBinMultiplier;
+    fNumberOfBinsY = fYRange * fBinMultiplier;
+    fNnumberOfBinsZ = fZRange * fBinMultiplier;
   }
 
   fOutputEvents = new JPetTimeWindow("JPetEvent");
 
   getStatistics().createHistogram(new TH3D("hits_pos",
                                   "Reconstructed hit pos",
-                                  numberOfBinsX, -xRange, xRange,
-                                  numberOfBinsY, -yRange, yRange,
-                                  numberOfBinsZ, -zRange, zRange));
+                                  fNumberOfBinsX, -fXRange, fXRange,
+                                  fNumberOfBinsY, -fYRange, fYRange,
+                                  fNnumberOfBinsZ, -fZRange, fZRange));
   getStatistics().createHistogram(new TH1I("number_of_events",
                                   "Number of events with n hits",
-                                  numberOfHitsInEventHisto, 0, numberOfHitsInEventHisto));
+                                  kNumberOfHitsInEventHisto, 0, kNumberOfHitsInEventHisto));
   getStatistics().createHistogram(new TH1I("number_of_hits_filtered_by_condition",
                                   "Number of hits filtered by condition",
-                                  numberOfConditions, 0, numberOfConditions));
+                                  kNumberOfConditions, 0, kNumberOfConditions));
 
   getStatistics().createHistogram(new TH1D("distance_from_center",
                                   "Distance from center",
-                                  zRange, -zRange, zRange));
+                                  fZRange, -fZRange, fZRange));
 
   getStatistics().createHistogram(new TH1D("cut_on_Z",
                                   "Cut on Z",
-                                  zRange, -zRange, zRange));
+                                  fZRange, -fZRange, fZRange));
 
   getStatistics().createHistogram(new TH1D("angle_delta",
                                   "Angle delta",
@@ -86,11 +112,11 @@ bool ImageReco::init()
 
   getStatistics().createHistogram(new TH1D("annihilation_point_z",
                                   "Annihilation point Z",
-                                  zRange, -zRange, zRange));
+                                  fZRange, -fZRange, fZRange));
 
   getStatistics().createHistogram(new TH1D("annihilation_point_z_cutted",
                                   "Annihilation point Z",
-                                  zRange, -zRange, zRange));
+                                  fZRange, -fZRange, fZRange));
 
   //it is not really nessesery, but it is creating labels in given order
   getStatistics().getObject<TH1I>("number_of_hits_filtered_by_condition")->Fill("Cut on Z", 1);
@@ -118,7 +144,7 @@ bool ImageReco::exec()
         for (unsigned int i = 0; i < hits.size() - 1; i++) {
           if (!checkConditions(hits[i], hits[i + 1]))
             continue;
-          calculateReconstructedPosition(hits[i], hits[i + 1]);
+          calculateAnnihilationPoint(hits[i], hits[i + 1]);
         }
       }
     }
@@ -144,14 +170,14 @@ bool ImageReco::checkConditions(const JPetHit& first, const JPetHit& second)
     getStatistics().getObject<TH1I>("number_of_hits_filtered_by_condition")->Fill("Cut on LOR distance", 1);
     return false;
   }
-  if (angleDelta(first, second) < ANGLE_DELTA_MIN_VALUE) {
+  if (angleDelta(first, second) < fANGLE_DELTA_MIN_VALUE) {
     getStatistics().getObject<TH1I>("number_of_hits_filtered_by_condition")->Fill("Cut on delta angle", 1);
     return false;
   }
 
   double totOfFirstHit = calculateSumOfTOTsOfHit(first);
   getStatistics().getObject<TH1D>("first_hit_TOT")->Fill(totOfFirstHit);
-  if (totOfFirstHit < TOT_MIN_VALUE_IN_NS || totOfFirstHit > TOT_MAX_VALUE_IN_NS) {
+  if (totOfFirstHit < fTOT_MIN_VALUE_IN_NS || totOfFirstHit > fTOT_MAX_VALUE_IN_NS) {
     getStatistics().getObject<TH1D>("first_hit_TOT_cutted")->Fill(totOfFirstHit);
     getStatistics().getObject<TH1I>("number_of_hits_filtered_by_condition")->Fill("Cut on first hit TOT", 1);
     return false;
@@ -159,7 +185,7 @@ bool ImageReco::checkConditions(const JPetHit& first, const JPetHit& second)
 
   double totOfSecondHit = calculateSumOfTOTsOfHit(second);
   getStatistics().getObject<TH1D>("second_hit_TOT")->Fill(totOfSecondHit);
-  if (totOfSecondHit < TOT_MIN_VALUE_IN_NS || totOfSecondHit > TOT_MAX_VALUE_IN_NS) {
+  if (totOfSecondHit < fTOT_MIN_VALUE_IN_NS || totOfSecondHit > fTOT_MAX_VALUE_IN_NS) {
     getStatistics().getObject<TH1I>("number_of_hits_filtered_by_condition")->Fill("Cut on second hit TOT", 1);
     return false;
   }
@@ -171,7 +197,7 @@ bool ImageReco::cutOnZ(const JPetHit& first, const JPetHit& second)
 {
   getStatistics().getObject<TH1D>("cut_on_Z")->Fill(std::fabs(first.getPosZ()));
   getStatistics().getObject<TH1D>("cut_on_Z")->Fill(std::fabs(second.getPosZ()));
-  return (std::fabs(first.getPosZ()) < CUT_ON_Z_VALUE) && (fabs(second.getPosZ()) < CUT_ON_Z_VALUE);
+  return (std::fabs(first.getPosZ()) < fCUT_ON_Z_VALUE) && (fabs(second.getPosZ()) < fCUT_ON_Z_VALUE);
 }
 
 bool ImageReco::cutOnLORDistanceFromCenter(const JPetHit& first, const JPetHit& second)
@@ -185,7 +211,7 @@ bool ImageReco::cutOnLORDistanceFromCenter(const JPetHit& first, const JPetHit& 
   double a = (y_a - y_b) / (x_a - x_b);
   double c = y_a - ((y_a - y_b) / (x_a - x_b)) * x_a;
   getStatistics().getObject<TH1D>("distance_from_center")->Fill((std::fabs(c) / std::sqrt(a * a + 1)));
-  return (std::fabs(c) / std::sqrt(a * a + 1)) < CUT_ON_LOR_DISTANCE_FROM_CENTER; //b is 1 and b*b is 1
+  return (std::fabs(c) / std::sqrt(a * a + 1)) < fCUT_ON_LOR_DISTANCE_FROM_CENTER; //b is 1 and b*b is 1
 }
 
 float ImageReco::angleDelta(const JPetHit& first, const JPetHit& second)
@@ -216,7 +242,7 @@ double ImageReco::calculateSumOfTOTs(const JPetPhysSignal& signal)
   return tot / 1000.;
 }
 
-bool ImageReco::calculateReconstructedPosition(const JPetHit& firstHit, const JPetHit& secondHit)
+bool ImageReco::calculateAnnihilationPoint(const JPetHit& firstHit, const JPetHit& secondHit)
 {
   double s1_x = static_cast<double>(firstHit.getPosX());
   double s1_y = static_cast<double>(firstHit.getPosY());
@@ -253,7 +279,7 @@ bool ImageReco::calculateReconstructedPosition(const JPetHit& firstHit, const JP
   y = s1_y + ((vdy / 2.0) + (vdy / dd * mtof_a));
   z = s1_z + ((vdz / 2.0) + (vdz / dd * mtof_a));
   getStatistics().getObject<TH1D>("annihilation_point_z")->Fill(z);
-  if (z > -ANNIHILATION_POINT_Z && z < ANNIHILATION_POINT_Z) {
+  if (z > -fANNIHILATION_POINT_Z && z < fANNIHILATION_POINT_Z) {
     getStatistics().getObject<TH3D>("hits_pos")->Fill(x, y, z);
     return true;
   } else {
