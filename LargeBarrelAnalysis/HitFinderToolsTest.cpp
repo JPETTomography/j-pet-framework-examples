@@ -5,8 +5,8 @@
 
 #include <utility>
 #include "HitFinderTools.h"
-#include <../j-pet-framework/JPetPhysSignal/JPetPhysSignal.h>
-#include "../j-pet-framework/JPetLoggerInclude.h"
+#include <./JPetPhysSignal/JPetPhysSignal.h>
+#include "./JPetLoggerInclude.h"
 
 typedef std::map <int, std::pair < std::vector<JPetPhysSignal>, std::vector<JPetPhysSignal> > > SignalsContainer;
 

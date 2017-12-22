@@ -136,42 +136,42 @@ bool EventCategorizer::exec()
 
               if (fSaveControlHistos) {
                 getStatistics().getHisto1D("two_hit_event_theta_diff")
-                .Fill(thetaDiff);
+                ->Fill(thetaDiff);
                 getStatistics().getHisto1D("hits_x_pos")
-                .Fill(firstHit.getPosX());
+                ->Fill(firstHit.getPosX());
                 getStatistics().getHisto1D("hits_y_pos")
-                .Fill(firstHit.getPosY());
+                ->Fill(firstHit.getPosY());
                 getStatistics().getHisto1D("hits_z_pos")
-                .Fill(firstHit.getPosZ());
+                ->Fill(firstHit.getPosZ());
                 getStatistics().getHisto1D("hits_x_pos")
-                .Fill(secondHit.getPosX());
+                ->Fill(secondHit.getPosX());
                 getStatistics().getHisto1D("hits_y_pos")
-                .Fill(secondHit.getPosY());
+                ->Fill(secondHit.getPosY());
                 getStatistics().getHisto1D("hits_z_pos")
-                .Fill(secondHit.getPosZ());
+                ->Fill(secondHit.getPosZ());
                 getStatistics().getHisto2D("hit_distanece_vs_time_diff")
-                .Fill(distance, timeDiff);
+                ->Fill(distance, timeDiff);
                 getStatistics().getHisto2D("hit_distanece_vs_theta_diff")
-                .Fill(distance, thetaDiff);
+                ->Fill(distance, thetaDiff);
                 if (thetaDiff >= 180.0 && thetaDiff < 181.0) {
                   getStatistics().getHisto1D("two_hit_event_theta_diff_cut")
-                  .Fill(thetaDiff);
+                  ->Fill(thetaDiff);
                   getStatistics().getHisto1D("hits_x_pos_cut")
-                  .Fill(firstHit.getPosX());
+                  ->Fill(firstHit.getPosX());
                   getStatistics().getHisto1D("hits_y_pos_cut")
-                  .Fill(firstHit.getPosY());
+                  ->Fill(firstHit.getPosY());
                   getStatistics().getHisto1D("hits_z_pos_cut")
-                  .Fill(firstHit.getPosZ());
+                  ->Fill(firstHit.getPosZ());
                   getStatistics().getHisto1D("hits_x_pos_cut")
-                  .Fill(secondHit.getPosX());
+                  ->Fill(secondHit.getPosX());
                   getStatistics().getHisto1D("hits_y_pos_cut")
-                  .Fill(secondHit.getPosY());
+                  ->Fill(secondHit.getPosY());
                   getStatistics().getHisto1D("hits_z_pos_cut")
-                  .Fill(secondHit.getPosZ());
+                  ->Fill(secondHit.getPosZ());
                   getStatistics().getHisto2D("hit_distanece_vs_time_diff_cut")
-                  .Fill(distance, timeDiff);
+                  ->Fill(distance, timeDiff);
                   getStatistics().getHisto2D("hit_distanece_vs_theta_diff_cut")
-                  .Fill(distance, thetaDiff);
+                  ->Fill(distance, thetaDiff);
                 }
               }
             }
@@ -190,7 +190,7 @@ bool EventCategorizer::exec()
                                - thirdHit.getBarrelSlot().getTheta());
 
         getStatistics().getHisto2D("3_hit_angles")
-        .Fill(theta_1_2, theta_2_3);
+        ->Fill(theta_1_2, theta_2_3);
       }
     }
   } else {

@@ -77,7 +77,7 @@ bool TimeWindowCreator::exec()
 {
   if (auto evt = dynamic_cast <EventIII * const > (fEvent)) {
     int ntdc = evt->GetTotalNTDCChannels();
-    getStatistics().getHisto1D("ChannelsPerEvt").Fill( ntdc );
+    getStatistics().getHisto1D("ChannelsPerEvt")->Fill( ntdc );
 
     auto tdcHits = evt->GetTDCChannelsArray();
     for (int i = 0; i < ntdc; ++i) {
@@ -104,7 +104,7 @@ bool TimeWindowCreator::exec()
       // one TDC channel may record multiple signals in one TSlot
       // iterate over all signals from one TDC channel
       // analyze number of hits per channel
-      getStatistics().getHisto1D("HitsPerEvtCh").Fill( tdcChannel->GetHitsNum() );
+      getStatistics().getHisto1D("HitsPerEvtCh")->Fill( tdcChannel->GetHitsNum() );
       const int kNumHits = tdcChannel->GetHitsNum();
       for (int j = 0; j < kNumHits; ++j) {
 
