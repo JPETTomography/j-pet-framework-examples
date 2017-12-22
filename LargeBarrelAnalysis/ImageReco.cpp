@@ -20,23 +20,6 @@
 #include "./JPetOptionsTools/JPetOptionsTools.h"
 using namespace jpet_options_tools;
 
-const int xRange = 50;
-const int yRange = 50;
-const int zRange = 30;
-const int numberOfBinsX = xRange * 12; //1 bin is 8 1/3 mm, TBufferFile cannot write more then 1073741822 bytes
-const int numberOfBinsY = yRange * 12;
-const int numberOfBinsZ = zRange * 12;
-
-const int numberOfHitsInEventHisto = 10;
-const int numberOfConditions = 6;
-
-float CUT_ON_Z_VALUE = 23;
-float CUT_ON_LOR_DISTANCE_FROM_CENTER = 25;
-float ANNIHILATION_POINT_Z = 23;
-float TOT_MIN_VALUE_IN_NS = 15;
-float TOT_MAX_VALUE_IN_NS = 25;
-float ANGLE_DELTA_MIN_VALUE = 20;
-
 ImageReco::ImageReco(const char* name) : JPetUserTask(name) {}
 
 ImageReco::~ImageReco() {}
@@ -44,12 +27,24 @@ ImageReco::~ImageReco() {}
 bool ImageReco::init()
 {
   auto opts = getOptions();
-  CUT_ON_Z_VALUE = getOptionAsFloat(opts, "ImageReco_CUT_ON_Z_VALUE_float");
-  CUT_ON_LOR_DISTANCE_FROM_CENTER = getOptionAsFloat(opts, "ImageReco_CUT_ON_LOR_DISTANCE_FROM_CENTER_float");
-  ANNIHILATION_POINT_Z = getOptionAsFloat(opts, "ImageReco_ANNIHILATION_POINT_Z_float");
-  TOT_MIN_VALUE_IN_NS = getOptionAsFloat(opts, "ImageReco_TOT_MIN_VALUE_IN_NS_float");
-  TOT_MAX_VALUE_IN_NS = getOptionAsFloat(opts, "ImageReco_TOT_MAX_VALUE_IN_NS_float");
-  ANGLE_DELTA_MIN_VALUE = getOptionAsFloat(opts, "ImageReco_ANGLE_DELTA_MIN_VALUE_float");
+  if (isOptionSet(opts, fCutOnZValueKey)) {
+    CUT_ON_Z_VALUE = getOptionAsFloat(opts, fCutOnZValueKey);
+  }
+  if (isOptionSet(opts, fCutOnLORDistanceKey)) {
+    CUT_ON_LOR_DISTANCE_FROM_CENTER = getOptionAsFloat(opts, fCutOnLORDistanceKey);
+  }
+  if (isOptionSet(opts, fCutOnAnnihilationPointZ)) {
+    ANNIHILATION_POINT_Z = getOptionAsFloat(opts, fCutOnAnnihilationPointZ);
+  }
+  if (isOptionSet(opts, fCutOnTOTMinValue)) {
+    TOT_MIN_VALUE_IN_NS = getOptionAsFloat(opts, fCutOnTOTMinValue);
+  }
+  if (isOptionSet(opts, fCutOnTOTMaxValue)) {
+    TOT_MAX_VALUE_IN_NS = getOptionAsFloat(opts, fCutOnTOTMaxValue);
+  }
+  if (isOptionSet(opts, fCutOnAngleDeltaMinValue)) {
+    ANGLE_DELTA_MIN_VALUE = getOptionAsFloat(opts, fCutOnAngleDeltaMinValue);
+  }
 
   fOutputEvents = new JPetTimeWindow("JPetEvent");
 
