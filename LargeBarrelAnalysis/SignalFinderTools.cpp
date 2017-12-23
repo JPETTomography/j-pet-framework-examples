@@ -225,21 +225,21 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(
   //filling controll histograms
   if (saveControlHistos) {
     stats.getHisto1D("remainig_leading_sig_ch_per_thr")
-    .Fill(1, thresholdSigCh.at(0).size());
+    ->Fill(1, thresholdSigCh.at(0).size());
     stats.getHisto1D("remainig_leading_sig_ch_per_thr")
-    .Fill(2, thresholdSigCh.at(1).size());
+    ->Fill(2, thresholdSigCh.at(1).size());
     stats.getHisto1D("remainig_leading_sig_ch_per_thr")
-    .Fill(3, thresholdSigCh.at(2).size());
+    ->Fill(3, thresholdSigCh.at(2).size());
     stats.getHisto1D("remainig_leading_sig_ch_per_thr")
-    .Fill(4, thresholdSigCh.at(3).size());
+    ->Fill(4, thresholdSigCh.at(3).size());
     stats.getHisto1D("remainig_trailing_sig_ch_per_thr")
-    .Fill(1, thresholdSigCh.at(4).size());
+    ->Fill(1, thresholdSigCh.at(4).size());
     stats.getHisto1D("remainig_trailing_sig_ch_per_thr")
-    .Fill(2, thresholdSigCh.at(5).size());
+    ->Fill(2, thresholdSigCh.at(5).size());
     stats.getHisto1D("remainig_trailing_sig_ch_per_thr")
-    .Fill(3, thresholdSigCh.at(6).size());
+    ->Fill(3, thresholdSigCh.at(6).size());
     stats.getHisto1D("remainig_trailing_sig_ch_per_thr")
-    .Fill(4, thresholdSigCh.at(7).size());
+    ->Fill(4, thresholdSigCh.at(7).size());
   }
 
   return rawSigVec;

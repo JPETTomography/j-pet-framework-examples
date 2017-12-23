@@ -147,12 +147,12 @@ std::vector<JPetHit> HitFinderTools::createHits(
             hits.push_back(hit);
 
             statistics.getHisto2D("time_diff_per_scin")
-            .Fill(hit.getTimeDiff(),
-                  (float)(hit.getScintillator().getID()));
+            ->Fill(hit.getTimeDiff(),
+                   (float)(hit.getScintillator().getID()));
 
             statistics.getHisto2D("hit_pos_per_scin")
-            .Fill(hit.getPosZ(),
-                  (float)(hit.getScintillator().getID()));
+            ->Fill(hit.getPosZ(),
+                   (float)(hit.getScintillator().getID()));
           }
         }
       }

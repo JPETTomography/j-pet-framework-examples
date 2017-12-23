@@ -79,7 +79,7 @@ bool HitFinder::exec()
                                   kTimeWindowWidth,
                                   fVelocityMap);
     saveHits(hits);
-    getStatistics().getHisto1D("hits_per_time_window").Fill(hits.size());
+    getStatistics().getHisto1D("hits_per_time_window")->Fill(hits.size());
     fAllSignalsInTimeWindow.clear();
   } else {
     return false;
