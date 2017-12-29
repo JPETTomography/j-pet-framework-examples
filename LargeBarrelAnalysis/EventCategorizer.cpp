@@ -16,6 +16,7 @@
 #include <iostream>
 #include <JPetWriter/JPetWriter.h>
 #include "EventCategorizer.h"
+#include "EventCategorizerTools.h"
 
 using namespace std;
 
@@ -94,13 +95,36 @@ bool EventCategorizer::init()
                100, 0.0, 150.0,
                360, -0.5, 359.5)
     );
-
     getStatistics().createHistogram(
-      new TH2F("3_hit_angles",
+       new TH2F("3_hit_angles",
                "3 Hit angles difference 1-2, 2-3",
                360, -0.5, 359.5,
                360, -0.5, 359.5)
+		    );
+    getStatistics().createHistogram(
+      new TH2F("XY",
+               "XY coordinates of annihilation points",
+               121, -60.5, 60.5,
+               121, -60.5, 60.5)
     );
+    getStatistics().createHistogram(
+      new TH2F("XZ",
+               "XZ coordinates of annihilation points",
+               121, -60.5, 60.5,
+               121, -60.5, 60.5)
+    );
+    getStatistics().createHistogram(
+      new TH2F("YZ",
+               "YZ coordinates of annihilation points",
+               121, -60.5, 60.5,
+               121, -60.5, 60.5)
+    );
+    getStatistics().createHistogram(
+      new TH1F("TOF",
+               "TOF annihilation events",
+               600, -3000,3000)
+    );
+    
   }
   return true;
 }
@@ -178,7 +202,16 @@ bool EventCategorizer::exec()
           }
         }
       }
-
+      if (event.getHits().size() == 2)
+      {
+	JPetHit firstHit = event.getHits().at(0);
+        JPetHit secondHit = event.getHits().at(1);
+	getStatistics().getHisto1D("TOF").Fill(EventCategorizerTools::calculateTOF(firstHit, secondHit));
+	Point3D annhilationPoint = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit);
+	getStatistics().getHisto2D("XY").Fill(annhilationPoint.x, annhilationPoint.y);
+	getStatistics().getHisto2D("XZ").Fill(annhilationPoint.x, annhilationPoint.z);
+	getStatistics().getHisto2D("YZ").Fill(annhilationPoint.y, annhilationPoint.z);
+      }
       if (event.getHits().size() == 3) {
         JPetHit firstHit = event.getHits().at(0);
         JPetHit secondHit = event.getHits().at(1);
