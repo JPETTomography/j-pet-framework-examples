@@ -3,7 +3,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "SignalFinderTools.h"
-#include "./JPetLoggerInclude.h"
+#include "JPetLoggerInclude.h"
 
 
 BOOST_AUTO_TEST_SUITE(FirstSuite)
