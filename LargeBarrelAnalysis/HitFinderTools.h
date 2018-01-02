@@ -27,8 +27,6 @@ public:
   typedef std::map<int, std::pair<std::vector<JPetPhysSignal>, std::vector<JPetPhysSignal>>> SignalsContainer;
   typedef std::map<int, std::pair<double, double>> VelocityMap;
 
-  void setStatistics(const JPetStatistics& statistics);
-
   /**
   * Map od all signals within a single DAQ time window.
   * For each scintillator with at least one signal this container stores two vectors

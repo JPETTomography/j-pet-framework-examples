@@ -39,13 +39,11 @@ BOOST_AUTO_TEST_CASE( checkZAxisConvention )
 
   double timeDifferenceWindow = 25000;
 
-  std::map<int, std::vector<double>> velMap;
-  std::vector<double> values;
-  values.push_back(12.6);
-  values.push_back(1.1);
+  HitFinderTools::VelocityMap velMap;
+  std::pair<double, double> values = std::make_pair(12.6, 1.1);
   velMap[barrelSlotID] = values;
 
-  HitFinderTools HitTools(stats);
+  HitFinderTools HitTools;
   std::vector<JPetHit> hit = HitTools.createHits(stats, allSignalsInTimeWindow, timeDifferenceWindow, velMap);
   BOOST_REQUIRE( hit[0].getPosZ() > 0 );
 
