@@ -10,17 +10,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file EventCategorizerImaging.h
+ *  @file EventCategorizerPhysics.h
  */
 
-#ifndef EVENTCATEGORIZERIMAGING_H
-#define EVENTCATEGORIZERIMAGING_H
+#ifndef EVENTCATEGORIZERPHYSICS_H
+#define EVENTCATEGORIZERPHYSICS_H
 #include <vector>
 #include <map>
-#include <JPetUserTask/JPetUserTask.h>
 #include <JPetHit/JPetHit.h>
 #include <JPetEvent/JPetEvent.h>
 #include <JPetEventType/JPetEventType.h>
+#include <JPetUserTask/JPetUserTask.h>
 #include <JPetStatistics/JPetStatistics.h>
 
 class JPetWriter;
@@ -29,20 +29,26 @@ class JPetWriter;
 #	define override
 #endif
 
-class EventCategorizerImaging : public JPetUserTask{
+class EventCategorizerPhysics : public JPetUserTask{
 public:  
-	EventCategorizerImaging(const char * name);
-	virtual ~EventCategorizerImaging(){}
+	EventCategorizerPhysics(const char * name);
+	virtual ~EventCategorizerPhysics(){}
 	virtual bool init() override;
 	virtual bool exec() override;
 	virtual bool terminate() override;
-	int Imaging( std::vector<JPetHit> Hits, double MinAnnihilationTOT, double MaxAnnihilationTOT, bool SaveControlHistos );
+	std::vector<unsigned> PhysicsAnalysis( std::vector<JPetHit> Hits, double MinAnnihilationTOT, double MaxAnnihilationTOT, double MinDeexcitationTOT, double MaxDeexcitationTOT, bool SaveControlHistos );
 
 protected:
+	
 	double kMinAnnihilationTOT = 10000.0;
 	double kMaxAnnihilationTOT = 25000.0;
 	const std::string fMinAnnihilationParamKey = "EventCategorizer_MinAnnihilationTOT_float";
 	const std::string fMaxAnnihilationParamKey = "EventCategorizer_MaxAnnihilationTOT_float";
+	
+	double kMinDeexcitationTOT = 30000.0;
+	double kMaxDeexcitationTOT = 50000.0;
+	const std::string fMinDeexcitationParamKey = "EventCategorizer_MinDeexcitationTOT_float";
+	const std::string fMaxDeexcitationParamKey = "EventCategorizer_MaxDeexcitationTOT_float";
 	
 	void saveEvents(const std::vector<JPetEvent>& event);
 	bool fSaveControlHistos = true;
