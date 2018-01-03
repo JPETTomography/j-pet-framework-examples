@@ -107,7 +107,7 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& hits)
 
     if (fSaveControlHistos) getStatistics()
       .getHisto1D("hits_per_event")
-      .Fill(event.getHits().size());
+      ->Fill(event.getHits().size());
 
     eventVec.push_back(event);
   }
