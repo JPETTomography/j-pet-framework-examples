@@ -206,11 +206,11 @@ bool EventCategorizer::exec()
       {
 	JPetHit firstHit = event.getHits().at(0);
         JPetHit secondHit = event.getHits().at(1);
-	getStatistics().getHisto1D("TOF").Fill(EventCategorizerTools::calculateTOF(firstHit, secondHit));
+	getStatistics().getHisto1D("TOF")->Fill(EventCategorizerTools::calculateTOF(firstHit, secondHit));
 	Point3D annhilationPoint = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit);
-	getStatistics().getHisto2D("XY").Fill(annhilationPoint.x, annhilationPoint.y);
-	getStatistics().getHisto2D("XZ").Fill(annhilationPoint.x, annhilationPoint.z);
-	getStatistics().getHisto2D("YZ").Fill(annhilationPoint.y, annhilationPoint.z);
+	getStatistics().getHisto2D("XY")->Fill(annhilationPoint.x, annhilationPoint.y);
+	getStatistics().getHisto2D("XZ")->Fill(annhilationPoint.x, annhilationPoint.z);
+	getStatistics().getHisto2D("YZ")->Fill(annhilationPoint.y, annhilationPoint.z);
       }
       if (event.getHits().size() == 3) {
         JPetHit firstHit = event.getHits().at(0);
