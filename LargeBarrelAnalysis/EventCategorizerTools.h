@@ -16,7 +16,7 @@
 #ifndef _EVENTCATEGORIZERTOOLS_H_
 #define _EVENTCATEGORIZERTOOLS_H_
 
-#include <DataObjects/JPetHit/JPetHit.h>
+#include <JPetHit/JPetHit.h>
 
 struct Point3D
 {
