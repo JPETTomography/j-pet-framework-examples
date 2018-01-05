@@ -7,7 +7,6 @@
 #include <JPetPhysSignal/JPetPhysSignal.h>
 #include "JPetLoggerInclude.h"
 
-typedef std::map <int, std::pair < std::vector<JPetPhysSignal>, std::vector<JPetPhysSignal> > > SignalsContainer;
 BOOST_AUTO_TEST_SUITE(FirstSuite)
 
 BOOST_AUTO_TEST_CASE( checkZAxisConvention )
