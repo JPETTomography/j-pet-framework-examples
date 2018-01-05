@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(checkTOFsignPositive)
 
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(AnnihilationPointSuite )
+BOOST_AUTO_TEST_SUITE(AnnihilationPointSuite)
 
 BOOST_AUTO_TEST_CASE(pointAtCenter)
 {
