@@ -26,17 +26,17 @@ Point3D EventCategorizerTools::calculateAnnihilationPoint(const JPetHit& firstHi
 		    pow((firstHitPoint.y - latterHitPoint.y),2) +
 		    pow((firstHitPoint.z - latterHitPoint.z),2) );
   
-  std::vector<double> versorOnLOR;  //towards first hit
-  versorOnLOR.push_back( fabs( (latterHitPoint.x - firstHitPoint.x)/LORlength ) );
-  versorOnLOR.push_back( fabs( (latterHitPoint.y - firstHitPoint.y)/LORlength ) );
-  versorOnLOR.push_back( fabs( (latterHitPoint.z - firstHitPoint.z)/LORlength ) );
+  double versorOnLOR_x, versorOnLOR_y, versorOnLOR_z;  //towards first hit
+  versorOnLOR_x =  fabs( (latterHitPoint.x - firstHitPoint.x)/LORlength );
+  versorOnLOR_y = fabs( (latterHitPoint.y - firstHitPoint.y)/LORlength );
+  versorOnLOR_z = fabs( (latterHitPoint.z - firstHitPoint.z)/LORlength );
   
   double velocity = 30.0; //cm/ns
   velocity/=1000; //cm/ps
   
-  annihilationPoint.x = middleOfLOR.x - versorOnLOR[0]* calculateTOF(firstHit, latterHit)*velocity;
-  annihilationPoint.y = middleOfLOR.y - versorOnLOR[1]* calculateTOF(firstHit, latterHit)*velocity;
-  annihilationPoint.z = middleOfLOR.z - versorOnLOR[2]* calculateTOF(firstHit, latterHit)*velocity;
+  annihilationPoint.x = middleOfLOR.x - versorOnLOR_x* calculateTOF(firstHit, latterHit)*velocity;
+  annihilationPoint.y = middleOfLOR.y - versorOnLOR_y* calculateTOF(firstHit, latterHit)*velocity;
+  annihilationPoint.z = middleOfLOR.z - versorOnLOR_z* calculateTOF(firstHit, latterHit)*velocity;
   
   return annihilationPoint;
 }
