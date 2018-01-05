@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(checkTOFsignNegative)
   secondHit.setBarrelSlot(secondSlot);
   
   double tof = EventCategorizerTools::calculateTOF(firstHit, secondHit);
-  BOOST_REQUIRE( tof < 0 );
+  BOOST_REQUIRE_LT( tof, 0 );
 }
 
 BOOST_AUTO_TEST_CASE(checkTOFsignPositive)
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(checkTOFsignPositive)
   secondHit.setBarrelSlot(secondSlot);
   
   double tof = EventCategorizerTools::calculateTOF(firstHit, secondHit);
-  BOOST_REQUIRE( tof > 0 );
+  BOOST_REQUIRE_GT( tof, 0 );
 }
 
 BOOST_AUTO_TEST_SUITE_END()
