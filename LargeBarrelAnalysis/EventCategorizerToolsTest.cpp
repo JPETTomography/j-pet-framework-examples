@@ -3,8 +3,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "EventCategorizerTools.h"
-#include "../j-pet-framework/DataObjects/JPetHit/JPetHit.h"
-// #include "../j-pet-framework/Core/JPetBarrelSlot/JPetBarrelSlot.h"
+#include "JPetHit/JPetHit.h"
 
 BOOST_AUTO_TEST_SUITE(TOFSuite)
 
