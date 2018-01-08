@@ -148,6 +148,50 @@ bool EventCategorizer::init()
 		getStatistics().getHisto1D("4_hit_T_diff").SetXTitle("Time difference [ns]");
 		getStatistics().getHisto1D("4_hit_T_diff").SetYTitle("Counts");	
 		
+			getStatistics().createHistogram(
+			new TH2F("4_hit_T_diff_anni_vs_angles",
+								"",
+								40000, -200, 200,
+								360, -0.5, 359.5)
+			);
+			getStatistics().getHisto2D("4_hit_T_diff_anni_vs_angles").SetXTitle("Time difference [ns]");
+			getStatistics().getHisto2D("4_hit_T_diff_anni_vs_angles").SetYTitle("Sum of the two smallest angles [deg]");	
+			
+			getStatistics().createHistogram(
+			new TH2F("4_hit_TOT1_vs_angles",
+								"",
+								1500, 0, 150,
+								360, -0.5, 359.5)
+			);
+			getStatistics().getHisto2D("4_hit_TOT1_vs_angles").SetXTitle("TOT [ns]");
+			getStatistics().getHisto2D("4_hit_TOT1_vs_angles").SetYTitle("Sum of two smallest angles [deg]");
+			
+			getStatistics().createHistogram(
+			new TH2F("4_hit_TOT2_vs_angles",
+								"",
+								1500, 0, 150,
+								360, -0.5, 359.5)
+			);
+			getStatistics().getHisto2D("4_hit_TOT2_vs_angles").SetXTitle("TOT [ns]");
+			getStatistics().getHisto2D("4_hit_TOT2_vs_angles").SetYTitle("Sum of two smallest angles [deg]");
+			
+			getStatistics().createHistogram(
+			new TH2F("4_hit_TOT3_vs_angles",
+								"",
+								1500, 0, 150,
+								360, -0.5, 359.5)
+			);
+			getStatistics().getHisto2D("4_hit_TOT3_vs_angles").SetXTitle("TOT [ns]");
+			getStatistics().getHisto2D("4_hit_TOT3_vs_angles").SetYTitle("Sum of two smallest angles [deg]");
+			
+			getStatistics().createHistogram(
+			new TH1F("Scatter_Test",
+								"",
+								40000, -200, 200)
+			);
+			getStatistics().getHisto1D("Scatter_Test").SetXTitle("Scatter test [ns]");
+			getStatistics().getHisto1D("Scatter_Test").SetYTitle("Counts");	
+		
 		getStatistics().createHistogram(
 			new TH2F("4_hit_pos",
 								"Pos reco",
@@ -291,7 +335,7 @@ bool EventCategorizer::exec()
 		{
 			  if( AnniHits[i].getTime() > DeexHits[0].getTime() - 100000 )//ps
 			  {
-				  int test = CheckIfScattered( DeexHits[0], AnniHits[i],  0.5 );
+				  int test = CheckIfScattered( DeexHits[0], AnniHits[i],  0.5, getStatistics() );
 				  if( ! test)
 				  {
 					  getStatistics().getHisto1D("Quick_T_diff").Fill(  AnniHits[i].getTime()/1000 - DeexHits[0].getTime()/1000 );
@@ -424,7 +468,7 @@ bool EventCategorizer::exec()
 					
 					if( AnniHitsDec3[i].getScintillator().getID() != AnniHitsDec3[j].getScintillator().getID() && AnniHitsDec3[i].getScintillator().getID() != AnniHitsDec3[k].getScintillator().getID() && AnniHitsDec3[k].getScintillator().getID() != AnniHitsDec3[j].getScintillator().getID() && DeexHits[0].getScintillator().getID() != AnniHitsDec3[i].getScintillator().getID() && DeexHits[0].getScintillator().getID() != AnniHitsDec3[j].getScintillator().getID() && DeexHits[0].getScintillator().getID() != AnniHitsDec3[k].getScintillator().getID() )
 					{		
-
+					  
 						angles4.clear();
 						double angle11 = CalcAngle( AnniHitsDec3[i], AnniHitsDec3[j]);
 						double angle22 = CalcAngle( AnniHitsDec3[j], AnniHitsDec3[k]);
@@ -437,13 +481,64 @@ bool EventCategorizer::exec()
 						getStatistics().getHisto1D("4_hit_angles_distance_from_0").Fill( CalcDistanceOfSurfaceAndZero( AnniHitsDec3[i], AnniHitsDec3[j], AnniHitsDec3[k] ) );
 						if( angles4[1] + angles4[0] > 190 && CalcDistanceOfSurfaceAndZero( AnniHitsDec3[i], AnniHitsDec3[j], AnniHitsDec3[k] ) < 5 )
 						{
+							double TOT1 = CalcTOT( AnniHitsDec3[i] );
+							double TOT2 = CalcTOT( AnniHitsDec3[j] );
+							double TOT3 = CalcTOT( AnniHitsDec3[k] );
+							if( TOT1 < TOT2 && TOT1 < TOT3 )
+							{
+								if( TOT2 < TOT3 )
+								{
+									getStatistics().getHisto2D("4_hit_TOT1_vs_angles").Fill( TOT1 ,angles4[1] + angles4[0] );
+									getStatistics().getHisto2D("4_hit_TOT2_vs_angles").Fill( TOT2 ,angles4[1] + angles4[0] );
+									getStatistics().getHisto2D("4_hit_TOT3_vs_angles").Fill( TOT3 ,angles4[1] + angles4[0] );
+								}
+								else
+								{
+									getStatistics().getHisto2D("4_hit_TOT1_vs_angles").Fill( TOT1 ,angles4[1] + angles4[0] );
+									getStatistics().getHisto2D("4_hit_TOT2_vs_angles").Fill( TOT3 ,angles4[1] + angles4[0] );
+									getStatistics().getHisto2D("4_hit_TOT3_vs_angles").Fill( TOT2 ,angles4[1] + angles4[0] );
+								}
+							}
+							else if( TOT2 < TOT1 && TOT2 < TOT3 )
+							{
+								if( TOT1 < TOT3 )
+								{
+									getStatistics().getHisto2D("4_hit_TOT1_vs_angles").Fill( TOT2 ,angles4[1] + angles4[0] );
+									getStatistics().getHisto2D("4_hit_TOT2_vs_angles").Fill( TOT1 ,angles4[1] + angles4[0] );
+									getStatistics().getHisto2D("4_hit_TOT3_vs_angles").Fill( TOT3 ,angles4[1] + angles4[0] );
+								}
+								else
+								{
+									getStatistics().getHisto2D("4_hit_TOT1_vs_angles").Fill( TOT2 ,angles4[1] + angles4[0] );
+									getStatistics().getHisto2D("4_hit_TOT2_vs_angles").Fill( TOT3 ,angles4[1] + angles4[0] );
+									getStatistics().getHisto2D("4_hit_TOT3_vs_angles").Fill( TOT1 ,angles4[1] + angles4[0] );
+								}
+							}
+							else
+							{
+								if( TOT1 < TOT2 )
+								{
+									getStatistics().getHisto2D("4_hit_TOT1_vs_angles").Fill( TOT3 ,angles4[1] + angles4[0] );
+									getStatistics().getHisto2D("4_hit_TOT2_vs_angles").Fill( TOT1 ,angles4[1] + angles4[0] );
+									getStatistics().getHisto2D("4_hit_TOT3_vs_angles").Fill( TOT2 ,angles4[1] + angles4[0] );
+								}
+								else
+								{
+									getStatistics().getHisto2D("4_hit_TOT1_vs_angles").Fill( TOT3 ,angles4[1] + angles4[0] );
+									getStatistics().getHisto2D("4_hit_TOT2_vs_angles").Fill( TOT2 ,angles4[1] + angles4[0] );
+									getStatistics().getHisto2D("4_hit_TOT3_vs_angles").Fill( TOT1 ,angles4[1] + angles4[0] );
+								}
+							}
+						  
 							getStatistics().getHisto1D("4_hit_T_diff_anni").Fill(  fabs( 2*NormalizeTime( AnniHitsDec3[i] ) - NormalizeTime( AnniHitsDec3[j] ) - NormalizeTime( AnniHitsDec3[k] ) )/2 );
-							  int test = CheckIfScattered( AnniHitsDec3[i], AnniHitsDec3[j], 0.2 ) + CheckIfScattered( AnniHitsDec3[i], AnniHitsDec3[k], 0.2 ) + CheckIfScattered( AnniHitsDec3[j], AnniHitsDec3[k], 0.2 ) + CheckIfScattered( DeexHits[0], AnniHitsDec3[i], 0.2 ) + CheckIfScattered( DeexHits[0], AnniHitsDec3[j], 0.2 ) + CheckIfScattered( DeexHits[0], AnniHitsDec3[k], 0.2 );
+							
+							  int test = CheckIfScattered( AnniHitsDec3[i], AnniHitsDec3[j], 0.2, getStatistics() ) + CheckIfScattered( AnniHitsDec3[i], AnniHitsDec3[k], 0.2, getStatistics() ) + CheckIfScattered( AnniHitsDec3[j], AnniHitsDec3[k], 0.2, getStatistics() ) + CheckIfScattered( DeexHits[0], AnniHitsDec3[i], 0.2, getStatistics() ) + CheckIfScattered( DeexHits[0], AnniHitsDec3[j], 0.2, getStatistics() ) + CheckIfScattered( DeexHits[0], AnniHitsDec3[k], 0.2, getStatistics() );
 							  std::cout << test << std::endl;
 							if( fabs( 2*NormalizeTime( AnniHitsDec3[i] ) - NormalizeTime( AnniHitsDec3[j] ) - NormalizeTime( AnniHitsDec3[k] ) )/2 < 1.5 /* && !test*/ )
 							{
 							  std::cout << NormalizeTime( AnniHitsDec3[j] ) - NormalizeTime( AnniHitsDec3[i] ) << " " << NormalizeTime( AnniHitsDec3[k] ) - NormalizeTime( AnniHitsDec3[i] ) << std::endl;
 							  getStatistics().getHisto1D("4_hit_T_diff").Fill(  ( NormalizeTime( AnniHitsDec3[i] ) + NormalizeTime( AnniHitsDec3[j] ) + NormalizeTime( AnniHitsDec3[k] ) )/3  - NormalizeTime( DeexHits[0] ) );
+							  getStatistics().getHisto2D("4_hit_T_diff_anni_vs_angles").Fill(  ( NormalizeTime( AnniHitsDec3[i] ) + NormalizeTime( AnniHitsDec3[j] ) + NormalizeTime( AnniHitsDec3[k] ) )/3  - NormalizeTime( DeexHits[0] ), angles4[1] + angles4[0] );
 							  RecoPos( AnniHitsDec3[i], AnniHitsDec3[j], AnniHitsDec3[k] );
 							}
 						}
@@ -551,13 +646,14 @@ double CalcDistanceOfSurfaceAndZero( JPetHit Hit1, JPetHit Hit2, JPetHit Hit3 )
 	return distanceFromZero;
 }
 
-int CheckIfScattered( JPetHit Hit1, JPetHit Hit2, double ErrorInterval )
+int CheckIfScattered( JPetHit Hit1, JPetHit Hit2, double ErrorInterval, JPetStatistics& Stats )
 {
 	double TDiff = fabs(Hit2.getTime()/1000 - Hit1.getTime()/1000);
 	TVector3 vec1( Hit2.getPosX() - Hit1.getPosX(), Hit2.getPosY() - Hit1.getPosY(), Hit2.getPosZ() - Hit1.getPosZ() );
 	double Distance = vec1.Mag();
 	double LightVel = 29.979246; 
 	double ScattTime = Distance/LightVel;
+	Stats.getHisto1D("Scatter_Test").Fill( TDiff - ScattTime );
 	if( fabs( TDiff - ScattTime ) < ErrorInterval )
 		return 1;
 	else

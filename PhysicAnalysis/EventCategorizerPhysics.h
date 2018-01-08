@@ -36,7 +36,7 @@ public:
 	virtual bool init() override;
 	virtual bool exec() override;
 	virtual bool terminate() override;
-	std::vector<unsigned> PhysicsAnalysis( std::vector<JPetHit> Hits, double MinAnnihilationTOT, double MaxAnnihilationTOT, double MinDeexcitationTOT, double MaxDeexcitationTOT, bool SaveControlHistos );
+	std::vector<unsigned> PhysicsAnalysis( std::vector<JPetHit> Hits );
 
 protected:
 	

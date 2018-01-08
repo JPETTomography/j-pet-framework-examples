@@ -18,7 +18,6 @@
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include "EventCategorizerCosmic.h"
 #include "../LargeBarrelAnalysis/EventCategorizerTools.h"
-#include "../LargeBarrelAnalysis/EventCategorizerTools.cpp"
 
 using namespace jpet_options_tools;
 
@@ -71,7 +70,7 @@ bool EventCategorizerCosmic::exec()
 	if (event.getHits().size() >= 1) 
 	{
 		vector<JPetHit> hits = event.getHits();	 	
-		CosmicHits = CosmicAnalysis( hits, kMinCosmicTOT/1000, fSaveControlHistos );	
+		CosmicHits = CosmicAnalysis( hits );	
 		if( CosmicHits )
 		{
 			JPetEvent newEvent;
@@ -104,7 +103,6 @@ bool EventCategorizerCosmic::exec()
 
 bool EventCategorizerCosmic::terminate()
 {
-  //INFO("More than one hit Events done. Writing control histograms.");
   return true;
 }
 
@@ -116,22 +114,22 @@ void EventCategorizerCosmic::saveEvents(const vector<JPetEvent>& events)
 }
 
 
-int EventCategorizerCosmic::CosmicAnalysis( vector<JPetHit> Hits, double MinTOT, bool SaveControlHistos )
+int EventCategorizerCosmic::CosmicAnalysis( vector<JPetHit> Hits )
 {
 	int NmbOfCosmics = 0;
 	for( unsigned i=0; i<Hits.size(); i++ )
 	{
 		double TOTofHit = EventCategorizerTools::CalcTOT( Hits[i] );
-		if( TOTofHit >= MinTOT )
+		if( TOTofHit >= kMinCosmicTOT/1000 )
 		{
 			NmbOfCosmics++;
-			if( SaveControlHistos )
+			if( fSaveControlHistos )
 			{
 				getStatistics().getHisto1D("Cosmic_TOT").Fill( TOTofHit );
 			}
 		}
 	}
-	if( SaveControlHistos )
+	if( fSaveControlHistos )
 	{
 		getStatistics().getHisto1D("Cosmic_Hits_in_event").Fill( NmbOfCosmics );
 	}

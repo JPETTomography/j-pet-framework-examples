@@ -50,7 +50,7 @@ double CalcScattAngle( JPetHit Hit1, JPetHit Hit2 );
 double CalcDistanceBetweenHits( JPetHit Hit1, JPetHit Hit2 );
 double CalcAngle( JPetHit Hit1, JPetHit Hit2 );
 double CalcDistanceOfSurfaceAndZero( JPetHit Hit1, JPetHit Hit2, JPetHit Hit3 );
-int CheckIfScattered( JPetHit Hit1, JPetHit Hit2, double ErrorInterval );
+int CheckIfScattered( JPetHit Hit1, JPetHit Hit2, double ErrorInterval, JPetStatistics& Stats );
 double NormalizeTime( JPetHit Hit1 );
 double NormalizeTimeToPoint( JPetHit Hit1, TVector3 Point );
 

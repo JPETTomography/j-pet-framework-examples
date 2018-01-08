@@ -36,7 +36,7 @@ public:
 	virtual bool init() override;
 	virtual bool exec() override;
 	virtual bool terminate() override;
-	int Imaging( std::vector<JPetHit> Hits, double MinAnnihilationTOT, double MaxAnnihilationTOT, bool SaveControlHistos );
+	int Imaging( std::vector<JPetHit> Hits );
 
 protected:
 	double kMinAnnihilationTOT = 10000.0;

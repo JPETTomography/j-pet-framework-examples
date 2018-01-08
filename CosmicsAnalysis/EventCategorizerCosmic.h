@@ -37,7 +37,7 @@ public:
 	virtual bool init() override;
 	virtual bool exec() override;
 	virtual bool terminate() override;
-	int CosmicAnalysis( std::vector<JPetHit> Hits, double MinTOT, bool SaveControlHistos );
+	int CosmicAnalysis( std::vector<JPetHit> Hits );
 
 protected:
 	double kMinCosmicTOT = 55000.0;
