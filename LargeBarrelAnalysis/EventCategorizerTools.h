@@ -49,6 +49,7 @@ public:
 	
 	static double CalcDistFromCentres( TVector3 Sol1, TVector3 Gamma1, TVector3 Gamma2, TVector3 Gamma3 );
 	static double NormalizeTime( JPetHit Hit1 );
+	static double NormalizeTimeToPoint( JPetHit Hit1, TVector3 Point );
 
 	
 };

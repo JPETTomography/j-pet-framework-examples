@@ -18,45 +18,45 @@
 #include <iterator>
 
 
-double EventCategorizerTools::CalcTOT( JPetHit Hit )
+double EventCategorizerTools::CalcTOT( JPetHit Hit )  // Calculation of TOT of the Hit, as the sum of the TOTs on all thresholds (1-4) and both sides (A,B)
 {
 	double TOT = 0;
-	  std::map<int, double> lead_timesA, lead_timesB, trail_timesA, trail_timesB;
-	  lead_timesA = Hit.getSignalA().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading);
-	  lead_timesB = Hit.getSignalB().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading);
-	  trail_timesA = Hit.getSignalA().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Trailing);
-	  trail_timesB = Hit.getSignalB().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Trailing);	  
-	  for(int i=1;i<=Hit.getSignalA().getRecoSignal().getRawSignal().getNumberOfPoints(JPetSigCh::Leading);i++){
-                    auto leadSearch = lead_timesA.find(i);
-                    auto trailSearch = trail_timesA.find(i);
-                    if (leadSearch != lead_timesA.end()
-                        && trailSearch != trail_timesA.end())
-                            TOT+=(trailSearch->second - leadSearch->second)/1000;
-                }
-          for(int i=1;i<=Hit.getSignalB().getRecoSignal().getRawSignal().getNumberOfPoints(JPetSigCh::Leading);i++){
-                    auto leadSearch = lead_timesB.find(i);
-                    auto trailSearch = trail_timesB.find(i);
-                    if (leadSearch != lead_timesB.end()
-                        && trailSearch != trail_timesB.end())
-                            TOT+=(trailSearch->second - leadSearch->second)/1000;
-                }
+	std::map< int, double > lead_timesA, lead_timesB, trail_timesA, trail_timesB;
+	lead_timesA = Hit.getSignalA().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading);
+	lead_timesB = Hit.getSignalB().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading);
+	trail_timesA = Hit.getSignalA().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Trailing);
+	trail_timesB = Hit.getSignalB().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Trailing);	  
+	for( int i=1; i<=Hit.getSignalA().getRecoSignal().getRawSignal().getNumberOfPoints(JPetSigCh::Leading); i++ )
+	{
+		  auto leadSearch = lead_timesA.find(i);
+		  auto trailSearch = trail_timesA.find(i);
+		  if (leadSearch != lead_timesA.end() && trailSearch != trail_timesA.end())
+			  TOT+=(trailSearch->second - leadSearch->second)/1000;
+	}
+	for( int i=1; i<=Hit.getSignalB().getRecoSignal().getRawSignal().getNumberOfPoints(JPetSigCh::Leading); i++ )
+	{
+		  auto leadSearch = lead_timesB.find(i);
+		  auto trailSearch = trail_timesB.find(i);
+		  if (leadSearch != lead_timesB.end() && trailSearch != trail_timesB.end())
+			  TOT+=(trailSearch->second - leadSearch->second)/1000;
+	}
 	return TOT;
 }
 
-double EventCategorizerTools::CalcScattAngle( JPetHit Hit1, JPetHit Hit2 )
+double EventCategorizerTools::CalcScattAngle( JPetHit Hit1, JPetHit Hit2 ) // Calculation of scatter angle if the Hit1 represents primary Gamma registration, and Hit2 represents scatter gamma from Hit1. This function assumes that source of first gamma was in (0,0,0). Angle is calculated from scalar product
 {
-	double scalarProd = Hit1.getPosX()*(Hit2.getPosX()-Hit1.getPosX()) + Hit1.getPosY()*(Hit2.getPosY()-Hit1.getPosY()) + Hit1.getPosZ()*(Hit2.getPosZ()-Hit1.getPosZ());
+	double scalarProd = Hit1.getPosX()*(Hit2.getPosX()-Hit1.getPosX()) + Hit1.getPosY()*(Hit2.getPosY()-Hit1.getPosY()) + Hit1.getPosZ()*(Hit2.getPosZ()-Hit1.getPosZ()); // scalar product as simple multiplication of coordinates
 	double magProd = sqrt( ( pow(Hit1.getPosX(),2)	// Pos in cm
 			+pow(Hit1.getPosY(),2)
 			+pow(Hit1.getPosZ(),2) )*( pow(Hit2.getPosX()-Hit1.getPosX(),2)
 			+pow(Hit2.getPosY()-Hit1.getPosY(),2)
-			+pow(Hit2.getPosZ()-Hit1.getPosZ(),2) ) );
+			+pow(Hit2.getPosZ()-Hit1.getPosZ(),2) ) ); // multiplication of magnitudes of Hit positions vectors
 	double ScattAngle = acos( scalarProd/magProd )*180/3.14159265;
 	return ScattAngle;
 }
 
 
-double EventCategorizerTools::CalcScattTime( JPetHit Hit1, JPetHit Hit2 )
+double EventCategorizerTools::CalcScattTime( JPetHit Hit1, JPetHit Hit2 ) // Calculation of time that potentially could be equal to time difference between two hits, if the first one was primary gamma, and Hit2 is coming from scatter of Hit1
 {
 	float dist1_Scatt = sqrt(pow(Hit1.getPosX()-Hit2.getPosX(),2)  // Pos in cm
 			+pow(Hit1.getPosY()-Hit2.getPosY(),2)
@@ -64,7 +64,7 @@ double EventCategorizerTools::CalcScattTime( JPetHit Hit1, JPetHit Hit2 )
 	return dist1_Scatt/29.979246;  //light velocity in cm/s, returns time in ns
 }
 
-double EventCategorizerTools::CalcDistance( JPetHit Hit1, JPetHit Hit2 )
+double EventCategorizerTools::CalcDistance( JPetHit Hit1, JPetHit Hit2 ) // Calculation of distance between Hit1 and Hit2 positions
 {
 	float dist1 = sqrt(pow(Hit1.getPosX()-Hit2.getPosX(),2)  // Pos in cm
 			+pow(Hit1.getPosY()-Hit2.getPosY(),2)
@@ -72,7 +72,7 @@ double EventCategorizerTools::CalcDistance( JPetHit Hit1, JPetHit Hit2 )
 	return dist1;
 }
 
-double EventCategorizerTools::CalcAngle( JPetHit Hit1, JPetHit Hit2 )
+double EventCategorizerTools::CalcAngle( JPetHit Hit1, JPetHit Hit2 ) // Calculation of angle between Hit1 and Hit2 positions assuming that the gamma quanta represented by Hits came from (0,0,0). Calculation from scalar product in 3D - taking all 3 coordinates
 {
 	double scalarProd = Hit1.getPosX()*Hit2.getPosX() + Hit1.getPosY()*Hit2.getPosY() + Hit1.getPosZ()*Hit2.getPosZ();
 	double magProd = sqrt( ( pow(Hit1.getPosX(),2)	// Pos in cm
@@ -81,10 +81,10 @@ double EventCategorizerTools::CalcAngle( JPetHit Hit1, JPetHit Hit2 )
 			+pow(Hit2.getPosY(),2)
 			+pow(Hit2.getPosZ(),2) ) );
 	double Angle = acos( scalarProd/magProd )*180/3.14159265;
-	return Angle;
+	return Angle; // Angle in degrees
 }
 
-double EventCategorizerTools::CalcAngle2D( JPetHit Hit1, JPetHit Hit2 )
+double EventCategorizerTools::CalcAngle2D( JPetHit Hit1, JPetHit Hit2 ) // Calculation of angle between Hit1 and Hit2 positions assuming that the gamma quanta represented by Hits came from (0,0,0). Calculation from scalar product in 2D - taking only 2 coordinates -> XY plane
 {
 	double scalarProd = Hit1.getPosX()*Hit2.getPosX() + Hit1.getPosY()*Hit2.getPosY();
 	double magProd = sqrt( ( pow(Hit1.getPosX(),2)	// Pos in cm
@@ -92,13 +92,13 @@ double EventCategorizerTools::CalcAngle2D( JPetHit Hit1, JPetHit Hit2 )
 			( pow(Hit2.getPosX(),2)
 			+pow(Hit2.getPosY(),2) ) );
 	double Angle = acos( scalarProd/magProd )*180/3.14159265;
-	return Angle;
+	return Angle; // Angle in degrees
 }
 
-std::vector<double> EventCategorizerTools::CalcAnglesFrom3Hit( JPetHit Hit1, JPetHit Hit2, JPetHit Hit3 )
+std::vector<double> EventCategorizerTools::CalcAnglesFrom3Hit( JPetHit Hit1, JPetHit Hit2, JPetHit Hit3 ) // Calculation of relative angles between three hits - Result is vector of angles that contains: Angle between Hit1 and Hit2, Angle between Hit2 and Hit3, Angle between Hit3 and Hit1. Angles are calculated in 3D, form scalar product.
 {
 	std::vector<double> angles;
-	double angle12 = CalcAngle( Hit1, Hit2);
+	double angle12 = CalcAngle( Hit1, Hit2); // Angles - degrees
 	double angle23 = CalcAngle( Hit2, Hit3);
 	double angle31 = CalcAngle( Hit3, Hit1);
 	angles.push_back( angle12 );
@@ -108,10 +108,10 @@ std::vector<double> EventCategorizerTools::CalcAnglesFrom3Hit( JPetHit Hit1, JPe
 	return angles;
 }
 
-std::vector<double> EventCategorizerTools::CalcAngles2DFrom3Hit( JPetHit Hit1, JPetHit Hit2, JPetHit Hit3 )
+std::vector<double> EventCategorizerTools::CalcAngles2DFrom3Hit( JPetHit Hit1, JPetHit Hit2, JPetHit Hit3 ) // Calculation of relative angles between three hits - Result is vector of angles that contains: Angle between Hit1 and Hit2, Angle between Hit2 and Hit3, Angle between Hit3 and Hit1. Angles are calculated in 2D, form scalar product.
 {
 	std::vector<double> angles;
-	double angle12 = CalcAngle2D( Hit1, Hit2);
+	double angle12 = CalcAngle2D( Hit1, Hit2); // Angles - degrees
 	double angle23 = CalcAngle2D( Hit2, Hit3);
 	double angle31 = CalcAngle2D( Hit3, Hit1);
 	angles.push_back( angle12 );
@@ -121,14 +121,14 @@ std::vector<double> EventCategorizerTools::CalcAngles2DFrom3Hit( JPetHit Hit1, J
 	return angles;
 }
 
-double EventCategorizerTools::CalcDistanceOfSurfaceAndZero( JPetHit Hit1, JPetHit Hit2, JPetHit Hit3 )
+double EventCategorizerTools::CalcDistanceOfSurfaceAndZero( JPetHit Hit1, JPetHit Hit2, JPetHit Hit3 ) // Calculation of distance between plane based on Hit positions and (0,0,0)
 {
 	TVector3 vec1( Hit2.getPosX() - Hit1.getPosX(), Hit2.getPosY() - Hit1.getPosY(), Hit2.getPosZ() - Hit1.getPosZ() );
 	TVector3 vec2( Hit3.getPosX() - Hit2.getPosX(), Hit3.getPosY() - Hit2.getPosY(), Hit3.getPosZ() - Hit2.getPosZ() );
 	TVector3 crossProd  = vec1.Cross(vec2);
 	double Dcoeef = -crossProd(0)*Hit2.getPosX() -crossProd(1)*Hit2.getPosY() -crossProd(2)*Hit2.getPosZ();
 	double distanceFromZero = fabs(Dcoeef) / crossProd.Mag();
-	return distanceFromZero;
+	return distanceFromZero; // Distance in cm
 }
 
 TVector3 EventCategorizerTools::RecoPosition3Hit( JPetHit Hit1, JPetHit Hit2, JPetHit Hit3 )
@@ -171,134 +171,8 @@ TVector3 EventCategorizerTools::RecoPosition3Hit( JPetHit Hit1, JPetHit Hit2, JP
 	
 }
 
-/*TVector3 EventCategorizerTools::FindIntersection( JPetHit Hit1, JPetHit Hit2, JPetHit Hit3 )
-{
-	
-	TVector3 Hit1Pos( Hit1.getPosX(), Hit1.getPosY(), Hit1.getPosZ() );
-	TVector3 Hit2Pos( Hit2.getPosX(), Hit2.getPosY(), Hit2.getPosZ() );
-	TVector3 Hit3Pos( Hit3.getPosX(), Hit3.getPosY(), Hit3.getPosZ() );  
-	double t21 = Hit2.getTime()/1000 - Hit1.getTime()/1000;
-	double t31 = Hit3.getTime()/1000 - Hit1.getTime()/1000;
-  
-  
-	double R21 = sqrt( pow(Hit2Pos(0) - Hit1Pos(0),2 ) + pow(Hit2Pos(1) - Hit1Pos(1),2 ) );
-	double R32 = sqrt( pow(Hit3Pos(0) - Hit2Pos(0),2 ) + pow(Hit3Pos(1) - Hit2Pos(1),2 ) );
-	double R13 = sqrt( pow(Hit1Pos(0) - Hit3Pos(0),2 ) + pow(Hit1Pos(1) - Hit3Pos(1),2 ) );
-	
-	double TDiffTOR1 = 0.;
-	double TDiffTOR2 = t21;
-	double TDiffTOR3 = t31;
-	
-	TDiffTOR2 = 29.979246*TDiffTOR2;
-	TDiffTOR3 = 29.979246*TDiffTOR3;
-	
-	double R0 = 0.;
-	
-	if( R0 < (R21 - TDiffTOR2 )/2  )
-	  R0 = (R21 - TDiffTOR2 )/2;
-	if( R0 < (R32 - TDiffTOR2 - TDiffTOR3 )/2  )
-	  R0 = (R32 - TDiffTOR2 - TDiffTOR3 )/2;
-	if( R0 < (R13 - TDiffTOR3 )/2  )
-	  R0 = (R13 - TDiffTOR3 )/2;
-	
-	double R1 = 0.;
-	double R2 = 0.;
-	double R3 = 0.;
-	std::vector<double> temp, temp2;
-	std::vector< std::vector<double> > Points;
-	temp.push_back(0.);
-	temp.push_back(0.);
-	Points.push_back(temp);
-	Points.push_back(temp);
-	Points.push_back(temp);
-	Points.push_back(temp);
-	Points.push_back(temp);
-	Points.push_back(temp);
-	double Distance = 0.;
-	double MinDistance = 0.;
-	double PreviousDistance = 10000000.;
-	
-	temp.clear();
-	
-	int test = 1;
-	while( test )
-	{
-		R1 = TDiffTOR1 + R0+1;
-		R2 = TDiffTOR2 + R0+1;
-		R3 = TDiffTOR2 + R0+1;
-		
-		Points[0][0] = (Hit1Pos(0) + Hit2Pos(0) )/2 + (pow(R1,2) - pow(R2,2) )*( Hit2Pos(0) - Hit1Pos(0) )/2/pow( R21,2 ) + 0.5*( Hit2Pos(1) - Hit1Pos(1) )*sqrt( 2 * (pow(R1,2) + pow(R2,2) )/pow( R21,2 ) - pow( pow(R1,2) - pow(R2,2), 2 )/pow( R21, 4 ) - 1 );
-		Points[0][1] = (Hit1Pos(1) + Hit2Pos(1) )/2 + (pow(R1,2) - pow(R2,2) )*( Hit2Pos(1) - Hit1Pos(1) )/2/pow( R21,2 ) + 0.5*( Hit1Pos(0) - Hit2Pos(0) )*sqrt( 2 * (pow(R1,2) + pow(R2,2) )/pow( R21,2 ) - pow( pow(R1,2) - pow(R2,2), 2 )/pow( R21, 4 ) - 1 );
-		Points[1][0] = (Hit1Pos(0) + Hit2Pos(0) )/2 + (pow(R1,2) - pow(R2,2) )*( Hit2Pos(0) - Hit1Pos(0) )/2/pow( R21,2 ) - 0.5*( Hit2Pos(1) - Hit1Pos(1) )*sqrt( 2 * (pow(R1,2) + pow(R2,2) )/pow( R21,2 ) - pow( pow(R1,2) - pow(R2,2), 2 )/pow( R21, 4 ) - 1 );
-		Points[1][1] = (Hit1Pos(1) + Hit2Pos(1) )/2 + (pow(R1,2) - pow(R2,2) )*( Hit2Pos(1) - Hit1Pos(1) )/2/pow( R21,2 ) - 0.5*( Hit1Pos(0) - Hit2Pos(0) )*sqrt( 2 * (pow(R1,2) + pow(R2,2) )/pow( R21,2 ) - pow( pow(R1,2) - pow(R2,2), 2 )/pow( R21, 4 ) - 1 );
-		
-		Points[2][0] = (Hit2Pos(0) + Hit3Pos(0) )/2 + (pow(R2,2) - pow(R3,2) )*( Hit3Pos(0) - Hit2Pos(0) )/2/pow( R32,2 ) + 0.5*( Hit3Pos(1) - Hit2Pos(1) )*sqrt( 2 * (pow(R2,2) + pow(R3,2) )/pow( R32,2 ) - pow( pow(R2,2) - pow(R3,2), 2 )/pow( R32, 4 ) - 1 );
-		Points[2][1] = (Hit2Pos(1) + Hit3Pos(1) )/2 + (pow(R2,2) - pow(R3,2) )*( Hit3Pos(1) - Hit2Pos(1) )/2/pow( R32,2 ) + 0.5*( Hit2Pos(0) - Hit3Pos(0) )*sqrt( 2 * (pow(R2,2) + pow(R3,2) )/pow( R32,2 ) - pow( pow(R2,2) - pow(R3,2), 2 )/pow( R32, 4 ) - 1 );
-		Points[3][0] = (Hit2Pos(0) + Hit3Pos(0) )/2 + (pow(R2,2) - pow(R3,2) )*( Hit3Pos(0) - Hit2Pos(0) )/2/pow( R32,2 ) - 0.5*( Hit3Pos(1) - Hit2Pos(1) )*sqrt( 2 * (pow(R2,2) + pow(R3,2) )/pow( R32,2 ) - pow( pow(R2,2) - pow(R3,2), 2 )/pow( R32, 4 ) - 1 );
-		Points[3][1] = (Hit2Pos(1) + Hit3Pos(1) )/2 + (pow(R2,2) - pow(R3,2) )*( Hit3Pos(1) - Hit2Pos(1) )/2/pow( R32,2 ) - 0.5*( Hit2Pos(0) - Hit3Pos(0) )*sqrt( 2 * (pow(R2,2) + pow(R3,2) )/pow( R32,2 ) - pow( pow(R2,2) - pow(R3,2), 2 )/pow( R32, 4 ) - 1 );
-		
-		Points[4][0] = (Hit1Pos(0) + Hit3Pos(0) )/2 + (pow(R3,2) - pow(R1,2) )*( Hit1Pos(0) - Hit3Pos(0) )/2/pow( R13,2 ) + 0.5*( Hit1Pos(1) - Hit3Pos(1) )*sqrt( 2 * (pow(R3,2) + pow(R1,2) )/pow( R13,2 ) - pow( pow(R3,2) - pow(R1,2), 2 )/pow( R13, 4 ) - 1 );
-		Points[4][1] = (Hit1Pos(1) + Hit3Pos(1) )/2 + (pow(R3,2) - pow(R1,2) )*( Hit1Pos(1) - Hit3Pos(1) )/2/pow( R13,2 ) + 0.5*( Hit3Pos(0) - Hit1Pos(0) )*sqrt( 2 * (pow(R3,2) + pow(R1,2) )/pow( R13,2 ) - pow( pow(R3,2) - pow(R1,2), 2 )/pow( R13, 4 ) - 1 );
-		Points[5][0] = (Hit1Pos(0) + Hit3Pos(0) )/2 + (pow(R3,2) - pow(R1,2) )*( Hit1Pos(0) - Hit3Pos(0) )/2/pow( R13,2 ) - 0.5*( Hit1Pos(1) - Hit3Pos(1) )*sqrt( 2 * (pow(R3,2) + pow(R1,2) )/pow( R13,2 ) - pow( pow(R3,2) - pow(R1,2), 2 )/pow( R13, 4 ) - 1 );
-		Points[5][1] = (Hit1Pos(1) + Hit3Pos(1) )/2 + (pow(R3,2) - pow(R1,2) )*( Hit1Pos(1) - Hit3Pos(1) )/2/pow( R13,2 ) - 0.5*( Hit3Pos(0) - Hit1Pos(0) )*sqrt( 2 * (pow(R3,2) + pow(R1,2) )/pow( R13,2 ) - pow( pow(R3,2) - pow(R1,2), 2 )/pow( R13, 4 ) - 1 );
-		
-		MinDistance = 1000000.;
-		for( unsigned i=0; i<2; i++ )
-		{
-			for( unsigned j=0; j<2; j++ )
-			{
-				for( unsigned k=0; k<2; k++ )
-				{
-					Distance = sqrt( pow(Points[i][0] - Points[j+2][0], 2) + pow(Points[i][1] - Points[j+2][1],2 ) ) + sqrt( pow(Points[i][0] - Points[k+4][0], 2) + pow(Points[i][1] - Points[k+4][1],2 ) ) + sqrt( pow(Points[k+4][0] - Points[j+2][0], 2) + pow(Points[k+4][1] - Points[j+2][1],2 ) );
-					if( Distance < MinDistance )
-					{
-						MinDistance = Distance;
-						temp.clear();
-						temp.push_back( Points[i][0] );
-						temp.push_back( Points[i][1] );
-						temp.push_back( Points[2+j][0] );
-						temp.push_back( Points[2+j][1] );
-						temp.push_back( Points[4+k][0] );
-						temp.push_back( Points[4+k][1] );
-					}
-				}	
-			}
-		}
-		test++;
-		if( test % 50 == 0 )
-		{
-			if( MinDistance == 1000000. )
-			{
-				temp.clear();
-				temp.push_back(100.);
-				temp.push_back(100.);
-				temp.push_back(100.);
-				temp.push_back(100.);
-				temp.push_back(100.);
-				temp.push_back(100.);
-				break;
-			}
-		}
-		if( MinDistance > PreviousDistance )
-			test = 0;
-		else
-		{
-			PreviousDistance = MinDistance;
-			temp2 = temp;
-		}
-		R0 += 1;
-	}
-	TVector3 RecoPoint( (temp[0]+temp[2]+temp[4])/3, (temp[1]+temp[3]+temp[5])/3, Hit1Pos(2) );
-	
-	return RecoPoint;
-}*/
 TVector3 EventCategorizerTools::FindIntersection( TVector3 Hit1Pos, TVector3 Hit2Pos, TVector3 Hit3Pos, double t21, double t31 )
 {
-	/*TVector3 Hit1Pos( Hit1.getPosX(), Hit1.getPosY(), Hit1.getPosZ() );
-	TVector3 Hit2Pos( Hit2.getPosX(), Hit2.getPosY(), Hit2.getPosZ() );
-	TVector3 Hit3Pos( Hit3.getPosX(), Hit3.getPosY(), Hit3.getPosZ() );  
-	double t21 = Hit2.getTime()/1000 - Hit1.getTime()/1000;
-	double t31 = Hit3.getTime()/1000 - Hit1.getTime()/1000;*/
   
 	double R21 = sqrt( pow(Hit2Pos(0) - Hit1Pos(0),2 ) + pow(Hit2Pos(1) - Hit1Pos(1),2 ) );
 	double R32 = sqrt( pow(Hit3Pos(0) - Hit2Pos(0),2 ) + pow(Hit3Pos(1) - Hit2Pos(1),2 ) );
@@ -510,7 +384,7 @@ TVector3 EventCategorizerTools::FindIntersection( TVector3 Hit1Pos, TVector3 Hit
 }
 
 
-double EventCategorizerTools::FindMinFromQuadraticFit( std::vector<double> Arg, std::vector<double> Val )
+double EventCategorizerTools::FindMinFromQuadraticFit( std::vector<double> Arg, std::vector<double> Val ) // Finding minimum of function specified by Argument Arg and Values Val by fitting quadratic function
 {
 	double X=0., X2=0., X3=0., X4=0., Y=0., XY=0., X2Y=0.;
 	for( unsigned i=0; i<Arg.size(); i++ )
@@ -544,7 +418,7 @@ double EventCategorizerTools::FindMinFromQuadraticFit( std::vector<double> Arg, 
 	return -a1/2/a2;  
 }
 
-double EventCategorizerTools::FindMinFromDerrivative( std::vector<double> Arg, std::vector<double> Val )
+double EventCategorizerTools::FindMinFromDerrivative( std::vector<double> Arg, std::vector<double> Val ) // Finding minimum of function specified by Argument Arg and Values Val by finding 0 of derrivative estimation of this function, and fitting linear function to derrivative
 {
 	double Derr1 = Val[1] - Val[0];
 	unsigned StopInd = 0;
@@ -566,7 +440,7 @@ double EventCategorizerTools::FindMinFromDerrivative( std::vector<double> Arg, s
 		return -b/a;
 	else
 	{
-		std::cout << "Error, wtf, error, no idea?!?" << std::endl;
+		std::cout << "Error, wth, error, no idea?!?" << std::endl;
 		return 0;
 	}
 	
@@ -601,10 +475,10 @@ std::vector< std::vector<double> > EventCategorizerTools::FindIntersectionPoints
 	Points[5][1] = (Hit1Pos(1) + Hit3Pos(1) )/2 + (pow(R3,2) - pow(R1,2) )*( Hit1Pos(1) - Hit3Pos(1) )/2/pow( R13,2 ) - 0.5*( Hit3Pos(0) - Hit1Pos(0) )*sqrt( 2 * (pow(R3,2) + pow(R1,2) )/pow( R13,2 ) - pow( pow(R3,2) - pow(R1,2), 2 )/pow( R13, 4 ) - 1 );
 	
 	return Points;
-}
+} // Calculation of intersection points of three circles
 
 
-int EventCategorizerTools::CheckIfScattered( JPetHit Hit1, JPetHit Hit2, double ErrorInterval )
+int EventCategorizerTools::CheckIfScattered( JPetHit Hit1, JPetHit Hit2, double ErrorInterval ) // Test that checks if the two hits can come from scattering - Hit1 primary gamma, Hit2 - scattered gamma. ErrorInterval specifies resolution of time calculations
 {
 	double TDiff = fabs(Hit2.getTime()/1000 - Hit1.getTime()/1000);
 	TVector3 vec1( Hit2.getPosX() - Hit1.getPosX(), Hit2.getPosY() - Hit1.getPosY(), Hit2.getPosZ() - Hit1.getPosZ() );
@@ -618,7 +492,7 @@ int EventCategorizerTools::CheckIfScattered( JPetHit Hit1, JPetHit Hit2, double 
 	
 }
 
-TVector3 EventCategorizerTools::AlekReconstruct( JPetHit Hit1, JPetHit Hit2, JPetHit Hit3 )
+TVector3 EventCategorizerTools::AlekReconstruct( JPetHit Hit1, JPetHit Hit2, JPetHit Hit3 ) // Copy of the procedure that Alek uses to reconstruct position from 3 Hits
 {
   
   TVector3 Hit1Pos( Hit1.getPosX(), Hit1.getPosY(), Hit1.getPosZ() );
@@ -743,7 +617,7 @@ TVector3 EventCategorizerTools::AlekReconstruct( JPetHit Hit1, JPetHit Hit2, JPe
 }
 
 
-TVector3 EventCategorizerTools::AlekReconstruct2( JPetHit Hit1, JPetHit Hit2, JPetHit Hit3 )
+TVector3 EventCategorizerTools::AlekReconstruct2( JPetHit Hit1, JPetHit Hit2, JPetHit Hit3 ) // Copy of the procedure that Alek uses to reconstruct position from 3 Hits with some addition of finding the best solution
 {
   
   TVector3 Hit1Pos( Hit1.getPosX(), Hit1.getPosY(), Hit1.getPosZ() );
@@ -854,21 +728,28 @@ TVector3 EventCategorizerTools::AlekReconstruct2( JPetHit Hit1, JPetHit Hit2, JP
   return sol_hit[BttSol];
 }
 
-double EventCategorizerTools::CalcDistFromCentres( TVector3 Sol1, TVector3 Gamma1, TVector3 Gamma2, TVector3 Gamma3 )
+double EventCategorizerTools::CalcDistFromCentres( TVector3 Sol1, TVector3 Gamma1, TVector3 Gamma2, TVector3 Gamma3 ) // Test for better solution in reconstruction of position from 3 hits, that checkes which solution lies closer to the hit positions - Gamma1, Gamma2, Gamma3
 {
 	double distance1 = 0.;
 	distance1 = sqrt( pow(Sol1(0) - Gamma1(0),2) + pow(Sol1(1) - Gamma1(1),2) + pow(Sol1(2) - Gamma1(2),2) ) + sqrt( pow(Sol1(0) - Gamma2(0),2) + pow(Sol1(1) - Gamma2(1),2) + pow(Sol1(2) - Gamma2(2),2) ) + sqrt( pow(Sol1(0) - Gamma3(0),2) + pow(Sol1(1) - Gamma3(1),2) + pow(Sol1(2) - Gamma3(2),2) );		
 	return distance1;
 }
 
-double EventCategorizerTools::NormalizeTime( JPetHit Hit1 )
+double EventCategorizerTools::NormalizeTime( JPetHit Hit1 ) // Calculation of time of hit with substraction of TOF of the hit. Assuming that gamma came from (0,0,0)
 {
 	TVector3 vec1( Hit1.getPosX(), Hit1.getPosY(), Hit1.getPosZ() );
 	double Length0 = vec1.Mag();
-	return Hit1.getTime()/1000 - (Length0)/29.979246;
+	return Hit1.getTime()/1000 - (Length0)/29.979246; // in ns
 }
 
-TVector3 EventCategorizerTools::RecoPosition( const JPetHit & Hit1, const JPetHit & Hit2)
+double EventCategorizerTools::NormalizeTimeToPoint( JPetHit Hit1, TVector3 Point ) // Calculation of time of hit with substraction of TOF of the hit. Assuming that gamma came from Point
+{
+	TVector3 vec1( Hit1.getPosX() - Point(0), Hit1.getPosY() - Point(1), Hit1.getPosZ() - Point(2) );
+	double Length0 = vec1.Mag();
+	return Hit1.getTime()/1000 - (Length0)/29.979246; // in ns
+}
+
+TVector3 EventCategorizerTools::RecoPosition( const JPetHit & Hit1, const JPetHit & Hit2) // Reconstruction of position from back-to-back hits
 {
 	TVector3 ReconstructedPosition;
 	//double tof = fabs( JPetHitUtils::getTimeAtThr(Hit1, 1) - JPetHitUtils::getTimeAtThr(Hit2, 1) )/1000;

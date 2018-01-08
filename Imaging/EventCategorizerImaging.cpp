@@ -233,7 +233,6 @@ int EventCategorizerImaging::Imaging( vector<JPetHit> Hits )
 			}
 		}
 	}
-	
 	if( AnnihilationHits.size() < 3 )
 		return NmbOfAnnihilations;
 	for( unsigned i=0; i<AnnihilationHits.size() - 2; i++ )
