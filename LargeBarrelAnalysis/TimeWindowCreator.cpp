@@ -39,7 +39,7 @@ bool TimeWindowCreator::init()
     fMinTime = getOptionAsDouble(fParams.getOptions(), kMinTimeParamKey);
   }
   // Getting time calibration file from user options
-  auto calibFile = std::string("TimeConstants.txt");
+  auto calibFile = std::string("dummyTimeCalib.txt");
   if (isOptionSet(fParams.getOptions(), kTimeCalibFileParamKey)) {
     calibFile = getOptionAsString(fParams.getOptions(), kTimeCalibFileParamKey);
   }else{

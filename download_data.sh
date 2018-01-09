@@ -1,9 +1,9 @@
 #!/bin/bash
 #if the first argument is provided it is treated as the output path
 #e.g. download_data.sh /blabla/path
-#will write the output to /blabla/path 
+#will write the output to /blabla/path
 
-#if there is an extra argument treat it as the output path 
+#if there is an extra argument treat it as the output path
 #if the argument is empty set some default paths
 BASE_PATH=.
 if [ ! -z $1 ]; then
@@ -20,7 +20,7 @@ function check_sums {
 CHECKSUM_COMMAND="check_sums"
 
 #for wget
-TEST_CHECKSUM_FILE="examples.sha"
+TEST_CHECKSUM_FILE="examples_reformed.sha"
 TEST_BASE_URL="http://sphinx.if.uj.edu.pl/framework"
 TEST_CHECKSUM_URL=$TEST_BASE_URL/$TEST_CHECKSUM_FILE
 TEST_OUTPUT=$BASE_PATH

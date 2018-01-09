@@ -18,8 +18,8 @@ set(AUXILLIARY_FILES
   conf_trb3.xml
   resultsForThresholda.txt
   dummyThresholds.txt
-  large_barrel.json
-  TimeConstants.txt
+  dummyTimeCalib.txt
+  detectorSetupRun1.json
   userParams.json
   README
   )
