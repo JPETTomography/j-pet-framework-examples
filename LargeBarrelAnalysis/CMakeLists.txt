@@ -17,6 +17,7 @@ set(AUXILLIARY_FILES
   run.sh
   conf_trb3.xml
   resultsForThresholda.txt
+  dummyThresholds.txt
   large_barrel.json
   TimeConstants.txt
   userParams.json
