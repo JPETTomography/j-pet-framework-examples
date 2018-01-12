@@ -189,21 +189,21 @@ bool TimeCalibration::terminate()
 //
     const char* histo_name_l = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffAB_leading_", LayerToCalib, StripToCalib, thr);
     //double mean_l = getStatistics().getHisto1D(histo_name_l).GetMean();
-    TH1F* histoToSave_leading = &(getStatistics().getHisto1D(histo_name_l));
+    TH1F* histoToSave_leading = getStatistics().getHisto1D(histo_name_l);
     //
     const char* histo_name_t = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffAB_trailing_", LayerToCalib, StripToCalib, thr);
     //double mean_t = getStatistics().getHisto1D(histo_name_t).GetMean();
 
-    TH1F* histoToSave_trailing = &(getStatistics().getHisto1D(histo_name_t));
+    TH1F* histoToSave_trailing = getStatistics().getHisto1D(histo_name_t);
 //reference detector
     //
     const char* histo_name_Ref_l = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffRef_leading_", LayerToCalib, StripToCalib, thr);
     //double mean_Ref_l = getStatistics().getHisto1D(histo_name_Ref_l).GetMean();
-    TH1F* histoToSave_Ref_leading = &(getStatistics().getHisto1D(histo_name_Ref_l));
+    TH1F* histoToSave_Ref_leading = getStatistics().getHisto1D(histo_name_Ref_l);
     //
     const char* histo_name_Ref_t = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffRef_trailing_", LayerToCalib, StripToCalib, thr);
     //double mean_Ref_t = getStatistics().getHisto1D(histo_name_Ref_t).GetMean();
-    TH1F* histoToSave_Ref_trailing = &(getStatistics().getHisto1D(histo_name_Ref_t));
+    TH1F* histoToSave_Ref_trailing = getStatistics().getHisto1D(histo_name_Ref_t);
 //
     //
     if (histoToSave_leading->GetEntries() != 0 && histoToSave_trailing->GetEntries() != 0
@@ -381,7 +381,7 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
         // fill the appropriate histogram
         const char* histo_name_l = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffAB_leading_");
         //**const char * histo_name_l = Form("%slayer_%d_slot_%d_thr_%d","timeDiffAB_leading_",LayerToCalib,StripToCalib,thr);
-        getStatistics().getHisto1D(histo_name_l).Fill( timeDiffAB_l);
+        getStatistics().getHisto1D(histo_name_l)->Fill( timeDiffAB_l);
 //
 //take minimum time difference between Ref and Scint
         timeDiffLmin = 10000000000000.;
@@ -395,7 +395,7 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
         //**			const char * histo_name_Ref_l = Form("%slayer_%d_slot_%d_thr_%d","timeDiffRef_leading_",LayerToCalib,StripToCalib,thr);
         const char* histo_name_Ref_l = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffRef_leading_");
         if (timeDiffTmin < 100.) {
-          getStatistics().getHisto1D(histo_name_Ref_l).Fill(timeDiffLmin);
+          getStatistics().getHisto1D(histo_name_Ref_l)->Fill(timeDiffLmin);
         }
       }
     }
@@ -416,7 +416,7 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
         //fill the appropriate histogram
         const char* histo_name_t = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffAB_trailing_");
         //**const char * histo_name_t = Form("%slayer_%d_slot_%d_thr_%d","timeDiffAB_trailing_",LayerToCalib,StripToCalib,thr);
-        getStatistics().getHisto1D(histo_name_t).Fill( timeDiffAB_t);
+        getStatistics().getHisto1D(histo_name_t)->Fill( timeDiffAB_t);
 //
 //taken minimal time difference between Ref and Scint
         timeDiffTmin = 10000000000000.;
@@ -430,7 +430,7 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
         //**const char* histo_name_Ref_t = Form("%slayer_%d_slot_%d_thr_%d","timeDiffRef_trailing_",LayerToCalib,StripToCalib,thr);
         const char* histo_name_Ref_t = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffRef_trailing_");
         if (timeDiffTmin < 100.) {
-          getStatistics().getHisto1D(histo_name_Ref_t).Fill(timeDiffTmin);
+          getStatistics().getHisto1D(histo_name_Ref_t)->Fill(timeDiffTmin);
         }
       }
     }
