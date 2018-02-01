@@ -17,7 +17,7 @@ BOOST_AUTO_TEST_CASE(checkHitOrder)
   
   double tof = EventCategorizerTools::calculateTOF(firstHit, secondHit);
   
-  BOOST_REQUIRE_CLOSE( tof, 9999, 0.100);
+  BOOST_REQUIRE_CLOSE( tof, kUndefined::tof, 0.100);
 }
 
 BOOST_AUTO_TEST_CASE(checkTOFsignNegative)

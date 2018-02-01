@@ -18,6 +18,8 @@
 
 #include <JPetHit/JPetHit.h>
 
+enum kUndefined { point = 999, tof = 9999 };
+
 struct Point3D
 {
   double x=0;

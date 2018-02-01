@@ -18,9 +18,9 @@
 Point3D EventCategorizerTools::calculateAnnihilationPoint(const JPetHit& firstHit, const JPetHit& latterHit)
 {
   Point3D annihilationPoint;
-  annihilationPoint.x = 999.0;
-  annihilationPoint.y = 999.0;
-  annihilationPoint.z = 999.0;
+  annihilationPoint.x = kUndefined::point;
+  annihilationPoint.y = kUndefined::point;
+  annihilationPoint.z = kUndefined::point;
   
   Point3D firstHitPoint;
   firstHitPoint.x = firstHit.getPosX();
@@ -58,7 +58,7 @@ Point3D EventCategorizerTools::calculateAnnihilationPoint(const JPetHit& firstHi
 
 double EventCategorizerTools::calculateTOF(const JPetHit& firstHit, const JPetHit& latterHit)
 {
-  double TOF = 9999;
+  double TOF = kUndefined::tof;
   if( firstHit.getTime() > latterHit.getTime() )
   {
     ERROR("First hit time should be earlier than later hit");
