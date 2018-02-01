@@ -145,8 +145,8 @@ bool EventCategorizer::exec()
         vector<JPetHit> hits = event.getHits();
         for (size_t i = 0; i < hits.size(); i++) {
           for (size_t j = i + 1; j < hits.size(); j++) {
-            JPetHit firstHit = hits.at(i);
-            JPetHit secondHit = hits.at(j);
+            JPetHit& firstHit = hits.at(i);
+            JPetHit& secondHit = hits.at(j);
 
             if (firstHit.getBarrelSlot().getLayer().getID() != 3
                 && secondHit.getBarrelSlot().getLayer().getID() != 3) {
@@ -204,8 +204,8 @@ bool EventCategorizer::exec()
       }
       if (event.getHits().size() == 2)
       {
-	JPetHit firstHit = event.getHits().at(0);
-        JPetHit secondHit = event.getHits().at(1);
+	JPetHit& firstHit = event.getHits().at(0);
+        JPetHit& secondHit = event.getHits().at(1);
 	getStatistics().getHisto1D("TOF")->Fill(EventCategorizerTools::calculateTOF(firstHit, secondHit));
 	Point3D annhilationPoint = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit);
 	getStatistics().getHisto2D("XY")->Fill(annhilationPoint.x, annhilationPoint.y);
@@ -213,9 +213,9 @@ bool EventCategorizer::exec()
 	getStatistics().getHisto2D("YZ")->Fill(annhilationPoint.y, annhilationPoint.z);
       }
       if (event.getHits().size() == 3) {
-        JPetHit firstHit = event.getHits().at(0);
-        JPetHit secondHit = event.getHits().at(1);
-        JPetHit thirdHit = event.getHits().at(2);
+        JPetHit& firstHit = event.getHits().at(0);
+        JPetHit& secondHit = event.getHits().at(1);
+        JPetHit& thirdHit = event.getHits().at(2);
 
         float theta_1_2 = fabs(firstHit.getBarrelSlot().getTheta()
                                - secondHit.getBarrelSlot().getTheta());
