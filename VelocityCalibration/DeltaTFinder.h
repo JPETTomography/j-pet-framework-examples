@@ -48,7 +48,6 @@ protected:
 	const char * formatUniqueSlotDescription(const JPetBarrelSlot & slot, int threshold,const char * prefix);
 	void fillHistosForHit(const JPetHit& hit);
 	JPetGeomMapping* fBarrelMap = nullptr;
-	JPetParamManager* fParamManager = nullptr;
   	bool fSaveControlHistos = true;
 	const std::string fInput_file_key = "inputFile_std::string";
 	const std::string fPosition = "DeltaTFinder_Position_";
