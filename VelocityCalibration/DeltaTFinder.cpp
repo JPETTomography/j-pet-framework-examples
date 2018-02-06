@@ -32,19 +32,21 @@ bool DeltaTFinder::init(){
 
 	INFO("DeltaT extraction started.");
 
-	fBarrelMap = new JPetGeomMapping( fParamManager->getParamBank() );
+	fOutputEvents = new JPetTimeWindow("JPetHit");
+
+	fBarrelMap = new JPetGeomMapping( getParamBank() );
 
 	if (fSaveControlHistos)
 	{
 	// create histograms for time differences at each slot and each threshold
-	for(auto & scin : fParamManager->getParamBank().getScintillators()){
+	for(auto & scin : getParamBank().getScintillators()){
 		for (int thr=1;thr<=4;thr++){
 			const char * histo_name = formatUniqueSlotDescription(scin.second->getBarrelSlot(), thr, "timeDiffAB_");
 			getStatistics().createHistogram( new TH1F(histo_name, histo_name, 400, -20., 20.) );
 		}
 	}
 	// create histograms for time diffrerence vs slot ID
-	for(auto & layer : fParamManager->getParamBank().getLayers()){
+	for(auto & layer : getParamBank().getLayers()){
 		for (int thr=1;thr<=4;thr++){
 			const char * histo_name = Form("TimeDiffVsID_layer_%d_thr_%d", (int)fBarrelMap->getLayerNumber(*layer.second), thr);
 			const char * histo_titile = Form("%s;Slot ID; TimeDiffAB [ns]", histo_name); 
@@ -73,7 +75,7 @@ bool DeltaTFinder::init(){
 	{
 	  std::string pos = fPosition;
 	  pos+= boost::lexical_cast<std::string>(i);
-	  
+	  pos+= "_std::string";
 	  if (isOptionSet(fParams.getOptions(), pos)) {
 	    auto res = retrievePositionAndFileName(getOptionAsString(fParams.getOptions(), pos));
 	    if( file_path == res.second )
@@ -105,12 +107,19 @@ const char* DeltaTFinder::formatUniqueSlotDescription(const JPetBarrelSlot & slo
 
 bool DeltaTFinder::exec(){
 
-  if(auto hit = dynamic_cast<const JPetHit*const>(fEvent)){
-    fillHistosForHit(*hit);
-  }else{
-    return false;
-  }
+  if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
+    uint nhits = timeWindow->getNumberOfEvents();
+    for (uint i = 0; i < nhits; ++i) {
+        fillHistosForHit( dynamic_cast<const JPetHit&>(timeWindow->operator[](i)) );
+    }
+        }
+    else{
+      return false;
+        }
+
+
   return true;
+
 }
 
 bool DeltaTFinder::terminate(){
@@ -127,7 +136,7 @@ bool DeltaTFinder::terminate(){
 	TString results_folder_name = (fOutputPath+"Results/position_"+boost::lexical_cast<std::string>(fPos)).c_str();
 	system("mkdir -p "+ results_folder_name);
 
-	for(auto & slot : fParamManager->getParamBank().getBarrelSlots()){
+	for(auto & slot : getParamBank().getBarrelSlots()){
 		for (int thr=1;thr<=4;thr++){
 			const char * histo_name = formatUniqueSlotDescription(*(slot.second), thr, "timeDiffAB_");
 			TH1F* histoToSave = getStatistics().getHisto1D(histo_name);
