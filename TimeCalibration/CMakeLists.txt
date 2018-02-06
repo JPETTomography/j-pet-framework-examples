@@ -74,6 +74,8 @@ list(APPEND SOURCES ${use_modules_from}/EventFinder.cpp)
 #
 list(APPEND HEADERS ${use_modules_from}/EventCategorizer.h)
 list(APPEND SOURCES ${use_modules_from}/EventCategorizer.cpp)
+list(APPEND HEADERS ${use_modules_from}/EventCategorizerTools.h)
+list(APPEND SOURCES ${use_modules_from}/EventCategorizerTools.cpp)
 
 message(STATUS "S: " ${SOURCES})
 message(STATUS "H: " ${HEADERS})

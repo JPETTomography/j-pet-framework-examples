@@ -5,7 +5,6 @@
 #include "SignalFinderTools.h"
 #include "JPetLoggerInclude.h"
 
-
 BOOST_AUTO_TEST_SUITE(FirstSuite)
 
 BOOST_AUTO_TEST_CASE( getSigChsPMMapById_nullPointer )
