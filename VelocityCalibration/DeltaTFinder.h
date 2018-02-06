@@ -50,11 +50,11 @@ protected:
 	JPetGeomMapping* fBarrelMap = nullptr;
 	JPetParamManager* fParamManager = nullptr;
   	bool fSaveControlHistos = true;
-	const std::string fInput_file_key = "inputFile";
-	const std::string fPosition = "DeltaTFinder_Position";
-	const std::string fNumberOfPositionsKey = "DeltaTFinder_numberOfPositions";
-	const std::string fOutputPath_key = "DeltaTFinder_outputPath";
-	const std::string fVelocityCalibFile_key = "DeltaTFinder_velocityCalibFile";
+	const std::string fInput_file_key = "inputFile_std::string";
+	const std::string fPosition = "DeltaTFinder_Position_";
+	const std::string fNumberOfPositionsKey = "DeltaTFinder_numberOfPositions_std::string";
+	const std::string fOutputPath_key = "DeltaTFinder_outputPath_std::string";
+	const std::string fVelocityCalibFile_key = "DeltaTFinder_velocityCalibFile_std::string";
 	std::string fOutputPath = "";
 	std::string fOutputVelocityCalibName = "";
 	double fPos = 999;
