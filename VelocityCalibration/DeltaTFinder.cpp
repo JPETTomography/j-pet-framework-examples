@@ -83,13 +83,13 @@ bool DeltaTFinder::init(){
 	  }
 	}
 
-	std::string fOutputPath_key = "outputPath";
-
 	if (isOptionSet(fParams.getOptions(),  fOutputPath_key )) 
 	  fOutputPath = getOptionAsString(fParams.getOptions(),  fOutputPath_key );
 	
 	if (isOptionSet(fParams.getOptions(), fVelocityCalibFile_key ) )
-	  fOutputVelocityCalibName = getOptionAsString(fParams.getOptions(),  fOutputPath_key );
+	  fOutputVelocityCalibName = getOptionAsString(fParams.getOptions(),  fVelocityCalibFile_key );
+
+	
 	
 	return true;
 }
@@ -156,6 +156,7 @@ bool DeltaTFinder::terminate(){
 			
 		}
 	}
+
 	outStream.close();
 	delete fBarrelMap;
 
