@@ -35,7 +35,7 @@ bool SinogramCreator::exec()
   float reconstructionAngleDiff = kReconstructionEndAngle - kReconstructionStartAngle;
   float reconstructionAngleStep = (reconstructionAngleDiff) / static_cast<float>(numberOfScintillatorsInHalf);
   if (fSinogram == nullptr) {
-    fSinogram = new SinogramResultType((reconstructionAngleDiff / reconstructionAngleStep) + 1, (std::vector<int>(std::floor(25.f * kReconstructionDistanceAccuracy))) + 1);
+    fSinogram = new SinogramResultType((reconstructionAngleDiff / reconstructionAngleStep) + 1, (std::vector<int>(std::floor(25.f * kReconstructionDistanceAccuracy) + 1)));
   }
   if (auto& timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     unsigned int numberOfEventsInTimeWindow = timeWindow->getNumberOfEvents();
