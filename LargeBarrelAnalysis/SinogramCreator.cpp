@@ -36,6 +36,7 @@ bool SinogramCreator::exec()
   float reconstructionAngleStep = (reconstructionAngleDiff) / static_cast<float>(numberOfScintillatorsInHalf);
   if (fSinogram == nullptr) {
     fSinogram = new SinogramResultType((reconstructionAngleDiff / reconstructionAngleStep) + 1, (std::vector<int>(std::floor(25.f * kReconstructionDistanceAccuracy) + 1)));
+    std::cout << "thetaMAx: " << (reconstructionAngleDiff / reconstructionAngleStep) + 1 << " distanceMax: " << std::floor(25.f * kReconstructionDistanceAccuracy) + 1 << std::endl;
   }
   if (auto& timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     unsigned int numberOfEventsInTimeWindow = timeWindow->getNumberOfEvents();
@@ -52,6 +53,7 @@ bool SinogramCreator::exec()
             float distance = SinogramCreatorTools::calculateDistanceFromCenter(0.f, 0.f, x, y, firstHit.getPosX(), secondHit.getPosY());
             int distanceRound = std::floor((distance / kReconstructionDistanceAccuracy) + kReconstructionDistanceAccuracy);
             int thetaNumber = theta / reconstructionAngleStep;
+            std::cout << "thetaNumber: " << thetaNumber << " distanceRound: " << distanceRound << std::endl;
             fSinogram->at(thetaNumber).at(distanceRound)++;
           }
         }
