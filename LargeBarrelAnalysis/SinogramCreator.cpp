@@ -34,10 +34,10 @@ bool SinogramCreator::exec()
   int numberOfScintillatorsInHalf = kNumberOfScintillatorsInReconstructionLayer / 2;
   float reconstructionAngleDiff = kReconstructionEndAngle - kReconstructionStartAngle;
   float reconstructionAngleStep = (reconstructionAngleDiff) / static_cast<float>(numberOfScintillatorsInHalf);
-  std::cout << "reconstructionAngleStep: " << reconstructionAngleStep << std::endl;
+  //std::cout << "reconstructionAngleStep: " << reconstructionAngleStep << std::endl;
   if (fSinogram == nullptr) {
     fSinogram = new SinogramResultType((reconstructionAngleDiff / reconstructionAngleStep) + 1, (std::vector<int>(std::floor(kReconstructionLayerRadius * (1.f / kReconstructionDistanceAccuracy)) + 1)));
-    std::cout << "thetaMAx: " << (reconstructionAngleDiff / reconstructionAngleStep) + 1 << " distanceMax: " << std::floor(kReconstructionLayerRadius * (1.f / kReconstructionDistanceAccuracy)) + 1 << std::endl;
+    //std::cout << "thetaMAx: " << (reconstructionAngleDiff / reconstructionAngleStep) + 1 << " distanceMax: " << std::floor(kReconstructionLayerRadius * (1.f / kReconstructionDistanceAccuracy)) + 1 << std::endl;
   }
   if (auto& timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     unsigned int numberOfEventsInTimeWindow = timeWindow->getNumberOfEvents();
@@ -62,11 +62,11 @@ bool SinogramCreator::exec()
           for (float theta = kReconstructionStartAngle; theta < kReconstructionEndAngle; theta += reconstructionAngleStep) {
             float x = kReconstructionLayerRadius * std::cos(theta * (M_PI / 180));
             float y = kReconstructionLayerRadius * std::sin(theta * (M_PI / 180));
-            std::cout << "theta: " << theta << " x: " << x << " y: " << y << std::endl;
+            //std::cout << "theta: " << theta << " x: " << x << " y: " << y << std::endl;
             float distance = SinogramCreatorTools::calculateDistanceFromCenter(0.f, 0.f, x, y, reconstructionX, reconstructionY);
             int distanceRound = std::floor((distance / kReconstructionDistanceAccuracy) + kReconstructionDistanceAccuracy);
             int thetaNumber = theta / reconstructionAngleStep;
-            std::cout << "thetaNumber: " << thetaNumber << " distanceRound: " << distanceRound << std::endl;
+            //std::cout << "thetaNumber: " << thetaNumber << " distanceRound: " << distanceRound << std::endl;
             fSinogram->at(thetaNumber).at(distanceRound)++;
           }
         }
