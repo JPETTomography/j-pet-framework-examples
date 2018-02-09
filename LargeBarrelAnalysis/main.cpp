@@ -22,6 +22,7 @@
 #include "EventFinder.h"
 #include "EventCategorizer.h"
 #include "ImageReco.h"
+#include "SinogramCreator.h"
 
 using namespace std;
 
@@ -38,6 +39,7 @@ int main(int argc, const char* argv[])
   manager.registerTask<EventFinder>("EventFinder");
   manager.registerTask<EventCategorizer>("EventCategorizer");
   manager.registerTask<ImageReco>("ImageReco");
+  manager.registerTask<SinogramCreator>("SinogramCreator");
 
   manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
   manager.useTask("TimeCalibLoader", "tslot.raw", "tslot.calib");
@@ -47,6 +49,7 @@ int main(int argc, const char* argv[])
   manager.useTask("EventFinder", "hits", "unk.evt");
   manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
   manager.useTask("ImageReco", "unk.evt", "reco");
+  manager.useTask("SinogramCreator", "unk.evt", "sino");
 
   manager.run(argc, argv);
 }
