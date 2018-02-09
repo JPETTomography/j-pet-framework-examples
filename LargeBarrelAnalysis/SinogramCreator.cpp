@@ -47,12 +47,23 @@ bool SinogramCreator::exec()
       if (hits.size() == 2) {
         const auto& firstHit = hits[0];
         const auto& secondHit = hits[1];
+        float reconstructionX = 0.f;
+        float reconstructionY = 0.f;
+        if(firstHit.getPosY() >= 0) {
+          reconstructionX = firstHit.getPosX();
+          reconstructionY = firstHit.getPosY();
+        } else if(secondHit.getPosY() >= 0) {
+          reconstructionX = secondHit.getPosX();
+          reconstructionY = secondHit.getPosY();
+        } else {
+          continue;
+        }
         if (checkLayer(firstHit) && checkLayer(secondHit)) {
           for (float theta = kReconstructionStartAngle; theta < kReconstructionEndAngle; theta += reconstructionAngleStep) {
             float x = kReconstructionLayerRadius * std::cos(theta * (M_PI / 180));
             float y = kReconstructionLayerRadius * std::sin(theta * (M_PI / 180));
             std::cout << "theta: " << theta << " x: " << x << " y: " << y << std::endl;
-            float distance = SinogramCreatorTools::calculateDistanceFromCenter(0.f, 0.f, x, y, firstHit.getPosX(), secondHit.getPosY());
+            float distance = SinogramCreatorTools::calculateDistanceFromCenter(0.f, 0.f, x, y, reconstructionX, reconstructionY);
             int distanceRound = std::floor((distance / kReconstructionDistanceAccuracy) + kReconstructionDistanceAccuracy);
             int thetaNumber = theta / reconstructionAngleStep;
             std::cout << "thetaNumber: " << thetaNumber << " distanceRound: " << distanceRound << std::endl;
