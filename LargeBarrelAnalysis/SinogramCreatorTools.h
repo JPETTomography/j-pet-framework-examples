@@ -70,7 +70,7 @@ private :
   static float fpart(float x);
   static float rfpart(float x);
 
-  static const float EPSILON = 0.00001f;
+  static constexpr float EPSILON = 0.00001f;
 };
 
 #endif /*  !SINOGRAMCREATORTOOLS_H */
