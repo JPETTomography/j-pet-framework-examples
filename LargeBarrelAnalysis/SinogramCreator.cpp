@@ -36,7 +36,7 @@ bool SinogramCreator::exec()
   float reconstructionAngleStep = (reconstructionAngleDiff) / static_cast<float>(numberOfScintillatorsInHalf);
   if (fSinogram == nullptr) {
     int maxThetaNumber = (reconstructionAngleDiff / reconstructionAngleStep) + 1;
-    int maxDistanceNumber = std::floor(kReconstructionLayerRadius * (1.f / kReconstructionDistanceAccuracy)) + 1;
+    int maxDistanceNumber = std::floor(kReconstructionLayerRadius * kReconstructionLayerRadius * (1.f / kReconstructionDistanceAccuracy)) + 1;
     fSinogram = new SinogramResultType(maxDistanceNumber, (std::vector<int>(maxThetaNumber)));
   }
   if (const auto& timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
@@ -55,7 +55,11 @@ bool SinogramCreator::exec()
                 std::make_pair(firstHit.getPosX(), firstHit.getPosY()), std::make_pair(secondHit.getPosX(), secondHit.getPosY()));
             if (intersectionPoint.first != std::numeric_limits<float>::max() && intersectionPoint.second != std::numeric_limits<float>::max()) {
               float distance = SinogramCreatorTools::length2D(intersectionPoint.first, intersectionPoint.second);
-              int distanceRound = std::floor((distance / kReconstructionDistanceAccuracy) + kReconstructionDistanceAccuracy);
+              if (intersectionPoint.first < 0.f)
+                distance = -distance;
+              int distanceRound = std::floor((kReconstructionLayerRadius / kReconstructionDistanceAccuracy)
+                                             + kReconstructionDistanceAccuracy)
+                                  + std::floor((distance / kReconstructionDistanceAccuracy) + kReconstructionDistanceAccuracy);
               int thetaNumber = theta / reconstructionAngleStep;
               fSinogram->at(distanceRound).at(thetaNumber)++;
             }
