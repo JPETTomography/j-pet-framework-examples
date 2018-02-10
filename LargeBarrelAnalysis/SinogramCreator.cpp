@@ -36,7 +36,7 @@ bool SinogramCreator::exec()
   float reconstructionAngleStep = (reconstructionAngleDiff) / static_cast<float>(numberOfScintillatorsInHalf);
 
   int maxThetaNumber = (reconstructionAngleDiff / reconstructionAngleStep) + 1;
-  int maxDistanceNumber = std::floor(kReconstructionLayerRadius * kReconstructionLayerRadius * (1.f / kReconstructionDistanceAccuracy)) + 1;
+  int maxDistanceNumber = std::floor(kReconstructionLayerRadius * 2 * (1.f / kReconstructionDistanceAccuracy)) + 1;
   if (fSinogram == nullptr) {
     fSinogram = new SinogramResultType(maxDistanceNumber, (std::vector<int>(maxThetaNumber)));
   }
@@ -62,9 +62,9 @@ bool SinogramCreator::exec()
                                              + kReconstructionDistanceAccuracy)
                                   + std::floor((distance / kReconstructionDistanceAccuracy) + kReconstructionDistanceAccuracy);
               int thetaNumber = theta / reconstructionAngleStep;
-              if (thetaNumber >= maxThetaNumber || distanceRound >= maxDistanceNumber) {
-                std::cout << "Theta: " << thetaNumber << " maxTheta: " << maxThetaNumber << " distanceRound: " << distanceRound << " maxDistanceRound: " << maxDistanceNumber << " ix: " << intersectionPoint.first << " iy: " << intersectionPoint.second << std::endl;
-              }
+              //if (thetaNumber >= maxThetaNumber || distanceRound >= maxDistanceNumber) {
+              std::cout << "Theta: " << thetaNumber << " maxTheta: " << maxThetaNumber << " distanceRound: " << distanceRound << " maxDistanceRound: " << maxDistanceNumber << " distance: " << distance << " ix: " << intersectionPoint.first << " iy: " << intersectionPoint.second << " x1: " << firstHit.getPosX() << " y1: " << firstHit.getPosY() << " x2: " << secondHit.getPosX() << " y2: " << secondHit.getPosY() << std::endl;
+              //}
               fSinogram->at(distanceRound).at(thetaNumber)++;
             }
           }
