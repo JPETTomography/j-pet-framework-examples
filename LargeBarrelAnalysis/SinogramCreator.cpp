@@ -65,7 +65,7 @@ bool SinogramCreator::exec()
                                   + std::floor((distance / kReconstructionDistanceAccuracy) + kReconstructionDistanceAccuracy);
               int thetaNumber = theta / reconstructionAngleStep;
               //if (thetaNumber >= maxThetaNumber || distanceRound >= maxDistanceNumber) {
-              std::cout << "Theta: " << thetaNumber << " maxTheta: " << maxThetaNumber << " distanceRound: " << distanceRound << " maxDistanceRound: " << maxDistanceNumber << " distance: " << distance << " ix: " << intersectionPoint.first << " iy: " << intersectionPoint.second << " x1: " << firstHit.getPosX() << " y1: " << firstHit.getPosY() << " x2: " << secondHit.getPosX() << " y2: " << secondHit.getPosY() << std::endl;
+              //std::cout << "Theta: " << thetaNumber << " maxTheta: " << maxThetaNumber << " distanceRound: " << distanceRound << " maxDistanceRound: " << maxDistanceNumber << " distance: " << distance << " ix: " << intersectionPoint.first << " iy: " << intersectionPoint.second << " x1: " << firstHit.getPosX() << " y1: " << firstHit.getPosY() << " x2: " << secondHit.getPosX() << " y2: " << secondHit.getPosY() << std::endl;
               //}
               fSinogram->at(distanceRound).at(thetaNumber)++;
             }
