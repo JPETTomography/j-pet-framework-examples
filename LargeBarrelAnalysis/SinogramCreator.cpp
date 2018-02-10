@@ -34,9 +34,10 @@ bool SinogramCreator::exec()
   int numberOfScintillatorsInHalf = kNumberOfScintillatorsInReconstructionLayer / 2;
   float reconstructionAngleDiff = kReconstructionEndAngle - kReconstructionStartAngle;
   float reconstructionAngleStep = (reconstructionAngleDiff) / static_cast<float>(numberOfScintillatorsInHalf);
+
+  int maxThetaNumber = (reconstructionAngleDiff / reconstructionAngleStep) + 1;
+  int maxDistanceNumber = std::floor(kReconstructionLayerRadius * kReconstructionLayerRadius * (1.f / kReconstructionDistanceAccuracy)) + 1;
   if (fSinogram == nullptr) {
-    int maxThetaNumber = (reconstructionAngleDiff / reconstructionAngleStep) + 1;
-    int maxDistanceNumber = std::floor(kReconstructionLayerRadius * kReconstructionLayerRadius * (1.f / kReconstructionDistanceAccuracy)) + 1;
     fSinogram = new SinogramResultType(maxDistanceNumber, (std::vector<int>(maxThetaNumber)));
   }
   if (const auto& timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
@@ -51,7 +52,7 @@ bool SinogramCreator::exec()
           for (float theta = kReconstructionStartAngle; theta < kReconstructionEndAngle; theta += reconstructionAngleStep) {
             float x = kReconstructionLayerRadius * std::cos(theta * (M_PI / 180));
             float y = kReconstructionLayerRadius * std::sin(theta * (M_PI / 180));
-            std::pair<float, float> intersectionPoint = SinogramCreatorTools::lineIntersection(std::make_pair(0.f, 0.f), std::make_pair(x, y),
+            std::pair<float, float> intersectionPoint = SinogramCreatorTools::lineIntersection(std::make_pair(-x, -y), std::make_pair(x, y),
                 std::make_pair(firstHit.getPosX(), firstHit.getPosY()), std::make_pair(secondHit.getPosX(), secondHit.getPosY()));
             if (intersectionPoint.first != std::numeric_limits<float>::max() && intersectionPoint.second != std::numeric_limits<float>::max()) {
               float distance = SinogramCreatorTools::length2D(intersectionPoint.first, intersectionPoint.second);
@@ -61,6 +62,9 @@ bool SinogramCreator::exec()
                                              + kReconstructionDistanceAccuracy)
                                   + std::floor((distance / kReconstructionDistanceAccuracy) + kReconstructionDistanceAccuracy);
               int thetaNumber = theta / reconstructionAngleStep;
+              if (thetaNumber >= maxThetaNumber || distanceRound >= maxDistanceNumber) {
+                std::cout << "Theta: " << thetaNumber << " maxTheta: " << maxThetaNumber << " distanceRound: " << distanceRound << " maxDistanceRound: " << maxDistanceNumber << " ix: " << intersectionPoint.first << " iy: " << intersectionPoint.second << std::endl;
+              }
               fSinogram->at(distanceRound).at(thetaNumber)++;
             }
           }
