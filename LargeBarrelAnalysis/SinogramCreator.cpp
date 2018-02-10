@@ -56,6 +56,8 @@ bool SinogramCreator::exec()
                 std::make_pair(firstHit.getPosX(), firstHit.getPosY()), std::make_pair(secondHit.getPosX(), secondHit.getPosY()));
             if (intersectionPoint.first != std::numeric_limits<float>::max() && intersectionPoint.second != std::numeric_limits<float>::max()) {
               float distance = SinogramCreatorTools::length2D(intersectionPoint.first, intersectionPoint.second);
+              if (distance >= kReconstructionLayerRadius) // if distance is greather then our max reconstuction layer radius, it cant be placed in sinogram
+                continue;
               if (intersectionPoint.first < 0.f)
                 distance = -distance;
               int distanceRound = std::floor((kReconstructionLayerRadius / kReconstructionDistanceAccuracy)
