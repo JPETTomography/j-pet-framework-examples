@@ -180,3 +180,25 @@ float SinogramCreatorTools::length2D(const float x, const float y)
 {
   return std::sqrt(x * x + y * y);
 }
+
+std::pair<float, float> SinogramCreatorTools::lineIntersection(const std::pair<float, float> A, const std::pair<float, float> B, const std::pair<float, float> C, const std::pair<float, float> D)
+{
+  float a1 = B.second - A.second;
+  float b1 = A.first - B.first;
+  float c1 = a1 * (A.first) + b1 * (A.second);
+
+  float a2 = D.second - C.second;
+  float b2 = C.first - D.first;
+  float c2 = a2 * (C.first) + b2 * (C.second);
+
+  float determinant = a1 * b2 - a2 * b1;
+
+  if (std::abs(determinant) < EPSILON) {
+    float maxLimits = std::numeric_limits<float>::max();
+    return std::make_pair(maxLimits, maxLimits);
+  } else {
+    float x = (b2 * c1 - b1 * c2) / determinant;
+    float y = (a1 * c2 - a2 * c1) / determinant;
+    return std::make_pair(x, y);
+  }
+}

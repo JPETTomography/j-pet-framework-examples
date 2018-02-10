@@ -25,6 +25,7 @@
 #include <JPetUserTask/JPetUserTask.h>
 #include <vector>
 #include <tuple>
+#include <limits>
 
 class SinogramCreatorTools
 {
@@ -58,6 +59,8 @@ public:
   static float calculateDistanceFromCenter(const float firstX, const float firstY, const float secondX, const float secondY, const float pointX = 0.f, const float pointY = 0.f);
   static float length2D(const float x, const float y);
 
+  static std::pair<float, float> lineIntersection(const std::pair<float, float> A, const std::pair<float, float> B, const std::pair<float, float> C, const std::pair<float, float> D);
+
 private :
   SinogramCreatorTools() = delete;
   ~SinogramCreatorTools() = delete;
@@ -66,6 +69,8 @@ private :
 
   static float fpart(float x);
   static float rfpart(float x);
+
+  static const float EPSILON = 0.00001f;
 };
 
 #endif /*  !SINOGRAMCREATORTOOLS_H */

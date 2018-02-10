@@ -34,12 +34,12 @@ bool SinogramCreator::exec()
   int numberOfScintillatorsInHalf = kNumberOfScintillatorsInReconstructionLayer / 2;
   float reconstructionAngleDiff = kReconstructionEndAngle - kReconstructionStartAngle;
   float reconstructionAngleStep = (reconstructionAngleDiff) / static_cast<float>(numberOfScintillatorsInHalf);
-  //std::cout << "reconstructionAngleStep: " << reconstructionAngleStep << std::endl;
   if (fSinogram == nullptr) {
-    fSinogram = new SinogramResultType((reconstructionAngleDiff / reconstructionAngleStep) + 1, (std::vector<int>(std::floor(kReconstructionLayerRadius * (1.f / kReconstructionDistanceAccuracy)) + 1)));
-    //std::cout << "thetaMAx: " << (reconstructionAngleDiff / reconstructionAngleStep) + 1 << " distanceMax: " << std::floor(kReconstructionLayerRadius * (1.f / kReconstructionDistanceAccuracy)) + 1 << std::endl;
+    int maxThetaNumber = (reconstructionAngleDiff / reconstructionAngleStep) + 1;
+    int maxDistanceNumber = std::floor(kReconstructionLayerRadius * (1.f / kReconstructionDistanceAccuracy)) + 1;
+    fSinogram = new SinogramResultType(maxDistanceNumber, (std::vector<int>(maxThetaNumber)));
   }
-  if (auto& timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
+  if (const auto& timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     unsigned int numberOfEventsInTimeWindow = timeWindow->getNumberOfEvents();
     for (unsigned int i = 0; i < numberOfEventsInTimeWindow; i++) {
       auto event = dynamic_cast<const JPetEvent&>(timeWindow->operator[](static_cast<int>(i)));
@@ -47,27 +47,18 @@ bool SinogramCreator::exec()
       if (hits.size() == 2) {
         const auto& firstHit = hits[0];
         const auto& secondHit = hits[1];
-        float reconstructionX = 0.f;
-        float reconstructionY = 0.f;
-        if(firstHit.getPosY() >= 0) {
-          reconstructionX = firstHit.getPosX();
-          reconstructionY = firstHit.getPosY();
-        } else if(secondHit.getPosY() >= 0) {
-          reconstructionX = secondHit.getPosX();
-          reconstructionY = secondHit.getPosY();
-        } else {
-          continue;
-        }
         if (checkLayer(firstHit) && checkLayer(secondHit)) {
           for (float theta = kReconstructionStartAngle; theta < kReconstructionEndAngle; theta += reconstructionAngleStep) {
             float x = kReconstructionLayerRadius * std::cos(theta * (M_PI / 180));
             float y = kReconstructionLayerRadius * std::sin(theta * (M_PI / 180));
-            //std::cout << "theta: " << theta << " x: " << x << " y: " << y << std::endl;
-            float distance = SinogramCreatorTools::calculateDistanceFromCenter(0.f, 0.f, x, y, reconstructionX, reconstructionY);
-            int distanceRound = std::floor((distance / kReconstructionDistanceAccuracy) + kReconstructionDistanceAccuracy);
-            int thetaNumber = theta / reconstructionAngleStep;
-            //std::cout << "thetaNumber: " << thetaNumber << " distanceRound: " << distanceRound << std::endl;
-            fSinogram->at(thetaNumber).at(distanceRound)++;
+            std::pair<float, float> intersectionPoint = SinogramCreatorTools::lineIntersection(std::make_pair(0.f, 0.f), std::make_pair(x, y),
+                std::make_pair(firstHit.getPosX(), firstHit.getPosY), std::make_pair(secondHit.getPosX(), secondHit.getPosY()));
+            if (intersectionPoint.first != std::numeric_limits<float>::max() && intersectionPoint.second != std::numeric_limits<float>::max()) {
+              float distance = SinogramCreatorTools::length2D(intersectionPoint.first, intersectionPoint.second);
+              int distanceRound = std::floor((distance / kReconstructionDistanceAccuracy) + kReconstructionDistanceAccuracy);
+              int thetaNumber = theta / reconstructionAngleStep;
+              fSinogram->at(distanceRound).at(thetaNumber)++;
+            }
           }
         }
       }
