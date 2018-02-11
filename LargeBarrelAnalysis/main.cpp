@@ -15,13 +15,12 @@
 
 #include <JPetManager/JPetManager.h>
 #include "TimeWindowCreator.h"
-#include "TimeCalibLoader.h"
 #include "SignalFinder.h"
 #include "SignalTransformer.h"
 #include "HitFinder.h"
 #include "EventFinder.h"
-#include "EventCategorizer.h"
-#include "ImageReco.h"
+// #include "EventCategorizer.h"
+// #include "ImageReco.h"
 
 using namespace std;
 
@@ -31,22 +30,20 @@ int main(int argc, const char* argv[])
   JPetManager& manager = JPetManager::getManager();
 
   manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
-  manager.registerTask<TimeCalibLoader>("TimeCalibLoader");
   manager.registerTask<SignalFinder>("SignalFinder");
   manager.registerTask<SignalTransformer>("SignalTransformer");
   manager.registerTask<HitFinder>("HitFinder");
   manager.registerTask<EventFinder>("EventFinder");
-  manager.registerTask<EventCategorizer>("EventCategorizer");
-  manager.registerTask<ImageReco>("ImageReco");
+  // manager.registerTask<EventCategorizer>("EventCategorizer");
+  // manager.registerTask<ImageReco>("ImageReco");
 
-  manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
-  manager.useTask("TimeCalibLoader", "tslot.raw", "tslot.calib");
+  manager.useTask("TimeWindowCreator", "hld", "tslot.calib");
   manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
   manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
   manager.useTask("HitFinder", "phys.sig", "hits");
   manager.useTask("EventFinder", "hits", "unk.evt");
-  manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
-  manager.useTask("ImageReco", "unk.evt", "reco");
+  // manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
+  // manager.useTask("ImageReco", "unk.evt", "reco");
 
   manager.run(argc, argv);
 }

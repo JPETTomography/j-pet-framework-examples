@@ -16,253 +16,199 @@
 #include "SignalFinderTools.h"
 using namespace std;
 
-map<int, vector<JPetSigCh>> SignalFinderTools::getSigChsPMMapById(const JPetTimeWindow* timeWindow)
+/**
+ * Method returns a map of vectors of JPetSigCh ordered by photomultiplier ID
+ */
+map<int, vector<JPetSigCh>> SignalFinderTools::getSigChsPMMapById(
+  const JPetTimeWindow* timeWindow)
 {
   map<int, vector<JPetSigCh>> sigChsPMMap;
   if (!timeWindow) {
-    WARNING("timeWindow pointer is not set");
+    WARNING("Pointer of Time Window object is not set, returning empty map");
     return sigChsPMMap;
   }
 
-  //map Signal Channels in this Time window according to PM they belong to
+  // Map Signal Channels according to PM they belong to
   const unsigned int nSigChs = timeWindow->getNumberOfEvents();
   for (unsigned int i = 0; i < nSigChs; i++) {
     JPetSigCh sigCh = dynamic_cast<const JPetSigCh&>(timeWindow->operator[](i));
-    int pmt_id = sigCh.getPM().getID();
-    auto search = sigChsPMMap.find(pmt_id);
+    int pmtID = sigCh.getPM().getID();
+    auto search = sigChsPMMap.find(pmtID);
     if (search == sigChsPMMap.end()) {
       vector<JPetSigCh> tmp;
       tmp.push_back(sigCh);
-      sigChsPMMap.insert(pair<int, vector<JPetSigCh>>(pmt_id, tmp));
+      sigChsPMMap.insert(pair<int, vector<JPetSigCh>>(pmtID, tmp));
     } else {
       search->second.push_back(sigCh);
     }
   }
-
   return sigChsPMMap;
 }
 
-//method with loop of building raw signals for whole PM map
+/**
+ * Method invoking Raw Signal building method
+ * for each PM separately, looping over whole PM map
+ */
 vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
   map<int, vector<JPetSigCh>> sigChsPMMap,
   unsigned int numOfThresholds,
   JPetStatistics& stats,
-  bool saveControlHistos,
   double sigChEdgeMaxTime,
-  double sigChLeadTrailMaxTime)
+  double sigChLeadTrailMaxTime,
+  bool saveHistos)
 {
-
   vector<JPetRawSignal> allSignals;
-
   for (auto& sigChPair : sigChsPMMap) {
-    vector<JPetRawSignal> currentSignals = buildRawSignals(sigChPair.second, numOfThresholds, stats, saveControlHistos, sigChEdgeMaxTime, sigChLeadTrailMaxTime);
-    allSignals.insert(allSignals.end(), currentSignals.begin(), currentSignals.end());
+    vector<JPetRawSignal> currentSignals = buildRawSignals(
+      sigChPair.second,
+      numOfThresholds,
+      stats,
+      sigChEdgeMaxTime,
+      sigChLeadTrailMaxTime,
+      saveHistos);
+    allSignals.insert(
+      allSignals.end(),
+      currentSignals.begin(),
+      currentSignals.end());
   }
-
   return allSignals;
 }
 
-//sorting method
-bool sortByTimeValue(JPetSigCh sig1, JPetSigCh sig2)
-{
-  return (sig1.getValue() < sig2.getValue());
-}
-
-//method creating Raw signals form vector of Signal Channels
+/**
+ * Method reconstructs Raw Signals based on Signal Channels on one PM
+ */
 vector<JPetRawSignal> SignalFinderTools::buildRawSignals(
   const vector<JPetSigCh>& sigChFromSamePM,
   unsigned int numOfThresholds,
   JPetStatistics& stats,
-  bool saveControlHistos,
   double sigChEdgeMaxTime,
-  double sigChLeadTrailMaxTime)
+  double sigChLeadTrailMaxTime,
+  bool saveHistos)
 {
   vector<JPetRawSignal> rawSigVec;
 
-  //Threshold number check - fixed number equal 4
+  // Threshold number check - fixed number equal 4
   if (numOfThresholds != 4) {
     ERROR("This function is ment to work with 4 thresholds only!");
     return rawSigVec;
   }
 
-  vector<JPetSigCh> tmp;
-  vector<vector<JPetSigCh>> thresholdSigCh(2 * numOfThresholds, tmp);
+  vector<JPetSigCh> tmpVec;
+  vector<vector<JPetSigCh>> thrLeadingSigCh(numOfThresholds, tmpVec);
+  vector<vector<JPetSigCh>> thrTrailingSigCh(numOfThresholds, tmpVec);
 
-  bool errorOccured = false;
-
-  //division into subvectors according to threshold number:
-  //0-3 leading, 4-7 trailing
-  for (const JPetSigCh& sigCh : sigChFromSamePM) {
-    auto threshNum = sigCh.getThresholdNumber();
-    if ((threshNum <= 0) || (threshNum > 2 * numOfThresholds)) {
-      ERROR("Threshold number out of range:" + std::to_string(threshNum));
-      errorOccured = true;
-      break;
-    }
-
-    if (sigCh.getType() == JPetSigCh::Leading) {
-      thresholdSigCh.at(sigCh.getThresholdNumber() - 1).push_back(sigCh);
-    } else if (sigCh.getType() == JPetSigCh::Trailing) {
-      thresholdSigCh.at(sigCh.getThresholdNumber() + numOfThresholds - 1)
-      .push_back(sigCh);
+  for (const JPetSigCh & sigCh : sigChFromSamePM) {
+    if(sigCh.getType() == JPetSigCh::Leading) {
+      thrLeadingSigCh.at(sigCh.getThresholdNumber()-1).push_back(sigCh);
+    } else if(sigCh.getType() == JPetSigCh::Trailing) {
+      thrTrailingSigCh.at(sigCh.getThresholdNumber()-1).push_back(sigCh);
     }
   }
 
-  if (errorOccured) {
-    return rawSigVec;
-  }
+  assert(thrLeadingSigCh.size() > 0);
+  while (thrLeadingSigCh.at(0).size() > 0) {
+  	JPetRawSignal rawSig;
+  	rawSig.setPM(thrLeadingSigCh.at(0).at(0).getPM());
+  	rawSig.setBarrelSlot(thrLeadingSigCh.at(0).at(0).getPM().getBarrelSlot());
 
-  //probably not needed vector sorting according to Signal channel time values
-  for (auto thrVec : thresholdSigCh) {
-    sort(thrVec.begin(), thrVec.end(), sortByTimeValue);
-  }
+  	// First THR leading added by default
+  	rawSig.addPoint(thrLeadingSigCh.at(0).at(0));
 
-  assert(thresholdSigCh.size() > 0);
-  while (thresholdSigCh.at(0).size() > 0) {
+    // Searching for matching trailing on first THR
+    int closestTrailingSigCh = findTrailingSigCh(
+  	  thrLeadingSigCh.at(0).at(0),
+      thrTrailingSigCh.at(0),
+  	  sigChLeadTrailMaxTime
+    );
 
-    JPetRawSignal rawSig;
-    rawSig.setPM(thresholdSigCh.at(0).at(0).getPM());
-    rawSig.setBarrelSlot(thresholdSigCh.at(0).at(0).getPM().getBarrelSlot());
-
-    //first leading added by default
-    rawSig.addPoint(thresholdSigCh.at(0).at(0));
-
-    //looking for points from other thresholds that belong to the same leading edge
-    //and search for equivalent trailing edge points
-    //first thr trailing
-
-    assert(thresholdSigCh.at(0).size() > 0);
-    assert(thresholdSigCh.size() > 4);
-
-    int closestTrailingSigCh0 = findTrailingSigCh(
-                                  thresholdSigCh.at(0).at(0),
-                                  thresholdSigCh.at(4),
-                                  sigChLeadTrailMaxTime);
-
-    if (closestTrailingSigCh0 != -1) {
-      rawSig.addPoint(thresholdSigCh.at(4).at(closestTrailingSigCh0));
-      thresholdSigCh.at(4).erase(thresholdSigCh.at(4).begin()
-                                 + closestTrailingSigCh0);
+  	if(closestTrailingSigCh != -1) {
+  		rawSig.addPoint(thrTrailingSigCh.at(0).at(closestTrailingSigCh));
+      if(saveHistos)
+        stats.getHisto1D("lead_trail_thr1_diff")->Fill(
+          thrTrailingSigCh.at(0)
+            .at(closestTrailingSigCh).getValue()-thrLeadingSigCh.at(0).at(0).getValue()
+        );
+      thrTrailingSigCh.at(0).erase(thrTrailingSigCh.at(0).begin()+closestTrailingSigCh);
     }
 
-    //second thr leading and trailing
-    int nextThrSigChIndex1 = findSigChOnNextThr(
-                               thresholdSigCh.at(0).at(0).getValue(),
-                               thresholdSigCh.at(1),
-                               sigChEdgeMaxTime);
+    // Procedure follows in loop for THR 2,3,4
+    // First search for leading SigCh on iterated THR,
+    // then search for trailing SigCh on iterated THR
+    for(uint kk=1;kk<numOfThresholds;kk++){
+      int nextThrSigChIndex = findSigChOnNextThr(
+        thrLeadingSigCh.at(0).at(0).getValue(),
+        thrLeadingSigCh.at(kk),
+        sigChEdgeMaxTime
+      );
 
-    if (nextThrSigChIndex1 != -1) {
+  	  if (nextThrSigChIndex != -1) {
+  		  closestTrailingSigCh = findTrailingSigCh(
+          thrLeadingSigCh.at(0).at(0),
+          thrTrailingSigCh.at(kk),
+          sigChLeadTrailMaxTime
+  		  );
 
-      int closestTrailingSigCh1 = findTrailingSigCh(
-                                    thresholdSigCh.at(0).at(0),
-                                    thresholdSigCh.at(5),
-                                    sigChLeadTrailMaxTime);
+  			if (closestTrailingSigCh != -1) {
+          rawSig.addPoint(thrTrailingSigCh.at(kk).at(closestTrailingSigCh));
+          if(saveHistos)
+            stats.getHisto1D(Form("lead_trail_thr%d_diff", kk+1))->Fill(
+              thrTrailingSigCh.at(kk)
+                .at(closestTrailingSigCh).getValue()-thrLeadingSigCh.at(kk).at(nextThrSigChIndex).getValue()
+            );
+          thrTrailingSigCh.at(kk).erase(thrTrailingSigCh.at(kk).begin()+closestTrailingSigCh);
+        }
 
-      if (closestTrailingSigCh1 != -1) {
-        rawSig.addPoint(thresholdSigCh.at(5).at(closestTrailingSigCh1));
-        thresholdSigCh.at(5).erase(thresholdSigCh.at(5).begin()
-                                   + closestTrailingSigCh1);
-      }
-
-      rawSig.addPoint(thresholdSigCh.at(1).at(nextThrSigChIndex1));
-      thresholdSigCh.at(1).erase(thresholdSigCh.at(1).begin()
-                                 + nextThrSigChIndex1);
+  			rawSig.addPoint(thrLeadingSigCh.at(kk).at(nextThrSigChIndex));
+        if(saveHistos)
+          stats.getHisto1D(Form("lead_thr1_thr%d_diff", kk+1))->Fill(
+            thrLeadingSigCh.at(kk)
+              .at(nextThrSigChIndex).getValue()-thrLeadingSigCh.at(0).at(0).getValue()
+          );
+        thrLeadingSigCh.at(kk).erase(thrLeadingSigCh.at(kk).begin()+nextThrSigChIndex);
+  		}
     }
 
-    //third thr leading and trailing
-    int nextThrSigChIndex2 = findSigChOnNextThr(
-                               thresholdSigCh.at(0).at(0).getValue(),
-                               thresholdSigCh.at(2),
-                               sigChEdgeMaxTime);
-
-    if (nextThrSigChIndex2 != -1) {
-
-      int closestTrailingSigCh2 = findTrailingSigCh(
-                                    thresholdSigCh.at(0).at(0),
-                                    thresholdSigCh.at(6),
-                                    sigChLeadTrailMaxTime);
-
-      if (closestTrailingSigCh2 != -1) {
-        rawSig.addPoint(thresholdSigCh.at(6).at(closestTrailingSigCh2));
-        thresholdSigCh.at(6).erase(thresholdSigCh.at(6).begin()
-                                   + closestTrailingSigCh2);
-      }
-
-      rawSig.addPoint(thresholdSigCh.at(2).at(nextThrSigChIndex2));
-      thresholdSigCh.at(2).erase(thresholdSigCh.at(2).begin()
-                                 + nextThrSigChIndex2);
-    }
-
-    //fourth thr leading and trailing
-    int nextThrSigChIndex3 = findSigChOnNextThr(
-                               thresholdSigCh.at(0).at(0).getValue(),
-                               thresholdSigCh.at(3),
-                               sigChEdgeMaxTime);
-
-    if (nextThrSigChIndex3 != -1) {
-
-      int closestTrailingSigCh3 = findTrailingSigCh(
-                                    thresholdSigCh.at(0).at(0),
-                                    thresholdSigCh.at(7),
-                                    sigChLeadTrailMaxTime);
-
-      if (closestTrailingSigCh3 != -1) {
-        rawSig.addPoint(thresholdSigCh.at(7).at(closestTrailingSigCh3));
-        thresholdSigCh.at(7).erase(thresholdSigCh.at(7).begin()
-                                   + closestTrailingSigCh3);
-      }
-
-      rawSig.addPoint(thresholdSigCh.at(3).at(nextThrSigChIndex3));
-      thresholdSigCh.at(3).erase(thresholdSigCh.at(3).begin()
-                                 + nextThrSigChIndex3);
-    }
-
-    //adding created Raw Signal to vector
-    rawSigVec.push_back(rawSig);
-    thresholdSigCh.at(0).erase(thresholdSigCh.at(0).begin() + 0);
+  	// Adding created Raw Signal to vector
+  	rawSigVec.push_back(rawSig);
+  	thrLeadingSigCh.at(0).erase(thrLeadingSigCh.at(0).begin());
   }
 
-  //filling controll histograms
-  if (saveControlHistos) {
-    stats.getHisto1D("remainig_leading_sig_ch_per_thr")
-    ->Fill(1, thresholdSigCh.at(0).size());
-    stats.getHisto1D("remainig_leading_sig_ch_per_thr")
-    ->Fill(2, thresholdSigCh.at(1).size());
-    stats.getHisto1D("remainig_leading_sig_ch_per_thr")
-    ->Fill(3, thresholdSigCh.at(2).size());
-    stats.getHisto1D("remainig_leading_sig_ch_per_thr")
-    ->Fill(4, thresholdSigCh.at(3).size());
-    stats.getHisto1D("remainig_trailing_sig_ch_per_thr")
-    ->Fill(1, thresholdSigCh.at(4).size());
-    stats.getHisto1D("remainig_trailing_sig_ch_per_thr")
-    ->Fill(2, thresholdSigCh.at(5).size());
-    stats.getHisto1D("remainig_trailing_sig_ch_per_thr")
-    ->Fill(3, thresholdSigCh.at(6).size());
-    stats.getHisto1D("remainig_trailing_sig_ch_per_thr")
-    ->Fill(4, thresholdSigCh.at(7).size());
-  }
-
-  return rawSigVec;
+  // Filling controll histograms
+  if(saveHistos)
+    for(uint jj=0;jj<numOfThresholds;jj++){
+      stats.getHisto1D("remainig_leading_sig_ch_per_thr")
+        ->Fill(jj+1, thrLeadingSigCh.at(jj).size());
+      stats.getHisto1D("remainig_trailing_sig_ch_per_thr")
+        ->Fill(jj+1, thrTrailingSigCh.at(jj).size());
+    }
+	return rawSigVec;
 }
 
-
-//method of finding Signal Channels that belong to the same leading edge
-//not more than sigChEdgeMaxTime away. Defined in ps.
-int SignalFinderTools::findSigChOnNextThr(Double_t sigChValue, const vector<JPetSigCh>& sigChVec, double sigChEdgeMaxTime)
+/**
+ * Method finds Signal Channels that belong to the same leading edge
+ */
+int SignalFinderTools::findSigChOnNextThr(
+  Double_t sigChValue,
+  const vector<JPetSigCh>& sigChVec,
+  double sigChEdgeMaxTime)
 {
   for (size_t i = 0; i < sigChVec.size(); i++) {
-    if (fabs(sigChValue - sigChVec.at(i).getValue()) < sigChEdgeMaxTime) {
+    if (fabs(sigChValue - sigChVec.at(i).getValue()) < sigChEdgeMaxTime)
       return i;
-    }
   }
   return -1;
 }
 
-//method of finding trailing edge SigCh that suits certian leading edge SigCh
-//not further away than sigChLeadTrailMaxTime in ps
-//if more than one trailing edge SigCh found, returning one with the smallest index
-//that is equivalent of SigCh earliest in time
-int SignalFinderTools::findTrailingSigCh(const JPetSigCh& leadingSigCh, const vector<JPetSigCh>& trailingSigChVec, double sigChLeadTrailMaxTime)
+/**
+ * Method finds trailing edge Signal Channel that suits certian leading edge
+ * Signal Channel, if more than one trailing edge Signal Channel found,
+ * returning the one with the smallest index, that is equivalent of SigCh
+ * earliest in time
+ */
+int SignalFinderTools::findTrailingSigCh(
+  const JPetSigCh& leadingSigCh,
+  const vector<JPetSigCh>& trailingSigChVec,
+  double sigChLeadTrailMaxTime)
 {
   vector<int> trailingFoundIdices;
   for (size_t i = 0; i < trailingSigChVec.size(); i++) {

@@ -15,45 +15,44 @@
 
 #ifndef SIGNALFINDERTOOLS_H
 #define SIGNALFINDERTOOLS_H
-#include <vector>
+
+/**
+ * @brief Set of tools for Signal Finder task
+ *
+ * Contains methods building Raw Signals from Signal Channels
+ * Core algorithm descibed in
+ * http://koza.if.uj.edu.pl/petwiki/images/4/4f/SignalFinderDoc.pdf
+ */
+
 #include <map>
-#include <JPetRawSignal/JPetRawSignal.h>
+#include <vector>
 #include <JPetSigCh/JPetSigCh.h>
+#include <JPetRawSignal/JPetRawSignal.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
 #include <JPetStatistics/JPetStatistics.h>
 
 class SignalFinderTools
 {
 public:
-
-  //Method returns a map of vectors of JPetSigCh ordered by photomultiplier id.
-  //The map is based on the JPetSigCh from a given timeWindow.
   static std::map<int, std::vector<JPetSigCh>> getSigChsPMMapById(const JPetTimeWindow* timeWindow);
-
-  //Method reconstructs all signals based on the signal channels
-  //from the SigChPMMap
   static std::vector<JPetRawSignal> buildAllSignals(
     std::map<int, std::vector<JPetSigCh>> sigChsPMMap,
     unsigned int numOfThresholds,
     JPetStatistics& stats,
-    bool saveControlHistos,
     double sigChEdgeMaxTime,
-    double sigChLeadTrailMaxTime
+    double sigChLeadTrailMaxTime,
+    bool saveHistos
   );
 
-  //Method reconstructs signals based on the signal channels
-  //from the sigChFromSamePM container
   static std::vector<JPetRawSignal> buildRawSignals(
     const std::vector<JPetSigCh>& sigChFromSamePM,
     unsigned int numOfThresholds,
     JPetStatistics& stats,
-    bool saveControlHistos,
     double sigChEdgeMaxTime,
-    double sigChLeadTrailMaxTime
+    double sigChLeadTrailMaxTime,
+    bool saveHistos
   );
 
-  //Methods for checking relative between Signal Channel times
-  //and if they fit in defined time windows
   static int findSigChOnNextThr(Double_t sigChValue,
                                 const std::vector<JPetSigCh>& sigChVec,
                                 double sigChEdgeMaxTime);
@@ -63,4 +62,4 @@ public:
                                double sigChLeadTrailMaxTime);
 
 };
-#endif /*  !SIGNALFINDERTOOLS_H */
+#endif /* !SIGNALFINDERTOOLS_H */
