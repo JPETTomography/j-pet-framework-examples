@@ -19,8 +19,8 @@
 #include <map>
 #include <vector>
 #include <JPetUserTask/JPetUserTask.h>
-#include <JPetHit/JPetHit.h>
-#include <JPetRawSignal/JPetRawSignal.h>
+#include <JPetMCHit/JPetMCHit.h>
+#include "MCHitTranslatorTools.h"
 
 class JPetWriter;
 
@@ -31,8 +31,7 @@ class JPetWriter;
 #endif
 
 /**
- * @brief      Module responsible for creating JPetHit from signals on oppositte photomultipliers
- *
+ * @brief      Module responsible for creating JPetMCHit from GEANT MC simulations
  *
  */
 class MCHitTranslator: public JPetUserTask
@@ -48,21 +47,14 @@ public:
 
 protected :
 
-//  bool kFirstTime = true;
+  bool kFirstTime = true;
 //  MCHitTranslatorTools::SignalsContainer fAllSignalsInTimeWindow;
 //  MCHitTranslatorTools fHitTools;
 //
 //  void fillSignalsMap(const JPetPhysSignal& signal);
 //  void saveHits(const std::vector<JPetHit>& hits);
 //  const std::string fTimeWindowWidthParamKey = "MCHitTranslator_TimeWindowWidth_float";
-//  const std::string fVelocityCalibFileParamKey = "MCHitTranslator_Velocity_Calibration_File_Path_std::string";
-//  double kTimeWindowWidth = 50000; /// in ps -> 50ns. Maximal time difference between signals
-//
-//private:
-//  std::string fVelocityCalibrationFilePath = "resultsForThresholda.txt";
-//  MCHitTranslatorTools::VelocityMap fVelocityMap;
-//
-//  MCHitTranslatorTools::VelocityMap readVelocityFile();
+
 };
 
 #endif 

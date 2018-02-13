@@ -27,39 +27,10 @@ MCHitTranslator::~MCHitTranslator() { }
 
 bool MCHitTranslator::init()
 {
-//  fOutputEvents = new JPetTimeWindow("JPetHit");
-//  auto opts = getOptions();
-//
-//  if (isOptionSet(opts, fVelocityCalibFileParamKey))
-//    fVelocityCalibrationFilePath = getOptionAsString(opts, fVelocityCalibFileParamKey);
-//
-//  INFO("Reading velocities.");
-//  fVelocityMap = readVelocityFile();
-//
-//  getStatistics().createHistogram(
-//    new TH1F("hits_per_time_window",
-//             "Number of Hits in Time Window",
-//             101, -0.5, 100.5
-//            )
-//  );
-//
-//  getStatistics().createHistogram(
-//    new TH2F("time_diff_per_scin",
-//             "Signals Time Difference per Scintillator ID",
-//             200, -20000.0, 20000.0,
-//             192, 1.0, 193.0));
-//
-//  getStatistics().createHistogram(
-//    new TH2F("hit_pos_per_scin",
-//             "Hit Position per Scintillator ID",
-//             200, -150.0, 150.0,
-//             192, 1.0, 193.0));
-//
-//  if (isOptionSet(opts, fTimeWindowWidthParamKey)) {
-//    kTimeWindowWidth = getOptionAsFloat(opts, fTimeWindowWidthParamKey);
-//  }
-//
-//  INFO("Hit finding started.");
+  fOutputEvents = new JPetTimeWindow("JPetMCHit");
+  auto opts = getOptions();
+
+  INFO("MC Hit wrapper started.");
 
   return true;
 }

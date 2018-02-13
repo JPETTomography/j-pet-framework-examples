@@ -12,6 +12,7 @@
 *.kate-swp
 *.kdev*
 *.exe
+o
 
 # CMake specific files
 CMakeFiles
@@ -27,6 +28,8 @@ MakeFile
 /*.so
 /*.dylib
 /*.cbp
+
+MCGeantAnalysis/.*.swp
 
 *.1
 
