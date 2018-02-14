@@ -51,6 +51,7 @@ private:
   const float kReconstructionEndAngle = 180.f;
   const float kReconstructionDistanceAccuracy = 0.01f; // in cm, 5mm accuracy
   const unsigned int kNumberOfScintillatorsInReconstructionLayer = 48; // number of scintillators in full layer
+  const float kReconstructionAngleStep = 0.5f;
 };
 
 #endif /*  !SINOGRAMCREATOR_H */

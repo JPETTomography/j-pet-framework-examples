@@ -14,6 +14,7 @@
  */
 
 #include "SinogramCreator.h"
+#include <TH2F.h>
 
 SinogramCreator::SinogramCreator(const char* name) : JPetUserTask(name) {}
 
@@ -24,6 +25,11 @@ bool SinogramCreator::init()
   auto opts = getOptions();
   fOutputEvents = new JPetTimeWindow("JPetEvent");
 
+  getStatistics().createHistogram(new TH2I("reconstuction_histogram",
+                                  "reconstuction_histogram",
+                                  std::ceil(kReconstructionLayerRadius * 2 * (1.f / kReconstructionDistanceAccuracy)) + 1, -kReconstructionLayerRadius, kReconstructionLayerRadius,
+                                  std::ceil((kReconstructionEndAngle - kReconstructionStartAngle) / kReconstructionAngleStep), kReconstructionStartAngle, kReconstructionEndAngle));
+
   return true;
 }
 
@@ -33,9 +39,8 @@ bool SinogramCreator::exec()
 
   int numberOfScintillatorsInHalf = kNumberOfScintillatorsInReconstructionLayer / 2;
   float reconstructionAngleDiff = kReconstructionEndAngle - kReconstructionStartAngle;
-  float reconstructionAngleStep = 0.5f;
 
-  int maxThetaNumber = std::ceil(reconstructionAngleDiff / reconstructionAngleStep);
+  int maxThetaNumber = std::ceil(reconstructionAngleDiff / kReconstructionAngleStep);
   int maxDistanceNumber = std::ceil(kReconstructionLayerRadius * 2 * (1.f / kReconstructionDistanceAccuracy)) + 1;
   if (fSinogram == nullptr) {
     fSinogram = new SinogramResultType(maxDistanceNumber, (std::vector<int>(maxThetaNumber)));
@@ -49,12 +54,12 @@ bool SinogramCreator::exec()
         const auto& firstHit = hits[0];
         const auto& secondHit = hits[1];
         if (checkLayer(firstHit) && checkLayer(secondHit)) {
-          for (float theta = kReconstructionStartAngle; theta < kReconstructionEndAngle; theta += reconstructionAngleStep) {
+          for (float theta = kReconstructionStartAngle; theta < kReconstructionEndAngle; theta += kReconstructionAngleStep) {
             float x = kReconstructionLayerRadius * std::cos(theta * (M_PI / 180.f)); // calculate x,y positon of line with theta angle from line (0,0) = theta
             float y = kReconstructionLayerRadius * std::sin(theta * (M_PI / 180.f));
             std::pair<float, float> intersectionPoint = SinogramCreatorTools::lineIntersection(std::make_pair(-x, -y), std::make_pair(x, y),
-                std::make_pair(firstHit.getPosX(), firstHit.getPosY()), std::make_pair(secondHit.getPosX(), secondHit.getPosY()));
-            if (intersectionPoint.first != std::numeric_limits<float>::max() && intersectionPoint.second != std::numeric_limits<float>::max()) {
+                std::make_pair(firstHit.getPosX(), firstHit.getPosY()), std::make_pair(secondHit.getPosX(), secondHit.getPosY())); //find intersection point
+            if (intersectionPoint.first != std::numeric_limits<float>::max() && intersectionPoint.second != std::numeric_limits<float>::max()) { // check is there is intersection point
               float distance = SinogramCreatorTools::length2D(intersectionPoint.first, intersectionPoint.second);
               if (distance >= kReconstructionLayerRadius) // if distance is greather then our max reconstuction layer radius, it cant be placed in sinogram
                 continue;
@@ -63,11 +68,12 @@ bool SinogramCreator::exec()
               int distanceRound = std::floor((kReconstructionLayerRadius / kReconstructionDistanceAccuracy)
                                              + kReconstructionDistanceAccuracy)
                                   + std::floor((distance / kReconstructionDistanceAccuracy) + kReconstructionDistanceAccuracy); //clever way of floating to nearest accuracy digit and change it to int
-              int thetaNumber = std::round(theta / reconstructionAngleStep); // round because of floating point
+              int thetaNumber = std::round(theta / kReconstructionAngleStep);                                                   // round because of floating point
               //if (thetaNumber >= maxThetaNumber || distanceRound >= maxDistanceNumber) {
               //std::cout << "Theta: " << thetaNumber << " maxTheta: " << maxThetaNumber << " distanceRound: " << distanceRound << " maxDistanceRound: " << maxDistanceNumber << " distance: " << distance << " ix: " << intersectionPoint.first << " iy: " << intersectionPoint.second << " x1: " << firstHit.getPosX() << " y1: " << firstHit.getPosY() << " x2: " << secondHit.getPosX() << " y2: " << secondHit.getPosY() << std::endl;
               //}
-              fSinogram->at(distanceRound).at(thetaNumber)++;
+              fSinogram->at(distanceRound).at(thetaNumber)++; // add to sinogram
+              getStatistics().getObject<TH2I>("reconstuction_histogram")->Fill(distance, theta); //add to histogram
             }
           }
         }
