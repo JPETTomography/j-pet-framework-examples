@@ -33,7 +33,7 @@ bool SinogramCreator::exec()
 
   int numberOfScintillatorsInHalf = kNumberOfScintillatorsInReconstructionLayer / 2;
   float reconstructionAngleDiff = kReconstructionEndAngle - kReconstructionStartAngle;
-  float reconstructionAngleStep = (reconstructionAngleDiff) / static_cast<float>(numberOfScintillatorsInHalf);
+  float reconstructionAngleStep = 1.;
 
   int maxThetaNumber = (reconstructionAngleDiff / reconstructionAngleStep) + 1;
   int maxDistanceNumber = std::floor(kReconstructionLayerRadius * 2 * (1.f / kReconstructionDistanceAccuracy)) + 1;
@@ -50,8 +50,8 @@ bool SinogramCreator::exec()
         const auto& secondHit = hits[1];
         if (checkLayer(firstHit) && checkLayer(secondHit)) {
           for (float theta = kReconstructionStartAngle; theta < kReconstructionEndAngle; theta += reconstructionAngleStep) {
-            float x = kReconstructionLayerRadius * std::cos(theta * (M_PI / 180));
-            float y = kReconstructionLayerRadius * std::sin(theta * (M_PI / 180));
+            float x = kReconstructionLayerRadius * std::cos(theta * (M_PI / 180.f));
+            float y = kReconstructionLayerRadius * std::sin(theta * (M_PI / 180.f));
             std::pair<float, float> intersectionPoint = SinogramCreatorTools::lineIntersection(std::make_pair(-x, -y), std::make_pair(x, y),
                 std::make_pair(firstHit.getPosX(), firstHit.getPosY()), std::make_pair(secondHit.getPosX(), secondHit.getPosY()));
             if (intersectionPoint.first != std::numeric_limits<float>::max() && intersectionPoint.second != std::numeric_limits<float>::max()) {
