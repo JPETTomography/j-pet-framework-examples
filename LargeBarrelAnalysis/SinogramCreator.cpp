@@ -35,8 +35,8 @@ bool SinogramCreator::exec()
   float reconstructionAngleDiff = kReconstructionEndAngle - kReconstructionStartAngle;
   float reconstructionAngleStep = 0.5f;
 
-  int maxThetaNumber = std::floor(reconstructionAngleDiff / reconstructionAngleStep);
-  int maxDistanceNumber = std::floor(kReconstructionLayerRadius * 2 * (1.f / kReconstructionDistanceAccuracy));
+  int maxThetaNumber = std::ceil(reconstructionAngleDiff / reconstructionAngleStep);
+  int maxDistanceNumber = std::ceil(kReconstructionLayerRadius * 2 * (1.f / kReconstructionDistanceAccuracy));
   if (fSinogram == nullptr) {
     fSinogram = new SinogramResultType(maxDistanceNumber, (std::vector<int>(maxThetaNumber)));
   }
@@ -50,7 +50,7 @@ bool SinogramCreator::exec()
         const auto& secondHit = hits[1];
         if (checkLayer(firstHit) && checkLayer(secondHit)) {
           for (float theta = kReconstructionStartAngle; theta < kReconstructionEndAngle; theta += reconstructionAngleStep) {
-            float x = kReconstructionLayerRadius * std::cos(theta * (M_PI / 180.f));
+            float x = kReconstructionLayerRadius * std::cos(theta * (M_PI / 180.f)); // calculate x,y positon of line with theta angle from line (0,0) = theta
             float y = kReconstructionLayerRadius * std::sin(theta * (M_PI / 180.f));
             std::pair<float, float> intersectionPoint = SinogramCreatorTools::lineIntersection(std::make_pair(-x, -y), std::make_pair(x, y),
                 std::make_pair(firstHit.getPosX(), firstHit.getPosY()), std::make_pair(secondHit.getPosX(), secondHit.getPosY()));
@@ -62,8 +62,8 @@ bool SinogramCreator::exec()
                 distance = -distance;
               int distanceRound = std::floor((kReconstructionLayerRadius / kReconstructionDistanceAccuracy)
                                              + kReconstructionDistanceAccuracy)
-                                  + std::floor((distance / kReconstructionDistanceAccuracy) + kReconstructionDistanceAccuracy);
-              int thetaNumber = theta / reconstructionAngleStep;
+                                  + std::floor((distance / kReconstructionDistanceAccuracy) + kReconstructionDistanceAccuracy); //clever way of floating to nearest accuracy digit and change it to int
+              int thetaNumber = std::round(theta / reconstructionAngleStep); // round because of floating point
               //if (thetaNumber >= maxThetaNumber || distanceRound >= maxDistanceNumber) {
               //std::cout << "Theta: " << thetaNumber << " maxTheta: " << maxThetaNumber << " distanceRound: " << distanceRound << " maxDistanceRound: " << maxDistanceNumber << " distance: " << distance << " ix: " << intersectionPoint.first << " iy: " << intersectionPoint.second << " x1: " << firstHit.getPosX() << " y1: " << firstHit.getPosY() << " x2: " << secondHit.getPosX() << " y2: " << secondHit.getPosY() << std::endl;
               //}
