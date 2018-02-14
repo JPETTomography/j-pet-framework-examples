@@ -35,8 +35,8 @@ bool SinogramCreator::exec()
   float reconstructionAngleDiff = kReconstructionEndAngle - kReconstructionStartAngle;
   float reconstructionAngleStep = 1.;
 
-  int maxThetaNumber = (reconstructionAngleDiff / reconstructionAngleStep) + 1;
-  int maxDistanceNumber = std::floor(kReconstructionLayerRadius * 2 * (1.f / kReconstructionDistanceAccuracy)) + 1;
+  int maxThetaNumber = std::floor(reconstructionAngleDiff / reconstructionAngleStep);
+  int maxDistanceNumber = std::floor(kReconstructionLayerRadius * 2 * (1.f / kReconstructionDistanceAccuracy));
   if (fSinogram == nullptr) {
     fSinogram = new SinogramResultType(maxDistanceNumber, (std::vector<int>(maxThetaNumber)));
   }
