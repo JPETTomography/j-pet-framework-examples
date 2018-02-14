@@ -33,7 +33,7 @@ bool SinogramCreator::exec()
 
   int numberOfScintillatorsInHalf = kNumberOfScintillatorsInReconstructionLayer / 2;
   float reconstructionAngleDiff = kReconstructionEndAngle - kReconstructionStartAngle;
-  float reconstructionAngleStep = 0.5.;
+  float reconstructionAngleStep = 0.5f;
 
   int maxThetaNumber = std::floor(reconstructionAngleDiff / reconstructionAngleStep);
   int maxDistanceNumber = std::floor(kReconstructionLayerRadius * 2 * (1.f / kReconstructionDistanceAccuracy));
