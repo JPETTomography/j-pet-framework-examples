@@ -46,10 +46,10 @@ private:
   SinogramResultType* fSinogram = nullptr;
 
   float fElipsonForHits = 0.30f;
-  const float kReconstructionLayerRadius = 42.5f; //TODO CHECK REAL VALUE!!
+  const float kReconstructionLayerRadius = 42.5f;
   const float kReconstructionStartAngle = 0.f;
   const float kReconstructionEndAngle = 180.f;
-  const float kReconstructionDistanceAccuracy = 0.05f; // in cm, 5mm accuracy
+  const float kReconstructionDistanceAccuracy = 0.01f; // in cm, 5mm accuracy
   const unsigned int kNumberOfScintillatorsInReconstructionLayer = 48; // number of scintillators in full layer
 };
 
