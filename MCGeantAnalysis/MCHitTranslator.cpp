@@ -43,12 +43,12 @@ bool MCHitTranslator::exec()
 //      fillSignalsMap(dynamic_cast<const JPetPhysSignal&>(timeWindow->operator[](i)));
 //    }
 //
-//    std::vector<JPetHit> hits = fHitTools.createHits(
+    std::vector<JPetMCHit> hits = fHitTools.createHits();
 //                                  getStatistics(),
 //                                  fAllSignalsInTimeWindow,
 //                                  kTimeWindowWidth,
 //                                  fVelocityMap);
-//    saveHits(hits);
+    saveHits(hits);
 //    getStatistics().getHisto1D("hits_per_time_window")->Fill(hits.size());
 //    fAllSignalsInTimeWindow.clear();
 //  } else {
@@ -65,16 +65,15 @@ bool MCHitTranslator::terminate()
   return true;
 }
 
-//
-//void MCHitTranslator::saveHits(const std::vector<JPetHit>& hits)
-//{
-//  auto sortedHits = JPetAnalysisTools::getHitsOrderedByTime(hits);
-//
-//  for (const auto& hit : sortedHits) {
-//    fOutputEvents->add<JPetHit>(hit);
-//  }
-//}
-//
+
+void MCHitTranslator::saveHits(const std::vector<JPetMCHit>& hits)
+{
+
+  for (const auto& hit : hits) {
+    fOutputEvents->add<JPetMCHit>(hit);
+  }
+}
+
 //void MCHitTranslator::fillSignalsMap(const JPetPhysSignal& signal)
 //{
 //  auto scinId = signal.getPM().getScin().getID();

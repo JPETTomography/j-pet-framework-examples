@@ -24,6 +24,8 @@
 class MCHitTranslatorTools
 {
 public:
+    std::vector<JPetMCHit> createHits();
+    JPetMCHit createHit();
 //  typedef std::map<int, std::pair<std::vector<JPetPhysSignal>, std::vector<JPetPhysSignal>>> SignalsContainer;
 //  typedef std::map<int, std::pair<double, double>> VelocityMap;
 //
@@ -50,4 +52,4 @@ public:
 //  bool checkIsDegreeOrRad(const std::vector<JPetHit>& hits);
 };
 
-#endif /*  !HITFINDERTOOLS_H */
+#endif 

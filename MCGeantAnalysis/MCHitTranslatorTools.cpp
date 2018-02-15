@@ -17,103 +17,18 @@
 #include <cmath> /// std::sin(), std::cos()
 #include <TMath.h> /// DegToRad()
 
-//JPetHit MCHitTranslatorTools::createDummyRefDefHit(const JPetPhysSignal& signalB,
-//    const VelocityMap& velMap)
-//{
-//  JPetHit hit;
-//  hit.setSignalB(signalB);
-//  hit.setTime(signalB.getTime());
-//  hit.setQualityOfTime(-1.0);
-//  hit.setTimeDiff(0.0);
-//  hit.setQualityOfTimeDiff(-1.0);
-//  hit.setEnergy(-1.0);
-//  hit.setQualityOfEnergy(-1.0);
-//  hit.setScintillator(signalB.getPM().getScin());
-//  hit.setBarrelSlot(signalB.getPM().getBarrelSlot());
-//  setHitXYPosition(hit);
-//
-//  auto search = velMap.find(hit.getBarrelSlot().getID());
-//  if (search != velMap.end()) hit.setPosZ(-1000000.0);
-//
-//  return hit;
-//}
-//
-//void MCHitTranslatorTools::addIfReferenceSignal(
-//  std::vector<JPetHit>& hits,
-//  const std::vector<JPetPhysSignal>& sideA,
-//  const std::vector<JPetPhysSignal>& sideB,
-//  const VelocityMap& velMap)
-//{
-//  if (sideA.size() == 0 && sideB.size() > 0) {
-//    auto scinID = sideB.at(0).getPM().getScin().getID();
-//    auto layerID = sideB.at(0).getBarrelSlot().getLayer().getID();
-//    if (scinID == 193 && layerID == 4) {
-//      for (auto signalB : sideB) {
-//        hits.push_back(createDummyRefDefHit(signalB, velMap));
-//      }
-//    }
-//  }
-//}
-//
-//void MCHitTranslatorTools::sortByTime(std::vector<JPetPhysSignal>& side)
-//{
-//  std::sort(side.begin(),
-//            side.end(),
-//            [](const JPetPhysSignal & h1,
-//  const JPetPhysSignal & h2) {
-//    return h1.getTime() < h2.getTime();
-//  });
-//}
-//
-//void MCHitTranslatorTools::setHitZPosition(JPetHit& hit, const VelocityMap& velMap)
-//{
-//  auto search = velMap.find(hit.getBarrelSlot().getID());
-//  if (search != velMap.end()) {
-//    double vel = search->second.first;
-//    double position = vel * hit.getTimeDiff() / 2000.;
-//    hit.setPosZ(position);
-//  } else {
-//    hit.setPosZ(-1000000.0);
-//  }
-//}
-//
-//void MCHitTranslatorTools::setHitXYPosition(JPetHit& hit)
-//{
-//  auto radius = hit.getBarrelSlot().getLayer().getRadius();
-//  auto theta = TMath::DegToRad() * hit.getBarrelSlot().getTheta();
-//  hit.setPosX(radius * std::cos(theta));
-//  hit.setPosY(radius * std::sin(theta));
-//}
-//
-//JPetHit MCHitTranslatorTools::createHit(const JPetPhysSignal& signalA,
-//                                  const JPetPhysSignal& signalB,
-//                                  const VelocityMap& velMap)
-//{
-//  JPetHit hit;
-//  hit.setSignalA(signalA);
-//  hit.setSignalB(signalB);
-//  hit.setTime((signalA.getTime() + signalB.getTime()) / 2.0);
-//  hit.setQualityOfTime(-1.0);
-//  hit.setTimeDiff(signalB.getTime() - signalA.getTime());
-//  hit.setQualityOfTimeDiff(-1.0);
-//  hit.setEnergy(-1.0);
-//  hit.setQualityOfEnergy(-1.0);
-//  hit.setScintillator(signalA.getPM().getScin());
-//  hit.setBarrelSlot(signalA.getPM().getBarrelSlot());
-//
-//  setHitXYPosition(hit);
-//  setHitZPosition(hit, velMap);
-//
-//  return hit;
-//}
-//
-//std::vector<JPetHit> MCHitTranslatorTools::createHits(
+
+std::vector<JPetMCHit> MCHitTranslatorTools::createHits()
+{
+
 //  JPetStatistics& statistics,
 //  const SignalsContainer& allSignalsInTimeWindow,
 //  const double timeDifferenceWindow,
 //  const VelocityMap& velMap)
 //{
-//  std::vector<JPetHit> hits;
+  std::vector<JPetMCHit> hits;
+  JPetMCHit hit = createHit();
+  hits.push_back(hit);
 //
 //  for (auto scintillator : allSignalsInTimeWindow) {
 //
@@ -160,8 +75,63 @@
 //  }
 //  if (!checkIsDegreeOrRad(hits))
 //    WARNING("ALL barrel slots have theta < then 7, check is they have correct degree theta");
-//  return hits;
+  return hits;
+}
+
+
+JPetMCHit MCHitTranslatorTools::createHit()
+{
+  JPetMCHit hit;
+
+//  hit.setSignalA(signalA);
+//  hit.setSignalB(signalB);
+//  hit.setTime((signalA.getTime() + signalB.getTime()) / 2.0);
+//  hit.setQualityOfTime(-1.0);
+//  hit.setTimeDiff(signalB.getTime() - signalA.getTime());
+  hit.setQualityOfTimeDiff(-1.0);
+  hit.setEnergy(-1.0);
+//  hit.setQualityOfEnergy(-1.0);
+//  hit.setScintillator(signalA.getPM().getScin());
+//  hit.setBarrelSlot(signalA.getPM().getBarrelSlot());
+//
+//  setHitXYPosition(hit);
+//  setHitZPosition(hit, velMap);
+
+  return hit;
+}
+
+
+
+//
+//void MCHitTranslatorTools::addIfReferenceSignal(
+//  std::vector<JPetHit>& hits,
+//  const std::vector<JPetPhysSignal>& sideA,
+//  const std::vector<JPetPhysSignal>& sideB,
+//  const VelocityMap& velMap)
+//{
+//  if (sideA.size() == 0 && sideB.size() > 0) {
+//    auto scinID = sideB.at(0).getPM().getScin().getID();
+//    auto layerID = sideB.at(0).getBarrelSlot().getLayer().getID();
+//    if (scinID == 193 && layerID == 4) {
+//      for (auto signalB : sideB) {
+//        hits.push_back(createDummyRefDefHit(signalB, velMap));
+//      }
+//    }
+//  }
 //}
+//
+//void MCHitTranslatorTools::sortByTime(std::vector<JPetPhysSignal>& side)
+//{
+//  std::sort(side.begin(),
+//            side.end(),
+//            [](const JPetPhysSignal & h1,
+//  const JPetPhysSignal & h2) {
+//    return h1.getTime() < h2.getTime();
+//  });
+//}
+//
+//
+
 //
 //bool MCHitTranslatorTools::checkIsDegreeOrRad(const std::vector<JPetHit>& hits)
 //{

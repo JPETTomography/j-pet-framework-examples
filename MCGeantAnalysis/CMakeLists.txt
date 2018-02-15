@@ -13,9 +13,6 @@ cmake_minimum_required(VERSION 2.6)
 ######################################################################
 set(projectName MCGeantAnalysis)
 
-# files to be copied from some other example directory, if any
-set(USE_AUX_FILES_FROM LargeBarrelAnalysis)
-
 set(AUXILLIARY_FILES
   run.sh
   conf_trb3.xml
@@ -23,7 +20,6 @@ set(AUXILLIARY_FILES
   large_barrel.json
   TimeConstants.txt
   userParams.json
-  README
   )
 
 set(ROOT_SCRIPTS
@@ -88,18 +84,7 @@ set(copy_depends) #create variable for list with depends files path
 
 # copy the example auxilliary files
 foreach( file_i ${AUXILLIARY_FILES})
-  list(APPEND copy_depends ${CMAKE_CURRENT_BINARY_DIR}/${file_i})
-
-  if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../${USE_AUX_FILES_FROM}/${file_i})
-    set(CP_CMD copy_directory)
-  else()
-    set(CP_CMD copy)
-  endif()
-  add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND}
-    ARGS -E ${CP_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/../${USE_AUX_FILES_FROM}/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
-    )
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i} COPYONLY)
 endforeach( file_i )
 
 # copy the ROOT scripts

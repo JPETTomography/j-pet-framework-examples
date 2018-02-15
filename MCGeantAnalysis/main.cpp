@@ -23,7 +23,11 @@ int main(int argc, const char* argv[])
 {
   JPetManager& manager = JPetManager::getManager();
 
+  manager.registerTask<MCHitTranslator>("MCHitTranslator");
+
+  manager.useTask("MCHitTranslator", "mcGeant", "mc.hits"); 
   
+
   
   manager.run(argc, argv);
 }

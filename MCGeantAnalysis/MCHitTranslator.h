@@ -49,10 +49,10 @@ protected :
 
   bool kFirstTime = true;
 //  MCHitTranslatorTools::SignalsContainer fAllSignalsInTimeWindow;
-//  MCHitTranslatorTools fHitTools;
+  MCHitTranslatorTools fHitTools;
 //
 //  void fillSignalsMap(const JPetPhysSignal& signal);
-//  void saveHits(const std::vector<JPetHit>& hits);
+  void saveHits(const std::vector<JPetMCHit>& hits);
 //  const std::string fTimeWindowWidthParamKey = "MCHitTranslator_TimeWindowWidth_float";
 
 };
