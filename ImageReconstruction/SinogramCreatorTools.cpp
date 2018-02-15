@@ -181,7 +181,10 @@ float SinogramCreatorTools::length2D(const float x, const float y)
   return std::sqrt(x * x + y * y);
 }
 
-std::pair<float, float> SinogramCreatorTools::lineIntersection(const std::pair<float, float> A, const std::pair<float, float> B, const std::pair<float, float> C, const std::pair<float, float> D)
+SinogramCreatorTools::Point SinogramCreatorTools::lineIntersection(const SinogramCreatorTools::Point& A,
+    const SinogramCreatorTools::Point& B,
+    const SinogramCreatorTools::Point& C,
+    const SinogramCreatorTools::Point& D)
 {
   float a1 = B.second - A.second;
   float b1 = A.first - B.first;

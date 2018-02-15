@@ -31,6 +31,7 @@ class SinogramCreatorTools
 {
 public:
   using LineResult = std::vector<std::tuple<int, int, int>>;
+  using Point = std::pair<float, float>;
 
   /*
   * @brief Calculate integer line values between 2 hits without antialiasing
@@ -42,7 +43,7 @@ public:
   *
   * @return vector with interpolated points and intensivity: (x, y, 255) where max intensivity is 255
   */
-  static std::vector<std::tuple<int, int, int>> calculateLineWithoutAntialiasing(float X1, float Y1, float X2, float Y2);
+  static LineResult calculateLineWithoutAntialiasing(float X1, float Y1, float X2, float Y2);
 
   /*
    * @brief Calculate integer line values between 2 hits with antialiasing
@@ -54,12 +55,21 @@ public:
    *
    * @return vector with interpolated points and intensivity: (x, y, c)
    */
-  static std::vector<std::tuple<int, int, int>> calculateLineWithAntialiasing(float X1, float Y1, float X2, float Y2);
+  static LineResult calculateLineWithAntialiasing(float X1, float Y1, float X2, float Y2);
 
   static float calculateDistanceFromCenter(const float firstX, const float firstY, const float secondX, const float secondY, const float pointX = 0.f, const float pointY = 0.f);
   static float length2D(const float x, const float y);
 
-  static std::pair<float, float> lineIntersection(const std::pair<float, float> A, const std::pair<float, float> B, const std::pair<float, float> C, const std::pair<float, float> D);
+  /*
+  * @brief Calculating intersection point of 2 lines, if they are are not intersect, std::numeric_limits<float>::max() is returned
+  * \param A std::pair<float, float> with starting point of first line
+  * \param B std::pair<float, float> with ending point of first line
+  * \param C std::pair<float, float> with starting point of second line
+  * \param D std::pair<float, float> with ending point of second line
+  *
+  * @return point of intersection
+  */
+  static Point lineIntersection(const Point& A, const Point& B, const Point& C, const Point& D);
 
 private :
   SinogramCreatorTools() = delete;

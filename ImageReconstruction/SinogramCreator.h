@@ -22,11 +22,17 @@
 #define override
 #endif
 
-#include <JPetUserTask/JPetUserTask.h>
+#include "JPetUserTask/JPetUserTask.h"
 #include "SinogramCreatorTools.h"
-#include <JPetHit/JPetHit.h>
+#include "JPetHit/JPetHit.h"
 #include <vector>
+#include <string>
 
+/**
+ * @brief Module creating sinogram from data
+ *
+ * It implements creating sinogram from data, but only for 1st layer.
+ */
 class SinogramCreator : public JPetUserTask
 {
 public:
@@ -40,18 +46,27 @@ private:
   SinogramCreator(const SinogramCreator&) = delete;
   SinogramCreator& operator=(const SinogramCreator&) = delete;
 
+  void setUpOptions();
   bool checkLayer(const JPetHit& hit);
-  using SinogramResultType = std::vector<std::vector<int>>;
+  using SinogramResultType = std::vector<std::vector<unsigned int>>;
 
   SinogramResultType* fSinogram = nullptr;
 
-  float fElipsonForHits = 0.30f;
-  const float kReconstructionLayerRadius = 42.5f;
-  const float kReconstructionStartAngle = 0.f;
-  const float kReconstructionEndAngle = 180.f;
-  const float kReconstructionDistanceAccuracy = 0.01f; // in cm, 5mm accuracy
-  const unsigned int kNumberOfScintillatorsInReconstructionLayer = 48; // number of scintillators in full layer
-  const float kReconstructionAngleStep = 0.5f;
+  const std::string kOutFileNameKey = "SinogramCreator_OutFileName_std::string";
+  const std::string kReconstructionLayerRadiusKey = "SinogramCreator_ReconstructionLayerRadius_float";
+  const std::string kReconstructionStartAngle = "SinogramCreator_ReconstructionStartAngle_float";
+  const std::string kReconstructionEndAngle = "SinogramCreator_ReconstructionEndAngle_float";
+  const std::string kReconstructionDistanceAccuracy = "SinogramCreator_ReconstructionDistanceAccuracy_float";
+  const std::string kReconstructionAngleStep = "SinogramCreator_ReconstructionAngleStep_float";
+
+  std::string fOutFileName = "sinogram.ppm";
+  unsigned int fMaxValueInSinogram = 0; // to fill later output file
+
+  float fReconstructionLayerRadius = 42.5f;
+  float fReconstructionStartAngle = 0.f;
+  float fReconstructionEndAngle = 180.f;
+  float fReconstructionDistanceAccuracy = 0.01f; // in cm, 5mm accuracy
+  float fReconstructionAngleStep = 0.5f;
 };
 
 #endif /*  !SINOGRAMCREATOR_H */
