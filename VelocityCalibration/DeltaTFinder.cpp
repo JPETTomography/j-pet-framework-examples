@@ -39,22 +39,22 @@ bool DeltaTFinder::init(){
 	if (fSaveControlHistos)
 	{
 	// create histograms for time differences at each slot and each threshold
-	for(auto & scin : getParamBank().getScintillators()){
-		for (int thr=1;thr<=4;thr++){
-			const char * histo_name = formatUniqueSlotDescription(scin.second->getBarrelSlot(), thr, "timeDiffAB_");
-			getStatistics().createHistogram( new TH1F(histo_name, histo_name, 400, -20., 20.) );
-		}
-	}
+	  for(auto & scin : getParamBank().getScintillators()){
+	    for (int thr=1;thr<=4;thr++){
+	      const char * histo_name = formatUniqueSlotDescription(scin.second->getBarrelSlot(), thr, "timeDiffAB_");
+	      getStatistics().createHistogram( new TH1F(histo_name, histo_name, 400, -20., 20.) );
+	    }
+	  }
 	// create histograms for time diffrerence vs slot ID
-	for(auto & layer : getParamBank().getLayers()){
-		for (int thr=1;thr<=4;thr++){
-			const char * histo_name = Form("TimeDiffVsID_layer_%d_thr_%d", (int)fBarrelMap->getLayerNumber(*layer.second), thr);
-			const char * histo_titile = Form("%s;Slot ID; TimeDiffAB [ns]", histo_name); 
-			int n_slots_in_layer = fBarrelMap->getSlotsCount(*layer.second);
-			getStatistics().createHistogram( new TH2F(histo_name, histo_titile, n_slots_in_layer, 0.5, n_slots_in_layer+0.5,
-								  120, -20., 20.) );
-		}
-	}
+	  for(auto & layer : getParamBank().getLayers()){
+	    for (int thr=1;thr<=4;thr++){
+	      const char * histo_name = Form("TimeDiffVsID_layer_%d_thr_%d", (int)fBarrelMap->getLayerNumber(*layer.second), thr);
+	      const char * histo_titile = Form("%s;Slot ID; TimeDiffAB [ns]", histo_name); 
+	      int n_slots_in_layer = fBarrelMap->getSlotsCount(*layer.second);
+	      getStatistics().createHistogram( new TH2F(histo_name, histo_titile, n_slots_in_layer, 0.5, n_slots_in_layer+0.5,
+									  120, -20., 20.) );
+	    }
+	  }
 	}
 	
 	std::string file_path = "";
@@ -110,13 +110,12 @@ bool DeltaTFinder::exec(){
   if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     uint nhits = timeWindow->getNumberOfEvents();
     for (uint i = 0; i < nhits; ++i) {
-        fillHistosForHit( dynamic_cast<const JPetHit&>(timeWindow->operator[](i)) );
+      fillHistosForHit( dynamic_cast<const JPetHit&>(timeWindow->operator[](i)) );
     }
-        }
-    else{
-      return false;
-        }
-
+  }
+  else{
+    return false;
+  }
 
   return true;
 
@@ -130,31 +129,29 @@ bool DeltaTFinder::terminate(){
 	thresholdConversionMap[2] = 'b';
 	thresholdConversionMap[3] = 'c';
 	thresholdConversionMap[4] = 'd';
-	
-	
-	
+		
 	TString results_folder_name = (fOutputPath+"Results/position_"+boost::lexical_cast<std::string>(fPos)).c_str();
 	system("mkdir -p "+ results_folder_name);
 
 	for(auto & slot : getParamBank().getBarrelSlots()){
-		for (int thr=1;thr<=4;thr++){
-			const char * histo_name = formatUniqueSlotDescription(*(slot.second), thr, "timeDiffAB_");
-			TH1F* histoToSave = getStatistics().getHisto1D(histo_name);
-			int highestBin = histoToSave->GetBinCenter( histoToSave->GetMaximumBin() );
-			histoToSave->Fit("gaus","","", highestBin-fRangeAroundMaximumBin, highestBin+fRangeAroundMaximumBin);
-			TCanvas* c = new TCanvas();
-			histoToSave->Draw();
-			std::string sHistoName = (std::string)results_folder_name; 
-			sHistoName+="/"+std::string(histo_name)+"_position_"+boost::lexical_cast<std::string>(fPos)+".png"; 
-			c->SaveAs( (sHistoName).c_str() );
-			if( histoToSave->GetEntries() != 0 )
-			{
-				TF1 *fit = histoToSave->GetFunction("gaus");
-				outStream << slot.first << "\t" << fPos << "\t" << thresholdConversionMap[thr] << "\t" << fit->GetParameter(1)   
-				     <<"\t" << fit->GetParError(1) << "\t" << fit->GetChisquare() << "\t" << fit->GetNDF() << std::endl;
-			}
+	  for (int thr=1;thr<=4;thr++){
+	    const char * histo_name = formatUniqueSlotDescription(*(slot.second), thr, "timeDiffAB_");
+	    TH1F* histoToSave = getStatistics().getHisto1D(histo_name);
+	    int highestBin = histoToSave->GetBinCenter( histoToSave->GetMaximumBin() );
+	    histoToSave->Fit("gaus","","", highestBin-fRangeAroundMaximumBin, highestBin+fRangeAroundMaximumBin);
+	    TCanvas* c = new TCanvas();
+	    histoToSave->Draw();
+	    std::string sHistoName = (std::string)results_folder_name; 
+	    sHistoName+="/"+std::string(histo_name)+"_position_"+boost::lexical_cast<std::string>(fPos)+".png"; 
+	    c->SaveAs( (sHistoName).c_str() );
+	    if( histoToSave->GetEntries() != 0 )
+	    {
+              TF1 *fit = histoToSave->GetFunction("gaus");
+	      outStream << slot.first << "\t" << fPos << "\t" << thresholdConversionMap[thr] << "\t" << fit->GetParameter(1)   
+			     <<"\t" << fit->GetParError(1) << "\t" << fit->GetChisquare() << "\t" << fit->GetNDF() << std::endl;
+	    }
 			
-		}
+	  }
 	}
 
 	outStream.close();
@@ -169,19 +166,19 @@ void DeltaTFinder::fillHistosForHit(const JPetHit & hit){
 	auto lead_times_A = hit.getSignalA().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading);
 	auto lead_times_B = hit.getSignalB().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading);
 	for(auto & thr_time_pair : lead_times_A){
-		int thr = thr_time_pair.first;
-		if( lead_times_B.count(thr) > 0 ){ // if there was leading time at the same threshold at opposite side
-			double timeDiffAB = lead_times_A[thr] - lead_times_B[thr];
-			timeDiffAB /= 1000.; // we want the plots in ns instead of ps
-			// fill the appropriate histogram
-			const char * histo_name = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffAB_");
-			getStatistics().getHisto1D(histo_name)->Fill( timeDiffAB );
-			// fill the timeDiffAB vs slot ID histogram
-			int layer_number = fBarrelMap->getLayerNumber( hit.getBarrelSlot().getLayer() );
-			int slot_number = fBarrelMap->getSlotNumber( hit.getBarrelSlot() );
-			getStatistics().getHisto2D(Form("TimeDiffVsID_layer_%d_thr_%d", layer_number, thr))->Fill( slot_number,
-														  timeDiffAB);
-		}
+	  int thr = thr_time_pair.first;
+	  if( lead_times_B.count(thr) > 0 ){ // if there was leading time at the same threshold at opposite side
+	    double timeDiffAB = lead_times_A[thr] - lead_times_B[thr];
+	    timeDiffAB /= 1000.; // we want the plots in ns instead of ps
+	    // fill the appropriate histogram
+	    const char * histo_name = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffAB_");
+	    getStatistics().getHisto1D(histo_name)->Fill( timeDiffAB );
+	    // fill the timeDiffAB vs slot ID histogram
+            int layer_number = fBarrelMap->getLayerNumber( hit.getBarrelSlot().getLayer() );
+	    int slot_number = fBarrelMap->getSlotNumber( hit.getBarrelSlot() );
+	    getStatistics().getHisto2D(Form("TimeDiffVsID_layer_%d_thr_%d", layer_number, thr))->Fill( slot_number,
+													  timeDiffAB);
+	  }
 	}
 }
 
