@@ -105,11 +105,15 @@ const char* DeltaTFinder::formatUniqueSlotDescription(const JPetBarrelSlot & slo
 
 bool DeltaTFinder::exec(){
 
-  if(auto hit = dynamic_cast<const JPetHit*const>(fEvent)){
-    fillHistosForHit(*hit);
-  }else{
+   if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
+    uint nhits = timeWindow->getNumberOfEvents();
+    for (uint i = 0; i < nhits; ++i) {
+      fillHistosForHit( dynamic_cast<const JPetHit&>(timeWindow->operator[](i)) );
+    }
+  } else {
     return false;
   }
+
   return true;
 }
 
