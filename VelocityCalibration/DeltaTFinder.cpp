@@ -131,7 +131,7 @@ bool DeltaTFinder::terminate(){
 	TString results_folder_name = (fOutputPath+"Results/position_"+boost::lexical_cast<std::string>(fPos)).c_str();
 	system("mkdir -p "+ results_folder_name);
 
-	for(auto & slot : fParamManager->getParamBank().getBarrelSlots()){
+	for(auto & slot : getParamBank().getBarrelSlots()){
 		for (int thr=1;thr<=4;thr++){
 			const char * histo_name = formatUniqueSlotDescription(*(slot.second), thr, "timeDiffAB_");
 			TH1F* histoToSave = getStatistics().getHisto1D(histo_name);
