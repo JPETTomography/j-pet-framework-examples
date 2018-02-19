@@ -14,26 +14,26 @@ cmake_minimum_required(VERSION 2.6)
 set(projectName LargeBarrelAnalysis)
 
 set(AUXILIARY_FILES
-  ConfigFiles/EffVelocitiesRun1_2_3.txt
-  ConfigFiles/EffVelocitiesRun4.txt
-  ConfigFiles/EffVelocitiesRun5.txt
-  ConfigFiles/TOTConfigRun1_2.root
-  ConfigFiles/TOTConfigRun3_4.root
-  ConfigFiles/TOTConfigRun5After.root
-  ConfigFiles/TOTConfigRun5Before.root
-  ConfigFiles/TimeCalib_Run1_Collim.txt
-  ConfigFiles/TimeCalib_Run1_RefDet.txt
-  ConfigFiles/TimeCalib_Run2_RefDet.txt
-  ConfigFiles/TimeCalib_Run3_RefDet.txt
-  ConfigFiles/TimeCalib_Run4_RefDet.txt
-  ConfigFiles/TimeCalib_Run4_RefDet_Rev.txt
-  ConfigFiles/TimeCalib_Run4_RefDet_TOT_cut.txt
-  ConfigFiles/TimeCalib_Run5_RefDet.txt
-  ConfigFiles/conf_trb3.xml
-  ConfigFiles/detectorSetupRun1.json
-  ConfigFiles/detectorSetupRun2_3_4_5.json
-  ConfigFiles/dummyCalibration.txt
-  ConfigFiles/userParams.json
+  EffVelocitiesRun1_2_3.txt
+  EffVelocitiesRun4.txt
+  EffVelocitiesRun5.txt
+  TOTConfigRun1_2.root
+  TOTConfigRun3_4.root
+  TOTConfigRun5After.root
+  TOTConfigRun5Before.root
+  TimeCalib_Run1_Collim.txt
+  TimeCalib_Run1_RefDet.txt
+  TimeCalib_Run2_RefDet.txt
+  TimeCalib_Run3_RefDet.txt
+  TimeCalib_Run4_RefDet.txt
+  TimeCalib_Run4_RefDet_Rev.txt
+  TimeCalib_Run4_RefDet_TOT_cut.txt
+  TimeCalib_Run5_RefDet.txt
+  conf_trb3.xml
+  detectorSetupRun1.json
+  detectorSetupRun2_3_4_5.json
+  dummyCalibration.txt
+  userParams.json
   README
   run.sh
 )

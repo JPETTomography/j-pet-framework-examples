@@ -32,16 +32,16 @@ endif()
 ## Download input and config files
 ## The script shouldn't do anything if the data is present and correct.
 #set(DOWNLOAD_DATA ${CMAKE_CURRENT_SOURCE_DIR}/download_data.sh ${CMAKE_CURRENT_SOURCE_DIR})
-#execute_process( COMMAND ${DOWNLOAD_DATA} )
-set(DOWNLOAD_MORE_DATA ${CMAKE_CURRENT_SOURCE_DIR}/download_more_data.sh ${CMAKE_CURRENT_SOURCE_DIR}/ConfigFiles/)
-execute_process( COMMAND ${DOWNLOAD_MORE_DATA} )
+#execute_process(COMMAND ${DOWNLOAD_DATA})
+set(DOWNLOAD_MORE_DATA ${CMAKE_CURRENT_SOURCE_DIR}/download_more_data.sh ${CMAKE_CURRENT_SOURCE_DIR})
+execute_process(COMMAND ${DOWNLOAD_MORE_DATA})
 
 ################################################################################
 ## Directories with examples
 add_subdirectory(LargeBarrelAnalysis)
-add_subdirectory(VelocityCalibration)
-add_subdirectory(NewAnalysisTemplate)
-add_subdirectory(ScopeLoaderExample)
-add_subdirectory(TimeCalibration)
-add_subdirectory(ScopeAnalysis)
-add_subdirectory(modules)
+#add_subdirectory(VelocityCalibration)
+#add_subdirectory(NewAnalysisTemplate)
+#add_subdirectory(ScopeLoaderExample)
+#add_subdirectory(TimeCalibration)
+#add_subdirectory(ScopeAnalysis)
+#add_subdirectory(modules)
