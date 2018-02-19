@@ -2,9 +2,12 @@
 #define BOOST_TEST_MODULE SinogramCreatorTest
 #include <boost/test/unit_test.hpp>
 
+#include <ostream>
+
 #include "SinogramCreatorTools.h"
 #include "JPetLoggerInclude.h"
 #include <JPetHit/JPetHit.h>
+#include "JPetCommonTools/JPetCommonTools.h"
 
 //fix for printing pair values
 //https://stackoverflow.com/questions/10976130/boost-check-equal-with-pairint-int-and-custom-operator
@@ -97,6 +100,69 @@ BOOST_AUTO_TEST_CASE(distance_from_center)
   BOOST_REQUIRE_CLOSE(distance, 1.f, 0.0001f);
   distance = SinogramCreatorTools::calculateDistanceFromCenter(0.f, 1.f, 1.f, 0.f, 0.f, 0.f);
   BOOST_REQUIRE_CLOSE(distance, std::sqrt(2.f) / 2, 0.0001f);
+}
+
+BOOST_AUTO_TEST_CASE( test_MC_data )
+{
+  const std::string inFile = "unitTestData/SinogramCreatorToolsTest/mc_data.txt";
+  const std::string fOutFileName = "result.ppm";
+  std::vector<std::pair<SinogramCreatorTools::Point, SinogramCreatorTools::Point>> hits;
+  std::ifstream in(inFile);
+  BOOST_REQUIRE(in);
+  float x1, y1, x2, y2;
+  while (in.peek() != EOF) {
+    in >> x1 >> y1 >> x2 >> y2;
+    hits.push_back(std::make_pair(std::make_pair(x1, y1), std::make_pair(x2, y2)));
+  }
+  float fReconstructionStartAngle = 0.;
+  float fReconstructionEndAngle = 180.;
+  float fReconstructionAngleStep = 1.;
+  float fReconstructionLayerRadius =  10.;
+  float fReconstructionDistanceAccuracy = 0.1;
+  using SinogramResultType = std::vector<std::vector<unsigned int>>;
+  SinogramResultType* fSinogram = nullptr;
+  unsigned int maxThetaNumber = std::ceil(180. / fReconstructionAngleStep);
+  unsigned int maxDistanceNumber = std::ceil(fReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
+  if (fSinogram == nullptr) {
+    fSinogram = new SinogramResultType(maxDistanceNumber, (std::vector<unsigned int>(maxThetaNumber)));
+  }
+  unsigned int currentValueInSinogram = 0;
+  unsigned int fMaxValueInSinogram = 0;
+  std::cout << "Number of hits: " << hits.size() << std::endl;
+  std::cout << "Hit[0]: x:" << hits[0].first.first << " y:" << hits[0].first.second << " x:" << hits[0].second.first << " y:" << hits[0].second.second << std::endl;
+  for (int i = 0; i < hits.size(); i++) {
+    for (float theta = fReconstructionStartAngle; theta < fReconstructionEndAngle; theta += fReconstructionAngleStep) {
+      float x = fReconstructionLayerRadius * std::cos(theta * (M_PI / 180.f)); // calculate x,y positon of line with theta angle from line (0,0) = theta
+      float y = fReconstructionLayerRadius * std::sin(theta * (M_PI / 180.f));
+      std::pair<float, float> intersectionPoint = SinogramCreatorTools::lineIntersection(std::make_pair(-x, -y), std::make_pair(x, y),
+          hits[i].first, hits[i].second); //find intersection point
+      if (intersectionPoint.first != std::numeric_limits<float>::max() && intersectionPoint.second != std::numeric_limits<float>::max()) {
+        // check is there is intersection point
+        float distance = SinogramCreatorTools::length2D(intersectionPoint.first, intersectionPoint.second);
+        if (distance >= fReconstructionLayerRadius) // if distance is greather then our max reconstuction layer radius, it cant be placed in sinogram
+          continue;
+        if (intersectionPoint.first < 0.f)
+          distance = -distance;
+        int distanceRound = std::floor((fReconstructionLayerRadius / fReconstructionDistanceAccuracy) + fReconstructionDistanceAccuracy) + std::floor((distance / fReconstructionDistanceAccuracy) + fReconstructionDistanceAccuracy); //clever way of rounding to nearest multipicity of accuracy digit and change it to int
+        int thetaNumber = std::round(theta / fReconstructionAngleStep);                                                                                                                                                                // round because of floating point
+        currentValueInSinogram = ++fSinogram->at(distanceRound).at(thetaNumber);                                                                                                                                                       // add to sinogram
+        if (currentValueInSinogram >= fMaxValueInSinogram)
+          fMaxValueInSinogram = currentValueInSinogram;                                    // save max value of sinogram
+      }
+    }
+  }
+  std::ofstream res(fOutFileName);
+  res << "P2" << std::endl;
+  res << (*fSinogram)[0].size() << " " << fSinogram->size() << std::endl;
+  res << fMaxValueInSinogram << std::endl;
+  for (unsigned int i = 0; i < fSinogram->size(); i++) {
+    for (unsigned int j = 0; j < (*fSinogram)[0].size(); j++) {
+      res << (*fSinogram)[i][j] << " ";
+    }
+    res << std::endl;
+  }
+  res.close();
+  BOOST_REQUIRE(JPetCommonTools::ifFileExisting(fOutFileName));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

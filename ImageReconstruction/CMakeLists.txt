@@ -13,20 +13,20 @@ cmake_minimum_required(VERSION 2.6)
 ######################################################################
 set(projectName ImageReconstruction)
 
-set(ROOT_SCRIPTS
-  rootlogon.C
-  rootalias.C
-  )
-
 set(projectBinary ${projectName}.x)
 
 project(${projectName} CXX) # using only C++
 
 file(GLOB HEADERS *.h)
 file(GLOB SOURCES *.cpp)
+file(GLOB MAIN_CPP main.cpp)
 
 file(GLOB UNIT_TEST_SOURCES *Test.cpp)
 list(REMOVE_ITEM SOURCES ${UNIT_TEST_SOURCES})
+
+file(GLOB SOURCES_WITHOUT_MAIN *.cpp)
+list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${UNIT_TEST_SOURCES})
+list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${MAIN_CPP})
 
 include_directories(${Framework_INCLUDE_DIRS})
 add_definitions(${Framework_DEFINITIONS})
@@ -36,16 +36,6 @@ target_link_libraries(${projectBinary} JPetFramework)
 
 add_custom_target(clean_data_${projectName}
   COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root)
-
-# copy the ROOT scripts
-foreach( file_i ${ROOT_SCRIPTS})
-  list(APPEND copy_depends ${CMAKE_CURRENT_BINARY_DIR}/${file_i})
-  add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND}
-    ARGS -E ${CP_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
-    )
-endforeach( file_i )
 
 # unit tests
 set(TESTS_DIR ${CMAKE_CURRENT_BINARY_DIR}/tests)
