@@ -68,7 +68,7 @@ bool SinogramCreator::exec()
                                              + fReconstructionDistanceAccuracy)
                                   + std::floor((distance / fReconstructionDistanceAccuracy) + fReconstructionDistanceAccuracy); //clever way of rounding to nearest multipicity of accuracy digit and change it to int
               int thetaNumber = std::round(theta / fReconstructionAngleStep);                                                   // round because of floating point
-              currentValueInSinogram = ++ fSinogram->at(distanceRound).at(thetaNumber); // add to sinogram
+              currentValueInSinogram = ++fSinogram->at(distanceRound).at(thetaNumber); // add to sinogram
               if (currentValueInSinogram >= fMaxValueInSinogram)
                 fMaxValueInSinogram = currentValueInSinogram; // save max value of sinogram
               getStatistics().getObject<TH2I>("reconstuction_histogram")->Fill(distance, theta); //add to histogram
