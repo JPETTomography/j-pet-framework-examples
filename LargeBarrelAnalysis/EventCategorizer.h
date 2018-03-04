@@ -21,6 +21,7 @@
 #include <JPetUserTask/JPetUserTask.h>
 #include <JPetHit/JPetHit.h>
 #include <JPetEvent/JPetEvent.h>
+#include "EventCategorizerTools.h"
 
 class JPetWriter;
 

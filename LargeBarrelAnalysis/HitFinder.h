@@ -46,24 +46,30 @@ class HitFinder: public JPetUserTask
 {
 
 public:
-	HitFinder(const char* name);
-	virtual ~HitFinder();
-	virtual bool init() override;
-	virtual bool exec() override;
-	virtual bool terminate() override;
-	std::map<int, std::vector<double>> fVelocityMap;
+  HitFinder(const char* name);
+  virtual ~HitFinder();
+  virtual bool init() override;
+  virtual bool exec() override;
+  virtual bool terminate() override;
 
-protected:
 
-	bool kFirstTime = true;
-	HitFinderTools::SignalsContainer fAllSignalsInTimeWindow;
-	HitFinderTools HitTools;
-  	std::map<int, std::vector<double>> readVelocityFile();
-	void fillSignalsMap(const JPetPhysSignal signal);
-	void saveHits(const std::vector<JPetHit>& hits);
-	const std::string fTimeWindowWidthParamKey = "HitFinder_TimeWindowWidth_float";
-	double kTimeWindowWidth = 50000; /// in ps -> 50ns. Maximal time difference between signals
+protected :
 
+  bool kFirstTime = true;
+  HitFinderTools::SignalsContainer fAllSignalsInTimeWindow;
+  HitFinderTools fHitTools;
+
+  void fillSignalsMap(const JPetPhysSignal& signal);
+  void saveHits(const std::vector<JPetHit>& hits);
+  const std::string fTimeWindowWidthParamKey = "HitFinder_TimeWindowWidth_float";
+  const std::string fVelocityCalibFileParamKey = "HitFinder_Velocity_Calibration_File_Path_std::string";
+  double kTimeWindowWidth = 50000; /// in ps -> 50ns. Maximal time difference between signals
+
+private:
+  std::string fVelocityCalibrationFilePath = "resultsForThresholda.txt";
+  HitFinderTools::VelocityMap fVelocityMap;
+
+  HitFinderTools::VelocityMap readVelocityFile();
 };
 
 #endif /*  !HitFinder_H */

@@ -71,6 +71,8 @@ list(APPEND SOURCES ${use_modules_from}/EventFinder.cpp)
 #
 list(APPEND HEADERS ${use_modules_from}/EventCategorizer.h)
 list(APPEND SOURCES ${use_modules_from}/EventCategorizer.cpp)
+list(APPEND HEADERS ${use_modules_from}/EventCategorizerTools.h)
+list(APPEND SOURCES ${use_modules_from}/EventCategorizerTools.cpp)
 
 include_directories(${Framework_INCLUDE_DIRS})
 add_definitions(${Framework_DEFINITIONS})
