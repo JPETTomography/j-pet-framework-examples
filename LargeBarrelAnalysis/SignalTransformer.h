@@ -20,8 +20,16 @@
 #include "JPetRecoSignal/JPetRecoSignal.h"
 
 #ifdef __CINT__
-#   define override
+#define override
 #endif
+
+/**
+ * @brief User Task: method rewriting Raw Signals to Reco and Phys Signals.
+ *
+ * Task organizes rewrites Raw Signals to Reco Signals and Physical Signals,
+ * saving JPetPhysSignal. Only time of the signal is set, the rest of available
+ * fields are set to -1.
+ */
 
 class JPetWriter;
 

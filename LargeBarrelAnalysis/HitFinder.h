@@ -16,60 +16,42 @@
 #ifndef HitFinder_H
 #define HitFinder_H
 
-#include <map>
-#include <vector>
+#include <JPetRawSignal/JPetRawSignal.h>
 #include <JPetUserTask/JPetUserTask.h>
 #include <JPetHit/JPetHit.h>
-#include <JPetRawSignal/JPetRawSignal.h>
-#include "HitFinderTools.h"
+#include <vector>
+#include <map>
 
 class JPetWriter;
 
 #ifdef __CINT__
-//when cint is used instead of compiler, override word is not recognized
-//nevertheless it's needed for checking if the structure of project is correct
-#   define override
+#define override
 #endif
 
 /**
- * @brief      Module responsible for creating JPetHit from signals on oppositte photomultipliers
+ * @brief User Task creating JPetHit from matched Singlas
  *
- * This module takes all physical signals (JPetPhysSignal) within a single time window (JPetTimeWindow)
- * and creates special type of container - SignalsContainer.
- * For each scintillator with at least one signal this container stores two vectors
- * one for physical signals on photomultiplier on side A and second for signals on side B. Then
- * for each signal on side A it searches for corresponding signal on side B - that is time difference of arrival
- * of those two signals needs to be less then specified time difference (kTimeWindowWidth)
- *
+ * Task pairs Physical Signals and creates Hits, based on time comparison
+ * of Signals, time window for hit matching can be specified in user options,
+ * default one is provided. Matching method is contained in tools class.
  */
-class HitFinder: public JPetUserTask
-{
+class HitFinder: public JPetUserTask {
 
 public:
   HitFinder(const char* name);
-  virtual ~HitFinder();
+  virtual ~HitFinder(){};
   virtual bool init() override;
   virtual bool exec() override;
   virtual bool terminate() override;
 
-
-protected :
-
-  bool kFirstTime = true;
-  HitFinderTools::SignalsContainer fAllSignalsInTimeWindow;
-  HitFinderTools fHitTools;
-
-  void fillSignalsMap(const JPetPhysSignal& signal);
+protected:
   void saveHits(const std::vector<JPetHit>& hits);
-  const std::string fTimeWindowWidthParamKey = "HitFinder_TimeWindowWidth_float";
-  const std::string fVelocityCalibFileParamKey = "HitFinder_Velocity_Calibration_File_Path_std::string";
-  double kTimeWindowWidth = 50000; /// in ps -> 50ns. Maximal time difference between signals
-
-private:
-  std::string fVelocityCalibrationFilePath = "resultsForThresholda.txt";
-  HitFinderTools::VelocityMap fVelocityMap;
-
-  HitFinderTools::VelocityMap readVelocityFile();
+  std::map<unsigned int, std::vector<double>> fVelocities;
+  const std::string kSaveControlHistosParamKey = "Save_Cotrol_Histograms_bool";
+  const std::string kVelocityFileParamKey = "HitFinder_VelocityFile_string";
+  const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_double";
+  double fABTimeDiff = 25000.0;
+  bool fSaveControlHistos = true;
 };
 
 #endif /*  !HitFinder_H */

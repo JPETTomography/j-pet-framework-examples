@@ -57,14 +57,24 @@ protected:
   const std::string kMinTimeParamKey = "TimeWindowCreator_MinTime_double";
   const std::string kTimeCalibFileParamKey = "TimeCalibLoader_ConfigFile_string";
   const std::string kThresholdFileParamKey = "ThresholdLoader_ConfigFile_string";
+<<<<<<< HEAD
+=======
+  const std::string kSaveControlHistosParamKey = "Save_Cotrol_Histograms_bool";
+>>>>>>> 48681053e76c20e874bd164785ac0f2cb066552f
   std::map<unsigned int, std::vector<double>> fTimeCalibration;
   std::map<unsigned int, std::vector<double>> fThresholds;
   std::pair<int,int> fMainStrip;
   std::set<int> fAllowedChannels;
   long long int fCurrEventNumber = 0;
+<<<<<<< HEAD
   bool fMainStripSet = false;
   double fMaxTime = 0.;
+=======
+>>>>>>> 48681053e76c20e874bd164785ac0f2cb066552f
   double fMinTime = -1.e6;
+  double fMaxTime = 0.;
+  bool fMainStripSet = false;
+  bool fSaveControlHistos = true;
 };
 
 #endif /*  !TimeWindowCreator_H */

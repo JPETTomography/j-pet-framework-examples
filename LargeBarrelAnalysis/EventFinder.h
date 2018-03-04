@@ -13,34 +13,43 @@
  *  @file EventFinder.h
  */
 
-#ifndef EVENTFINDER_H 
-#define EVENTFINDER_H 
+#ifndef EVENTFINDER_H
+#define EVENTFINDER_H
 
+#include <JPetUserTask/JPetUserTask.h>
+#include <JPetEvent/JPetEvent.h>
+#include <JPetHit/JPetHit.h>
 #include <vector>
 #include <map>
-#include <JPetUserTask/JPetUserTask.h>
-#include <JPetHit/JPetHit.h>
-#include <JPetEvent/JPetEvent.h>
 
 class JPetWriter;
 
 #ifdef __CINT__
-#	define override
+#define override
 #endif
 
-class EventFinder : public JPetUserTask{
+/**
+ * @brief User Task creating JPetEvent from hits
+ *
+ * Simple task, that groups hits into uncategorized Events
+ * with the use of some time window value. This value is given by
+ * default, but it can be provided by the user in parameters file.
+ */
+class EventFinder: public JPetUserTask
+{
 public:
 	EventFinder(const char * name);
 	virtual ~EventFinder(){}
 	virtual bool init() override;
 	virtual bool exec() override;
 	virtual bool terminate() override;
+
 protected:
-  	double kEventTimeWindow = 5000.0; //ps
-	const std::string fEventTimeParamKey = "EventFinder_EventTime_float";
-    	std::vector<JPetHit> fHitVector;
-  	bool fSaveControlHistos = true;
 	void saveEvents(const std::vector<JPetEvent>& event);
 	std::vector<JPetEvent> buildEvents(const JPetTimeWindow & hits);
+	const std::string kSaveControlHistosParamKey = "Save_Cotrol_Histograms_bool";
+	const std::string kEventTimeParamKey = "EventFinder_EventTime_double";
+  double fEventTimeWindow = 5000.0;
+	bool fSaveControlHistos = true;
 };
 #endif /*  !EVENTFINDER_H */
