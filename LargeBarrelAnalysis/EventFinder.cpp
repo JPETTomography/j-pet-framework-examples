@@ -33,19 +33,24 @@ bool EventFinder::init()
   // Reading values from the user options if available
   // Event time
   if (isOptionSet(fParams.getOptions(), kEventTimeParamKey))
-    fEventTimeWindow = getOptionAsDouble(fParams.getOptions(), kEventTimeParamKey);
+    fEventTimeWindow = getOptionAsFloat(fParams.getOptions(), kEventTimeParamKey);
+  else
+    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
+      kEventTimeParamKey.c_str(), fEventTimeWindow));
   // Getting bool for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey))
     fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
 
   // Control histograms
-  if (fSaveControlHistos)
-  getStatistics().createHistogram(
-    new TH1F("hits_per_event", "Number of Hits in Event", 20, 0.5, 20.5));
-  getStatistics().getHisto1D("hits_per_event")
-    ->GetXaxis()->SetTitle("Hits in Event");
-  getStatistics().getHisto1D("hits_per_event")
-    ->GetYaxis()->SetTitle("Number of Hits");
+  if (fSaveControlHistos){
+    getStatistics().createHistogram(
+      new TH1F("hits_per_event", "Number of Hits in Event", 20, 0.5, 20.5));
+    getStatistics().getHisto1D("hits_per_event")
+      ->GetXaxis()->SetTitle("Hits in Event");
+    getStatistics().getHisto1D("hits_per_event")
+      ->GetYaxis()->SetTitle("Number of Hits");
+  }
+
   return true;
 }
 

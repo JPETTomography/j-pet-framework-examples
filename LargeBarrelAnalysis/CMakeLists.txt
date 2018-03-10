@@ -14,33 +14,6 @@ cmake_minimum_required(VERSION 2.6)
 set(projectName LargeBarrelAnalysis)
 
 set(AUXILIARY_FILES
-  EffVelocitiesRun1_2_3.txt
-  EffVelocitiesRun4.txt
-  EffVelocitiesRun5.txt
-  TOTConfigRun1_2.root
-  TOTConfigRun3_4.root
-  TOTConfigRun5After.root
-  TOTConfigRun5Before.root
-  TimeCalib_Run1_Collim.txt
-  TimeCalib_Run1_RefDet.txt
-  TimeCalib_Run2_RefDet.txt
-  TimeCalib_Run3_RefDet.txt
-  TimeCalib_Run4_RefDet.txt
-  TimeCalib_Run4_RefDet_Rev.txt
-  TimeCalib_Run4_RefDet_TOT_cut.txt
-  TimeCalib_Run5_RefDet.txt
-  conf_trb3.xml
-<<<<<<< HEAD
-  resultsForThresholda.txt
-  dummyThresholds.txt
-  dummyTimeCalib.txt
-  detectorSetupRun1.json
-=======
-  detectorSetupRun1.json
-  detectorSetupRun2_3_4_5.json
-  dummyCalibration.txt
->>>>>>> 48681053e76c20e874bd164785ac0f2cb066552f
-  userParams.json
   README
   run.sh
 )

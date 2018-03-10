@@ -48,9 +48,9 @@ protected:
   void saveHits(const std::vector<JPetHit>& hits);
   std::map<unsigned int, std::vector<double>> fVelocities;
   const std::string kSaveControlHistosParamKey = "Save_Cotrol_Histograms_bool";
-  const std::string kVelocityFileParamKey = "HitFinder_VelocityFile_string";
-  const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_double";
-  double fABTimeDiff = 25000.0;
+  const std::string kVelocityFileParamKey = "HitFinder_VelocityFile_std::string";
+  const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_float";
+  double fABTimeDiff = 6000.0;
   bool fSaveControlHistos = true;
 };
 

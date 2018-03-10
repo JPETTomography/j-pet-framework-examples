@@ -28,52 +28,17 @@ bool TimeWindowCreator::init()
 {
   INFO("TimeSlot Creation Started");
   fOutputEvents = new JPetTimeWindow("JPetSigCh");
-<<<<<<< HEAD
-
-  // Reading values from the user options if available
-  // Max allowed signal time
-  if (isOptionSet(fParams.getOptions(), kMaxTimeParamKey)) {
-    fMaxTime = getOptionAsDouble(fParams.getOptions(), kMaxTimeParamKey);
-  }
-  // Min allowed signal time
-  if (isOptionSet(fParams.getOptions(), kMinTimeParamKey)) {
-    fMinTime = getOptionAsDouble(fParams.getOptions(), kMinTimeParamKey);
-  }
-  // Getting time calibration file from user options
-  auto calibFile = std::string("dummyTimeCalib.txt");
-  if (isOptionSet(fParams.getOptions(), kTimeCalibFileParamKey)) {
-    calibFile = getOptionAsString(fParams.getOptions(), kTimeCalibFileParamKey);
-  }else{
-    WARNING("No path to the time calibration file was provided in user options.");
-  }
-  // Getting threshold values file from user options
-  auto thresholdFile = std::string("dummyThresholds.txt");
-  if (isOptionSet(fParams.getOptions(), kThresholdFileParamKey)) {
-    thresholdFile = getOptionAsString(fParams.getOptions(), kThresholdFileParamKey);
-  }else{
-    WARNING("No path to the file with threshold values was provided in user options.");
-  }
-
-  // Use of Time Calibratin and Thresholds files
-  JPetGeomMapping mapper(getParamBank());
-  auto tombMap = mapper.getTOMBMapping();
-  fTimeCalibration = UniversalFileLoader::loadConfigurationParameters(calibFile, tombMap);
-  if (fTimeCalibration.empty()) ERROR("Time Calibration seems to be empty");
-  fThresholds = UniversalFileLoader::loadConfigurationParameters(thresholdFile, tombMap);
-  if (fThresholds.empty()) ERROR("Thresholds values seem to be empty");
-
-=======
 
   // Reading values from the user options if available
   // Min allowed signal time
   if (isOptionSet(fParams.getOptions(), kMinTimeParamKey))
-    fMinTime = getOptionAsDouble(fParams.getOptions(), kMinTimeParamKey);
+    fMinTime = getOptionAsFloat(fParams.getOptions(), kMinTimeParamKey);
   else
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
       kMinTimeParamKey.c_str(), fMinTime));
   // Max allowed signal time
   if (isOptionSet(fParams.getOptions(), kMaxTimeParamKey))
-    fMaxTime = getOptionAsDouble(fParams.getOptions(), kMaxTimeParamKey);
+    fMaxTime = getOptionAsFloat(fParams.getOptions(), kMaxTimeParamKey);
   else
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
       kMaxTimeParamKey.c_str(), fMaxTime));
@@ -101,7 +66,6 @@ bool TimeWindowCreator::init()
   fThresholds = UniversalFileLoader::loadConfigurationParameters(thresholdFile, tombMap);
   if (fThresholds.empty()) ERROR("Thresholds values seem to be empty");
 
->>>>>>> 48681053e76c20e874bd164785ac0f2cb066552f
   // Reference Detector
   // Take coordinates of the main (irradiated strip) from user parameters
   if (isOptionSet(fParams.getOptions(), kMainStripKey)) {
@@ -131,16 +95,6 @@ bool TimeWindowCreator::init()
   }
 
   // Control histogram
-<<<<<<< HEAD
-  getStatistics().createHistogram(
-    new TH1F("sig_ch_per_time_slot",
-      "Signal Channels Per Time Slot",
-      250, -0.5, 999.5));
-  getStatistics().getHisto1D("sig_ch_per_time_slot")
-    ->GetXaxis()->SetTitle("Signal Channels in Time Slot");
-  getStatistics().getHisto1D("sig_ch_per_time_slot")
-    ->GetYaxis()->SetTitle("Number of Time Slots");
-=======
   if(fSaveControlHistos){
     getStatistics().createHistogram(
       new TH1F("sig_ch_per_time_slot",
@@ -151,8 +105,6 @@ bool TimeWindowCreator::init()
     getStatistics().getHisto1D("sig_ch_per_time_slot")
       ->GetYaxis()->SetTitle("Number of Time Slots");
   }
->>>>>>> 48681053e76c20e874bd164785ac0f2cb066552f
-
   return true;
 }
 
@@ -161,12 +113,8 @@ TimeWindowCreator::~TimeWindowCreator() {}
 bool TimeWindowCreator::exec() {
   if (auto event = dynamic_cast <EventIII * const > (fEvent)) {
     int kTDCChannels = event->GetTotalNTDCChannels();
-<<<<<<< HEAD
-    getStatistics().getHisto1D("sig_ch_per_time_slot")->Fill(kTDCChannels);
-=======
     if(fSaveControlHistos)
       getStatistics().getHisto1D("sig_ch_per_time_slot")->Fill(kTDCChannels);
->>>>>>> 48681053e76c20e874bd164785ac0f2cb066552f
 
     // Loop over all TDC channels in file
     auto tdcChannels = event->GetTDCChannelsArray();

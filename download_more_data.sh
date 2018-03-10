@@ -48,4 +48,4 @@ else
 fi
 rm $LOCAL_TEST_CHECKSUM_FILE
 # Undo the magic.
-unlink $BASE_PATH/ExamplesReformed
+unlink $BASE_PATH/ExamplesReformed/j-pet-framework-examples

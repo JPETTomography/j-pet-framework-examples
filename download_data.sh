@@ -20,7 +20,7 @@ function check_sums {
 CHECKSUM_COMMAND="check_sums"
 
 #for wget
-TEST_CHECKSUM_FILE="examples_reformed.sha"
+TEST_CHECKSUM_FILE="examples.sha"
 TEST_BASE_URL="http://sphinx.if.uj.edu.pl/framework"
 TEST_CHECKSUM_URL=$TEST_BASE_URL/$TEST_CHECKSUM_FILE
 TEST_OUTPUT=$BASE_PATH
@@ -32,7 +32,7 @@ LOCAL_TEST_CHECKSUM_FILE=$TEST_OUTPUT/$TEST_CHECKSUM_FILE
 declare -a WGET_FLAGS=(-x -nH -nv --cut-dirs=1)
 
 # We want the directory structure to be flatter than on sphinx, so here is some magic allowing for that.
-ln -s $BASE_PATH $BASE_PATH/ExamplesReformed
+ln -s $BASE_PATH $BASE_PATH/Examples
 #downloading test data via wget
 # first get and check the checksums
 wget "${TEST_CHECKSUM_URL}" "${WGET_FLAGS[@]}" -P "${TEST_OUTPUT}"
@@ -48,4 +48,4 @@ else
 fi
 rm $LOCAL_TEST_CHECKSUM_FILE
 # Undo the magic.
-unlink $BASE_PATH/ExamplesReformed
+unlink $BASE_PATH/Examples

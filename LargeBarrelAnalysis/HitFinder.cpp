@@ -39,7 +39,7 @@ bool HitFinder::init()
   // Reading values from the user options if available
   // Allowed time difference between signals on A and B sides
   if (isOptionSet(fParams.getOptions(), kABTimeDiffParamKey))
-    fABTimeDiff = getOptionAsDouble(fParams.getOptions(), kABTimeDiffParamKey);
+    fABTimeDiff = getOptionAsFloat(fParams.getOptions(), kABTimeDiffParamKey);
   // Getting velocities file from user options
   auto velocitiesFile = std::string("dummyCalibration.txt");
   if (isOptionSet(fParams.getOptions(), kVelocityFileParamKey))

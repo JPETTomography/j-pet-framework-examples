@@ -48,7 +48,7 @@ protected:
 	void saveEvents(const std::vector<JPetEvent>& event);
 	std::vector<JPetEvent> buildEvents(const JPetTimeWindow & hits);
 	const std::string kSaveControlHistosParamKey = "Save_Cotrol_Histograms_bool";
-	const std::string kEventTimeParamKey = "EventFinder_EventTime_double";
+	const std::string kEventTimeParamKey = "EventFinder_EventTime_float";
   double fEventTimeWindow = 5000.0;
 	bool fSaveControlHistos = true;
 };

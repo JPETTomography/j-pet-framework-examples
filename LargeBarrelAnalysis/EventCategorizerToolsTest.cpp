@@ -1,7 +1,6 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE EventCategorizerToolsTests
 #include <boost/test/unit_test.hpp>
-
 #include "EventCategorizerTools.h"
 #include "JPetHit/JPetHit.h"
 
@@ -13,11 +12,13 @@ BOOST_AUTO_TEST_CASE(checkHitOrder)
   firstHit.setTime(500.0);
 
   JPetHit secondHit;
-  secondHit.setTime(100);
+  secondHit.setTime(100.0);
 
   double tof = EventCategorizerTools::calculateTOF(firstHit, secondHit);
 
-  BOOST_REQUIRE_CLOSE( tof, kUndefined::tof, 0.100);
+  // this line is not working for some reason, does not compile: cannot convert double to kUndefined
+  // BOOST_REQUIRE_CLOSE(tof, kUndefined::tof, 0.100);
+  BOOST_REQUIRE_CLOSE(tof, 9999, 0.100);
 }
 
 BOOST_AUTO_TEST_CASE(checkTOFsignNegative)

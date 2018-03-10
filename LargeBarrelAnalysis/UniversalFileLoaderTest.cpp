@@ -150,11 +150,7 @@ BOOST_AUTO_TEST_CASE (fillConfRecord_too_few_numbers)
 
 BOOST_AUTO_TEST_CASE (readConfigurationParametersFromFile)
 {
-<<<<<<< HEAD
-  auto result = UniversalFileLoader::readConfigurationParametersFromFile("../TimeConstants.txt");
-=======
-  auto result = UniversalFileLoader::readConfigurationParametersFromFile("../dummyTimeCalib.txt");
->>>>>>> 48681053e76c20e874bd164785ac0f2cb066552f
+  auto result = UniversalFileLoader::readConfigurationParametersFromFile("../dummyCalibration.txt");
   BOOST_REQUIRE_EQUAL(result.size(), 1536);
 }
 
