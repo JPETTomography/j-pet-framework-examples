@@ -29,6 +29,14 @@ class JPetWriter;
 #	define override
 #endif
 
+/**
+ * @brief User Task categorizing Events
+ *
+ * Task attempts to add types of events to each event. Each category/type
+ * has separate method for checking, if current event fulfills set of conditions.
+ * These methods are defined in tools class. More than one type can be added to an event.
+ * Set of controll histograms are created, unless the user decides not to produce them.
+ */
 class EventCategorizer : public JPetUserTask{
 public:
 	EventCategorizer(const char * name);
@@ -38,8 +46,10 @@ public:
 	virtual bool terminate() override;
 
 protected:
+	const std::string kScatterTOFTimeDiffParamKey = "Scatter_Categorizer_TOF_TimeDiff_float";
 	const std::string kSaveControlHistosParamKey = "Save_Cotrol_Histograms_bool";
 	void saveEvents(const std::vector<JPetEvent>& event);
+	double fScatterTOFTimeDiff = 2000.0;
 	bool fSaveControlHistos = true;
 	void initialiseHistograms();
 };

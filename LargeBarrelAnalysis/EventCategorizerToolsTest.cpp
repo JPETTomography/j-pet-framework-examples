@@ -17,6 +17,7 @@ BOOST_AUTO_TEST_CASE(checkHitOrder)
   double tof = EventCategorizerTools::calculateTOF(firstHit, secondHit);
 
   // this line is not working for some reason, does not compile: cannot convert double to kUndefined
+  // putting explicitly value of kUndefined::tof = 9999
   // BOOST_REQUIRE_CLOSE(tof, kUndefined::tof, 0.100);
   BOOST_REQUIRE_CLOSE(tof, 9999, 0.100);
 }

@@ -34,6 +34,7 @@ class JPetWriter;
  * Simple task, that groups hits into uncategorized Events
  * with the use of some time window value. This value is given by
  * default, but it can be provided by the user in parameters file.
+ * Also user can require to save only Events of minimum multiplicity
  */
 class EventFinder: public JPetUserTask
 {

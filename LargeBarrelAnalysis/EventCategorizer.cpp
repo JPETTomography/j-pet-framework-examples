@@ -25,6 +25,12 @@ EventCategorizer::EventCategorizer(const char* name): JPetUserTask(name) {}
 bool EventCategorizer::init()
 {
   INFO("Event categorization started.");
+  // Parameter for scattering determination
+  if (isOptionSet(fParams.getOptions(), kScatterTOFTimeDiffParamKey))
+    fScatterTOFTimeDiff = getOptionAsBool(fParams.getOptions(), kScatterTOFTimeDiffParamKey);
+  else
+    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
+      kScatterTOFTimeDiffParamKey.c_str(), fScatterTOFTimeDiff));
   // Getting bool for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey))
     fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
@@ -46,12 +52,13 @@ bool EventCategorizer::exec()
       bool is2Gamma = EventCategorizerTools::checkFor2Gamma(event, getStatistics(), fSaveControlHistos);
       bool is3Gamma = EventCategorizerTools::checkFor3Gamma(event, getStatistics(), fSaveControlHistos);
       bool isPrompt = EventCategorizerTools::checkForPrompt(event, getStatistics(), fSaveControlHistos);
-      bool isScattered = EventCategorizerTools::checkForScatter(event, getStatistics(), fSaveControlHistos);
+      bool isScattered = EventCategorizerTools::checkForScatter(event, getStatistics(),
+        fSaveControlHistos, fScatterTimeDiffParam);
 
-      if(is2Gamma)  event.addEventType(JPetEventType::k2Gamma);
-      if(is3Gamma)  event.addEventType(JPetEventType::k3Gamma);
-      if(isPrompt)  event.addEventType(JPetEventType::kPrompt);
-      if(isScattered)  event.addEventType(JPetEventType::kScattered);
+      if(is2Gamma) event.addEventType(JPetEventType::k2Gamma);
+      if(is3Gamma) event.addEventType(JPetEventType::k3Gamma);
+      if(isPrompt) event.addEventType(JPetEventType::kPrompt);
+      if(isScattered) event.addEventType(JPetEventType::kScattered);
 
       if(fSaveControlHistos){
         //TODO fill general histos
@@ -124,4 +131,23 @@ void EventCategorizer::initialiseHistograms(){
      new TH2F("3Gamma_Angles", "Relative angles - transformed", 251, -0.5, 250.5, 201, -0.5, 200.5));
      getStatistics().getHisto2D("3Gamma_Angles")->GetXaxis()->SetTitle("Relative angle 1-2");
      getStatistics().getHisto2D("3Gamma_Angles")->GetYaxis()->SetTitle("Relative angle 2-3");
+
+  // Histograms for scattering category
+  getStatistics().createHistogram(
+    new TH1F("ScatterTOF_TimeDiff", "Difference of Scatter TOF and hits time difference",
+      200, -5.0*fScatterTOFTimeDiff, 5.0*fScatterTOFTimeDiff));
+  getStatistics().getHisto1D("ScatterTOF_TimeDiff")->GetXaxis()->SetTitle("Scat_TOF & time diff [ps]");
+  getStatistics().getHisto1D("ScatterTOF_TimeDiff")->GetYaxis()->SetTitle("Number of Hit Pairs");
+
+  getStatistics().createHistogram(
+     new TH2F("ScatterAngle_PrimaryTOT", "Angle of scattering vs. TOT of primary hits",
+      181, -0.5, 180.5, 200, 0.0, 25000.0));
+  getStatistics().getHisto2D("ScatterAngle_PrimaryTOT")->GetXaxis()->SetTitle("Scattering Angle");
+  getStatistics().getHisto2D("ScatterAngle_PrimaryTOT")->GetYaxis()->SetTitle("TOT of primary hit");
+
+  getStatistics().createHistogram(
+     new TH2F("ScatterAngle_ScatterTOT", "Angle of scattering vs. TOT of primary hits",
+      181, -0.5, 180.5, 200, 0.0, 25000.0));
+  getStatistics().getHisto2D("ScatterAngle_ScatterTOT")->GetXaxis()->SetTitle("Scattering Angle");
+  getStatistics().getHisto2D("ScatterAngle_ScatterTOT")->GetYaxis()->SetTitle("TOT of scattered hit");
 }

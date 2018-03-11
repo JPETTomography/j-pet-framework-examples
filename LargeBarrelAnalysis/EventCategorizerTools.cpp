@@ -14,7 +14,11 @@
  */
 
 #include "EventCategorizerTools.h"
+#include <TMath.h>
 
+/**
+* Method for determining type of event - back to back 2 gamma
+*/
 bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos)
 {
   if (event.getHits().size() < 2) return false;
@@ -44,6 +48,9 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
   return false;
 }
 
+/**
+* Method for determining type of event - 3Gamma
+*/
 bool EventCategorizerTools::checkFor3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos)
 {
   if (event.getHits().size() < 3) return false;
@@ -68,27 +75,118 @@ bool EventCategorizerTools::checkFor3Gamma(const JPetEvent& event, JPetStatistic
         double transformedX = relativeAngles.at(1)+relativeAngles.at(0);
         double transformedY = relativeAngles.at(1)-relativeAngles.at(0);
 
-        if(saveHistos){
+        if(saveHistos)
           stats.getHisto2D("3Gamma_Angles")->Fill(transformedX., transformedY);
-        }
       }
     }
   }
   return true;
 }
 
+/**
+* Method for determining type of event - prompt
+*/
 bool EventCategorizerTools::checkForPrompt(const JPetEvent& event, JPetStatistics& stats, bool saveHistos)
 {
   // Placeholder for proper method
   return false;
 }
 
-bool EventCategorizerTools::checkForScatter(const JPetEvent& event, JPetStatistics& stats, bool saveHistos)
+/**
+* Method for determining type of event - scatter
+*/
+bool EventCategorizerTools::checkForScatter(
+  const JPetEvent& event,
+  JPetStatistics& stats,
+  bool saveHistos,
+  double scatterTOFTimeDiff)
 {
-  // Placeholder for proper method
+  if (event.getHits().size() < 2) return false;
+  for(uint i = 0; i < event.getHits().size(); i++){
+    for(uint j = i+1; j < event.getHits().size()); j++){
+      JPetHit primaryHit, scatterHit;
+      if(event.getHits().at(i).getTime() < event.getHits().at(j).getTime()){
+        primaryHit = event.getHits().at(i);
+        scatterHit = event.getHits().at(j);
+      }else{
+        primaryHit = event.getHits().at(j);
+        scatterHit = event.getHits().at(i);
+      }
+
+      double scattAngle = calculateScatteringAngle(primaryHit, scatterHit);
+      double scattTOF = calculateScatteringTime(primaryHit, scatterHit)/1000.0;
+      double timeDiff = scatterHit.getTime() - primaryHit.getTime();
+
+      if(saveHistos)
+        stats.getHisto1D("ScatterTOF_TimeDiff")->Fill(scattTime-timeDiff);
+
+      if(fabs(scattTOF-timeDiff) < scatterTOFTimeDiff){
+        if(saveHistos) {
+          stats.getHisto2D("ScatterAngle_PrimaryTOT")->Fill(scattAngle, calculateTOT(primaryHit));
+          stats.getHisto2D("ScatterAngle_ScatterTOT")->Fill(scattAngle, calculateTOT(scatterHit));
+        }
+        return true;
+      }
+    }
+  }
   return false;
 }
 
+/**
+* Calculation of the total TOT of the hit - Time over Threshold:
+* the sum of the TOTs on all of the thresholds (1-4) and on the both sides (A,B)
+*/
+double EventCategorizerTools::calculateTOT(const JPetHit& hit)
+{
+	double tot = 0.0;
+
+	std::vector<JPetSigCh> sigALead = hit.getSignalA().getRecoSignal()
+    .getRawSignal().getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+	std::vector<JPetSigCh> sigBLead = hit.getSignalB().getRecoSignal()
+    .getRawSignal().getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+	std::vector<JPetSigCh> sigATrail = hit.getSignalA().getRecoSignal()
+    .getRawSignal().getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+	std::vector<JPetSigCh> sigBTrail = hit.getSignalB().getRecoSignal()
+    .getRawSignal().getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+
+	for(uint i = 0; i < sigALead.size() && i < sigATrail.size(); i++)
+		tot += (sigATrail.at(i).getValue() - sigALead.at(i).getValue());
+	for( unsigned i = 0; i < sigBLead.size() && i < sigBTrail.size(); i++)
+		tot += (sigBTrail.at(i).getValue() - sigBLead.at(i).getValue());
+
+	return tot;
+}
+
+/**
+* Calculation of distance between two hits
+*/
+double EventCategorizerTools::calculateDistance(const JPetHit& hit1, const JPetHit& hit2)
+{
+	return (hit1.getPos() - hit2.getPos()).Mag();
+}
+
+/**
+* Calculation of time that light needs to travel the distance between primary gamma
+* and scattered gamma. Return value in nanoseconds.
+*/
+double EventCategorizerTools::calculateScatteringTime(const JPetHit& hit1, const JPetHit& hit2)
+{
+	return calculateDistance(hit1, hit2)/kLightVelocity_cm_ns;
+}
+
+/**
+* Calculation of scatter angle between primary hit and scattered hit.
+* This function assumes that source of first gamma was in (0,0,0).
+* Angle is calculated from scalar product, return value in degrees.
+*/
+double EventCategorizerTools::calculateScatteringAngle(const JPetHit& hit1, const JPetHit& hit2)
+{
+  return TMath::RadToDeg()*hit1.getPos().Angle(hit2.getPos() - hit1.getPos());
+}
+
+/**
+* Calculation point in 3D, where annihilation occured
+*/
 Point3D EventCategorizerTools::calculateAnnihilationPoint(const JPetHit& firstHit, const JPetHit& latterHit)
 {
   Point3D annihilationPoint;
@@ -130,6 +228,9 @@ Point3D EventCategorizerTools::calculateAnnihilationPoint(const JPetHit& firstHi
   return annihilationPoint;
 }
 
+/**
+* Calculation Time of flight
+*/
 double EventCategorizerTools::calculateTOF(const JPetHit& firstHit, const JPetHit& latterHit)
 {
   double TOF = kUndefined::tof;
