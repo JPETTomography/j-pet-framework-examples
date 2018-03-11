@@ -30,10 +30,10 @@ struct Point3D
 class EventCategorizerTools
 {
 public:
-  static bool checkFor2Gamma(const JPetEvent& event);
-  static bool checkFor3Gamma(const JPetEvent& event);
-  static bool checkForPrompt(const JPetEvent& event);
-  static bool checkForScatter(const JPetEvent& event);
+  static bool checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos);
+  static bool checkFor3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos);
+  static bool checkForPrompt(const JPetEvent& event, JPetStatistics& stats, bool saveHistos);
+  static bool checkForScatter(const JPetEvent& event, JPetStatistics& stats, bool saveHistos);
   static double calculateTOF(const JPetHit& firstHit, const JPetHit& latterHit);
   static Point3D calculateAnnihilationPoint(const JPetHit& firstHit, const JPetHit& latterHit);
 };
