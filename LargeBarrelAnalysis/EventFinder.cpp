@@ -13,60 +13,60 @@
  *  @file EventFinder.cpp
  */
 
-#include <iostream>
+using namespace std;
+
+#include <JPetOptionsTools/JPetOptionsTools.h>
 #include <JPetWriter/JPetWriter.h>
 #include "EventFinder.h"
-#include <JPetOptionsTools/JPetOptionsTools.h>
+#include <iostream>
 
 using namespace jpet_options_tools;
-
-using namespace std;
 
 EventFinder::EventFinder(const char* name): JPetUserTask(name) {}
 
 bool EventFinder::init()
 {
-
   INFO("Event finding started.");
 
   fOutputEvents = new JPetTimeWindow("JPetEvent");
 
-  if (isOptionSet(fParams.getOptions(), fEventTimeParamKey))
-    kEventTimeWindow = getOptionAsFloat(fParams.getOptions(), fEventTimeParamKey);
+  // Reading values from the user options if available
+  // Event time
+  if (isOptionSet(fParams.getOptions(), kEventTimeParamKey))
+    fEventTimeWindow = getOptionAsFloat(fParams.getOptions(), kEventTimeParamKey);
+  else
+    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
+      kEventTimeParamKey.c_str(), fEventTimeWindow));
+  // Minimum number of hits in an event to save an event
+  if (isOptionSet(fParams.getOptions(), kEventMinMultiplicity))
+    fMinMultiplicity = getOptionAsFloat(fParams.getOptions(), kEventMinMultiplicity);
+  else
+    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
+      kEventMinMultiplicity.c_str(), fMinMultiplicity));
+  // Getting bool for saving histograms
+  if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey))
+    fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
 
-  if (fSaveControlHistos)
+  // Control histograms
+  if (fSaveControlHistos){
     getStatistics().createHistogram(
-      new TH1F("hits_per_event", "Number of Hits in Event", 20, 0.5, 20.5)
-    );
+      new TH1F("hits_per_event", "Number of Hits in Event", 20, 0.5, 20.5));
+    getStatistics().getHisto1D("hits_per_event")
+      ->GetXaxis()->SetTitle("Hits in Event");
+    getStatistics().getHisto1D("hits_per_event")
+      ->GetYaxis()->SetTitle("Number of Hits");
+  }
+
   return true;
 }
 
 bool EventFinder::exec()
 {
-
   if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
-    //uint n = timeWindow->getNumberOfEvents();
-    // for(uint i=0;i<n;++i){
-    //   fHitVector.push_back(dynamic_cast<const JPetHit&>(timeWindow->operator[](i)));
-    // }
-
-    vector<JPetEvent> events = buildEvents(*timeWindow);
-
-    saveEvents(events);
-
-    fHitVector.clear();
-  } else {
-    return false;
-  }
+    saveEvents(buildEvents(*timeWindow));
+  } else return false;
   return true;
 }
-
-//sorting method
-bool sortByTimeValue(JPetHit hit1, JPetHit hit2)
-{
-  return (hit1.getTime() < hit2.getTime());
-}
-
 
 bool EventFinder::terminate()
 {
@@ -74,50 +74,37 @@ bool EventFinder::terminate()
   return true;
 }
 
-vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& hits)
-{
-
-  vector<JPetEvent> eventVec;
-  //	sort(hitVec.begin(), hitVec.end(), sortByTimeValue);
-
-  int s = 0;
-  int nhits = hits.getNumberOfEvents();
-
-  while ( s < nhits ) {
-
-    JPetEvent event;
-    event.setEventType(JPetEventType::kUnknown);
-
-    const JPetHit& startHit = dynamic_cast<const JPetHit&>(hits[s]);
-
-    event.addHit(startHit);
-
-    int k = 1;
-    while ( s + k < nhits ) {
-      const JPetHit& currentHit = dynamic_cast<const JPetHit&>(hits[s + k]);
-      if (fabs(currentHit.getTime() - startHit.getTime()) < kEventTimeWindow) {
-        event.addHit(currentHit);
-        k++;
-      } else {
-        break;
-      }
-    }
-
-    s += k;
-
-    if (fSaveControlHistos) getStatistics()
-      .getHisto1D("hits_per_event")
-      ->Fill(event.getHits().size());
-
-    eventVec.push_back(event);
-  }
-
-  return eventVec;
-}
-
 void EventFinder::saveEvents(const vector<JPetEvent>& events)
 {
-  for (const auto& event : events) {
+  for (const auto& event : events)
     fOutputEvents->add<JPetEvent>(event);
+}
+
+vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
+{
+  vector<JPetEvent> eventVec;
+  const unsigned int nHits = timeWindow.getNumberOfEvents();
+  unsigned int count = 0;
+  while(count<nHits){
+    JPetEvent event;
+    event.setEventType(JPetEventType::kUnknown);
+    JPetHit hit = dynamic_cast<const JPetHit&>(timeWindow.operator[](count));
+    event.addHit(hit);
+
+    unsigned int nextCount = 1;
+    while(count+nextCount<nHits){
+      JPetHit nextHit = dynamic_cast<const JPetHit&>(timeWindow.operator[](count+nextCount));
+      if (fabs(nextHit.getTime() - hit.getTime()) < fEventTimeWindow) {
+        event.addHit(nextHit);
+        nextCount++;
+      } else break;
+    }
+    count+=nextCount;
+    if(event.getHits().size()>=fMinMultiplicity){
+      eventVec.push_back(event);
+      if(fSaveControlHistos)
+        getStatistics().getHisto1D("hits_per_event")->Fill(event.getHits().size());
+    }
   }
+  return eventVec;
 }

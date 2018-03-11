@@ -16,6 +16,7 @@
 #include <iostream>
 #include <JPetWriter/JPetWriter.h>
 #include "EventCategorizer.h"
+#include "EventCategorizerTools.h"
 
 using namespace std;
 
@@ -25,11 +26,19 @@ bool EventCategorizer::init()
 {
 
   INFO("Event categorization started.");
-  INFO("Looking at two hit Events on Layer 1&2 only - creating only control histograms");
+
+  // Getting bool for saving histograms
+  if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey))
+    fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
 
   fOutputEvents = new JPetTimeWindow("JPetEvent");
 
   if (fSaveControlHistos) {
+
+
+
+
+
     getStatistics().createHistogram(
       new TH1F("two_hit_event_theta_diff",
                "Abs Theta Difference Between Two Hits in Event",
@@ -94,35 +103,63 @@ bool EventCategorizer::init()
                100, 0.0, 150.0,
                360, -0.5, 359.5)
     );
-
     getStatistics().createHistogram(
-      new TH2F("3_hit_angles",
+       new TH2F("3_hit_angles",
                "3 Hit angles difference 1-2, 2-3",
                360, -0.5, 359.5,
                360, -0.5, 359.5)
+		    );
+    getStatistics().createHistogram(
+      new TH2F("XY",
+               "XY coordinates of annihilation points",
+               121, -60.5, 60.5,
+               121, -60.5, 60.5)
     );
+    getStatistics().createHistogram(
+      new TH2F("XZ",
+               "XZ coordinates of annihilation points",
+               121, -60.5, 60.5,
+               121, -60.5, 60.5)
+    );
+    getStatistics().createHistogram(
+      new TH2F("YZ",
+               "YZ coordinates of annihilation points",
+               121, -60.5, 60.5,
+               121, -60.5, 60.5)
+    );
+    getStatistics().createHistogram(
+      new TH1F("TOF",
+               "TOF annihilation events",
+               600, -3000,3000)
+    );
+
   }
   return true;
 }
 
 bool EventCategorizer::exec()
 {
-
-  //Analysis of Events consisting of two hits that come from Layer 1 or 2
-  //Layer 3 is ignored, since it is not callibrated
   if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
-    uint n = timeWindow->getNumberOfEvents();
-    for (uint i = 0; i < n; ++i) {
-
+    uint numberOfEvents = ;
+    for (uint i = 0; i < timeWindow->getNumberOfEvents(); i++) {
       const auto& event = dynamic_cast<const JPetEvent&>(timeWindow->operator[](i));
+
+      // Check types of current event
+      bool is2Gamma = EventCategorizerTools::checkFor2Gamma(event);
+      bool is3Gamma = EventCategorizerTools::checkFor3Gamma(event);
+      bool isPrompt = EventCategorizerTools::checkForPrompt(event);
+      bool isScattered = EventCategorizerTools::checkForScatter(event);
+
+      if(is2Gamma)
+
 
       if (event.getHits().size() > 1) {
 
         vector<JPetHit> hits = event.getHits();
         for (size_t i = 0; i < hits.size(); i++) {
           for (size_t j = i + 1; j < hits.size(); j++) {
-            JPetHit firstHit = hits.at(i);
-            JPetHit secondHit = hits.at(j);
+            JPetHit& firstHit = hits.at(i);
+            JPetHit& secondHit = hits.at(j);
 
             if (firstHit.getBarrelSlot().getLayer().getID() != 3
                 && secondHit.getBarrelSlot().getLayer().getID() != 3) {
@@ -178,11 +215,20 @@ bool EventCategorizer::exec()
           }
         }
       }
-
+      if (event.getHits().size() == 2)
+      {
+	JPetHit& firstHit = event.getHits().at(0);
+        JPetHit& secondHit = event.getHits().at(1);
+	getStatistics().getHisto1D("TOF")->Fill(EventCategorizerTools::calculateTOF(firstHit, secondHit));
+	Point3D annhilationPoint = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit);
+	getStatistics().getHisto2D("XY")->Fill(annhilationPoint.x, annhilationPoint.y);
+	getStatistics().getHisto2D("XZ")->Fill(annhilationPoint.x, annhilationPoint.z);
+	getStatistics().getHisto2D("YZ")->Fill(annhilationPoint.y, annhilationPoint.z);
+      }
       if (event.getHits().size() == 3) {
-        JPetHit firstHit = event.getHits().at(0);
-        JPetHit secondHit = event.getHits().at(1);
-        JPetHit thirdHit = event.getHits().at(2);
+        JPetHit& firstHit = event.getHits().at(0);
+        JPetHit& secondHit = event.getHits().at(1);
+        JPetHit& thirdHit = event.getHits().at(2);
 
         float theta_1_2 = fabs(firstHit.getBarrelSlot().getTheta()
                                - secondHit.getBarrelSlot().getTheta());

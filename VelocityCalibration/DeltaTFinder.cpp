@@ -89,8 +89,6 @@ bool DeltaTFinder::init()
   if (isOptionSet(fParams.getOptions(), fVelocityCalibFile_key ) )
     fOutputVelocityCalibName = getOptionAsString(fParams.getOptions(),  fVelocityCalibFile_key );
 
-
-
   return true;
 }
 
@@ -132,6 +130,11 @@ bool DeltaTFinder::terminate()
   thresholdConversionMap[3] = 'c';
   thresholdConversionMap[4] = 'd';
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> ebab67dc0afdb29199f27cc99d299883595ad947
   TString results_folder_name = (fOutputPath + "Results/position_" + boost::lexical_cast<std::string>(fPos)).c_str();
   system("mkdir -p " + results_folder_name);
 
@@ -154,7 +157,10 @@ bool DeltaTFinder::terminate()
 
     }
   }
+<<<<<<< HEAD
 
+=======
+>>>>>>> ebab67dc0afdb29199f27cc99d299883595ad947
   outStream.close();
   delete fBarrelMap;
 

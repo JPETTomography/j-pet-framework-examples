@@ -1,46 +1,38 @@
-# J-PET tool project using J-PET framework
-#
-# Author: Adam Strzelecki <adam.strzelecki@uj.edu.pl>
-#
-# Description:
-#   Builds project depending on J-PET framework.
+################################################################################
+## J-PET tool project using J-PET framework
+##
+## Author: Adam Strzelecki <adam.strzelecki@uj.edu.pl>
+##
+## Description:
+##   Builds project depending on J-PET framework.
+################################################################################
 
 cmake_minimum_required(VERSION 2.6)
 
-######################################################################
-### when creating a new project,
-### set this section appropriately for your project
-######################################################################
+################################################################################
+## Project name
 set(projectName LargeBarrelAnalysis)
 
-set(AUXILLIARY_FILES
-  run.sh
-  conf_trb3.xml
-  resultsForThresholda.txt
-  large_barrel.json
-  TimeConstants.txt
-  userParams.json
+set(AUXILIARY_FILES
   README
-  )
+  run.sh
+)
 
 set(ROOT_SCRIPTS
   rootlogon.C
   rootalias.C
-  )
+)
 
-######################################################################
-### this section should not need to be modified for a new project
-######################################################################
+################################################################################
+## Build targets
 set(projectBinary ${projectName}.x)
-
-project(${projectName} CXX) # using only C++
+project(${projectName} CXX)
 
 file(GLOB HEADERS *.h)
 file(GLOB SOURCES *.cpp)
 file(GLOB MAIN_CPP main.cpp)
 file(GLOB UNIT_TEST_SOURCES *Test.cpp)
 list(REMOVE_ITEM SOURCES ${UNIT_TEST_SOURCES})
-
 file(GLOB SOURCES_WITHOUT_MAIN *.cpp)
 list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${UNIT_TEST_SOURCES})
 list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${MAIN_CPP})
@@ -56,8 +48,9 @@ add_custom_target(clean_data_largebarrelextended
 
 set(copy_depends) #create variable for list with depends files path
 
-# copy the example auxilliary files
-foreach( file_i ${AUXILLIARY_FILES})
+################################################################################
+## Copy the example auxiliary files
+foreach( file_i ${AUXILIARY_FILES})
   list(APPEND copy_depends ${CMAKE_CURRENT_BINARY_DIR}/${file_i})
 
   if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${file_i})
@@ -72,7 +65,8 @@ foreach( file_i ${AUXILLIARY_FILES})
     )
 endforeach( file_i )
 
-# copy the ROOT scripts
+################################################################################
+## Copy the ROOT scripts
 foreach( file_i ${ROOT_SCRIPTS})
   list(APPEND copy_depends ${CMAKE_CURRENT_BINARY_DIR}/${file_i})
   add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
@@ -82,10 +76,14 @@ foreach( file_i ${ROOT_SCRIPTS})
     )
 endforeach( file_i )
 
-add_custom_target(copy_files DEPENDS ${copy_depends}) #add new target that depends on copied files
-add_dependencies(${projectBinary} copy_files) #add dependencies between building project and copy files
+################################################################################
+## Add new target that depends on copied files
+add_custom_target(copy_files DEPENDS ${copy_depends})
+## Add dependencies between building project and copy files
+add_dependencies(${projectBinary} copy_files)
 
-# unit tests
+################################################################################
+## Unit tests
 set(TESTS_DIR ${CMAKE_CURRENT_BINARY_DIR}/tests)
 file(MAKE_DIRECTORY ${TESTS_DIR})
 foreach(test_source ${UNIT_TEST_SOURCES})
