@@ -41,7 +41,7 @@ bool EventFinder::init()
   if (isOptionSet(fParams.getOptions(), kEventMinMultiplicity))
     fMinMultiplicity = getOptionAsFloat(fParams.getOptions(), kEventMinMultiplicity);
   else
-    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
+    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %d.",
       kEventMinMultiplicity.c_str(), fMinMultiplicity));
   // Getting bool for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey))

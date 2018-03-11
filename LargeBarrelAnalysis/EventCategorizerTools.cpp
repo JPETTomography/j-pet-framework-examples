@@ -15,6 +15,9 @@
 
 #include "EventCategorizerTools.h"
 #include <TMath.h>
+#include <vector>
+
+using namespace std;
 
 /**
 * Method for determining type of event - back to back 2 gamma
@@ -23,7 +26,7 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
 {
   if (event.getHits().size() < 2) return false;
   for(uint i = 0; i < event.getHits().size(); i++){
-    for(uint j = i+1; j < event.getHits().size()); j++){
+    for(uint j = i+1; j < event.getHits().size(); j++){
       JPetHit& firstHit = event.getHits().at(i);
       JPetHit& secondHit = event.getHits().at(j);
       // Checking for back to back
@@ -55,8 +58,8 @@ bool EventCategorizerTools::checkFor3Gamma(const JPetEvent& event, JPetStatistic
 {
   if (event.getHits().size() < 3) return false;
   for(uint i = 0; i < event.getHits().size(); i++){
-    for(uint j = i+1; j < event.getHits().size()); j++){
-      for(uint k = j+1; k < event.getHits().size()); k++){
+    for(uint j = i+1; j < event.getHits().size(); j++){
+      for(uint k = j+1; k < event.getHits().size(); k++){
         JPetHit& firstHit = event.getHits().at(i);
         JPetHit& secondHit = event.getHits().at(j);
         JPetHit& thirdHit = event.getHits().at(k);
@@ -76,7 +79,7 @@ bool EventCategorizerTools::checkFor3Gamma(const JPetEvent& event, JPetStatistic
         double transformedY = relativeAngles.at(1)-relativeAngles.at(0);
 
         if(saveHistos)
-          stats.getHisto2D("3Gamma_Angles")->Fill(transformedX., transformedY);
+          stats.getHisto2D("3Gamma_Angles")->Fill(transformedX, transformedY);
       }
     }
   }
@@ -86,7 +89,7 @@ bool EventCategorizerTools::checkFor3Gamma(const JPetEvent& event, JPetStatistic
 /**
 * Method for determining type of event - prompt
 */
-bool EventCategorizerTools::checkForPrompt(const JPetEvent& event, JPetStatistics& stats, bool saveHistos)
+bool EventCategorizerTools::checkForPrompt(const JPetEvent&, JPetStatistics&, bool)
 {
   // Placeholder for proper method
   return false;
@@ -103,7 +106,7 @@ bool EventCategorizerTools::checkForScatter(
 {
   if (event.getHits().size() < 2) return false;
   for(uint i = 0; i < event.getHits().size(); i++){
-    for(uint j = i+1; j < event.getHits().size()); j++){
+    for(uint j = i+1; j < event.getHits().size(); j++){
       JPetHit primaryHit, scatterHit;
       if(event.getHits().at(i).getTime() < event.getHits().at(j).getTime()){
         primaryHit = event.getHits().at(i);
@@ -118,7 +121,7 @@ bool EventCategorizerTools::checkForScatter(
       double timeDiff = scatterHit.getTime() - primaryHit.getTime();
 
       if(saveHistos)
-        stats.getHisto1D("ScatterTOF_TimeDiff")->Fill(scattTime-timeDiff);
+        stats.getHisto1D("ScatterTOF_TimeDiff")->Fill(scattTOF-timeDiff);
 
       if(fabs(scattTOF-timeDiff) < scatterTOFTimeDiff){
         if(saveHistos) {

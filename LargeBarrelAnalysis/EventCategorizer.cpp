@@ -13,11 +13,13 @@
  *  @file EventCategorizer.cpp
  */
 
+#include <JPetOptionsTools/JPetOptionsTools.h>
 #include <JPetWriter/JPetWriter.h>
 #include "EventCategorizerTools.h"
 #include "EventCategorizer.h"
 #include <iostream>
 
+using namespace jpet_options_tools;
 using namespace std;
 
 EventCategorizer::EventCategorizer(const char* name): JPetUserTask(name) {}
@@ -53,18 +55,19 @@ bool EventCategorizer::exec()
       bool is3Gamma = EventCategorizerTools::checkFor3Gamma(event, getStatistics(), fSaveControlHistos);
       bool isPrompt = EventCategorizerTools::checkForPrompt(event, getStatistics(), fSaveControlHistos);
       bool isScattered = EventCategorizerTools::checkForScatter(event, getStatistics(),
-        fSaveControlHistos, fScatterTimeDiffParam);
+        fSaveControlHistos, fScatterTOFTimeDiff);
 
-      if(is2Gamma) event.addEventType(JPetEventType::k2Gamma);
-      if(is3Gamma) event.addEventType(JPetEventType::k3Gamma);
-      if(isPrompt) event.addEventType(JPetEventType::kPrompt);
-      if(isScattered) event.addEventType(JPetEventType::kScattered);
+      JPetEvent newEvent = event;
+      if(is2Gamma) newEvent.addEventType(JPetEventType::k2Gamma);
+      if(is3Gamma) newEvent.addEventType(JPetEventType::k3Gamma);
+      if(isPrompt) newEvent.addEventType(JPetEventType::kPrompt);
+      if(isScattered) newEvent.addEventType(JPetEventType::kScattered);
 
       if(fSaveControlHistos){
-        //TODO fill general histos
+        for(auto hit : event.getHits())
+          getStatistics().getHisto2D("All_XYpos")->Fill(hit.getPosX(), hit.getPosY());
       }
-
-      events.push_back(event);
+      events.push_back(newEvent);
     }
     saveEvents(events);
   } else return false;
@@ -128,9 +131,9 @@ void EventCategorizer::initialiseHistograms(){
 
   // Histograms for 3Gamama category
   getStatistics().createHistogram(
-     new TH2F("3Gamma_Angles", "Relative angles - transformed", 251, -0.5, 250.5, 201, -0.5, 200.5));
-     getStatistics().getHisto2D("3Gamma_Angles")->GetXaxis()->SetTitle("Relative angle 1-2");
-     getStatistics().getHisto2D("3Gamma_Angles")->GetYaxis()->SetTitle("Relative angle 2-3");
+    new TH2F("3Gamma_Angles", "Relative angles - transformed", 251, -0.5, 250.5, 201, -0.5, 200.5));
+  getStatistics().getHisto2D("3Gamma_Angles")->GetXaxis()->SetTitle("Relative angle 1-2");
+  getStatistics().getHisto2D("3Gamma_Angles")->GetYaxis()->SetTitle("Relative angle 2-3");
 
   // Histograms for scattering category
   getStatistics().createHistogram(

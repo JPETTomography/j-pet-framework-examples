@@ -16,6 +16,8 @@
 #ifndef _EVENTCATEGORIZERTOOLS_H_
 #define _EVENTCATEGORIZERTOOLS_H_
 
+#include <JPetStatistics/JPetStatistics.h>
+#include <JPetEvent/JPetEvent.h>
 #include <JPetHit/JPetHit.h>
 #define kLightVelocity_cm_ns 29.9792458
 
@@ -43,7 +45,7 @@ public:
   static double calculateTOT(const JPetHit& hit);
   static double calculateDistance(const JPetHit& hit1, const JPetHit& hit2);
   static double calculateScatteringTime(const JPetHit& hit1, const JPetHit& hit2);
-  static double scalculateScatteringAngle(const JPetHit& hit1, const JPetHit& hit2);
+  static double calculateScatteringAngle(const JPetHit& hit1, const JPetHit& hit2);
   static double calculateTOF(const JPetHit& firstHit, const JPetHit& latterHit);
   static Point3D calculateAnnihilationPoint(const JPetHit& firstHit, const JPetHit& latterHit);
 };
