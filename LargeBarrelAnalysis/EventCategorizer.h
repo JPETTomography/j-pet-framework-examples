@@ -16,12 +16,12 @@
 #ifndef EVENTCATEGORIZER_H
 #define EVENTCATEGORIZER_H
 
+#include <JPetUserTask/JPetUserTask.h>
+#include "EventCategorizerTools.h"
+#include <JPetEvent/JPetEvent.h>
+#include <JPetHit/JPetHit.h>
 #include <vector>
 #include <map>
-#include <JPetUserTask/JPetUserTask.h>
-#include <JPetHit/JPetHit.h>
-#include <JPetEvent/JPetEvent.h>
-#include "EventCategorizerTools.h"
 
 class JPetWriter;
 
@@ -38,7 +38,9 @@ public:
 	virtual bool terminate() override;
 
 protected:
+	const std::string kSaveControlHistosParamKey = "Save_Cotrol_Histograms_bool";
 	void saveEvents(const std::vector<JPetEvent>& event);
 	bool fSaveControlHistos = true;
+	void initialiseHistograms();
 };
 #endif /*  !EVENTCATEGORIZER_H */

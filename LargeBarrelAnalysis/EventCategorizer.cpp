@@ -13,10 +13,10 @@
  *  @file EventCategorizer.cpp
  */
 
-#include <iostream>
 #include <JPetWriter/JPetWriter.h>
-#include "EventCategorizer.h"
 #include "EventCategorizerTools.h"
+#include "EventCategorizer.h"
+#include <iostream>
 
 using namespace std;
 
@@ -24,237 +24,104 @@ EventCategorizer::EventCategorizer(const char* name): JPetUserTask(name) {}
 
 bool EventCategorizer::init()
 {
-
   INFO("Event categorization started.");
-
   // Getting bool for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey))
     fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
-
+  // Input events type
   fOutputEvents = new JPetTimeWindow("JPetEvent");
-
-  if (fSaveControlHistos) {
-
-
-
-
-
-    getStatistics().createHistogram(
-      new TH1F("two_hit_event_theta_diff",
-               "Abs Theta Difference Between Two Hits in Event",
-               360, -0.5, 359.5)
-    );
-    getStatistics().createHistogram(
-      new TH1F("two_hit_event_theta_diff_cut",
-               "Abs Theta Difference Between Opposite Hits in Event",
-               360, -0.5, 359.5)
-    );
-    getStatistics().createHistogram(
-      new TH1F("hits_x_pos",
-               "Hits X position",
-               100, -60.0, 60.0)
-    );
-    getStatistics().createHistogram(
-      new TH1F("hits_y_pos",
-               "Hits Y position",
-               100, -60.0, 60.0)
-    );
-    getStatistics().createHistogram(
-      new TH1F("hits_z_pos",
-               "Hits Z position",
-               100, -60.0, 60.0)
-    );
-    getStatistics().createHistogram(
-      new TH1F("hits_x_pos_cut",
-               "Opposite Hits X position",
-               100, -60.0, 60.0)
-    );
-    getStatistics().createHistogram(
-      new TH1F("hits_y_pos_cut",
-               "Opposite Hits Y position",
-               100, -60.0, 60.0)
-    );
-    getStatistics().createHistogram(
-      new TH1F("hits_z_pos_cut",
-               "Opposite Hits Z position",
-               100, -60.0, 60.0)
-    );
-    getStatistics().createHistogram(
-      new TH2F("hit_distanece_vs_time_diff",
-               "Two Hit distance vs. abs time difference",
-               100, 0.0, 150.0,
-               100, 0.0, 6000.0)
-    );
-    getStatistics().createHistogram(
-      new TH2F("hit_distanece_vs_theta_diff",
-               "Two Hit distance vs. abs theta difference",
-               100, 0.0, 150.0,
-               360, -0.5, 359.5)
-    );
-    getStatistics().createHistogram(
-      new TH2F("hit_distanece_vs_time_diff_cut",
-               "Opposite Hits distance vs. abs time difference",
-               100, 0.0, 150.0,
-               100, 0.0, 6000.0)
-    );
-    getStatistics().createHistogram(
-      new TH2F("hit_distanece_vs_theta_diff_cut",
-               "Opposite Hit distance vs. abs theta difference",
-               100, 0.0, 150.0,
-               360, -0.5, 359.5)
-    );
-    getStatistics().createHistogram(
-       new TH2F("3_hit_angles",
-               "3 Hit angles difference 1-2, 2-3",
-               360, -0.5, 359.5,
-               360, -0.5, 359.5)
-		    );
-    getStatistics().createHistogram(
-      new TH2F("XY",
-               "XY coordinates of annihilation points",
-               121, -60.5, 60.5,
-               121, -60.5, 60.5)
-    );
-    getStatistics().createHistogram(
-      new TH2F("XZ",
-               "XZ coordinates of annihilation points",
-               121, -60.5, 60.5,
-               121, -60.5, 60.5)
-    );
-    getStatistics().createHistogram(
-      new TH2F("YZ",
-               "YZ coordinates of annihilation points",
-               121, -60.5, 60.5,
-               121, -60.5, 60.5)
-    );
-    getStatistics().createHistogram(
-      new TH1F("TOF",
-               "TOF annihilation events",
-               600, -3000,3000)
-    );
-
-  }
+  // Initialise hisotgrams
+  if(fSaveControlHistos) initialiseHistograms();
   return true;
 }
 
 bool EventCategorizer::exec()
 {
   if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
-    uint numberOfEvents = ;
+    vector<JPetEvent> events;
     for (uint i = 0; i < timeWindow->getNumberOfEvents(); i++) {
       const auto& event = dynamic_cast<const JPetEvent&>(timeWindow->operator[](i));
 
       // Check types of current event
-      bool is2Gamma = EventCategorizerTools::checkFor2Gamma(event);
-      bool is3Gamma = EventCategorizerTools::checkFor3Gamma(event);
-      bool isPrompt = EventCategorizerTools::checkForPrompt(event);
-      bool isScattered = EventCategorizerTools::checkForScatter(event);
+      bool is2Gamma = EventCategorizerTools::checkFor2Gamma(event, getStatistics(), fSaveControlHistos);
+      bool is3Gamma = EventCategorizerTools::checkFor3Gamma(event, getStatistics(), fSaveControlHistos);
+      bool isPrompt = EventCategorizerTools::checkForPrompt(event, getStatistics(), fSaveControlHistos);
+      bool isScattered = EventCategorizerTools::checkForScatter(event, getStatistics(), fSaveControlHistos);
 
-      if(is2Gamma)
+      if(is2Gamma)  event.addEventType(JPetEventType::k2Gamma);
+      if(is3Gamma)  event.addEventType(JPetEventType::k3Gamma);
+      if(isPrompt)  event.addEventType(JPetEventType::kPrompt);
+      if(isScattered)  event.addEventType(JPetEventType::kScattered);
 
-
-      if (event.getHits().size() > 1) {
-
-        vector<JPetHit> hits = event.getHits();
-        for (size_t i = 0; i < hits.size(); i++) {
-          for (size_t j = i + 1; j < hits.size(); j++) {
-            JPetHit& firstHit = hits.at(i);
-            JPetHit& secondHit = hits.at(j);
-
-            if (firstHit.getBarrelSlot().getLayer().getID() != 3
-                && secondHit.getBarrelSlot().getLayer().getID() != 3) {
-
-              float thetaDiff = fabs(firstHit.getBarrelSlot().getTheta()
-                                     - secondHit.getBarrelSlot().getTheta());
-              float timeDiff = fabs(firstHit.getTime() - secondHit.getTime());
-              float distance = sqrt(pow(firstHit.getPosX() - secondHit.getPosX(), 2)
-                                    + pow(firstHit.getPosY() - secondHit.getPosY(), 2)
-                                    + pow(firstHit.getPosZ() - secondHit.getPosZ(), 2));
-
-              if (fSaveControlHistos) {
-                getStatistics().getHisto1D("two_hit_event_theta_diff")
-                ->Fill(thetaDiff);
-                getStatistics().getHisto1D("hits_x_pos")
-                ->Fill(firstHit.getPosX());
-                getStatistics().getHisto1D("hits_y_pos")
-                ->Fill(firstHit.getPosY());
-                getStatistics().getHisto1D("hits_z_pos")
-                ->Fill(firstHit.getPosZ());
-                getStatistics().getHisto1D("hits_x_pos")
-                ->Fill(secondHit.getPosX());
-                getStatistics().getHisto1D("hits_y_pos")
-                ->Fill(secondHit.getPosY());
-                getStatistics().getHisto1D("hits_z_pos")
-                ->Fill(secondHit.getPosZ());
-                getStatistics().getHisto2D("hit_distanece_vs_time_diff")
-                ->Fill(distance, timeDiff);
-                getStatistics().getHisto2D("hit_distanece_vs_theta_diff")
-                ->Fill(distance, thetaDiff);
-                if (thetaDiff >= 180.0 && thetaDiff < 181.0) {
-                  getStatistics().getHisto1D("two_hit_event_theta_diff_cut")
-                  ->Fill(thetaDiff);
-                  getStatistics().getHisto1D("hits_x_pos_cut")
-                  ->Fill(firstHit.getPosX());
-                  getStatistics().getHisto1D("hits_y_pos_cut")
-                  ->Fill(firstHit.getPosY());
-                  getStatistics().getHisto1D("hits_z_pos_cut")
-                  ->Fill(firstHit.getPosZ());
-                  getStatistics().getHisto1D("hits_x_pos_cut")
-                  ->Fill(secondHit.getPosX());
-                  getStatistics().getHisto1D("hits_y_pos_cut")
-                  ->Fill(secondHit.getPosY());
-                  getStatistics().getHisto1D("hits_z_pos_cut")
-                  ->Fill(secondHit.getPosZ());
-                  getStatistics().getHisto2D("hit_distanece_vs_time_diff_cut")
-                  ->Fill(distance, timeDiff);
-                  getStatistics().getHisto2D("hit_distanece_vs_theta_diff_cut")
-                  ->Fill(distance, thetaDiff);
-                }
-              }
-            }
-          }
-        }
+      if(fSaveControlHistos){
+        //TODO fill general histos
       }
-      if (event.getHits().size() == 2)
-      {
-	JPetHit& firstHit = event.getHits().at(0);
-        JPetHit& secondHit = event.getHits().at(1);
-	getStatistics().getHisto1D("TOF")->Fill(EventCategorizerTools::calculateTOF(firstHit, secondHit));
-	Point3D annhilationPoint = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit);
-	getStatistics().getHisto2D("XY")->Fill(annhilationPoint.x, annhilationPoint.y);
-	getStatistics().getHisto2D("XZ")->Fill(annhilationPoint.x, annhilationPoint.z);
-	getStatistics().getHisto2D("YZ")->Fill(annhilationPoint.y, annhilationPoint.z);
-      }
-      if (event.getHits().size() == 3) {
-        JPetHit& firstHit = event.getHits().at(0);
-        JPetHit& secondHit = event.getHits().at(1);
-        JPetHit& thirdHit = event.getHits().at(2);
 
-        float theta_1_2 = fabs(firstHit.getBarrelSlot().getTheta()
-                               - secondHit.getBarrelSlot().getTheta());
-        float theta_2_3 = fabs(secondHit.getBarrelSlot().getTheta()
-                               - thirdHit.getBarrelSlot().getTheta());
-
-        getStatistics().getHisto2D("3_hit_angles")
-        ->Fill(theta_1_2, theta_2_3);
-      }
+      events.push_back(event);
     }
-  } else {
-    return false;
-  }
+    saveEvents(events);
+  } else return false;
   return true;
 }
 
 bool EventCategorizer::terminate()
 {
-
-  INFO("More than one hit Events done. Writing conrtrol histograms.");
+  INFO("Event categorizetion completed.");
   return true;
 }
 
 void EventCategorizer::saveEvents(const vector<JPetEvent>& events)
 {
-  for (const auto& event : events) {
-    fOutputEvents->add<JPetEvent>(event);
-  }
+  for (const auto& event : events) fOutputEvents->add<JPetEvent>(event);
+}
+
+void EventCategorizer::initialiseHistograms(){
+
+  // General histograms
+  getStatistics().createHistogram(
+    new TH2F("All_XYpos", "Hit position XY", 121, -60.5, 60.5, 121, -60.5, 60.5));
+  getStatistics().getHisto2D("All_XYpos")->GetXaxis()->SetTitle("Hit X position [cm]");
+  getStatistics().getHisto2D("All_XYpos")->GetYaxis()->SetTitle("Hit Y position [cm]");
+
+  // Histograms for 2Gamama category
+  getStatistics().createHistogram(
+    new TH1F("2Gamma_Zpos", "B2B hits Z position", 100, -30.0, 30.0));
+  getStatistics().getHisto1D("2Gamma_Zpos")->GetXaxis()->SetTitle("Z axis position [cm]");
+  getStatistics().getHisto1D("2Gamma_Zpos")->GetYaxis()->SetTitle("Number of Hits");
+
+  getStatistics().createHistogram(
+    new TH1F("2Gamma_TimeDiff", "B2B hits time difference", 100, -10.0, 10.0));
+  getStatistics().getHisto1D("2Gamma_TimeDiff")->GetXaxis()->SetTitle("Time Difference [ps]");
+  getStatistics().getHisto1D("2Gamma_TimeDiff")->GetYaxis()->SetTitle("Number of Hit Pairs");
+
+  getStatistics().createHistogram(
+    new TH1F("2Gamma_Dist", "B2B hits distance", 100, -10.0, 10.0));
+  getStatistics().getHisto1D("2Gamma_Dist")->GetXaxis()->SetTitle("Distance [cm]");
+  getStatistics().getHisto1D("2Gamma_Dist")->GetYaxis()->SetTitle("Number of Hit Pairs");
+
+  getStatistics().createHistogram(
+    new TH1F("Annih_TOF", "Annihilation pairs Time of Flight", 200, -3000.0,3000.0));
+  getStatistics().getHisto1D("Annih_TOF")->GetXaxis()->SetTitle("Time of Flight [ps]");
+  getStatistics().getHisto1D("Annih_TOF")->GetYaxis()->SetTitle("Number of Annihilation Pairs");
+
+  getStatistics().createHistogram(
+     new TH2F("AnnihPoint_XY", "XY position of annihilation point", 121, -60.5, 60.5, 121, -60.5, 60.5));
+  getStatistics().getHisto2D("AnnihPoint_XY")->GetXaxis()->SetTitle("X position [cm]");
+  getStatistics().getHisto2D("AnnihPoint_XY")->GetYaxis()->SetTitle("Y position [cm]");
+
+  getStatistics().createHistogram(
+    new TH2F("AnnihPoint_XZ", "XZ position of annihilation point", 121, -60.5, 60.5, 121, -60.5, 60.5));
+  getStatistics().getHisto2D("AnnihPoint_XZ")->GetXaxis()->SetTitle("X position [cm]");
+  getStatistics().getHisto2D("AnnihPoint_XZ")->GetYaxis()->SetTitle("Z position [cm]");
+
+  getStatistics().createHistogram(
+    new TH2F("AnnihPoint_YZ", "YZ position of annihilation point", 121, -60.5, 60.5, 121, -60.5, 60.5));
+  getStatistics().getHisto2D("AnnihPoint_YZ")->GetXaxis()->SetTitle("Y position [cm]");
+  getStatistics().getHisto2D("AnnihPoint_YZ")->GetYaxis()->SetTitle("Z position [cm]");
+
+  // Histograms for 3Gamama category
+  getStatistics().createHistogram(
+     new TH2F("3Gamma_Angles", "Relative angles - transformed", 251, -0.5, 250.5, 201, -0.5, 200.5));
+     getStatistics().getHisto2D("3Gamma_Angles")->GetXaxis()->SetTitle("Relative angle 1-2");
+     getStatistics().getHisto2D("3Gamma_Angles")->GetYaxis()->SetTitle("Relative angle 2-3");
 }
