@@ -26,11 +26,19 @@ bool EventCategorizer::init()
 {
 
   INFO("Event categorization started.");
-  INFO("Looking at two hit Events on Layer 1&2 only - creating only control histograms");
+
+  // Getting bool for saving histograms
+  if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey))
+    fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
 
   fOutputEvents = new JPetTimeWindow("JPetEvent");
 
   if (fSaveControlHistos) {
+
+
+
+
+
     getStatistics().createHistogram(
       new TH1F("two_hit_event_theta_diff",
                "Abs Theta Difference Between Two Hits in Event",
@@ -124,21 +132,26 @@ bool EventCategorizer::init()
                "TOF annihilation events",
                600, -3000,3000)
     );
-    
+
   }
   return true;
 }
 
 bool EventCategorizer::exec()
 {
-
-  //Analysis of Events consisting of two hits that come from Layer 1 or 2
-  //Layer 3 is ignored, since it is not callibrated
   if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
-    uint n = timeWindow->getNumberOfEvents();
-    for (uint i = 0; i < n; ++i) {
-
+    uint numberOfEvents = ;
+    for (uint i = 0; i < timeWindow->getNumberOfEvents(); i++) {
       const auto& event = dynamic_cast<const JPetEvent&>(timeWindow->operator[](i));
+
+      // Check types of current event
+      bool is2Gamma = EventCategorizerTools::checkFor2Gamma(event);
+      bool is3Gamma = EventCategorizerTools::checkFor3Gamma(event);
+      bool isPrompt = EventCategorizerTools::checkForPrompt(event);
+      bool isScattered = EventCategorizerTools::checkForScatter(event);
+
+      if(is2Gamma)
+
 
       if (event.getHits().size() > 1) {
 

@@ -37,6 +37,12 @@ bool EventFinder::init()
   else
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
       kEventTimeParamKey.c_str(), fEventTimeWindow));
+  // Minimum number of hits in an event to save an event
+  if (isOptionSet(fParams.getOptions(), kEventMinMultiplicity))
+    fMinMultiplicity = getOptionAsFloat(fParams.getOptions(), kEventMinMultiplicity);
+  else
+    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
+      kEventMinMultiplicity.c_str(), fMinMultiplicity));
   // Getting bool for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey))
     fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
@@ -94,9 +100,11 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
       } else break;
     }
     count+=nextCount;
-    if(fSaveControlHistos)
-      getStatistics().getHisto1D("hits_per_event")->Fill(event.getHits().size());
-    eventVec.push_back(event);
+    if(event.getHits().size()>=fMinMultiplicity){
+      eventVec.push_back(event);
+      if(fSaveControlHistos)
+        getStatistics().getHisto1D("hits_per_event")->Fill(event.getHits().size());
+    }
   }
   return eventVec;
 }

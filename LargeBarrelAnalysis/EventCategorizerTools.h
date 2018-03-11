@@ -27,12 +27,15 @@ struct Point3D
   double z=0;
 };
 
-
 class EventCategorizerTools
 {
 public:
-    static double calculateTOF(const JPetHit& firstHit, const JPetHit& latterHit);
-    static Point3D calculateAnnihilationPoint(const JPetHit& firstHit, const JPetHit& latterHit);
+  static bool checkFor2Gamma(const JPetEvent& event);
+  static bool checkFor3Gamma(const JPetEvent& event);
+  static bool checkForPrompt(const JPetEvent& event);
+  static bool checkForScatter(const JPetEvent& event);
+  static double calculateTOF(const JPetHit& firstHit, const JPetHit& latterHit);
+  static Point3D calculateAnnihilationPoint(const JPetHit& firstHit, const JPetHit& latterHit);
 };
 
 #endif /*  !EVENTCATEGORIZERTOOLS_H */
