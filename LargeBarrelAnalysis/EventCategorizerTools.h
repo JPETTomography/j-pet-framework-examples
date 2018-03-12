@@ -18,21 +18,30 @@
 
 #include <JPetHit/JPetHit.h>
 
-enum kUndefined { point = 999, tof = 9999 };
-
-struct Point3D
+class Point3D
 {
-  double x=0;
-  double y=0;
-  double z=0;
+public:
+  Point3D() : x(0), y(0), z(0) {}
+  Point3D(double initialValue) : x(initialValue), y(initialValue), z(initialValue) {}
+  double x;
+  double y;
+  double z;
 };
-
 
 class EventCategorizerTools
 {
 public:
-    static double calculateTOF(const JPetHit& firstHit, const JPetHit& latterHit);
-    static Point3D calculateAnnihilationPoint(const JPetHit& firstHit, const JPetHit& latterHit);
+
+  static constexpr float kUndefinedPoint = 999;
+  static constexpr float kUndefinedTof = 9999;
+
+  static double calculateTOF(const JPetHit& firstHit, const JPetHit& latterHit);
+  static Point3D calculateAnnihilationPoint(const JPetHit& firstHit, const JPetHit& latterHit);
+
+
+
+private:
+  EventCategorizerTools() = delete;
 };
 
 #endif /*  !EVENTCATEGORIZERTOOLS_H */
