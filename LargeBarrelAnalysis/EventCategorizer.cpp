@@ -138,7 +138,7 @@ void EventCategorizer::initialiseHistograms(){
   // Histograms for scattering category
   getStatistics().createHistogram(
     new TH1F("ScatterTOF_TimeDiff", "Difference of Scatter TOF and hits time difference",
-      200, -5.0*fScatterTOFTimeDiff, 5.0*fScatterTOFTimeDiff));
+      200, 0.0, 3.0*fScatterTOFTimeDiff));
   getStatistics().getHisto1D("ScatterTOF_TimeDiff")->GetXaxis()->SetTitle("Scat_TOF & time diff [ps]");
   getStatistics().getHisto1D("ScatterTOF_TimeDiff")->GetYaxis()->SetTitle("Number of Hit Pairs");
 
