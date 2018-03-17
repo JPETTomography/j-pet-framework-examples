@@ -74,12 +74,12 @@ bool HitFinder::init()
     getStatistics().getHisto1D("remain_signals_per_scin")
       ->GetXaxis()->SetTitle("ID of Scintillator");
     getStatistics().getHisto1D("remain_signals_per_scin")
-      ->GetYaxis()->SetTitle("Number of Unused Signals in Time Slot");
+      ->GetYaxis()->SetTitle("Number of Unused Signals in Scintillator");
 
     getStatistics().createHistogram(
       new TH2F("time_diff_per_scin",
         "Signals Time Difference per Scintillator ID",
-        200, -fABTimeDiff, fABTimeDiff,
+        200, -2*fABTimeDiff, 2*fABTimeDiff,
         192, 0.5, 192.5));
     getStatistics().getHisto2D("time_diff_per_scin")
       ->GetXaxis()->SetTitle("A-B time difference");
@@ -89,7 +89,7 @@ bool HitFinder::init()
     getStatistics().createHistogram(
       new TH2F("hit_pos_per_scin",
         "Hit Position per Scintillator ID",
-        200, -30.0, 30.0,
+        200, -50.0, 50.0,
         192, 0.5, 192.5));
     getStatistics().getHisto2D("hit_pos_per_scin")
       ->GetXaxis()->SetTitle("Hit z position [cm]");

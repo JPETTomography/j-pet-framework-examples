@@ -89,23 +89,23 @@ void EventCategorizer::initialiseHistograms(){
 
   // General histograms
   getStatistics().createHistogram(
-    new TH2F("All_XYpos", "Hit position XY", 121, -60.5, 60.5, 121, -60.5, 60.5));
+    new TH2F("All_XYpos", "Hit position XY", 242, -60.5, 60.5, 121, -60.5, 60.5));
   getStatistics().getHisto2D("All_XYpos")->GetXaxis()->SetTitle("Hit X position [cm]");
   getStatistics().getHisto2D("All_XYpos")->GetYaxis()->SetTitle("Hit Y position [cm]");
 
   // Histograms for 2Gamama category
   getStatistics().createHistogram(
-    new TH1F("2Gamma_Zpos", "B2B hits Z position", 100, -30.0, 30.0));
+    new TH1F("2Gamma_Zpos", "B2B hits Z position", 200, -50.0, 50.0));
   getStatistics().getHisto1D("2Gamma_Zpos")->GetXaxis()->SetTitle("Z axis position [cm]");
   getStatistics().getHisto1D("2Gamma_Zpos")->GetYaxis()->SetTitle("Number of Hits");
 
   getStatistics().createHistogram(
-    new TH1F("2Gamma_TimeDiff", "B2B hits time difference", 100, -10.0, 10.0));
+    new TH1F("2Gamma_TimeDiff", "B2B hits time difference", 100, -10000.0, 10000.0));
   getStatistics().getHisto1D("2Gamma_TimeDiff")->GetXaxis()->SetTitle("Time Difference [ps]");
   getStatistics().getHisto1D("2Gamma_TimeDiff")->GetYaxis()->SetTitle("Number of Hit Pairs");
 
   getStatistics().createHistogram(
-    new TH1F("2Gamma_Dist", "B2B hits distance", 100, -10.0, 10.0));
+    new TH1F("2Gamma_Dist", "B2B hits distance", 200, -100.0, 100.0));
   getStatistics().getHisto1D("2Gamma_Dist")->GetXaxis()->SetTitle("Distance [cm]");
   getStatistics().getHisto1D("2Gamma_Dist")->GetYaxis()->SetTitle("Number of Hit Pairs");
 
@@ -144,13 +144,13 @@ void EventCategorizer::initialiseHistograms(){
 
   getStatistics().createHistogram(
      new TH2F("ScatterAngle_PrimaryTOT", "Angle of scattering vs. TOT of primary hits",
-      181, -0.5, 180.5, 200, 0.0, 25000.0));
+      181, -0.5, 180.5, 200, 0.0, 40000.0));
   getStatistics().getHisto2D("ScatterAngle_PrimaryTOT")->GetXaxis()->SetTitle("Scattering Angle");
-  getStatistics().getHisto2D("ScatterAngle_PrimaryTOT")->GetYaxis()->SetTitle("TOT of primary hit");
+  getStatistics().getHisto2D("ScatterAngle_PrimaryTOT")->GetYaxis()->SetTitle("TOT of primary hit [ps]");
 
   getStatistics().createHistogram(
-     new TH2F("ScatterAngle_ScatterTOT", "Angle of scattering vs. TOT of primary hits",
-      181, -0.5, 180.5, 200, 0.0, 25000.0));
+     new TH2F("ScatterAngle_ScatterTOT", "Angle of scattering vs. TOT of scattered hits",
+      181, -0.5, 180.5, 200, 0.0, 40000.0));
   getStatistics().getHisto2D("ScatterAngle_ScatterTOT")->GetXaxis()->SetTitle("Scattering Angle");
-  getStatistics().getHisto2D("ScatterAngle_ScatterTOT")->GetYaxis()->SetTitle("TOT of scattered hit");
+  getStatistics().getHisto2D("ScatterAngle_ScatterTOT")->GetYaxis()->SetTitle("TOT of scattered hit [ps]");
 }
