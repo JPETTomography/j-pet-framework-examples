@@ -102,4 +102,10 @@ foreach(test_source ${UNIT_TEST_SOURCES})
     )
 endforeach()
 
-add_custom_target(tests_LargeBarrel DEPENDS ${test_binaries} )
+# create a symlink to the directory with data necessary for some unit tests
+add_custom_command(OUTPUT ${TESTS_DIR}/unitTestData
+  COMMAND ln -s ${CMAKE_CURRENT_SOURCE_DIR}/../unitTestData ${TESTS_DIR}/unitTestData
+  )
+
+add_custom_target(tests_LargeBarrel DEPENDS ${test_binaries} ${TESTS_DIR}/unitTestData)
+
