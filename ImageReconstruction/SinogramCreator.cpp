@@ -102,9 +102,7 @@ bool SinogramCreator::exec()
               if (intersectionPoint.first < 0.f)
                 distance = -distance;
               getStatistics().getObject<TH1F>("pos_r_3")->Fill(distance);
-              int distanceRound = std::floor((fReconstructionLayerRadius / fReconstructionDistanceAccuracy)
-                                             + fReconstructionDistanceAccuracy)
-                                  + std::floor((distance / fReconstructionDistanceAccuracy) + fReconstructionDistanceAccuracy); //clever way of rounding to nearest multipicity of accuracy digit and change it to int
+              int distanceRound = SinogramCreatorTools::roundToNearesMultiplicity(distance, fReconstructionDistanceAccuracy, fReconstructionLayerRadius);
               int thetaNumber = std::round(theta / fReconstructionAngleStep);                                                   // round because of floating point
               currentValueInSinogram = ++fSinogram->at(distanceRound).at(thetaNumber); // add to sinogram
               if (currentValueInSinogram >= fMaxValueInSinogram)
@@ -123,7 +121,7 @@ bool SinogramCreator::exec()
               if (intersectionPointMonteCarlo.first < 0.f)
                 distance = -distance;
               getStatistics().getObject<TH1F>("pos_r_3_monte")->Fill(distance);
-              int distanceRound = std::floor((fReconstructionLayerRadius / fReconstructionDistanceAccuracy) + fReconstructionDistanceAccuracy) + std::floor((distance / fReconstructionDistanceAccuracy) + fReconstructionDistanceAccuracy); //clever way of rounding to nearest multipicity of accuracy digit and change it to int
+              int distanceRound = SinogramCreatorTools::roundToNearesMultiplicity(distance, fReconstructionDistanceAccuracy, fReconstructionLayerRadius);
               int thetaNumber = std::round(theta / fReconstructionAngleStep);                                                                                                                                                                // round because of floating point
               currentValueInSinogram = ++fSinogram->at(distanceRound).at(thetaNumber);                                                                                                                                                       // add to sinogram
               if (currentValueInSinogram >= fMaxValueInSinogram)
