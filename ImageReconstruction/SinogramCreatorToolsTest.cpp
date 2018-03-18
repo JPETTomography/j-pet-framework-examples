@@ -25,6 +25,20 @@ struct print_log_value<std::tuple<T, U, L>> {
 }
 }
 
+namespace boost
+{
+namespace test_tools
+{
+template <typename T, typename U>
+struct print_log_value<std::pair<T, U>> {
+  void operator()(std::ostream& os, std::pair<T, U> const& pr)
+  {
+    os << "<" << std::get<0>(pr) << "," << std::get<1>(pr) << ">";
+  }
+};
+}
+}
+
 BOOST_AUTO_TEST_SUITE(FirstSuite)
 
 BOOST_AUTO_TEST_CASE( bresenham_test )
@@ -102,7 +116,36 @@ BOOST_AUTO_TEST_CASE(distance_from_center)
   BOOST_REQUIRE_CLOSE(distance, std::sqrt(2.f) / 2, 0.0001f);
 }
 
-BOOST_AUTO_TEST_CASE( test_MC_data )
+BOOST_AUTO_TEST_CASE( test_line_intersection )
+{
+  const float EPSILON = 0.00001f;
+  std::pair<float, float> p1 = std::make_pair(0.f, 0.f);
+  std::pair<float, float> p2 = std::make_pair(1.f, 0.f);
+  std::pair<float, float> p3 = std::make_pair(0.5f, 0.5f);
+  std::pair<float, float> p4 = std::make_pair(0.5f, -0.5f);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::lineIntersection(p1, p2, p3, p4), std::make_pair(0.5f, 0.0f));
+
+}
+
+BOOST_AUTO_TEST_CASE(roundToNearesMultiplicity_test)
+{
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::roundToNearesMultiplicity(0.0f, 1.f, 30.f), 30u);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::roundToNearesMultiplicity(-30.f, 1.f, 30.f), 0u);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::roundToNearesMultiplicity(-29.9f, 1.f, 30.f), 0u);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::roundToNearesMultiplicity(-29.5f, 1.f, 30.f), 1u);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::roundToNearesMultiplicity(-29.4f, 1.f, 30.f), 1u);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::roundToNearesMultiplicity(-29.f, 1.f, 30.f), 1u);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::roundToNearesMultiplicity(-28.6f, 1.f, 30.f), 1u);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::roundToNearesMultiplicity(-28.5f, 1.f, 30.f), 2u);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::roundToNearesMultiplicity(30.f, 1.f, 30.f), 60u);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::roundToNearesMultiplicity(0.00f, 0.01f, 30.f), 3000u);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::roundToNearesMultiplicity(0.01f, 0.01f, 30.f), 3001u);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::roundToNearesMultiplicity(0.02f, 0.01f, 30.f), 3002u);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::roundToNearesMultiplicity(-30.f, 0.01f, 30.f), 0u);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::roundToNearesMultiplicity(-29.9f, 0.01f, 30.f), 10u);
+}
+
+/*BOOST_AUTO_TEST_CASE( test_MC_data )
 {
   const std::string inFile = "unitTestData/SinogramCreatorToolsTest/mc_data.txt";
   const std::string fOutFileName = "result.ppm";
@@ -118,7 +161,7 @@ BOOST_AUTO_TEST_CASE( test_MC_data )
   float fReconstructionEndAngle = 180.;
   float fReconstructionAngleStep = 1.;
   float fReconstructionLayerRadius =  10.;
-  float fReconstructionDistanceAccuracy = 0.1;
+  float fReconstructionDistanceAccuracy = 1;
   using SinogramResultType = std::vector<std::vector<unsigned int>>;
   SinogramResultType* fSinogram = nullptr;
   unsigned int maxThetaNumber = std::ceil(180. / fReconstructionAngleStep);
@@ -139,11 +182,16 @@ BOOST_AUTO_TEST_CASE( test_MC_data )
       if (intersectionPoint.first != std::numeric_limits<float>::max() && intersectionPoint.second != std::numeric_limits<float>::max()) {
         // check is there is intersection point
         float distance = SinogramCreatorTools::length2D(intersectionPoint.first, intersectionPoint.second);
+        if (std::abs(distance) < 0.000001) {
+          std::cout << "Distance: " << distance << " intersectionPoint: " << intersectionPoint.first << "," << intersectionPoint.second << " x,y: " << x << "," << y << " p1: " << hits[i].first.first << "," << hits[i].first.second << " p2: " << hits[i].second.first << "," << hits[i].second.second << std::endl;
+        }
         if (distance >= fReconstructionLayerRadius) // if distance is greather then our max reconstuction layer radius, it cant be placed in sinogram
           continue;
         if (intersectionPoint.first < 0.f)
           distance = -distance;
-        int distanceRound = std::floor((fReconstructionLayerRadius / fReconstructionDistanceAccuracy) + fReconstructionDistanceAccuracy) + std::floor((distance / fReconstructionDistanceAccuracy) + fReconstructionDistanceAccuracy); //clever way of rounding to nearest multipicity of accuracy digit and change it to int
+        int distanceRound = std::floor((fReconstructionLayerRadius / fReconstructionDistanceAccuracy) + fReconstructionDistanceAccuracy) + std::floor((distance / fReconstructionDistanceAccuracy) + (fReconstructionDistanceAccuracy / 2.)); //clever way of rounding to nearest multipicity of accuracy digit and change it to int
+        if (distanceRound >= maxDistanceNumber)
+          distanceRound = maxDistanceNumber - 1;
         int thetaNumber = std::round(theta / fReconstructionAngleStep);                                                                                                                                                                // round because of floating point
         currentValueInSinogram = ++fSinogram->at(distanceRound).at(thetaNumber);                                                                                                                                                       // add to sinogram
         if (currentValueInSinogram >= fMaxValueInSinogram)
@@ -163,6 +211,6 @@ BOOST_AUTO_TEST_CASE( test_MC_data )
   }
   res.close();
   BOOST_REQUIRE(JPetCommonTools::ifFileExisting(fOutFileName));
-}
+}*/
 
 BOOST_AUTO_TEST_SUITE_END()

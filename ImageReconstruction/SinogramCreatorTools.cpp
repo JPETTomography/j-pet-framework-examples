@@ -178,7 +178,7 @@ float SinogramCreatorTools::calculateDistanceFromCenter(const float firstX, cons
 
 float SinogramCreatorTools::length2D(const float x, const float y)
 {
-  return std::sqrt(x * x + y * y);
+  return std::sqrt((x * x) + (y * y));
 }
 
 SinogramCreatorTools::Point SinogramCreatorTools::lineIntersection(const SinogramCreatorTools::Point& A,
@@ -194,14 +194,19 @@ SinogramCreatorTools::Point SinogramCreatorTools::lineIntersection(const Sinogra
   float b2 = C.first - D.first;
   float c2 = a2 * (C.first) + b2 * (C.second);
 
-  float determinant = a1 * b2 - a2 * b1;
+  float determinant = (a1 * b2) - (a2 * b1);
 
   if (std::abs(determinant) < EPSILON) {
     float maxLimits = std::numeric_limits<float>::max();
     return std::make_pair(maxLimits, maxLimits);
   } else {
-    float x = (b2 * c1 - b1 * c2) / determinant;
-    float y = (a1 * c2 - a2 * c1) / determinant;
+    float x = ((b2 * c1) - (b1 * c2)) / determinant;
+    float y = ((a1 * c2) - (a2 * c1)) / determinant;
     return std::make_pair(x, y);
   }
+}
+
+unsigned int SinogramCreatorTools::roundToNearesMultiplicity(float numberToRound, float accuracy, float maxValue)
+{
+  return std::floor((maxValue / accuracy) + (accuracy / 2)) + std::floor((numberToRound / accuracy) + (accuracy / 2)); //clever way of rounding to nearest multipicity of accuracy digit and change it to int
 }

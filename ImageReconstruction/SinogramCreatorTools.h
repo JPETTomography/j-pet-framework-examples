@@ -71,6 +71,8 @@ public:
   */
   static Point lineIntersection(const Point& A, const Point& B, const Point& C, const Point& D);
 
+  static unsigned int roundToNearesMultiplicity(float numberToRound, float muliFactor, float maxValue);
+
 private :
   SinogramCreatorTools() = delete;
   ~SinogramCreatorTools() = delete;
