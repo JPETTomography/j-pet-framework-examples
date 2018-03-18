@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE (fillTimeCalibRecord_too_few_numbers)
 
 BOOST_AUTO_TEST_CASE (readCalibrationRecordsFromFile)
 {
-  auto result = TimeCalibTools::readCalibrationRecordsFromFile("../TimeConstants_Layer1_2.txt");
+  auto result = TimeCalibTools::readCalibrationRecordsFromFile("unitTestData/TimeConstants_Layer1_2.txt");
   BOOST_REQUIRE_EQUAL(result.size(), 768);
 }
 
