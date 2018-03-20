@@ -84,6 +84,8 @@ bool SinogramCreatorMC::init()
         int distanceRound = SinogramCreatorTools::roundToNearesMultiplicity(distance, fReconstructionDistanceAccuracy, fReconstructionLayerRadius);
         int thetaNumber = std::round(theta / fReconstructionAngleStep); // round because of floating point
         currentValueInSinogram = ++fSinogram->at(distanceRound).at(thetaNumber);
+        if (currentValueInSinogram >= fMaxValueInSinogram)
+          fMaxValueInSinogram = currentValueInSinogram;                                          // save max value of sinogram
         getStatistics().getObject<TH2I>("reconstuction_histogram_monte")->Fill(distance, theta); //add to histogram
       }
     }
