@@ -200,8 +200,12 @@ SinogramCreatorTools::Point SinogramCreatorTools::lineIntersection(const Sinogra
     float maxLimits = std::numeric_limits<float>::max();
     return std::make_pair(maxLimits, maxLimits);
   } else {
-    float x = ((b2 * c1) - (b1 * c2)) / determinant;
-    float y = ((a1 * c2) - (a2 * c1)) / determinant;
+    static const int determinantAccuracy = 1e6;
+    int determinantMulti = determinant * determinantAccuracy;
+    float xTmp = ((b2 * c1) - (b1 * c2)) * static_cast<float>(determinantAccuracy);
+    float yTmp = ((a1 * c2) - (a2 * c1)) * static_cast<float>(determinantAccuracy);
+    float x = xTmp / static_cast<float>(determinantMulti);
+    float y = yTmp / static_cast<float>(determinantMulti);
     return std::make_pair(x, y);
   }
 }
