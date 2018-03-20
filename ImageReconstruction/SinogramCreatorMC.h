@@ -10,11 +10,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file SinogramCreator.h
+ *  @file SinogramCreatorMC.h
  */
 
-#ifndef SINOGRAMCREATOR_H
-#define SINOGRAMCREATOR_H
+#ifndef SINOGRAMCREATORMC_H
+#define SINOGRAMCREATORMC_H
 
 #ifdef __CINT__
 //when cint is used instead of compiler, override word is not recognized
@@ -42,18 +42,18 @@
  * - "SinogramCreator_ReconstructionAngleStep_float": defines by what angle should scan change between start angle and end angle
  *
  */
-class SinogramCreator : public JPetUserTask
+class SinogramCreatorMC : public JPetUserTask
 {
 public:
-  SinogramCreator(const char* name);
-  virtual ~SinogramCreator();
+  SinogramCreatorMC(const char* name);
+  virtual ~SinogramCreatorMC();
   virtual bool init() override;
   virtual bool exec() override;
   virtual bool terminate() override;
 
 private:
-  SinogramCreator(const SinogramCreator&) = delete;
-  SinogramCreator& operator=(const SinogramCreator&) = delete;
+  SinogramCreatorMC(const SinogramCreatorMC&) = delete;
+  SinogramCreatorMC& operator=(const SinogramCreatorMC&) = delete;
 
   void setUpOptions();
   bool checkLayer(const JPetHit& hit);
@@ -61,14 +61,14 @@ private:
 
   SinogramResultType* fSinogram = nullptr;
 
-  const std::string kOutFileNameKey = "SinogramCreator_OutFileName_std::string";
-  const std::string kReconstructionLayerRadiusKey = "SinogramCreator_ReconstructionLayerRadius_float";
-  const std::string kReconstructionStartAngle = "SinogramCreator_ReconstructionStartAngle_float";
-  const std::string kReconstructionEndAngle = "SinogramCreator_ReconstructionEndAngle_float";
-  const std::string kReconstructionDistanceAccuracy = "SinogramCreator_ReconstructionDistanceAccuracy_float";
-  const std::string kReconstructionAngleStep = "SinogramCreator_ReconstructionAngleStep_float";
+  const std::string kOutFileNameKey = "SinogramCreatorMC_OutFileName_std::string";
+  const std::string kReconstructionLayerRadiusKey = "SinogramCreatorMC_ReconstructionLayerRadius_float";
+  const std::string kReconstructionStartAngle = "SinogramCreatorMC_ReconstructionStartAngle_float";
+  const std::string kReconstructionEndAngle = "SinogramCreatorMC_ReconstructionEndAngle_float";
+  const std::string kReconstructionDistanceAccuracy = "SinogramCreatorMC_ReconstructionDistanceAccuracy_float";
+  const std::string kReconstructionAngleStep = "SinogramCreatorMC_ReconstructionAngleStep_float";
 
-  std::string fOutFileName = "sinogram.ppm";
+  std::string fOutFileName = "sinogramMC.ppm";
   unsigned int fMaxValueInSinogram = 0; // to fill later in output file
 
   float fReconstructionLayerRadius = 42.5f;
@@ -80,4 +80,4 @@ private:
   std::vector<std::pair<SinogramCreatorTools::Point, SinogramCreatorTools::Point>> hitsVector;
 };
 
-#endif /*  !SINOGRAMCREATOR_H */
+#endif /*  !SINOGRAMCREATORMC_H */
