@@ -39,7 +39,7 @@ bool EventFinder::init()
       kEventTimeParamKey.c_str(), fEventTimeWindow));
   // Minimum number of hits in an event to save an event
   if (isOptionSet(fParams.getOptions(), kEventMinMultiplicity))
-    fMinMultiplicity = getOptionAsFloat(fParams.getOptions(), kEventMinMultiplicity);
+    fMinMultiplicity = getOptionAsInt(fParams.getOptions(), kEventMinMultiplicity);
   else
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %d.",
       kEventMinMultiplicity.c_str(), fMinMultiplicity));
