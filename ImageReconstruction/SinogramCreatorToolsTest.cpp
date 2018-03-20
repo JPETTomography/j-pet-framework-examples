@@ -116,15 +116,28 @@ BOOST_AUTO_TEST_CASE(distance_from_center)
   BOOST_REQUIRE_CLOSE(distance, std::sqrt(2.f) / 2, 0.0001f);
 }
 
-BOOST_AUTO_TEST_CASE( test_line_intersection )
+BOOST_AUTO_TEST_CASE( test_line_intersection_and_distance )
 {
-  const float EPSILON = 0.00001f;
+  const float EPSILON = 0.0001f;
   std::pair<float, float> p1 = std::make_pair(0.f, 0.f);
   std::pair<float, float> p2 = std::make_pair(1.f, 0.f);
   std::pair<float, float> p3 = std::make_pair(0.5f, 0.5f);
   std::pair<float, float> p4 = std::make_pair(0.5f, -0.5f);
   BOOST_REQUIRE_EQUAL(SinogramCreatorTools::lineIntersection(p1, p2, p3, p4), std::make_pair(0.5f, 0.0f));
 
+  for (float alpha = 0.1f; alpha < 180.f; alpha += 0.1f) {
+    float x = cos(alpha * (M_PI / 180.f));
+    float y = sin(alpha * (M_PI / 180.f));
+    auto result = SinogramCreatorTools::lineIntersection(std::make_pair(1.f, 0.f), std::make_pair(-1.f, 0.f), std::make_pair(x, y), std::make_pair(-x, -y));
+    BOOST_REQUIRE_CLOSE(result.first, 0.f, EPSILON);
+    BOOST_REQUIRE_CLOSE(result.second, 0.f, EPSILON);
+    BOOST_REQUIRE_CLOSE(SinogramCreatorTools::length2D(result.first, result.second), 0.f, EPSILON);
+  }
+
+  auto result = SinogramCreatorTools::lineIntersection(std::make_pair(0.f, .5f), std::make_pair(0.5f, -0.5f), std::make_pair(0.f, -0.5f), std::make_pair(0.5f, -0.5f));
+  BOOST_REQUIRE_CLOSE(result.first, 0.5f, EPSILON);
+  BOOST_REQUIRE_CLOSE(result.second, -0.5f, EPSILON);
+  BOOST_REQUIRE_CLOSE(SinogramCreatorTools::length2D(result.first, result.second), 0.707106781f, EPSILON);
 }
 
 BOOST_AUTO_TEST_CASE(roundToNearesMultiplicity_test)
