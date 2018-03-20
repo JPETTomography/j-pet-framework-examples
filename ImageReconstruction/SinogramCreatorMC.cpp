@@ -10,20 +10,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file SinogramCreator.cpp
+ *  @file SinogramCreatorMC.cpp
  */
 
-#include "SinogramCreator.h"
+#include "SinogramCreatorMC.h"
 #include <TH2I.h>
 #include <TH2F.h>
 #include <TH1I.h>
 using namespace jpet_options_tools;
 
-SinogramCreator::SinogramCreator(const char* name) : JPetUserTask(name) {}
+SinogramCreatorMC::SinogramCreatorMC(const char* name) : JPetUserTask(name) {}
 
-SinogramCreator::~SinogramCreator() {}
+SinogramCreatorMC::~SinogramCreatorMC() {}
 
-bool SinogramCreator::init()
+bool SinogramCreatorMC::init()
 {
   setUpOptions();
   fOutputEvents = new JPetTimeWindow("JPetEvent");
@@ -92,17 +92,17 @@ bool SinogramCreator::init()
   return true;
 }
 
-bool SinogramCreator::exec()
+bool SinogramCreatorMC::exec()
 {
   return true;
 }
 
-bool SinogramCreator::checkLayer(const JPetHit& hit)
+bool SinogramCreatorMC::checkLayer(const JPetHit& hit)
 {
   return hit.getBarrelSlot().getLayer().getID() == 1;
 }
 
-bool SinogramCreator::terminate()
+bool SinogramCreatorMC::terminate()
 {
   std::ofstream res(fOutFileName);
   res << "P2" << std::endl;
@@ -118,7 +118,7 @@ bool SinogramCreator::terminate()
   return true;
 }
 
-void SinogramCreator::setUpOptions()
+void SinogramCreatorMC::setUpOptions()
 {
   auto opts = getOptions();
   if (isOptionSet(opts, kOutFileNameKey)) {
