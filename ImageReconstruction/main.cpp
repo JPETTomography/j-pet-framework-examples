@@ -25,11 +25,11 @@ int main(int argc, const char* argv[])
 
   manager.registerTask<ImageReco>("ImageReco");
   manager.registerTask<SinogramCreator>("SinogramCreator");
-  manager.registerTask<SinogramCreator>("SinogramCreatorMC");
+  manager.registerTask<SinogramCreatorMC>("SinogramCreatorMC");
 
   manager.useTask("ImageReco", "unk.evt", "reco");
   manager.useTask("SinogramCreator", "unk.evt", "sino");
-  manager.useTask("SinogramCreatorMC", "unk.evt", "sino");
+  manager.useTask("SinogramCreatorMC", "unk.evt", "sino.mc");
 
   manager.run(argc, argv);
 }
