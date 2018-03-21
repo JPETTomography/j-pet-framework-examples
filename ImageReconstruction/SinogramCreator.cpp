@@ -16,6 +16,7 @@
 #include "SinogramCreator.h"
 #include <TH2I.h>
 #include <TH2F.h>
+#include <TH3F.h>
 #include <TH1I.h>
 using namespace jpet_options_tools;
 
@@ -33,9 +34,11 @@ bool SinogramCreator::init()
                                   std::ceil(fReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1, -fReconstructionLayerRadius, fReconstructionLayerRadius,
                                   std::ceil((fReconstructionEndAngle - fReconstructionStartAngle) / fReconstructionAngleStep), fReconstructionStartAngle, fReconstructionEndAngle));
 
-  getStatistics().createHistogram(new TH1F("pos_r_1", "Position r real data", (fReconstructionLayerRadius + 15.) * 2 * 10 * 5, -fReconstructionLayerRadius, fReconstructionLayerRadius)); //42.5cm * 2 sides * 10mm * 5, 0.2mm acc;
+  getStatistics().createHistogram(new TH1F("pos_r_1", "Position r real data", fReconstructionLayerRadius * 2 * 10 * 5, -fReconstructionLayerRadius, fReconstructionLayerRadius)); //42.5cm * 2 sides * 10mm * 5, 0.2mm acc;
   getStatistics().createHistogram(new TH1F("pos_r_2", "Position r real data", fReconstructionLayerRadius * 2 * 10 * 5, -fReconstructionLayerRadius, fReconstructionLayerRadius));
   getStatistics().createHistogram(new TH1F("pos_r_3", "Position r real data", fReconstructionLayerRadius * 2 * 10 * 5, -fReconstructionLayerRadius, fReconstructionLayerRadius));
+
+  getStatistics().createHistogram(new TH1F("rej_r_1", "Position of rejected data", fReconstructionLayerRadius * 2 * 10 * 5, -fReconstructionLayerRadius, fReconstructionLayerRadius));
 
   getStatistics().createHistogram(new TH2F("pos_xvsy_real", "Position x vs y real", fReconstructionLayerRadius * 2 * 10 * 5, -fReconstructionLayerRadius, fReconstructionLayerRadius, fReconstructionLayerRadius * 2 * 10 * 5, fReconstructionLayerRadius, fReconstructionLayerRadius)); //10cm * 2 sides * 10mm * 5, 0.2mm acc;
 
@@ -45,6 +48,8 @@ bool SinogramCreator::init()
   getStatistics().getObject<TH1F>("pos_r_1")->SetBit(TH1::kCanRebin);
   getStatistics().getObject<TH1F>("pos_r_2")->SetBit(TH1::kCanRebin);
   getStatistics().getObject<TH1F>("pos_r_3")->SetBit(TH1::kCanRebin);
+
+  getStatistics().getObject<TH1F>("rej_r_1")->SetBit(TH1::kCanRebin);
 
   getStatistics().getObject<TH2F>("pos_xvsy_real")->SetBit(TH2::kCanRebin);
 
@@ -79,11 +84,14 @@ bool SinogramCreator::exec()
             if (intersectionPoint.first != std::numeric_limits<float>::max() && intersectionPoint.second != std::numeric_limits<float>::max()) { // check is there is intersection point
               float distance = SinogramCreatorTools::length2D(intersectionPoint.first, intersectionPoint.second);
               getStatistics().getObject<TH1F>("pos_r_1")->Fill(distance);
-              if (distance >= fReconstructionLayerRadius) // if distance is greather then our max reconstuction layer radius, it cant be placed in sinogram
+              if (distance >= fReconstructionLayerRadius) { // if distance is greather then our max reconstuction layer radius, it cant be placed in sinogram
+                getStatistics().getObject<TH1F>("rej_r_1")->Fill(distance);
                 continue;
+              }
               getStatistics().getObject<TH1F>("pos_r_2")->Fill(distance);
-              if (intersectionPoint.first < 0.f)
+              if (intersectionPoint.first < 0.f) {
                 distance = -distance;
+              }
               getStatistics().getObject<TH1F>("pos_r_3")->Fill(distance);
               int distanceRound = SinogramCreatorTools::roundToNearesMultiplicity(distance, fReconstructionDistanceAccuracy, fReconstructionLayerRadius);
               int thetaNumber = std::round(theta / fReconstructionAngleStep);                                                   // round because of floating point
