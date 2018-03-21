@@ -56,7 +56,6 @@ private:
   SinogramCreatorMC& operator=(const SinogramCreatorMC&) = delete;
 
   void setUpOptions();
-  bool checkLayer(const JPetHit& hit);
   using SinogramResultType = std::vector<std::vector<unsigned int>>;
 
   SinogramResultType* fSinogram = nullptr;
