@@ -16,6 +16,7 @@
 #include "SinogramCreatorMC.h"
 #include <TH2I.h>
 #include <TH2F.h>
+#include <TH3F.h>
 #include <TH1I.h>
 using namespace jpet_options_tools;
 
@@ -32,9 +33,7 @@ bool SinogramCreatorMC::init()
                                   "reconstuction_histogram_monte",
                                   std::ceil(fReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1, -fReconstructionLayerRadius, fReconstructionLayerRadius,
                                   std::ceil((fReconstructionEndAngle - fReconstructionStartAngle) / fReconstructionAngleStep), fReconstructionStartAngle, fReconstructionEndAngle));
-
-  getStatistics().createHistogram(new TH1F("pos_x", "Position x monte carlo", fReconstructionLayerRadius * 2 * 10 * 5, -fReconstructionLayerRadius, fReconstructionLayerRadius));                                                                                                           //42.5cm * 2 sides * 10mm * 5, 0.2mm acc;
-  getStatistics().createHistogram(new TH1F("pos_y", "Position y monte carlo", fReconstructionLayerRadius * 2 * 10 * 5, -fReconstructionLayerRadius, fReconstructionLayerRadius));                                                                                                           //42.5cm * 2 sides * 10mm * 5, 0.2mm acc;
+  getStatistics().createHistogram(new TH1F("rej_r_1", "Position of rejected data", fReconstructionLayerRadius * 2 * 10 * 5, -fReconstructionLayerRadius, fReconstructionLayerRadius));
 
   getStatistics().createHistogram(new TH1F("pos_r_1_monte", "Position r monte data", (fReconstructionLayerRadius + 15.) * 2 * 10 * 5, -fReconstructionLayerRadius, fReconstructionLayerRadius)); //42.5cm * 2 sides * 10mm * 5, 0.2mm acc;
   getStatistics().createHistogram(new TH1F("pos_r_2_monte", "Position r monte data", fReconstructionLayerRadius * 2 * 10 * 5, -fReconstructionLayerRadius, fReconstructionLayerRadius));
@@ -42,8 +41,7 @@ bool SinogramCreatorMC::init()
 
   getStatistics().getObject<TH2I>("reconstuction_histogram_monte")->SetBit(TH2::kCanRebin);
 
-  getStatistics().getObject<TH1F>("pos_x")->SetBit(TH1::kCanRebin);
-  getStatistics().getObject<TH1F>("pos_y")->SetBit(TH1::kCanRebin);
+  getStatistics().getObject<TH1F>("rej_r_1")->SetBit(TH1::kCanRebin);
 
   getStatistics().getObject<TH1F>("pos_r_1_monte")->SetBit(TH1::kCanRebin);
   getStatistics().getObject<TH1F>("pos_r_2_monte")->SetBit(TH1::kCanRebin);
@@ -75,8 +73,11 @@ bool SinogramCreatorMC::init()
         // check is there is intersection point
         float distance = SinogramCreatorTools::length2D(intersectionPointMonteCarlo.first, intersectionPointMonteCarlo.second);
         getStatistics().getObject<TH1F>("pos_r_1_monte")->Fill(distance);
-        if (distance >= fReconstructionLayerRadius) // if distance is greather then our max reconstuction layer radius, it cant be placed in sinogram
+        if (distance >= fReconstructionLayerRadius) {
+          // if distance is greather then our max reconstuction layer radius, it cant be placed in sinogram
+          getStatistics().getObject<TH1F>("rej_r_1")->Fill(distance);
           continue;
+        }
         getStatistics().getObject<TH1F>("pos_r_2_monte")->Fill(distance);
         if (intersectionPointMonteCarlo.first < 0.f)
           distance = -distance;
@@ -97,11 +98,6 @@ bool SinogramCreatorMC::init()
 bool SinogramCreatorMC::exec()
 {
   return true;
-}
-
-bool SinogramCreatorMC::checkLayer(const JPetHit& hit)
-{
-  return hit.getBarrelSlot().getLayer().getID() == 1;
 }
 
 bool SinogramCreatorMC::terminate()
