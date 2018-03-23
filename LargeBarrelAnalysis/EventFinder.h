@@ -38,6 +38,8 @@ public:
 protected:
   	double kEventTimeWindow = 5000.0; //ps
 	const std::string fEventTimeParamKey = "EventFinder_EventTime_float";
+	int kMinimalEventSize = 1;
+	const std::string fMinimalEventSize = "EventFinder_MinimalEventSize_int";
     	std::vector<JPetHit> fHitVector;
   	bool fSaveControlHistos = true;
 	void saveEvents(const std::vector<JPetEvent>& event);

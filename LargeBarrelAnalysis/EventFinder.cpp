@@ -33,7 +33,9 @@ bool EventFinder::init()
 
   if (isOptionSet(fParams.getOptions(), fEventTimeParamKey))
     kEventTimeWindow = getOptionAsFloat(fParams.getOptions(), fEventTimeParamKey);
-
+  if (isOptionSet(fParams.getOptions(), fMinimalEventSize))
+    kMinimalEventSize = getOptionAsInt(fParams.getOptions(), fMinimalEventSize);
+  
   if (fSaveControlHistos)
     getStatistics().createHistogram(
       new TH1F("hits_per_event", "Number of Hits in Event", 20, 0.5, 20.5)
@@ -118,6 +120,7 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& hits)
 void EventFinder::saveEvents(const vector<JPetEvent>& events)
 {
   for (const auto& event : events) {
-    fOutputEvents->add<JPetEvent>(event);
+    if( event.getHits().getSize() >= kMinimalEventSize )
+      fOutputEvents->add<JPetEvent>(event);
   }
 }
