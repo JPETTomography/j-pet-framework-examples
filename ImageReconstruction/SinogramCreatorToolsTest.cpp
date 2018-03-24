@@ -136,12 +136,31 @@ BOOST_AUTO_TEST_CASE( test_line_intersection_and_distance )
   BOOST_REQUIRE_CLOSE(result.second, -0.5f, EPSILON);
   BOOST_REQUIRE_CLOSE(SinogramCreatorTools::length2D(result.first, result.second), 0.707106781f, EPSILON);
 
-  const float interesectionScale = 1.f / 10.f;
+  float interesectionScale = 1.f / 10.f;
   for (float alpha = 0.1f; alpha < 180.f; alpha += 0.1f) {
     float x = 10 * cos(alpha * (M_PI / 180.f));
     float y = 10 * sin(alpha * (M_PI / 180.f));
     float scaledX = x * interesectionScale;
-    float scaledY = y * interesectionScale;
+    float scaledY = y * interesectionScale; // intersection point should be in (scaledX, scaledY)
+    float dx = scaledX + scaledX;
+    float dy = scaledY + scaledY;
+    float a1 = scaledX - dy / 2;
+    float b1 = scaledY + dx / 2;
+    float a2 = scaledX + dy / 2;
+    float b2 = scaledY - dx / 2;
+    auto result = SinogramCreatorTools::lineIntersection(std::make_pair(a1, b1), std::make_pair(a2, b2), std::make_pair(x, y), std::make_pair(-x, -y));
+    float distance = std::sqrt((scaledX * scaledX) + (scaledY * scaledY));
+    BOOST_REQUIRE_CLOSE(result.first, scaledX, EPSILON);
+    BOOST_REQUIRE_CLOSE(result.second, scaledY, EPSILON);
+    BOOST_REQUIRE_CLOSE(SinogramCreatorTools::length2D(result.first, result.second), distance, EPSILON);
+  }
+
+  interesectionScale = 1.f / 100.f;
+  for (float alpha = 0.1f; alpha < 180.f; alpha += 0.1f) {
+    float x = 10 * cos(alpha * (M_PI / 180.f));
+    float y = 10 * sin(alpha * (M_PI / 180.f));
+    float scaledX = x * interesectionScale;
+    float scaledY = y * interesectionScale; // intersection point should be in (scaledX, scaledY)
     float dx = scaledX + scaledX;
     float dy = scaledY + scaledY;
     float a1 = scaledX - dy / 2;
