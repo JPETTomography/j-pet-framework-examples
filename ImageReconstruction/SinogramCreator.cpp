@@ -48,12 +48,10 @@ bool SinogramCreator::init()
 bool SinogramCreator::exec()
 {
   unsigned int currentValueInSinogram = 0; // holds current bin value of sinogram
-  float reconstructionAngleDiff = std::abs(fReconstructionEndAngle - fReconstructionStartAngle); // should be always positive
 
-  unsigned int maxThetaNumber = std::ceil(reconstructionAngleDiff / fReconstructionAngleStep);
   unsigned int maxDistanceNumber = std::ceil(fReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
   if (fSinogram == nullptr) {
-    fSinogram = new SinogramResultType(maxDistanceNumber, (std::vector<unsigned int>(maxThetaNumber)));
+    fSinogram = new SinogramResultType(maxDistanceNumber, (std::vector<unsigned int>(kReconstructionMaxAngle)));
   }
   if (const auto& timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     unsigned int numberOfEventsInTimeWindow = timeWindow->getNumberOfEvents();
