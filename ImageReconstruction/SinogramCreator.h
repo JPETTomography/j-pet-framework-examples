@@ -63,19 +63,16 @@ private:
 
   const std::string kOutFileNameKey = "SinogramCreator_OutFileName_std::string";
   const std::string kReconstructionLayerRadiusKey = "SinogramCreator_ReconstructionLayerRadius_float";
-  const std::string kReconstructionStartAngle = "SinogramCreator_ReconstructionStartAngle_float";
-  const std::string kReconstructionEndAngle = "SinogramCreator_ReconstructionEndAngle_float";
   const std::string kReconstructionDistanceAccuracy = "SinogramCreator_ReconstructionDistanceAccuracy_float";
-  const std::string kReconstructionAngleStep = "SinogramCreator_ReconstructionAngleStep_float";
 
+  const int kReconstructionMaxAngle = 180;
+  const float EPSILON = 0.000001f;
+  
   std::string fOutFileName = "sinogram.ppm";
   unsigned int fMaxValueInSinogram = 0; // to fill later in output file
 
   float fReconstructionLayerRadius = 42.5f;
-  float fReconstructionStartAngle = 0.f;
-  float fReconstructionEndAngle = 180.f;
   float fReconstructionDistanceAccuracy = 0.01f; // in cm, 0.1mm accuracy
-  float fReconstructionAngleStep = 0.5f;
 
   std::vector<std::pair<SinogramCreatorTools::Point, SinogramCreatorTools::Point>> hitsVector;
 };

@@ -32,26 +32,15 @@ bool SinogramCreator::init()
   getStatistics().createHistogram(new TH2I("reconstuction_histogram",
                                   "reconstuction_histogram",
                                   std::ceil(fReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1, -fReconstructionLayerRadius, fReconstructionLayerRadius,
-                                  std::ceil((fReconstructionEndAngle - fReconstructionStartAngle) / fReconstructionAngleStep), fReconstructionStartAngle, fReconstructionEndAngle));
+                                  kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
 
-  getStatistics().createHistogram(new TH1F("pos_r_1", "Position r real data", fReconstructionLayerRadius * 2 * 10 * 5, -fReconstructionLayerRadius, fReconstructionLayerRadius)); //42.5cm * 2 sides * 10mm * 5, 0.2mm acc;
-  getStatistics().createHistogram(new TH1F("pos_r_2", "Position r real data", fReconstructionLayerRadius * 2 * 10 * 5, -fReconstructionLayerRadius, fReconstructionLayerRadius));
-  getStatistics().createHistogram(new TH1F("pos_r_3", "Position r real data", fReconstructionLayerRadius * 2 * 10 * 5, -fReconstructionLayerRadius, fReconstructionLayerRadius));
-
-  getStatistics().createHistogram(new TH1F("rej_r_1", "Position of rejected data", fReconstructionLayerRadius * 2 * 10 * 5, -fReconstructionLayerRadius, fReconstructionLayerRadius));
-
-  getStatistics().createHistogram(new TH2F("pos_xvsy_real", "Position x vs y real", fReconstructionLayerRadius * 2 * 10 * 5, -fReconstructionLayerRadius, fReconstructionLayerRadius, fReconstructionLayerRadius * 2 * 10 * 5, fReconstructionLayerRadius, fReconstructionLayerRadius)); //10cm * 2 sides * 10mm * 5, 0.2mm acc;
+  getStatistics().createHistogram(new TH1F("pos_dis", "Position distance monte data", (fReconstructionLayerRadius) * 2 * 10 * 5, -fReconstructionLayerRadius, fReconstructionLayerRadius));
+  getStatistics().createHistogram(new TH1F("angle", "Position angle monte data", kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
 
   getStatistics().getObject<TH2I>("reconstuction_histogram")->SetBit(TH2::kCanRebin);
 
-
-  getStatistics().getObject<TH1F>("pos_r_1")->SetBit(TH1::kCanRebin);
-  getStatistics().getObject<TH1F>("pos_r_2")->SetBit(TH1::kCanRebin);
-  getStatistics().getObject<TH1F>("pos_r_3")->SetBit(TH1::kCanRebin);
-
-  getStatistics().getObject<TH1F>("rej_r_1")->SetBit(TH1::kCanRebin);
-
-  getStatistics().getObject<TH2F>("pos_xvsy_real")->SetBit(TH2::kCanRebin);
+  getStatistics().getObject<TH1F>("angle")->SetBit(TH1::kCanRebin);
+  getStatistics().getObject<TH1F>("pos_dis")->SetBit(TH1::kCanRebin);
 
   return true;
 }
@@ -75,30 +64,34 @@ bool SinogramCreator::exec()
         const auto& firstHit = hits[0];
         const auto& secondHit = hits[1];
         if (checkLayer(firstHit) && checkLayer(secondHit)) {
-          for (float theta = fReconstructionStartAngle; theta < fReconstructionEndAngle; theta += fReconstructionAngleStep) {
-            float x = fReconstructionLayerRadius * std::cos(theta * (M_PI / 180.f)); // calculate x,y positon of line with theta angle from line (0,0) = theta
-            float y = fReconstructionLayerRadius * std::sin(theta * (M_PI / 180.f));
-            getStatistics().getObject<TH2F>("pos_xvsy_real")->Fill(x, y);
-            std::pair<float, float> intersectionPoint = SinogramCreatorTools::lineIntersection(std::make_pair(-x, -y), std::make_pair(x, y),
-                std::make_pair(firstHit.getPosX(), firstHit.getPosY()), std::make_pair(secondHit.getPosX(), secondHit.getPosY())); //find intersection point
-            if (intersectionPoint.first != std::numeric_limits<float>::max() && intersectionPoint.second != std::numeric_limits<float>::max()) { // check is there is intersection point
-              float distance = SinogramCreatorTools::length2D(intersectionPoint.first, intersectionPoint.second);
-              getStatistics().getObject<TH1F>("pos_r_1")->Fill(distance);
-              if (distance >= fReconstructionLayerRadius) { // if distance is greather then our max reconstuction layer radius, it cant be placed in sinogram
-                getStatistics().getObject<TH1F>("rej_r_1")->Fill(distance);
-                continue;
-              }
-              getStatistics().getObject<TH1F>("pos_r_2")->Fill(distance);
-              if (intersectionPoint.first < 0.f) {
-                distance = -distance;
-              }
-              getStatistics().getObject<TH1F>("pos_r_3")->Fill(distance);
+          float distance = (secondHit.getPosX() * firstHit.getPosY()) - (secondHit.getPosY() * firstHit.getPosX());
+          float norm = std::sqrt(std::pow((secondHit.getPosY() - firstHit.getPosY()), 2)
+                                 + std::pow((secondHit.getPosX() - firstHit.getPosX()), 2));
+          if (norm > 0) {
+            distance /= norm;
+            getStatistics().getObject<TH1F>("pos_dis")->Fill(distance);
+            float angle = 0.f;
+            if (secondHit.getPosX() - firstHit.getPosX() != 0)
+              angle = std::atan((firstHit.getPosY() - secondHit.getPosY()) / (secondHit.getPosX() - firstHit.getPosX()));
+
+            if (distance > 0)
+              angle = angle + M_PI / 2.;
+            else
+              angle = angle + 3. * M_PI / 2.;
+
+            if (angle > M_PI) {
+              angle = angle - M_PI;
+              distance = -distance;
+            }
+            angle *= 180. / M_PI;
+            getStatistics().getObject<TH1F>("angle")->Fill(angle);
+            if (std::abs(distance) > EPSILON && std::abs(angle) > EPSILON) {
               int distanceRound = SinogramCreatorTools::roundToNearesMultiplicity(distance, fReconstructionDistanceAccuracy, fReconstructionLayerRadius);
-              int thetaNumber = std::round(theta / fReconstructionAngleStep);                                                   // round because of floating point
-              currentValueInSinogram = ++fSinogram->at(distanceRound).at(thetaNumber); // add to sinogram
+              int thetaNumber = std::round(angle);
+              currentValueInSinogram = ++fSinogram->at(distanceRound).at(thetaNumber);
               if (currentValueInSinogram >= fMaxValueInSinogram)
-                fMaxValueInSinogram = currentValueInSinogram; // save max value of sinogram
-              getStatistics().getObject<TH2I>("reconstuction_histogram")->Fill(distance, theta); //add to histogram
+                fMaxValueInSinogram = currentValueInSinogram;                                          // save max value of sinogram
+              getStatistics().getObject<TH2I>("reconstuction_histogram")->Fill(distance, angle); //add to histogram
             }
           }
         }
@@ -143,19 +136,7 @@ void SinogramCreator::setUpOptions()
     fReconstructionLayerRadius = getOptionAsFloat(opts, kReconstructionLayerRadiusKey);
   }
 
-  if (isOptionSet(opts, kReconstructionStartAngle)) {
-    fReconstructionStartAngle = getOptionAsFloat(opts, kReconstructionStartAngle);
-  }
-
-  if (isOptionSet(opts, kReconstructionEndAngle)) {
-    fReconstructionEndAngle = getOptionAsFloat(opts, kReconstructionEndAngle);
-  }
-
   if (isOptionSet(opts, kReconstructionDistanceAccuracy)) {
     fReconstructionDistanceAccuracy = getOptionAsFloat(opts, kReconstructionDistanceAccuracy);
-  }
-
-  if (isOptionSet(opts, kReconstructionAngleStep)) {
-    fReconstructionAngleStep = getOptionAsFloat(opts, kReconstructionAngleStep);
   }
 }
