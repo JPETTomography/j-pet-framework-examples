@@ -29,15 +29,15 @@ bool SinogramCreatorMC::init()
   setUpOptions();
   fOutputEvents = new JPetTimeWindow("JPetEvent");
 
-  getStatistics().createHistogram(new TH2I("reconstuction_histogram_monte",
-                                  "reconstuction_histogram_monte",
-                                  std::ceil(fReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1, -fReconstructionLayerRadius, fReconstructionLayerRadius,
+  getStatistics().createHistogram(new TH2I("reconstuction_histogram",
+                                  "reconstuction histogram",
+                                  std::ceil(fReconstructionLayerRadius * (1.f / fReconstructionDistanceAccuracy)) + 1, 0.f, fReconstructionLayerRadius,
                                   kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
 
-  getStatistics().createHistogram(new TH1F("pos_dis", "Position distance monte data", (fReconstructionLayerRadius) * 2 * 10 * 5, -fReconstructionLayerRadius, fReconstructionLayerRadius));
+  getStatistics().createHistogram(new TH1F("pos_dis", "Position distance monte data", (fReconstructionLayerRadius) * 10 * 5, 0.f, fReconstructionLayerRadius));
   getStatistics().createHistogram(new TH1F("angle", "Position angle monte data", kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
 
-  getStatistics().getObject<TH2I>("reconstuction_histogram_monte")->SetBit(TH2::kCanRebin);
+  getStatistics().getObject<TH2I>("reconstuction_histogram")->SetBit(TH2::kCanRebin);
 
   getStatistics().getObject<TH1F>("angle")->SetBit(TH1::kCanRebin);
   getStatistics().getObject<TH1F>("pos_dis")->SetBit(TH1::kCanRebin);
@@ -52,40 +52,45 @@ bool SinogramCreatorMC::init()
 
   unsigned int currentValueInSinogram = 0; // holds current bin value of sinogram
 
-  unsigned int maxDistanceNumber = std::ceil(fReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
+  unsigned int maxDistanceNumber = std::ceil(fReconstructionLayerRadius * (1.f / fReconstructionDistanceAccuracy)) + 1;
   if (fSinogram == nullptr) {
     fSinogram = new SinogramResultType(maxDistanceNumber, (std::vector<unsigned int>(kReconstructionMaxAngle)));
   }
   for (unsigned int i = 0; i < hitsVector.size(); i++) {
-    float distance = hitsVector[i].second.first * hitsVector[i].first.second - hitsVector[i].second.second * hitsVector[i].first.first;
-    float norm = std::sqrt((hitsVector[i].second.second - hitsVector[i].first.second) * (hitsVector[i].second.second - hitsVector[i].first.second)
-                           + (hitsVector[i].second.first - hitsVector[i].first.first) * (hitsVector[i].second.first - hitsVector[i].first.first));
-    if (norm > 0) {
+
+    float firstX = hitsVector[i].first.first;
+    float firstY = hitsVector[i].first.second;
+    float secondX = hitsVector[i].second.first;
+    float secondY = hitsVector[i].second.second; // copy positions
+
+    float distance = (secondX * firstY) - (secondY * firstX);
+
+    float norm = std::sqrt(std::pow((secondY - firstY), 2) + std::pow((secondX - firstX), 2));
+    if (norm > 0.f) {
       distance /= norm;
       getStatistics().getObject<TH1F>("pos_dis")->Fill(distance);
-      float angle = 0.;
-      if ((hitsVector[i].second.first - hitsVector[i].first.first) != 0)
-        angle = std::atan((hitsVector[i].first.second - hitsVector[i].second.second) / (hitsVector[i].second.first - hitsVector[i].first.first));
+      float angle = 0.f;
+      if (std::abs(secondX - firstX) > EPSILON)
+        angle = std::atan((firstY - secondY) / (secondX - firstX));
 
-      if (distance > 0)
-        angle = angle + M_PI / 2.;
+      if (distance > 0.f)
+        angle = angle + M_PI / 2.f;
       else
-        angle = angle + 3. * M_PI / 2.;
+        angle = angle + 3.f * M_PI / 2.f;
 
       if (angle > M_PI) {
         angle = angle - M_PI;
         distance = -distance;
       }
-      angle *= 180. / M_PI;
+      angle *= 180.f / M_PI;
       getStatistics().getObject<TH1F>("angle")->Fill(angle);
-      if (std::abs(distance) > EPSILON && std::abs(angle) > EPSILON)
-      {
-        int distanceRound = SinogramCreatorTools::roundToNearesMultiplicity(distance, fReconstructionDistanceAccuracy, fReconstructionLayerRadius);
+      if (std::abs(distance) > EPSILON && std::abs(angle) > EPSILON) {
+        int distanceRound = SinogramCreatorTools::roundToNearesMultiplicity(distance, fReconstructionDistanceAccuracy);
         int thetaNumber = std::round(angle);
         currentValueInSinogram = ++fSinogram->at(distanceRound).at(thetaNumber);
         if (currentValueInSinogram >= fMaxValueInSinogram)
-          fMaxValueInSinogram = currentValueInSinogram;                                          // save max value of sinogram
-        getStatistics().getObject<TH2I>("reconstuction_histogram_monte")->Fill(distance, angle); //add to histogram
+          fMaxValueInSinogram = currentValueInSinogram;                                    // save max value of sinogram
+        getStatistics().getObject<TH2I>("reconstuction_histogram")->Fill(distance, angle); //add to histogram
       }
     }
   }

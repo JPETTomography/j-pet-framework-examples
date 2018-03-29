@@ -36,10 +36,7 @@
  * It defines 6 user options:
  * - "SinogramCreator_OutFileName_std::string": defines output file name where sinogram is saved
  * - "SinogramCreator_ReconstructionLayerRadius_float": defines radius of reconstruction layer
- * - "SinogramCreator_ReconstructionStartAngle_float": defines starting angle, in degrees, for scans
- * - "SinogramCreator_ReconstructionEndAngle_float": defines end angle, in degrees, for scan, it should not be greater then 180 degrees and (end angle - start angle) should be positive
- * - "SinogramCreator_ReconstructionDistanceAccuracy_float": defines maximal round value for distance, in cm, e.g. 0.1 means 1px in sinogram corresponds to 0.1 cm in reality
- * - "SinogramCreator_ReconstructionAngleStep_float": defines by what angle should scan change between start angle and end angle
+ * - "SinogramCreator_ReconstructionDistanceAccuracy_float": defines maximal round value for distance, in cm, e.g. 0.1 means 1 bin in sinogram corresponds to 0.1 cm in reality
  *
  */
 class SinogramCreator : public JPetUserTask
@@ -67,14 +64,12 @@ private:
 
   const int kReconstructionMaxAngle = 180;
   const float EPSILON = 0.000001f;
-  
+
   std::string fOutFileName = "sinogram.ppm";
   unsigned int fMaxValueInSinogram = 0; // to fill later in output file
 
   float fReconstructionLayerRadius = 42.5f;
   float fReconstructionDistanceAccuracy = 0.01f; // in cm, 0.1mm accuracy
-
-  std::vector<std::pair<SinogramCreatorTools::Point, SinogramCreatorTools::Point>> hitsVector;
 };
 
 #endif /*  !SINOGRAMCREATOR_H */

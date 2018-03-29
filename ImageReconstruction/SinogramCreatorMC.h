@@ -31,15 +31,12 @@
 /**
  * @brief Module creating sinogram from data
  *
- * It implements creating sinogram from data, but only for 1st layer.
+ * It implements creating sinogram from data, from 1 layer and data readed from ASCII file.
  *
  * It defines 6 user options:
- * - "SinogramCreator_OutFileName_std::string": defines output file name where sinogram is saved
- * - "SinogramCreator_ReconstructionLayerRadius_float": defines radius of reconstruction layer
- * - "SinogramCreator_ReconstructionStartAngle_float": defines starting angle, in degrees, for scans
- * - "SinogramCreator_ReconstructionEndAngle_float": defines end angle, in degrees, for scan, it should not be greater then 180 degrees and (end angle - start angle) should be positive
- * - "SinogramCreator_ReconstructionDistanceAccuracy_float": defines maximal round value for distance, in cm, e.g. 0.1 means 1px in sinogram corresponds to 0.1 cm in reality
- * - "SinogramCreator_ReconstructionAngleStep_float": defines by what angle should scan change between start angle and end angle
+ * - "SinogramCreatorMC_OutFileName_std::string": defines output file name where sinogram is saved
+ * - "SinogramCreatorMC_ReconstructionLayerRadius_float": defines radius of reconstruction layer
+ * - "SinogramCreatorMC_ReconstructionDistanceAccuracy_float": defines maximal round value for distance, in cm, e.g. 0.1 means 1px in sinogram corresponds to 0.1 cm in reality
  *
  */
 class SinogramCreatorMC : public JPetUserTask
