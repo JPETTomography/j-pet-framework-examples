@@ -30,6 +30,8 @@
 class SinogramCreatorTools
 {
 public:
+  using Point = std::pair<float, float>;
+
   static unsigned int roundToNearesMultiplicity(float numberToRound, float muliFactor);
 
 private :
