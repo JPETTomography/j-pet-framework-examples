@@ -30,48 +30,7 @@
 class SinogramCreatorTools
 {
 public:
-  using LineResult = std::vector<std::tuple<int, int, int>>;
-  using Point = std::pair<float, float>;
-
-  /*
-  * @brief Calculate integer line values between 2 hits without antialiasing
-  *
-  * \param X1 - x position of first hit
-  * \param X2 - x postion of second hit
-  * \param Y1 - y postion of first hit
-  * \param Y2 - y postion of second hit
-  *
-  * @return vector with interpolated points and intensivity: (x, y, 255) where max intensivity is 255
-  */
-  static LineResult calculateLineWithoutAntialiasing(float X1, float Y1, float X2, float Y2);
-
-  /*
-   * @brief Calculate integer line values between 2 hits with antialiasing
-   *
-   * \param X1 - x position of first hit
-   * \param X2 - x postion of second hit
-   * \param Y1 - y postion of first hit
-   * \param Y2 - y postion of second hit
-   *
-   * @return vector with interpolated points and intensivity: (x, y, c)
-   */
-  static LineResult calculateLineWithAntialiasing(float X1, float Y1, float X2, float Y2);
-
-  static float calculateDistanceFromCenter(const float firstX, const float firstY, const float secondX, const float secondY, const float pointX = 0.f, const float pointY = 0.f);
-  static float length2D(const float x, const float y);
-
-  /*
-  * @brief Calculating intersection point of 2 lines, if they are are not intersect, std::numeric_limits<float>::max() is returned
-  * \param A std::pair<float, float> with starting point of first line
-  * \param B std::pair<float, float> with ending point of first line
-  * \param C std::pair<float, float> with starting point of second line
-  * \param D std::pair<float, float> with ending point of second line
-  *
-  * @return point of intersection
-  */
-  static Point lineIntersection(const Point& A, const Point& B, const Point& C, const Point& D);
-
-  static unsigned int roundToNearesMultiplicity(float numberToRound, float muliFactor, float maxValue);
+  static unsigned int roundToNearesMultiplicity(float numberToRound, float muliFactor);
 
 private :
   SinogramCreatorTools() = delete;
@@ -79,10 +38,6 @@ private :
   SinogramCreatorTools(const SinogramCreatorTools&) = delete;
   SinogramCreatorTools& operator=(const SinogramCreatorTools&) = delete;
 
-  static float fpart(float x);
-  static float rfpart(float x);
-
-  static constexpr float EPSILON = 0.00001f;
 };
 
 #endif /*  !SINOGRAMCREATORTOOLS_H */
