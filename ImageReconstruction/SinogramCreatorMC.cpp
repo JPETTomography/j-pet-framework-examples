@@ -44,9 +44,9 @@ bool SinogramCreatorMC::init()
 
   std::ifstream in("sinogram_data.txt");
 
-  float x1, y1, x2, y2;
+  float x1, y1, x2, y2, tmp;
   while (in.peek() != EOF) {
-    in >> x1 >> y1 >> x2 >> y2;
+    in >> x1 >> y1 >> tmp >> x2 >> y2 >> tmp;
     hitsVector.push_back(std::make_pair(std::make_pair(x1, y1), std::make_pair(x2, y2)));
   }
 
@@ -87,6 +87,9 @@ bool SinogramCreatorMC::init()
       if (std::abs(distance) > EPSILON && std::abs(angle) > EPSILON) {
         int distanceRound = SinogramCreatorTools::roundToNearesMultiplicity(distance, fReconstructionDistanceAccuracy);
         int thetaNumber = std::round(angle);
+        if (distanceRound >= maxDistanceNumber) {
+          std::cout << "Distance round: " << distanceRound << " distance: " << distance << " norm: " << norm << " x1: " << firstX << " y1: " << firstY << " x2: " << secondX << " y2: " << secondY << std::endl;
+        }
         currentValueInSinogram = ++fSinogram->at(distanceRound).at(thetaNumber);
         if (currentValueInSinogram >= fMaxValueInSinogram)
           fMaxValueInSinogram = currentValueInSinogram;                                    // save max value of sinogram
