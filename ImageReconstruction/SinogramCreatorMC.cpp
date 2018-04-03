@@ -44,9 +44,11 @@ bool SinogramCreatorMC::init()
 
   std::ifstream in("sinogram_data.txt");
 
-  float x1, y1, x2, y2, tmp;
+  float x1, y1, x2, y2, tmp1, tmp2;
   while (in.peek() != EOF) {
-    in >> x1 >> y1 >> tmp >> x2 >> y2 >> tmp;
+    in >> x1 >> y1 >> tmp1 >> x2 >> y2 >> tmp2;
+    if (std::abs(tmp1) > 0.0005f || std::abs(tmp2) > 0.0005f)
+      continue;
     hitsVector.push_back(std::make_pair(std::make_pair(x1, y1), std::make_pair(x2, y2)));
   }
 
