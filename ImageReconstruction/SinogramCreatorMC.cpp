@@ -31,7 +31,7 @@ bool SinogramCreatorMC::init()
 
   getStatistics().createHistogram(new TH2I("reconstuction_histogram",
                                   "reconstuction histogram",
-                                  std::ceil(fReconstructionLayerRadius * (1.f / fReconstructionDistanceAccuracy)) + 1, 0.f, fReconstructionLayerRadius,
+                                  std::ceil(fReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1, 0.f, fReconstructionLayerRadius,
                                   kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
 
   getStatistics().createHistogram(new TH1F("pos_dis", "Position distance monte data", (fReconstructionLayerRadius) * 10 * 5, 0.f, fReconstructionLayerRadius));
@@ -54,7 +54,7 @@ bool SinogramCreatorMC::init()
 
   unsigned int currentValueInSinogram = 0; // holds current bin value of sinogram
 
-  unsigned int maxDistanceNumber = std::ceil(fReconstructionLayerRadius * (1.f / fReconstructionDistanceAccuracy)) + 1;
+  unsigned int maxDistanceNumber = std::ceil(fReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
   if (fSinogram == nullptr) {
     fSinogram = new SinogramResultType(maxDistanceNumber, (std::vector<unsigned int>(kReconstructionMaxAngle)));
   }
@@ -80,22 +80,26 @@ bool SinogramCreatorMC::init()
       else
         angle = angle + 3.f * M_PI / 2.f;
 
-      if (angle > M_PI) {
+      if (angle >= M_PI) {
         angle = angle - M_PI;
-        distance = -distance;
       }
       angle *= 180.f / M_PI;
+      if (angle >= 90.f)
+        distance = -distance;
       getStatistics().getObject<TH1F>("angle")->Fill(angle);
       if (std::abs(distance) > EPSILON && std::abs(angle) > EPSILON) {
-        int distanceRound = SinogramCreatorTools::roundToNearesMultiplicity(distance + ( fReconstructionLayerRadius / 2.), fReconstructionDistanceAccuracy); //displacement is calculated from center
+        int distanceRound = SinogramCreatorTools::roundToNearesMultiplicity(distance + fReconstructionLayerRadius, fReconstructionDistanceAccuracy); //displacement is calculated from center
         int thetaNumber = std::round(angle);
+        if (thetaNumber >= kReconstructionMaxAngle) {
+          std::cout << "Angle: " << angle << " rounded angle: " << thetaNumber << " x1: " << firstX << " y1: " << firstY << " x2: " << secondX << " y2: " << secondY << std::endl;
+        }
         if (distanceRound >= maxDistanceNumber) {
           std::cout << "Distance round: " << distanceRound << " distance: " << distance << " norm: " << norm << " x1: " << firstX << " y1: " << firstY << " x2: " << secondX << " y2: " << secondY << std::endl;
         }
         currentValueInSinogram = ++fSinogram->at(distanceRound).at(thetaNumber);
         if (currentValueInSinogram >= fMaxValueInSinogram)
           fMaxValueInSinogram = currentValueInSinogram;                                    // save max value of sinogram
-        getStatistics().getObject<TH2I>("reconstuction_histogram")->Fill(distance + (fReconstructionLayerRadius / 2.), angle); //add to histogram
+        getStatistics().getObject<TH2I>("reconstuction_histogram")->Fill(distance + fReconstructionLayerRadius, angle); //add to histogram
       }
     }
   }
