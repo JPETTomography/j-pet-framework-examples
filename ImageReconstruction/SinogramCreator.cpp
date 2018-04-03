@@ -90,12 +90,12 @@ bool SinogramCreator::exec()
             angle *= 180.f / M_PI;
             getStatistics().getObject<TH1F>("angle")->Fill(angle);
             if (std::abs(distance) > EPSILON && std::abs(angle) > EPSILON) {
-              int distanceRound = SinogramCreatorTools::roundToNearesMultiplicity(distance, fReconstructionDistanceAccuracy);
+              int distanceRound = SinogramCreatorTools::roundToNearesMultiplicity(distance + ( fReconstructionLayerRadius / 2.), fReconstructionDistanceAccuracy);
               int thetaNumber = std::round(angle);
               currentValueInSinogram = ++fSinogram->at(distanceRound).at(thetaNumber);
               if (currentValueInSinogram >= fMaxValueInSinogram)
                 fMaxValueInSinogram = currentValueInSinogram;                                    // save max value of sinogram
-              getStatistics().getObject<TH2I>("reconstuction_histogram")->Fill(distance, angle); //add to histogram
+              getStatistics().getObject<TH2I>("reconstuction_histogram")->Fill(distance + (fReconstructionLayerRadius / 2.), angle); //add to histogram
             }
           }
         }

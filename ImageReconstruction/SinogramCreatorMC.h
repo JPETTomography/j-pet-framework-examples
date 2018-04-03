@@ -61,7 +61,7 @@ private:
   const std::string kReconstructionLayerRadiusKey = "SinogramCreatorMC_ReconstructionLayerRadius_float";
   const std::string kReconstructionDistanceAccuracy = "SinogramCreatorMC_ReconstructionDistanceAccuracy_float";
 
-  const int kReconstructionMaxAngle = 181;
+  const int kReconstructionMaxAngle = 180;
   const float EPSILON = 0.000001f;
 
   std::string fOutFileName = "sinogramMC.ppm";
