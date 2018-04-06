@@ -14,7 +14,8 @@
  */
 
 #include <JPetManager/JPetManager.h>
-#include "MCHitTranslator.h"
+#include <JPetGeantParser/JPetGeantParser.h>
+#include "EventFinder.h"
 
 
 using namespace std;
@@ -23,11 +24,12 @@ int main(int argc, const char* argv[])
 {
   JPetManager& manager = JPetManager::getManager();
 
-  manager.registerTask<MCHitTranslator>("MCHitTranslator");
+  manager.registerTask<JPetGeantParser>("JPetGeantParser");
+  manager.registerTask<EventFinder>("EventFinder");
 
-  manager.useTask("MCHitTranslator", "mcGeant", "mc.hits"); 
-  
 
-  
+  manager.useTask("JPetGeantParser", "mcGeant", "mc.hits"); 
+  manager.useTask("EventFinder", "mc.hits", "mc.unk.evt");
+
   manager.run(argc, argv);
 }
