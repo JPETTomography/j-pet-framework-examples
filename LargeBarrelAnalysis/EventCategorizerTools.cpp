@@ -104,9 +104,10 @@ bool EventCategorizerTools::checkForPrompt(
     double tot = calculateTOT(hit);
     if(tot > deexTOTCutMin && tot < deexTOTCutMax){
       if(saveHistos) stats.getHisto1D("Deex_TOT_cut")->Fill(tot);
+      return true;
     }
   }
-  return true;
+  return false;
 }
 
 /**
