@@ -33,6 +33,20 @@ bool EventCategorizer::init()
   else
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
       kScatterTOFTimeDiffParamKey.c_str(), fScatterTOFTimeDiff));
+
+  // Parameters for deexcitation TOT cut
+  if (isOptionSet(fParams.getOptions(), kDeexTOTCutMinParamKey))
+    fDeexTOTCutMin = getOptionAsBool(fParams.getOptions(), kDeexTOTCutMinParamKey);
+  else
+    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
+      kDeexTOTCutMinParamKey.c_str(), fDeexTOTCutMin));
+
+  if (isOptionSet(fParams.getOptions(), kDeexTOTCutMaxParamKey))
+    fDeexTOTCutMax = getOptionAsBool(fParams.getOptions(), kDeexTOTCutMaxParamKey);
+  else
+    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
+      kDeexTOTCutMaxParamKey.c_str(), fDeexTOTCutMax));
+
   // Getting bool for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey))
     fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
