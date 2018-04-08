@@ -32,8 +32,10 @@ class EventCategorizerTools
 public:
   static bool checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos);
   static bool checkFor3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos);
-  static bool checkForPrompt(const JPetEvent& event, JPetStatistics& stats, bool saveHistos);
-  static bool checkForScatter(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double scatterTOFTimeDiff);
+  static bool checkForPrompt(const JPetEvent& event, JPetStatistics& stats,
+    bool saveHistos, double deexTOTCutMin, double deexTOTCutMax);
+  static bool checkForScatter(const JPetEvent& event, JPetStatistics& stats,
+    bool saveHistos, double scatterTOFTimeDiff);
   static double calculateTOT(const JPetHit& hit);
   static double calculateDistance(const JPetHit& hit1, const JPetHit& hit2);
   static double calculateScatteringTime(const JPetHit& hit1, const JPetHit& hit2);

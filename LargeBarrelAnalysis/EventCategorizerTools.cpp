@@ -95,10 +95,18 @@ bool EventCategorizerTools::checkFor3Gamma(const JPetEvent& event, JPetStatistic
 /**
 * Method for determining type of event - prompt
 */
-bool EventCategorizerTools::checkForPrompt(const JPetEvent&, JPetStatistics&, bool)
+bool EventCategorizerTools::checkForPrompt(
+  const JPetEvent&, JPetStatistics&, bool saveHistos,
+  double deexTOTCutMin, double deexTOTCutMax)
 {
-  // Placeholder for proper method
-  return false;
+  for(uint i = 0; i < event.getHits().size(); i++){
+    JPetHit& hit = event.getHits().at(i);
+    double tot = calculateTOT(hit);
+    if(tot > deexTOTCutMin && tot < deexTOTCutMax){
+      if(saveHistos) stats.getHisto1D("Deex_TOT_cut")->Fill(tot);
+    }
+  }
+  return true;
 }
 
 /**

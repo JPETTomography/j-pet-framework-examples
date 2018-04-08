@@ -53,7 +53,8 @@ bool EventCategorizer::exec()
       // Check types of current event
       bool is2Gamma = EventCategorizerTools::checkFor2Gamma(event, getStatistics(), fSaveControlHistos);
       bool is3Gamma = EventCategorizerTools::checkFor3Gamma(event, getStatistics(), fSaveControlHistos);
-      bool isPrompt = EventCategorizerTools::checkForPrompt(event, getStatistics(), fSaveControlHistos);
+      bool isPrompt = EventCategorizerTools::checkForPrompt(event, getStatistics(),
+        fSaveControlHistos, fDeexTOTCutMin, fDeexTOTCutMax);
       bool isScattered = EventCategorizerTools::checkForScatter(event, getStatistics(),
         fSaveControlHistos, fScatterTOFTimeDiff);
 
@@ -153,4 +154,11 @@ void EventCategorizer::initialiseHistograms(){
       181, -0.5, 180.5, 200, 0.0, 40000.0));
   getStatistics().getHisto2D("ScatterAngle_ScatterTOT")->GetXaxis()->SetTitle("Scattering Angle");
   getStatistics().getHisto2D("ScatterAngle_ScatterTOT")->GetYaxis()->SetTitle("TOT of scattered hit [ps]");
+
+  // Histograms for deexcitation
+  getStatistics().createHistogram(
+    new TH1F("Deex_TOT_cut", "TOT of all hits with deex cut (30,50) ns",
+      200, 25000.0, 55000.0));
+  getStatistics().getHisto1D("Deex_TOT_cut")->GetXaxis()->SetTitle("TOT [ps]");
+  getStatistics().getHisto1D("Deex_TOT_cut")->GetYaxis()->SetTitle("Number of Hits");
 }
