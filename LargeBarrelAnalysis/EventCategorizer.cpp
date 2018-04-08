@@ -29,20 +29,20 @@ bool EventCategorizer::init()
   INFO("Event categorization started.");
   // Parameter for scattering determination
   if (isOptionSet(fParams.getOptions(), kScatterTOFTimeDiffParamKey))
-    fScatterTOFTimeDiff = getOptionAsBool(fParams.getOptions(), kScatterTOFTimeDiffParamKey);
+    fScatterTOFTimeDiff = getOptionAsFloat(fParams.getOptions(), kScatterTOFTimeDiffParamKey);
   else
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
       kScatterTOFTimeDiffParamKey.c_str(), fScatterTOFTimeDiff));
 
   // Parameters for deexcitation TOT cut
   if (isOptionSet(fParams.getOptions(), kDeexTOTCutMinParamKey))
-    fDeexTOTCutMin = getOptionAsBool(fParams.getOptions(), kDeexTOTCutMinParamKey);
+    fDeexTOTCutMin = getOptionAsFloat(fParams.getOptions(), kDeexTOTCutMinParamKey);
   else
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
       kDeexTOTCutMinParamKey.c_str(), fDeexTOTCutMin));
 
   if (isOptionSet(fParams.getOptions(), kDeexTOTCutMaxParamKey))
-    fDeexTOTCutMax = getOptionAsBool(fParams.getOptions(), kDeexTOTCutMaxParamKey);
+    fDeexTOTCutMax = getOptionAsFloat(fParams.getOptions(), kDeexTOTCutMaxParamKey);
   else
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
       kDeexTOTCutMaxParamKey.c_str(), fDeexTOTCutMax));
