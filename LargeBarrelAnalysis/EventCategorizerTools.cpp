@@ -96,7 +96,7 @@ bool EventCategorizerTools::checkFor3Gamma(const JPetEvent& event, JPetStatistic
 * Method for determining type of event - prompt
 */
 bool EventCategorizerTools::checkForPrompt(
-  const JPetEvent&, JPetStatistics&, bool saveHistos,
+  const JPetEvent& event, JPetStatistics& stats, bool saveHistos,
   double deexTOTCutMin, double deexTOTCutMax)
 {
   for(uint i = 0; i < event.getHits().size(); i++){
