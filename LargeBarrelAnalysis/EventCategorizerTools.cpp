@@ -158,13 +158,18 @@ double EventCategorizerTools::calculateTOT(const JPetHit& hit)
 {
 	double tot = 0.0;
 
-	std::vector<JPetSigCh> sigALead = hit.getSignalA().getRecoSignal()
+  std::vector<JPetSigCh> sigALead;
+  std::vector<JPetSigCh> sigBLead;
+  std::vector<JPetSigCh> sigATrail;
+  std::vector<JPetSigCh> sigBTrail;
+
+	sigALead = hit.getSignalA().getRecoSignal()
     .getRawSignal().getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-	std::vector<JPetSigCh> sigBLead = hit.getSignalB().getRecoSignal()
+	sigBLead = hit.getSignalB().getRecoSignal()
     .getRawSignal().getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-	std::vector<JPetSigCh> sigATrail = hit.getSignalA().getRecoSignal()
+	sigATrail = hit.getSignalA().getRecoSignal()
     .getRawSignal().getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-	std::vector<JPetSigCh> sigBTrail = hit.getSignalB().getRecoSignal()
+	sigBTrail = hit.getSignalB().getRecoSignal()
     .getRawSignal().getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
 
 	for(uint i = 0; i < sigALead.size() && i < sigATrail.size(); i++)

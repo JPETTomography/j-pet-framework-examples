@@ -40,7 +40,6 @@ bool EventCategorizer::init()
   else
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
       kDeexTOTCutMinParamKey.c_str(), fDeexTOTCutMin));
-
   if (isOptionSet(fParams.getOptions(), kDeexTOTCutMaxParamKey))
     fDeexTOTCutMax = getOptionAsFloat(fParams.getOptions(), kDeexTOTCutMaxParamKey);
   else
