@@ -13,24 +13,21 @@
  *  @file SignalTransformer.cpp
  */
 
-#include "SignalTransformer.h"
 #include "JPetWriter/JPetWriter.h"
+#include "SignalTransformer.h"
 
-SignalTransformer::SignalTransformer(const char* name):
-	JPetUserTask(name) { }
+SignalTransformer::SignalTransformer(const char* name): JPetUserTask(name) {}
 
 bool SignalTransformer::init()
 {
-	  INFO("Signal transforming started: Raw to Reco and Phys");
-	  fOutputEvents = new JPetTimeWindow("JPetPhysSignal");
-	  return true;
+  INFO("Signal transforming started: Raw to Reco and Phys");
+  fOutputEvents = new JPetTimeWindow("JPetPhysSignal");
+  return true;
 }
-
 
 bool SignalTransformer::exec()
 {
   if(auto & timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
-
     uint n = timeWindow->getNumberOfEvents();
     for(uint i=0;i<n;++i){
       const JPetRawSignal & currSignal = dynamic_cast<const JPetRawSignal&>(timeWindow->operator[](i));
@@ -40,9 +37,7 @@ bool SignalTransformer::exec()
       auto physSignal = createPhysSignal(recoSignal);
       fOutputEvents->add<JPetPhysSignal>(physSignal);
     }
-  }else{
-    return false;
-  }
+  }else return false;
   return true;
 }
 
@@ -57,13 +52,13 @@ bool SignalTransformer::terminate()
  */
 JPetRecoSignal SignalTransformer::createRecoSignal(const JPetRawSignal& rawSignal)
 {
-	JPetRecoSignal recoSignal;
-	recoSignal.setRawSignal(rawSignal);
-	recoSignal.setAmplitude(-1.0);
-	recoSignal.setOffset(-1.0);
-	recoSignal.setCharge(-1.0);
-	recoSignal.setDelay(-1.0);
-	return recoSignal;
+  JPetRecoSignal recoSignal;
+  recoSignal.setRawSignal(rawSignal);
+  recoSignal.setAmplitude(-1.0);
+  recoSignal.setOffset(-1.0);
+  recoSignal.setCharge(-1.0);
+  recoSignal.setDelay(-1.0);
+  return recoSignal;
 }
 
 /**
@@ -74,13 +69,13 @@ JPetRecoSignal SignalTransformer::createRecoSignal(const JPetRawSignal& rawSigna
  */
 JPetPhysSignal SignalTransformer::createPhysSignal(const JPetRecoSignal& recoSignal)
 {
-	JPetPhysSignal physSignal;
-	physSignal.setRecoSignal(recoSignal);
-	physSignal.setPhe(-1.0);
-	physSignal.setQualityOfPhe(0.0);
-	std::vector<JPetSigCh> leadingSigChVec = recoSignal.getRawSignal().getPoints(
-		JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-	physSignal.setTime(leadingSigChVec.at(0).getValue());
-	physSignal.setQualityOfTime(0.0);
-	return physSignal;
+  JPetPhysSignal physSignal;
+  physSignal.setRecoSignal(recoSignal);
+  physSignal.setPhe(-1.0);
+  physSignal.setQualityOfPhe(0.0);
+  std::vector<JPetSigCh> leadingSigChVec = recoSignal.getRawSignal().getPoints(
+  JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+  physSignal.setTime(leadingSigChVec.at(0).getValue());
+  physSignal.setQualityOfTime(0.0);
+  return physSignal;
 }

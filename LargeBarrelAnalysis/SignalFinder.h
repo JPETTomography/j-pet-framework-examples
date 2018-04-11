@@ -53,6 +53,7 @@ protected:
   double fSigChLeadTrailMaxTime = 25000.0;
   double fSigChEdgeMaxTime = 5000.0;
   bool fSaveControlHistos = true;
+  void initialiseHistograms();
 };
 #endif
 /*  !SIGNALFINDER_H */

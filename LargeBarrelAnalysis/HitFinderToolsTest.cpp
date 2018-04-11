@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(matchSignals_test_allSigsSameSide)
   double timeDiffAB = 10.0;
 
   std::vector<JPetHit> allHits = HitFinderTools::matchSignals(
-    stats, signalSlotMap, velocitiesMap, timeDiffAB, false);
+    stats, signalSlotMap, velocitiesMap, timeDiffAB, -1, false);
 
   BOOST_REQUIRE(allHits.empty());
 }
@@ -207,7 +207,7 @@ BOOST_AUTO_TEST_CASE(matchSignals_test_smallTimeDiff)
   double timeDiffAB = 0.001;
 
   std::vector<JPetHit> allHits = HitFinderTools::matchSignals(
-    stats, signalSlotMap, velocitiesMap, timeDiffAB, false);
+    stats, signalSlotMap, velocitiesMap, timeDiffAB, -1, false);
 
   BOOST_REQUIRE(allHits.empty());
 }
@@ -215,7 +215,7 @@ BOOST_AUTO_TEST_CASE(matchSignals_test_smallTimeDiff)
 BOOST_AUTO_TEST_CASE(matchSignals_test_refDetSigs)
 {
   JPetBarrelSlot refBarrelSlot(193, true, "refBS", 45.0, 193);
-  JPetScin refScin(193);
+  JPetScin refScin(999);
   JPetPM refPm(11, "ref");
   refPm.setScin(refScin);
   refPm.setBarrelSlot(refBarrelSlot);
@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE(matchSignals_test_refDetSigs)
   double timeDiffAB = 1.1;
   JPetStatistics stats;
   std::vector<JPetHit> allHits = HitFinderTools::matchSignals(
-    stats, signalSlotMap, velocitiesMap, timeDiffAB, false);
+    stats, signalSlotMap, velocitiesMap, timeDiffAB, 999, false);
 
   BOOST_REQUIRE_EQUAL(allHits.size(), 3);
 }
@@ -327,7 +327,7 @@ BOOST_AUTO_TEST_CASE(matchSignals_test)
   auto epsilon = 0.0001;
   JPetStatistics stats;
   std::vector<JPetHit> allHits = HitFinderTools::matchSignals(
-    stats, signalSlotMap, velocitiesMap, timeDiffAB, false);
+    stats, signalSlotMap, velocitiesMap, timeDiffAB, -1, false);
 
   BOOST_REQUIRE_EQUAL(allHits.size(), 3);
 

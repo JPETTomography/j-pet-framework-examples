@@ -46,6 +46,12 @@ bool HitFinder::init()
     velocitiesFile = getOptionAsString(fParams.getOptions(), kVelocityFileParamKey);
   else
     WARNING("No path to the file with velocities was provided in user options.");
+  // Getting number of Reference Detector Scintillator ID
+  if (isOptionSet(fParams.getOptions(), kRefDetScinIDParamKey))
+    fRefDetScinID = getOptionAsInt(fParams.getOptions(), kRefDetScinIDParamKey);
+  else
+    WARNING(Form("No value of the %s parameter provided by the user, indicating that Reference Detector was not used.",
+    kRefDetScinIDParamKey.c_str()));
   // Getting bool for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey))
     fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
@@ -103,20 +109,12 @@ bool HitFinder::exec()
 {
   if (auto& timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     map<int, vector<JPetPhysSignal>> signalSlotMap = HitFinderTools::getSignalsSlotMap(timeWindow);
-    vector<JPetHit> allHits = HitFinderTools::matchSignals(
-                                getStatistics(),
-                                signalSlotMap,
-                                fVelocities,
-                                fABTimeDiff,
-                                fSaveControlHistos);
-
+    vector<JPetHit> allHits = HitFinderTools::matchSignals(getStatistics(), signalSlotMap,
+      fVelocities, fABTimeDiff, fRefDetScinID, fSaveControlHistos);
     if(fSaveControlHistos)
       getStatistics().getHisto1D("hits_per_time_slot")->Fill(allHits.size());
-
     saveHits(allHits);
-  } else {
-    return false;
-  }
+  } else return false;
   return true;
 }
 

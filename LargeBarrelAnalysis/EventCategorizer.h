@@ -47,11 +47,13 @@ public:
 
 protected:
 	const std::string kScatterTOFTimeDiffParamKey = "Scatter_Categorizer_TOF_TimeDiff_float";
+  const std::string kBack2BackSlotThetaDiffParamKey = "Back2Back_Categorizer_SlotThetaDiff_float";
 	const std::string kDeexTOTCutMinParamKey = "Deex_Categorizer_TOT_Cut_Min_float";
 	const std::string kDeexTOTCutMaxParamKey = "Deex_Categorizer_TOT_Cut_Max_float";
 	const std::string kSaveControlHistosParamKey = "Save_Cotrol_Histograms_bool";
 	void saveEvents(const std::vector<JPetEvent>& event);
 	double fScatterTOFTimeDiff = 2000.0;
+  double fB2BSlotThetaDiff = 3.0;
 	double fDeexTOTCutMin = 30000.0;
 	double fDeexTOTCutMax = 50000.0;
 	bool fSaveControlHistos = true;

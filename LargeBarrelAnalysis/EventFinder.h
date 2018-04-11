@@ -39,20 +39,20 @@ class JPetWriter;
 class EventFinder: public JPetUserTask
 {
 public:
-	EventFinder(const char * name);
-	virtual ~EventFinder(){}
-	virtual bool init() override;
-	virtual bool exec() override;
-	virtual bool terminate() override;
+  EventFinder(const char * name);
+  virtual ~EventFinder(){}
+  virtual bool init() override;
+  virtual bool exec() override;
+  virtual bool terminate() override;
 
 protected:
-	void saveEvents(const std::vector<JPetEvent>& event);
-	std::vector<JPetEvent> buildEvents(const JPetTimeWindow & hits);
-	const std::string kSaveControlHistosParamKey = "Save_Cotrol_Histograms_bool";
-	const std::string kEventTimeParamKey = "EventFinder_EventTime_float";
-	const std::string kEventMinMultiplicity = "EventFinder_MinEventMultiplicity_int";
+  void saveEvents(const std::vector<JPetEvent>& event);
+  std::vector<JPetEvent> buildEvents(const JPetTimeWindow & hits);
+  const std::string kSaveControlHistosParamKey = "Save_Cotrol_Histograms_bool";
+  const std::string kEventTimeParamKey = "EventFinder_EventTime_float";
+  const std::string kEventMinMultiplicity = "EventFinder_MinEventMultiplicity_int";
   double fEventTimeWindow = 5000.0;
-	bool fSaveControlHistos = true;
-	uint fMinMultiplicity = 1;
+  bool fSaveControlHistos = true;
+  uint fMinMultiplicity = 1;
 };
 #endif /*  !EVENTFINDER_H */

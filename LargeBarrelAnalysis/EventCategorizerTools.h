@@ -30,7 +30,8 @@
 class EventCategorizerTools
 {
 public:
-  static bool checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos);
+  static bool checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats,
+    bool saveHistos, double b2bSlotThetaDiff);
   static bool checkFor3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos);
   static bool checkForPrompt(const JPetEvent& event, JPetStatistics& stats,
     bool saveHistos, double deexTOTCutMin, double deexTOTCutMax);

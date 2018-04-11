@@ -27,13 +27,18 @@ EventCategorizer::EventCategorizer(const char* name): JPetUserTask(name) {}
 bool EventCategorizer::init()
 {
   INFO("Event categorization started.");
+  // Parameter for back to back categorization
+  if (isOptionSet(fParams.getOptions(), kBack2BackSlotThetaDiffParamKey))
+    fB2BSlotThetaDiff = getOptionAsFloat(fParams.getOptions(), kBack2BackSlotThetaDiffParamKey);
+  else
+    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
+      kBack2BackSlotThetaDiffParamKey.c_str(), fB2BSlotThetaDiff));
   // Parameter for scattering determination
   if (isOptionSet(fParams.getOptions(), kScatterTOFTimeDiffParamKey))
     fScatterTOFTimeDiff = getOptionAsFloat(fParams.getOptions(), kScatterTOFTimeDiffParamKey);
   else
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
       kScatterTOFTimeDiffParamKey.c_str(), fScatterTOFTimeDiff));
-
   // Parameters for deexcitation TOT cut
   if (isOptionSet(fParams.getOptions(), kDeexTOTCutMinParamKey))
     fDeexTOTCutMin = getOptionAsFloat(fParams.getOptions(), kDeexTOTCutMinParamKey);
@@ -45,10 +50,10 @@ bool EventCategorizer::init()
   else
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
       kDeexTOTCutMaxParamKey.c_str(), fDeexTOTCutMax));
-
   // Getting bool for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey))
     fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
+
   // Input events type
   fOutputEvents = new JPetTimeWindow("JPetEvent");
   // Initialise hisotgrams
@@ -64,7 +69,8 @@ bool EventCategorizer::exec()
       const auto& event = dynamic_cast<const JPetEvent&>(timeWindow->operator[](i));
 
       // Check types of current event
-      bool is2Gamma = EventCategorizerTools::checkFor2Gamma(event, getStatistics(), fSaveControlHistos);
+      bool is2Gamma = EventCategorizerTools::checkFor2Gamma(event, getStatistics(),
+        fSaveControlHistos, fB2BSlotThetaDiff);
       bool is3Gamma = EventCategorizerTools::checkFor3Gamma(event, getStatistics(), fSaveControlHistos);
       bool isPrompt = EventCategorizerTools::checkForPrompt(event, getStatistics(),
         fSaveControlHistos, fDeexTOTCutMin, fDeexTOTCutMax);
@@ -90,7 +96,7 @@ bool EventCategorizer::exec()
 
 bool EventCategorizer::terminate()
 {
-  INFO("Event categorizetion completed.");
+  INFO("Event categorization completed.");
   return true;
 }
 

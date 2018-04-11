@@ -58,12 +58,13 @@ vector<JPetHit> HitFinderTools::matchSignals(
   const map<int, vector<JPetPhysSignal>>& signalSlotMap,
   const map<unsigned int, vector<double>>& velocitiesMap,
   double timeDiffAB,
+  int refDetScinId,
   bool saveHistos)
 {
   vector<JPetHit> allHits;
   vector<JPetPhysSignal> remainSignals;
   for(auto& physSigPair : signalSlotMap) {
-    if(physSigPair.first == 193) {
+    if(physSigPair.first == refDetScinId) {
       for(auto refSignal : physSigPair.second){
         JPetHit refHit = createDummyRefDetHit(refSignal);
         allHits.push_back(refHit);

@@ -38,6 +38,7 @@ public:
     const std::map<int, std::vector<JPetPhysSignal>>& signalSlotMap,
     const std::map<unsigned int, std::vector<double>>& velocitiesMap,
     double timeDiffAB,
+    int refDetScinId,
     bool saveHistos
   );
   static JPetHit createHit(

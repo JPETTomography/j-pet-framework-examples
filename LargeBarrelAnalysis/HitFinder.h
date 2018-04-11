@@ -50,8 +50,10 @@ protected:
   const std::string kSaveControlHistosParamKey = "Save_Cotrol_Histograms_bool";
   const std::string kVelocityFileParamKey = "HitFinder_VelocityFile_std::string";
   const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_float";
-  double fABTimeDiff = 6000.0;
+  const std::string kRefDetScinIDParamKey = "HitFinder_RefDetScinID_int";
   bool fSaveControlHistos = true;
+  double fABTimeDiff = 6000.0;
+  int fRefDetScinID = -1;
 };
 
 #endif /*  !HitFinder_H */

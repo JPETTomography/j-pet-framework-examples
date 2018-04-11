@@ -38,9 +38,7 @@ map<int, vector<JPetSigCh>> SignalFinderTools::getSigChsPMMapById(
       vector<JPetSigCh> tmp;
       tmp.push_back(sigCh);
       sigChsPMMap.insert(pair<int, vector<JPetSigCh>>(pmtID, tmp));
-    } else {
-      search->second.push_back(sigCh);
-    }
+    } else search->second.push_back(sigCh);
   }
   return sigChsPMMap;
 }
@@ -89,7 +87,7 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(
 
   // Threshold number check - fixed number equal 4
   if (numOfThresholds != 4) {
-    ERROR("This function is ment to work with 4 thresholds only!");
+    ERROR("This function is meant to work with 4 thresholds only!");
     return rawSigVec;
   }
 
@@ -107,22 +105,22 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(
 
   assert(thrLeadingSigCh.size() > 0);
   while (thrLeadingSigCh.at(0).size() > 0) {
-  	JPetRawSignal rawSig;
-  	rawSig.setPM(thrLeadingSigCh.at(0).at(0).getPM());
-  	rawSig.setBarrelSlot(thrLeadingSigCh.at(0).at(0).getPM().getBarrelSlot());
+    JPetRawSignal rawSig;
+    rawSig.setPM(thrLeadingSigCh.at(0).at(0).getPM());
+    rawSig.setBarrelSlot(thrLeadingSigCh.at(0).at(0).getPM().getBarrelSlot());
 
-  	// First THR leading added by default
-  	rawSig.addPoint(thrLeadingSigCh.at(0).at(0));
+    // First THR leading added by default
+    rawSig.addPoint(thrLeadingSigCh.at(0).at(0));
 
     // Searching for matching trailing on first THR
     int closestTrailingSigCh = findTrailingSigCh(
-  	  thrLeadingSigCh.at(0).at(0),
+      thrLeadingSigCh.at(0).at(0),
       thrTrailingSigCh.at(0),
-  	  sigChLeadTrailMaxTime
+      sigChLeadTrailMaxTime
     );
 
-  	if(closestTrailingSigCh != -1) {
-  		rawSig.addPoint(thrTrailingSigCh.at(0).at(closestTrailingSigCh));
+    if(closestTrailingSigCh != -1) {
+      rawSig.addPoint(thrTrailingSigCh.at(0).at(closestTrailingSigCh));
       if(saveHistos)
         stats.getHisto1D("lead_trail_thr1_diff")->Fill(
           thrTrailingSigCh.at(0)
@@ -141,14 +139,14 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(
         sigChEdgeMaxTime
       );
 
-  	  if (nextThrSigChIndex != -1) {
-  		  closestTrailingSigCh = findTrailingSigCh(
+      if (nextThrSigChIndex != -1) {
+        closestTrailingSigCh = findTrailingSigCh(
           thrLeadingSigCh.at(0).at(0),
           thrTrailingSigCh.at(kk),
           sigChLeadTrailMaxTime
-  		  );
+        );
 
-  			if (closestTrailingSigCh != -1) {
+        if (closestTrailingSigCh != -1) {
           rawSig.addPoint(thrTrailingSigCh.at(kk).at(closestTrailingSigCh));
           if(saveHistos)
             stats.getHisto1D(Form("lead_trail_thr%d_diff", kk+1))->Fill(
@@ -158,19 +156,19 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(
           thrTrailingSigCh.at(kk).erase(thrTrailingSigCh.at(kk).begin()+closestTrailingSigCh);
         }
 
-  			rawSig.addPoint(thrLeadingSigCh.at(kk).at(nextThrSigChIndex));
+        rawSig.addPoint(thrLeadingSigCh.at(kk).at(nextThrSigChIndex));
         if(saveHistos)
           stats.getHisto1D(Form("lead_thr1_thr%d_diff", kk+1))->Fill(
             thrLeadingSigCh.at(kk)
               .at(nextThrSigChIndex).getValue()-thrLeadingSigCh.at(0).at(0).getValue()
           );
         thrLeadingSigCh.at(kk).erase(thrLeadingSigCh.at(kk).begin()+nextThrSigChIndex);
-  		}
+      }
     }
 
-  	// Adding created Raw Signal to vector
-  	rawSigVec.push_back(rawSig);
-  	thrLeadingSigCh.at(0).erase(thrLeadingSigCh.at(0).begin());
+    // Adding created Raw Signal to vector
+    rawSigVec.push_back(rawSig);
+    thrLeadingSigCh.at(0).erase(thrLeadingSigCh.at(0).begin());
   }
 
   // Filling controll histograms
@@ -181,14 +179,14 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(
       stats.getHisto1D("remainig_trailing_sig_ch_per_thr")
         ->Fill(jj+1, thrTrailingSigCh.at(jj).size());
     }
-	return rawSigVec;
+  return rawSigVec;
 }
 
 /**
  * Method finds Signal Channels that belong to the same leading edge
  */
 int SignalFinderTools::findSigChOnNextThr(
-  Double_t sigChValue,
+  double sigChValue,
   const vector<JPetSigCh>& sigChVec,
   double sigChEdgeMaxTime)
 {

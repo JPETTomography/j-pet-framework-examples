@@ -24,12 +24,12 @@
  * http://koza.if.uj.edu.pl/petwiki/images/4/4f/SignalFinderDoc.pdf
  */
 
-#include <map>
-#include <vector>
-#include <JPetSigCh/JPetSigCh.h>
-#include <JPetRawSignal/JPetRawSignal.h>
-#include <JPetTimeWindow/JPetTimeWindow.h>
 #include <JPetStatistics/JPetStatistics.h>
+#include <JPetTimeWindow/JPetTimeWindow.h>
+#include <JPetRawSignal/JPetRawSignal.h>
+#include <JPetSigCh/JPetSigCh.h>
+#include <vector>
+#include <map>
 
 class SignalFinderTools
 {
@@ -53,13 +53,16 @@ public:
     bool saveHistos
   );
 
-  static int findSigChOnNextThr(Double_t sigChValue,
-                                const std::vector<JPetSigCh>& sigChVec,
-                                double sigChEdgeMaxTime);
+  static int findSigChOnNextThr(
+    double sigChValue,
+    const std::vector<JPetSigCh>& sigChVec,
+    double sigChEdgeMaxTime
+  );
 
-  static int findTrailingSigCh(const JPetSigCh& leadingSigCh,
-                               const std::vector<JPetSigCh>& trailingSigChVec,
-                               double sigChLeadTrailMaxTime);
+  static int findTrailingSigCh(
+    const JPetSigCh& leadingSigCh,
+    const std::vector<JPetSigCh>& trailingSigChVec,
+    double sigChLeadTrailMaxTime);
 
 };
 #endif /* !SIGNALFINDERTOOLS_H */

@@ -25,6 +25,8 @@ The analysis is split into tasks.
 
 Additional info
 --------------
+For description of possible parameters, that can be ised in useParams.json,
+see file PARAMETERS
 
 Compiling
 ------------

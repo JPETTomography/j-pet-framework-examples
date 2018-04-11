@@ -16,8 +16,8 @@
 #ifndef SIGNALTRANSFORMER_H
 #define SIGNALTRANSFORMER_H
 
-#include "JPetUserTask/JPetUserTask.h"
 #include "JPetRecoSignal/JPetRecoSignal.h"
+#include "JPetUserTask/JPetUserTask.h"
 
 #ifdef __CINT__
 #define override
@@ -35,7 +35,6 @@ class JPetWriter;
 
 class SignalTransformer: public JPetUserTask
 {
-
 public:
 	SignalTransformer(const char* name);
 	virtual bool init() override;
