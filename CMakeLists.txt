@@ -31,9 +31,7 @@ endif()
 ################################################################################
 ## Download input and config files
 ## The script shouldn't do anything if the data is present and correct.
-#set(DOWNLOAD_DATA ${CMAKE_CURRENT_SOURCE_DIR}/download_data.sh ${CMAKE_CURRENT_SOURCE_DIR})
-#execute_process(COMMAND ${DOWNLOAD_DATA})
-set(DOWNLOAD_MORE_DATA ${CMAKE_CURRENT_SOURCE_DIR}/download_more_data.sh ${CMAKE_CURRENT_SOURCE_DIR})
+set(DOWNLOAD_MORE_DATA ${CMAKE_CURRENT_SOURCE_DIR}/download_reformed_data.sh ${CMAKE_CURRENT_SOURCE_DIR})
 execute_process(COMMAND ${DOWNLOAD_MORE_DATA})
 
 ################################################################################
