@@ -97,7 +97,7 @@ bool SinogramCreator::exec()
               getStatistics().getObject<TH1F>("angle")->Fill(angle);
               int distanceRound = SinogramCreatorTools::roundToNearesMultiplicity(distance + fReconstructionLayerRadius, fReconstructionDistanceAccuracy);
               int thetaNumber = std::round(angle);
-              if (thetaNumber >= 180)
+              if (thetaNumber >= kReconstructionMaxAngle)
                 thetaNumber -= 180;
               if (thetaNumber >= kReconstructionMaxAngle) {
                 std::cout << "Angle: " << angle << " rounded angle: " << thetaNumber << " x1: " << firstX << " y1: " << firstY << " x2: " << secondX << " y2: " << secondY << std::endl;
@@ -137,9 +137,9 @@ bool SinogramCreator::terminate()
     res << "P2" << std::endl;
     res << (*fSinogram[i])[0].size() << " " << fSinogram[i]->size() << std::endl;
     res << fMaxValueInSinogram[i] << std::endl;
-    for (unsigned int i = 0; i < fSinogram[i]->size(); i++) {
+    for (unsigned int k = 0; k < fSinogram[i]->size(); k++) {
       for (unsigned int j = 0; j < (*fSinogram[i])[0].size(); j++) {
-        res << (*fSinogram[i])[i][j] << " ";
+        res << (*fSinogram[i])[k][j] << " ";
       }
       res << std::endl;
     }
