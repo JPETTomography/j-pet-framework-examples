@@ -82,25 +82,25 @@ bool SinogramCreatorMC::init()
 
       if (angle >= M_PI) {
         angle = angle - M_PI;
+        distance = -distance;
       }
       angle *= 180.f / M_PI;
       if (angle >= 90.f)
         distance = -distance;
       getStatistics().getObject<TH1F>("angle")->Fill(angle);
-      if (std::abs(distance) > EPSILON && std::abs(angle) > EPSILON) {
-        int distanceRound = SinogramCreatorTools::roundToNearesMultiplicity(distance + fReconstructionLayerRadius, fReconstructionDistanceAccuracy); //displacement is calculated from center
-        int thetaNumber = std::round(angle);
-        if (thetaNumber >= kReconstructionMaxAngle) {
-          std::cout << "Angle: " << angle << " rounded angle: " << thetaNumber << " x1: " << firstX << " y1: " << firstY << " x2: " << secondX << " y2: " << secondY << std::endl;
-        }
-        if (distanceRound >= maxDistanceNumber) {
-          std::cout << "Distance round: " << distanceRound << " distance: " << distance << " norm: " << norm << " x1: " << firstX << " y1: " << firstY << " x2: " << secondX << " y2: " << secondY << std::endl;
-        }
-        currentValueInSinogram = ++fSinogram->at(distanceRound).at(thetaNumber);
-        if (currentValueInSinogram >= fMaxValueInSinogram)
-          fMaxValueInSinogram = currentValueInSinogram;                                    // save max value of sinogram
-        getStatistics().getObject<TH2I>("reconstuction_histogram")->Fill(distance + fReconstructionLayerRadius, angle); //add to histogram
+      int distanceRound = SinogramCreatorTools::roundToNearesMultiplicity(distance + fReconstructionLayerRadius, fReconstructionDistanceAccuracy); //displacement is calculated from center
+      int thetaNumber = std::round(angle);
+      if (thetaNumber >= kReconstructionMaxAngle) {
+        thetaNumber -= kReconstructionMaxAngle;
       }
+      if (distanceRound >= maxDistanceNumber) {
+        std::cout << "Distance round: " << distanceRound << " distance: " << distance << " norm: " << norm << " x1: " << firstX << " y1: " << firstY << " x2: " << secondX << " y2: " << secondY << std::endl;
+      }
+      currentValueInSinogram = ++fSinogram->at(distanceRound).at(thetaNumber);
+      if (currentValueInSinogram >= fMaxValueInSinogram)
+        fMaxValueInSinogram = currentValueInSinogram;                                    // save max value of sinogram
+      getStatistics().getObject<TH2I>("reconstuction_histogram")->Fill(distance + fReconstructionLayerRadius, angle); //add to histogram
+
     }
   }
   return true;
