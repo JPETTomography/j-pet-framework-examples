@@ -174,10 +174,11 @@ void SinogramCreator::setUpOptions()
 
   fMaxValueInSinogram = new int[fZSplitNumber];
   fCurrentValueInSinogram = new int[fZSplitNumber];
-  float range = 2 * fReconstructionLayerRadius;
+  const float maxZRange = 25.f;
+  float range = 2.f * maxZRange;
   for (int i = 0; i < fZSplitNumber; i ++) {
-    float rangeStart = (i * range) - fReconstructionLayerRadius;
-    float rangeEnd = ((i + 1) * range) - fReconstructionLayerRadius;
+    float rangeStart = (i * range) - maxZRange;
+    float rangeEnd = ((i + 1.f) * range) - maxZRange;
     fZSplitRange.push_back(std::make_pair(rangeStart, rangeEnd));
     fCurrentValueInSinogram[i] = 0;
   }
