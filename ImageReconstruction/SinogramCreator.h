@@ -56,19 +56,23 @@ private:
   bool checkLayer(const JPetHit& hit);
   using SinogramResultType = std::vector<std::vector<unsigned int>>;
 
-  SinogramResultType* fSinogram = nullptr;
+  SinogramResultType** fSinogram = nullptr;
 
   const std::string kOutFileNameKey = "SinogramCreator_OutFileName_std::string";
   const std::string kReconstructionLayerRadiusKey = "SinogramCreator_ReconstructionLayerRadius_float";
   const std::string kReconstructionDistanceAccuracy = "SinogramCreator_ReconstructionDistanceAccuracy_float";
+  const std::string kZSplitNumber = "SinogramCreator_SinogramZSplitNumber";
 
   const int kReconstructionMaxAngle = 180;
   const float EPSILON = 0.000001f;
+  int fZSplitNumber = 1;
+  std::vector<std::pair<float, float>> fZSplitRange;
 
   std::string fOutFileName = "sinogram.ppm";
-  unsigned int fMaxValueInSinogram = 0; // to fill later in output file
+  int* fMaxValueInSinogram = nullptr; // to fill later in output file
+  int* fCurrentValueInSinogram = nullptr;
 
-  float fReconstructionLayerRadius = 42.5f;
+  float fReconstructionLayerRadius = 57.5f;
   float fReconstructionDistanceAccuracy = 0.01f; // in cm, 0.1mm accuracy
 };
 
