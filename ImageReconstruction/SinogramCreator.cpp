@@ -145,10 +145,7 @@ bool SinogramCreator::terminate()
     }
     res.close();
   }
-  for (int i = 0; i < fZSplitNumber; i++) {
-    delete[] fSinogram[i];
-  }
-
+  delete [] fSinogram;
   delete [] fMaxValueInSinogram;
 
   return true;
