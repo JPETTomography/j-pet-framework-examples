@@ -173,7 +173,7 @@ void SinogramCreator::setUpOptions()
   fMaxValueInSinogram = new int[fZSplitNumber];
   fCurrentValueInSinogram = new int[fZSplitNumber];
   const float maxZRange = 25.f;
-  float range = 2.f * maxZRange;
+  float range = (2.f * maxZRange) / fZSplitNumber;
   for (int i = 0; i < fZSplitNumber; i ++) {
     float rangeStart = (i * range) - maxZRange;
     float rangeEnd = ((i + 1) * range) - maxZRange;
