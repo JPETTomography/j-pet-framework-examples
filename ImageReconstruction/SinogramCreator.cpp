@@ -51,7 +51,7 @@ bool SinogramCreator::exec()
   if (fSinogram == nullptr) {
     fSinogram = new SinogramResultType*[fZSplitNumber];
     for (int i = 0; i < fZSplitNumber; i++) {
-      fSinogram[i] = new SinogramResultType(maxDistanceNumber, (std::vector<unsigned int>(kReconstructionMaxAngle)));
+      fSinogram[i] = new SinogramResultType(maxDistanceNumber, (std::vector<unsigned int>(kReconstructionMaxAngle, 0)));
     }
   }
   if (const auto& timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
@@ -131,11 +131,10 @@ bool SinogramCreator::checkLayer(const JPetHit& hit)
 bool SinogramCreator::terminate()
 {
   for (int i = 0; i < fZSplitNumber; i ++) {
-    std::string name = fOutFileName.substr(0, fOutFileName.find("."))[0] + "_" + i + fOutFileName.substr(0, fOutFileName.find("."))[1];
-    std::ofstream res(name);
+    std::ofstream res(fOutFileName + std::to_string(i) + ".ppm");
     res << "P2" << std::endl;
-    res << (*fSinogram)[0].size() << " " << fSinogram[i]->size() << std::endl;
-    res << fMaxValueInSinogram << std::endl;
+    res << (*fSinogram[i])[0].size() << " " << fSinogram[i]->size() << std::endl;
+    res << fMaxValueInSinogram[i] << std::endl;
     for (unsigned int i = 0; i < fSinogram[i]->size(); i++) {
       for (unsigned int j = 0; j < (*fSinogram[i])[0].size(); j++) {
         res << (*fSinogram[i])[i][j] << " ";
@@ -178,7 +177,7 @@ void SinogramCreator::setUpOptions()
   float range = 2.f * maxZRange;
   for (int i = 0; i < fZSplitNumber; i ++) {
     float rangeStart = (i * range) - maxZRange;
-    float rangeEnd = ((i + 1.f) * range) - maxZRange;
+    float rangeEnd = ((i + 1) * range) - maxZRange;
     fZSplitRange.push_back(std::make_pair(rangeStart, rangeEnd));
     fCurrentValueInSinogram[i] = 0;
   }
