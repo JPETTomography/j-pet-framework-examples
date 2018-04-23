@@ -2,8 +2,8 @@
 
 function executeCommand {
     $@
-    rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
     echo "Exit code[" $@ "]: $rc"
+    rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 }
 
 executeCommand "mkdir -p build"
