@@ -94,7 +94,7 @@ bool HitFinder::exec()
   return true;
 }
 
-bool HitFinderTools::checkIsDegreeOrRad(const std::vector<JPetHit>& hits)
+bool HitFinder::checkIsDegreeOrRad(const std::vector<JPetHit>& hits)
 {
   for (const JPetHit& hit : hits) {
     if (hit.getBarrelSlot().getTheta() > 7.) {
