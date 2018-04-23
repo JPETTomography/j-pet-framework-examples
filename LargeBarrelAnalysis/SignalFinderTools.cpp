@@ -33,7 +33,7 @@ map<int, vector<JPetSigCh>> SignalFinderTools::getSigChsPMMapById(const JPetTime
     if (search == sigChsPMMap.end()) {
       vector<JPetSigCh> tmp;
       tmp.push_back(sigCh);
-      sigChsPMMap.insert(pair<int, vector<JPetSigCh>>(pmt_id, tmp));
+      sigChsPMMap.insert(make_pair(pmt_id, tmp));
     } else {
       search->second.push_back(sigCh);
     }

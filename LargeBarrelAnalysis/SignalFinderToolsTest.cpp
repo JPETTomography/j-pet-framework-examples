@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_CASE( getSigChsPMMapById_nullPointer )
 
 BOOST_AUTO_TEST_CASE( getSigChsPMMapById )
 {
-  JPetTimeWindow window;
+  JPetTimeWindow window("JPetSigCh");
   auto sigCh1 = JPetSigCh(JPetSigCh::Leading, 10);
   sigCh1.setThreshold(1);
   JPetPM pm1(1);
