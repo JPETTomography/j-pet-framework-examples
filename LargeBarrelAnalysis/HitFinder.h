@@ -66,9 +66,10 @@ protected :
   double kTimeWindowWidth = 50000; /// in ps -> 50ns. Maximal time difference between signals
 
 private:
+  bool checkIsDegreeOrRad(const std::vector<JPetHit>& hits);
+
   std::string fVelocityCalibrationFilePath = "resultsForThresholda.txt";
   HitFinderTools::VelocityMap fVelocityMap;
-
   HitFinderTools::VelocityMap readVelocityFile();
 };
 

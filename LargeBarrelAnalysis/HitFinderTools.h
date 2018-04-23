@@ -47,7 +47,6 @@ public:
   void setHitZPosition(JPetHit& hit, const VelocityMap& velMap);
   JPetHit createHit(const JPetPhysSignal& signalA, const JPetPhysSignal& signalB, const VelocityMap& velMap);
   JPetHit createDummyRefDefHit(const JPetPhysSignal& signalB, const VelocityMap& velMap);
-  bool checkIsDegreeOrRad(const std::vector<JPetHit>& hits);
 };
 
 #endif /*  !HITFINDERTOOLS_H */
