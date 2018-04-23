@@ -14,6 +14,7 @@ cmake_minimum_required(VERSION 2.6)
 set(projectName LargeBarrelAnalysis)
 
 set(AUXILIARY_FILES
+  run.sh
   README
   run.sh
 )
