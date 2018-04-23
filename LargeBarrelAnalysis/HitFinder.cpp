@@ -67,6 +67,7 @@ bool HitFinder::init()
 
 bool HitFinder::exec()
 {
+  bool isDegree = false;
   if (auto& timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     uint n = timeWindow->getNumberOfEvents();
     for (uint i = 0; i < n; ++i) {
@@ -78,16 +79,30 @@ bool HitFinder::exec()
                                   fAllSignalsInTimeWindow,
                                   kTimeWindowWidth,
                                   fVelocityMap);
+    if (!isDegree) {
+      isDegree = checkIsDegreeOrRad(hits);
+    }
     saveHits(hits);
     getStatistics().getHisto1D("hits_per_time_window")->Fill(hits.size());
     fAllSignalsInTimeWindow.clear();
+
   } else {
     return false;
   }
+  if (!isDegree)
+    WARNING("ALL barrel slots have theta < then 7, check is they have correct degree theta");
   return true;
 }
 
-
+bool HitFinderTools::checkIsDegreeOrRad(const std::vector<JPetHit>& hits)
+{
+  for (const JPetHit& hit : hits) {
+    if (hit.getBarrelSlot().getTheta() > 7.) {
+      return true;
+    }
+  }
+  return false;
+}
 
 bool HitFinder::terminate()
 {
