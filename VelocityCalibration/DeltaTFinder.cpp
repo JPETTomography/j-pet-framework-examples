@@ -24,10 +24,7 @@
 using namespace std;
 using namespace jpet_options_tools;
 
-DeltaTFinder::DeltaTFinder(const char* name): JPetUserTask(name)
-{
-
-}
+DeltaTFinder::DeltaTFinder(const char* name): JPetUserTask(name){}
 
 bool DeltaTFinder::init()
 {
@@ -106,7 +103,6 @@ const char* DeltaTFinder::formatUniqueSlotDescription(const JPetBarrelSlot& slot
 
 bool DeltaTFinder::exec()
 {
-
   if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     uint nhits = timeWindow->getNumberOfEvents();
     for (uint i = 0; i < nhits; ++i) {
@@ -115,8 +111,8 @@ bool DeltaTFinder::exec()
   } else {
     return false;
   }
-
   return true;
+
 }
 
 bool DeltaTFinder::terminate()
@@ -128,8 +124,6 @@ bool DeltaTFinder::terminate()
   thresholdConversionMap[2] = 'b';
   thresholdConversionMap[3] = 'c';
   thresholdConversionMap[4] = 'd';
-
-
 
   TString results_folder_name = (fOutputPath + "Results/position_" + boost::lexical_cast<std::string>(fPos)).c_str();
   system("mkdir -p " + results_folder_name);

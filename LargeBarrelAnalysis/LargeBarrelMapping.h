@@ -14,26 +14,29 @@
  */
 #ifndef _LARGE_BARREL_MAPPING_
 #define _LARGE_BARREL_MAPPING_
-#include <map>
-#include <vector>
+
 #include <JPetParamBank/JPetParamBank.h>
 #include <JPetHit/JPetHit.h>
+#include <vector>
+#include <map>
+
 class LargeBarrelMapping{
+
 public:
-	
-	LargeBarrelMapping();
-	LargeBarrelMapping(const JPetParamBank & paramBank);
-	virtual ~LargeBarrelMapping();
-	int getLayerNumber(const JPetLayer & layer) const;
-	int getNumberOfSlots(const JPetLayer & layer) const;
-	int getNumberOfSlots(int layerNumber) const;
-	int getSlotNumber(const JPetBarrelSlot & slot) const;
-	int calcDeltaID(const JPetHit & hit1,const JPetHit & hit2) const;
-	void buildMappings(const JPetParamBank & paramBank);
+  LargeBarrelMapping();
+  LargeBarrelMapping(const JPetParamBank & paramBank);
+  virtual ~LargeBarrelMapping();
+  int getLayerNumber(const JPetLayer & layer) const;
+  int getNumberOfSlots(const JPetLayer & layer) const;
+  int getNumberOfSlots(int layerNumber) const;
+  int getSlotNumber(const JPetBarrelSlot & slot) const;
+  int calcDeltaID(const JPetHit & hit1,const JPetHit & hit2) const;
+  void buildMappings(const JPetParamBank & paramBank);
+
 private:
-	std::map<double, int> fRadiusToLayer;
-	std::vector<std::map<double, int> > fThetaToSlot;
-	std::vector<int> fNumberOfSlotsInLayer;
+  std::vector<std::map<double, int> > fThetaToSlot;
+  std::vector<int> fNumberOfSlotsInLayer;
+  std::map<double, int> fRadiusToLayer;
 };
 
 #endif /* _LARGE_BARREL_MAPPING_ */
