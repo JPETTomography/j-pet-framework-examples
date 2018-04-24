@@ -15,7 +15,6 @@
 
 #include <JPetManager/JPetManager.h>
 #include "../LargeBarrelAnalysis/TimeWindowCreator.h"
-#include "../LargeBarrelAnalysis/TimeCalibLoader.h"
 #include "../LargeBarrelAnalysis/SignalFinder.h"
 #include "../LargeBarrelAnalysis/SignalTransformer.h"
 #include "../LargeBarrelAnalysis/HitFinder.h"
@@ -29,19 +28,17 @@ int main(int argc, const char* argv[])
   JPetManager& manager = JPetManager::getManager();
 
   manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
-  manager.registerTask<TimeCalibLoader>("TimeCalibLoader");
   manager.registerTask<SignalFinder>("SignalFinder");
-  manager.registerTask<SignalTransformer>("SignalTransformer"); 
-  manager.registerTask<HitFinder>("HitFinder"); 
-  manager.registerTask<DeltaTFinder>("DeltaTFinder"); 
-  
-  manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
-  manager.useTask("TimeCalibLoader", "tslot.raw", "tslot.calib");
+  manager.registerTask<SignalTransformer>("SignalTransformer");
+  manager.registerTask<HitFinder>("HitFinder");
+  manager.registerTask<DeltaTFinder>("DeltaTFinder");
+
+  manager.useTask("TimeWindowCreator", "hld", "tslot.calib");
   manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
   manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
   manager.useTask("HitFinder", "phys.sig", "hits");
   manager.useTask("DeltaTFinder", "hits", "deltaT");
 
   manager.run(argc, argv);
-  
+
 }
