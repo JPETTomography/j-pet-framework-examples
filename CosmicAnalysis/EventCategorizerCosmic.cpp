@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2017 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -32,27 +32,27 @@ bool EventCategorizerCosmic::init()
   
   fOutputEvents = new JPetTimeWindow("JPetEvent");
   
-  if ( isOptionSet(fParams.getOptions(), fMinCosmicTOTParamKey) )
-	kMinCosmicTOT = getOptionAsFloat(fParams.getOptions(), fMinCosmicTOTParamKey);
+  if ( isOptionSet(fParams.getOptions(), kMinCosmicTOTParamKey) )
+	fMinCosmicTOT = getOptionAsFloat(fParams.getOptions(), kMinCosmicTOTParamKey);
   
   
   if (fSaveControlHistos) 
   {
 	getStatistics().createHistogram(
-			new TH1F("Cosmic_TOT",
-			      "TOT of Cosmic Hits",
-			      1000, -0.5, 99.5)
+	  new TH1F("Cosmic_TOT",
+	    "TOT of Cosmic Hits",
+	    1000, -0.5, 99.5)
 	);
-		getStatistics().getHisto1D("Cosmic_TOT")->SetXTitle("TOT [ns]");
-		getStatistics().getHisto1D("Cosmic_TOT")->SetYTitle("Counts");
+	getStatistics().getHisto1D("Cosmic_TOT")->SetXTitle("TOT [ns]");
+	getStatistics().getHisto1D("Cosmic_TOT")->SetYTitle("Counts");
 	
 	getStatistics().createHistogram(
-			new TH1F("Cosmic_Hits_in_event",
-			      "Number of Cosmic Hits in Event", 
-			      50, -0.5, 49.5)
+	  new TH1F("Cosmic_Hits_in_event",
+	    "Number of Cosmic Hits in Event", 
+	    50, -0.5, 49.5)
 	);
-		getStatistics().getHisto1D("Cosmic_Hits_in_event")->SetXTitle("Number of Cosmic Hits in Event");
-		getStatistics().getHisto1D("Cosmic_Hits_in_event")->SetYTitle("Counts");
+	getStatistics().getHisto1D("Cosmic_Hits_in_event")->SetXTitle("Number of Cosmic Hits in Event");
+	getStatistics().getHisto1D("Cosmic_Hits_in_event")->SetYTitle("Counts");
   }
   return true;
 }
@@ -66,13 +66,12 @@ bool EventCategorizerCosmic::exec()
     for (uint i = 0; i < n; ++i) {
 
 	const auto& event = dynamic_cast<const JPetEvent&>(timeWindow->operator[](i));
-	unsigned cosmicHits = 0;
 	if (event.getHits().size() >= 1) 
 	{
 		vector<JPetHit> hits = event.getHits();	
-		JPetEvent CosmicEvent = cosmicAnalysis( hits );
-		if( CosmicEvent.getHits().size() )
-			events.push_back( CosmicEvent );
+		JPetEvent cosmicEvent = cosmicAnalysis( hits );
+		if( cosmicEvent.getHits().size() )
+			events.push_back( cosmicEvent );
 	}
 	
       
@@ -103,17 +102,17 @@ void EventCategorizerCosmic::saveEvents(const vector<JPetEvent>& events)
 
 JPetEvent EventCategorizerCosmic::cosmicAnalysis( vector<JPetHit> hits )
 {
-	JPetEvent CosmicEvent;
+	JPetEvent cosmicEvent;
 	for( unsigned i=0; i<hits.size(); i++ )
 	{
 		double TOTofHit = EventCategorizerTools::calcTOT( hits[i] );
-		if( TOTofHit >= kMinCosmicTOT/1000 )
+		if( TOTofHit >= fMinCosmicTOT/1000 )
 		{
-			CosmicEvent.addHit(hit);
+			cosmicEvent.addHit(hits[i]);
 			
 			//Uncomment if kCosmic type will be avalible
-			/*if( CosmicEvent.getEventType() != JPetEventType::kCosmic )
-				CosmicEvent.setEventType(JPetEventType::kCosmic);*/
+			/*if( cosmicEvent.getEventType() != JPetEventType::kCosmic )
+				cosmicEvent.setEventType(JPetEventType::kCosmic);*/
 			if( fSaveControlHistos )
 			{
 				getStatistics().getHisto1D("Cosmic_TOT")->Fill( TOTofHit );
@@ -122,7 +121,7 @@ JPetEvent EventCategorizerCosmic::cosmicAnalysis( vector<JPetHit> hits )
 	}
 	if( fSaveControlHistos )
 	{
-		getStatistics().getHisto1D("Cosmic_Hits_in_event")->Fill( CosmicEvent.getHits().size() );
+		getStatistics().getHisto1D("Cosmic_Hits_in_event")->Fill( cosmicEvent.getHits().size() );
 	}
-	return JPetEvent;
+	return cosmicEvent;
 }

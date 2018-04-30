@@ -41,7 +41,7 @@ int main(int argc, const char* argv[])
   manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
   manager.useTask("HitFinder", "phys.sig", "hits");
   manager.useTask("EventFinder", "hits", "unk.evt");
-  manager.useTask("EventCategorizerCosmic", "unk.evt", "cat.evt");
+  manager.useTask("EventCategorizerCosmic", "unk.evt", "cosm.evt");
   
   manager.run(argc, argv);
 }
