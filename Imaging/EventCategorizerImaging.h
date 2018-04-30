@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2017 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -39,10 +39,10 @@ public:
 	JPetEvent imageReconstruction( std::vector<JPetHit> hits );
 
 protected:
-	double kMinAnnihilationTOT = 10000.0;
-	double kMaxAnnihilationTOT = 25000.0;
-	const std::string fMinAnnihilationParamKey = "EventCategorizer_MinAnnihilationTOT_float";
-	const std::string fMaxAnnihilationParamKey = "EventCategorizer_MaxAnnihilationTOT_float";
+	double fMinAnnihilationTOT = 10000.0;
+	double fMaxAnnihilationTOT = 25000.0;
+	const std::string kMinAnnihilationParamKey = "EventCategorizer_MinAnnihilationTOT_float";
+	const std::string kMaxAnnihilationParamKey = "EventCategorizer_MaxAnnihilationTOT_float";
 	
 	void saveEvents(const std::vector<JPetEvent>& event);
 	bool fSaveControlHistos = true;
