@@ -21,6 +21,7 @@
 #include "../LargeBarrelAnalysis/HitFinder.h"
 #include "../LargeBarrelAnalysis/EventFinder.h"
 #include "EventCategorizerCosmic.h"
+
 using namespace std;
 
 int main(int argc, const char* argv[])
