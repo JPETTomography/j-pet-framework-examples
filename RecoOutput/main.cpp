@@ -21,6 +21,8 @@
 #include "../LargeBarrelAnalysis/HitFinder.h"
 #include "../LargeBarrelAnalysis/EventFinder.h"
 #include "../LargeBarrelAnalysis/EventCategorizer.h"
+#include "RecoOutput.h"
+
 using namespace std;
 
 int main(int argc, const char* argv[])
@@ -34,6 +36,7 @@ int main(int argc, const char* argv[])
   manager.registerTask<HitFinder>("HitFinder"); 
   manager.registerTask<EventFinder>("EventFinder");
   manager.registerTask<EventCategorizer>("EventCategorizer");
+  manager.registerTask<RecoOutput>("RecoOutput");
   
   manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
   manager.useTask("TimeCalibLoader", "tslot.raw", "tslot.calib");
@@ -42,6 +45,7 @@ int main(int argc, const char* argv[])
   manager.useTask("HitFinder", "phys.sig", "hits");
   manager.useTask("EventFinder", "hits", "unk.evt");
   manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
+  manager.useTask("RecoOutput","cat.evt","out.evt");
   
   manager.run(argc, argv);
 }
