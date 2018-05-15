@@ -22,10 +22,7 @@
 #define override
 #endif
 
-#include <JPetUserTask/JPetUserTask.h>
-#include <vector>
-#include <tuple>
-#include <limits>
+#include <utility>
 
 class SinogramCreatorTools
 {
@@ -33,6 +30,7 @@ public:
   using Point = std::pair<float, float>;
 
   static unsigned int roundToNearesMultiplicity(float numberToRound, float muliFactor);
+  static int calcuateAngle(float firstX, float secondX, float firstY, float secondY, float distance);
 
 private :
   SinogramCreatorTools() = delete;
@@ -40,6 +38,7 @@ private :
   SinogramCreatorTools(const SinogramCreatorTools&) = delete;
   SinogramCreatorTools& operator=(const SinogramCreatorTools&) = delete;
 
+  static constexpr float EPSILON = 0.000001f;
 };
 
 #endif /*  !SINOGRAMCREATORTOOLS_H */

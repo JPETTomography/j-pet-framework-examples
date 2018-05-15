@@ -47,7 +47,7 @@ bool SinogramCreator::init()
 
 bool SinogramCreator::exec()
 {
-  int maxDistanceNumber = std::ceil(fReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
+  const int maxDistanceNumber = std::ceil(fReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
   if (fSinogram == nullptr) {
     fSinogram = new SinogramResultType*[fZSplitNumber];
     for (int i = 0; i < fZSplitNumber; i++) {
@@ -55,67 +55,48 @@ bool SinogramCreator::exec()
     }
   }
   if (const auto& timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
-    unsigned int numberOfEventsInTimeWindow = timeWindow->getNumberOfEvents();
+    const unsigned int numberOfEventsInTimeWindow = timeWindow->getNumberOfEvents();
     for (unsigned int i = 0; i < numberOfEventsInTimeWindow; i++) {
-      auto event = dynamic_cast<const JPetEvent&>(timeWindow->operator[](static_cast<int>(i)));
-      auto hits = event.getHits();
-      if (hits.size() == 2) {
-        const auto& firstHit = hits[0];
-        const auto& secondHit = hits[1];
-        float firstX = firstHit.getPosX();
-        float firstY = firstHit.getPosY();
-        float secondX = secondHit.getPosX();
-        float secondY = secondHit.getPosY(); // copy positions
+      const auto event = dynamic_cast<const JPetEvent&>(timeWindow->operator[](static_cast<int>(i)));
+      const auto hits = event.getHits();
+      if (hits.size() != 2) {
+        continue;
+      }
+      const auto& firstHit = hits[0];
+      const auto& secondHit = hits[1];
+      const float firstX = firstHit.getPosX();
+      const float firstY = firstHit.getPosY();
+      const float secondX = secondHit.getPosX();
+      const float secondY = secondHit.getPosY(); // copy positions
 
-        float firstZ = firstHit.getPosZ();
-        float secondZ = secondHit.getPosZ();
+      const float firstZ = firstHit.getPosZ();
+      const float secondZ = secondHit.getPosZ();
 
-        for (int i = 0; i < fZSplitNumber; i ++) {
-          if (firstZ >= fZSplitRange[i].first && firstZ <= fZSplitRange[i].second
-              && secondZ >= fZSplitRange[i].first && secondZ <= fZSplitRange[i].second ) {
-            float distance = (secondX * firstY) - (secondY * firstX);
-
-            float norm = std::sqrt(std::pow((secondY - firstY), 2) + std::pow((secondX - firstX), 2));
-            if (norm > 0.f) {
-              distance /= norm;
-              getStatistics().getObject<TH1F>("pos_dis")->Fill(distance);
-              float angle = 0.f;
-              if (std::abs(secondX - firstX) > EPSILON)
-                angle = std::atan((firstY - secondY) / (secondX - firstX));
-
-              if (distance > 0.f)
-                angle = angle + M_PI / 2.f;
-              else
-                angle = angle + 3.f * M_PI / 2.f;
-
-              if (angle > M_PI) {
-                angle = angle - M_PI;
-              }
-              angle *= 180.f / M_PI;
-              if (angle >= 90.f)
-                distance = -distance;
-              getStatistics().getObject<TH1F>("angle")->Fill(angle);
-              int distanceRound = SinogramCreatorTools::roundToNearesMultiplicity(distance + fReconstructionLayerRadius, fReconstructionDistanceAccuracy);
-              int thetaNumber = std::round(angle);
-              if (thetaNumber >= kReconstructionMaxAngle)
-                thetaNumber -= 180;
-              if (thetaNumber >= kReconstructionMaxAngle) {
-                std::cout << "Angle: " << angle << " rounded angle: " << thetaNumber << " x1: " << firstX << " y1: " << firstY << " x2: " << secondX << " y2: " << secondY << std::endl;
-              }
-              if (distanceRound >= maxDistanceNumber) {
-                std::cout << "Distance round: " << distanceRound << " distance: " << distance << " norm: " << norm << " x1: " << firstX << " y1: " << firstY << " x2: " << secondX << " y2: " << secondY << std::endl;
-              }
-              fCurrentValueInSinogram[i] = ++fSinogram[i]->at(distanceRound).at(thetaNumber);
-              if (fCurrentValueInSinogram[i] >= fMaxValueInSinogram[i])
-                fMaxValueInSinogram[i] = fCurrentValueInSinogram[i];                                                                 // save max value of sinogram
-              getStatistics().getObject<TH2I>("reconstuction_histogram")->Fill(distance + fReconstructionLayerRadius, angle); //add to histogram
-            }
-          } else {
-            continue;
-          }
+      for (int i = 0; i < fZSplitNumber; i ++) {
+        if (!checkSplitRange(firstZ, secondZ, i)) {
+          continue;
         }
 
+        float distance = (secondX * firstY) - (secondY * firstX);
+        const float norm = std::sqrt(std::pow((secondY - firstY), 2) + std::pow((secondX - firstX), 2));
 
+        if (norm <= EPSILON) {
+          continue;
+        }
+
+        distance /= norm;
+        getStatistics().getObject<TH1F>("pos_dis")->Fill(distance);
+        const int angle = SinogramCreatorTools::calcuateAngle(firstX, secondX, firstY, secondY, distance);
+
+        if (angle > 90)
+          distance = -distance;
+        getStatistics().getObject<TH1F>("angle")->Fill(angle);
+        int distanceRound = SinogramCreatorTools::roundToNearesMultiplicity(distance + fReconstructionLayerRadius, fReconstructionDistanceAccuracy);
+        fCurrentValueInSinogram[i] = ++fSinogram[i]->at(distanceRound).at(angle);
+        if (fCurrentValueInSinogram[i] >= fMaxValueInSinogram[i]) {
+          fMaxValueInSinogram[i] = fCurrentValueInSinogram[i];                                                          // save max value of sinogram
+        }
+        getStatistics().getObject<TH2I>("reconstuction_histogram")->Fill(distance + fReconstructionLayerRadius, angle); //add to histogram
       }
     }
   } else {
@@ -125,9 +106,9 @@ bool SinogramCreator::exec()
   return true;
 }
 
-bool SinogramCreator::checkLayer(const JPetHit& hit)
+bool SinogramCreator::checkSplitRange(float firstZ, float secondZ, int i)
 {
-  return hit.getBarrelSlot().getLayer().getID() == 1;
+  return firstZ >= fZSplitRange[i].first && firstZ <= fZSplitRange[i].second && secondZ >= fZSplitRange[i].first && secondZ <= fZSplitRange[i].second;
 }
 
 bool SinogramCreator::terminate()
@@ -170,9 +151,13 @@ void SinogramCreator::setUpOptions()
     fZSplitNumber = getOptionAsInt(opts, kZSplitNumber);
   }
 
+  if (isOptionSet(opts, kScintillatorLenght)) {
+    fScintillatorLenght = getOptionAsFloat(opts, kScintillatorLenght);
+  }
+
   fMaxValueInSinogram = new int[fZSplitNumber];
   fCurrentValueInSinogram = new int[fZSplitNumber];
-  const float maxZRange = 25.f;
+  const float maxZRange = fScintillatorLenght / 2.f;
   float range = (2.f * maxZRange) / fZSplitNumber;
   for (int i = 0; i < fZSplitNumber; i ++) {
     float rangeStart = (i * range) - maxZRange;

@@ -19,3 +19,23 @@ unsigned int SinogramCreatorTools::roundToNearesMultiplicity(float numberToRound
 {
   return std::floor((numberToRound / accuracy) + (accuracy / 2));
 }
+
+int SinogramCreatorTools::calcuateAngle(float firstX, float secondX, float firstY, float secondY, float distance)
+{
+  float angle = 0.f;
+  if (std::abs(secondX - firstX) > EPSILON)
+    angle = std::atan((firstY - secondY) / (secondX - firstX));
+
+  if (distance > 0.f)
+    angle = angle + M_PI / 2.f;
+  else
+    angle = angle + 3.f * M_PI / 2.f;
+
+  if (angle > M_PI) {
+    angle = angle - M_PI;
+  }
+  angle *= 180.f / M_PI;
+
+  int angleRound = std::round(angle);
+  return angleRound >= 180 ? angleRound - 180 : angleRound;
+}

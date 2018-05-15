@@ -31,13 +31,16 @@
 /**
  * @brief Module creating sinogram from data
  *
- * It implements creating sinogram from data, but only for 1st layer.
+ * Input: *.unk.evt
+ * Output: *.sino with root diagrams and sinogram*.ppm with calculated sinogram.
  *
- * It defines 6 user options:
+ *
+ * It defines 5 user options:
  * - "SinogramCreator_OutFileName_std::string": defines output file name where sinogram is saved
  * - "SinogramCreator_ReconstructionLayerRadius_float": defines radius of reconstruction layer
  * - "SinogramCreator_ReconstructionDistanceAccuracy_float": defines maximal round value for distance, in cm, e.g. 0.1 means 1 bin in sinogram corresponds to 0.1 cm in reality
- *
+ * - "SinogramCreator_SinogramZSplitNumber_int": defines number of splits around "z" coordinate
+ * - "SinogramCreator_ScintillatorLenght_float": defines scintillator lenght in "z" coordinate
  */
 class SinogramCreator : public JPetUserTask
 {
@@ -53,7 +56,7 @@ private:
   SinogramCreator& operator=(const SinogramCreator&) = delete;
 
   void setUpOptions();
-  bool checkLayer(const JPetHit& hit);
+  bool checkSplitRange(float firstZ, float secondZ, int i);
   using SinogramResultType = std::vector<std::vector<unsigned int>>;
 
   SinogramResultType** fSinogram = nullptr;
@@ -61,19 +64,21 @@ private:
   const std::string kOutFileNameKey = "SinogramCreator_OutFileName_std::string";
   const std::string kReconstructionLayerRadiusKey = "SinogramCreator_ReconstructionLayerRadius_float";
   const std::string kReconstructionDistanceAccuracy = "SinogramCreator_ReconstructionDistanceAccuracy_float";
-  const std::string kZSplitNumber = "SinogramCreator_SinogramZSplitNumber";
+  const std::string kZSplitNumber = "SinogramCreator_SinogramZSplitNumber_int";
+  const std::string kScintillatorLenght = "SinogramCreator_ScintillatorLenght_float";
 
   const int kReconstructionMaxAngle = 180;
   const float EPSILON = 0.000001f;
   int fZSplitNumber = 1;
   std::vector<std::pair<float, float>> fZSplitRange;
 
-  std::string fOutFileName = "sinogram.ppm";
+  std::string fOutFileName = "sinogram";
   int* fMaxValueInSinogram = nullptr; // to fill later in output file
   int* fCurrentValueInSinogram = nullptr;
 
-  float fReconstructionLayerRadius = 57.5f;
-  float fReconstructionDistanceAccuracy = 0.01f; // in cm, 0.1mm accuracy
+  float fReconstructionLayerRadius = 57.5f; //in cm
+  float fReconstructionDistanceAccuracy = 0.1f; // in cm, 0.1mm accuracy
+  float fScintillatorLenght = 50.0f; //in cm
 };
 
 #endif /*  !SINOGRAMCREATOR_H */
