@@ -13,7 +13,6 @@
  * Purpose: Time calibration with data measured with reference detector
  *  @file InterThresholdCalibration.h
  */
-
 #ifndef InterThresholdCalibration_H 
 #define InterThresholdCalibration_H 
 #include <JPetUserTask/JPetUserTask.h>
