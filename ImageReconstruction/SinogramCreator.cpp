@@ -31,10 +31,10 @@ bool SinogramCreator::init()
 
   getStatistics().createHistogram(new TH2I("reconstuction_histogram",
                                            "reconstuction histogram",
-                                           std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1, 0.f, fReconstructionLayerRadius,
+                                           std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1, 0.f, fMaxReconstructionLayerRadius,
                                            kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
 
-  getStatistics().createHistogram(new TH1F("pos_dis", "Position distance real data", (fReconstructionLayerRadius)*10 * 5, 0.f, fReconstructionLayerRadius));
+  getStatistics().createHistogram(new TH1F("pos_dis", "Position distance real data", (fMaxReconstructionLayerRadius)*10 * 5, 0.f, fMaxReconstructionLayerRadius));
   getStatistics().createHistogram(new TH1F("angle", "Position angle real data", kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
 
   getStatistics().getObject<TH2I>("reconstuction_histogram")->SetBit(TH2::kCanRebin);
@@ -178,7 +178,7 @@ void SinogramCreator::setUpOptions()
     if (maxLayerRadius < layer.getRadius())
       maxLayerRadius = layer.getRadius();
   }
-
+  fMaxReconstructionLayerRadius = maxLayerRadius;
   fMaxValueInSinogram = new int[fZSplitNumber];
   fCurrentValueInSinogram = new int[fZSplitNumber];
   const float maxZRange = fScintillatorLenght / 2.f;

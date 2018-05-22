@@ -23,6 +23,7 @@
 #endif
 
 #include <utility>
+#include <cmath>
 
 class SinogramCreatorTools
 {
@@ -32,11 +33,11 @@ public:
   static unsigned int roundToNearesMultiplicity(float numberToRound, float muliFactor);
   static int calcuateAngle(float firstX, float secondX, float firstY, float secondY, float distance);
 
-private :
+private:
   SinogramCreatorTools() = delete;
   ~SinogramCreatorTools() = delete;
-  SinogramCreatorTools(const SinogramCreatorTools&) = delete;
-  SinogramCreatorTools& operator=(const SinogramCreatorTools&) = delete;
+  SinogramCreatorTools(const SinogramCreatorTools &) = delete;
+  SinogramCreatorTools &operator=(const SinogramCreatorTools &) = delete;
 
   static constexpr float EPSILON = 0.000001f;
 };
