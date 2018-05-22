@@ -45,24 +45,23 @@
 class SinogramCreator : public JPetUserTask
 {
 public:
-  SinogramCreator(const char* name);
+  SinogramCreator(const char *name);
   virtual ~SinogramCreator();
   virtual bool init() override;
   virtual bool exec() override;
   virtual bool terminate() override;
 
 private:
-  SinogramCreator(const SinogramCreator&) = delete;
-  SinogramCreator& operator=(const SinogramCreator&) = delete;
+  SinogramCreator(const SinogramCreator &) = delete;
+  SinogramCreator &operator=(const SinogramCreator &) = delete;
 
   void setUpOptions();
   bool checkSplitRange(float firstZ, float secondZ, int i);
   using SinogramResultType = std::vector<std::vector<unsigned int>>;
 
-  SinogramResultType** fSinogram = nullptr;
+  SinogramResultType **fSinogram = nullptr;
 
   const std::string kOutFileNameKey = "SinogramCreator_OutFileName_std::string";
-  const std::string kReconstructionLayerRadiusKey = "SinogramCreator_ReconstructionLayerRadius_float";
   const std::string kReconstructionDistanceAccuracy = "SinogramCreator_ReconstructionDistanceAccuracy_float";
   const std::string kZSplitNumber = "SinogramCreator_SinogramZSplitNumber_int";
   const std::string kScintillatorLenght = "SinogramCreator_ScintillatorLenght_float";
@@ -73,12 +72,12 @@ private:
   std::vector<std::pair<float, float>> fZSplitRange;
 
   std::string fOutFileName = "sinogram";
-  int* fMaxValueInSinogram = nullptr; // to fill later in output file
-  int* fCurrentValueInSinogram = nullptr;
+  int *fMaxValueInSinogram = nullptr; // to fill later in output file
+  int *fCurrentValueInSinogram = nullptr;
 
-  float fReconstructionLayerRadius = 57.5f; //in cm
-  float fReconstructionDistanceAccuracy = 0.1f; // in cm, 0.1mm accuracy
-  float fScintillatorLenght = 50.0f; //in cm
+  float fMaxReconstructionLayerRadius = 0.f;    //in cm
+  float fReconstructionDistanceAccuracy = 0.1f; //in cm, 1mm accuracy
+  float fScintillatorLenght = 50.0f;            //in cm
 };
 
 #endif /*  !SINOGRAMCREATOR_H */
