@@ -23,6 +23,7 @@
 #endif
 
 #include "JPetUserTask/JPetUserTask.h"
+#include "JPetGeomMapping/JPetGeomMapping.h"
 #include "SinogramCreatorTools.h"
 #include "JPetHit/JPetHit.h"
 #include <vector>

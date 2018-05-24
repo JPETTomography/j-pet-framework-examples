@@ -147,14 +147,9 @@ void SinogramCreator::setUpOptions()
   }
 
   const JPetParamBank bank = getParamBank();
-  const auto layersSize = bank.getLayersSize();
-  float maxLayerRadius = 57.5f;
-  /*for (int i = 0; i < layersSize; i++) {
-    const auto layer = bank.getLayer(i);
-    if (maxLayerRadius < layer.getRadius())
-      maxLayerRadius = layer.getRadius();
-  }*/
-  fMaxReconstructionLayerRadius = maxLayerRadius;
+  const JPetGeomMapping mapping(bank);
+  fMaxReconstructionLayerRadius = mapping.getRadiusOfLayer(mapping.getLayersCount());
+
   fMaxValueInSinogram = new int[fZSplitNumber];
   fCurrentValueInSinogram = new int[fZSplitNumber];
   const float maxZRange = fScintillatorLenght / 2.f;
