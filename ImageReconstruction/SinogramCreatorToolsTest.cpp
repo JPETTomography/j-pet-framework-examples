@@ -25,13 +25,18 @@ BOOST_AUTO_TEST_CASE(test_angle)
 
 BOOST_AUTO_TEST_CASE(test_distance)
 {
-  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateDistance(0.f, 0.f, 0.f, 0.f), 0);
-  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateDistance(0.f, 0.f, -1.f, 0.f), -0);
-  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateDistance(0.f, 0.f, 1.f, 0.f), 0);
-  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateDistance(1.f, 1.f, -1.f, 1.f), 1);
-  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateDistance(-1.f, 1.f, 1.f, 1.f), 1);
-  BOOST_REQUIRE_CLOSE(SinogramCreatorTools::calculateDistance(0.f, 1.f, 1.f, 0.f), std::sqrt(0.5f), 0.0001f);
-  BOOST_REQUIRE_CLOSE(SinogramCreatorTools::calculateDistance(1.f, 0.f, 0.f, 1.f), std::sqrt(0.5f), 0.0001f);
+  const float EPSILON = 0.00001f;
+  BOOST_REQUIRE_CLOSE(SinogramCreatorTools::calculateDistance(0.f, 0.f, 0.f, 0.f), 0, EPSILON);
+  BOOST_REQUIRE_CLOSE(SinogramCreatorTools::calculateDistance(0.f, 0.f, -1.f, 0.f), -0, EPSILON);
+  BOOST_REQUIRE_CLOSE(SinogramCreatorTools::calculateDistance(0.f, 0.f, 1.f, 0.f), 0, EPSILON);
+  BOOST_REQUIRE_CLOSE(SinogramCreatorTools::calculateDistance(1.f, 1.f, -1.f, 1.f), 1, EPSILON);
+  BOOST_REQUIRE_CLOSE(SinogramCreatorTools::calculateDistance(-1.f, 1.f, 1.f, 1.f), 1, EPSILON);
+  BOOST_REQUIRE_CLOSE(SinogramCreatorTools::calculateDistance(0.f, 1.f, 1.f, 0.f), std::sqrt(0.5f), EPSILON);
+  BOOST_REQUIRE_CLOSE(SinogramCreatorTools::calculateDistance(1.f, 0.f, 0.f, 1.f), std::sqrt(0.5f), EPSILON);
+  BOOST_REQUIRE_CLOSE(SinogramCreatorTools::calculateDistance(-1.f, 0.f, 1.f, 0.f), 0, EPSILON);
+  BOOST_REQUIRE_CLOSE(SinogramCreatorTools::calculateDistance(1.f, 0.f, -1.f, 0.f), 0, EPSILON);
+  BOOST_REQUIRE_CLOSE(SinogramCreatorTools::calculateDistance(0.f, 1.f, 0.f, -1.f), 0, EPSILON);
+  BOOST_REQUIRE_CLOSE(SinogramCreatorTools::calculateDistance(0.f, -1.f, 0.f, 1.f), 0, EPSILON);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
