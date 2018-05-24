@@ -64,10 +64,10 @@ bool SinogramCreator::exec()
       }
       const auto& firstHit = hits[0];
       const auto& secondHit = hits[1];
-      const float firstY = firstHit.getPosX();
-      const float firstX = firstHit.getPosY();
-      const float secondY = secondHit.getPosX();
-      const float secondX = secondHit.getPosY(); // copy positions
+      const float firstX = firstHit.getPosX();
+      const float firstY = firstHit.getPosY();
+      const float secondX = secondHit.getPosX();
+      const float secondY = secondHit.getPosY(); // copy positions
 
       const float firstZ = firstHit.getPosZ();
       const float secondZ = secondHit.getPosZ();
