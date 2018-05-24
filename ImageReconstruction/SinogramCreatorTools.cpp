@@ -37,13 +37,14 @@ int SinogramCreatorTools::calculateAngle(float firstX, float firstY, float secon
 
 float SinogramCreatorTools::calculateDistance(float firstX, float firstY, float secondX, float secondY)
 {
-  if (firstX > secondX) {
+  if (firstX > secondX)
+  {
     std::swap(firstX, secondX);
     std::swap(firstY, secondY);
   }
   float norm = calculateNorm(firstX, firstY, secondX, secondY);
-  std::cout << norm << std::endl;
-  if (std::abs(norm) < 0.000001f) {
+  if (std::abs(norm) < 0.000001f)
+  {
     return 0;
   }
   return ((secondX * firstY) - (secondY * firstX)) / norm;
