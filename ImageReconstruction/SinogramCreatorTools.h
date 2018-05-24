@@ -31,7 +31,9 @@ public:
   using Point = std::pair<float, float>;
 
   static unsigned int roundToNearesMultiplicity(float numberToRound, float muliFactor);
-  static int calcuateAngle(float firstX, float secondX, float firstY, float secondY, float distance);
+  static int calculateAngle(float firstX, float firstY, float secondX, float secondY);
+
+  static float calculateDistance(float firstX, float firstY, float secondX, float secondY);
 
 private:
   SinogramCreatorTools() = delete;
@@ -39,7 +41,7 @@ private:
   SinogramCreatorTools(const SinogramCreatorTools &) = delete;
   SinogramCreatorTools &operator=(const SinogramCreatorTools &) = delete;
 
-  static constexpr float EPSILON = 0.000001f;
+  static float calculateNorm(float firstX, float firstY, float secondX, float secondY);
 };
 
 #endif /*  !SINOGRAMCREATORTOOLS_H */

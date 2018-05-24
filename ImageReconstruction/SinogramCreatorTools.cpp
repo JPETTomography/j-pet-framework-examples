@@ -15,27 +15,41 @@
 
 #include "SinogramCreatorTools.h"
 
+#include <iostream> //TODO DELETE
+
 unsigned int SinogramCreatorTools::roundToNearesMultiplicity(float numberToRound, float accuracy)
 {
   return std::floor((numberToRound / accuracy) + (accuracy / 2));
 }
 
-int SinogramCreatorTools::calcuateAngle(float firstX, float secondX, float firstY, float secondY, float distance)
+int SinogramCreatorTools::calculateAngle(float firstX, float firstY, float secondX, float secondY)
 {
+  float dx = firstX - secondX;
+  float dy = firstY - secondY;
   float angle = 0.f;
-  if (std::abs(secondX - firstX) > EPSILON)
-    angle = std::atan((firstY - secondY) / (secondX - firstX));
+  angle = std::atan2(dy, dx) * 180.f / M_PI;
 
-  if (distance > 0.f)
-    angle = angle + M_PI / 2.f;
-  else
-    angle = angle + 3.f * M_PI / 2.f;
-
-  if (angle > M_PI) {
-    angle = angle - M_PI;
-  }
-  angle *= 180.f / M_PI;
-
+  if (angle < 0.f)
+    angle = angle + 180.f;
   int angleRound = std::round(angle);
   return angleRound >= 180 ? angleRound - 180 : angleRound;
+}
+
+float SinogramCreatorTools::calculateDistance(float firstX, float firstY, float secondX, float secondY)
+{
+  if (firstX > secondX) {
+    std::swap(firstX, secondX);
+    std::swap(firstY, secondY);
+  }
+  float norm = calculateNorm(firstX, firstY, secondX, secondY);
+  std::cout << norm << std::endl;
+  if (std::abs(norm) < 0.000001f) {
+    return 0;
+  }
+  return ((secondX * firstY) - (secondY * firstX)) / norm;
+}
+
+float SinogramCreatorTools::calculateNorm(float firstX, float firstY, float secondX, float secondY)
+{
+  return std::sqrt(std::pow((secondY - firstY), 2) + std::pow((secondX - firstX), 2));
 }

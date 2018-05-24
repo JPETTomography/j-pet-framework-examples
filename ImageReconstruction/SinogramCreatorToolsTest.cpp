@@ -17,4 +17,21 @@ BOOST_AUTO_TEST_CASE(roundToNearesMultiplicity_test)
   BOOST_REQUIRE_EQUAL(SinogramCreatorTools::roundToNearesMultiplicity(0.02f, 0.01f), 2u);
 }
 
+BOOST_AUTO_TEST_CASE(test_angle)
+{
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(0.f, 0.f, 0.f, 0.f), 0);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(0.f, 0.f, -1.f, 0.f), 0);
+}
+
+BOOST_AUTO_TEST_CASE(test_distance)
+{
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateDistance(0.f, 0.f, 0.f, 0.f), 0);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateDistance(0.f, 0.f, -1.f, 0.f), -0);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateDistance(0.f, 0.f, 1.f, 0.f), 0);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateDistance(1.f, 1.f, -1.f, 1.f), 1);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateDistance(-1.f, 1.f, 1.f, 1.f), 1);
+  BOOST_REQUIRE_CLOSE(SinogramCreatorTools::calculateDistance(0.f, 1.f, 1.f, 0.f), std::sqrt(0.5f), 0.0001f);
+  BOOST_REQUIRE_CLOSE(SinogramCreatorTools::calculateDistance(1.f, 0.f, 0.f, 1.f), std::sqrt(0.5f), 0.0001f);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
