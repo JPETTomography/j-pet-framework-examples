@@ -17,10 +17,23 @@ BOOST_AUTO_TEST_CASE(roundToNearesMultiplicity_test)
   BOOST_REQUIRE_EQUAL(SinogramCreatorTools::roundToNearesMultiplicity(0.02f, 0.01f), 2u);
 }
 
+BOOST_AUTO_TEST_CASE(test_angle_middle)
+{
+  for (int i = 0; i < 180; i++) {
+    float x = std::cos(i / M_PI);
+    float y = std::sin(i / M_PI);
+    BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(x, y, -x, -y), i);
+  }
+}
+
 BOOST_AUTO_TEST_CASE(test_angle)
 {
   BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(0.f, 0.f, 0.f, 0.f), 0);
   BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(0.f, 0.f, -1.f, 0.f), 0);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(-1.f, 0.f, 1.f, 0.f), 0);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(1.f, 0.f, -1.f, 0.f), 0);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(0.f, 1.f, 0.f, -1.f), 90);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(0.f, -1.f, 0.f, 1.f), 90);
 }
 
 BOOST_AUTO_TEST_CASE(test_distance)
