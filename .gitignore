@@ -44,6 +44,10 @@ ScopeLoaderExample/cfg/data/1/
 LargeBarrelExample
 
 build/
+build_jsrv03/
+LargeBarrelAnalysis/*.txt
+
+*.swp
 
 *.json
 
