@@ -23,6 +23,7 @@ set(AUXILLIARY_FILES
   calib_run_3/run2_thirdAttempt_Sync9.db
   calib_run_3/TimeConstants_Run3.txt
   calib_run_3/tot_calib_dabc17083123644_a.root
+  calib_run_3/resultsForThresholda.txt
   )
 
 set(ROOT_SCRIPTS
@@ -36,43 +37,14 @@ project(${projectName} CXX) # using only C++
 
 file(GLOB HEADERS *.h)
 file(GLOB SOURCES *.cpp)
+file(GLOB MAIN_CPP main.cpp)
+file(GLOB UNIT_TEST_SOURCES *Test.cpp)
+list(REMOVE_ITEM SOURCES ${UNIT_TEST_SOURCES})
 
-######################################################################
-### Use source files of modules from LargeBarrelAnalysis
-###
-### If you are using your own version of some module which
-### is also presenr in LargeBarrelAnalysis,
-### comment out the respective lines below so as not to use
-### this module's source from LargeBarrelAnalysis.
-######################################################################
-#set(use_modules_from ../LargeBarrelAnalysis)
-##
-#list(APPEND HEADERS ${use_modules_from}/TimeWindowCreator.h)
-#list(APPEND SOURCES ${use_modules_from}/TimeWindowCreator.cpp)
-##
-#list(APPEND HEADERS ${use_modules_from}/TimeCalibLoader.h)
-#list(APPEND SOURCES ${use_modules_from}/TimeCalibLoader.cpp)
-#list(APPEND HEADERS ${use_modules_from}/TimeCalibTools.h)
-#list(APPEND SOURCES ${use_modules_from}/TimeCalibTools.cpp)
-##
-#list(APPEND HEADERS ${use_modules_from}/SignalFinder.h)
-#list(APPEND SOURCES ${use_modules_from}/SignalFinder.cpp)
-#list(APPEND HEADERS ${use_modules_from}/SignalFinderTools.h)
-#list(APPEND SOURCES ${use_modules_from}/SignalFinderTools.cpp)
-##
-#list(APPEND HEADERS ${use_modules_from}/SignalTransformer.h)
-#list(APPEND SOURCES ${use_modules_from}/SignalTransformer.cpp)
-##
-#list(APPEND HEADERS ${use_modules_from}/HitFinder.h)
-#list(APPEND SOURCES ${use_modules_from}/HitFinder.cpp)
-#list(APPEND HEADERS ${use_modules_from}/HitFinderTools.h)
-#list(APPEND SOURCES ${use_modules_from}/HitFinderTools.cpp)
-##
-#list(APPEND HEADERS ${use_modules_from}/EventFinder.h)
-#list(APPEND SOURCES ${use_modules_from}/EventFinder.cpp)
-##
-#list(APPEND HEADERS ${use_modules_from}/EventCategorizer.h)
-#list(APPEND SOURCES ${use_modules_from}/EventCategorizer.cpp)
+file(GLOB SOURCES_WITHOUT_MAIN *.cpp)
+list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${UNIT_TEST_SOURCES})
+list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${MAIN_CPP})
+
 
 include_directories(${Framework_INCLUDE_DIRS})
 add_definitions(${Framework_DEFINITIONS})
