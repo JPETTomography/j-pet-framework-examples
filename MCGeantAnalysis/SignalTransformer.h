@@ -16,18 +16,25 @@
 #ifndef SIGNALTRANSFORMER_H
 #define SIGNALTRANSFORMER_H
 
-#include "JPetUserTask/JPetUserTask.h"
 #include "JPetRecoSignal/JPetRecoSignal.h"
+#include "JPetUserTask/JPetUserTask.h"
 
 #ifdef __CINT__
-#   define override
+#define override
 #endif
+
+/**
+ * @brief User Task: method rewriting Raw Signals to Reco and Phys Signals.
+ *
+ * Task organizes rewrites Raw Signals to Reco Signals and Physical Signals,
+ * saving JPetPhysSignal. Only time of the signal is set, the rest of available
+ * fields are set to -1.
+ */
 
 class JPetWriter;
 
 class SignalTransformer: public JPetUserTask
 {
-
 public:
 	SignalTransformer(const char* name);
 	virtual bool init() override;

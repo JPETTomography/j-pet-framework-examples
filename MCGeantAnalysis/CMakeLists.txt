@@ -1,6 +1,5 @@
 # J-PET tool project using J-PET framework
 #
-# Author: Adam Strzelecki <adam.strzelecki@uj.edu.pl>
 #
 # Description:
 #   Builds project depending on J-PET framework.
@@ -15,15 +14,11 @@ set(projectName MCGeantAnalysis)
 
 set(AUXILLIARY_FILES
   README.md
-  run_mc.sh
-  run_data.sh
-  calib_run_3/conf_trb3.xml
-  calib_run_3/userParams.json
-  calib_run_3/detectorSetupRun2345.json
-  calib_run_3/run2_thirdAttempt_Sync9.db
-  calib_run_3/TimeConstants_Run3.txt
-  calib_run_3/tot_calib_dabc17083123644_a.root
-  calib_run_3/resultsForThresholda.txt
+  run.sh
+  Run3/userParams.json
+  Run3/config.xml
+  Run3/detectorSetup.json
+  Run3/17083123644_TOT_params.root
   )
 
 set(ROOT_SCRIPTS
@@ -59,7 +54,7 @@ set(copy_depends) #create variable for list with depends files path
 
 # copy the example auxilliary files
 foreach( file_i ${AUXILLIARY_FILES})
-    make_directory(calib_run_3)
+    make_directory(calib_files)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i} COPYONLY)
 endforeach( file_i )
 
