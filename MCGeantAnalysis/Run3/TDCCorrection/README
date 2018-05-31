@@ -1,0 +1,3 @@
+Applied on leading and trailing edges of SigChannels by Unpacker task. One has to change <CORRECTION_FILE> raw into path to file for all TRBs except 0x8040 
+
+

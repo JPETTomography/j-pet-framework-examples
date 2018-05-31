@@ -12,6 +12,7 @@
 *.kate-swp
 *.kdev*
 *.exe
+o
 
 # CMake specific files
 CMakeFiles
@@ -28,6 +29,8 @@ MakeFile
 /*.dylib
 /*.cbp
 
+MCGeantAnalysis/.*.swp
+
 *.1
 
 *.xml
@@ -41,6 +44,10 @@ ScopeLoaderExample/cfg/data/1/
 LargeBarrelExample
 
 build/
+build_jsrv03/
+LargeBarrelAnalysis/*.txt
+
+*.swp
 
 *.json
 
