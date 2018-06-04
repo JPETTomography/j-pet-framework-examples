@@ -15,8 +15,6 @@
 
 #include "SinogramCreatorTools.h"
 
-#include <iostream> //TODO DELETE
-
 unsigned int SinogramCreatorTools::roundToNearesMultiplicity(float numberToRound, float accuracy)
 {
   return std::floor((numberToRound / accuracy) + (accuracy / 2));
@@ -24,6 +22,11 @@ unsigned int SinogramCreatorTools::roundToNearesMultiplicity(float numberToRound
 
 int SinogramCreatorTools::calculateAngle(float firstX, float firstY, float secondX, float secondY)
 {
+  if (firstX > secondX)
+  {
+    std::swap(firstX, secondX);
+    std::swap(firstY, secondY);
+  }
   float dx = firstX - secondX;
   float dy = firstY - secondY;
   float angle = 0.f;
@@ -52,5 +55,10 @@ float SinogramCreatorTools::calculateDistance(float firstX, float firstY, float 
 
 float SinogramCreatorTools::calculateNorm(float firstX, float firstY, float secondX, float secondY)
 {
+  if (firstX > secondX)
+  {
+    std::swap(firstX, secondX);
+    std::swap(firstY, secondY);
+  }
   return std::sqrt(std::pow((secondY - firstY), 2) + std::pow((secondX - firstX), 2));
 }
