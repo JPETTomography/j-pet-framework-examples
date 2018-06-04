@@ -158,5 +158,6 @@ void SinogramCreatorMC::setUpOptions()
     float rangeEnd = ((i + 1) * range) - maxZRange;
     fZSplitRange.push_back(std::make_pair(rangeStart, rangeEnd));
     fCurrentValueInSinogram[i] = 0;
+    fMaxValueInSinogram[i] = 0;
   }
 }
