@@ -80,7 +80,7 @@ bool SinogramCreator::exec()
         float distance = SinogramCreatorTools::calculateDistance(firstX, firstY, secondX, secondY);
         getStatistics().getObject<TH1F>("pos_dis")->Fill(distance);
         const int angle = SinogramCreatorTools::calculateAngle(firstX, firstY, secondX, secondY);
-        if (angle < 90)
+        if (angle > 90)
           distance = -distance;
         if (angle == 90)
           continue;
