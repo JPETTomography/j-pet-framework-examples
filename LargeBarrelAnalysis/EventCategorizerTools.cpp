@@ -69,9 +69,9 @@ bool EventCategorizerTools::checkFor3Gamma(const JPetEvent& event, JPetStatistic
   for(uint i = 0; i < event.getHits().size(); i++){
     for(uint j = i+1; j < event.getHits().size(); j++){
       for(uint k = j+1; k < event.getHits().size(); k++){
-        JPetHit& firstHit = event.getHits().at(i);
-        JPetHit& secondHit = event.getHits().at(j);
-        JPetHit& thirdHit = event.getHits().at(k);
+        JPetHit firstHit = event.getHits().at(i);
+        JPetHit secondHit = event.getHits().at(j);
+        JPetHit thirdHit = event.getHits().at(k);
 
         vector<double> thetaAngles;
         thetaAngles.push_back(firstHit.getBarrelSlot().getTheta());
