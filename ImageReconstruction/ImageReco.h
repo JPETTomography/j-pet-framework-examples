@@ -22,7 +22,7 @@
 #define override
 #endif
 
-#include <JPetUserTask/JPetUserTask.h>
+#include "JPetUserTask/JPetUserTask.h"
 #include <memory>
 
 /**
@@ -39,7 +39,7 @@
  * - ImageReco_TOT_MAX_VALUE_IN_NS_float
  * - ImageReco_ANGLE_DELTA_MIN_VALUE_float
  * The point of annihilation is reconstructed for all combination of registered hits in given events.
- * Addnitional optional options:
+ * Additional optional options:
  * - ImageReco_XRANGE_ON_3D_HISTOGRAM_int
  * - ImageReco_YRANGE_ON_3D_HISTOGRAM_int
  * - ImageReco_ZRANGE_ON_3D_HISTOGRAM_int
