@@ -15,97 +15,160 @@
 
 using namespace std;
 
-#include <map>
-#include <string>
-#include <vector>
+#include <JPetOptionsTools/JPetOptionsTools.h>
 #include <JPetWriter/JPetWriter.h>
 #include "SignalFinderTools.h"
 #include "SignalFinder.h"
-#include <JPetOptionsTools/JPetOptionsTools.h>
+#include <string>
+#include <vector>
+#include <map>
 
 using namespace jpet_options_tools;
 
-SignalFinder::SignalFinder(const char* name)
-	: JPetUserTask(name)
-{
-  //	fSaveControlHistos = saveControlHistos;
-}
+SignalFinder::SignalFinder(const char* name): JPetUserTask(name) {}
 
 SignalFinder::~SignalFinder() {}
 
-//SignalFinder init method
 bool SignalFinder::init()
 {
-	INFO("Signal finding started.");
-	
-	fOutputEvents = new JPetTimeWindow("JPetRawSignal");
+  INFO("Signal finding started.");
+  fOutputEvents = new JPetTimeWindow("JPetRawSignal");
 
-	if (isOptionSet(fParams.getOptions(), fEdgeMaxTimeParamKey)) {
-	  kSigChEdgeMaxTime = getOptionAsFloat(fParams.getOptions(), fEdgeMaxTimeParamKey);
-	}else{
-	  WARNING(Form("No value of the %s parameter provided by the user. Using default valu of %lf.", fEdgeMaxTimeParamKey.c_str(), kSigChEdgeMaxTime));
-	}
+  // Reading values from the user options if available
+  // Time window parameter for leading edge
+  if (isOptionSet(fParams.getOptions(), kEdgeMaxTimeParamKey))
+    fSigChEdgeMaxTime = getOptionAsFloat(fParams.getOptions(), kEdgeMaxTimeParamKey);
+  else
+    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
+  kEdgeMaxTimeParamKey.c_str(), fSigChEdgeMaxTime));
+  // Time window parameter for leading-trailing comparison
+  if (isOptionSet(fParams.getOptions(), kLeadTrailMaxTimeParamKey))
+    fSigChLeadTrailMaxTime = getOptionAsFloat(fParams.getOptions(), kLeadTrailMaxTimeParamKey);
+  else
+    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
+  kLeadTrailMaxTimeParamKey.c_str(), fSigChLeadTrailMaxTime));
+  // Getting bool for saving histograms
+  if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey))
+    fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
 
-	if (isOptionSet(fParams.getOptions(), fLeadTrailMaxTimeParamKey)) {
-	  kSigChLeadTrailMaxTime = getOptionAsFloat(fParams.getOptions(), fLeadTrailMaxTimeParamKey);
-	}else{
-	  WARNING(Form("No value of the %s parameter provided by the user. Using default valu of %lf.", fLeadTrailMaxTimeParamKey.c_str(), kSigChLeadTrailMaxTime));
-	}
-
-	if (fSaveControlHistos) {
-		getStatistics().createHistogram(
-			new TH1F("remainig_leading_sig_ch_per_thr",
-				"Remainig Leading Signal Channels",
-				4, 0.5, 4.5));
-		getStatistics().createHistogram(
-			new TH1F("remainig_trailing_sig_ch_per_thr",
-				"Remainig Trailing Signal Channels",
-				4, 0.5, 4.5));
-	}
-	return true;
+  // Creating control histograms
+  if(fSaveControlHistos) initialiseHistograms();
+  return true;
 }
 
-//SignalFinder execution method
+// SignalFinder execution method
 bool SignalFinder::exec()
 {
 
-	//getting the data from event in apropriate format
-	if(auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
+  // Getting the data from event in apropriate format
+  if(auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
 
-		//mapping method invocation
-		map<int, vector<JPetSigCh>> sigChsPMMap = SignalFinderTools::getSigChsPMMapById(timeWindow);
+  // Mapping method invocation
+  map<int, vector<JPetSigCh>> sigChsPMMap = SignalFinderTools::getSigChsPMMapById(timeWindow);
 
-		//building signals method invocation
-		vector<JPetRawSignal> allSignals = SignalFinderTools::buildAllSignals(
-    							sigChsPMMap,
-    							kNumOfThresholds ,
-    							getStatistics(),
-    							fSaveControlHistos,
-    							kSigChEdgeMaxTime,
-    							kSigChLeadTrailMaxTime);
+  // Building signals method invocation
+  vector<JPetRawSignal> allSignals = SignalFinderTools::buildAllSignals(
+    sigChsPMMap, kNumOfThresholds, getStatistics(),
+    fSigChEdgeMaxTime, fSigChLeadTrailMaxTime, fSaveControlHistos
+  );
 
-		//saving method invocation
-		saveRawSignals(allSignals);
+  // Saving method invocation
+  saveRawSignals(allSignals);
 
-	}else{
-	  return false;
-	}
-	return true;
+  } else return false;
+  return true;
 }
 
-//SignalFinder finish method
+// SignalFinder finish method
 bool SignalFinder::terminate()
 {
-	INFO("Signal finding ended.");
-	return true;
+  INFO("Signal finding ended.");
+  return true;
 }
 
-
-//saving method
+// Saving method
 void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& sigChVec)
 {
-	for (auto & sigCh : sigChVec) {
-	  fOutputEvents->add<JPetRawSignal>(sigCh);
-	}
+  for (auto & sigCh : sigChVec) fOutputEvents->add<JPetRawSignal>(sigCh);
 }
 
+void SignalFinder::initialiseHistograms(){
+  getStatistics().createHistogram(new TH1F(
+    "remainig_leading_sig_ch_per_thr", "Remainig Leading Signal Channels",
+    4, 0.5, 4.5));
+  getStatistics().getHisto1D("remainig_leading_sig_ch_per_thr")
+    ->GetXaxis()->SetTitle("Threshold Number");
+  getStatistics().getHisto1D("remainig_leading_sig_ch_per_thr")
+    ->GetYaxis()->SetTitle("Number of Signal Channels");
+
+  getStatistics().createHistogram(new TH1F(
+    "remainig_trailing_sig_ch_per_thr", "Remainig Trailing Signal Channels",
+     4, 0.5, 4.5));
+  getStatistics().getHisto1D("remainig_trailing_sig_ch_per_thr")
+    ->GetXaxis()->SetTitle("Threshold Number");
+  getStatistics().getHisto1D("remainig_trailing_sig_ch_per_thr")
+    ->GetYaxis()->SetTitle("Number of Signal Channels");
+
+  getStatistics().createHistogram(new TH1F(
+    "lead_thr1_thr2_diff",
+    "Time Difference between leading Signal Channels THR1 and THR2 in found signals",
+    200, -fSigChEdgeMaxTime, fSigChEdgeMaxTime));
+  getStatistics().getHisto1D("lead_thr1_thr2_diff")
+    ->GetXaxis()->SetTitle("time diff [ps]");
+  getStatistics().getHisto1D("lead_thr1_thr2_diff")
+    ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
+
+  getStatistics().createHistogram(new TH1F(
+    "lead_thr1_thr3_diff",
+    "Time Difference between leading Signal Channels THR1 and THR3 in found signals",
+    200, -fSigChEdgeMaxTime, fSigChEdgeMaxTime));
+  getStatistics().getHisto1D("lead_thr1_thr3_diff")
+    ->GetXaxis()->SetTitle("time diff [ps]");
+  getStatistics().getHisto1D("lead_thr1_thr3_diff")
+    ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
+
+  getStatistics().createHistogram(new TH1F(
+    "lead_thr1_thr4_diff",
+    "Time Difference between leading Signal Channels THR1 and THR4 in found signals",
+    200, -fSigChEdgeMaxTime, fSigChEdgeMaxTime));
+  getStatistics().getHisto1D("lead_thr1_thr4_diff")
+    ->GetXaxis()->SetTitle("time diff [ps]");
+  getStatistics().getHisto1D("lead_thr1_thr4_diff")
+    ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
+
+  getStatistics().createHistogram(new TH1F(
+    "lead_trail_thr1_diff",
+    "Time Difference between leading and trailing Signal Channels THR1 in found signals",
+    200, 0.0, fSigChLeadTrailMaxTime));
+  getStatistics().getHisto1D("lead_trail_thr1_diff")
+    ->GetXaxis()->SetTitle("time diff [ps]");
+  getStatistics().getHisto1D("lead_trail_thr1_diff")
+    ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
+
+  getStatistics().createHistogram(new TH1F(
+    "lead_trail_thr2_diff",
+    "Time Difference between leading and trailing Signal Channels THR2 in found signals",
+    200, 0.0, fSigChLeadTrailMaxTime));
+  getStatistics().getHisto1D("lead_trail_thr2_diff")
+    ->GetXaxis()->SetTitle("time diff [ps]");
+  getStatistics().getHisto1D("lead_trail_thr2_diff")
+    ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
+
+  getStatistics().createHistogram(new TH1F(
+    "lead_trail_thr3_diff",
+    "Time Difference between leading and trailing Signal Channels THR3 in found signals",
+    200, 0.0, fSigChLeadTrailMaxTime));
+  getStatistics().getHisto1D("lead_trail_thr3_diff")
+    ->GetXaxis()->SetTitle("time diff [ps]");
+  getStatistics().getHisto1D("lead_trail_thr3_diff")
+    ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
+
+  getStatistics().createHistogram(new TH1F(
+    "lead_trail_thr4_diff",
+    "Time Difference between leading and trailing Signal Channels THR4 in found signals",
+    200, 0.0, fSigChLeadTrailMaxTime));
+  getStatistics().getHisto1D("lead_trail_thr4_diff")
+    ->GetXaxis()->SetTitle("time diff [ps]");
+  getStatistics().getHisto1D("lead_trail_thr4_diff")
+    ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
+}

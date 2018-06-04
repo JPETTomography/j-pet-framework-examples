@@ -18,10 +18,6 @@ set(USE_AUX_FILES_FROM LargeBarrelAnalysis)
 
 set(AUXILLIARY_FILES
   run.sh
-  conf_trb3.xml
-  resultsForThresholda.txt
-  large_barrel.json
-  TimeConstants.txt
   userParams.json
   README
   )
@@ -50,11 +46,8 @@ set(use_modules_from ../LargeBarrelAnalysis)
 #
 list(APPEND HEADERS ${use_modules_from}/TimeWindowCreator.h)
 list(APPEND SOURCES ${use_modules_from}/TimeWindowCreator.cpp)
-#
-list(APPEND HEADERS ${use_modules_from}/TimeCalibLoader.h)
-list(APPEND SOURCES ${use_modules_from}/TimeCalibLoader.cpp)
-list(APPEND HEADERS ${use_modules_from}/TimeCalibTools.h)
-list(APPEND SOURCES ${use_modules_from}/TimeCalibTools.cpp)
+list(APPEND HEADERS ${use_modules_from}/UniversalFileLoader.h)
+list(APPEND SOURCES ${use_modules_from}/UniversalFileLoader.cpp)
 #
 list(APPEND HEADERS ${use_modules_from}/SignalFinder.h)
 list(APPEND SOURCES ${use_modules_from}/SignalFinder.cpp)
@@ -74,6 +67,8 @@ list(APPEND SOURCES ${use_modules_from}/EventFinder.cpp)
 #
 list(APPEND HEADERS ${use_modules_from}/EventCategorizer.h)
 list(APPEND SOURCES ${use_modules_from}/EventCategorizer.cpp)
+list(APPEND HEADERS ${use_modules_from}/EventCategorizerTools.h)
+list(APPEND SOURCES ${use_modules_from}/EventCategorizerTools.cpp)
 
 include_directories(${Framework_INCLUDE_DIRS})
 add_definitions(${Framework_DEFINITIONS})

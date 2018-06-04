@@ -18,10 +18,6 @@ set(USE_AUX_FILES_FROM LargeBarrelAnalysis)
 
 set(AUXILLIARY_FILES
   run.sh
-  conf_trb3.xml
-  resultsForThresholda.txt
-  large_barrel.json
-  TimeConstants.txt
   userParams.json
   README
   )
@@ -50,11 +46,8 @@ set(use_modules_from ../LargeBarrelAnalysis)
 #
 list(APPEND HEADERS ${use_modules_from}/TimeWindowCreator.h)
 list(APPEND SOURCES ${use_modules_from}/TimeWindowCreator.cpp)
-#
-list(APPEND HEADERS ${use_modules_from}/TimeCalibLoader.h)
-list(APPEND SOURCES ${use_modules_from}/TimeCalibLoader.cpp)
-list(APPEND HEADERS ${use_modules_from}/TimeCalibTools.h)
-list(APPEND SOURCES ${use_modules_from}/TimeCalibTools.cpp)
+list(APPEND HEADERS ${use_modules_from}/UniversalFileLoader.h)
+list(APPEND SOURCES ${use_modules_from}/UniversalFileLoader.cpp)
 #
 list(APPEND HEADERS ${use_modules_from}/SignalFinder.h)
 list(APPEND SOURCES ${use_modules_from}/SignalFinder.cpp)
@@ -74,6 +67,8 @@ list(APPEND SOURCES ${use_modules_from}/EventFinder.cpp)
 #
 list(APPEND HEADERS ${use_modules_from}/EventCategorizer.h)
 list(APPEND SOURCES ${use_modules_from}/EventCategorizer.cpp)
+list(APPEND HEADERS ${use_modules_from}/EventCategorizerTools.h)
+list(APPEND SOURCES ${use_modules_from}/EventCategorizerTools.cpp)
 
 message(STATUS "S: " ${SOURCES})
 message(STATUS "H: " ${HEADERS})
@@ -86,15 +81,6 @@ target_link_libraries(${projectBinary} JPetFramework)
 
 add_custom_target(clean_data_${projectName}
   COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root)
-
-# copy the DB config file to an expected location
-set(db_config_dir ${CMAKE_CURRENT_BINARY_DIR}/../DBConfig)
-
-add_custom_command(TARGET ${projectBinary}
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND}
-  ARGS -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/../j-pet-framework/DBHandler/Config ${db_config_dir}
-)
 
 set(copy_depends) #create variable for list with depends files path
 
