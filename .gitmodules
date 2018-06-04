@@ -1,3 +1,6 @@
 [submodule "j-pet-framework"]
 	path = j-pet-framework
 	url = https://github.com/JPETTomography/j-pet-framework.git
+[submodule "j-pet-mlem"]
+	path = j-pet-mlem
+	url = https://github.com/JPETTomography/j-pet-mlem
