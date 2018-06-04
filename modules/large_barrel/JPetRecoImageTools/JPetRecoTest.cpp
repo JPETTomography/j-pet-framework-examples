@@ -58,7 +58,11 @@ BOOST_AUTO_TEST_CASE(backProjectSinogramNone)
   res << maxValue << std::endl;
   for (unsigned int i = 0; i < result.size(); i++) {
     for (unsigned int j = 0; j < result[0].size(); j++) {
-      res << static_cast<int>(result[i][j]) << " ";
+      int resultInt = static_cast<int>(result[i][j]);
+      if (resultInt < 0) {
+        resultInt = 0;
+      }
+      res << resultInt << " ";
     }
     res << std::endl;
   }
@@ -107,7 +111,11 @@ BOOST_AUTO_TEST_CASE(backProjectSinogramRamLak)
   res << maxValue << std::endl;
   for (unsigned int i = 0; i < result.size(); i++) {
     for (unsigned int j = 0; j < result[0].size(); j++) {
-      res << static_cast<int>(result[i][j]) << " ";
+      int resultInt = static_cast<int>(result[i][j]);
+      if (resultInt < 0) {
+        resultInt = 0;
+      }
+      res << resultInt << " ";
     }
     res << std::endl;
   }
@@ -156,7 +164,11 @@ BOOST_AUTO_TEST_CASE(backProjectSinogramCosine)
   res << maxValue << std::endl;
   for (unsigned int i = 0; i < result.size(); i++) {
     for (unsigned int j = 0; j < result[0].size(); j++) {
-      res << static_cast<int>(result[i][j]) << " ";
+      int resultInt = static_cast<int>(result[i][j]);
+      if (resultInt < 0) {
+        resultInt = 0;
+      }
+      res << resultInt << " ";
     }
     res << std::endl;
   }
@@ -205,7 +217,11 @@ BOOST_AUTO_TEST_CASE(backProjectSinogramHamming)
   res << maxValue << std::endl;
   for (unsigned int i = 0; i < result.size(); i++) {
     for (unsigned int j = 0; j < result[0].size(); j++) {
-      res << static_cast<int>(result[i][j]) << " ";
+      int resultInt = static_cast<int>(result[i][j]);
+      if (resultInt < 0) {
+        resultInt = 0;
+      }
+      res << resultInt << " ";
     }
     res << std::endl;
   }
@@ -252,7 +268,11 @@ BOOST_AUTO_TEST_CASE(backProjectSinogramRidgelet)
   resF << maxValueF << std::endl;
   for (unsigned int i = 0; i < filteredSinogram.size(); i++) {
     for (unsigned int j = 0; j < filteredSinogram[0].size(); j++) {
-      resF << static_cast<int>(filteredSinogram[i][j]) << " ";
+      int resultInt = static_cast<int>(filteredSinogram[i][j]);
+      if (resultInt < 0) {
+        resultInt = 0;
+      }
+      resF << resultInt << " ";
     }
     resF << std::endl;
   }
@@ -272,7 +292,11 @@ BOOST_AUTO_TEST_CASE(backProjectSinogramRidgelet)
   res << maxValue << std::endl;
   for (unsigned int i = 0; i < result.size(); i++) {
     for (unsigned int j = 0; j < result[0].size(); j++) {
-      res << static_cast<int>(result[i][j]) << " ";
+      int resultInt = static_cast<int>(result[i][j]);
+      if (resultInt < 0) {
+        resultInt = 0;
+      }
+      res << resultInt << " ";
     }
     res << std::endl;
   }
@@ -321,7 +345,11 @@ BOOST_AUTO_TEST_CASE(backProjectSinogramSheppLogan)
   res << maxValue << std::endl;
   for (unsigned int i = 0; i < result.size(); i++) {
     for (unsigned int j = 0; j < result[0].size(); j++) {
-      res << static_cast<int>(result[i][j]) << " ";
+      int resultInt = static_cast<int>(result[i][j]);
+      if (resultInt < 0) {
+        resultInt = 0;
+      }
+      res << resultInt << " ";
     }
     res << std::endl;
   }
