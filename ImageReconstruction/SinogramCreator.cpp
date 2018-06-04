@@ -77,10 +77,13 @@ bool SinogramCreator::exec()
           continue;
         }
 
-        const float distance = SinogramCreatorTools::calculateDistance(firstX, firstY, secondX, secondY);
+        float distance = SinogramCreatorTools::calculateDistance(firstX, firstY, secondX, secondY);
         getStatistics().getObject<TH1F>("pos_dis")->Fill(distance);
         const int angle = SinogramCreatorTools::calculateAngle(firstX, firstY, secondX, secondY);
-
+        if (angle < 90)
+          distance = -distance;
+        if (angle == 90)
+          continue;
         getStatistics().getObject<TH1F>("angle")->Fill(angle);
         const int distanceRound = SinogramCreatorTools::roundToNearesMultiplicity(distance + fMaxReconstructionLayerRadius, fReconstructionDistanceAccuracy);
         if (distanceRound >= maxDistanceNumber || angle >= kReconstructionMaxAngle) {
@@ -159,5 +162,6 @@ void SinogramCreator::setUpOptions()
     float rangeEnd = ((i + 1) * range) - maxZRange;
     fZSplitRange.push_back(std::make_pair(rangeStart, rangeEnd));
     fCurrentValueInSinogram[i] = 0;
+    fMaxValueInSinogram[i] = 0;
   }
 }
