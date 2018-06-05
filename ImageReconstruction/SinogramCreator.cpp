@@ -112,7 +112,7 @@ bool SinogramCreator::checkSplitRange(float firstZ, float secondZ, int i)
 bool SinogramCreator::terminate()
 {
   for (int i = 0; i < fZSplitNumber; i++) {
-    std::ofstream res(fOutFileName + std::to_string(i) + ".ppm");
+    std::ofstream res(fOutFileName + "_" + std::to_string(i) + ".ppm");
     res << "P2" << std::endl;
     res << (*fSinogram[i])[0].size() << " " << fSinogram[i]->size() << std::endl;
     res << fMaxValueInSinogram[i] << std::endl;
@@ -133,8 +133,10 @@ bool SinogramCreator::terminate()
 void SinogramCreator::setUpOptions()
 {
   auto opts = getOptions();
+  fOutFileName = getInputFile(opts);
   if (isOptionSet(opts, kOutFileNameKey)) {
-    fOutFileName = getOptionAsString(opts, kOutFileNameKey);
+    fOutFileName += "_" + getOptionAsString(opts, kOutFileNameKey); // returned file name is input:
+    // file name + _ + out file name + _ + slice number + .ppm
   }
 
   if (isOptionSet(opts, kReconstructionDistanceAccuracy)) {
@@ -149,7 +151,7 @@ void SinogramCreator::setUpOptions()
     fScintillatorLenght = getOptionAsFloat(opts, kScintillatorLenght);
   }
 
-  const JPetParamBank bank = getParamBank();
+  const JPetParamBank& bank = getParamBank();
   const JPetGeomMapping mapping(bank);
   fMaxReconstructionLayerRadius = mapping.getRadiusOfLayer(mapping.getLayersCount());
 
