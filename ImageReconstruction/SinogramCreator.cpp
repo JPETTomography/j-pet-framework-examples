@@ -18,6 +18,7 @@
 #include <TH2F.h>
 #include <TH3F.h>
 #include <TH1I.h>
+#include <RVersion.h>
 using namespace jpet_options_tools;
 
 SinogramCreator::SinogramCreator(const char *name) : JPetUserTask(name) {}
