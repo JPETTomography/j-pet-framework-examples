@@ -82,10 +82,11 @@ bool SinogramCreator::exec()
         const int angle = SinogramCreatorTools::calculateAngle(firstX, firstY, secondX, secondY);
         if (angle > 90)
           distance = -distance;
-        if (angle == 90)
-          continue;
         getStatistics().getObject<TH1F>("angle")->Fill(angle);
         const int distanceRound = SinogramCreatorTools::roundToNearesMultiplicity(distance + fMaxReconstructionLayerRadius, fReconstructionDistanceAccuracy);
+        if (angle == (kReconstructionMaxAngle / 2) && distanceRound == (maxDistanceNumber / 2)) {
+          continue; //skip events in middle of sinogram, waiting for acceptace correction
+        }
         if (distanceRound >= maxDistanceNumber || angle >= kReconstructionMaxAngle) {
           std::cout << "Distance round: " << distanceRound << " angle: " << angle << std::endl;
           continue;
@@ -137,6 +138,8 @@ void SinogramCreator::setUpOptions()
   if (isOptionSet(opts, kOutFileNameKey)) {
     fOutFileName += "_" + getOptionAsString(opts, kOutFileNameKey); // returned file name is input:
     // file name + _ + out file name + _ + slice number + .ppm
+  } else {
+    fOutFileName += "_sinogram";
   }
 
   if (isOptionSet(opts, kReconstructionDistanceAccuracy)) {
@@ -153,7 +156,7 @@ void SinogramCreator::setUpOptions()
 
   const JPetParamBank& bank = getParamBank();
   const JPetGeomMapping mapping(bank);
-  fMaxReconstructionLayerRadius = mapping.getRadiusOfLayer(mapping.getLayersCount());
+  fMaxReconstructionLayerRadius = mapping.getRadiusOfLayer(mapping.getLayersCount() - 1);
 
   fMaxValueInSinogram = new int[fZSplitNumber];
   fCurrentValueInSinogram = new int[fZSplitNumber];
