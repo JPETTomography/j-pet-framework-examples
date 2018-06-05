@@ -26,16 +26,4 @@ sed -i 's/manager.useTask(\"TimeCalibLoader\", \"tslot.raw\", \"tslot.calib\");/
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 executeCommand "make"
 executeCommand "./LargeBarrelAnalysis.x -t root -f dabc_17025151847.tslot.calib.root   -r 0 100"
-executeCommand "cd ../TimeCalibration"
-executeCommand "make"
-executeCommand "cd ../VelocityCalibration"
-executeCommand "make"
-executeCommand "cd tests/unitTestData/VelocityCalibrationTest"
-executeCommand "chmod +x run.sh"
-executeCommand "./run.sh"
-executeCommand "cmp -s resultsForThresholda.txt thresholdResults/resultsForThresholda.txt"
-executeCommand "cmp -s resultsForThresholdb.txt thresholdResults/resultsForThresholdb.txt"
-executeCommand "cmp -s resultsForThresholdc.txt thresholdResults/resultsForThresholdc.txt"
-executeCommand "cmp -s resultsForThresholdd.txt thresholdResults/resultsForThresholdd.txt"
-executeCommand "cd ../../../../NewAnalysisTemplate"
-executeCommand "make"
+
