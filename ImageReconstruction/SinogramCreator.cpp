@@ -20,7 +20,7 @@
 #include <TH1I.h>
 using namespace jpet_options_tools;
 
-SinogramCreator::SinogramCreator(const char* name) : JPetUserTask(name) {}
+SinogramCreator::SinogramCreator(const char *name) : JPetUserTask(name) {}
 
 SinogramCreator::~SinogramCreator() {}
 
@@ -30,17 +30,22 @@ bool SinogramCreator::init()
   fOutputEvents = new JPetTimeWindow("JPetEvent");
 
   getStatistics().createHistogram(new TH2I("reconstuction_histogram",
-                                  "reconstuction histogram",
-                                  std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1, 0.f, fMaxReconstructionLayerRadius,
-                                  kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
+                                           "reconstuction histogram",
+                                           std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1, 0.f, fMaxReconstructionLayerRadius,
+                                           kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
 
-  getStatistics().createHistogram(new TH1F("pos_dis", "Position distance real data", (fMaxReconstructionLayerRadius) * 10 * 5, 0.f, fMaxReconstructionLayerRadius));
+  getStatistics().createHistogram(new TH1F("pos_dis", "Position distance real data", (fMaxReconstructionLayerRadius)*10 * 5, 0.f, fMaxReconstructionLayerRadius));
   getStatistics().createHistogram(new TH1F("angle", "Position angle real data", kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
 
+#if ROOT_VERSION_CODE < ROOT_VERSION(6, 0, 0)
   getStatistics().getObject<TH2I>("reconstuction_histogram")->SetBit(TH2::kCanRebin);
-
   getStatistics().getObject<TH1F>("angle")->SetBit(TH1::kCanRebin);
   getStatistics().getObject<TH1F>("pos_dis")->SetBit(TH1::kCanRebin);
+#else
+  getStatistics().getObject<TH2I>("reconstuction_histogram")->SetCanExtend(TH1::kAllAxes);
+  getStatistics().getObject<TH1F>("angle")->SetCanExtend(TH1::kAllAxes);
+  getStatistics().getObject<TH1F>("pos_dis")->SetCanExtend(TH1::kAllAxes);
+#endif
 
   return true;
 }
@@ -48,22 +53,27 @@ bool SinogramCreator::init()
 bool SinogramCreator::exec()
 {
   const int maxDistanceNumber = std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
-  if (fSinogram == nullptr) {
+  if (fSinogram == nullptr)
+  {
     fSinogram = new SinogramResultType *[fZSplitNumber];
-    for (int i = 0; i < fZSplitNumber; i++) {
+    for (int i = 0; i < fZSplitNumber; i++)
+    {
       fSinogram[i] = new SinogramResultType(maxDistanceNumber, (std::vector<unsigned int>(kReconstructionMaxAngle, 0)));
     }
   }
-  if (const auto& timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
+  if (const auto &timeWindow = dynamic_cast<const JPetTimeWindow *const>(fEvent))
+  {
     const unsigned int numberOfEventsInTimeWindow = timeWindow->getNumberOfEvents();
-    for (unsigned int i = 0; i < numberOfEventsInTimeWindow; i++) {
-      const auto event = dynamic_cast<const JPetEvent&>(timeWindow->operator[](static_cast<int>(i)));
+    for (unsigned int i = 0; i < numberOfEventsInTimeWindow; i++)
+    {
+      const auto event = dynamic_cast<const JPetEvent &>(timeWindow->operator[](static_cast<int>(i)));
       const auto hits = event.getHits();
-      if (hits.size() != 2) {
+      if (hits.size() != 2)
+      {
         continue;
       }
-      const auto& firstHit = hits[0];
-      const auto& secondHit = hits[1];
+      const auto &firstHit = hits[0];
+      const auto &secondHit = hits[1];
       const float firstX = firstHit.getPosX();
       const float firstY = firstHit.getPosY();
       const float secondX = secondHit.getPosX();
@@ -72,8 +82,10 @@ bool SinogramCreator::exec()
       const float firstZ = firstHit.getPosZ();
       const float secondZ = secondHit.getPosZ();
 
-      for (int i = 0; i < fZSplitNumber; i++) {
-        if (!checkSplitRange(firstZ, secondZ, i)) {
+      for (int i = 0; i < fZSplitNumber; i++)
+      {
+        if (!checkSplitRange(firstZ, secondZ, i))
+        {
           continue;
         }
 
@@ -84,21 +96,26 @@ bool SinogramCreator::exec()
           distance = -distance;
         getStatistics().getObject<TH1F>("angle")->Fill(angle);
         const int distanceRound = SinogramCreatorTools::roundToNearesMultiplicity(distance + fMaxReconstructionLayerRadius, fReconstructionDistanceAccuracy);
-        if (angle == (kReconstructionMaxAngle / 2) && distanceRound == (maxDistanceNumber / 2)) {
+        if (angle == (kReconstructionMaxAngle / 2) && distanceRound == (maxDistanceNumber / 2))
+        {
           continue; //skip events in middle of sinogram, waiting for acceptace correction
         }
-        if (distanceRound >= maxDistanceNumber || angle >= kReconstructionMaxAngle) {
+        if (distanceRound >= maxDistanceNumber || angle >= kReconstructionMaxAngle)
+        {
           std::cout << "Distance round: " << distanceRound << " angle: " << angle << std::endl;
           continue;
         }
         fCurrentValueInSinogram[i] = ++fSinogram[i]->at(distanceRound).at(angle);
-        if (fCurrentValueInSinogram[i] > fMaxValueInSinogram[i]) {
+        if (fCurrentValueInSinogram[i] > fMaxValueInSinogram[i])
+        {
           fMaxValueInSinogram[i] = fCurrentValueInSinogram[i]; // save max value of sinogram
         }
         getStatistics().getObject<TH2I>("reconstuction_histogram")->Fill(distance + fMaxReconstructionLayerRadius, angle); //add to histogram
       }
     }
-  } else {
+  }
+  else
+  {
     ERROR("Returned event is not TimeWindow");
     return false;
   }
@@ -112,13 +129,16 @@ bool SinogramCreator::checkSplitRange(float firstZ, float secondZ, int i)
 
 bool SinogramCreator::terminate()
 {
-  for (int i = 0; i < fZSplitNumber; i++) {
+  for (int i = 0; i < fZSplitNumber; i++)
+  {
     std::ofstream res(fOutFileName + "_" + std::to_string(i) + ".ppm");
     res << "P2" << std::endl;
     res << (*fSinogram[i])[0].size() << " " << fSinogram[i]->size() << std::endl;
     res << fMaxValueInSinogram[i] << std::endl;
-    for (unsigned int k = 0; k < fSinogram[i]->size(); k++) {
-      for (unsigned int j = 0; j < (*fSinogram[i])[0].size(); j++) {
+    for (unsigned int k = 0; k < fSinogram[i]->size(); k++)
+    {
+      for (unsigned int j = 0; j < (*fSinogram[i])[0].size(); j++)
+      {
         res << (*fSinogram[i])[k][j] << " ";
       }
       res << std::endl;
@@ -135,26 +155,32 @@ void SinogramCreator::setUpOptions()
 {
   auto opts = getOptions();
   fOutFileName = getInputFile(opts);
-  if (isOptionSet(opts, kOutFileNameKey)) {
+  if (isOptionSet(opts, kOutFileNameKey))
+  {
     fOutFileName += "_" + getOptionAsString(opts, kOutFileNameKey); // returned file name is input:
     // file name + _ + out file name + _ + slice number + .ppm
-  } else {
+  }
+  else
+  {
     fOutFileName += "_sinogram";
   }
 
-  if (isOptionSet(opts, kReconstructionDistanceAccuracy)) {
+  if (isOptionSet(opts, kReconstructionDistanceAccuracy))
+  {
     fReconstructionDistanceAccuracy = getOptionAsFloat(opts, kReconstructionDistanceAccuracy);
   }
 
-  if (isOptionSet(opts, kZSplitNumber)) {
+  if (isOptionSet(opts, kZSplitNumber))
+  {
     fZSplitNumber = getOptionAsInt(opts, kZSplitNumber);
   }
 
-  if (isOptionSet(opts, kScintillatorLenght)) {
+  if (isOptionSet(opts, kScintillatorLenght))
+  {
     fScintillatorLenght = getOptionAsFloat(opts, kScintillatorLenght);
   }
 
-  const JPetParamBank& bank = getParamBank();
+  const JPetParamBank &bank = getParamBank();
   const JPetGeomMapping mapping(bank);
   fMaxReconstructionLayerRadius = mapping.getRadiusOfLayer(mapping.getLayersCount() - 1);
 
@@ -162,7 +188,8 @@ void SinogramCreator::setUpOptions()
   fCurrentValueInSinogram = new int[fZSplitNumber];
   const float maxZRange = fScintillatorLenght / 2.f;
   float range = (2.f * maxZRange) / fZSplitNumber;
-  for (int i = 0; i < fZSplitNumber; i++) {
+  for (int i = 0; i < fZSplitNumber; i++)
+  {
     float rangeStart = (i * range) - maxZRange;
     float rangeEnd = ((i + 1) * range) - maxZRange;
     fZSplitRange.push_back(std::make_pair(rangeStart, rangeEnd));
