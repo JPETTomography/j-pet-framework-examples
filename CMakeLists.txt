@@ -20,6 +20,10 @@ add_definitions(${Framework_DEFINITIONS})
 add_definitions(-std=c++11 -Wall -Wunused-parameter)
 
 ################################################################################
+# Add MLEM submodule
+add_subdirectory(j-pet-mlem)
+
+################################################################################
 ## Enable rpath on OS X and point it to ROOT
 if(APPLE)
   set(CMAKE_MACOSX_RPATH ON)
@@ -44,3 +48,4 @@ add_subdirectory(TimeCalibration)
 add_subdirectory(ScopeAnalysis)
 add_subdirectory(modules)
 add_subdirectory(ImageReconstruction)
+
