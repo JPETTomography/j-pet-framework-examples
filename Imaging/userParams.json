@@ -1,0 +1,10 @@
+{
+ "TimeCalibLoader_ConfigFile_std::string":"TimeConstants_Run2.txt",
+ "SignalFinder_EdgeMaxTime_float":"4000",
+ "SignalFinder_LeadTrailMaxTime_float":"30000",
+ "HitFinder_TimeWindowWidth_float":"25000",
+ "EventFinder_EventTime_float":"200000",
+ "EventFinder_MinimalEventSize_int":"1",
+ "EventCategorizer_MinAnnihilationTOT_float":"10000",
+ "EventCategorizer_MaxAnnihilationTOT_float":"25000",
+}
