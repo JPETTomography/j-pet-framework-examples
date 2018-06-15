@@ -22,10 +22,10 @@
 
 using namespace std;
 
-int main(int argc, const char *argv[])
+int main(int argc, const char* argv[])
 {
 
-  JPetManager &manager = JPetManager::getManager();
+  JPetManager& manager = JPetManager::getManager();
 
   manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
   manager.registerTask<SignalFinder>("SignalFinder");
@@ -33,8 +33,8 @@ int main(int argc, const char *argv[])
   manager.registerTask<HitFinder>("HitFinder");
   manager.registerTask<DeltaTFinder>("DeltaTFinder");
 
-  manager.useTask("TimeWindowCreator", "hld", "tslot.calib");
-  manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
+  manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
+  manager.useTask("SignalFinder", "tslot.raw", "raw.sig");
   manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
   manager.useTask("HitFinder", "phys.sig", "hits");
   manager.useTask("DeltaTFinder", "hits", "deltaT");
