@@ -19,8 +19,6 @@
 #include "../LargeBarrelAnalysis/SignalFinder.h"
 #include "../LargeBarrelAnalysis/SignalTransformer.h"
 #include "../LargeBarrelAnalysis/HitFinder.h"
-#include "../LargeBarrelAnalysis/EventFinder.h"
-#include "../LargeBarrelAnalysis/EventCategorizer.h"
 #include "InterThresholdCalibration.h"
 using namespace std;
 

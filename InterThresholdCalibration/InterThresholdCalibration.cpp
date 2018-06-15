@@ -1,5 +1,5 @@
 /*
- *  @copyright Copyright 2016 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <JPetOptionsTools/JPetOptionsTools.h>
+#include <JPetTimer/JPetTimer.h>
 
 using namespace jpet_options_tools;
 using namespace std;
@@ -40,8 +41,15 @@ InterThresholdCalibration::~InterThresholdCalibration()
 
 bool InterThresholdCalibration::init()
 {
-  time_t local_time;
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  JPetTimer timer;
+
+  string local_time=timer.getAllMeasuredTimes();
+
+
+////////////////////////
+
+   //time_t local_time;
 
    fBarrelMap = new JPetGeomMapping(getParamBank());
 
@@ -58,7 +66,7 @@ bool InterThresholdCalibration::init()
   }
 
 
-  time(&local_time); //get the local time at which we start calibration
+  //time(&local_time); //get the local time at which we start calibration
   std::ofstream output;
 
   output.open(OutputFile, std::ios::app); //open the final output file in append mode
@@ -67,9 +75,9 @@ bool InterThresholdCalibration::init()
     output << "# correction and offset with respect to the t1 (for thr a)" << std::endl;
     output << "# time differences for thresholds are following: t2-t1 (1), t3-t1 (2), t4-t1 (3)" << std::endl;
     output << "# Description of the parameters: layer(1-3) | slot(1-48/96) | side(A-B) | thr time diffr: 1 (ab), 2 (ac), 3 (ad) | offset_value_leading | offset_uncertainty_leading | offset_value_trailing | offset_uncertainty_trailing | sigma_offset_leading | sigma_offset_trailing | (chi2/ndf)_leading | (chi2/ndf)_trailing" << std::endl;
-    output << "# Calibration started on " << ctime(&local_time);
+    output << "# Calibration started on " << local_time;
   } else {
-    output << "# Calibration started on " << ctime(&local_time); //if the file was already on disk write only the time at which the calibration started
+    output << "# Calibration started on " << local_time; //if the file was already on disk write only the time at which the calibration started
     output.close();
   }
   
@@ -129,25 +137,25 @@ std::vector <JPetHit> fhitsCalib;
 
 
   //getting the data from event in propriate format
-  if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {//1
+  if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     uint n = timeWindow->getNumberOfEvents();
   
-    for (uint i = 0; i < n; ++i) {//2
+    for (uint i = 0; i < n; ++i) {
       const JPetHit& hit = dynamic_cast<const JPetHit&>(timeWindow->operator[](i));
 
       fhitsCalib.push_back(hit);
 
-    }//2
+    }
 
 
- //
+
     for (auto i = fhitsCalib.begin(); i != fhitsCalib.end(); i++) {
       fillHistosForHit(*i);
     }
 
     fhitsCalib.clear();
 
-  } //1
+  } 
 
 
 
@@ -344,7 +352,7 @@ void InterThresholdCalibration::fillHistosForHit(const JPetHit & hit){
 //A
 	for(auto & thr_time_pair : lead_times_A){
 
-	int thr = thr_time_pair.first;//key
+	int thr = thr_time_pair.first;
 
 		if(lead_times_A.count(thr) > 0 && trail_times_A.count(thr) > 0 && lead_times_A.size()==4 && trail_times_A.size()==4){ //exactly 4 thresholds
 
@@ -367,7 +375,7 @@ void InterThresholdCalibration::fillHistosForHit(const JPetHit & hit){
 
 	int thr = thr_time_pair.first;
 
-		if(lead_times_B.count(thr) > 0 && trail_times_B.count(thr) > 0 && lead_times_B.size()==4 && trail_times_B.size()==4){ //count(4)
+		if(lead_times_B.count(thr) > 0 && trail_times_B.count(thr) > 0 && lead_times_B.size()==4 && trail_times_B.size()==4){ 
 
 		lead_times_first_B=lead_times_B[1];
 
@@ -389,7 +397,7 @@ for(auto & thr_time_pair : trail_times_A){
 
 	int thr = thr_time_pair.first;
 
-		if(trail_times_A.count(thr) > 0 && lead_times_A.count(thr) > 0 && lead_times_A.size()==4 && trail_times_A.size()==4){ //count(4)
+		if(trail_times_A.count(thr) > 0 && lead_times_A.count(thr) > 0 && lead_times_A.size()==4 && trail_times_A.size()==4){ 
 
 		trail_times_first_A=trail_times_A[1];
 		
@@ -411,7 +419,7 @@ for(auto & thr_time_pair : trail_times_A){
 
 	int thr = thr_time_pair.first;
 
-		if(trail_times_B.count(thr) > 0 && lead_times_B.count(thr) > 0 && lead_times_B.size()==4 && trail_times_B.size()==4){ //count(4)
+		if(trail_times_B.count(thr) > 0 && lead_times_B.count(thr) > 0 && lead_times_B.size()==4 && trail_times_B.size()==4){ 
 
 
 		trail_times_first_B=trail_times_B[1];

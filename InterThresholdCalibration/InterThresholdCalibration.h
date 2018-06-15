@@ -19,6 +19,7 @@
 #include <JPetHit/JPetHit.h>
 #include <JPetRawSignal/JPetRawSignal.h>
 #include <JPetGeomMapping/JPetGeomMapping.h>
+#include <JPetTimer/JPetTimer.h>
 class JPetWriter;
 #ifdef __CINT__
 //when cint is used instead of compiler, override word is not recognized
