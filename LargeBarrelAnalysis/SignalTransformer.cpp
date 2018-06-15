@@ -13,39 +13,31 @@
  *  @file SignalTransformer.cpp
  */
 
-#include "SignalTransformer.h"
 #include "JPetWriter/JPetWriter.h"
+#include "SignalTransformer.h"
 
-SignalTransformer::SignalTransformer(const char* name):
-	JPetUserTask(name) { }
+SignalTransformer::SignalTransformer(const char* name): JPetUserTask(name) {}
 
 bool SignalTransformer::init()
 {
-	  INFO("Signal transforming started: Raw to Reco and Phys");	  
-	  fOutputEvents = new JPetTimeWindow("JPetPhysSignal");
-	  return true;
+  INFO("Signal transforming started: Raw to Reco and Phys");
+  fOutputEvents = new JPetTimeWindow("JPetPhysSignal");
+  return true;
 }
-
 
 bool SignalTransformer::exec()
 {
   if(auto & timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
-
     uint n = timeWindow->getNumberOfEvents();
-
     for(uint i=0;i<n;++i){
       const JPetRawSignal & currSignal = dynamic_cast<const JPetRawSignal&>(timeWindow->operator[](i));
-
-      //Make Reco Signal from Raw Signal
+      // Make Reco Signal from Raw Signal
       auto recoSignal = createRecoSignal(currSignal);
-
-      //Make Phys Signal from Reco Signal and save
+      // Make Phys Signal from Reco Signal and save
       auto physSignal = createPhysSignal(recoSignal);
       fOutputEvents->add<JPetPhysSignal>(physSignal);
-    }    
-  }else{
-    return false;
-  }
+    }
+  }else return false;
   return true;
 }
 
@@ -55,61 +47,35 @@ bool SignalTransformer::terminate()
   return true;
 }
 
+/**
+ * Method rewrites Raw Signal to Reco Signal. All fields set to -1.
+ */
 JPetRecoSignal SignalTransformer::createRecoSignal(const JPetRawSignal& rawSignal)
 {
-	JPetRecoSignal recoSignal;
-
-	//reading threshold times by threshold number
-	//from Leading and Trailing edge
-	std::map<int,double> leadingPoints = rawSignal.getTimesVsThresholdNumber(JPetSigCh::Leading);
-	std::map<int,double> trailingPoints = rawSignal.getTimesVsThresholdNumber(JPetSigCh::Trailing);
-
-	//finding TOT for every threshold 1-4
-	std::vector<double> tots;
-	for(int i=1;i<5;i++){
-		auto leadSearch = leadingPoints.find(i);
-		auto trailSearch = trailingPoints.find(i);
-		if (leadSearch != leadingPoints.end()
-			&& trailSearch != trailingPoints.end())
-				tots.push_back(trailSearch->second - leadSearch->second);
-	}
-
-	//setting charge of Reco Signal equal to TOT on first threshold
-	if(tots.size()!=0){
-		recoSignal.setCharge(tots.at(0));
-	}else{
-		recoSignal.setCharge(-1.0);
-	}
-
-	//set the rest of Reco Signal properties to -1.0.
-	recoSignal.setDelay(-1.0);
-	recoSignal.setOffset(-1.0);
-	recoSignal.setAmplitude(-1.0);
-
-	//store the original Raw Signal in the RecoSignal as a processing history
-	recoSignal.setRawSignal(rawSignal);
-	return recoSignal;
+  JPetRecoSignal recoSignal;
+  recoSignal.setRawSignal(rawSignal);
+  recoSignal.setAmplitude(-1.0);
+  recoSignal.setOffset(-1.0);
+  recoSignal.setCharge(-1.0);
+  recoSignal.setDelay(-1.0);
+  return recoSignal;
 }
 
+/**
+ * Method rewrites Reco Signal to Phys Signal.
+ * Time of Signal set to time of the Signal Channel at the First Threshold.
+ * This should be changed to something more resonable. Rest of the fields
+ * set to -1, quality fields set to 0.
+ */
 JPetPhysSignal SignalTransformer::createPhysSignal(const JPetRecoSignal& recoSignal)
 {
-	JPetPhysSignal physSignal;
-
-	//use the values from Reco Signal to set the physical properties of signal
-	//here is an example - replace with correct method
-	physSignal.setPhe(recoSignal.getCharge()*1.0+0.0);
-	physSignal.setQualityOfPhe(0.0);
-
-	//Set tmie of Physical Signal as a time of Signal at First Threshold
-	//This should be changed to more resonable
-	std::map<int,double> leadingPointsMap = recoSignal
-				.getRawSignal()
-				.getTimesVsThresholdNumber(JPetSigCh::Leading);
-	double time = leadingPointsMap.begin()->second;
-	physSignal.setTime(time);
-	physSignal.setQualityOfTime(0.0);
-
-	//store the original Reco Signal in the Phys Signal as a processing history
-	physSignal.setRecoSignal(recoSignal);
-	return physSignal;
+  JPetPhysSignal physSignal;
+  physSignal.setRecoSignal(recoSignal);
+  physSignal.setPhe(-1.0);
+  physSignal.setQualityOfPhe(0.0);
+  std::vector<JPetSigCh> leadingSigChVec = recoSignal.getRawSignal().getPoints(
+  JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+  physSignal.setTime(leadingSigChVec.at(0).getValue());
+  physSignal.setQualityOfTime(0.0);
+  return physSignal;
 }

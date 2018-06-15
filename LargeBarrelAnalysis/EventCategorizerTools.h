@@ -16,23 +16,33 @@
 #ifndef _EVENTCATEGORIZERTOOLS_H_
 #define _EVENTCATEGORIZERTOOLS_H_
 
+#include <JPetStatistics/JPetStatistics.h>
+#include <JPetEvent/JPetEvent.h>
 #include <JPetHit/JPetHit.h>
+#define kLightVelocity_cm_ns 29.9792458
+#define kUndefinedValue 999.0
 
-enum kUndefined { point = 999, tof = 9999 };
-
-struct Point3D
-{
-  double x=0;
-  double y=0;
-  double z=0;
-};
-
-
+/**
+ * @brief Tools for Event Categorization
+ *
+ * Lots of tools in constatnt developement.
+ */
 class EventCategorizerTools
 {
 public:
-    static double calculateTOF(const JPetHit& firstHit, const JPetHit& latterHit);
-    static Point3D calculateAnnihilationPoint(const JPetHit& firstHit, const JPetHit& latterHit);
+  static bool checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats,
+    bool saveHistos, double b2bSlotThetaDiff);
+  static bool checkFor3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos);
+  static bool checkForPrompt(const JPetEvent& event, JPetStatistics& stats,
+    bool saveHistos, double deexTOTCutMin, double deexTOTCutMax);
+  static bool checkForScatter(const JPetEvent& event, JPetStatistics& stats,
+    bool saveHistos, double scatterTOFTimeDiff);
+  static double calculateTOT(const JPetHit& hit);
+  static double calculateDistance(const JPetHit& hit1, const JPetHit& hit2);
+  static double calculateScatteringTime(const JPetHit& hit1, const JPetHit& hit2);
+  static double calculateScatteringAngle(const JPetHit& hit1, const JPetHit& hit2);
+  static double calculateTOF(const JPetHit& firstHit, const JPetHit& latterHit);
+  static TVector3 calculateAnnihilationPoint(const JPetHit& firstHit, const JPetHit& latterHit);
 };
 
 #endif /*  !EVENTCATEGORIZERTOOLS_H */

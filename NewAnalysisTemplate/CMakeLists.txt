@@ -13,16 +13,8 @@ cmake_minimum_required(VERSION 2.6)
 ######################################################################
 set(projectName NewProjectName)
 
-# files to be copied from some other example directory, if any
-set(USE_AUX_FILES_FROM LargeBarrelAnalysis)
-
+# files to be copied from the source directory, if any
 set(AUXILLIARY_FILES
-  run.sh
-  conf_trb3.xml
-  resultsForThresholda.txt
-  large_barrel.json
-  TimeConstants.txt
-  userParams.json
   README
   )
 
@@ -50,11 +42,8 @@ set(use_modules_from ../LargeBarrelAnalysis)
 #
 list(APPEND HEADERS ${use_modules_from}/TimeWindowCreator.h)
 list(APPEND SOURCES ${use_modules_from}/TimeWindowCreator.cpp)
-#
-list(APPEND HEADERS ${use_modules_from}/TimeCalibLoader.h)
-list(APPEND SOURCES ${use_modules_from}/TimeCalibLoader.cpp)
-list(APPEND HEADERS ${use_modules_from}/TimeCalibTools.h)
-list(APPEND SOURCES ${use_modules_from}/TimeCalibTools.cpp)
+list(APPEND HEADERS ${use_modules_from}/UniversalFileLoader.h)
+list(APPEND SOURCES ${use_modules_from}/UniversalFileLoader.cpp)
 #
 list(APPEND HEADERS ${use_modules_from}/SignalFinder.h)
 list(APPEND SOURCES ${use_modules_from}/SignalFinder.cpp)
@@ -92,7 +81,7 @@ set(copy_depends) #create variable for list with depends files path
 foreach( file_i ${AUXILLIARY_FILES})
   list(APPEND copy_depends ${CMAKE_CURRENT_BINARY_DIR}/${file_i})
 
-  if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../${USE_AUX_FILES_FROM}/${file_i})
+  if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${file_i})
     set(CP_CMD copy_directory)
   else()
     set(CP_CMD copy)
@@ -100,7 +89,7 @@ foreach( file_i ${AUXILLIARY_FILES})
   add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
     POST_BUILD
     COMMAND ${CMAKE_COMMAND}
-    ARGS -E ${CP_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/../${USE_AUX_FILES_FROM}/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
+    ARGS -E ${CP_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
     )
 endforeach( file_i )
 

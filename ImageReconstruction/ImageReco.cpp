@@ -131,7 +131,7 @@ bool ImageReco::init()
 
 bool ImageReco::exec()
 {
-  if (auto& timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
+  if (const auto& timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     unsigned int numberOfEventsInTimeWindow = timeWindow->getNumberOfEvents();
     for (unsigned int i = 0; i < numberOfEventsInTimeWindow; i++) {
       auto event = dynamic_cast<const JPetEvent&>(timeWindow->operator[](static_cast<int>(i)));
