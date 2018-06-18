@@ -67,6 +67,7 @@ WORKDIR j-pet-framework-examples
 COPY docker-entrypoint.sh /usr/local/bin/
 COPY compare_velocity_results.sh /usr/local/bin/
 COPY run_velocity_calibration.sh /usr/local/bin/
-RUN chmod 777 /usr/local/bin/docker-entrypoint.sh \
-  && ln -s /usr/local/bin/docker-entrypoint.sh / && ln -s /usr/local/bin/docker-entrypoint.sh /j-pet-framework-examples
+RUN chmod 777 /usr/local/bin/compare_velocity_results.sh
+RUN chmod 777 /usr/local/bin/run_velocity_calibration.sh
+RUN chmod 777 /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT [ "bash", "-c", "docker-entrypoint.sh" ]
