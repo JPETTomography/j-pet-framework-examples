@@ -282,7 +282,7 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
       }
       // Checking for back to back
       JPetHit fakeHit;
-      fakeHit.setPos(firstHit.getPosX()+1, firstHit.getPosY(), firstHitgetPosZ());
+      fakeHit.setPos(firstHit.getPosX()+1, firstHit.getPosY(), firstHit.getPosZ());
       double distanceFromCenter = calcDistanceOfSurfaceAndCenter(firstHit, secondHit, fakeHit);
       double thetaDiff = fabs(firstHit.getBarrelSlot().getTheta() - secondHit.getBarrelSlot().getTheta());
       double timeDiff = fabs( firstHit.getTime()/1000.0 - secondHit.getTime()/1000.0 );
@@ -340,7 +340,7 @@ bool EventCategorizerTools::checkFor3Gamma(const JPetEvent& event, JPetStatistic
 	  stats.getHisto1D("DecayInto3_TimeDiff")->Fill(timeDiff);
 	}
 	if( transformedX > d3SlotThetaMin && timeDiff < d3TimeDiff && distanceFromCenter < d3DistanceFromCenter )
-	  return true
+	  return true;
       }
     }
   }
