@@ -1,0 +1,54 @@
+Aim
+---
+This example show a simple procedure of Imaging, for data collected by the Big Barrel. 
+
+Expected output
+---------------
+No output to stdout.
+JPet.log file appears with the log of the processing and ROOT files with the following etensions are produced:
+ *.tslot.raw.root
+ *.tslot.calib.root
+ *.raw.sig.root
+ *.phys.sig.root
+ *.hit.root
+ *.unk.evt.root
+ *.cat.evt.root
+
+where "*" stands for the name of the input file
+
+Input Data
+-----------
+For this example, user must provide their own data file(s) collected with the big barrel.
+
+Description
+--------------
+Procedure uses a couple of constants that is used for process of selection of hits
+
+userParams option:
+
+ "TimeCalibLoader_ConfigFile_std::string":"[file]", 			File with time calibration constants;
+ "SignalFinder_EdgeMaxTime_float":"4000",				Time Window for Leading edges to gather impulses into one signal
+ "SignalFinder_LeadTrailMaxTime_float":"30000",				Time Window for Trailing and Leading times on the same threshold to gather them into presignal
+ "HitFinder_TimeWindowWidth_float":"25000",				Time Window for signals on both sides of photomultiplier to gather them into Hit
+ "EventFinder_EventTime_float":"200000",				Time Window for Hits to gather them into Event
+ "EventFinder_MinimalEventSize_int":"1",				Minimal Size of Event to Save it for Categorization
+ "EventCategorizer_MinAnnihilationTOT_float":"10000",			Minimal TOT of Hit to analyze it further as Annihilation Hit
+ "EventCategorizer_MaxAnnihilationTOT_float":"25000",			Maximal TOT of Hit to analyze it further as Annihilation Hit
+ "EventCategorizer_MinDeexcitationTOT_float":"30000",			Minimal TOT of Hit to analyze it further as Deexcitation Hit
+ "EventCategorizer_MaxDeexcitationTOT_float":"50000"			Maximal TOT of Hit to analyze it further as Deexcitation Hit
+
+
+Additional info
+--------------
+
+Compiling 
+------------
+make
+
+Running
+------------
+
+Author
+------------
+Kamil Dulski
+Please report any bugs and suggestions of corrections to: <kamil.dulski@gmail.com>
