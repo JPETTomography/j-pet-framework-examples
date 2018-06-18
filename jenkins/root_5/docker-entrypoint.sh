@@ -26,10 +26,12 @@ sed -i 's/manager.useTask("TimeCalibLoader", "tslot.raw", "tslot.calib");//' ../
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 executeCommand "make"
 executeCommand "./LargeBarrelAnalysis.x -t root -f dabc_17025151847.tslot.calib.root -r 0 100"
-executeCommand "cd ../VelocityCalibration/tests/unitTestData/VelocityCalibrationTest"
-executeCommand "mkdir -p results_root_5"
-executeCommand "run-velocity-calibration.sh"
-executeCommand "compare_velocity_results.sh resultsForThresholda.txt thresholdResults/resultsForThresholda.txt 5"
-executeCommand "compare_velocity_results.sh resultsForThresholdb.txt thresholdResults/resultsForThresholdb.txt 5"
-executeCommand "compare_velocity_results.sh resultsForThresholdc.txt thresholdResults/resultsForThresholdc.txt 5"
-executeCommand "compare_velocity_results.sh resultsForThresholdd.txt thresholdResults/resultsForThresholdd.txt 5"
+if [ "$RUN_VELOCITY" = "1" ]; then
+    executeCommand "cd ../VelocityCalibration/tests/unitTestData/VelocityCalibrationTest"
+    executeCommand "mkdir -p results_root_5"
+    executeCommand "run-velocity-calibration.sh"
+    executeCommand "compare_velocity_results.sh resultsForThresholda.txt thresholdResults/resultsForThresholda.txt 5"
+    executeCommand "compare_velocity_results.sh resultsForThresholdb.txt thresholdResults/resultsForThresholdb.txt 5"
+    executeCommand "compare_velocity_results.sh resultsForThresholdc.txt thresholdResults/resultsForThresholdc.txt 5"
+    executeCommand "compare_velocity_results.sh resultsForThresholdd.txt thresholdResults/resultsForThresholdd.txt 5"
+fi
