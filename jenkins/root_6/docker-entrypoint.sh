@@ -29,9 +29,9 @@ executeCommand "./LargeBarrelAnalysis.x -t root -f dabc_17025151847.tslot.calib.
 if [ "$RUN_VELOCITY" = "1" ]; then
     executeCommand "cd ../VelocityCalibration/tests/unitTestData/VelocityCalibrationTest"
     executeCommand "mkdir -p results_root_5"
-    executeCommand "run-velocity-calibration.sh"
-    executeCommand "compare_velocity_results.sh resultsForThresholda.txt thresholdResults/resultsForThresholda.txt 5"
-    executeCommand "compare_velocity_results.sh resultsForThresholdb.txt thresholdResults/resultsForThresholdb.txt 5"
-    executeCommand "compare_velocity_results.sh resultsForThresholdc.txt thresholdResults/resultsForThresholdc.txt 5"
-    executeCommand "compare_velocity_results.sh resultsForThresholdd.txt thresholdResults/resultsForThresholdd.txt 5"
+    executeCommand "/usr/local/bin/run-velocity-calibration.sh"
+    executeCommand "/usr/local/bin/compare_velocity_results.sh resultsForThresholda.txt thresholdResults/resultsForThresholda.txt 5"
+    executeCommand "/usr/local/bin/compare_velocity_results.sh resultsForThresholdb.txt thresholdResults/resultsForThresholdb.txt 5"
+    executeCommand "/usr/local/bin/compare_velocity_results.sh resultsForThresholdc.txt thresholdResults/resultsForThresholdc.txt 5"
+    executeCommand "/usr/local/bin/compare_velocity_results.sh resultsForThresholdd.txt thresholdResults/resultsForThresholdd.txt 5"
 fi
