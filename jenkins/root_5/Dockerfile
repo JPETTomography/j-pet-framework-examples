@@ -65,9 +65,9 @@ RUN ln -s /usr/bin/g++ /usr/bin/c++
 RUN ln -s /usr/bin/gcc /usr/bin/cc
 WORKDIR j-pet-framework-examples
 COPY docker-entrypoint.sh /usr/local/bin/
-COPY compare_velocity_results.sh /usr/local/bin/
+COPY compare_velocity_results.py /usr/local/bin/
 COPY run_velocity_calibration.sh /usr/local/bin/
-RUN chmod 777 /usr/local/bin/compare_velocity_results.sh
+RUN chmod 777 /usr/local/bin/compare_velocity_results.py
 RUN chmod 777 /usr/local/bin/run_velocity_calibration.sh
 RUN chmod 777 /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT [ "bash", "-c", "docker-entrypoint.sh" ]
