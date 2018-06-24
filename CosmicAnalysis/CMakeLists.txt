@@ -11,7 +11,7 @@ cmake_minimum_required(VERSION 2.6)
 ### when creating a new project,
 ### set this section appropriately for your project
 ######################################################################
-set(projectName CosmicsAnalysisName)
+set(projectName CosmicsAnalysis)
 
 # files to be copied from some other example directory, if any
 set(USE_AUX_FILES_FROM LargeBarrelAnalysis)
@@ -51,10 +51,10 @@ set(use_modules_from ../LargeBarrelAnalysis)
 list(APPEND HEADERS ${use_modules_from}/TimeWindowCreator.h)
 list(APPEND SOURCES ${use_modules_from}/TimeWindowCreator.cpp)
 #
-list(APPEND HEADERS ${use_modules_from}/TimeCalibLoader.h)
-list(APPEND SOURCES ${use_modules_from}/TimeCalibLoader.cpp)
-list(APPEND HEADERS ${use_modules_from}/TimeCalibTools.h)
-list(APPEND SOURCES ${use_modules_from}/TimeCalibTools.cpp)
+list(APPEND HEADERS ${use_modules_from}/UniversalFileLoader.h)
+list(APPEND SOURCES ${use_modules_from}/UniversalFileLoader.cpp)
+#list(APPEND HEADERS ${use_modules_from}/TimeCalibTools.h)
+#list(APPEND SOURCES ${use_modules_from}/TimeCalibTools.cpp)
 #
 list(APPEND HEADERS ${use_modules_from}/SignalFinder.h)
 list(APPEND SOURCES ${use_modules_from}/SignalFinder.cpp)

@@ -15,7 +15,6 @@
 
 #include <JPetManager/JPetManager.h>
 #include "../LargeBarrelAnalysis/TimeWindowCreator.h"
-#include "../LargeBarrelAnalysis/TimeCalibLoader.h"
 #include "../LargeBarrelAnalysis/SignalFinder.h"
 #include "../LargeBarrelAnalysis/SignalTransformer.h"
 #include "../LargeBarrelAnalysis/HitFinder.h"
@@ -29,7 +28,6 @@ int main(int argc, const char* argv[])
   JPetManager& manager = JPetManager::getManager();
 
   manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
-  manager.registerTask<TimeCalibLoader>("TimeCalibLoader");
   manager.registerTask<SignalFinder>("SignalFinder");
   manager.registerTask<SignalTransformer>("SignalTransformer"); 
   manager.registerTask<HitFinder>("HitFinder"); 
