@@ -53,8 +53,6 @@ list(APPEND SOURCES ${use_modules_from}/TimeWindowCreator.cpp)
 #
 list(APPEND HEADERS ${use_modules_from}/UniversalFileLoader.h)
 list(APPEND SOURCES ${use_modules_from}/UniversalFileLoader.cpp)
-#list(APPEND HEADERS ${use_modules_from}/TimeCalibTools.h)
-#list(APPEND SOURCES ${use_modules_from}/TimeCalibTools.cpp)
 #
 list(APPEND HEADERS ${use_modules_from}/SignalFinder.h)
 list(APPEND SOURCES ${use_modules_from}/SignalFinder.cpp)
