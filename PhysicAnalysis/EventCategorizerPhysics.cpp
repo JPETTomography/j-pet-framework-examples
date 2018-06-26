@@ -211,7 +211,7 @@ JPetEvent EventCategorizerPhysics::physicsAnalysis( vector<JPetHit> hits )
 	if( deexcitationHits.getHits().size() > 0 )
 	{
 		physicEvent.setEventType(JPetEventType::kPrompt);
-		if( deexcitationHits.getHits().size() > 0 )
+		if( annihilationHits.getHits().size() > 0 )
 		{
 			getStatistics().getHisto1D("Positronium_Lifetime")->Fill( annihilationHits.getHits().at(0).getTime()/1000. - deexcitationHits.getHits().at(0).getTime()/1000. );
 		}
