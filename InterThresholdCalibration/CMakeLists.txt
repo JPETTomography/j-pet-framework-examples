@@ -46,6 +46,8 @@ set(use_modules_from ../LargeBarrelAnalysis)
 #
 list(APPEND HEADERS ${use_modules_from}/TimeWindowCreator.h)
 list(APPEND SOURCES ${use_modules_from}/TimeWindowCreator.cpp)
+list(APPEND HEADERS ${use_modules_from}/UniversalFileLoader.h)
+list(APPEND SOURCES ${use_modules_from}/UniversalFileLoader.cpp)
 #
 list(APPEND HEADERS ${use_modules_from}/SignalFinder.h)
 list(APPEND SOURCES ${use_modules_from}/SignalFinder.cpp)
@@ -59,12 +61,6 @@ list(APPEND HEADERS ${use_modules_from}/HitFinder.h)
 list(APPEND SOURCES ${use_modules_from}/HitFinder.cpp)
 list(APPEND HEADERS ${use_modules_from}/HitFinderTools.h)
 list(APPEND SOURCES ${use_modules_from}/HitFinderTools.cpp)
-#
-list(APPEND HEADERS ${use_modules_from}/EventFinder.h)
-list(APPEND SOURCES ${use_modules_from}/EventFinder.cpp)
-#
-list(APPEND HEADERS ${use_modules_from}/EventCategorizer.h)
-list(APPEND SOURCES ${use_modules_from}/EventCategorizer.cpp)
 
 message(STATUS "S: " ${SOURCES})
 message(STATUS "H: " ${HEADERS})
