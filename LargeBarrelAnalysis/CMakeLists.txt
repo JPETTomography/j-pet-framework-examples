@@ -14,7 +14,9 @@ cmake_minimum_required(VERSION 2.6)
 set(projectName LargeBarrelAnalysis)
 
 set(AUXILIARY_FILES
-  run.sh
+  conf_trb3.xml
+  userParams.json
+  dummyCalibration.txt
   README
   run.sh
 )
