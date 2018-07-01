@@ -22,6 +22,32 @@ add_definitions(-std=c++11 -Wall -Wunused-parameter)
 ################################################################################
 # Add MLEM submodule
 add_subdirectory(j-pet-mlem)
+include_directories(j-pet-mlem ${MLEM_INCLUDE_DIRS})
+
+# add options from j-pet-mlem as compile flags removing PET_ prefix
+get_cmake_property(vars VARIABLES)
+foreach(var ${vars})
+  if(var MATCHES "^PET_" AND NOT var MATCHES "_DIR$")
+    string(REGEX REPLACE "^PET_" "" name ${var})
+    if(name MATCHES "_TYPE$")
+      string(REGEX REPLACE "_TYPE$" "" type_name ${name})
+      add_definitions(-DUSE_${${var}}_${type_name}=1)
+      add_definitions(-D${name}=${${var}})
+      message(STATUS "Using ${${var}} ${type_name}")
+    elseif(${var})
+      if(${var} STREQUAL ON)
+        add_definitions(-D${name}=1)
+        message(STATUS "Enabled ${name}")
+      else()
+        message(STATUS "Using ${name}=${${var}}")
+        add_definitions(-D${name}=${${var}})
+      endif()
+    else()
+      add_definitions(-D${name}=0)
+      message(STATUS "Disabled ${name}")
+    endif()
+  endif()
+endforeach()
 
 ################################################################################
 ## Enable rpath on OS X and point it to ROOT
