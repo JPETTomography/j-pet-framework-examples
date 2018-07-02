@@ -25,5 +25,19 @@ rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 sed -i 's/manager.useTask(\"TimeCalibLoader\", \"tslot.raw\", \"tslot.calib\");//' ../../LargeBarrelAnalysis/main.cpp
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 executeCommand "make"
-executeCommand "./LargeBarrelAnalysis.x -t root -f dabc_17025151847.tslot.calib.root   -r 0 100"
-
+executeCommand "./LargeBarrelAnalysis.x -t root -f dabc_17025151847.tslot.calib.root -r 0 100"
+if [ "$RUN_VELOCITY" = "1" ]; then
+    executeCommand "cd ../VelocityCalibration/tests/unitTestData/VelocityCalibrationTest"
+    executeCommand "rm -rf results_root_6"
+    executeCommand "rm -rf results_root6.txt"
+    executeCommand "rm -rf results.txt"
+    executeCommand "mkdir -p results_root_6"
+    executeCommand "rm -rf *.png"
+    executeCommand "rm -rf calibrationRoot*"
+    executeCommand "rm -rf Results"
+    executeCommand "/usr/local/bin/run_velocity_calibration.sh"
+    executeCommand "/usr/local/bin/compare_velocity_results.py calibrationRoot6resultsForThresholda.txt thresholdResults/resultsForThresholda.txt 5"
+    executeCommand "/usr/local/bin/compare_velocity_results.py calibrationRoot6resultsForThresholdb.txt thresholdResults/resultsForThresholdb.txt 5"
+    executeCommand "/usr/local/bin/compare_velocity_results.py calibrationRoot6resultsForThresholdc.txt thresholdResults/resultsForThresholdc.txt 5"
+    executeCommand "/usr/local/bin/compare_velocity_results.py calibrationRoot6resultsForThresholdd.txt thresholdResults/resultsForThresholdd.txt 5"
+fi

@@ -54,6 +54,9 @@ RUN mkdir -p root-system/etc
 RUN cd root-6.08.06/build && cmake -Dbuiltin_fftw3=ON -Dbuiltin_ftgl=ON -Dfail-on-missing=ON -Dgviz=OFF -Dbonjour=OFF -Dkrb5=OFF -Dcastor=OFF -Drfio=OFF -Dmysql=OFF -Doracle=OFF -Dodbc=OFF -Dsqlite=OFF -Dpythia6=OFF -Dbuiltin_xrootd=ON -Dgfal=OFF -Ddcache=OFF -Dldap=OFF -Dchirp=OFF -Dhdfs=OFF -Dbuiltin_davix=ON -DCMAKE_INSTALL_PREFIX=/root-system --build .. && make && make install
 WORKDIR j-pet-framework-examples
 COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod 777 /usr/local/bin/docker-entrypoint.sh \
-  && ln -s /usr/local/bin/docker-entrypoint.sh / && ln -s /usr/local/bin/docker-entrypoint.sh /j-pet-framework-examples
+COPY compare_velocity_results.py /usr/local/bin/
+COPY run_velocity_calibration.sh /usr/local/bin/
+RUN chmod 777 /usr/local/bin/compare_velocity_results.py
+RUN chmod 777 /usr/local/bin/run_velocity_calibration.sh
+RUN chmod 777 /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT [ "bash", "-c", "docker-entrypoint.sh" ]
