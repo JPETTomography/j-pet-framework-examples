@@ -41,36 +41,29 @@ using SquareScanner = Scanner<PET2D::Barrel::SquareDetector<float>>;
 class MLEMRunner : public JPetUserTask
 {
 public:
-  MLEMRunner(const char* name);
+  MLEMRunner(const char *name);
   virtual ~MLEMRunner();
   virtual bool init() override;
   virtual bool exec() override;
   virtual bool terminate() override;
 
 private:
-  MLEMRunner(const MLEMRunner&) = delete;
-  MLEMRunner& operator=(const MLEMRunner&) = delete;
+  MLEMRunner(const MLEMRunner &) = delete;
+  MLEMRunner &operator=(const MLEMRunner &) = delete;
 
   void setUpOptions();
-  bool parseEvent(const JPetEvent& event);
+  bool parseEvent(const JPetEvent &event);
 
   const std::string kOutFileNameKey = "MLEMRunner_OutFileName_std::string";
   const double speed_of_light_m_per_ps = 299792458.0e-12;
   const double cm = 0.01;
+  const float EPSILON = 0.0001;
 
   std::string fOutFileName = "mlem_reconstruction_output.txt";
   std::string fOutFileNameTest = "mlem_reconstruction_output_test.txt";
+  float fHalfStripLenght = 0.f;
 
-  SquareScanner kScanner =
-    ScannerBuilder<SquareScanner>::build_multiple_rings(__PET2D_BARREL(
-          std::vector<float> {0.4155f, 0.458f, 0.5655f}, //radius
-          std::vector<float> {0.f, 0.5f, 0.5f},         //rotation
-          std::vector<int> {48, 48, 96},                //n-detectors
-          0.007f,                                       //w-detector
-          0.019f,                                       //h-detector
-          0.f,                                          //should be d-detector
-          0.40f                                         //fow radius
-        ));
+  SquareScanner fScanner;
 
   std::ofstream fOutputStream;
   std::ofstream fOutputStreamTest;
