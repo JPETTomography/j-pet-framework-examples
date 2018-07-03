@@ -43,6 +43,12 @@ public:
   static double calculateScatteringAngle(const JPetHit& hit1, const JPetHit& hit2);
   static double calculateTOF(const JPetHit& firstHit, const JPetHit& latterHit);
   static TVector3 calculateAnnihilationPoint(const JPetHit& firstHit, const JPetHit& latterHit);
+  static double calcDistanceOfSurfaceAndCenter(const JPetHit& firstHit, 
+    const JPetHit& secondHit, const JPetHit& thirdHit);  
+  static bool checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats,
+    bool saveHistos, double b2bSlotThetaDiff, double b2bTimeDiff, double b2bDistanceFromCenter);
+  static bool checkFor3Gamma(const JPetEvent& event, JPetStatistics& stats, 
+    bool saveHistos, double d3SlotThetaMin, double d3TimeDiff, double d3DistanceFromCenter);
 };
 
 #endif /*  !EVENTCATEGORIZERTOOLS_H */
