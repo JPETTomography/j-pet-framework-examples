@@ -64,7 +64,7 @@ vector<JPetHit> HitFinderTools::createHits(JPetStatistics& stats,
             hit.setSignalB(signalB);
             hit.setTime((signalA.getTime() + signalB.getTime()) / 2.0);
             hit.setQualityOfTime(-1.0);
-            hit.setTimeDiff(signalA.getTime() - signalB.getTime());
+            hit.setTimeDiff(signalB.getTime() - signalA.getTime());
             hit.setQualityOfTimeDiff(-1.0);
             hit.setEnergy(-1.0);
             hit.setQualityOfEnergy(-1.0);

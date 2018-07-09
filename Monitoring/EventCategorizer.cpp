@@ -38,22 +38,22 @@ void EventCategorizer::init(const JPetTaskInterface::Options&){
 										400, -100, 100,
 										400, -100, 100)
 				);
-			getStatistics().getHisto2D("XY_plane_scint").SetXTitle("X axis");
-			getStatistics().getHisto2D("XY_plane_scint").SetYTitle("Y axis");
+			getStatistics().getHisto2D("XY_plane_scint").SetXTitle("Y axis");
+			getStatistics().getHisto2D("XY_plane_scint").SetYTitle("X axis");
 	  
 	  		getStatistics().createHistogram(
 					new TH2F("XY_plane",
 										"XY",
-										200, -50, 50,
-										200, -50, 50)
+										199, -49.75, 49.75,
+										199, -49.75, 49.75)
 				);
-			getStatistics().getHisto2D("XY_plane").SetXTitle("X axis");
-			getStatistics().getHisto2D("XY_plane").SetYTitle("Y axis");
+			getStatistics().getHisto2D("XY_plane").SetXTitle("Y axis");
+			getStatistics().getHisto2D("XY_plane").SetYTitle("X axis");
 			
 			getStatistics().createHistogram(
 					new TH1F("Z_plane",
 										"Z",
-										200, -50, 50)
+										199, -49.75, 49.75)
 				);
 			getStatistics().getHisto1D("Z_plane").SetXTitle("Z axis");
 			getStatistics().getHisto1D("Z_plane").SetYTitle("Counts");
@@ -61,7 +61,7 @@ void EventCategorizer::init(const JPetTaskInterface::Options&){
 			getStatistics().createHistogram(
 					new TH2F("TimeDifferenceVsID",
 										"TimeDiffVsID",
-										1000, -50, 50,
+										999, -49.95, 49.95,
 										200, 0, 200)
 				);
 			getStatistics().getHisto2D("TimeDifferenceVsID").SetXTitle("Time difference between side A and side B on 1 threshold [ns]");
@@ -69,39 +69,40 @@ void EventCategorizer::init(const JPetTaskInterface::Options&){
 					
 			getStatistics().createHistogram(
 					new TH2F("TOFVsID",
-										"TOFVsID2",
-										3000, -150, 150,
+										"TOFVsID",
+										2999, -149.95, 149.95,
 										200, 0, 200)
 				);
 			getStatistics().getHisto2D("TOFVsID").SetXTitle("Time of flight between back to back hits on 1 threshold [ns]");
 			getStatistics().getHisto2D("TOFVsID").SetYTitle("Scintillator ID");
 			
 			getStatistics().createHistogram(
-					new TH1F("TOT",
-										"TOT",
-										1500, 0, 150)
-				);
-			getStatistics().getHisto1D("TOT").SetXTitle("TOT [ns]");
-			getStatistics().getHisto1D("TOT").SetYTitle("Counts");
-	  
+							new TH2F("TOTvsID",
+								 "TOT",
+								 200, 0, 200,
+								 1500, 0, 150)
+							);
+			getStatistics().getHisto2D("TOTvsID").SetXTitle("Scintillator ID");
+			getStatistics().getHisto2D("TOTvsID").SetYTitle("TOT [ns]");
+
 	  
 		getStatistics().createHistogram(
 			new TH2F("HitDistanceVsTDiff",
 								"Two Hit distance vs. abs time difference",
 								100, 0.0, 150.0,
-								100, 0.0, 6000.0)
+								100, 0.0, 10.0)
 		);
-		getStatistics().getHisto2D("HitDistanceVsTDiff").SetXTitle("Time difference [ns]");
-		getStatistics().getHisto2D("HitDistanceVsTDiff").SetYTitle("Distance between hits [cm]");	
+		getStatistics().getHisto2D("HitDistanceVsTDiff").SetYTitle("Time difference [ns]");
+		getStatistics().getHisto2D("HitDistanceVsTDiff").SetXTitle("Distance between hits [cm]");	
 		
 		getStatistics().createHistogram(
 			new TH2F("HitDistanceVsTDiff_btb",
 								"Opposite Hits distance vs. abs time difference for opposite hits",
 								100, 0.0, 150.0,
-								100, 0.0, 6000.0)
+								100, 0.0, 10.0)
 		);
-		getStatistics().getHisto2D("HitDistanceVsTDiff_btb").SetXTitle("Time difference [ns]");
-		getStatistics().getHisto2D("HitDistanceVsTDiff_btb").SetYTitle("Distance between hits [cm]");		
+		getStatistics().getHisto2D("HitDistanceVsTDiff_btb").SetYTitle("Time difference [ns]");
+		getStatistics().getHisto2D("HitDistanceVsTDiff_btb").SetXTitle("Distance between hits [cm]");		
 
 		getStatistics().createHistogram(
 			new TH2F("3_hit_angles",
@@ -109,8 +110,16 @@ void EventCategorizer::init(const JPetTaskInterface::Options&){
 								360, -0.5, 359.5,
 								360, -0.5, 359.5)
 		);
-		getStatistics().getHisto2D("3_hit_angles").SetXTitle("Smallest angle [deg]");
-		getStatistics().getHisto2D("3_hit_angles").SetYTitle("Second smallest angle [deg]");
+		getStatistics().getHisto2D("3_hit_angles").SetXTitle("Smallest angle + Second smallest angle [deg]");
+		getStatistics().getHisto2D("3_hit_angles").SetYTitle("Second smallest angle - Smallest angle [deg]");
+
+		getStatistics().createHistogram(
+			new TH1F("HitCounts_vs_ID",
+								"Counts of Hits per scintillator",
+								200, 0, 200)
+		);
+		getStatistics().getHisto1D("HitCounts_vs_ID").SetXTitle("Scintillator ID");
+		getStatistics().getHisto1D("HitCounts_vs_ID").SetYTitle("Hit count");
 	}
 }
 
@@ -135,10 +144,10 @@ void EventCategorizer::exec(){
 		}*/
 		if( hits.size() > 0){
 
-
 		  for(unsigned k=0;k<hits.size();k++){
 		    	JPetHit firstHit = hits.at(k);
-			getStatistics().getHisto1D("TOT").Fill( CalcTOT( firstHit ) );
+			getStatistics().getHisto1D("HitCounts_vs_ID").Fill( firstHit.getScintillator().getID() );
+			getStatistics().getHisto2D("TOTvsID").Fill( firstHit.getScintillator().getID(), CalcTOT( firstHit ) );
 			if( JPetHitUtils::getTimeDiffAtThr( firstHit, 1 ) / 1000. < 100 )
 			{
 				    getStatistics().getHisto2D("TimeDifferenceVsID").Fill( JPetHitUtils::getTimeDiffAtThr( firstHit , 1) / 1000., firstHit.getScintillator().getID() );
@@ -151,8 +160,13 @@ void EventCategorizer::exec(){
 				{
 					double tof = fabs( JPetHitUtils::getTimeAtThr( firstHit, 1) - JPetHitUtils::getTimeAtThr( secondHit, 1) );
 					tof /= 1000.; // [ns]
-					int delta_ID = fBarrelMap->calcDeltaID( firstHit.getBarrelSlot(), secondHit.getBarrelSlot() );
-					if( tof < 150.0 && delta_ID == fBarrelMap->getSlotsCount( firstHit.getBarrelSlot().getLayer() ) / 2)
+
+
+
+					int delta_ID2 = (fabs(firstHit.getScintillator().getID() - secondHit.getScintillator().getID()) <= fBarrelMap->getSlotsCount( firstHit.getBarrelSlot().getLayer() ) / 2) ? fabs(firstHit.getScintillator().getID() - secondHit.getScintillator().getID() ) : ( fBarrelMap->getSlotsCount( firstHit.getBarrelSlot().getLayer() ) - (firstHit.getScintillator().getID() - secondHit.getScintillator().getID() ) );
+
+					int half_layer = 24 + (firstHit.getBarrelSlot().getLayer().getID()==3 ? 24 : 0);
+					if( tof < 150.0 && delta_ID2 == half_layer)
 					{
 							 getStatistics().getHisto2D("TOFVsID").Fill( (JPetHitUtils::getTimeAtThr(firstHit, 1) -
 								JPetHitUtils::getTimeAtThr(secondHit, 1))/1000, firstHit.getScintillator().getID() );
@@ -166,7 +180,7 @@ void EventCategorizer::exec(){
 
             float thetaDiff = fabs(firstHit.getBarrelSlot().getTheta()
               -secondHit.getBarrelSlot().getTheta());
-            float timeDiff = fabs(firstHit.getTime()-secondHit.getTime());
+            float timeDiff = fabs(firstHit.getTime()-secondHit.getTime())/1000;
             float distance = sqrt(pow(firstHit.getPosX()-secondHit.getPosX(),2)
               +pow(firstHit.getPosY()-secondHit.getPosY(),2)
               +pow(firstHit.getPosZ()-secondHit.getPosZ(),2));
@@ -200,7 +214,7 @@ void EventCategorizer::exec(){
 	  angles.push_back(theta_2_3);
 	  angles.push_back(theta_3_1);	  
 	  std::sort( angles.begin(), angles.begin() +3 );
-	  getStatistics().getHisto2D("3_hit_angles").Fill( angles[0], angles[1]);
+	  getStatistics().getHisto2D("3_hit_angles").Fill( angles[0]+angles[1], angles[1] - angles[0]);
          /* float theta_1_2 = fabs(firstHit.getBarrelSlot().getTheta()
             -secondHit.getBarrelSlot().getTheta());
           float theta_2_3 = fabs(secondHit.getBarrelSlot().getTheta()
@@ -241,20 +255,20 @@ void EventCategorizer::fillPlanes( const JPetHit & Hit1, const JPetHit & Hit2)
 	double VecLength = sqrt( pow(Hit1.getPosX()-Hit2.getPosX(),2)	// Pos in cm
 			+pow(Hit1.getPosY()-Hit2.getPosY(),2)
 			+pow(Hit1.getPosZ()-Hit2.getPosZ(),2) );
-	getStatistics().getHisto2D("XY_plane_scint").Fill( Hit1.getPosX(), Hit1.getPosY() );
-	getStatistics().getHisto2D("XY_plane_scint").Fill( Hit2.getPosX(), Hit2.getPosY() );
+	getStatistics().getHisto2D("XY_plane_scint").Fill( Hit1.getPosY(), Hit1.getPosX() );
+	getStatistics().getHisto2D("XY_plane_scint").Fill( Hit2.getPosY(), Hit2.getPosX() );
 	double middleX = (Hit1.getPosX()+Hit2.getPosX() )/2;
 	double middleY = (Hit1.getPosY()+Hit2.getPosY() )/2;
 	double middleZ = (Hit1.getPosZ()+Hit2.getPosZ() )/2;
 	double Fraction = 2*tof*29.979246/VecLength;
 	if( JPetHitUtils::getTimeAtThr(Hit1, 1) >= JPetHitUtils::getTimeAtThr(Hit2, 1) )
 	{
-	getStatistics().getHisto2D("XY_plane").Fill( middleX + Fraction*( Hit1.getPosX()-middleX ), middleY + Fraction*( Hit1.getPosY()-middleY ) );
+	getStatistics().getHisto2D("XY_plane").Fill( middleY + Fraction*( Hit1.getPosY()-middleY ), middleX + Fraction*( Hit1.getPosX()-middleX ) );
 	getStatistics().getHisto1D("Z_plane").Fill( middleZ + Fraction*( Hit1.getPosZ()-middleZ ) );
 	}
 	else
 	 {
-	getStatistics().getHisto2D("XY_plane").Fill( middleX + Fraction*( Hit2.getPosX()-middleX ), middleY + Fraction*( Hit2.getPosY()-middleY ) );
+	getStatistics().getHisto2D("XY_plane").Fill( middleY + Fraction*( Hit2.getPosY()-middleY ), middleX + Fraction*( Hit2.getPosX()-middleX ) );
 	getStatistics().getHisto1D("Z_plane").Fill( middleZ + Fraction*( Hit2.getPosZ()-middleZ ) );
 	}
 }
