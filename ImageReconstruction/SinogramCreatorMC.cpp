@@ -18,7 +18,7 @@
 #include <TH1F.h>
 using namespace jpet_options_tools;
 
-SinogramCreatorMC::SinogramCreatorMC(const char *name) : JPetUserTask(name) {}
+SinogramCreatorMC::SinogramCreatorMC(const char* name) : JPetUserTask(name) {}
 
 SinogramCreatorMC::~SinogramCreatorMC() {}
 
@@ -28,11 +28,11 @@ bool SinogramCreatorMC::init()
   fOutputEvents = new JPetTimeWindow("JPetEvent");
 
   getStatistics().createHistogram(new TH2I("reconstuction_histogram",
-                                           "reconstuction histogram",
-                                           std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1, 0.f, fMaxReconstructionLayerRadius,
-                                           kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
+                                  "reconstuction histogram",
+                                  std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1, 0.f, fMaxReconstructionLayerRadius,
+                                  kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
 
-  getStatistics().createHistogram(new TH1F("pos_dis", "Position distance real data", (fMaxReconstructionLayerRadius)*10 * 5, 0.f, fMaxReconstructionLayerRadius));
+  getStatistics().createHistogram(new TH1F("pos_dis", "Position distance real data", (fMaxReconstructionLayerRadius) * 10 * 5, 0.f, fMaxReconstructionLayerRadius));
   getStatistics().createHistogram(new TH1F("angle", "Position angle real data", kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
 
 #if ROOT_VERSION_CODE < ROOT_VERSION(6, 0, 0)
@@ -61,44 +61,26 @@ void SinogramCreatorMC::generateSinogram()
   float secondZ = 0.f;
 
   const int maxDistanceNumber = std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
-  if (fSinogram == nullptr)
-  {
+  if (fSinogram == nullptr) {
     fSinogram = new SinogramResultType *[fZSplitNumber];
-    for (int i = 0; i < fZSplitNumber; i++)
-    {
+    for (int i = 0; i < fZSplitNumber; i++) {
       fSinogram[i] = new SinogramResultType(maxDistanceNumber, (std::vector<unsigned int>(kReconstructionMaxAngle, 0)));
     }
   }
 
-  while (in.peek() != EOF)
-  {
+  while (in.peek() != EOF) {
 
-    in >> firstX >> firstY >> firstZ >> secondX >> secondY >> secondZ;
+    in >> firstY >> firstX >> firstZ >> secondY >> secondX >> secondZ;
 
-    for (int i = 0; i < fZSplitNumber; i++)
-    {
-      if (!checkSplitRange(firstZ, secondZ, i))
-      {
+    for (int i = 0; i < fZSplitNumber; i++) {
+      if (!checkSplitRange(firstZ, secondZ, i)) {
         continue;
       }
-
-      const float distance = SinogramCreatorTools::calculateDistance(firstX, firstY, secondX, secondY);
-      getStatistics().getObject<TH1F>("pos_dis")->Fill(distance);
-      const int angle = SinogramCreatorTools::calculateAngle(firstX, firstY, secondX, secondY);
-
-      getStatistics().getObject<TH1F>("angle")->Fill(angle);
-      const int distanceRound = SinogramCreatorTools::roundToNearesMultiplicity(distance + fMaxReconstructionLayerRadius, fReconstructionDistanceAccuracy);
-      if (distanceRound >= maxDistanceNumber || angle >= kReconstructionMaxAngle)
-      {
-        std::cout << "Distance round: " << distanceRound << " angle: " << angle << std::endl;
-        continue;
-      }
-      fCurrentValueInSinogram[i] = ++fSinogram[i]->at(distanceRound).at(angle);
-      if (fCurrentValueInSinogram[i] > fMaxValueInSinogram[i])
-      {
+      const auto sinogramResult = SinogramCreatorTools::getSinogramRepresentation(firstX, firstY, secondX, secondY, fMaxReconstructionLayerRadius, fReconstructionDistanceAccuracy, maxDistanceNumber, kReconstructionMaxAngle);
+      fCurrentValueInSinogram[i] = ++fSinogram[i]->at(sinogramResult.first).at(sinogramResult.second);
+      if (fCurrentValueInSinogram[i] > fMaxValueInSinogram[i]) {
         fMaxValueInSinogram[i] = fCurrentValueInSinogram[i]; // save max value of sinogram
       }
-      getStatistics().getObject<TH2I>("reconstuction_histogram")->Fill(distance + fMaxReconstructionLayerRadius, angle); //add to histogram
     }
   }
 }
@@ -115,16 +97,13 @@ bool SinogramCreatorMC::exec()
 
 bool SinogramCreatorMC::terminate()
 {
-  for (int i = 0; i < fZSplitNumber; i++)
-  {
+  for (int i = 0; i < fZSplitNumber; i++) {
     std::ofstream res(fOutFileName + std::to_string(i) + ".ppm");
     res << "P2" << std::endl;
     res << (*fSinogram[i])[0].size() << " " << fSinogram[i]->size() << std::endl;
     res << fMaxValueInSinogram[i] << std::endl;
-    for (unsigned int k = 0; k < fSinogram[i]->size(); k++)
-    {
-      for (unsigned int j = 0; j < (*fSinogram[i])[0].size(); j++)
-      {
+    for (unsigned int k = 0; k < fSinogram[i]->size(); k++) {
+      for (unsigned int j = 0; j < (*fSinogram[i])[0].size(); j++) {
         res << (*fSinogram[i])[k][j] << " ";
       }
       res << std::endl;
@@ -140,33 +119,27 @@ bool SinogramCreatorMC::terminate()
 void SinogramCreatorMC::setUpOptions()
 {
   auto opts = getOptions();
-  if (isOptionSet(opts, kOutFileNameKey))
-  {
+  if (isOptionSet(opts, kOutFileNameKey)) {
     fOutFileName = getOptionAsString(opts, kOutFileNameKey);
   }
 
-  if (isOptionSet(opts, kReconstructionDistanceAccuracy))
-  {
+  if (isOptionSet(opts, kReconstructionDistanceAccuracy)) {
     fReconstructionDistanceAccuracy = getOptionAsFloat(opts, kReconstructionDistanceAccuracy);
   }
 
-  if (isOptionSet(opts, kZSplitNumber))
-  {
+  if (isOptionSet(opts, kZSplitNumber)) {
     fZSplitNumber = getOptionAsInt(opts, kZSplitNumber);
   }
 
-  if (isOptionSet(opts, kScintillatorLenght))
-  {
+  if (isOptionSet(opts, kScintillatorLenght)) {
     fScintillatorLenght = getOptionAsFloat(opts, kScintillatorLenght);
   }
 
-  if (isOptionSet(opts, kMaxReconstructionRadius))
-  {
+  if (isOptionSet(opts, kMaxReconstructionRadius)) {
     fMaxReconstructionLayerRadius = getOptionAsFloat(opts, kMaxReconstructionRadius);
   }
 
-  if (isOptionSet(opts, kInputDataKey))
-  {
+  if (isOptionSet(opts, kInputDataKey)) {
     fInputData = getOptionAsString(opts, kInputDataKey);
   }
 
@@ -174,8 +147,7 @@ void SinogramCreatorMC::setUpOptions()
   fCurrentValueInSinogram = new int[fZSplitNumber];
   const float maxZRange = fScintillatorLenght / 2.f;
   float range = (2.f * maxZRange) / fZSplitNumber;
-  for (int i = 0; i < fZSplitNumber; i++)
-  {
+  for (int i = 0; i < fZSplitNumber; i++) {
     float rangeStart = (i * range) - maxZRange;
     float rangeEnd = ((i + 1) * range) - maxZRange;
     fZSplitRange.push_back(std::make_pair(rangeStart, rangeEnd));
