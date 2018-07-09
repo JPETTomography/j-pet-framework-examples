@@ -27,49 +27,49 @@
 
 /**
  * @brief Task that filter events and output reco.unk.evt for futher reconstruction.
- * It defines 6 User Params:
- * - FilterEvents_CUT_ON_Z_VALUE_float
- * - FilterEvents_CUT_ON_LOR_DISTANCE_FROM_CENTER_float
- * - FilterEvents_ANNIHILATION_POINT_Z_float
- * - FilterEvents_TOT_MIN_VALUE_IN_NS_float
- * - FilterEvents_TOT_MAX_VALUE_IN_NS_float
- * - FilterEvents_ANGLE_DELTA_MIN_VALUE_float
+ * It defines 6 User Params, all units are in [cm]:
+ * - FilterEvents_Cut_On_Z_Value_float
+ * - FilterEvents_Cut_On_LOR_Distance_From_Center_float
+ * - FilterEvents_TOT_Min_Value_In_Ns_float
+ * - FilterEvents_TOT_Max_Value_IN_Ns_float
+ * - FilterEvents_Angle_Delta_Min_Value_float
  */
 class FilterEvents : public JPetUserTask
 {
 
 public:
-  FilterEvents(const char *name);
+  FilterEvents(const char* name);
   virtual ~FilterEvents();
   virtual bool init() override;
   virtual bool exec() override;
   virtual bool terminate() override;
 
 private:
-  bool cutOnZ(const JPetHit &first, const JPetHit &second);
-  bool cutOnLORDistanceFromCenter(const JPetHit &first, const JPetHit &second);
-  float angleDelta(const JPetHit &first, const JPetHit &second);
-  double calculateSumOfTOTsOfHit(const JPetHit &hit);
-  double calculateSumOfTOTs(const JPetPhysSignal &signal);
-  bool checkConditions(const JPetHit &first, const JPetHit &second);
+  bool cutOnZ(const JPetHit& first, const JPetHit& second);
+  bool cutOnLORDistanceFromCenter(const JPetHit& first, const JPetHit& second);
+  float angleDelta(const JPetHit& first, const JPetHit& second);
+  double calculateSumOfTOTsOfHit(const JPetHit& hit);
+  double calculateSumOfTOTs(const JPetPhysSignal& signal);
+  bool checkConditions(const JPetHit& first, const JPetHit& second);
   void setUpOptions();
 
-  const std::string kCutOnZValueKey = "FilterEvents_CUT_ON_Z_VALUE_float";
-  const std::string kCutOnLORDistanceKey = "FilterEvents_CUT_ON_LOR_DISTANCE_FROM_CENTER_float";
+  const std::string kCutOnZValueKey = "FilterEvents_Cut_On_Z_Value_float";
+  const std::string kCutOnLORDistanceKey = "FilterEvents_Cut_On_LOR_Distance_From_Center_float";
 
-  const std::string kCutOnTOTMinValueKey = "FilterEvents_TOT_MIN_VALUE_IN_NS_float";
-  const std::string kCutOnTOTMaxValueKey = "FilterEvents_TOT_MAX_VALUE_IN_NS_float";
-  const std::string kCutOnAngleDeltaMinValueKey = "FilterEvents_ANGLE_DELTA_MIN_VALUE_float";
+  const std::string kCutOnTOTMinValueKey = "FilterEvents_TOT_Min_Value_In_Ns_float";
+  const std::string kCutOnTOTMaxValueKey = "FilterEvents_TOT_Max_Value_In_Ns_float";
+  const std::string kCutOnAngleDeltaMinValueKey = "FilterEvents_Angle_Delta_Min_Value_float";
 
   const int kNumberOfHitsInEventHisto = 10;
   const int kNumberOfConditions = 6;
 
-  float fCUT_ON_Z_VALUE = 23;
-  float fCUT_ON_LOR_DISTANCE_FROM_CENTER = 25;
+  //all units are in [cm]
+  float fCutOnZValue = 23;
+  float fCutOnLORDistanceFromCenter = 25;
 
-  float fTOT_MIN_VALUE_IN_NS = 15;
-  float fTOT_MAX_VALUE_IN_NS = 25;
-  float fANGLE_DELTA_MIN_VALUE = 20;
+  float fTOTMinValueInNs = 15;
+  float fTOTMaxValueInNs = 25;
+  float fAngleDeltaMinValue = 20;
 };
 
 #endif /*  !FILTEREVENTS_H */

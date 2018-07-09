@@ -161,11 +161,12 @@ void ImageReco::setUpOptions()
   }
 
   if (isOptionSet(opts, kBinMultiplierKey))
-  {
+  { //sets-up bin size in root 3d-histogram, root cannot write more then 1073741822 bytes to 1 histogram
+    const int kMaxRootFileSize = 1073741822;
     fBinMultiplier = getOptionAsDouble(opts, kBinMultiplierKey);
     if ((std::floor(fBinMultiplier * fXRange) *
          std::floor(fBinMultiplier * fYRange) *
-         std::floor(fBinMultiplier * fZRange)) > 1073741822)
+         std::floor(fBinMultiplier * fZRange)) > kMaxRootFileSize)
     {
       fBinMultiplier = 6;
       WARNING("TBufferFile can only write up to 1073741822 bytes, bin multiplier is too big, reseted to 6");

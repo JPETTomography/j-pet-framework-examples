@@ -1,4 +1,3 @@
-
 /**
  *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -87,19 +86,19 @@ bool FilterEvents::checkConditions(const JPetHit& first, const JPetHit& second)
     getStatistics().getObject<TH1I>("number_of_hits_filtered_by_condition")->Fill("Cut on LOR distance", 1);
     return false;
   }
-  if (angleDelta(first, second) < fANGLE_DELTA_MIN_VALUE) {
+  if (angleDelta(first, second) < fAngleDeltaMinValue) {
     getStatistics().getObject<TH1I>("number_of_hits_filtered_by_condition")->Fill("Cut on delta angle", 1);
     return false;
   }
 
   double totOfFirstHit = calculateSumOfTOTsOfHit(first);
-  if (totOfFirstHit < fTOT_MIN_VALUE_IN_NS || totOfFirstHit > fTOT_MAX_VALUE_IN_NS) {
+  if (totOfFirstHit < fTOTMinValueInNs || totOfFirstHit > fTOTMaxValueInNs) {
     getStatistics().getObject<TH1I>("number_of_hits_filtered_by_condition")->Fill("Cut on first hit TOT", 1);
     return false;
   }
 
   double totOfSecondHit = calculateSumOfTOTsOfHit(second);
-  if (totOfSecondHit < fTOT_MIN_VALUE_IN_NS || totOfSecondHit > fTOT_MAX_VALUE_IN_NS) {
+  if (totOfSecondHit < fTOTMinValueInNs || totOfSecondHit > fTOTMaxValueInNs) {
     getStatistics().getObject<TH1I>("number_of_hits_filtered_by_condition")->Fill("Cut on second hit TOT", 1);
     return false;
   }
@@ -109,7 +108,7 @@ bool FilterEvents::checkConditions(const JPetHit& first, const JPetHit& second)
 
 bool FilterEvents::cutOnZ(const JPetHit& first, const JPetHit& second)
 {
-  return (std::fabs(first.getPosZ()) < fCUT_ON_Z_VALUE) && (fabs(second.getPosZ()) < fCUT_ON_Z_VALUE);
+  return (std::fabs(first.getPosZ()) < fCutOnZValue) && (fabs(second.getPosZ()) < fCutOnZValue);
 }
 
 bool FilterEvents::cutOnLORDistanceFromCenter(const JPetHit& first, const JPetHit& second)
@@ -122,7 +121,7 @@ bool FilterEvents::cutOnLORDistanceFromCenter(const JPetHit& first, const JPetHi
 
   double a = (y_a - y_b) / (x_a - x_b);
   double c = y_a - ((y_a - y_b) / (x_a - x_b)) * x_a;
-  return (std::fabs(c) / std::sqrt(a * a + 1)) < fCUT_ON_LOR_DISTANCE_FROM_CENTER; //b is 1 and b*b is 1
+  return (std::fabs(c) / std::sqrt(a * a + 1)) < fCutOnLORDistanceFromCenter; //b is 1 and b*b is 1
 }
 
 float FilterEvents::angleDelta(const JPetHit& first, const JPetHit& second)
@@ -157,18 +156,18 @@ void FilterEvents::setUpOptions()
   auto opts = getOptions();
 
   if (isOptionSet(opts, kCutOnZValueKey)) {
-    fCUT_ON_Z_VALUE = getOptionAsFloat(opts, kCutOnZValueKey);
+    fCutOnZValue = getOptionAsFloat(opts, kCutOnZValueKey);
   }
   if (isOptionSet(opts, kCutOnLORDistanceKey)) {
-    fCUT_ON_LOR_DISTANCE_FROM_CENTER = getOptionAsFloat(opts, kCutOnLORDistanceKey);
+    fCutOnLORDistanceFromCenter = getOptionAsFloat(opts, kCutOnLORDistanceKey);
   }
   if (isOptionSet(opts, kCutOnTOTMinValueKey)) {
-    fTOT_MIN_VALUE_IN_NS = getOptionAsFloat(opts, kCutOnTOTMinValueKey);
+    fTOTMinValueInNs = getOptionAsFloat(opts, kCutOnTOTMinValueKey);
   }
   if (isOptionSet(opts, kCutOnTOTMaxValueKey)) {
-    fTOT_MAX_VALUE_IN_NS = getOptionAsFloat(opts, kCutOnTOTMaxValueKey);
+    fTOTMaxValueInNs = getOptionAsFloat(opts, kCutOnTOTMaxValueKey);
   }
   if (isOptionSet(opts, kCutOnAngleDeltaMinValueKey)) {
-    fANGLE_DELTA_MIN_VALUE = getOptionAsFloat(opts, kCutOnAngleDeltaMinValueKey);
+    fAngleDeltaMinValue = getOptionAsFloat(opts, kCutOnAngleDeltaMinValueKey);
   }
 }

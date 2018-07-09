@@ -34,11 +34,11 @@
  * it should be preselected using FilterEvents Task.
  * The point of annihilation is reconstructed for all combination of registered hits in given events.
  * Additional optional options:
- * - ImageReco_ANNIHILATION_POINT_Z_float
- * - ImageReco_XRANGE_ON_3D_HISTOGRAM_int
- * - ImageReco_YRANGE_ON_3D_HISTOGRAM_int
- * - ImageReco_ZRANGE_ON_3D_HISTOGRAM_int
- * - ImageReco_BIN_MULTIPLIER_double
+ * - ImageReco_Annihilation_Point_Z_float
+ * - ImageReco_Xrange_On_3D_Histogram_int
+ * - ImageReco_Yrange_On_3D_Histogram_int
+ * - ImageReco_Zrange_On_3D_Histogram_int
+ * - ImageReco_Bin_Multiplier_double
  */
 class ImageReco : public JPetUserTask
 {
@@ -65,17 +65,17 @@ private:
   bool calculateAnnihilationPoint(const JPetHit& firstHit, const JPetHit& secondHit);
   void setUpOptions();
 
-  const std::string kCutOnAnnihilationPointZKey = "ImageReco_ANNIHILATION_POINT_Z_float";
-  const std::string kXRangeOn3DHistogramKey = "ImageReco_XRANGE_ON_3D_HISTOGRAM_int";
-  const std::string kYRangeOn3DHistogramKey = "ImageReco_YRANGE_ON_3D_HISTOGRAM_int";
-  const std::string kZRangeOn3DHistogramKey = "ImageReco_ZRANGE_ON_3D_HISTOGRAM_int";
-  const std::string kBinMultiplierKey = "ImageReco_BIN_MULTIPLIER_double";
+  const std::string kCutOnAnnihilationPointZKey = "ImageReco_Annihilation_Point_Z_float";
+  const std::string kXRangeOn3DHistogramKey = "ImageReco_Xrange_On_3D_Histogram_int";
+  const std::string kYRangeOn3DHistogramKey = "ImageReco_Yrange_On_3D_Histogram_int";
+  const std::string kZRangeOn3DHistogramKey = "ImageReco_Zrange_On_3D_Histogram_int";
+  const std::string kBinMultiplierKey = "ImageReco_Bin_Multiplier_double";
 
   int fXRange = 50;
   int fYRange = 50;
   int fZRange = 30;
   double fBinMultiplier = 12;
-  int fNumberOfBinsX = fXRange * fBinMultiplier; //1 bin is 8 1/3 mm, TBufferFile cannot write more then 1073741822 bytes
+  int fNumberOfBinsX = fXRange * fBinMultiplier; //1 bin is 8.33 mm, TBufferFile cannot write more then 1073741822 bytes
   int fNumberOfBinsY = fYRange * fBinMultiplier;
   int fNnumberOfBinsZ = fZRange * fBinMultiplier;
   float fANNIHILATION_POINT_Z = 23;
