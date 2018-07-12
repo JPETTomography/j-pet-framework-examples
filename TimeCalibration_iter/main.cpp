@@ -35,11 +35,10 @@ int main(int argc, const char* argv[])
     manager.registerTask<TimeCalibration>("TimeCalibration");
 
     manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
-    manager.useTask("TimeCalibLoader", "tslot.raw", "tslot.calib", 5);
-    //manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
-    //manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
-    //manager.useTask("HitFinder", "phys.sig", "hits");
-    //manager.useTask("TimeCalibration", "hits", "calib");
+    manager.useTask("SignalFinder", "tslot.raw", "raw.sig");
+    manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
+    manager.useTask("HitFinder", "phys.sig", "hits");
+    manager.useTask("TimeCalibration", "hits", "calib", 5);
 
     manager.run(argc, argv);
 
