@@ -47,6 +47,6 @@ int main(int argc, const char* argv[])
     std::cerr << "Unrecoverable error occured:" << except.what() << "Exiting the program!" << std::endl;
     return EXIT_FAILURE;
   }
-  exit EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 
 }
