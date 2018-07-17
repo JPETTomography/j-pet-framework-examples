@@ -33,12 +33,12 @@ int main(int argc, const char* argv[])
   manager.registerTask<EventFinder>("EventFinder");
   manager.registerTask<EventCategorizerCosmic>("EventCategorizerCosmic");
   
- /* manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
+  manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
   manager.useTask("TimeCalibLoader", "tslot.raw", "tslot.calib");
   manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
   manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
   manager.useTask("HitFinder", "phys.sig", "hits");
-  manager.useTask("EventFinder", "hits", "unk.evt");*/
+  manager.useTask("EventFinder", "hits", "unk.evt");
   manager.useTask("EventCategorizerCosmic", "unk.evt", "cosm.evt");
   
   manager.run(argc, argv);

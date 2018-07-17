@@ -18,11 +18,6 @@ set(USE_AUX_FILES_FROM LargeBarrelAnalysis)
 
 set(AUXILLIARY_FILES
   run.sh
-  conf_trb3.xml
-  resultsForThresholda.txt
-  large_barrel.json
-  TimeConstants.txt
-  userParams.json
   README
   )
 
@@ -73,8 +68,6 @@ list(APPEND SOURCES ${use_modules_from}/EventFinder.cpp)
 list(APPEND HEADERS ${use_modules_from}/EventCategorizerTools.h)
 list(APPEND SOURCES ${use_modules_from}/EventCategorizerTools.cpp)
 #
-#list(APPEND HEADERS ${use_modules_from}/EventCategorizer.h)
-#list(APPEND SOURCES ${use_modules_from}/EventCategorizer.cpp)
 
 include_directories(${Framework_INCLUDE_DIRS})
 add_definitions(${Framework_DEFINITIONS})

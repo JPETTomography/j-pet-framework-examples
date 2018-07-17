@@ -190,12 +190,12 @@ JPetEvent EventCategorizerPhysics::physicsAnalysis( vector<JPetHit> hits )
 			{
 				getStatistics().getHisto1D("TOT")->Fill( TOTofHit );
 			}
-			if( TOTofHit >= fMinAnnihilationTOT/1000 && TOTofHit <= fMaxAnnihilationTOT/1000 )
+			if( TOTofHit >= fMinAnnihilationTOT && TOTofHit <= fMaxAnnihilationTOT )
 			{
 				physicEvent.addHit( hits[i] );
 				annihilationHits.addHit( hits[i] );
 			}
-			if( TOTofHit >= fMinDeexcitationTOT/1000 && TOTofHit <= fMaxDeexcitationTOT/1000 )
+			if( TOTofHit >= fMinDeexcitationTOT && TOTofHit <= fMaxDeexcitationTOT )
 			{
 				physicEvent.addHit( hits[i] );
 				deexcitationHits.addHit( hits[i] );
