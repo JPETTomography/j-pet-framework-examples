@@ -6,7 +6,6 @@ Expected output
 ---------------
 No output to stdout.
 JPet.log file appears with the log of the processing and ROOT files with the following etensions are produced:
- *.tslot.raw.root
  *.tslot.calib.root
  *.raw.sig.root
  *.phys.sig.root
@@ -22,17 +21,7 @@ For this example, user must provide their own data file(s) collected with the bi
 
 Description
 --------------
-Procedure uses a couple of constants that is used for process of selection of hits
-
-userParams option:
-
- "TimeCalibLoader_ConfigFile_std::string":"[file]", 			File with time calibration constants;
- "SignalFinder_EdgeMaxTime_float":"4000",				Time Window for Leading edges to gather impulses into one signal
- "SignalFinder_LeadTrailMaxTime_float":"30000",				Time Window for Trailing and Leading times on the same threshold to gather them into presignal
- "HitFinder_TimeWindowWidth_float":"25000",				Time Window for signals on both sides of photomultiplier to gather them into Hit
- "EventFinder_EventTime_float":"200000",				Time Window for Hits to gather them into Event
- "EventFinder_MinimalEventSize_int":"1",				Minimal Size of Event to Save it for Categorization
- "EventCategorizer_MinCosmicTOT_float":"55000",				Minimal TOT of Hit to analyze it further as Cosmic Hit
+Procedure uses a couple of constants that is used for process of selection of hits included in userParams.json
 
 
 Additional info
@@ -48,4 +37,5 @@ Running
 Author
 ------------
 Kamil Dulski
+Elena Perez del Rio
 Please report any bugs and suggestions of corrections to: <kamil.dulski@gmail.com>

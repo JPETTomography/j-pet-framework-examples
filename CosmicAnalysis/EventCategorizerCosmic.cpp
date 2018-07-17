@@ -106,7 +106,7 @@ JPetEvent EventCategorizerCosmic::cosmicAnalysis( vector<JPetHit> hits )
 	for( unsigned i=0; i<hits.size(); i++ )
 	{
 		double TOTofHit = EventCategorizerTools::calculateTOT( hits[i] );
-		if( TOTofHit >= fMinCosmicTOT/1000 )
+		if( TOTofHit >= fMinCosmicTOT )
 		{
 			cosmicEvent.addHit(hits[i]);
 			

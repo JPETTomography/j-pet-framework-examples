@@ -153,7 +153,7 @@ JPetEvent EventCategorizerImaging::imageReconstruction( vector<JPetHit> hits )
 	for( unsigned i=0; i<hits.size(); i++ )
 	{
 		double TOTofHit = EventCategorizerTools::calculateTOT( hits[i] );
-		if( TOTofHit >= fMinAnnihilationTOT/1000 && TOTofHit <= fMaxAnnihilationTOT/1000 && fabs( hits[i].getPosZ() ) < fMaxZPos )
+		if( TOTofHit >= fMinAnnihilationTOT && TOTofHit <= fMaxAnnihilationTOT && fabs( hits[i].getPosZ() ) < fMaxZPos )
 		{
 			imagingEvent.addHit(hits[i]);
 		}
