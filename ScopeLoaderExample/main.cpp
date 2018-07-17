@@ -16,8 +16,13 @@
 #include <JPetManager/JPetManager.h>
 
 using namespace std;
-int main(int argc, const char* argv[])
-{
-  JPetManager& manager = JPetManager::getManager();
-  manager.run(argc, argv);
+int main(int argc, const char* argv[]) {
+  try {
+    JPetManager& manager = JPetManager::getManager();
+    manager.run(argc, argv);
+  } catch (const std::exception& except) {
+    std::cerr << "Unrecoverable error occured:" << except.what() << "Exiting the program!" << std::endl;
+    return EXIT_FAILURE;
+  }
+  return EXIT_SUCCESS;
 }

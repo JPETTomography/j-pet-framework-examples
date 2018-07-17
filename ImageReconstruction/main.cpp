@@ -13,23 +13,28 @@
  *  @file main.cpp
  */
 
-#include "JPetManager/JPetManager.h"
 #include "ImageReco.h"
+#include "JPetManager/JPetManager.h"
 #include "SinogramCreator.h"
 #include "SinogramCreatorMC.h"
 using namespace std;
 
-int main(int argc, const char* argv[])
-{
-  JPetManager& manager = JPetManager::getManager();
+int main(int argc, const char* argv[]) {
+  try {
+    JPetManager& manager = JPetManager::getManager();
 
-  //manager.registerTask<ImageReco>("ImageReco");
-  //manager.registerTask<SinogramCreator>("SinogramCreator");
-  manager.registerTask<SinogramCreatorMC>("SinogramCreatorMC");
+    // manager.registerTask<ImageReco>("ImageReco");
+    // manager.registerTask<SinogramCreator>("SinogramCreator");
+    manager.registerTask<SinogramCreatorMC>("SinogramCreatorMC");
 
-  //manager.useTask("ImageReco", "unk.evt", "reco");
-  //manager.useTask("SinogramCreator", "unk.evt", "sino");
-  manager.useTask("SinogramCreatorMC", "unk.evt", "sino.mc");
+    // manager.useTask("ImageReco", "unk.evt", "reco");
+    // manager.useTask("SinogramCreator", "unk.evt", "sino");
+    manager.useTask("SinogramCreatorMC", "unk.evt", "sino.mc");
 
-  manager.run(argc, argv);
+    manager.run(argc, argv);
+  } catch (const std::exception& except) {
+    std::cerr << "Unrecoverable error occured:" << except.what() << "Exiting the program!" << std::endl;
+    return EXIT_FAILURE;
+  }
+  return EXIT_SUCCESS;
 }
