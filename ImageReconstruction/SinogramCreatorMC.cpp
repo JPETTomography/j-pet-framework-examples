@@ -14,25 +14,24 @@
  */
 
 #include "SinogramCreatorMC.h"
-#include <TH2I.h>
 #include <TH1F.h>
+#include <TH2I.h>
 using namespace jpet_options_tools;
 
 SinogramCreatorMC::SinogramCreatorMC(const char* name) : JPetUserTask(name) {}
 
 SinogramCreatorMC::~SinogramCreatorMC() {}
 
-bool SinogramCreatorMC::init()
-{
+bool SinogramCreatorMC::init() {
   setUpOptions();
   fOutputEvents = new JPetTimeWindow("JPetEvent");
 
-  getStatistics().createHistogram(new TH2I("reconstuction_histogram",
-                                  "reconstuction histogram",
-                                  std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1, 0.f, fMaxReconstructionLayerRadius,
-                                  kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
+  getStatistics().createHistogram(new TH2I("reconstuction_histogram", "reconstuction histogram",
+                                           std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1, 0.f,
+                                           fMaxReconstructionLayerRadius, kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
 
-  getStatistics().createHistogram(new TH1F("pos_dis", "Position distance real data", (fMaxReconstructionLayerRadius) * 10 * 5, 0.f, fMaxReconstructionLayerRadius));
+  getStatistics().createHistogram(
+      new TH1F("pos_dis", "Position distance real data", (fMaxReconstructionLayerRadius)*10 * 5, 0.f, fMaxReconstructionLayerRadius));
   getStatistics().createHistogram(new TH1F("angle", "Position angle real data", kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
 
 #if ROOT_VERSION_CODE < ROOT_VERSION(6, 0, 0)
@@ -49,8 +48,7 @@ bool SinogramCreatorMC::init()
   return true;
 }
 
-void SinogramCreatorMC::generateSinogram()
-{
+void SinogramCreatorMC::generateSinogram() {
   std::ifstream in(fInputData);
 
   float firstX = 0.f;
@@ -62,7 +60,7 @@ void SinogramCreatorMC::generateSinogram()
 
   const int maxDistanceNumber = std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
   if (fSinogram == nullptr) {
-    fSinogram = new SinogramResultType *[fZSplitNumber];
+    fSinogram = new SinogramResultType*[fZSplitNumber];
     for (int i = 0; i < fZSplitNumber; i++) {
       fSinogram[i] = new SinogramResultType(maxDistanceNumber, (std::vector<unsigned int>(kReconstructionMaxAngle, 0)));
     }
@@ -70,13 +68,15 @@ void SinogramCreatorMC::generateSinogram()
 
   while (in.peek() != EOF) {
 
-    in >> firstY >> firstX >> firstZ >> secondY >> secondX >> secondZ;
+    in >> firstX >> firstY >> firstZ >> secondX >> secondY >> secondZ;
 
     for (int i = 0; i < fZSplitNumber; i++) {
       if (!checkSplitRange(firstZ, secondZ, i)) {
         continue;
       }
-      const auto sinogramResult = SinogramCreatorTools::getSinogramRepresentation(firstX, firstY, secondX, secondY, fMaxReconstructionLayerRadius, fReconstructionDistanceAccuracy, maxDistanceNumber, kReconstructionMaxAngle);
+      const auto sinogramResult =
+          SinogramCreatorTools::getSinogramRepresentation(firstX, firstY, secondX, secondY, fMaxReconstructionLayerRadius,
+                                                          fReconstructionDistanceAccuracy, maxDistanceNumber, kReconstructionMaxAngle);
       fCurrentValueInSinogram[i] = ++fSinogram[i]->at(sinogramResult.first).at(sinogramResult.second);
       if (fCurrentValueInSinogram[i] > fMaxValueInSinogram[i]) {
         fMaxValueInSinogram[i] = fCurrentValueInSinogram[i]; // save max value of sinogram
@@ -85,18 +85,13 @@ void SinogramCreatorMC::generateSinogram()
   }
 }
 
-bool SinogramCreatorMC::checkSplitRange(float firstZ, float secondZ, int i)
-{
+bool SinogramCreatorMC::checkSplitRange(float firstZ, float secondZ, int i) {
   return firstZ >= fZSplitRange[i].first && firstZ <= fZSplitRange[i].second && secondZ >= fZSplitRange[i].first && secondZ <= fZSplitRange[i].second;
 }
 
-bool SinogramCreatorMC::exec()
-{
-  return true;
-}
+bool SinogramCreatorMC::exec() { return true; }
 
-bool SinogramCreatorMC::terminate()
-{
+bool SinogramCreatorMC::terminate() {
   for (int i = 0; i < fZSplitNumber; i++) {
     std::ofstream res(fOutFileName + std::to_string(i) + ".ppm");
     res << "P2" << std::endl;
@@ -116,8 +111,7 @@ bool SinogramCreatorMC::terminate()
   return true;
 }
 
-void SinogramCreatorMC::setUpOptions()
-{
+void SinogramCreatorMC::setUpOptions() {
   auto opts = getOptions();
   if (isOptionSet(opts, kOutFileNameKey)) {
     fOutFileName = getOptionAsString(opts, kOutFileNameKey);
