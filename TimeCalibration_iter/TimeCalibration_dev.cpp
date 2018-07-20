@@ -44,52 +44,17 @@ bool TimeCalibration::init()
 {
   fMapper = jpet_common_tools::make_unique<JPetGeomMapping>(getParamBank());
 
+  fOutputEvents = new JPetTimeWindow("JPetEvent");
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-  fOutputEvents = new JPetTimeWindow("JPetEvent");//This line has to be added since starting from v6 we use cointainers
-  //for TimeWindows and we need to specify which type of data will be stored
-  //in the root tree. For now we do not need to save tree after the calibration
-  //so I left the JPetEvent class. For more info ask Alek or Wojtek
-
-  auto opts = fParams.getOptions();
-
-  //
-//------Lower TOT cut from config (json) file
-  if (isOptionSet(opts, fTOTcutLow)) {
-    TOTcut[0] = getOptionAsFloat(opts, fTOTcutLow);
-  }
-//------ Higher TOT cut from config (json) file
-  if (isOptionSet(opts, fTOTcutHigh)) {
-    TOTcut[1] = getOptionAsFloat(opts, fTOTcutHigh);
+  if (!loadOptions()) {
+    ERROR("Error while loading options from configuration file. Check user options!");
+    return false;
   }
 
-//------ Packed strip and layer number from config (json) file
-  if (isOptionSet(opts, kMainStripKey)) {
-    int code = getOptionAsInt(opts, kMainStripKey);
-    LayerToCalib = code / 100; // layer number
-    StripToCalib = code % 100; // strip number
-  }
-
-  if (isOptionSet(opts, fConstantsLoadingFlag)) {
-    flag_corr = getOptionAsInt(opts, fConstantsLoadingFlag);
-  }
-
-
-//------ Max number of iterations from config (json) file
-  if (isOptionSet(opts, fMaxIterationNumber)) {
-    NiterMax  = getOptionAsInt(opts, fMaxIterationNumber);
-  }
-
-//------ Temporary file name(the same as the name of file for CalibLoader
-  if (isOptionSet(opts, fTmpOutFile)) {
-    fOutputFileTmp = getOptionAsString(opts, fTmpOutFile);
-  }
-  //
   INFO("#############");
   INFO("CALIB_INIT:CALIBRATION INITIALIZATION IN PROGRESS ");
   INFO("#############");
-  INFO("WE ARE GOING TO CALIBRATE SCINTILLATOR " + std::to_string(StripToCalib) + " FROM LAYER " + std::to_string(LayerToCalib));
+  INFO("WE ARE GOING TO CALIBRATE SCINTILLATOR " + std::to_string(StripToCalib) + " FROM LAYER " + std::to_string(fLayerToCalib));
   fTimer.startMeasurement();
   //
   //
@@ -113,25 +78,74 @@ bool TimeCalibration::init()
 //histos for leading edge
 //		  const char * histo_name_l = formatUniqueSlotDescription(scin.at()->getBarrelSlot(), thr, "timeDiffAB_leading_");
 //
-    const char* histo_name_l = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffAB_leading_", LayerToCalib, StripToCalib, thr);
+    const char* histo_name_l = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffAB_leading_", fLayerToCalib, StripToCalib, thr);
     getStatistics().createHistogram( new TH1F(histo_name_l, histo_name_l, 400, -20., 20.) );
     //
 //histograms for leading edge refference detector time difference
-    const char* histo_name_Ref_l = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffRef_leading_", LayerToCalib, StripToCalib, thr);
+    const char* histo_name_Ref_l = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffRef_leading_", fLayerToCalib, StripToCalib, thr);
     getStatistics().createHistogram( new TH1F(histo_name_Ref_l, histo_name_Ref_l, 800, -80., 80.) );
     //
 //histos for trailing edge
-    const char* histo_name_t = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffAB_trailing_", LayerToCalib, StripToCalib, thr);
+    const char* histo_name_t = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffAB_trailing_", fLayerToCalib, StripToCalib, thr);
     getStatistics().createHistogram( new TH1F(histo_name_t, histo_name_t, 400, -20., 20.) );
     //
 //histograms for leading edge refference detector time difference
-    const char* histo_name_Ref_t = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffRef_trailing_", LayerToCalib, StripToCalib, thr);
+    const char* histo_name_Ref_t = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffRef_trailing_", fLayerToCalib, StripToCalib, thr);
     getStatistics().createHistogram( new TH1F(histo_name_Ref_t, histo_name_Ref_t, 1000, -100., 100.) );
     //
   }
   INFO("#############");
   INFO("CALIB_INIT: INITIALIZATION DONE!");
   INFO("#############");
+  return true;
+}
+
+bool TimeCalibration::loadOptions()
+{
+  auto opts = fParams.getOptions();
+
+//------Lower TOT cut from config (json) file
+  if (isOptionSet(opts, fTOTcutLow)) {
+    TOTcut[0] = getOptionAsFloat(opts, fTOTcutLow);
+  } else {
+    return false;
+  }
+//------ Higher TOT cut from config (json) file
+  if (isOptionSet(opts, fTOTcutHigh)) {
+    TOTcut[1] = getOptionAsFloat(opts, fTOTcutHigh);
+  } else {
+    return false;
+  }
+
+//------ Packed strip and layer number from config (json) file
+  if (isOptionSet(opts, kMainStripKey)) {
+    int code = getOptionAsInt(opts, kMainStripKey);
+    fLayerToCalib = code / 100; // layer number
+    StripToCalib = code % 100; // strip number
+  } else {
+    return false;
+  }
+
+  if (isOptionSet(opts, fConstantsLoadingFlag)) {
+    flag_corr = getOptionAsInt(opts, fConstantsLoadingFlag);
+  } else {
+    return false;
+  }
+
+
+//------ Max number of iterations from config (json) file
+  if (isOptionSet(opts, fMaxIterationNumber)) {
+    NiterMax  = getOptionAsInt(opts, fMaxIterationNumber);
+  } else {
+    return false;
+  }
+
+//------ Temporary file name(the same as the name of file for CalibLoader
+  if (isOptionSet(opts, fTmpOutFile)) {
+    fOutputFileTmp = getOptionAsString(opts, fTmpOutFile);
+  } else {
+    return false;
+  }
   return true;
 }
 
@@ -447,24 +461,24 @@ void TimeCalibration::saveParametersToFile(const std::string& filename)
   for (int thr = 1; thr <= 4; thr++) {
 //scintillators
 //
-    const char* histo_name_l = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffAB_leading_", LayerToCalib, StripToCalib, thr);
+    const char* histo_name_l = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffAB_leading_", fLayerToCalib, StripToCalib, thr);
     //double mean_l = getStatistics().getHisto1D(histo_name_l)->GetMean();
     //getAuxilliaryData().setValue("timeDiffAB mean values", histo_name_l, mean_l);
     auto histoToSave_leading = getStatistics().getHisto1D(histo_name_l);
     //
-    const char* histo_name_t = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffAB_trailing_", LayerToCalib, StripToCalib, thr);
+    const char* histo_name_t = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffAB_trailing_", fLayerToCalib, StripToCalib, thr);
     //double mean_t = getStatistics().getHisto1D(histo_name_t)->GetMean();
     //getAuxilliaryData().setValue("timeDiffAB mean values", histo_name_t, mean_t);
 
     auto histoToSave_trailing = getStatistics().getHisto1D(histo_name_t);
 //reference detector
     //
-    const char* histo_name_Ref_l = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffRef_leading_", LayerToCalib, StripToCalib, thr);
+    const char* histo_name_Ref_l = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffRef_leading_", fLayerToCalib, StripToCalib, thr);
     //double mean_Ref_l = getStatistics().getHisto1D(histo_name_Ref_l)->GetMean();
     //getAuxilliaryData().setValue("timeDiffRef mean values", histo_name_Ref_l, mean_Ref_l);
     auto histoToSave_Ref_leading = getStatistics().getHisto1D(histo_name_Ref_l);
     //
-    const char* histo_name_Ref_t = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffRef_trailing_", LayerToCalib, StripToCalib, thr);
+    const char* histo_name_Ref_t = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffRef_trailing_", fLayerToCalib, StripToCalib, thr);
     //double mean_Ref_t = getStatistics().getHisto1D(histo_name_Ref_t)->GetMean();
     //getAuxilliaryData().setValue("timeDiffref mean values", histo_name_Ref_t, mean_Ref_t);
     auto histoToSave_Ref_trailing = getStatistics().getHisto1D(histo_name_Ref_t);
@@ -473,7 +487,7 @@ void TimeCalibration::saveParametersToFile(const std::string& filename)
     if (histoToSave_leading->GetEntries() != 0 && histoToSave_trailing->GetEntries() != 0
         && histoToSave_Ref_leading->GetEntries() != 0 && histoToSave_Ref_trailing->GetEntries() != 0) {
       INFO("#############");
-      INFO("CALIB_INFO: Fitting histogams for layer= " + std::to_string(LayerToCalib) + ", slot= " + std::to_string(StripToCalib) + ", threshold= " + std::to_string(thr));
+      INFO("CALIB_INFO: Fitting histogams for layer= " + std::to_string(fLayerToCalib) + ", slot= " + std::to_string(StripToCalib) + ", threshold= " + std::to_string(thr));
       INFO("#############");
       if (histoToSave_Ref_leading->GetEntries() <= min_ev) {
         results_fit << "#WARNING: Statistics used to determine the leading edge calibration constant with respect to the refference detector was less than " << min_ev << " events!" << endl;
@@ -561,7 +575,7 @@ void TimeCalibration::saveParametersToFile(const std::string& filename)
       //CBt[thr] = -(position_peak_Ref_t - Cl[LayerToCalib - 1]) - position_peak_t / 2.;
       //SigCBt[thr] = SigCAt[thr];
     } else {
-      ERROR(": ONE OF THE HISTOGRAMS FOR THRESHOLD " + std::to_string(thr) + " LAYER " + std::to_string(LayerToCalib) + " SLOT " + std::to_string(StripToCalib) +
+      ERROR(": ONE OF THE HISTOGRAMS FOR THRESHOLD " + std::to_string(thr) + " LAYER " + std::to_string(fLayerToCalib) + " SLOT " + std::to_string(StripToCalib) +
             " IS EMPTY, WE CANNOT CALIBRATE IT");
     }
   }
@@ -584,29 +598,29 @@ void TimeCalibration::saveParametersToFile(const std::string& filename)
     if (SigCBt[thr] / abs(CBt[thr]) >= frac_err) {
       results_fit << "#WFIT: Large uncertainty on the calibration constant (Side B trailing edge)!" << endl;
     }
-    CAl[thr] = CAl[thr] + CAlTmp[thr]  - Cl[LayerToCalib - 1];
-    CAt[thr] = CAt[thr] + CAtTmp[thr] - Cl[LayerToCalib - 1];
-    SigCAl[thr] = sqrt(pow(SigCAl[thr], 2) + pow(SigCl[LayerToCalib - 1], 2) + pow(SigCAlTmp[thr], 2) );
-    SigCAt[thr] =  sqrt(pow(SigCAt[thr], 2) + pow(SigCl[LayerToCalib - 1], 2) + pow(SigCAtTmp[thr], 2) );
-    CBl[thr] = CBl[thr] + CBlTmp[thr] - Cl[LayerToCalib - 1];
-    CBt[thr] = CBt[thr] + CBtTmp[thr] - Cl[LayerToCalib - 1];
-    SigCBl[thr] = sqrt(pow(SigCBl[thr], 2) + pow(SigCl[LayerToCalib - 1], 2) + pow(SigCBlTmp[thr], 2) );
-    SigCBt[thr] =  sqrt(pow(SigCBt[thr], 2) + pow(SigCl[LayerToCalib - 1], 2) + pow(SigCBtTmp[thr], 2) );
+    CAl[thr] = CAl[thr] + CAlTmp[thr]  - Cl[fLayerToCalib - 1];
+    CAt[thr] = CAt[thr] + CAtTmp[thr] - Cl[fLayerToCalib - 1];
+    SigCAl[thr] = sqrt(pow(SigCAl[thr], 2) + pow(SigCl[fLayerToCalib - 1], 2) + pow(SigCAlTmp[thr], 2) );
+    SigCAt[thr] =  sqrt(pow(SigCAt[thr], 2) + pow(SigCl[fLayerToCalib - 1], 2) + pow(SigCAtTmp[thr], 2) );
+    CBl[thr] = CBl[thr] + CBlTmp[thr] - Cl[fLayerToCalib - 1];
+    CBt[thr] = CBt[thr] + CBtTmp[thr] - Cl[fLayerToCalib - 1];
+    SigCBl[thr] = sqrt(pow(SigCBl[thr], 2) + pow(SigCl[fLayerToCalib - 1], 2) + pow(SigCBlTmp[thr], 2) );
+    SigCBt[thr] =  sqrt(pow(SigCBt[thr], 2) + pow(SigCl[fLayerToCalib - 1], 2) + pow(SigCBtTmp[thr], 2) );
     //
 
-    results_fit << LayerToCalib << "\t" << StripToCalib << "\t" << "A" << "\t" << thr << "\t" << CAl[thr] << "\t" << SigCAl[thr]
+    results_fit << fLayerToCalib << "\t" << StripToCalib << "\t" << "A" << "\t" << thr << "\t" << CAl[thr] << "\t" << SigCAl[thr]
                 << "\t" << CAt[thr] << "\t" << SigCAt[thr] << "\t" << sigma_peak_Ref_l[thr]
                 << "\t" << sigma_peak_Ref_t[thr] << "\t"  << chi2_ndf_Ref_l[thr] << "\t" << chi2_ndf_Ref_t[thr] << Niter << endl;
     //
-    results_fit << LayerToCalib << "\t" << StripToCalib << "\t" << "B" << "\t" << thr << "\t" << CBl[thr] << "\t" << SigCBl[thr]
+    results_fit << fLayerToCalib << "\t" << StripToCalib << "\t" << "B" << "\t" << thr << "\t" << CBl[thr] << "\t" << SigCBl[thr]
                 << "\t" << CBt[thr] << "\t" << SigCBt[thr] << "\t" << sigma_peak_l[thr]
                 << "\t" << sigma_peak_t[thr] << "\t" << chi2_ndf_l[thr] << "\t" << chi2_ndf_t[thr] << Niter << endl;
     //
-    results_fitTmp << LayerToCalib << "\t" << StripToCalib << "\t" << "A" << "\t" << thr << "\t" << CAl[thr] << "\t" << SigCAl[thr]
+    results_fitTmp << fLayerToCalib << "\t" << StripToCalib << "\t" << "A" << "\t" << thr << "\t" << CAl[thr] << "\t" << SigCAl[thr]
                    << "\t" << CAt[thr] << "\t" << SigCAt[thr] << "\t" << sigma_peak_Ref_l[thr]
                    << "\t" << sigma_peak_Ref_t[thr] << "\t"  << chi2_ndf_Ref_l[thr] << "\t" << chi2_ndf_Ref_t[thr] << Niter << flag_end << endl;
     //
-    results_fitTmp << LayerToCalib << "\t" << StripToCalib << "\t" << "B" << "\t" << thr << "\t" << CBl[thr] << "\t" << SigCBl[thr]
+    results_fitTmp << fLayerToCalib << "\t" << StripToCalib << "\t" << "B" << "\t" << thr << "\t" << CBl[thr] << "\t" << SigCBl[thr]
                    << "\t" << CBt[thr] << "\t" << SigCBt[thr] << "\t" << sigma_peak_l[thr]
                    << "\t" << sigma_peak_t[thr] << "\t" << chi2_ndf_l[thr] << "\t" << chi2_ndf_t[thr] << Niter << flag_end << std::endl;
   }
@@ -624,11 +638,11 @@ void TimeCalibration::saveParametersToFile(const std::string& filename)
     SigCBl[thr] = sqrt(pow(SigCBl[thr], 2) + pow(SigCBlTmp[thr], 2) );
     SigCBt[thr] =  sqrt(pow(SigCBt[thr], 2) + pow(SigCBtTmp[thr], 2) );
     //
-    results_fitTmp << LayerToCalib << "\t" << StripToCalib << "\t" << "A" << "\t" << thr << "\t" << CAl[thr] << "\t" << SigCAl[thr]
+    results_fitTmp << fLayerToCalib << "\t" << StripToCalib << "\t" << "A" << "\t" << thr << "\t" << CAl[thr] << "\t" << SigCAl[thr]
                    << "\t" << CAt[thr] << "\t" << SigCAt[thr] << "\t" << sigma_peak_Ref_l[thr]
                    << "\t" << sigma_peak_Ref_t[thr] << "\t"  << chi2_ndf_Ref_l[thr] << "\t" << chi2_ndf_Ref_t[thr] << Niter << flag_end << endl;
     //
-    results_fitTmp << LayerToCalib << "\t" << StripToCalib << "\t" << "B" << "\t" << thr << "\t" << CBl[thr] << "\t" << SigCBl[thr]
+    results_fitTmp << fLayerToCalib << "\t" << StripToCalib << "\t" << "B" << "\t" << thr << "\t" << CBl[thr] << "\t" << SigCBl[thr]
                    << "\t" << CBt[thr] << "\t" << SigCBt[thr] << "\t" << sigma_peak_l[thr]
                    << "\t" << sigma_peak_t[thr] << "\t" << chi2_ndf_l[thr] << "\t" << chi2_ndf_t[thr] << Niter << flag_end << endl;
   }

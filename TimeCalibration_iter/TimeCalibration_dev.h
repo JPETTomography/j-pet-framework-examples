@@ -39,6 +39,7 @@ public:
   virtual bool terminate()override;
 
 protected:
+  bool loadOptions();
   bool isInChosenStrip(const JPetHit& hit) const;
   const char* formatUniqueSlotDescription(const JPetBarrelSlot& slot, int threshold, const char* prefix);
   void fillHistosForHit(const JPetHit& hit, const std::vector<double>& RefTimesL, const std::vector<double>& RefTimesT);
@@ -56,7 +57,7 @@ protected:
   const std::string kMainStripKey = "TimeWindowCreator_MainStrip_int";
   double frac_err = 0.3; //maximal fractional uncertainty of parameters accepted by calibration
   int min_ev = 100;     //minimal number of events for a distribution to be fitted
-  int LayerToCalib = 0; //Layer of calibrated slot
+  int fLayerToCalib = 0; //Layer of calibrated slot
   int StripToCalib = 0; //Slot to be calibrated
 
   float CAlTmp[5]    = {0., 0., 0., 0., 0.};
