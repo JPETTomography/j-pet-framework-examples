@@ -20,8 +20,10 @@
 #include <JPetUserTask/JPetUserTask.h>
 #include <JPetHit/JPetHit.h>
 #include <JPetRawSignal/JPetRawSignal.h>
-#include <JPetGeomMapping/JPetGeomMapping.h>
 #include <JPetParamManager/JPetParamManager.h>
+#include <JPetGeomMapping/JPetGeomMapping.h>
+#include <JPetTimer/JPetTimer.h>
+#include <memory>
 #ifdef __CINT__
 //when cint is used instead of compiler, override word is not recognized
 //nevertheless it's needed for checking if the structure of project is correct
@@ -35,23 +37,28 @@ public:
   virtual bool init()override;
   virtual bool exec()override;
   virtual bool terminate()override;
+
 protected:
+  bool isInChosenStrip(const JPetHit& hit) const;
   const char* formatUniqueSlotDescription(const JPetBarrelSlot& slot, int threshold, const char* prefix);
   void fillHistosForHit(const JPetHit& hit, const std::vector<double>& RefTimesL, const std::vector<double>& RefTimesT);
-  JPetGeomMapping* fBarrelMap = nullptr;
-  std::string OutputFile = "TimeConstantsCalib.txt";
-  std::string OutputFileTmp = "TimeConstants.txt";
+  void loadFileWithParameters(const std::string& filename);
+  void saveParametersToFile(const std::string& filename);
+
+  std::string fOutputFile = "TimeConstantsCalib.txt";
+  std::string fOutputFileTmp = "TimeConstants.txt";
   const std::string fTmpOutFile = "TimeCalibLoader_ConfigFile";
   const float Cl[3] = {0., 0.1418, 0.5003};  //[ns]
   const float SigCl[3] = {0., 0.0033, 0.0033}; //[ns]
   float TOTcut[2] = { -300000000., 300000000.}; //TOT cuts for slot hits (sum of TOTs from both sides)
-  const std::string fTOTcutLow  = "TOTcutLow";
-  const std::string fTOTcutHigh  = "TOTcutHigh";
-  const std::string kMainStripKey = "TimeWindowCreator_MainStrip";
+  const std::string fTOTcutLow  = "TOTcutLow_float";
+  const std::string fTOTcutHigh  = "TOTcutHigh_float";
+  const std::string kMainStripKey = "TimeWindowCreator_MainStrip_int";
   double frac_err = 0.3; //maximal fractional uncertainty of parameters accepted by calibration
   int min_ev = 100;     //minimal number of events for a distribution to be fitted
   int LayerToCalib = 0; //Layer of calibrated slot
   int StripToCalib = 0; //Slot to be calibrated
+
   float CAlTmp[5]    = {0., 0., 0., 0., 0.};
   float SigCAlTmp[5] = {0., 0., 0., 0., 0.};
   float CAtTmp[5]    = {0., 0., 0., 0., 0.};
@@ -79,5 +86,7 @@ protected:
   int   NiterMax = 1;   //Max number of iterations for calibration of one strip
   const std::string fMaxIterationNumber = "MaxIterationNumber";
   bool CheckIfExitIter(float CAl[], float  SigCAl[], float CBl[], float  SigCBl[], float CAt[], float SigCAt[], float CBt[], float SigCBt[], int Niter, int NiterM );
+  std::unique_ptr<JPetGeomMapping> fMapper;
+  JPetTimer fTimer;
 };
 #endif /*  !TimeCalibration_H */
