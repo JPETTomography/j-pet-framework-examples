@@ -58,7 +58,7 @@ protected:
   double frac_err = 0.3; //maximal fractional uncertainty of parameters accepted by calibration
   int min_ev = 100;     //minimal number of events for a distribution to be fitted
   int fLayerToCalib = 0; //Layer of calibrated slot
-  int StripToCalib = 0; //Slot to be calibrated
+  int fStripToCalib = 0; //Slot to be calibrated
 
   float CAlTmp[5]    = {0., 0., 0., 0., 0.};
   float SigCAlTmp[5] = {0., 0., 0., 0., 0.};
