@@ -24,11 +24,27 @@ file(GLOB SOURCES_WITHOUT_MAIN *.cpp)
 list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${UNIT_TEST_SOURCES})
 list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${MAIN_CPP})
 
+# add dependencies from j-pet-mlem
+set(use_modules_from ../j-pet-mlem)
+list(APPEND HEADERS ${use_modules_from}/src/util/png_writer.h)
+list(APPEND SOURCES ${use_modules_from}/src/util/png_writer.cpp)
+
+# libpng for output image generation
+find_package(PNG)
+if(NOT PNG_FOUND AND MSVC)
+  include(ExtPNG) # builds libpng automatically
+endif()
+if(PNG_FOUND)
+  add_definitions(-DHAVE_LIBPNG=1 ${PNG_DEFINITIONS})
+  include_directories(${PNG_INCLUDE_DIRS})
+  link_libraries(${PNG_LIBRARIES})
+endif()
+
 include_directories(${Framework_INCLUDE_DIRS})
 add_definitions(${Framework_DEFINITIONS})
 
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})
-target_link_libraries(${projectBinary} JPetFramework)
+target_link_libraries(${projectBinary} JPetFramework ${PNG_LIBRARIES})
 
 add_custom_target(clean_data_${projectName}
   COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root)
