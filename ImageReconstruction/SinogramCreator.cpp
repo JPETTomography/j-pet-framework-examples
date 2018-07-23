@@ -14,10 +14,14 @@
  */
 
 #include "SinogramCreator.h"
-#include <TH2I.h>
-#include <TH2F.h>
-#include <TH3F.h>
+
+#include "modules/large_barrel/JPetRecoImageTools/JPetFilterNone.h"
+#include "modules/large_barrel/JPetRecoImageTools/JPetRecoImageTools.h"
+
 #include <TH1I.h>
+#include <TH2F.h>
+#include <TH2I.h>
+#include <TH3F.h>
 using namespace jpet_options_tools;
 
 SinogramCreator::SinogramCreator(const char* name) : JPetUserTask(name) {}
@@ -29,12 +33,12 @@ bool SinogramCreator::init()
   setUpOptions();
   fOutputEvents = new JPetTimeWindow("JPetEvent");
 
-  getStatistics().createHistogram(new TH2I("reconstuction_histogram",
-                                  "reconstuction histogram",
-                                  std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1, 0.f, fMaxReconstructionLayerRadius,
-                                  kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
+  getStatistics().createHistogram(new TH2I("reconstuction_histogram", "reconstuction histogram",
+                                  std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1, 0.f,
+                                  fMaxReconstructionLayerRadius, kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
 
-  getStatistics().createHistogram(new TH1F("pos_dis", "Position distance real data", (fMaxReconstructionLayerRadius) * 10 * 5, 0.f, fMaxReconstructionLayerRadius));
+  getStatistics().createHistogram(
+    new TH1F("pos_dis", "Position distance real data", (fMaxReconstructionLayerRadius) * 10 * 5, 0.f, fMaxReconstructionLayerRadius));
   getStatistics().createHistogram(new TH1F("angle", "Position angle real data", kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
 
 #if ROOT_VERSION_CODE < ROOT_VERSION(6, 0, 0)
@@ -54,7 +58,7 @@ bool SinogramCreator::exec()
 {
   const int maxDistanceNumber = std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
   if (fSinogram == nullptr) {
-    fSinogram = new SinogramResultType *[fZSplitNumber];
+    fSinogram = new SinogramResultType*[fZSplitNumber];
     for (int i = 0; i < fZSplitNumber; i++) {
       fSinogram[i] = new SinogramResultType(maxDistanceNumber, (std::vector<unsigned int>(kReconstructionMaxAngle, 0)));
     }
@@ -81,8 +85,11 @@ bool SinogramCreator::exec()
         if (!checkSplitRange(firstZ, secondZ, i)) {
           continue;
         }
-        const auto sinogramResult = SinogramCreatorTools::getSinogramRepresentation(firstX, firstY, secondX, secondY, fMaxReconstructionLayerRadius, fReconstructionDistanceAccuracy, maxDistanceNumber, kReconstructionMaxAngle);
+        const auto sinogramResult =
+          SinogramCreatorTools::getSinogramRepresentation(firstX, firstY, secondX, secondY, fMaxReconstructionLayerRadius,
+              fReconstructionDistanceAccuracy, maxDistanceNumber, kReconstructionMaxAngle);
         fCurrentValueInSinogram[i] = ++fSinogram[i]->at(sinogramResult.first).at(sinogramResult.second);
+        fTOFInformation.at(sinogramResult.first).at(sinogramResult.second).push_back((secondHit.getTime() - firstHit.getTime()) / 2);
         if (fCurrentValueInSinogram[i] > fMaxValueInSinogram[i]) {
           fMaxValueInSinogram[i] = fCurrentValueInSinogram[i]; // save max value of sinogram
         }
@@ -100,8 +107,37 @@ bool SinogramCreator::checkSplitRange(float firstZ, float secondZ, int i)
   return firstZ >= fZSplitRange[i].first && firstZ <= fZSplitRange[i].second && secondZ >= fZSplitRange[i].first && secondZ <= fZSplitRange[i].second;
 }
 
+void SinogramCreator::saveResult(const JPetRecoImageTools::Matrix2DProj& result, const std::string& outputFileName)
+{
+  int maxValue = getMaxValue(result);
+  std::ofstream res(outputFileName);
+  res << "P2" << std::endl;
+  res << result[0].size() << " " << result.size() << std::endl;
+  res << maxValue << std::endl;
+  for (unsigned int i = 0; i < result.size(); i++) {
+    for (unsigned int j = 0; j < result[0].size(); j++) {
+      int resultInt = static_cast<int>(result[i][j]);
+      if (resultInt < 0) {
+        resultInt = 0;
+      }
+      res << resultInt << " ";
+    }
+    res << std::endl;
+  }
+  res.close();
+}
+
 bool SinogramCreator::terminate()
 {
+  auto sinogram = fSinogram[0];
+  JPetFilterNone noneFilter;
+  JPetRecoImageTools::FourierTransformFunction f = JPetRecoImageTools::doFFTW;
+  JPetRecoImageTools::Matrix2DProj filteredSinogram = JPetRecoImageTools::FilterSinogram(f, noneFilter, sinogram);
+  JPetRecoImageTools::Matrix2DProj result =
+    JPetRecoImageTools::backProjectWithTOF(filteredSinogram, fTOFInformation, sinogram[0].size(), JPetRecoImageTools::nonRescale, 0, 255);
+
+  saveResult(result, outFile);
+
   for (int i = 0; i < fZSplitNumber; i++) {
     std::ofstream res(fOutFileName + "_" + std::to_string(i) + ".ppm");
     res << "P2" << std::endl;

@@ -17,17 +17,17 @@
 #define SINOGRAMCREATOR_H
 
 #ifdef __CINT__
-//when cint is used instead of compiler, override word is not recognized
-//nevertheless it's needed for checking if the structure of project is correct
+// when cint is used instead of compiler, override word is not recognized
+// nevertheless it's needed for checking if the structure of project is correct
 #define override
 #endif
 
-#include "JPetUserTask/JPetUserTask.h"
 #include "JPetGeomMapping/JPetGeomMapping.h"
-#include "SinogramCreatorTools.h"
 #include "JPetHit/JPetHit.h"
-#include <vector>
+#include "JPetUserTask/JPetUserTask.h"
+#include "SinogramCreatorTools.h"
 #include <string>
+#include <vector>
 
 /**
  * @brief Module creating sinogram from data
@@ -39,28 +39,33 @@
  * It defines 5 user options:
  * - "SinogramCreator_OutFileName_std::string": defines output file name where sinogram is saved
  * - "SinogramCreator_ReconstructionLayerRadius_float": defines radius of reconstruction layer
- * - "SinogramCreator_ReconstructionDistanceAccuracy_float": defines maximal round value for distance, in cm, e.g. 0.1 means 1 bin in sinogram corresponds to 0.1 cm in reality
+ * - "SinogramCreator_ReconstructionDistanceAccuracy_float": defines maximal round value for distance, in cm, e.g. 0.1 means 1 bin in sinogram
+ * corresponds to 0.1 cm in reality
  * - "SinogramCreator_SinogramZSplitNumber_int": defines number of splits around "z" coordinate
  * - "SinogramCreator_ScintillatorLenght_float": defines scintillator lenght in "z" coordinate
  */
-class SinogramCreator : public JPetUserTask
-{
+class SinogramCreator : public JPetUserTask {
 public:
-  SinogramCreator(const char *name);
+  SinogramCreator(const char* name);
   virtual ~SinogramCreator();
   virtual bool init() override;
   virtual bool exec() override;
   virtual bool terminate() override;
 
 private:
-  SinogramCreator(const SinogramCreator &) = delete;
-  SinogramCreator &operator=(const SinogramCreator &) = delete;
+  SinogramCreator(const SinogramCreator&) = delete;
+  SinogramCreator& operator=(const SinogramCreator&) = delete;
 
   void setUpOptions();
   bool checkSplitRange(float firstZ, float secondZ, int i);
+  void saveResult(const JPetRecoImageTools::Matrix2DProj& result, const std::string& outputFileName);
+
   using SinogramResultType = std::vector<std::vector<unsigned int>>;
 
-  SinogramResultType **fSinogram = nullptr;
+  SinogramResultType** fSinogram = nullptr;
+
+  using Matrix2DTOF = std::vector<std::vector<std::vector<float>>>;
+  Matrix2dTOF fTOFInformation;
 
   const std::string kOutFileNameKey = "SinogramCreator_OutFileName_std::string";
   const std::string kReconstructionDistanceAccuracy = "SinogramCreator_ReconstructionDistanceAccuracy_float";
@@ -73,12 +78,12 @@ private:
   std::vector<std::pair<float, float>> fZSplitRange;
 
   std::string fOutFileName = "sinogram";
-  int *fMaxValueInSinogram = nullptr; // to fill later in output file
-  int *fCurrentValueInSinogram = nullptr;
+  int* fMaxValueInSinogram = nullptr; // to fill later in output file
+  int* fCurrentValueInSinogram = nullptr;
 
-  float fMaxReconstructionLayerRadius = 0.f;    //in cm
-  float fReconstructionDistanceAccuracy = 0.1f; //in cm, 1mm accuracy
-  float fScintillatorLenght = 50.0f;            //in cm
+  float fMaxReconstructionLayerRadius = 0.f;    // in cm
+  float fReconstructionDistanceAccuracy = 0.1f; // in cm, 1mm accuracy
+  float fScintillatorLenght = 50.0f;            // in cm
 };
 
 #endif /*  !SINOGRAMCREATOR_H */
