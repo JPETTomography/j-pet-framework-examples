@@ -14,28 +14,24 @@
  */
 
 #include "MLEMRunner.h"
-#include "JPetHit/JPetHit.h"
-#include <iomanip> //std::setprecision
-#include "JPetParamBank/JPetParamBank.h"
 #include "JPetGeomMapping/JPetGeomMapping.h"
+#include "JPetHit/JPetHit.h"
+#include "JPetParamBank/JPetParamBank.h"
+#include <iomanip> //std::setprecision
 
 using namespace jpet_options_tools;
-
-using Point = PET2D::Point<float>;
 
 MLEMRunner::MLEMRunner(const char* name) : JPetUserTask(name) {}
 
 MLEMRunner::~MLEMRunner() {}
 
-bool MLEMRunner::init()
-{
+bool MLEMRunner::init() {
   setUpOptions();
   fOutputEvents = new JPetTimeWindow("JPetEvent");
   return true;
 }
 
-bool MLEMRunner::exec()
-{
+bool MLEMRunner::exec() {
   if (const auto& timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     const unsigned int numberOfEventsInTimeWindow = timeWindow->getNumberOfEvents();
     for (unsigned int i = 0; i < numberOfEventsInTimeWindow; i++) {
@@ -46,14 +42,12 @@ bool MLEMRunner::exec()
   return true;
 }
 
-bool MLEMRunner::terminate()
-{
+bool MLEMRunner::terminate() {
   fOutputStream.close();
   return true;
 }
 
-bool MLEMRunner::parseEvent(const JPetEvent& event)
-{
+bool MLEMRunner::parseEvent(const JPetEvent& event) {
   const auto hits = event.getHits();
   if (hits.size() != 2) {
     return false;
@@ -68,8 +62,8 @@ bool MLEMRunner::parseEvent(const JPetEvent& event)
   float z2 = hits[1].getPosZ();
   float t2 = hits[1].getTime();
 
-  fOutputStreamTest << std::setprecision(30) << x1 << "\t" << y1 << "\t" << z1 << "\t" << t1 << "\t"
-                    << x2 << "\t" << y2 << "\t" << z2 << "\t" << t2 << std::endl;
+  fOutputStreamTest << std::setprecision(30) << x1 << "\t" << y1 << "\t" << z1 << "\t" << t1 << "\t" << x2 << "\t" << y2 << "\t" << z2 << "\t" << t2
+                    << std::endl;
 
   if (std::abs(z1 * cm) > fHalfStripLenght || std::abs(z2 * cm) > fHalfStripLenght) {
     return false;
@@ -93,14 +87,11 @@ bool MLEMRunner::parseEvent(const JPetEvent& event)
     std::swap(t1, t2);
   }
   double dl = (t1 - t2) * speed_of_light_m_per_ps;
-  fOutputStream << d1 << " " << d2 << " " << z1* cm << " "
-                << z2* cm << " " << dl
-                << "\n";
+  fOutputStream << d1 << " " << d2 << " " << z1 * cm << " " << z2 * cm << " " << dl << "\n";
   return true;
 }
 
-void MLEMRunner::setUpOptions()
-{
+void MLEMRunner::setUpOptions() {
   auto opts = getOptions();
   if (isOptionSet(opts, kOutFileNameKey)) {
     fOutFileName = getOptionAsString(opts, kOutFileNameKey);
@@ -130,13 +121,117 @@ void MLEMRunner::setUpOptions()
   const float detectorD = 0.f;
   const float fowRadius = 0.4f;
 
-  fScanner = ScannerBuilder<SquareScanner>::build_multiple_rings(__PET2D_BARREL(
-               radius,         //radius
-               rotation,       //rotation
-               scintillators,  //n-detectors
-               detectorWidth,  //w-detector
-               detectorHeight, //h-detector
-               detectorD,      //should be d-detector
-               fowRadius       //fow radius
-             ));
+  fScanner = ScannerBuilder<SquareScanner>::build_multiple_rings(__PET2D_BARREL(radius,         // radius
+                                                                                rotation,       // rotation
+                                                                                scintillators,  // n-detectors
+                                                                                detectorWidth,  // w-detector
+                                                                                detectorHeight, // h-detector
+                                                                                detectorD,      // should be d-detector
+                                                                                fowRadius       // fow radius
+                                                                                ));
+
+  if (isOptionSet(opts, kNumberOfPixelsInOneDimensionKey)) {
+    fNumberOfPixelsInOneDimension = getOptionAsInt(opts, kNumberOfPixelsInOneDimensionKey);
+  }
+
+  if (isOptionSet(opts, kPixelSizeKey)) {
+    fPixelSize = getOptionAsDouble(opts, kPixelSizeKey);
+  }
+
+  if (isOptionSet(opts, kStartPixelForPartialMatrixKey)) {
+    fStartPixelForPartialMatrix = static_cast<unsigned int>(getOptionAsInt(opts, kStartPixelForPartialMatrixKey));
+  }
+
+  if (isOptionSet(opts, kNumberOfEmissionsPerPixelKey)) {
+    fNumberOfEmissionsPerPixel = static_cast<unsigned int>(getOptionAsInt(opts, kNumberOfEmissionsPerPixelKey));
+  }
+
+  if (isOptionSet(opts, kTOFStepKey)) {
+    fTOFStep = getOptionAsDouble(opts, kTOFStepKey);
+  }
+
+  if (isOptionSet(opts, kVerboseKey)) {
+    fVerbose = getOptionAsBool(opts, kVerboseKey);
+  }
+
+  if (isOptionSet(opts, kSystemMatrixOutputPathKey)) {
+    fSystemMatrixOutputPath = getOptionAsString(opts, kSystemMatrixOutputPathKey);
+  }
+
+  if (isOptionSet(opts, kSystemMatrixSaveFullKey)) {
+    fSystemMatrixSaveFull = getOptionAsBool(opts, kSystemMatrixSaveFullKey);
+  }
+
+  runGenerateSystemMatrix();
+}
+
+void MLEMRunner::runGenerateSystemMatrix() {
+  Common::ScintillatorAccept<F> model(0.1f);
+
+  auto n_detectors = fScanner.size();
+
+  int n_tof_positions = 1;
+  double max_bias = 0;
+  if (fTOFStep > 0.) {
+    n_tof_positions = fScanner.n_tof_positions(fTOFStep, max_bias);
+  }
+
+  std::random_device rd;
+  util::random::tausworthe rng(rd());
+  if (fVerbose) {
+    std::cerr << "Monte-Carlo:" << std::endl;
+  }
+
+#if _OPENMP
+  std::cerr << " OpenMP threads = " << omp_get_max_threads() << std::endl;
+#endif
+
+  std::cerr << "  pixels in row = " << fNumberOfPixelsInOneDimension << std::endl;
+  std::cerr << "     pixel size = " << fPixelSize << std::endl;
+  std::cerr << "     fov radius = " << fScanner.fov_radius() << std::endl;
+  std::cerr << "   outer radius = " << fScanner.outer_radius() << std::endl;
+  std::cerr << "       max bias = " << max_bias << std::endl;
+  std::cerr << "       TOF step = " << fTOFStep << std::endl;
+  std::cerr << "  TOF positions = " << n_tof_positions << std::endl;
+  std::cerr << "      emissions = " << fNumberOfEmissionsPerPixel << std::endl;
+
+  ComputeMatrix::SparseMatrix sparse_matrix(fNumberOfPixelsInOneDimension, fScanner.size(), n_tof_positions);
+
+  ComputeMatrix matrix(fNumberOfPixelsInOneDimension, fScanner.size(), n_tof_positions);
+  util::progress progress(fVerbose, matrix.total_n_pixels_in_triangle, 1);
+
+  if (fNumberOfEmissionsPerPixel > 0) {
+    if (!sparse_matrix.empty()) {
+      matrix << sparse_matrix;
+      sparse_matrix.resize(0);
+    }
+
+    PET2D::Barrel::MonteCarlo<SquareScanner, ComputeMatrix> monte_carlo(fScanner, matrix, fPixelSize, fTOFStep, fStartPixelForPartialMatrix);
+    monte_carlo(rng, model, fNumberOfEmissionsPerPixel, progress);
+    sparse_matrix = matrix.to_sparse();
+  }
+
+  util::obstream out(fSystemMatrixOutputPath, std::ios::binary | std::ios::trunc);
+
+  if (fSystemMatrixSaveFull) {
+    auto full_matrix = sparse_matrix.to_full(fScanner.symmetry_descriptor());
+    out << full_matrix;
+  } else {
+    out << sparse_matrix;
+  }
+
+  try {
+    util::png_writer png(fSystemMatrixOutputPath + ".png");
+    sparse_matrix.output_bitmap(png);
+  } catch (const char* ex) {
+    // don't bail out just produce warning
+    std::cerr << "warning: " << ex << std::endl;
+  }
+
+  util::svg_ostream<F> svg(fSystemMatrixOutputPath + ".svg", fScanner.outer_radius(), fScanner.outer_radius(), 1024., 1024.);
+  svg.link_image(fSystemMatrixOutputPath + ".png", -(fPixelSize * fNumberOfPixelsInOneDimension) / 2,
+                 -(fPixelSize * fNumberOfPixelsInOneDimension) / 2, fPixelSize * fNumberOfPixelsInOneDimension,
+                 fPixelSize * fNumberOfPixelsInOneDimension);
+
+  svg << fScanner;
 }
