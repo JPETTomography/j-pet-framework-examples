@@ -19,13 +19,16 @@ Input Data
 -----------
 For this example, user must provide their own data file(s) collected with the big barrel.
 
+
 Description
 --------------
-Procedure uses a couple of constants that is used for process of selection of hits included in userParams.json
-
+The analysis is split into tasks.
 
 Additional info
 --------------
+For description of possible parameters, that can be ised in useParams.json,
+see file PARAMETERS
+
 
 Compiling 
 ------------
