@@ -11,7 +11,7 @@ cmake_minimum_required(VERSION 2.6)
 ### when creating a new project,
 ### set this section appropriately for your project
 ######################################################################
-set(projectName CosmicsAnalysis)
+set(projectName CosmicAnalysis)
 
 # files to be copied from some other example directory, if any
 set(USE_AUX_FILES_FROM ${projectName})
