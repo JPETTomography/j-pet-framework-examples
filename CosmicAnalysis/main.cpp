@@ -26,20 +26,20 @@ int main(int argc, const char* argv[])
 {
   JPetManager& manager = JPetManager::getManager();
 
+
   manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
   manager.registerTask<SignalFinder>("SignalFinder");
-  manager.registerTask<SignalTransformer>("SignalTransformer"); 
-  manager.registerTask<HitFinder>("HitFinder"); 
+  manager.registerTask<SignalTransformer>("SignalTransformer");
+  manager.registerTask<HitFinder>("HitFinder");
   manager.registerTask<EventFinder>("EventFinder");
   manager.registerTask<EventCategorizerCosmic>("EventCategorizerCosmic");
-  
-  manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
-  manager.useTask("TimeCalibLoader", "tslot.raw", "tslot.calib");
+
+  manager.useTask("TimeWindowCreator", "hld", "tslot.calib");
   manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
   manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
   manager.useTask("HitFinder", "phys.sig", "hits");
   manager.useTask("EventFinder", "hits", "unk.evt");
   manager.useTask("EventCategorizerCosmic", "unk.evt", "cosm.evt");
-  
+
   manager.run(argc, argv);
 }
