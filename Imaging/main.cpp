@@ -40,7 +40,7 @@ int main(int argc, const char* argv[])
   manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
   manager.useTask("HitFinder", "phys.sig", "hits");
   manager.useTask("EventFinder", "hits", "unk.evt");
-  manager.useTask("EventCategorizerImaging", "unk.evt", "img.evt");
-  
+  manager.useTask("EventCategorizerImaging", "unk.evt", "imag.evt");
+    
   manager.run(argc, argv);
 }
