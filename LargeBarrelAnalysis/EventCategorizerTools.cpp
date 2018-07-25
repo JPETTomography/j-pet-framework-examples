@@ -253,9 +253,9 @@ double EventCategorizerTools::calculateTOF(const JPetHit& firstHit, const JPetHi
 double EventCategorizerTools::calcDistanceOfSurfaceAndCenter(const JPetHit& firstHit, const JPetHit& secondHit, const JPetHit& thirdHit) 
 {
   TVector3 crossProd  = ( secondHit.getPos() - firstHit.getPos() ).Cross( thirdHit.getPos() - secondHit.getPos() );
-  double Dcoeef = -crossProd(0)*secondHit.getPosX() - crossProd(1)*secondHit.getPosY() - crossProd(2)*secondHit.getPosZ();
+  double distCoef = -crossProd.X()*secondHit.getPosX() - crossProd.Y()*secondHit.getPosY() - crossProd.Z()*secondHit.getPosZ();
   if( crossProd.Mag() != 0 )
-    return fabs(Dcoeef) / crossProd.Mag();
+    return fabs(distCoef) / crossProd.Mag();
   else
   {
     ERROR("One of the hit has zero position vector - unable to calculate distance from the center of the surface");
@@ -281,13 +281,15 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
         secondHit = event.getHits().at(i);
       }
       // Checking for back to back
-      JPetHit fakeHit;
-      fakeHit.setPos(firstHit.getPosX()+1, firstHit.getPosY(), firstHit.getPosZ());
-      double distanceFromCenter = calcDistanceOfSurfaceAndCenter(firstHit, secondHit, fakeHit);
+      
+      
+      
+      double delLor = (secondHit.getTime() - firstHit.getTime())*kLightVelocity_cm_ns*1000./2.;
+      
       double thetaDiff = fabs(firstHit.getBarrelSlot().getTheta() - secondHit.getBarrelSlot().getTheta());
       double timeDiff = fabs( firstHit.getTime()/1000.0 - secondHit.getTime()/1000.0 );
       if(saveHistos){
-	stats.getHisto1D("DecayInto2_Distance")->Fill(distanceFromCenter);
+	stats.getHisto1D("DecayInto2_DLOR")->Fill(delLor);
 	stats.getHisto1D("DecayInto2_Angles")->Fill(thetaDiff);
 	stats.getHisto1D("DecayInto2_TimeDiff")->Fill(timeDiff);
       }
