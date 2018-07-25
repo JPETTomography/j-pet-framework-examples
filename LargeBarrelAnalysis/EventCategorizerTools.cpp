@@ -284,17 +284,16 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
       
       
       
-      double delLor = (secondHit.getTime() - firstHit.getTime())*kLightVelocity_cm_ns*1000./2.;
+      double deltaLor = (secondHit.getTime() - firstHit.getTime())*kLightVelocity_cm_ns*1000./2.;
       
       double thetaDiff = fabs(firstHit.getBarrelSlot().getTheta() - secondHit.getBarrelSlot().getTheta());
       double timeDiff = fabs( firstHit.getTime()/1000.0 - secondHit.getTime()/1000.0 );
       if(saveHistos){
-	stats.getHisto1D("DecayInto2_DLOR")->Fill(delLor);
+	stats.getHisto1D("DecayInto2_DLOR")->Fill(deltaLor);
 	stats.getHisto1D("DecayInto2_Angles")->Fill(thetaDiff);
 	stats.getHisto1D("DecayInto2_TimeDiff")->Fill(timeDiff);
       }
-      if( fabs( thetaDiff - 180.0 ) < b2bSlotThetaDiff && timeDiff < b2bTimeDiff && 
-	distanceFromCenter < b2bDistanceFromCenter ){
+      if( fabs( thetaDiff - 180.0 ) < b2bSlotThetaDiff && timeDiff < b2bTimeDiff ){
         if(saveHistos){
           TVector3 annhilationPoint = calculateAnnihilationPoint(firstHit, secondHit);
           stats.getHisto2D("DecayInto2_XY")->Fill(annhilationPoint.X(), annhilationPoint.Y());
