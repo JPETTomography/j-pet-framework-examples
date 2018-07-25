@@ -286,10 +286,10 @@ JPetEvent EventCategorizerPhysics::physicsAnalysis( vector<JPetHit> hits )
     }
   if( deexcitationHits.getHits().size() > 0 )
     {
-      if(isOnlyTypeOf(JPetEvent::kUnknown))
+      if(physicEvent.isOnlyTypeOf(JPetEventType::kUnknown))
 	physicEvent.setEventType(JPetEventType::kPrompt);
       else
-	physicsEvent.addEventType(JPetEventType::kPrompt);
+	physicEvent.addEventType(JPetEventType::kPrompt);
       if( annihilationHits.getHits().size() > 0 )
 	{
 	  getStatistics().getHisto1D("Positronium_Lifetime")->Fill( annihilationHits.getHits().at(0).getTime()/1000. - deexcitationHits.getHits().at(0).getTime()/1000. );
@@ -297,14 +297,14 @@ JPetEvent EventCategorizerPhysics::physicsAnalysis( vector<JPetHit> hits )
     }
   if( EventCategorizerTools::checkFor2Gamma(annihilationHits, getStatistics(), fSaveControlHistos, fBackToBackAngleWindow, fMaxTimeDiff, fMaxDistOfDecayPlaneFromCenter) )
     {
-      if(isOnlyTypeOf(JPetEvent::kUnknown))
+      if(physicEvent.isOnlyTypeOf(JPetEventType::kUnknown))
 	physicEvent.setEventType(JPetEventType::k2Gamma);
       else
 	physicEvent.addEventType(JPetEventType::k2Gamma);
     }
   if( EventCategorizerTools::checkFor3Gamma(annihilationHits, getStatistics(), fSaveControlHistos, fDecayInto3MinAngle, fMaxTimeDiff, fMaxDistOfDecayPlaneFromCenter) )
     {
-      if(isOnlyTypeOf(JPetEvent::kUnknown))
+      if(physicEvent.isOnlyTypeOf(JPetEventType::kUnknown))
 	physicEvent.setEventType(JPetEventType::k3Gamma);
       else
 	physicEvent.addEventType(JPetEventType::k3Gamma);

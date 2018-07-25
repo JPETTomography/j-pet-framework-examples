@@ -39,6 +39,7 @@ public:
 	JPetEvent imageReconstruction( std::vector<JPetHit> hits );
 
 protected:
+        double fScatterTOFTimeDiff = 2000.0;
 	double fMinAnnihilationTOT = 10000.0;
 	double fMaxAnnihilationTOT = 25000.0;
 	const std::string kMinAnnihilationParamKey = "EventCategorizer_MinAnnihilationTOT_float";
