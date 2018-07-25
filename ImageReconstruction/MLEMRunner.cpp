@@ -14,6 +14,8 @@
  */
 
 #include "MLEMRunner.h"
+#include "2d/gate/gate_scanner_builder.h"
+#include "2d/gate/gate_volume_builder.h"
 #include "JPetGeomMapping/JPetGeomMapping.h"
 #include "JPetHit/JPetHit.h"
 #include "JPetParamBank/JPetParamBank.h"
@@ -27,6 +29,8 @@ MLEMRunner::~MLEMRunner() {}
 
 bool MLEMRunner::init() {
   setUpOptions();
+  runGenerateSystemMatrix();
+  runReconstructionWithMatrix();
   fOutputEvents = new JPetTimeWindow("JPetEvent");
   return true;
 }
@@ -43,8 +47,64 @@ bool MLEMRunner::exec() {
 }
 
 bool MLEMRunner::terminate() {
-  fOutputStream.close();
+  runReconstruction();
   return true;
+}
+
+void MLEMRunner::runReconstruction() {
+  if (fVerbose) {
+    Reconstruction::EventStatistics st;
+    fReconstruction->event_statistics(st);
+    std::cerr << "       events = " << fReconstruction->n_events() << std::endl;
+    std::cerr
+        // event pixels ranges:
+        << "  pixels: "
+        << "min = " << st.min_pixels << ", "
+        << "max = " << st.max_pixels << ", "
+        << "avg = " << st.avg_pixels
+        << std::endl
+        // event planes ranges:
+        << "  planes: "
+        << "min = " << st.min_planes << ", "
+        << "max = " << st.max_planes << ", "
+        << "avg = " << st.avg_planes
+        << std::endl
+        // event voxels ranges:
+        << "  voxels: "
+        << "min = " << st.min_voxels << ", "
+        << "max = " << st.max_voxels << ", "
+        << "avg = " << st.avg_voxels << std::endl;
+  }
+
+  auto n_blocks = fReconstructionIterations;
+  int n_iterations_in_block = 1;
+  auto n_iterations = fReconstructionIterations;
+  int start_iteration = 0;
+  util::progress progress(fVerbose, n_iterations, 1, start_iteration);
+
+  for (int block = 0; block < n_blocks; ++block) {
+    for (int i = 0; i < n_iterations_in_block; i++) {
+      const auto iteration = block * n_iterations_in_block + i;
+      if (iteration < start_iteration)
+        continue;
+      progress(iteration);
+      (*fReconstruction)();
+      progress(iteration, true);
+    }
+    const auto iteration = (block + 1) * n_iterations_in_block;
+    if (iteration <= start_iteration)
+      continue;
+    util::nrrd_writer nrrd(fReconstructionOutputPath + "_" + std::to_string(iteration) + ".nrrd",
+                           fReconstructionOutputPath + "_" + std::to_string(iteration), false);
+    nrrd << fReconstruction->rho;
+    util::obstream bin(fReconstructionOutputPath + "_" + std::to_string(iteration));
+    bin << fReconstruction->rho;
+  }
+  // final reconstruction statistics
+  const auto st = fReconstruction->statistics();
+  std::cerr << "  event count = " << st.used_events << std::endl;
+  std::cerr << "  voxel count = " << st.used_voxels << "(" << (double)st.used_voxels / st.used_events << " / event)" << std::endl;
+  std::cerr << "  pixel count = " << st.used_pixels << "(" << (double)st.used_pixels / st.used_events << " / event)" << std::endl;
 }
 
 bool MLEMRunner::parseEvent(const JPetEvent& event) {
@@ -87,7 +147,10 @@ bool MLEMRunner::parseEvent(const JPetEvent& event) {
     std::swap(t1, t2);
   }
   double dl = (t1 - t2) * speed_of_light_m_per_ps;
-  fOutputStream << d1 << " " << d2 << " " << z1 * cm << " " << z2 * cm << " " << dl << "\n";
+  std::stringstream ss;
+
+  ss << d1 << " " << d2 << " " << z1 * cm << " " << z2 * cm << " " << dl << "\n";
+  (*fReconstruction) << ss;
   return true;
 }
 
@@ -162,18 +225,101 @@ void MLEMRunner::setUpOptions() {
     fSystemMatrixSaveFull = getOptionAsBool(opts, kSystemMatrixSaveFullKey);
   }
 
-  runGenerateSystemMatrix();
+  if (isOptionSet(opts, kReconstructionOutputPathKey)) {
+    fReconstructionOutputPath = getOptionAsString(opts, kReconstructionOutputPathKey);
+  }
+
+  if (isOptionSet(opts, kReconstructionIterationsKey)) {
+    fReconstructionIterations = getOptionAsInt(opts, kReconstructionIterationsKey);
+  }
+}
+
+void MLEMRunner::setSystemMatrixFromFile() {
+  util::ibstream matrixStream(fSystemMatrixOutputPath);
+  fMatrix = new SquareMatrix(matrixStream);
+}
+
+void MLEMRunner::runReconstructionWithMatrix() {
+  setSystemMatrixFromFile();
+  if (fMatrix->triangular()) {
+    ERROR("matrix must be in full form, convert using 2d_barrel_matrix --full option");
+    return;
+  }
+
+  int n_planes = -1;
+  double z_left = 0.;
+
+  std::cout << "Assumed: " << std::endl;
+  if (n_planes == -1) {
+    n_planes = fNumberOfPixelsInOneDimension;
+    std::cout << "--n-planes=" << n_planes << std::endl;
+  }
+  if (z_left == 0.) {
+    z_left = -n_planes * fPixelSize / 2;
+    std::cout << "--z-left=" << z_left << std::endl;
+  }
+
+  Gate::D2::Volume<F>* world = Gate::D2::build_big_barrel_volume<F>();
+  auto builder = new Gate::D2::GenericScannerBuilder<F, S, 512>;
+  auto scanner2d = builder->build_with_8_symmetries(world);
+
+  double scannerLenght = 2.;
+  double fTOFsigmaAlongZAxis = 0.015;
+  double fTOFSigmaAxis = 0.06;
+
+  ScannerReconstruction scanner(scanner2d, scannerLenght);
+  scanner.set_sigmas(fTOFsigmaAlongZAxis, fTOFSigmaAxis);
+
+  if (fMatrix->n_detectors() != (int)scanner.barrel.size()) {
+    ERROR("n_detectors mismatch");
+    return;
+  }
+
+  Geometry::Grid grid2d(fMatrix->n_pixels_in_row(), fMatrix->n_pixels_in_row(), fPixelSize);
+
+  if (fVerbose) {
+    std::cout << "3D hybrid reconstruction w/system matrix:" << std::endl << "    detectors = " << fMatrix->n_detectors() << std::endl;
+    std::cerr << "   pixel grid = " // grid size:
+              << grid2d.n_columns << " x " << grid2d.n_rows << " / " << grid2d.pixel_size << std::endl;
+  }
+
+  const S* inactive_indices = nullptr;
+  size_t n_inactive_indices = 0;
+
+  Reconstruction::Grid grid(grid2d, z_left, n_planes);
+
+  Reconstruction::Geometry geometry_soa(*fMatrix, scanner.barrel.detector_centers(), grid2d, inactive_indices, n_inactive_indices);
+  if (fVerbose) {
+    std::cerr << "system matrix = " << fSystemMatrixOutputPath << std::endl;
+  }
+
+  setUpRunReconstruction(scanner, grid, geometry_soa);
+}
+
+void MLEMRunner::setUpRunReconstruction(Reconstruction::Scanner& scanner, Reconstruction::Grid& grid, Reconstruction::Geometry& geometry_soa) {
+  fReconstruction = new Reconstruction(scanner, grid, geometry_soa, false);
+
+  if (fVerbose) {
+    std::cerr << "   voxel grid = " // grid size:
+              << fReconstruction->grid.pixel_grid.n_columns << " x " << fReconstruction->grid.pixel_grid.n_columns << " x "
+              << fReconstruction->grid.n_planes << std::endl;
+  }
+
+  fReconstruction->calculate_sensitivity();
+  fReconstruction->normalize_geometry_weights();
 }
 
 void MLEMRunner::runGenerateSystemMatrix() {
-  Common::ScintillatorAccept<F> model(0.1f);
 
-  auto n_detectors = fScanner.size();
+  Gate::D2::Volume<F>* world = Gate::D2::build_big_barrel_volume<F>();
+  auto builder = new Gate::D2::GenericScannerBuilder<F, S, 512>;
+  auto scanner = builder->build_with_8_symmetries(world);
+  Common::ScintillatorAccept<F> model(0.1f);
 
   int n_tof_positions = 1;
   double max_bias = 0;
   if (fTOFStep > 0.) {
-    n_tof_positions = fScanner.n_tof_positions(fTOFStep, max_bias);
+    n_tof_positions = scanner.n_tof_positions(fTOFStep, max_bias);
   }
 
   std::random_device rd;
@@ -188,16 +334,16 @@ void MLEMRunner::runGenerateSystemMatrix() {
 
   std::cerr << "  pixels in row = " << fNumberOfPixelsInOneDimension << std::endl;
   std::cerr << "     pixel size = " << fPixelSize << std::endl;
-  std::cerr << "     fov radius = " << fScanner.fov_radius() << std::endl;
-  std::cerr << "   outer radius = " << fScanner.outer_radius() << std::endl;
+  std::cerr << "     fov radius = " << scanner.fov_radius() << std::endl;
+  std::cerr << "   outer radius = " << scanner.outer_radius() << std::endl;
   std::cerr << "       max bias = " << max_bias << std::endl;
   std::cerr << "       TOF step = " << fTOFStep << std::endl;
   std::cerr << "  TOF positions = " << n_tof_positions << std::endl;
   std::cerr << "      emissions = " << fNumberOfEmissionsPerPixel << std::endl;
 
-  ComputeMatrix::SparseMatrix sparse_matrix(fNumberOfPixelsInOneDimension, fScanner.size(), n_tof_positions);
+  ComputeMatrix::SparseMatrix sparse_matrix(fNumberOfPixelsInOneDimension, scanner.size(), n_tof_positions);
 
-  ComputeMatrix matrix(fNumberOfPixelsInOneDimension, fScanner.size(), n_tof_positions);
+  ComputeMatrix matrix(fNumberOfPixelsInOneDimension, scanner.size(), n_tof_positions);
   util::progress progress(fVerbose, matrix.total_n_pixels_in_triangle, 1);
 
   if (fNumberOfEmissionsPerPixel > 0) {
@@ -206,7 +352,7 @@ void MLEMRunner::runGenerateSystemMatrix() {
       sparse_matrix.resize(0);
     }
 
-    PET2D::Barrel::MonteCarlo<SquareScanner, ComputeMatrix> monte_carlo(fScanner, matrix, fPixelSize, fTOFStep, fStartPixelForPartialMatrix);
+    PET2D::Barrel::MonteCarlo<SquareScanner, ComputeMatrix> monte_carlo(scanner, matrix, fPixelSize, fTOFStep, fStartPixelForPartialMatrix);
     monte_carlo(rng, model, fNumberOfEmissionsPerPixel, progress);
     sparse_matrix = matrix.to_sparse();
   }
@@ -214,7 +360,7 @@ void MLEMRunner::runGenerateSystemMatrix() {
   util::obstream out(fSystemMatrixOutputPath, std::ios::binary | std::ios::trunc);
 
   if (fSystemMatrixSaveFull) {
-    auto full_matrix = sparse_matrix.to_full(fScanner.symmetry_descriptor());
+    auto full_matrix = sparse_matrix.to_full(scanner.symmetry_descriptor());
     out << full_matrix;
   } else {
     out << sparse_matrix;
@@ -228,10 +374,10 @@ void MLEMRunner::runGenerateSystemMatrix() {
     std::cerr << "warning: " << ex << std::endl;
   }
 
-  util::svg_ostream<F> svg(fSystemMatrixOutputPath + ".svg", fScanner.outer_radius(), fScanner.outer_radius(), 1024., 1024.);
+  util::svg_ostream<F> svg(fSystemMatrixOutputPath + ".svg", scanner.outer_radius(), scanner.outer_radius(), 1024., 1024.);
   svg.link_image(fSystemMatrixOutputPath + ".png", -(fPixelSize * fNumberOfPixelsInOneDimension) / 2,
                  -(fPixelSize * fNumberOfPixelsInOneDimension) / 2, fPixelSize * fNumberOfPixelsInOneDimension,
                  fPixelSize * fNumberOfPixelsInOneDimension);
 
-  svg << fScanner;
+  svg << scanner;
 }

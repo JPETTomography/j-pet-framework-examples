@@ -31,33 +31,22 @@
 #include "util/random.h"
 
 #include "2d/barrel/generic_scanner.h"
+#include "2d/barrel/geometry.h"
 #include "2d/barrel/matrix_pixel_major.h"
 #include "2d/barrel/monte_carlo.h"
 #include "2d/barrel/options.h"
 #include "2d/barrel/scanner_builder.h"
 #include "2d/barrel/square_detector.h"
+#include "2d/strip/gaussian_kernel.h"
 
 #include "2d/geometry/pixel.h"
 
+#include "3d/hybrid/reconstruction.h"
+#include "3d/hybrid/scanner.h"
 #include "common/model.h"
 
-using F = float;
-using S = short;
-using Hit = int;
-
-using Point = PET2D::Point<F>;
-using Pixel = PET2D::Pixel<S>;
-using LOR = PET2D::Barrel::LOR<S>;
-
-template <class DetectorClass> using Scanner = PET2D::Barrel::GenericScanner<DetectorClass, S>;
-template <class DetectorClass> using ScannerBuilder = PET2D::Barrel::ScannerBuilder<DetectorClass>;
-
-using SquareScanner = Scanner<PET2D::Barrel::SquareDetector<F>>;
-
-using SquareMatrix = PET2D::Barrel::SparseMatrix<Pixel, LOR, Hit>;
-using ComputeMatrix = PET2D::Barrel::MatrixPixelMajor<Pixel, LOR, Hit>;
-
-class MLEMRunner : public JPetUserTask {
+class MLEMRunner : public JPetUserTask
+{
 public:
   MLEMRunner(const char* name);
   virtual ~MLEMRunner();
@@ -66,12 +55,35 @@ public:
   virtual bool terminate() override;
 
 private:
+  using F = float;
+  using S = short;
+  using Hit = int;
+  using Point = PET2D::Point<F>;
+  using Pixel = PET2D::Pixel<S>;
+  using LOR = PET2D::Barrel::LOR<S>;
+  template <class DetectorClass> using Scanner = PET2D::Barrel::GenericScanner<DetectorClass, S>;
+  template <class DetectorClass> using ScannerBuilder = PET2D::Barrel::ScannerBuilder<DetectorClass>;
+  using SquareScanner = Scanner<PET2D::Barrel::SquareDetector<F>>;
+  using SquareMatrix = PET2D::Barrel::SparseMatrix<Pixel, LOR, Hit>;
+  using ComputeMatrix = PET2D::Barrel::MatrixPixelMajor<Pixel, LOR, Hit>;
+  using Geometry = PET2D::Barrel::Geometry<F, S>;
+
+  using Detector = PET2D::Barrel::SquareDetector<F>;
+  using Scanner2D = PET2D::Barrel::GenericScanner<Detector, S>;
+  using ScannerReconstruction = PET3D::Hybrid::Scanner<Scanner2D>;
+  using Kernel = PET2D::Strip::GaussianKernel<F>;
+  using Reconstruction = PET3D::Hybrid::Reconstruction<ScannerReconstruction, Kernel>;
+
   MLEMRunner(const MLEMRunner&) = delete;
   MLEMRunner& operator=(const MLEMRunner&) = delete;
 
   void setUpOptions();
   bool parseEvent(const JPetEvent& event);
   void runGenerateSystemMatrix();
+  void setSystemMatrixFromFile();
+  void runReconstructionWithMatrix();
+  void setUpRunReconstruction(Reconstruction::Scanner& scanner, Reconstruction::Grid& grid, Reconstruction::Geometry& geometry_soa);
+  void runReconstruction();
 
   const std::string kOutFileNameKey = "MLEMRunner_OutFileName_std::string";
 
@@ -99,16 +111,24 @@ private:
   const std::string kSystemMatrixOutputPathKey = "MLEMRunner_SystemMatrixOutputPath_std::string";
   const std::string kSystemMatrixSaveFullKey = "MLEMRunner_SystemMatrixSaveFull_bool";
 
-  int fNumberOfPixelsInOneDimension = 160;
-  double fPixelSize = 0.004;
+  const std::string kReconstructionOutputPathKey = "MLEMRunner_ReconstructionOutputPath_std::string";
+  const std::string kReconstructionIterationsKey = "MLEMRunner_ReconstuctionIterations_int";
+
+  int fNumberOfPixelsInOneDimension = 160; // n-pixels
+  double fPixelSize = 0.004;               // s-pixel
   unsigned int fStartPixelForPartialMatrix = 0u;
-  unsigned int fNumberOfEmissionsPerPixel = 1000000;
+  unsigned int fNumberOfEmissionsPerPixel = 10000;
   double fTOFStep = 0.;
 
   bool fVerbose = true;
   bool fSystemMatrixSaveFull = true;
 
   std::string fSystemMatrixOutputPath = "system_matix.bin";
+
+  SquareMatrix* fMatrix = nullptr;
+  Reconstruction* fReconstruction;
+  std::string fReconstructionOutputPath = "reconstuction";
+  int fReconstructionIterations = 10;
 };
 
 #endif /*  !MLEMRUNNER_H */
