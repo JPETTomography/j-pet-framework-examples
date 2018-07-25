@@ -126,8 +126,12 @@ private:
   std::string fSystemMatrixOutputPath = "system_matix.bin";
 
   SquareMatrix* fMatrix = nullptr;
-  Reconstruction* fReconstruction;
-  std::string fReconstructionOutputPath = "reconstuction";
+  Reconstruction* fReconstruction = nullptr;
+  Geometry::Grid* fGrid2d = nullptr;
+  Reconstruction::Grid* fGrid = nullptr;
+  ScannerReconstruction* fScannerReconstruction = nullptr;
+  Reconstruction::Geometry* fGeometrySOA = nullptr;
+   std::string fReconstructionOutputPath = "reconstuction";
   int fReconstructionIterations = 10;
 };
 
