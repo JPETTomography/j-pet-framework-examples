@@ -25,10 +25,15 @@ using namespace jpet_options_tools;
 
 MLEMRunner::MLEMRunner(const char* name) : JPetUserTask(name) {}
 
-MLEMRunner::~MLEMRunner() {}
+MLEMRunner::~MLEMRunner() {
+  delete fMatrix;
+  delete fReconstruction;
+  delete fGrid2d;
+  delete fScannerReconstruction;
+  delete fGeometrySOA;
+}
 
-bool MLEMRunner::init()
-{
+bool MLEMRunner::init() {
   setUpOptions();
   runGenerateSystemMatrix();
   runReconstructionWithMatrix();
@@ -36,8 +41,7 @@ bool MLEMRunner::init()
   return true;
 }
 
-bool MLEMRunner::exec()
-{
+bool MLEMRunner::exec() {
   if (const auto& timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     const unsigned int numberOfEventsInTimeWindow = timeWindow->getNumberOfEvents();
     for (unsigned int i = 0; i < numberOfEventsInTimeWindow; i++) {
@@ -48,20 +52,18 @@ bool MLEMRunner::exec()
   return true;
 }
 
-bool MLEMRunner::terminate()
-{
+bool MLEMRunner::terminate() {
   runReconstruction();
   return true;
 }
 
-void MLEMRunner::runReconstruction()
-{
+void MLEMRunner::runReconstruction() {
   if (fVerbose) {
     Reconstruction::EventStatistics st;
     fReconstruction->event_statistics(st);
     std::cerr << "       events = " << fReconstruction->n_events() << std::endl;
     std::cerr
-    // event pixels ranges:
+        // event pixels ranges:
         << "  pixels: "
         << "min = " << st.min_pixels << ", "
         << "max = " << st.max_pixels << ", "
@@ -111,8 +113,7 @@ void MLEMRunner::runReconstruction()
   std::cerr << "  pixel count = " << st.used_pixels << "(" << (double)st.used_pixels / st.used_events << " / event)" << std::endl;
 }
 
-bool MLEMRunner::parseEvent(const JPetEvent& event)
-{
+bool MLEMRunner::parseEvent(const JPetEvent& event) {
   const auto hits = event.getHits();
   if (hits.size() != 2) {
     return false;
@@ -154,13 +155,13 @@ bool MLEMRunner::parseEvent(const JPetEvent& event)
   double dl = (t1 - t2) * speed_of_light_m_per_ps;
   std::stringstream ss;
 
-  ss << d1 << " " << d2 << " " << z1* cm << " " << z2* cm << " " << dl << "\n";
+  ss << d1 << " " << d2 << " " << z1 * cm << " " << z2 * cm << " " << dl << "\n";
   (*fReconstruction) << ss;
+  fOutputStream << d1 << " " << d2 << " " << z1 * cm << " " << z2 * cm << " " << dl << "\n";
   return true;
 }
 
-void MLEMRunner::setUpOptions()
-{
+void MLEMRunner::setUpOptions() {
   auto opts = getOptions();
   if (isOptionSet(opts, kOutFileNameKey)) {
     fOutFileName = getOptionAsString(opts, kOutFileNameKey);
@@ -191,13 +192,13 @@ void MLEMRunner::setUpOptions()
   const float fowRadius = 0.4f;
 
   fScanner = ScannerBuilder<SquareScanner>::build_multiple_rings(__PET2D_BARREL(radius,         // radius
-             rotation,       // rotation
-             scintillators,  // n-detectors
-             detectorWidth,  // w-detector
-             detectorHeight, // h-detector
-             detectorD,      // should be d-detector
-             fowRadius       // fow radius
-                                                                               ));
+                                                                                rotation,       // rotation
+                                                                                scintillators,  // n-detectors
+                                                                                detectorWidth,  // w-detector
+                                                                                detectorHeight, // h-detector
+                                                                                detectorD,      // should be d-detector
+                                                                                fowRadius       // fow radius
+                                                                                ));
 
   if (isOptionSet(opts, kNumberOfPixelsInOneDimensionKey)) {
     fNumberOfPixelsInOneDimension = getOptionAsInt(opts, kNumberOfPixelsInOneDimensionKey);
@@ -240,14 +241,12 @@ void MLEMRunner::setUpOptions()
   }
 }
 
-void MLEMRunner::setSystemMatrixFromFile()
-{
+void MLEMRunner::setSystemMatrixFromFile() {
   util::ibstream matrixStream(fSystemMatrixOutputPath);
   fMatrix = new SquareMatrix(matrixStream);
 }
 
-void MLEMRunner::runReconstructionWithMatrix()
-{
+void MLEMRunner::runReconstructionWithMatrix() {
   setSystemMatrixFromFile();
   if (fMatrix->triangular()) {
     ERROR("matrix must be in full form, convert using 2d_barrel_matrix --full option");
@@ -298,12 +297,11 @@ void MLEMRunner::runReconstructionWithMatrix()
     std::cerr << "system matrix = " << fSystemMatrixOutputPath << std::endl;
   }
 
-  setUpRunReconstruction((*fScannerReconstruction), (*fGrid), (*fGeometrySOA));
+  setUpRunReconstruction();
 }
 
-void MLEMRunner::setUpRunReconstruction(Reconstruction::Scanner& scanner, Reconstruction::Grid& grid, Reconstruction::Geometry& geometry_soa)
-{
-  fReconstruction = new Reconstruction(scanner, grid, geometry_soa, false);
+void MLEMRunner::setUpRunReconstruction() {
+  fReconstruction = new Reconstruction((*fScannerReconstruction), (*fGrid), (*fGeometrySOA), false);
 
   if (fVerbose) {
     std::cerr << "   voxel grid = " // grid size:
@@ -315,8 +313,7 @@ void MLEMRunner::setUpRunReconstruction(Reconstruction::Scanner& scanner, Recons
   fReconstruction->normalize_geometry_weights();
 }
 
-void MLEMRunner::runGenerateSystemMatrix()
-{
+void MLEMRunner::runGenerateSystemMatrix() {
 
   Gate::D2::Volume<F>* world = Gate::D2::build_big_barrel_volume<F>();
   auto builder = new Gate::D2::GenericScannerBuilder<F, S, 512>;

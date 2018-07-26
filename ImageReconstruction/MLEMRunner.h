@@ -82,7 +82,7 @@ private:
   void runGenerateSystemMatrix();
   void setSystemMatrixFromFile();
   void runReconstructionWithMatrix();
-  void setUpRunReconstruction(Reconstruction::Scanner& scanner, Reconstruction::Grid& grid, Reconstruction::Geometry& geometry_soa);
+  void setUpRunReconstruction();
   void runReconstruction();
 
   const std::string kOutFileNameKey = "MLEMRunner_OutFileName_std::string";
@@ -117,7 +117,7 @@ private:
   int fNumberOfPixelsInOneDimension = 160; // n-pixels
   double fPixelSize = 0.004;               // s-pixel
   unsigned int fStartPixelForPartialMatrix = 0u;
-  unsigned int fNumberOfEmissionsPerPixel = 10000;
+  unsigned int fNumberOfEmissionsPerPixel = 100000000;
   double fTOFStep = 0.;
 
   bool fVerbose = true;
@@ -131,7 +131,7 @@ private:
   Reconstruction::Grid* fGrid = nullptr;
   ScannerReconstruction* fScannerReconstruction = nullptr;
   Reconstruction::Geometry* fGeometrySOA = nullptr;
-   std::string fReconstructionOutputPath = "reconstuction";
+  std::string fReconstructionOutputPath = "reconstuction";
   int fReconstructionIterations = 10;
 };
 
