@@ -115,7 +115,7 @@ JPetEvent EventCategorizerCosmic::cosmicAnalysis( vector<JPetHit> hits )
 				cosmicEvent.setEventType(JPetEventType::kCosmic);*/
 			if( fSaveControlHistos )
 			{
-				getStatistics().getHisto1D("Cosmic_TOT")->Fill( TOTofHit );
+			  getStatistics().getHisto1D("Cosmic_TOT")->Fill( TOTofHit/1000. ); //plot in [ns]
 			}
 		}
 	}

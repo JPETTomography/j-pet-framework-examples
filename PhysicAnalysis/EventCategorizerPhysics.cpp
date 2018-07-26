@@ -264,7 +264,7 @@ JPetEvent EventCategorizerPhysics::physicsAnalysis( vector<JPetHit> hits )
 	  double TOTofHit = EventCategorizerTools::calculateTOT( hits[i] );
 	  if( fSaveControlHistos )
 	    {
-	      getStatistics().getHisto1D("TOT")->Fill( TOTofHit );
+	      getStatistics().getHisto1D("TOT")->Fill( TOTofHit/1000. ); //plot is in [ns]
 	    }
 	  if( TOTofHit >= fMinAnnihilationTOT && TOTofHit <= fMaxAnnihilationTOT )
 	    {
