@@ -29,9 +29,6 @@
 #include <string>
 #include <vector>
 
-#include "../modules/large_barrel/JPetRecoImageTools/JPetFilterNone.h"
-#include "../modules/large_barrel/JPetRecoImageTools/JPetRecoImageTools.h"
-
 /**
  * @brief Module creating sinogram from data
  *
@@ -47,8 +44,7 @@
  * - "SinogramCreator_SinogramZSplitNumber_int": defines number of splits around "z" coordinate
  * - "SinogramCreator_ScintillatorLenght_float": defines scintillator lenght in "z" coordinate
  */
-class SinogramCreator : public JPetUserTask
-{
+class SinogramCreator : public JPetUserTask {
 public:
   SinogramCreator(const char* name);
   virtual ~SinogramCreator();
@@ -63,11 +59,13 @@ private:
   void setUpOptions();
   bool checkSplitRange(float firstZ, float secondZ, int i);
   void saveResult(const JPetRecoImageTools::Matrix2DProj& result, const std::string& outputFileName);
-  int getMaxValue(const JPetRecoImageTools::Matrix2DProj& result);
 
-  JPetRecoImageTools::Matrix2DProj** fSinogram = nullptr;
+  using SinogramResultType = std::vector<std::vector<unsigned int>>;
 
-  JPetRecoImageTools::Matrix2DTOF fTOFInformation;
+  SinogramResultType** fSinogram = nullptr;
+
+  using Matrix2DTOF = std::vector<std::vector<std::vector<float>>>;
+  Matrix2dTOF fTOFInformation;
 
   const std::string kOutFileNameKey = "SinogramCreator_OutFileName_std::string";
   const std::string kReconstructionDistanceAccuracy = "SinogramCreator_ReconstructionDistanceAccuracy_float";
