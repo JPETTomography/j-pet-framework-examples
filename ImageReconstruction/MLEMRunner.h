@@ -23,6 +23,7 @@
 #endif
 
 #include "JPetEvent/JPetEvent.h"
+#include "JPetLoggerInclude.h"
 #include "JPetUserTask/JPetUserTask.h"
 #include <fstream>
 
@@ -45,8 +46,30 @@
 #include "3d/hybrid/scanner.h"
 #include "common/model.h"
 
-class MLEMRunner : public JPetUserTask
-{
+/**
+ * @brief Module translating data to format accepted by A.Strzelecki MLEM package and running reconstruction.
+ *  It automatically generate system matrix if needed or load it from file.
+ *  Reconstructed image can be viewed by: MRIcroGL (http://www.mccauslandcenter.sc.edu/mricrogl/)
+ * 
+ * Input: *.reco.unk.evt
+ * Output: none
+ *
+ *
+ * It defines 5 user options:
+ *  "MLEMRunner_OutFileName_std::string" : filename of ascii file where translated data will be saved
+ *  "MLEMRunner_NumberOfPixelsInOneDimension_int" : number of pixels in reconstructed image
+ *  "MLEMRunner_PixelSize_double" : size of single pixel (in meters: e.g: 0.004 means 1 px corresponds 4mm)
+ *  "MLEMRunner_StartPixelForPartialMatrix_int" : start pixel for system matrix
+ *  "MLEMRunner_NumberOfEmissionsPerPixel_int" : number of emmisions per pixel for system matrix
+ *  "MLEMRunner_TOFStepSize_double" : TOF step size
+ *  "MLEMRunner_DisplayInfo_bool" : if true prints extra information about reconstruction on terminal
+ *  "MLEMRunner_SystemMatrixOutputPath_std::string" : path where system matrix will be/is saved
+ *  "MLEMRunner_SystemMatrixSaveFull_bool" : if true full system matrix will be saved
+ *  "MLEMRunner_ReconstructionOutputPath_std::string" : path where reconstructed image will be saved
+ *  "MLEMRunner_ReconstuctionIterations_int" : number of iterations in reconstruction
+ */
+
+class MLEMRunner : public JPetUserTask {
 public:
   MLEMRunner(const char* name);
   virtual ~MLEMRunner();
@@ -79,29 +102,12 @@ private:
 
   void setUpOptions();
   bool parseEvent(const JPetEvent& event);
-  void runGenerateSystemMatrix();
-  void setSystemMatrixFromFile();
-  void runReconstructionWithMatrix();
-  void setUpRunReconstruction();
+  SquareMatrix runGenerateSystemMatrix();
+  void setSystemMatrix();
+  bool setUpRunReconstructionWithMatrix();
   void runReconstruction();
 
   const std::string kOutFileNameKey = "MLEMRunner_OutFileName_std::string";
-
-  const double speed_of_light_m_per_ps = 299792458.0e-12;
-  const double cm = 0.01;
-  const float EPSILON = 0.0001;
-
-  std::string fOutFileName = "mlem_reconstruction_output.txt";
-  std::string fOutFileNameTest = "mlem_reconstruction_output_test.txt";
-  float fHalfStripLenght = 0.f;
-
-  SquareScanner fScanner;
-
-  std::ofstream fOutputStream;
-  std::ofstream fOutputStreamTest;
-
-  // SYSTEM MATRIX
-
   const std::string kNumberOfPixelsInOneDimensionKey = "MLEMRunner_NumberOfPixelsInOneDimension_int";
   const std::string kPixelSizeKey = "MLEMRunner_PixelSize_double";
   const std::string kStartPixelForPartialMatrixKey = "MLEMRunner_StartPixelForPartialMatrix_int";
@@ -114,16 +120,33 @@ private:
   const std::string kReconstructionOutputPathKey = "MLEMRunner_ReconstructionOutputPath_std::string";
   const std::string kReconstructionIterationsKey = "MLEMRunner_ReconstuctionIterations_int";
 
-  int fNumberOfPixelsInOneDimension = 160; // n-pixels
-  double fPixelSize = 0.004;               // s-pixel
-  unsigned int fStartPixelForPartialMatrix = 0u;
-  unsigned int fNumberOfEmissionsPerPixel = 100000000;
+  const double kSpeedOfLightMetersPerPs = 299792458.0e-12;
+  const double kCentimetersToMeters = 0.01;
+  const float EPSILON = 0.0001;
+
+  unsigned int fMissedEvents = 0u;
+  unsigned int fReconstructedEvents = 0u;
+
+  std::string fOutFileName = "mlem_reconstruction_output.txt";
+  float fHalfStripLenght = 0.f;
+
+  Scanner2D fScanner;
+
+  std::ofstream fOutputStream;                   // outputs data in format accepted by 3d_hybrid_reconstruction
+  std::stringstream fReconstructionStringStream; // connection between parsing events and reconstruction
+
+  int fNumberOfPixelsInOneDimension = 160;             // Dimension of 1 axis in 3d reconstructed image(n-pixels)
+  double fPixelSize = 0.004;                           // Size of 1 pixel in mm(s-pixel)
+  unsigned int fStartPixelForPartialMatrix = 0u;       // Starting position of matrix
+  unsigned int fNumberOfEmissionsPerPixel = 100000000; // Number of emissions per pixel for system matrix
   double fTOFStep = 0.;
 
-  bool fVerbose = true;
-  bool fSystemMatrixSaveFull = true;
+  bool fVerbose = true;               // if true prints extra information about reconstruction to cerr
+  bool fSystemMatrixSaveFull = true;  // if true generate and save full system matrix, if not only 1/8 of it and then converts to full
+  int fReconstructionIterations = 10; // number of iterations in reconstruction
 
   std::string fSystemMatrixOutputPath = "system_matix.bin";
+  std::string fReconstructionOutputPath = "reconstuction";
 
   SquareMatrix* fMatrix = nullptr;
   Reconstruction* fReconstruction = nullptr;
@@ -131,8 +154,7 @@ private:
   Reconstruction::Grid* fGrid = nullptr;
   ScannerReconstruction* fScannerReconstruction = nullptr;
   Reconstruction::Geometry* fGeometrySOA = nullptr;
-  std::string fReconstructionOutputPath = "reconstuction";
-  int fReconstructionIterations = 10;
+  Scanner2D fSymmetryDescriptor;
 };
 
 #endif /*  !MLEMRUNNER_H */
