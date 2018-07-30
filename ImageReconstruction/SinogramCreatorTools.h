@@ -17,15 +17,16 @@
 #define SINOGRAMCREATORTOOLS_H
 
 #ifdef __CINT__
-// when cint is used instead of compiler, override word is not recognized
-// nevertheless it's needed for checking if the structure of project is correct
+//when cint is used instead of compiler, override word is not recognized
+//nevertheless it's needed for checking if the structure of project is correct
 #define override
 #endif
 
-#include <cmath>
 #include <utility>
+#include <cmath>
 
-class SinogramCreatorTools {
+class SinogramCreatorTools
+{
 public:
   using Point = std::pair<float, float>;
 
@@ -34,16 +35,15 @@ public:
 
   static float calculateDistance(float firstX, float firstY, float secondX, float secondY);
 
-  static std::pair<int, int> getSinogramRepresentation(float firstX, float firstY, float secondX, float secondY, float fMaxReconstructionLayerRadius,
-                                                       float fReconstructionDistanceAccuracy, int maxDistanceNumber, int kReconstructionMaxAngle);
+  static std::pair<int, int> getSinogramRepresentation(float firstX, float firstY, float secondX, float secondY, float fMaxReconstructionLayerRadius, float fReconstructionDistanceAccuracy, int maxDistanceNumber, int kReconstructionMaxAngle);
 
 private:
   SinogramCreatorTools() = delete;
   ~SinogramCreatorTools() = delete;
-  SinogramCreatorTools(const SinogramCreatorTools&) = delete;
-  SinogramCreatorTools& operator=(const SinogramCreatorTools&) = delete;
+  SinogramCreatorTools(const SinogramCreatorTools &) = delete;
+  SinogramCreatorTools &operator=(const SinogramCreatorTools &) = delete;
 
-  static void swapIfNeeded(float& firstX, float& firstY, float& secondX, float& secondY);
+  static void swapIfNeeded(float &firstX, float &firstY, float &secondX, float &secondY);
   static float calculateNorm(float firstX, float firstY, float secondX, float secondY);
 };
 
