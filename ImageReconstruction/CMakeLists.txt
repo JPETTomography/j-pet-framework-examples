@@ -24,6 +24,29 @@ file(GLOB SOURCES_WITHOUT_MAIN *.cpp)
 list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${UNIT_TEST_SOURCES})
 list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${MAIN_CPP})
 
+# add options from j-pet-mlem as compile flags removing PET_ prefix
+# j-pet-mlem set some parameters of the build by CMake using definitions, but they are limited to project
+# so I copy them here
+get_cmake_property(vars VARIABLES)
+foreach(var ${vars})
+  if(var MATCHES "^PET_" AND NOT var MATCHES "_DIR$")
+    string(REGEX REPLACE "^PET_" "" name ${var})
+    if(name MATCHES "_TYPE$")
+      string(REGEX REPLACE "_TYPE$" "" type_name ${name})
+      add_definitions(-DUSE_${${var}}_${type_name}=1)
+      add_definitions(-D${name}=${${var}})
+    elseif(${var})
+      if(${var} STREQUAL ON)
+        add_definitions(-D${name}=1)
+      else()
+        add_definitions(-D${name}=${${var}})
+      endif()
+    else()
+      add_definitions(-D${name}=0)
+    endif()
+  endif()
+endforeach()
+
 # add dependencies from j-pet-mlem
 set(use_modules_from ../j-pet-mlem)
 list(APPEND HEADERS ${use_modules_from}/src/util/png_writer.h)
