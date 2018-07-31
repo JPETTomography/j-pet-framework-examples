@@ -34,6 +34,7 @@ using namespace std;
 
 InterThresholdCalibration::InterThresholdCalibration(const char* name): JPetUserTask(name) {}
 
+
 InterThresholdCalibration::~InterThresholdCalibration()
 {
   delete fBarrelMap;
@@ -62,14 +63,13 @@ bool InterThresholdCalibration::init()
 
 //------Calibration run number from options file
   if ( isOptionSet(fParams.getOptions(), fCalibRunKey)) {
-    CalibRun = getOptionAsInt(fParams.getOptions(), fCalibRunKey);
+    fCalibRun = getOptionAsInt(fParams.getOptions(), fCalibRunKey);
   }
 
 
-  //time(&local_time); //get the local time at which we start calibration
   std::ofstream output;
 
-  output.open(OutputFile, std::ios::app); //open the final output file in append mode
+  output.open(fOutputFile, std::ios::app); //open the final output file in append mode
   if (output.tellp() == 0) {             //if the file is empty/new write the header
     output << "# Threshold time calibration constants" << std::endl;
     output << "# correction and offset with respect to the t1 (for thr a)" << std::endl;
@@ -83,14 +83,9 @@ bool InterThresholdCalibration::init()
   
   //histograms
 
-	int sl_max;
-
 	for (int lay=1;lay<=3;lay++){// loop over layers
 
-		if(lay==1 || lay ==2) sl_max=48;
-		if(lay==3) sl_max=96;
-
-		for (int sl=1;sl<=sl_max;sl++){// loop over slots
+		for (int sl=1;sl<=kSl_max[lay-1];sl++){// loop over slots
 
 			for (int thre=2;thre<=4;thre++){// loop over th diffr times
 	
@@ -175,17 +170,11 @@ bool InterThresholdCalibration::terminate()
   //create output txt file with calibration parameters
   //
   std::ofstream results_fit;
-  results_fit.open(OutputFile, std::ios::app);
+  results_fit.open(fOutputFile, std::ios::app);
   //
-  
-	int sl_max;
-
 	for (int lay=1;lay<=3;lay++){// loop over layers
 
-		if(lay==1 || lay ==2) sl_max=48;
-		if(lay==3) sl_max=96;
-
-		for (int sl=1;sl<=sl_max;sl++){// loop over slots
+		for (int sl=1;sl<=kSl_max[lay-1];sl++){// loop over slots
 
 			for (int th=1;th<=3;th++){// loop over th diffr times
 	
@@ -284,19 +273,19 @@ bool InterThresholdCalibration::terminate()
       double chi2_ndf_t_B = fit_t_B->GetChisquare() / fit_t_B->GetNDF();
 
 
-      if ((position_peak_error_l_A / position_peak_l_A) >= frac_err) {
+      if ((position_peak_error_l_A / position_peak_l_A) >= kFrac_err) {
         results_fit << "#WFIT: Large uncertainty on the calibration constant!" << endl;
       }
 
-      if ((position_peak_error_l_B / position_peak_l_B) >= frac_err) {
+      if ((position_peak_error_l_B / position_peak_l_B) >= kFrac_err) {
         results_fit << "#WFIT: Large uncertainty on the calibration constant!" << endl;
       }
 
-      if ((position_peak_error_t_A / position_peak_t_A) >= frac_err) {
+      if ((position_peak_error_t_A / position_peak_t_A) >= kFrac_err) {
         results_fit << "#WFIT: Large uncertainty on the calibration constant!" << endl;
       }
 
-      if ((position_peak_error_t_B / position_peak_t_B) >= frac_err) {
+      if ((position_peak_error_t_B / position_peak_t_B) >= kFrac_err) {
         results_fit << "#WFIT: Large uncertainty on the calibration constant!" << endl;
       }
 
@@ -356,14 +345,14 @@ void InterThresholdCalibration::fillHistosForHit(const JPetHit & hit){
 
 		if(lead_times_A.count(thr) > 0 && trail_times_A.count(thr) > 0 && lead_times_A.size()==4 && trail_times_A.size()==4){ //exactly 4 thresholds
 
-		lead_times_first_A=lead_times_A[1];
+		fLead_times_first_A=lead_times_A[1];
 
 			if(thr>=2){
 
-	 		thr_time_diff_A[thr] = lead_times_A[thr]/1000 - lead_times_first_A/1000;
+	 		fThr_time_diff_A[thr] = lead_times_A[thr]/1000 - fLead_times_first_A/1000;
 
 			char * histo_name_l_A = Form("timeDiffA_leading_layer_%d_slot_%d_thr_1%d",layer_number,slot_nr,thr);
-			getStatistics().getHisto1D(histo_name_l_A)->Fill(thr_time_diff_A[thr]);
+			getStatistics().getHisto1D(histo_name_l_A)->Fill(fThr_time_diff_A[thr]);
 
 			}
 					  
@@ -377,14 +366,14 @@ void InterThresholdCalibration::fillHistosForHit(const JPetHit & hit){
 
 		if(lead_times_B.count(thr) > 0 && trail_times_B.count(thr) > 0 && lead_times_B.size()==4 && trail_times_B.size()==4){ 
 
-		lead_times_first_B=lead_times_B[1];
+		fLead_times_first_B=lead_times_B[1];
 
 			if(thr>=2){
 
-	 		thr_time_diff_B[thr] = lead_times_B[thr]/1000 - lead_times_first_B/1000;
+	 		fThr_time_diff_B[thr] = lead_times_B[thr]/1000 - fLead_times_first_B/1000;
 
 			char * histo_name_l_B = Form("timeDiffB_leading_layer_%d_slot_%d_thr_1%d",layer_number,slot_nr,thr);
-			getStatistics().getHisto1D(histo_name_l_B)->Fill(thr_time_diff_B[thr]);
+			getStatistics().getHisto1D(histo_name_l_B)->Fill(fThr_time_diff_B[thr]);
 
 			}
 							  
@@ -399,15 +388,15 @@ for(auto & thr_time_pair : trail_times_A){
 
 		if(trail_times_A.count(thr) > 0 && lead_times_A.count(thr) > 0 && lead_times_A.size()==4 && trail_times_A.size()==4){ 
 
-		trail_times_first_A=trail_times_A[1];
+		fTrail_times_first_A=trail_times_A[1];
 		
 
 			if(thr>=2){
 
-	 		thr_time_diff_t_A[thr] = trail_times_A[thr]/1000 - trail_times_first_A/1000;
+	 		fThr_time_diff_t_A[thr] = trail_times_A[thr]/1000 - fTrail_times_first_A/1000;
 
 			char * histo_name_t_A = Form("timeDiffA_trailing_layer_%d_slot_%d_thr_1%d",layer_number,slot_nr,thr);
-			getStatistics().getHisto1D(histo_name_t_A)->Fill(thr_time_diff_t_A[thr]);
+			getStatistics().getHisto1D(histo_name_t_A)->Fill(fThr_time_diff_t_A[thr]);
 
 			}
 							  
@@ -422,14 +411,14 @@ for(auto & thr_time_pair : trail_times_A){
 		if(trail_times_B.count(thr) > 0 && lead_times_B.count(thr) > 0 && lead_times_B.size()==4 && trail_times_B.size()==4){ 
 
 
-		trail_times_first_B=trail_times_B[1];
+		fTrail_times_first_B=trail_times_B[1];
 
 			if(thr>=2){
 
-	 		thr_time_diff_t_B[thr] = trail_times_B[thr]/1000 - trail_times_first_B/1000;
+	 		fThr_time_diff_t_B[thr] = trail_times_B[thr]/1000 - fTrail_times_first_B/1000;
 
 			char * histo_name_t_B = Form("timeDiffB_trailing_layer_%d_slot_%d_thr_1%d",layer_number,slot_nr,thr);
-			getStatistics().getHisto1D(histo_name_t_B)->Fill(thr_time_diff_t_B[thr]);
+			getStatistics().getHisto1D(histo_name_t_B)->Fill(fThr_time_diff_t_B[thr]);
 
 			}
 							  

@@ -1,5 +1,5 @@
  /**
- *  @copyright Copyright 2016 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -36,24 +36,17 @@ public:
 protected:
 	const char * formatUniqueSlotDescription(const JPetBarrelSlot & slot, int threshold,const char * prefix);
 	void fillHistosForHit(const JPetHit & hit);
-	JPetGeomMapping* fBarrelMap;
-	std::string OutputFile = "TimeConstantsInterThrCalib.txt";
-	const float Cl[3] = {0.,0.1418,0.5003};    //[ns]
-	const float SigCl[3] = {0.,0.0033,0.0033}; //[ns]
+	JPetGeomMapping* fBarrelMap = nullptr;
+	std::string fOutputFile = "TimeConstantsInterThrCalib.txt";
         const std::string fCalibRunKey = "TimeCalibRunNumber_int";
-        int CalibRun = 4; //Number of calibration run associated with Acquisition Campaign  
-	double frac_err=0.3;  //maximal fractional uncertainty of parameters accepted by calibration
+        int fCalibRun = 4; //Number of calibration run associated with Acquisition Campaign  
+	const double kFrac_err=0.3;  //maximal fractional uncertainty of parameters accepted by calibration
 	int min_ev = 100;     //minimal number of events for a distribution to be fitted                         
-
-	double thr_time_diff_t_A[5],thr_time_diff_A[5];
-        double thr_time_diff_t_B[5],thr_time_diff_B[5];
-        double lead_times_first_A,lead_times_first_B;
-	double lead_times_second_A,lead_times_second_B;
-	double lead_times_third_A,lead_times_third_B;
-	double trail_times_first_A,trail_times_first_B;
-	double trail_times_second_A,trail_times_second_B;
-	double trail_times_third_A,trail_times_third_B;
-        double TOT_A[5],TOT_B[5];
+  const std::vector<double> kSl_max = {48,48,96}; //amount of slots per each layer
+	double fThr_time_diff_t_A[5],fThr_time_diff_A[5];
+        double fThr_time_diff_t_B[5],fThr_time_diff_B[5];
+        double fLead_times_first_A,fLead_times_first_B;
+	double fTrail_times_first_A,fTrail_times_first_B;
 
 };
 #endif /*  !InterThresholdCalibration_H */
