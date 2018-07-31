@@ -46,6 +46,7 @@ add_subdirectory(NewAnalysisTemplate)
 add_subdirectory(ScopeLoaderExample)
 add_subdirectory(TimeCalibration)
 add_subdirectory(ScopeAnalysis)
+add_subdirectory(InterThresholdCalibration)
 add_subdirectory(modules)
 add_subdirectory(ImageReconstruction)
 
