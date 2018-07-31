@@ -60,10 +60,19 @@ bool InterThresholdCalibration::init()
   //so I left the JPetEvent class. For more info ask Alek or Wojtek
 
 //------Calibration run number from options file
-  if ( isOptionSet(fParams.getOptions(), fCalibRunKey)) {
+  if ( isOptionSet(fParams.getOptions(), fCalibRunKey)) 
     fCalibRun = getOptionAsInt(fParams.getOptions(), fCalibRunKey);
-  }
+  
 
+  if ( isOptionSet(fParams.getOptions(), fOutputFileKey)) 
+    fOutputFile = getOptionAsString(fParams.getOptions(), fOutputFileKey);
+  
+
+  if ( isOptionSet(fParams.getOptions(), fFrac_errKey)) 
+    fFrac_err = getOptionAsDouble(fParams.getOptions(), fFrac_errKey);
+
+  if ( isOptionSet(fParams.getOptions(), fMin_evKey)) 
+    fMin_ev = getOptionAsDouble(fParams.getOptions(), fMin_evKey);
 
   std::ofstream output;
 
@@ -272,19 +281,19 @@ bool InterThresholdCalibration::terminate()
           double chi2_ndf_t_B = fit_t_B->GetChisquare() / fit_t_B->GetNDF();
 
 
-          if ((position_peak_error_l_A / position_peak_l_A) >= kFrac_err) {
+          if ((position_peak_error_l_A / position_peak_l_A) >= fFrac_err) {
             results_fit << "#WFIT: Large uncertainty on the calibration constant!" << endl;
           }
 
-          if ((position_peak_error_l_B / position_peak_l_B) >= kFrac_err) {
+          if ((position_peak_error_l_B / position_peak_l_B) >= fFrac_err) {
             results_fit << "#WFIT: Large uncertainty on the calibration constant!" << endl;
           }
 
-          if ((position_peak_error_t_A / position_peak_t_A) >= kFrac_err) {
+          if ((position_peak_error_t_A / position_peak_t_A) >= fFrac_err) {
             results_fit << "#WFIT: Large uncertainty on the calibration constant!" << endl;
           }
 
-          if ((position_peak_error_t_B / position_peak_t_B) >= kFrac_err) {
+          if ((position_peak_error_t_B / position_peak_t_B) >= fFrac_err) {
             results_fit << "#WFIT: Large uncertainty on the calibration constant!" << endl;
           }
 
