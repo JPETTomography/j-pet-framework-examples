@@ -23,21 +23,25 @@ using namespace std;
 
 int main(int argc, const char* argv[])
 {
+  try {
+    JPetManager& manager = JPetManager::getManager();
 
-  JPetManager& manager = JPetManager::getManager();
-
-  manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
-  manager.registerTask<SignalFinder>("SignalFinder");
-  manager.registerTask<SignalTransformer>("SignalTransformer"); 
-  manager.registerTask<HitFinder>("HitFinder"); 
-  manager.registerTask<InterThresholdCalibration>("InterThresholdCalibration"); 
+    manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
+    manager.registerTask<SignalFinder>("SignalFinder");
+    manager.registerTask<SignalTransformer>("SignalTransformer"); 
+    manager.registerTask<HitFinder>("HitFinder"); 
+    manager.registerTask<InterThresholdCalibration>("InterThresholdCalibration"); 
   
-  manager.useTask("TimeWindowCreator", "hld", "tslot.calib");
-  manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
-  manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
-  manager.useTask("HitFinder", "phys.sig", "hits");
-  manager.useTask("InterThresholdCalibration", "hits", "calib");
+    manager.useTask("TimeWindowCreator", "hld", "tslot.calib");
+    manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
+    manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
+    manager.useTask("HitFinder", "phys.sig", "hits");
+    manager.useTask("InterThresholdCalibration", "hits", "calib");
 
-  manager.run(argc, argv);
-  
+    manager.run(argc, argv);
+  } catch (const std::exception& except) {
+    std::cerr << "Unrecoverable error occured:" << except.what() << "Exiting the program!" << std::endl;
+    return EXIT_FAILURE;
+  }
+  return EXIT_SUCCESS; 
 }
