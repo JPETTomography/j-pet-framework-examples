@@ -50,8 +50,6 @@ bool InterThresholdCalibration::init()
 
 ////////////////////////
 
-   //time_t local_time;
-
    fBarrelMap = new JPetGeomMapping(getParamBank());
 
   fOutputEvents = new JPetTimeWindow("JPetEvent");
@@ -208,24 +206,24 @@ bool InterThresholdCalibration::terminate()
       INFO("CALIB_INFO: Fitting histogams for layer= " + std::to_string(lay) + ", slot= " + std::to_string(sl) + ", time diffr threshold= " + std::to_string(th));
       INFO("#############");
 
-      if (histoToSave_leading_A->GetEntries() <= min_ev) {
-        results_fit << "#WARNING: Statistics used to determine the leading edge (A) threshold calibration constant was less than " << min_ev << " events!" << endl;
-        WARNING(": Statistics used to determine the leading edge (A) threshold calibration constant was less than " + std::to_string(min_ev) + " events!");
+      if (histoToSave_leading_A->GetEntries() <= fMin_ev) {
+        results_fit << "#WARNING: Statistics used to determine the leading edge (A) threshold calibration constant was less than " << fMin_ev << " events!" << endl;
+        WARNING(": Statistics used to determine the leading edge (A) threshold calibration constant was less than " + std::to_string(fMin_ev) + " events!");
       }
 
-      if (histoToSave_leading_B->GetEntries() <= min_ev) {
-         results_fit << "#WARNING: Statistics used to determine the leading edge (B) threshold calibration constant was less than " << min_ev << " events!" << endl;
-        WARNING(": Statistics used to determine the leading edge (B) threshold calibration constant was less than " + std::to_string(min_ev) + " events!");
+      if (histoToSave_leading_B->GetEntries() <= fMin_ev) {
+         results_fit << "#WARNING: Statistics used to determine the leading edge (B) threshold calibration constant was less than " << fMin_ev << " events!" << endl;
+        WARNING(": Statistics used to determine the leading edge (B) threshold calibration constant was less than " + std::to_string(fMin_ev) + " events!");
 	}
 
-      if (histoToSave_trailing_A->GetEntries() <= min_ev) {
-        results_fit << "#WARNING: Statistics used to determine the trailing edge (A) threshold calibration constant was less than " << min_ev << " events!" << endl;
-        WARNING(": Statistics used to determine the trailing edge (A) threshold calibration constant was less than " + std::to_string(min_ev) + " events!");
+      if (histoToSave_trailing_A->GetEntries() <= fMin_ev) {
+        results_fit << "#WARNING: Statistics used to determine the trailing edge (A) threshold calibration constant was less than " << fMin_ev << " events!" << endl;
+        WARNING(": Statistics used to determine the trailing edge (A) threshold calibration constant was less than " + std::to_string(fMin_ev) + " events!");
 	}
 
-      if (histoToSave_trailing_B->GetEntries() <= min_ev) {
-        results_fit << "#WARNING: Statistics used to determine the trailing edge (B) threshold calibration constant was less than " << min_ev << " events!" << endl;
-        WARNING(": Statistics used to determine the trailing edge (B) threshold calibration constant was less than " + std::to_string(min_ev) + " events!");
+      if (histoToSave_trailing_B->GetEntries() <= fMin_ev) {
+        results_fit << "#WARNING: Statistics used to determine the trailing edge (B) threshold calibration constant was less than " << fMin_ev << " events!" << endl;
+        WARNING(": Statistics used to determine the trailing edge (B) threshold calibration constant was less than " + std::to_string(fMin_ev) + " events!");
  	}
 
 
@@ -336,6 +334,12 @@ void InterThresholdCalibration::fillHistosForHit(const JPetHit & hit){
   if(layer_number==2) slot_nr=slot_number-48;
   if(layer_number==3) slot_nr=slot_number-96;
 
+  double thr_time_diff_t_A[5],thr_time_diff_A[5];
+  double thr_time_diff_t_B[5],thr_time_diff_B[5];
+  double lead_times_first_A,lead_times_first_B;
+  double trail_times_first_A,trail_times_first_B;
+
+
 //leading edge
 
 //A
@@ -345,14 +349,14 @@ void InterThresholdCalibration::fillHistosForHit(const JPetHit & hit){
 
 		if(lead_times_A.count(thr) > 0 && trail_times_A.count(thr) > 0 && lead_times_A.size()==4 && trail_times_A.size()==4){ //exactly 4 thresholds
 
-		fLead_times_first_A=lead_times_A[1];
+		lead_times_first_A=lead_times_A[1];
 
 			if(thr>=2){
 
-	 		fThr_time_diff_A[thr] = lead_times_A[thr]/1000 - fLead_times_first_A/1000;
+	 		thr_time_diff_A[thr] = lead_times_A[thr]/1000 - lead_times_first_A/1000;
 
 			char * histo_name_l_A = Form("timeDiffA_leading_layer_%d_slot_%d_thr_1%d",layer_number,slot_nr,thr);
-			getStatistics().getHisto1D(histo_name_l_A)->Fill(fThr_time_diff_A[thr]);
+			getStatistics().getHisto1D(histo_name_l_A)->Fill(thr_time_diff_A[thr]);
 
 			}
 					  
@@ -366,14 +370,14 @@ void InterThresholdCalibration::fillHistosForHit(const JPetHit & hit){
 
 		if(lead_times_B.count(thr) > 0 && trail_times_B.count(thr) > 0 && lead_times_B.size()==4 && trail_times_B.size()==4){ 
 
-		fLead_times_first_B=lead_times_B[1];
+		lead_times_first_B=lead_times_B[1];
 
 			if(thr>=2){
 
-	 		fThr_time_diff_B[thr] = lead_times_B[thr]/1000 - fLead_times_first_B/1000;
+	 		thr_time_diff_B[thr] = lead_times_B[thr]/1000 - lead_times_first_B/1000;
 
 			char * histo_name_l_B = Form("timeDiffB_leading_layer_%d_slot_%d_thr_1%d",layer_number,slot_nr,thr);
-			getStatistics().getHisto1D(histo_name_l_B)->Fill(fThr_time_diff_B[thr]);
+			getStatistics().getHisto1D(histo_name_l_B)->Fill(thr_time_diff_B[thr]);
 
 			}
 							  
@@ -388,15 +392,15 @@ for(auto & thr_time_pair : trail_times_A){
 
 		if(trail_times_A.count(thr) > 0 && lead_times_A.count(thr) > 0 && lead_times_A.size()==4 && trail_times_A.size()==4){ 
 
-		fTrail_times_first_A=trail_times_A[1];
+		trail_times_first_A=trail_times_A[1];
 		
 
 			if(thr>=2){
 
-	 		fThr_time_diff_t_A[thr] = trail_times_A[thr]/1000 - fTrail_times_first_A/1000;
+	 		thr_time_diff_t_A[thr] = trail_times_A[thr]/1000 - trail_times_first_A/1000;
 
 			char * histo_name_t_A = Form("timeDiffA_trailing_layer_%d_slot_%d_thr_1%d",layer_number,slot_nr,thr);
-			getStatistics().getHisto1D(histo_name_t_A)->Fill(fThr_time_diff_t_A[thr]);
+			getStatistics().getHisto1D(histo_name_t_A)->Fill(thr_time_diff_t_A[thr]);
 
 			}
 							  
@@ -411,14 +415,14 @@ for(auto & thr_time_pair : trail_times_A){
 		if(trail_times_B.count(thr) > 0 && lead_times_B.count(thr) > 0 && lead_times_B.size()==4 && trail_times_B.size()==4){ 
 
 
-		fTrail_times_first_B=trail_times_B[1];
+		trail_times_first_B=trail_times_B[1];
 
 			if(thr>=2){
 
-	 		fThr_time_diff_t_B[thr] = trail_times_B[thr]/1000 - fTrail_times_first_B/1000;
+	 		thr_time_diff_t_B[thr] = trail_times_B[thr]/1000 - trail_times_first_B/1000;
 
 			char * histo_name_t_B = Form("timeDiffB_trailing_layer_%d_slot_%d_thr_1%d",layer_number,slot_nr,thr);
-			getStatistics().getHisto1D(histo_name_t_B)->Fill(fThr_time_diff_t_B[thr]);
+			getStatistics().getHisto1D(histo_name_t_B)->Fill(thr_time_diff_t_B[thr]);
 
 			}
 							  

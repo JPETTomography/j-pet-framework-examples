@@ -41,12 +41,10 @@ protected:
         const std::string fCalibRunKey = "TimeCalibRunNumber_int";
         int fCalibRun = 4; //Number of calibration run associated with Acquisition Campaign  
 	const double kFrac_err=0.3;  //maximal fractional uncertainty of parameters accepted by calibration
-	int min_ev = 100;     //minimal number of events for a distribution to be fitted                         
+	int fMin_ev = 100;     //minimal number of events for a distribution to be fitted                         
   const std::vector<double> kSl_max = {48,48,96}; //amount of slots per each layer
 	double fThr_time_diff_t_A[5],fThr_time_diff_A[5];
         double fThr_time_diff_t_B[5],fThr_time_diff_B[5];
-        double fLead_times_first_A,fLead_times_first_B;
-	double fTrail_times_first_A,fTrail_times_first_B;
 
 };
 #endif /*  !InterThresholdCalibration_H */
