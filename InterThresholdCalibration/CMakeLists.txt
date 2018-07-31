@@ -14,10 +14,7 @@ cmake_minimum_required(VERSION 2.6)
 set(projectName InterThresholdCalibration)
 
 # files to be copied from some other example directory, if any
-set(USE_AUX_FILES_FROM LargeBarrelAnalysis)
-
 set(AUXILLIARY_FILES
-  run.sh
   userParams.json
   README
   )
