@@ -10,7 +10,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *
-* Purpose: Time calibration with data measured with reference detector
+*  @brief Time calibration with data measured with reference detector
 *  @file TimeCalibration.h
 */
 
@@ -34,9 +34,9 @@ class TimeCalibration: public JPetUserTask
 public:
   TimeCalibration(const char* name);
   virtual ~TimeCalibration();
-  virtual bool init()override;
-  virtual bool exec()override;
-  virtual bool terminate()override;
+  virtual bool init() override;
+  virtual bool exec() override;
+  virtual bool terminate() override;
 
 protected:
   bool loadOptions();
