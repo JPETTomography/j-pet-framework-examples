@@ -56,14 +56,15 @@ bool TimeCalibration::init()
   INFO("#############");
   INFO("WE ARE GOING TO CALIBRATE SCINTILLATOR " + std::to_string(fStripToCalib) + " FROM LAYER " + std::to_string(fLayerToCalib));
   fTimer.startMeasurement();
-  //
-  //
-  loadFileWithParameters(fOutputFileTmp);
-  if (flag_corr == 1) { //user flag to be used only if we disable the calibration loading module
-    //or we work with root files after the calibration loading module, by default flag_corr==1
-    //since this is much faster than the full analysis done starting from unpacker stage
-    //if You really want to use corrections at that level first uncomment in main.cpp the CalibLoader module
-    //and change flag_corr to 0
+
+  loadFileWithParameters(fTimeConstantsCalibFileNameTmp);
+  if (fIsCorrection) {
+    //User flag to be used only if we disable the calibration loading module
+    //or we work with root files after the calibration loading module.
+    //By default fIsCorrection is set to true
+    //since this is much faster than the full analysis done starting from unpacker stage.
+    //If You really want to use corrections at that level first uncomment in main.cpp the CalibLoader module
+    //and change fIsCorrection to false.
     for (int i = 1; i < 5; i++) {
       CAtCor[i] = CAtTmp[i];
       CBtCor[i] = CBtTmp[i];
@@ -71,29 +72,7 @@ bool TimeCalibration::init()
       CBlCor[i] = CBlTmp[i];
     }
   }
-  //
-  for (int thr = 1; thr <= 4; thr++) { // loop over thresholds
-
-
-//histos for leading edge
-//		  const char * histo_name_l = formatUniqueSlotDescription(scin.at()->getBarrelSlot(), thr, "timeDiffAB_leading_");
-//
-    const char* histo_name_l = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffAB_leading_", fLayerToCalib, fStripToCalib, thr);
-    getStatistics().createHistogram( new TH1F(histo_name_l, histo_name_l, 400, -20., 20.) );
-    //
-//histograms for leading edge refference detector time difference
-    const char* histo_name_Ref_l = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffRef_leading_", fLayerToCalib, fStripToCalib, thr);
-    getStatistics().createHistogram( new TH1F(histo_name_Ref_l, histo_name_Ref_l, 800, -80., 80.) );
-    //
-//histos for trailing edge
-    const char* histo_name_t = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffAB_trailing_", fLayerToCalib, fStripToCalib, thr);
-    getStatistics().createHistogram( new TH1F(histo_name_t, histo_name_t, 400, -20., 20.) );
-    //
-//histograms for leading edge refference detector time difference
-    const char* histo_name_Ref_t = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffRef_trailing_", fLayerToCalib, fStripToCalib, thr);
-    getStatistics().createHistogram( new TH1F(histo_name_Ref_t, histo_name_Ref_t, 1000, -100., 100.) );
-    //
-  }
+  createHistograms();
   INFO("#############");
   INFO("CALIB_INIT: INITIALIZATION DONE!");
   INFO("#############");
@@ -126,8 +105,8 @@ bool TimeCalibration::loadOptions()
     return false;
   }
 
-  if (isOptionSet(opts, fConstantsLoadingFlag)) {
-    flag_corr = getOptionAsInt(opts, fConstantsLoadingFlag);
+  if (isOptionSet(opts, fIsCorrectionOptionName)) {
+    fIsCorrection = getOptionAsBool(opts, fIsCorrectionOptionName);
   } else {
     return false;
   }
@@ -142,11 +121,36 @@ bool TimeCalibration::loadOptions()
 
 //------ Temporary file name(the same as the name of file for CalibLoader
   if (isOptionSet(opts, fTmpOutFile)) {
-    fOutputFileTmp = getOptionAsString(opts, fTmpOutFile);
+    fTimeConstantsCalibFileNameTmp = getOptionAsString(opts, fTmpOutFile);
   } else {
     return false;
   }
   return true;
+}
+
+void TimeCalibration::createHistograms()
+{
+  for (int thr = 1; thr <= 4; thr++) { // loop over thresholds
+
+//histos for leading edge
+//		  const char * histo_name_l = formatUniqueSlotDescription(scin.at()->getBarrelSlot(), thr, "timeDiffAB_leading_");
+//
+    const char* histo_name_l = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffAB_leading_", fLayerToCalib, fStripToCalib, thr);
+    getStatistics().createHistogram( new TH1F(histo_name_l, histo_name_l, 400, -20., 20.) );
+    //
+//histograms for leading edge refference detector time difference
+    const char* histo_name_Ref_l = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffRef_leading_", fLayerToCalib, fStripToCalib, thr);
+    getStatistics().createHistogram( new TH1F(histo_name_Ref_l, histo_name_Ref_l, 800, -80., 80.) );
+    //
+//histos for trailing edge
+    const char* histo_name_t = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffAB_trailing_", fLayerToCalib, fStripToCalib, thr);
+    getStatistics().createHistogram( new TH1F(histo_name_t, histo_name_t, 400, -20., 20.) );
+    //
+//histograms for leading edge refference detector time difference
+    const char* histo_name_Ref_t = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffRef_trailing_", fLayerToCalib, fStripToCalib, thr);
+    getStatistics().createHistogram( new TH1F(histo_name_Ref_t, histo_name_Ref_t, 1000, -100., 100.) );
+    //
+  }
 }
 
 
@@ -419,7 +423,7 @@ void TimeCalibration::saveParametersToFile(const std::string& filename)
 {
   time_t local_time;
   std::ofstream output;
-  output.open(fOutputFile, std::ios::app); //open the final output file in append mode
+  output.open(fTimeConstantsCalibFileName, std::ios::app); //open the final output file in append mode
   if (output.tellp() == 0) {             //if the file is empty/new write the header
     output << "# Time calibration constants" << std::endl;
     output << "# For side A we apply only the correction from refference detector, for side B the correction is equal to the sum of the A-B" << std::endl;
@@ -434,8 +438,8 @@ void TimeCalibration::saveParametersToFile(const std::string& filename)
 
   std::ofstream results_fit;
   std::fstream results_fitTmp;
-  results_fit.open(fOutputFile, std::ios::app);
-  results_fitTmp.open(fOutputFileTmp, std::ios::app);//out);
+  results_fit.open(fTimeConstantsCalibFileName, std::ios::app);
+  results_fitTmp.open(fTimeConstantsCalibFileNameTmp, std::ios::app);//out);
   float CAl[5] = {0., 0., 0., 0., 0.};
   float SigCAl[5] = {0., 0., 0., 0., 0.};
   float CAt[5] =  {0., 0., 0., 0., 0.};
