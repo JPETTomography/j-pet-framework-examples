@@ -1,5 +1,5 @@
 /*
- *  @copyright Copyright 2016 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -215,7 +215,7 @@ bool TimeCalibration::terminate()
 // so that they are available to the consecutive modules
 //	getAuxilliaryData().createMap("timeDiffAB mean values");
 //
-saveParametersToFile("");
+  saveParametersToFile("");
 //create output txt file with calibration parameters
 //
   return true;
@@ -266,7 +266,9 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
         // fill the appropriate histogram
         const char* histo_name_l = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffAB_leading_");
         auto hist = getStatistics().getHisto1D(histo_name_l);
-        getStatistics().getHisto1D(histo_name_l)->Fill( timeDiffAB_l);
+        if (hist) {
+          getStatistics().getHisto1D(histo_name_l)->Fill( timeDiffAB_l);
+        }
 //
 //take minimum time difference between Ref and Scint
         timeDiffLmin = 10000000000000.;
@@ -278,8 +280,11 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
           }
         }
         const char* histo_name_Ref_l = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffRef_leading_");
+        hist = getStatistics().getHisto1D(histo_name_Ref_l );
         if (timeDiffTmin < 100.) {
-          getStatistics().getHisto1D(histo_name_Ref_l)->Fill(timeDiffLmin);
+          if (hist) {
+            getStatistics().getHisto1D(histo_name_Ref_l)->Fill(timeDiffLmin);
+          }
         }
       }
     }
@@ -295,7 +300,10 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
         double timeDiffAB_t = (trail_times_B[thr] / 1000. + CBtCor[thr]) - (trail_times_A[thr] / 1000. + CAtCor[thr]); // we want the plots in ns instead of ps
         //fill the appropriate histogram
         const char* histo_name_t = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffAB_trailing_");
-        getStatistics().getHisto1D(histo_name_t)->Fill( timeDiffAB_t);
+        auto hist = getStatistics().getHisto1D(histo_name_t);
+        if (hist) {
+          getStatistics().getHisto1D(histo_name_t)->Fill( timeDiffAB_t);
+        }
 //
 //taken minimal time difference between Ref and Scint
         timeDiffTmin = 10000000000000.;
@@ -307,8 +315,11 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
           }
         }
         const char* histo_name_Ref_t = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffRef_trailing_");
+        hist = getStatistics().getHisto1D(histo_name_Ref_t);
         if (timeDiffTmin < 100.) {
-          getStatistics().getHisto1D(histo_name_Ref_t)->Fill(timeDiffTmin);
+          if (hist) {
+            getStatistics().getHisto1D(histo_name_Ref_t)->Fill(timeDiffTmin);
+          }
         }
       }
     }
