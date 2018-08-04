@@ -352,6 +352,14 @@ bool TimeCalibration::isInChosenStrip(const JPetHit& hit) const
 
 void TimeCalibration::loadFileWithParameters(const std::string& filename)
 {
+  float sigma_peak_Ref_lBTmp[5] = {0., 0., 0., 0., 0.};
+  float sigma_peak_Ref_tBTmp[5] = {0., 0., 0., 0., 0.};
+  float chi2_ndf_Ref_lBTmp[5] = {0., 0., 0., 0., 0.};
+  float chi2_ndf_Ref_tBTmp[5] = {0., 0., 0., 0., 0.};
+  float sigma_peak_Ref_lATmp[5] = {0., 0., 0., 0., 0.};
+  float sigma_peak_Ref_tATmp[5] = {0., 0., 0., 0., 0.};
+  float chi2_ndf_Ref_lATmp[5] = {0., 0., 0., 0., 0.};
+  float chi2_ndf_Ref_tATmp[5] = {0., 0., 0., 0., 0.};
   time_t local_time;
 
   std::fstream outputtmp;

@@ -80,14 +80,7 @@ protected:
   float SigCBlTmp[5] = {0., 0., 0., 0., 0.};
   float CBtTmp[5]    = {0., 0., 0., 0., 0.};
   float SigCBtTmp[5] = {0., 0., 0., 0., 0.};
-  float sigma_peak_Ref_lBTmp[5] = {0., 0., 0., 0., 0.};
-  float sigma_peak_Ref_tBTmp[5] = {0., 0., 0., 0., 0.};
-  float chi2_ndf_Ref_lBTmp[5] = {0., 0., 0., 0., 0.};
-  float chi2_ndf_Ref_tBTmp[5] = {0., 0., 0., 0., 0.};
-  float sigma_peak_Ref_lATmp[5] = {0., 0., 0., 0., 0.};
-  float sigma_peak_Ref_tATmp[5] = {0., 0., 0., 0., 0.};
-  float chi2_ndf_Ref_lATmp[5] = {0., 0., 0., 0., 0.};
-  float chi2_ndf_Ref_tATmp[5] = {0., 0., 0., 0., 0.};
+
   float CAtCor[5] = {0., 0., 0., 0., 0.};
   float CBtCor[5] = {0., 0., 0., 0., 0.};
   float CAlCor[5] = {0., 0., 0., 0., 0.};
