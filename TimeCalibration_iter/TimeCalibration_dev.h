@@ -39,6 +39,8 @@ public:
   virtual bool terminate() override;
 
 protected:
+  static constexpr int kNumberOfThresholds = 4;
+
   void createHistograms();
   bool loadOptions();
   bool isInChosenStrip(const JPetHit& hit) const;
@@ -46,9 +48,6 @@ protected:
   void fillHistosForHit(const JPetHit& hit, const std::vector<double>& RefTimesL, const std::vector<double>& RefTimesT);
   void loadFileWithParameters(const std::string& filename);
   void saveParametersToFile(const std::string& filename);
-
-  static constexpr int kNumberOfThresholds = 4;
-
 
   /// Required options to be loaded from the json file.
   const std::string kPMIdRefOptName  = "TimeCalibration_PMIdRef_string";
@@ -72,10 +71,7 @@ protected:
   const float Cl[3] = {0., 0.1418, 0.5003};  //[ns]
   const float SigCl[3] = {0., 0.0033, 0.0033}; //[ns]
 
-  double frac_err = 0.3; //maximal fractional uncertainty of parameters accepted by calibration
-  int min_ev = 100;     //minimal number of events for a distribution to be fitted
   int Niter = 0;
-  int flag_end = 0;
 
   float CAlTmp[5]    = {0., 0., 0., 0., 0.};
   float SigCAlTmp[5] = {0., 0., 0., 0., 0.};

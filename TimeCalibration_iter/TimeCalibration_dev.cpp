@@ -110,7 +110,7 @@ bool TimeCalibration::loadOptions()
 
 void TimeCalibration::createHistograms()
 {
-  for (int thr = 1; thr <= kNumberOfThresholds; thr++) { // loop over thresholds
+  for (int thr = 1; thr <= kNumberOfThresholds; thr++) {
 
 //histos for leading edge
 //		  const char * histo_name_l = formatUniqueSlotDescription(scin.at()->getBarrelSlot(), thr, "timeDiffAB_leading_");
@@ -341,6 +341,7 @@ bool TimeCalibration::isInChosenStrip(const JPetHit& hit) const
 
 void TimeCalibration::loadFileWithParameters(const std::string& filename)
 {
+  int flag_end = 0;
   float sigma_peak_Ref_lBTmp[5] = {0., 0., 0., 0., 0.};
   float sigma_peak_Ref_tBTmp[5] = {0., 0., 0., 0., 0.};
   float chi2_ndf_Ref_lBTmp[5] = {0., 0., 0., 0., 0.};
@@ -394,6 +395,10 @@ void TimeCalibration::loadFileWithParameters(const std::string& filename)
 
 void TimeCalibration::saveParametersToFile(const std::string& filename)
 {
+  int min_ev = 100;     //minimal number of events for a distribution to be fitted
+  double frac_err = 0.3; //maximal fractional uncertainty of parameters accepted by calibration
+  int flag_end = 0;
+
   time_t local_time;
   std::ofstream output(filename, std::ios::app); //open the final output file in append mode
   if (output.tellp() == 0) {             //if the file is empty/new write the header
@@ -436,7 +441,7 @@ void TimeCalibration::saveParametersToFile(const std::string& filename)
   double sigma_peak_Ref_t[5] = {0., 0., 0., 0., 0.};
   double chi2_ndf_Ref_t[5] = {0., 0., 0., 0., 0.};
   //
-  for (int thr = 1; thr <= 4; thr++) {
+  for (int thr = 1; thr <= kNumberOfThresholds; thr++) {
 //scintillators
 //
     const char* histo_name_l = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffAB_leading_", fLayerToCalib, fStripToCalib, thr);
