@@ -65,7 +65,7 @@ bool TimeCalibration::init()
     //since this is much faster than the full analysis done starting from unpacker stage.
     //If You really want to use corrections at that level first uncomment in main.cpp the CalibLoader module
     //and change fIsCorrection to false.
-    for (int i = 1; i < 5; i++) {
+    for (int i = 1; i <= kNumberOfThresholds ; i++) {
       CAtCor[i] = CAtTmp[i];
       CBtCor[i] = CBtTmp[i];
       CAlCor[i] = CAlTmp[i];
@@ -82,7 +82,7 @@ bool TimeCalibration::init()
 bool TimeCalibration::loadOptions()
 {
   auto opts = fParams.getOptions();
-  std::vector<std::string> requiredOptions = {kTOTCutLowOptName, kTOTCutHighOptName, kMainStripOptName, kLoadConstantsOptName, kMaxIterOptName, kCalibFileTmpOptName , kCalibFileFinalOptName };
+  std::vector<std::string> requiredOptions = {kTOTCutLowOptName, kTOTCutHighOptName, kMainStripOptName, kLoadConstantsOptName, kMaxIterOptName, kCalibFileTmpOptName , kCalibFileFinalOptName, kPMIdRefOptName };
   auto allOptionsExists = std::all_of(requiredOptions.begin(),
                                       requiredOptions.end(),
                                       [&opts](std::string optName)->bool {return isOptionSet(opts, optName); });
@@ -100,6 +100,8 @@ bool TimeCalibration::loadOptions()
     fMaxIter  = getOptionAsInt(opts, kMaxIterOptName);
 //------ Temporary file name(the same as the name of file for CalibLoader
     fTimeConstantsCalibFileNameTmp = getOptionAsString(opts, kCalibFileTmpOptName );
+//------ Reference photomultiplier identifier
+    kPMIdRef = getOptionAsInt(opts, kPMIdRefOptName);
     return true;
   } else {
     return false;
@@ -108,7 +110,7 @@ bool TimeCalibration::loadOptions()
 
 void TimeCalibration::createHistograms()
 {
-  for (int thr = 1; thr <= 4; thr++) { // loop over thresholds
+  for (int thr = 1; thr <= kNumberOfThresholds; thr++) { // loop over thresholds
 
 //histos for leading edge
 //		  const char * histo_name_l = formatUniqueSlotDescription(scin.at()->getBarrelSlot(), thr, "timeDiffAB_leading_");
@@ -131,31 +133,20 @@ void TimeCalibration::createHistograms()
   }
 }
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 bool TimeCalibration::exec()
 {
   double RefTimeLead[4] = { -1.e43, -1.e43, -1.e43, -1.e43};
   double RefTimeTrail[4] = { -1.e43, -1.e43, -1.e43, -1.e43};
-  std::vector <JPetHit> fhitsCalib;
-  std::vector <double> fRefTimesL;
-  std::vector <double> fRefTimesT;
+  std::vector <JPetHit> histCalib;
+  std::vector <double> refTimesL;
+  std::vector <double> refTimesT;
 
-  const int kPMidRef = 385;
-  //const int kPMidRef = 193;
-  //getting the data from event in propriate format
   if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     auto n = timeWindow->getNumberOfEvents();
-    //
     for (auto i = 0u; i < n; ++i) {
       const JPetHit& hit = dynamic_cast<const JPetHit&>(timeWindow->operator[](i));
       int PMid = hit.getSignalB().getRecoSignal().getRawSignal().getPM().getID();
-      //
-      //taking refference detector hits times (scin=193, Pmt=385)
-      //
-
-      if (PMid == kPMidRef) {
+      if (PMid == kPMIdRef) {
         auto lead_times_B = hit.getSignalB().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading);
         auto trail_times_B = hit.getSignalB().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Trailing);
         //
@@ -164,31 +155,29 @@ bool TimeCalibration::exec()
           RefTimeLead[thr] = thr_time_pair.second;
 
         }
-
         for (auto& thr_time_pair : trail_times_B) {
           int thr = thr_time_pair.first;
           RefTimeTrail[thr] = thr_time_pair.second;
         }
-        fRefTimesL.push_back(RefTimeLead[1] / 1000.); //We divide here to change ps to ns to omitt doing it later
-        fRefTimesT.push_back(RefTimeTrail[1] / 1000.);
+        refTimesL.push_back(RefTimeLead[1] / 1000.); //We divide here to change ps to ns to omitt doing it later
+        refTimesT.push_back(RefTimeTrail[1] / 1000.);
       } else {
         if (isInChosenStrip(hit)) {
-          fhitsCalib.push_back(hit);
+          histCalib.push_back(hit);
         }
       }
     }
     //
-    for (auto i = fhitsCalib.begin(); i != fhitsCalib.end(); i++) {
-      fillHistosForHit(*i, fRefTimesL, fRefTimesT);
+    for (auto i = histCalib.begin(); i != histCalib.end(); i++) {
+      fillHistosForHit(*i, refTimesL, refTimesT);
     }
-    fhitsCalib.clear();
-    fRefTimesL.clear();
-    fRefTimesT.clear();
+    histCalib.clear();
+    refTimesL.clear();
+    refTimesT.clear();
   }
 
   return true;
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool TimeCalibration::terminate()
 {
@@ -197,7 +186,7 @@ bool TimeCalibration::terminate()
 // so that they are available to the consecutive modules
 //	getAuxilliaryData().createMap("timeDiffAB mean values");
 //
-  saveParametersToFile("");
+  saveParametersToFile(fTimeConstantsCalibFileName);
 //create output txt file with calibration parameters
 //
   return true;
@@ -362,30 +351,29 @@ void TimeCalibration::loadFileWithParameters(const std::string& filename)
   float chi2_ndf_Ref_tATmp[5] = {0., 0., 0., 0., 0.};
   time_t local_time;
 
-  std::fstream outputtmp;
-  std::string zonk1;
   int LayerToCalibTmp = 0;
   int StripToCalibTmp = 0;
   char SideTmp = 0;
   int thrTmp = 0;
+  std::string line;
   //
-  outputtmp.open(filename, std::ios::in | std::ios::out);
-  if (outputtmp.is_open()) { //if the tmp file exists read the content
+  std::fstream inFile(filename, std::ios::in | std::ios::out);
+  if (inFile.is_open()) { //if the tmp file exists read the content
     //read the whole file to load the latest constants fitted previously. Not smart but works..
-    while (getline(outputtmp, zonk1)) {
+    while (getline(inFile, line)) {
 
       for (int i = 1; i < 5; i++) {
         //
-        outputtmp >> LayerToCalibTmp >> StripToCalibTmp >> SideTmp >> thrTmp >> CAlTmp[i] >> SigCAlTmp[i] >> CAtTmp[i] >> SigCAtTmp[i]
-                  >> sigma_peak_Ref_lATmp[i] >> sigma_peak_Ref_tATmp[i] >> chi2_ndf_Ref_lATmp[i] >> chi2_ndf_Ref_tATmp[i] >> Niter >> flag_end;
+        inFile >> LayerToCalibTmp >> StripToCalibTmp >> SideTmp >> thrTmp >> CAlTmp[i] >> SigCAlTmp[i] >> CAtTmp[i] >> SigCAtTmp[i]
+               >> sigma_peak_Ref_lATmp[i] >> sigma_peak_Ref_tATmp[i] >> chi2_ndf_Ref_lATmp[i] >> chi2_ndf_Ref_tATmp[i] >> Niter >> flag_end;
         //
         INFO(std::to_string(LayerToCalibTmp) + " " + std::to_string(StripToCalibTmp) + " " + SideTmp + " " + std::to_string(thrTmp)
              + " " + std::to_string(CAlTmp[i]) + " " + std::to_string(SigCAlTmp[i]) + " " + std::to_string(CAtTmp[i]) + " " + std::to_string(SigCAtTmp[i])
              + " " + std::to_string(sigma_peak_Ref_lATmp[i]) + " " + std::to_string(sigma_peak_Ref_tATmp[i]) + " " + std::to_string(chi2_ndf_Ref_lATmp[i])
              + " " + std::to_string(chi2_ndf_Ref_tATmp[i]));
         //
-        outputtmp >> LayerToCalibTmp >> StripToCalibTmp >> SideTmp >> thrTmp >> CBlTmp[i] >> SigCBlTmp[i] >> CBtTmp[i] >> SigCBtTmp[i]
-                  >> sigma_peak_Ref_lBTmp[i] >> sigma_peak_Ref_tBTmp[i] >> chi2_ndf_Ref_lBTmp[i] >> chi2_ndf_Ref_tBTmp[i] >> Niter >> flag_end;
+        inFile >> LayerToCalibTmp >> StripToCalibTmp >> SideTmp >> thrTmp >> CBlTmp[i] >> SigCBlTmp[i] >> CBtTmp[i] >> SigCBtTmp[i]
+               >> sigma_peak_Ref_lBTmp[i] >> sigma_peak_Ref_tBTmp[i] >> chi2_ndf_Ref_lBTmp[i] >> chi2_ndf_Ref_tBTmp[i] >> Niter >> flag_end;
         //
         INFO(std::to_string(LayerToCalibTmp) + " " + std::to_string(StripToCalibTmp) + " " + SideTmp + " " + std::to_string(thrTmp)
              + " " + std::to_string(CBlTmp[i]) + " " + std::to_string(SigCBlTmp[i]) + " " + std::to_string(CBtTmp[i]) + " " + std::to_string(SigCBtTmp[i])
@@ -397,9 +385,8 @@ void TimeCalibration::loadFileWithParameters(const std::string& filename)
     INFO("ITERATION NUMBER: " + std::to_string(Niter));
     INFO("Temporary file " + filename + " opened and read at " + ctime(&local_time));
   } else {
-    std::ofstream outputtmpnew;
-    outputtmp.open(filename);
-    outputtmp << "# Calibration started on " << ctime(&local_time);
+    inFile.open(filename);
+    inFile << "# Calibration started on " << ctime(&local_time);
     INFO("Temporary file " + filename + " opened at first iteration at " + ctime(&local_time));
     Niter = 1;
   }
@@ -408,8 +395,7 @@ void TimeCalibration::loadFileWithParameters(const std::string& filename)
 void TimeCalibration::saveParametersToFile(const std::string& filename)
 {
   time_t local_time;
-  std::ofstream output;
-  output.open(fTimeConstantsCalibFileName, std::ios::app); //open the final output file in append mode
+  std::ofstream output(filename, std::ios::app); //open the final output file in append mode
   if (output.tellp() == 0) {             //if the file is empty/new write the header
     output << "# Time calibration constants" << std::endl;
     output << "# For side A we apply only the correction from refference detector, for side B the correction is equal to the sum of the A-B" << std::endl;
