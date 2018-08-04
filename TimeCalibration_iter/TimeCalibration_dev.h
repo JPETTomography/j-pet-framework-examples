@@ -56,13 +56,13 @@ protected:
   const std::string kCalibFileTmpOptName = "TimeCalibration_OutputFileTmp_string";
   const std::string kCalibFileFinalOptName = "TimeCalibration_OutputFileFinal_string";
 
-  float TOTcut[2] = { -300000000., 300000000.}; //TOT cuts for slot hits (sum of TOTs from both sides)
+  std::array<float,2> TOTcut{{ -300000000., 300000000.}}; //TOT cuts for slot hits (sum of TOTs from both sides)
   int fLayerToCalib = 0; //Layer of calibrated slot
   int fStripToCalib = 0; //Slot to be calibrated
-  bool  fIsCorrection = true; //Flag for choosing the correction of times at the level of calibration module (use only if the calibration loader is not used)
-  int   NiterMax = 1;   //Max number of iterations for calibration of one strip
+  bool fIsCorrection = true; //Flag for choosing the correction of times at the level of calibration module (use only if the calibration loader is not used)
+  int fMaxIter = 1;   //Max number of iterations for calibration of one strip
   std::string fTimeConstantsCalibFileName = "TimeConstantsCalib.txt";
-  std::string fTimeConstantsCalibFileNameTmp = "TimeConstants.txt";
+  std::string fTimeConstantsCalibFileNameTmp = "TimeConstantsCalibTmp.txt";
 
   const float Cl[3] = {0., 0.1418, 0.5003};  //[ns]
   const float SigCl[3] = {0., 0.0033, 0.0033}; //[ns]

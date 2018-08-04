@@ -97,7 +97,7 @@ bool TimeCalibration::loadOptions()
     fStripToCalib = code % 100; // strip number
     fIsCorrection = getOptionAsBool(opts, kLoadConstantsOptName);
 //------ Max number of iterations from config (json) file
-    NiterMax  = getOptionAsInt(opts, kMaxIterOptName);
+    fMaxIter  = getOptionAsInt(opts, kMaxIterOptName);
 //------ Temporary file name(the same as the name of file for CalibLoader
     fTimeConstantsCalibFileNameTmp = getOptionAsString(opts, kCalibFileTmpOptName );
     return true;
