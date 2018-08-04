@@ -39,6 +39,7 @@ public:
   virtual bool terminate() override;
 
 protected:
+  void createHistograms();
   bool loadOptions();
   bool isInChosenStrip(const JPetHit& hit) const;
   const char* formatUniqueSlotDescription(const JPetBarrelSlot& slot, int threshold, const char* prefix);
@@ -46,19 +47,30 @@ protected:
   void loadFileWithParameters(const std::string& filename);
   void saveParametersToFile(const std::string& filename);
 
-  std::string fOutputFile = "TimeConstantsCalib.txt";
-  std::string fOutputFileTmp = "TimeConstants.txt";
-  const std::string fTmpOutFile = "TimeCalibLoader_ConfigFile";
-  const float Cl[3] = {0., 0.1418, 0.5003};  //[ns]
-  const float SigCl[3] = {0., 0.0033, 0.0033}; //[ns]
+  /// Required options to be loaded from the json file.
+  const std::string kTOTCutLowOptName = "TimeCalibration_TOTCutLow_float";
+  const std::string kTOTCutHighOptName  = "TimeCalibration_TOTCutHigh_float";
+  const std::string kMainStripOptName = "TimeCalibration_MainStrip_int";
+  const std::string kLoadConstantsOptName  = "TimeCalibration_LoadConstants_bool";
+  const std::string kMaxIterOptName = "TimeCalibration_MaxIteration_int";
+  const std::string kCalibFileTmpOptName = "TimeCalibration_OutputFileTmp_string";
+  const std::string kCalibFileFinalOptName = "TimeCalibration_OutputFileFinal_string";
+
   float TOTcut[2] = { -300000000., 300000000.}; //TOT cuts for slot hits (sum of TOTs from both sides)
-  const std::string fTOTcutLow  = "TOTcutLow_float";
-  const std::string fTOTcutHigh  = "TOTcutHigh_float";
-  const std::string kMainStripKey = "TimeWindowCreator_MainStrip_int";
-  double frac_err = 0.3; //maximal fractional uncertainty of parameters accepted by calibration
-  int min_ev = 100;     //minimal number of events for a distribution to be fitted
   int fLayerToCalib = 0; //Layer of calibrated slot
   int fStripToCalib = 0; //Slot to be calibrated
+  bool  fIsCorrection = true; //Flag for choosing the correction of times at the level of calibration module (use only if the calibration loader is not used)
+  int   NiterMax = 1;   //Max number of iterations for calibration of one strip
+  std::string fTimeConstantsCalibFileName = "TimeConstantsCalib.txt";
+  std::string fTimeConstantsCalibFileNameTmp = "TimeConstants.txt";
+
+  const float Cl[3] = {0., 0.1418, 0.5003};  //[ns]
+  const float SigCl[3] = {0., 0.0033, 0.0033}; //[ns]
+
+  double frac_err = 0.3; //maximal fractional uncertainty of parameters accepted by calibration
+  int min_ev = 100;     //minimal number of events for a distribution to be fitted
+  int Niter = 0;
+  int flag_end = 0;
 
   float CAlTmp[5]    = {0., 0., 0., 0., 0.};
   float SigCAlTmp[5] = {0., 0., 0., 0., 0.};
@@ -76,16 +88,11 @@ protected:
   float sigma_peak_Ref_tATmp[5] = {0., 0., 0., 0., 0.};
   float chi2_ndf_Ref_lATmp[5] = {0., 0., 0., 0., 0.};
   float chi2_ndf_Ref_tATmp[5] = {0., 0., 0., 0., 0.};
-  int Niter = 0;
-  int flag_end = 0;
   float CAtCor[5] = {0., 0., 0., 0., 0.};
   float CBtCor[5] = {0., 0., 0., 0., 0.};
   float CAlCor[5] = {0., 0., 0., 0., 0.};
   float CBlCor[5] = {0., 0., 0., 0., 0.};
-  int   flag_corr = 1; //Flag for choosing the correction of times at the level of calibration module (use only if the calibration loader is not used)
-  const std::string fConstantsLoadingFlag  = "ConstantsLoadingFlag";
-  int   NiterMax = 1;   //Max number of iterations for calibration of one strip
-  const std::string fMaxIterationNumber = "MaxIterationNumber";
+
   bool CheckIfExitIter(float CAl[], float  SigCAl[], float CBl[], float  SigCBl[], float CAt[], float SigCAt[], float CBt[], float SigCBt[], int Niter, int NiterM );
   std::unique_ptr<JPetGeomMapping> fMapper;
   JPetTimer fTimer;

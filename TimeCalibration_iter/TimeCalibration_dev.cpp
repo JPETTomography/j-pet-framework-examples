@@ -82,50 +82,28 @@ bool TimeCalibration::init()
 bool TimeCalibration::loadOptions()
 {
   auto opts = fParams.getOptions();
-
+  std::vector<std::string> requiredOptions = {kTOTCutLowOptName, kTOTCutHighOptName, kMainStripOptName, kLoadConstantsOptName, kMaxIterOptName, kCalibFileTmpOptName , kCalibFileFinalOptName };
+  auto allOptionsExists = std::all_of(requiredOptions.begin(),
+                                      requiredOptions.end(),
+                                      [&opts](std::string optName)->bool {return isOptionSet(opts, optName); });
+  if (allOptionsExists) {
 //------Lower TOT cut from config (json) file
-  if (isOptionSet(opts, fTOTcutLow)) {
-    TOTcut[0] = getOptionAsFloat(opts, fTOTcutLow);
-  } else {
-    return false;
-  }
+    TOTcut[0] = getOptionAsFloat(opts, kTOTCutLowOptName);
 //------ Higher TOT cut from config (json) file
-  if (isOptionSet(opts, fTOTcutHigh)) {
-    TOTcut[1] = getOptionAsFloat(opts, fTOTcutHigh);
-  } else {
-    return false;
-  }
-
+    TOTcut[1] = getOptionAsFloat(opts, kTOTCutHighOptName);
 //------ Packed strip and layer number from config (json) file
-  if (isOptionSet(opts, kMainStripKey)) {
-    int code = getOptionAsInt(opts, kMainStripKey);
+    int code = getOptionAsInt(opts, kMainStripOptName);
     fLayerToCalib = code / 100; // layer number
     fStripToCalib = code % 100; // strip number
-  } else {
-    return false;
-  }
-
-  if (isOptionSet(opts, fIsCorrectionOptionName)) {
-    fIsCorrection = getOptionAsBool(opts, fIsCorrectionOptionName);
-  } else {
-    return false;
-  }
-
-
+    fIsCorrection = getOptionAsBool(opts, kLoadConstantsOptName);
 //------ Max number of iterations from config (json) file
-  if (isOptionSet(opts, fMaxIterationNumber)) {
-    NiterMax  = getOptionAsInt(opts, fMaxIterationNumber);
-  } else {
-    return false;
-  }
-
+    NiterMax  = getOptionAsInt(opts, kMaxIterOptName);
 //------ Temporary file name(the same as the name of file for CalibLoader
-  if (isOptionSet(opts, fTmpOutFile)) {
-    fTimeConstantsCalibFileNameTmp = getOptionAsString(opts, fTmpOutFile);
+    fTimeConstantsCalibFileNameTmp = getOptionAsString(opts, kCalibFileTmpOptName );
+    return true;
   } else {
     return false;
   }
-  return true;
 }
 
 void TimeCalibration::createHistograms()
