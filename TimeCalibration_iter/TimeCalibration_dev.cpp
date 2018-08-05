@@ -14,23 +14,20 @@
  */
 
 #include "TimeCalibration_dev.h"
-#include <iostream>
-#include <fstream>
-#include <cstdlib>
-#include <string>
-#include <sstream>
-#include <algorithm>
-#include <cctype>
-#include "TF1.h"
-#include "TString.h"
-#include <TDirectory.h>
-#include <vector>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
 #include <JPetOptionsTools/JPetOptionsTools.h>
-#include <JPetOptionsGenerator/JPetOptionsTypeHandler.h>
 #include <JPetCommonTools/JPetCommonTools.h>
+
+#include <fstream>
+#include <algorithm>
+
+#include <cstdlib>
+#include <cstdio>
+#include <cctype>
+
+#include <TF1.h>
+#include <TString.h>
+#include <TDirectory.h>
+
 using namespace jpet_options_tools;
 using namespace std;
 
@@ -84,7 +81,7 @@ bool TimeCalibration::init()
 bool TimeCalibration::loadOptions()
 {
   auto opts = fParams.getOptions();
-  std::vector<std::string> requiredOptions = {kTOTCutLowOptName, kTOTCutHighOptName, kMainStripOptName, kLoadConstantsOptName, kMaxIterOptName, kCalibFileTmpOptName , kCalibFileFinalOptName, kPMIdRefOptName };
+  std::vector<std::string> requiredOptions = {kTOTCutLowOptName, kTOTCutHighOptName, kMainStripOptName, kLoadConstantsOptName, kCalibFileTmpOptName, kCalibFileFinalOptName, kPMIdRefOptName };
 
   auto allOptionsExist = std::all_of(requiredOptions.begin(),
                                      requiredOptions.end(),
@@ -105,8 +102,6 @@ bool TimeCalibration::loadOptions()
     fLayerToCalib = code / 100;
     fStripToCalib = code % 100;
     fIsCorrection = getOptionAsBool(opts, kLoadConstantsOptName);
-//------ Max number of iterations from config (json) file
-    fMaxIter  = getOptionAsInt(opts, kMaxIterOptName);
 //------ Temporary file name
     fTimeConstantsCalibFileNameTmp = getOptionAsString(opts, kCalibFileTmpOptName );
 //------ Final file name(the same as the name of file for CalibLoader
@@ -187,11 +182,6 @@ bool TimeCalibration::exec()
 
 bool TimeCalibration::terminate()
 {
-
-// save timeDiffAB mean values for each slot and each threshold in a JPetAuxilliaryData object
-// so that they are available to the consecutive modules
-//	getAuxilliaryData().createMap("timeDiffAB mean values");
-//
   fitAndSaveParametersToFile(fTimeConstantsCalibFileName, fTimeConstantsCalibFileNameTmp);
   return true;
 }
@@ -203,7 +193,6 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
 
   auto lead_times_B = hit.getSignalB().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading);
   auto trail_times_B = hit.getSignalB().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Trailing);
-//
 //-----------TOT calculation for the slot hit
   float TOT_A = 0.;
   float TOT_B = 0.;
@@ -224,10 +213,8 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
     }
   }
   float tTOT = (TOT_A + TOT_B) / 1000.; //total TOT in ns
-//
 //----------cut the hit if TOT is out of accepted range (cuts given in ns)
   if (tTOT >= TOTcut[0] && tTOT <= TOTcut[1]) {
-//
 //leading edge
     for (auto& thr_time_pair : lead_times_A) {
 
@@ -243,7 +230,6 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
         if (hist) {
           getStatistics().getHisto1D(histo_name_l)->Fill( timeDiffAB_l);
         }
-//
 //take minimum time difference between Ref and Scint
         timeDiffLmin = 10000000000000.;
         for (unsigned int i = 0; i < refTimesL.size(); i++) {
@@ -278,7 +264,6 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
         if (hist) {
           getStatistics().getHisto1D(histo_name_t)->Fill( timeDiffAB_t);
         }
-//
 //taken minimal time difference between Ref and Scint
         timeDiffTmin = 10000000000000.;
         for (unsigned int i = 0; i < refTimesT.size(); i++) {
@@ -303,34 +288,10 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
 
 const char* TimeCalibration::formatUniqueSlotDescription(const JPetBarrelSlot& slot, int threshold, const char* prefix = "")
 {
+  assert(fMapper);
   int slot_number =  fMapper->getSlotNumber(slot);
   int layer_number = fMapper->getLayerNumber(slot.getLayer());
-
   return Form("%slayer_%d_slot_%d_thr_%d", prefix, layer_number, slot_number, threshold);
-
-}
-
-bool TimeCalibration::CheckIfExitIter(float CAl[], float  SigCAl[], float CBl[], float  SigCBl[], float CAt[], float SigCAt[], float CBt[], float SigCBt[], int Niter, int NiterM )
-{
-  int exit_flag = 0.;
-  bool zonk = false;
-  //
-  //Function checking if we should finish the iterative calibration. Returns true if the maximum iteration number is reached (given by user)
-  // For now we require that the new correction is less then its sigma for ALL trhresholds and edges
-  //
-  if (Niter == NiterM) {
-    zonk = true;
-  } else {
-    for (int thr = 1; thr <= 4; thr++) {
-      if ( abs(CAl[thr]) < SigCAl[thr] && abs(CBl[thr]) < SigCBl[thr] && abs(CAt[thr]) < SigCAt[thr] && abs(CBt[thr]) < SigCBt[thr]) {
-        exit_flag++;
-      }
-    }
-    if (exit_flag == 4) {
-      zonk = true;
-    }
-  }
-  return zonk;
 }
 
 bool TimeCalibration::isInChosenStrip(const JPetHit& hit) const
@@ -353,7 +314,6 @@ void TimeCalibration::loadFileWithParameters(const std::string& filename)
   float sigma_peak_Ref_tATmp[5] = {0., 0., 0., 0., 0.};
   float chi2_ndf_Ref_lATmp[5] = {0., 0., 0., 0., 0.};
   float chi2_ndf_Ref_tATmp[5] = {0., 0., 0., 0., 0.};
-  time_t local_time;
 
   int LayerToCalibTmp = 0;
   int StripToCalibTmp = 0;
@@ -362,7 +322,8 @@ void TimeCalibration::loadFileWithParameters(const std::string& filename)
   std::string line;
 
   std::fstream inFile(filename, std::ios::in | std::ios::out);
-  if (inFile.is_open()) { //if the tmp file exists read the content
+  if (inFile.is_open()) {
+    //if the tmp file exists read the content
     //read the whole file to load the latest constants fitted previously. Not smart but works..
     while (getline(inFile, line)) {
 
@@ -387,11 +348,11 @@ void TimeCalibration::loadFileWithParameters(const std::string& filename)
     }
     Niter = Niter + 1; //Increment the iteration number if the file was not empty
     INFO("ITERATION NUMBER: " + std::to_string(Niter));
-    INFO("Temporary file " + filename + " opened and read at " + ctime(&local_time));
+    INFO("Temporary file " + filename + " opened and read at " + JPetCommonTools::currentDateTime());
   } else {
     inFile.open(filename);
-    inFile << "# Calibration started on " << ctime(&local_time);
-    INFO("Temporary file " + filename + " opened at first iteration at " + ctime(&local_time));
+    inFile << "# Calibration started on " << JPetCommonTools::currentDateTime();
+    INFO("Temporary file " + filename + " opened at first iteration at " + JPetCommonTools::currentDateTime());
     Niter = 1;
   }
 }
@@ -405,7 +366,7 @@ void TimeCalibration::fitAndSaveParametersToFile(const std::string& filename, co
   TimeCalibration::writeHeader(filename);
 
   std::ofstream results_fit(filename, std::ios::app);
-  std::fstream results_fitTmp(tmpFilename, std::ios::in);
+  std::fstream results_fitTmp(tmpFilename, std::ios::out);
 
 //side A
   float CAl[5] = {0., 0., 0., 0., 0.};
@@ -494,12 +455,10 @@ void TimeCalibration::fitAndSaveParametersToFile(const std::string& filename, co
 //fit reference detector
       int highestBin_Ref_l = histoToSave_Ref_leading->GetBinCenter(histoToSave_Ref_leading->GetMaximumBin());
       assert( histoToSave_Ref_leading->Integral() > 0);
-      //assert(highestBin_Ref_l  >=5);
       histoToSave_Ref_leading->Fit("gaus", "", "", highestBin_Ref_l - 5, highestBin_Ref_l + 5); //range for fit
       TF1* fit_Ref_l = histoToSave_Ref_leading->GetFunction("gaus");
       assert(fit_Ref_l);
       int highestBin_Ref_t = histoToSave_Ref_trailing->GetBinCenter(histoToSave_Ref_trailing->GetMaximumBin());
-      //assert(highestBin_Ref_t  >=5);
       assert( histoToSave_Ref_trailing->Integral() > 0);
       histoToSave_Ref_trailing->Fit("gaus", "", "", highestBin_Ref_t - 5, highestBin_Ref_t + 5); //range for fit
       TF1* fit_Ref_t = histoToSave_Ref_trailing->GetFunction("gaus");
@@ -614,19 +573,17 @@ void TimeCalibration::fitAndSaveParametersToFile(const std::string& filename, co
                    << "\t" << CBt[thr] << "\t" << SigCBt[thr] << "\t" << sigma_peak_l[thr]
                    << "\t" << sigma_peak_t[thr] << "\t" << chi2_ndf_l[thr] << "\t" << chi2_ndf_t[thr] << Niter << flag_end << endl;
   }
-  //}
   results_fit.close();
   results_fitTmp.close();
 }
 
 void TimeCalibration::writeHeader(const std::string& filename)
 {
-  time_t local_time;
   std::ofstream output(filename, std::ios::in);
   output << "# Time calibration constants" << std::endl;
   output << "# For side A we apply only the correction from refference detector, for side B the correction is equal to the sum of the A-B" << std::endl;
   output << "# correction and offset with respect to the refference detector. For side A we report the sigmas and chi2/ndf for fit to the time difference spectra with refference detector" << std::endl;
   output << "# while the same quality variables for fits to the A-B time difference are given for B side section" << std::endl;
   output << "# Description of the parameters: layer(1-3) | slot(1-48/96) | side(A-B) | threshold(1-4) | offset_value_leading | offset_uncertainty_leading | offset_value_trailing | offset_uncertainty_trailing | sigma_offset_leading | sigma_offset_trailing | (chi2/ndf)_leading | (chi2/ndf)_trailing" << std::endl;
-  output << "# Calibration started on " << ctime(&local_time);
+  output << "# Calibration started on " << JPetCommonTools::currentDateTime()<< std::endl;
 }

@@ -19,11 +19,12 @@
 #include <JPetTask/JPetTask.h>
 #include <JPetUserTask/JPetUserTask.h>
 #include <JPetHit/JPetHit.h>
-#include <JPetRawSignal/JPetRawSignal.h>
 #include <JPetParamManager/JPetParamManager.h>
 #include <JPetGeomMapping/JPetGeomMapping.h>
 #include <JPetTimer/JPetTimer.h>
 #include <memory>
+#include <vector>
+#include <string>
 #ifdef __CINT__
 //when cint is used instead of compiler, override word is not recognized
 //nevertheless it's needed for checking if the structure of project is correct
@@ -48,7 +49,7 @@ protected:
   void createHistograms();
   bool isInChosenStrip(const JPetHit& hit) const;
   const char* formatUniqueSlotDescription(const JPetBarrelSlot& slot, int threshold, const char* prefix);
-  void fillHistosForHit(const JPetHit& hit, const std::vector<double>& RefTimesL, const std::vector<double>& RefTimesT);
+  void fillHistosForHit(const JPetHit& hit, const std::vector<double>& refTimesL, const std::vector<double>& refTimesT);
   void fitAndSaveParametersToFile(const std::string& filename, const std::string& filenameTmp);
 
   /// Required options to be loaded from the json file.
@@ -57,7 +58,6 @@ protected:
   const std::string kTOTCutHighOptName  = "TimeCalibration_TOTCutHigh_float";
   const std::string kMainStripOptName = "TimeCalibration_MainStrip_int";
   const std::string kLoadConstantsOptName  = "TimeCalibration_LoadConstants_bool";
-  const std::string kMaxIterOptName = "TimeCalibration_MaxIteration_int";
   const std::string kCalibFileTmpOptName = "TimeCalibration_OutputFileTmp_std::string";
   const std::string kCalibFileFinalOptName = "TimeCalibration_OutputFileFinal_std::string";
 
@@ -66,11 +66,9 @@ protected:
   int fLayerToCalib = -1; //Layer of calibrated slot
   int fStripToCalib = -1; //Slot to be calibrated
   bool fIsCorrection = true; //Flag for choosing the correction of times at the level of calibration module (use only if the calibration loader is not used)
-  int fMaxIter = 1;   //Max number of iterations for calibration of one strip
   std::string fTimeConstantsCalibFileName = "TimeConstantsCalib.txt";
   std::string fTimeConstantsCalibFileNameTmp = "TimeConstantsCalibTmp.txt";
 
-  /// what is that ??
   const float Cl[3] = {0., 0.1418, 0.5003};  //[ns]
   const float SigCl[3] = {0., 0.0033, 0.0033}; //[ns]
 
@@ -92,7 +90,6 @@ protected:
   std::array<float, 5> CAlCor = {{0., 0., 0., 0., 0.}};
   std::array<float, 5> CBlCor = {{0., 0., 0., 0., 0.}};
 
-  bool CheckIfExitIter(float CAl[], float  SigCAl[], float CBl[], float  SigCBl[], float CAt[], float SigCAt[], float CBt[], float SigCBt[], int Niter, int NiterM );
   std::unique_ptr<JPetGeomMapping> fMapper;
   JPetTimer fTimer;
 };
