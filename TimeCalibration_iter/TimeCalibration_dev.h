@@ -50,14 +50,14 @@ protected:
   void saveParametersToFile(const std::string& filename);
 
   /// Required options to be loaded from the json file.
-  const std::string kPMIdRefOptName  = "TimeCalibration_PMIdRef_string";
+  const std::string kPMIdRefOptName  = "TimeCalibration_PMIdRef_int";
   const std::string kTOTCutLowOptName = "TimeCalibration_TOTCutLow_float";
   const std::string kTOTCutHighOptName  = "TimeCalibration_TOTCutHigh_float";
   const std::string kMainStripOptName = "TimeCalibration_MainStrip_int";
   const std::string kLoadConstantsOptName  = "TimeCalibration_LoadConstants_bool";
   const std::string kMaxIterOptName = "TimeCalibration_MaxIteration_int";
-  const std::string kCalibFileTmpOptName = "TimeCalibration_OutputFileTmp_string";
-  const std::string kCalibFileFinalOptName = "TimeCalibration_OutputFileFinal_string";
+  const std::string kCalibFileTmpOptName = "TimeCalibration_OutputFileTmp_std::string";
+  const std::string kCalibFileFinalOptName = "TimeCalibration_OutputFileFinal_std::string";
 
   int kPMIdRef = 385;
   std::array<float, 2> TOTcut{{ -300000000., 300000000.}}; //TOT cuts for slot hits (sum of TOTs from both sides)

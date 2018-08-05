@@ -13,13 +13,14 @@
  *  @file TimeCalibration.cpp
  */
 
+#include "TimeCalibration_dev.h"
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
 #include <string>
 #include <sstream>
+#include <algorithm>
 #include <cctype>
-#include "TimeCalibration_dev.h"
 #include "TF1.h"
 #include "TString.h"
 #include <TDirectory.h>
@@ -28,6 +29,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <JPetOptionsTools/JPetOptionsTools.h>
+#include <JPetOptionsGenerator/JPetOptionsTypeHandler.h>
 #include <JPetCommonTools/JPetCommonTools.h>
 using namespace jpet_options_tools;
 using namespace std;
@@ -83,10 +85,13 @@ bool TimeCalibration::loadOptions()
 {
   auto opts = fParams.getOptions();
   std::vector<std::string> requiredOptions = {kTOTCutLowOptName, kTOTCutHighOptName, kMainStripOptName, kLoadConstantsOptName, kMaxIterOptName, kCalibFileTmpOptName , kCalibFileFinalOptName, kPMIdRefOptName };
-  auto allOptionsExists = std::all_of(requiredOptions.begin(),
-                                      requiredOptions.end(),
-                                      [&opts](std::string optName)->bool {return isOptionSet(opts, optName); });
-  if (allOptionsExists) {
+
+  auto allOptionsExist = std::all_of(requiredOptions.begin(),
+                                     requiredOptions.end(),
+                                     [&opts](std::string optName)->bool { auto ok = isOptionSet(opts, optName); 
+                                                                          if (!ok) {ERROR("No option " + optName + " or bad option format in user param json file."); }
+                                     });
+  if (allOptionsExist) {
 //------Lower TOT cut from config (json) file
     TOTcut[0] = getOptionAsFloat(opts, kTOTCutLowOptName);
 //------ Higher TOT cut from config (json) file
@@ -187,8 +192,6 @@ bool TimeCalibration::terminate()
 //	getAuxilliaryData().createMap("timeDiffAB mean values");
 //
   saveParametersToFile(fTimeConstantsCalibFileName);
-//create output txt file with calibration parameters
-//
   return true;
 }
 
@@ -259,8 +262,6 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
         }
       }
     }
-
-
 
 //trailing
     for (auto& thr_time_pair : trail_times_A) {
@@ -467,6 +468,8 @@ void TimeCalibration::saveParametersToFile(const std::string& filename)
     auto histoToSave_Ref_trailing = getStatistics().getHisto1D(histo_name_Ref_t);
 //
     //
+    assert(histoToSave_leading);
+    assert(histoToSave_trailing);
     if (histoToSave_leading->GetEntries() != 0 && histoToSave_trailing->GetEntries() != 0
         && histoToSave_Ref_leading->GetEntries() != 0 && histoToSave_Ref_trailing->GetEntries() != 0) {
       INFO("#############");
@@ -568,7 +571,7 @@ void TimeCalibration::saveParametersToFile(const std::string& filename)
   //and correct the final results for different layers (layers synchronization)
   //C2 = C2 - Cl(warstwa-1) (we correct the correction with respect to ref. detector only for L2 and L3
   //Moreover, new offsets need to be added to the ones determined in the previous iteration
-  for (int thr = 1; thr <= 4; thr++) {
+  for (int thr = 1; thr <= kNumberOfThresholds; thr++) {
     if (SigCAl[thr] / abs(CAl[thr]) >= frac_err) {
       results_fit << "#WFIT: Large uncertainty on the calibration constant (Side A, leading edge)!" << endl;
     }
@@ -611,7 +614,7 @@ void TimeCalibration::saveParametersToFile(const std::string& filename)
   //
   //add the last and new constants and determine the new uncertainty
   //
-  for (int thr = 1; thr <= 4; thr++) {
+  for (int thr = 1; thr <= kNumberOfThresholds; thr++) {
     CAl[thr] = CAl[thr] + CAlTmp[thr];
     CAt[thr] = CAt[thr] + CAtTmp[thr];
     SigCAl[thr] = sqrt(pow(SigCAl[thr], 2) + pow(SigCAlTmp[thr], 2) );
