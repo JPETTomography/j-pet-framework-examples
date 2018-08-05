@@ -196,8 +196,6 @@ bool TimeCalibration::terminate()
   return true;
 }
 
-//////////////////////////////////
-
 void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<double>&   refTimesL, const std::vector<double>& refTimesT)
 {
   auto lead_times_A = hit.getSignalA().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading);
@@ -294,9 +292,9 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
         hist = getStatistics().getHisto1D(histo_name_Ref_t);
         hist->SetBit(TH1::kCanRebin);
         assert(hist);
-        //if (timeDiffTmin < 100.) {
-        getStatistics().getHisto1D(histo_name_Ref_t)->Fill(timeDiffTmin);
-        //}
+        if (timeDiffTmin < 100.) {
+          getStatistics().getHisto1D(histo_name_Ref_t)->Fill(timeDiffTmin);
+        }
       }
     }
   }//end of the if for TOT cut
@@ -404,10 +402,10 @@ void TimeCalibration::fitAndSaveParametersToFile(const std::string& filename, co
   double frac_err = 0.3; //maximal fractional uncertainty of parameters accepted by calibration
   int flag_end = 0;
 
-  writeHeaderIfNewFile(filename);
+  TimeCalibration::writeHeader(filename);
 
   std::ofstream results_fit(filename, std::ios::app);
-  std::fstream results_fitTmp(tmpFilename, std::ios::app);
+  std::fstream results_fitTmp(tmpFilename, std::ios::in);
 
 //side A
   float CAl[5] = {0., 0., 0., 0., 0.};
@@ -470,11 +468,11 @@ void TimeCalibration::fitAndSaveParametersToFile(const std::string& filename, co
 
 //fit scintilators
       int highestBin_l = histoToSave_leading->GetBinCenter(histoToSave_leading->GetMaximumBin());
-      assert(highestBin_l >= 5);
+      assert(histoToSave_leading->Integral() > 0);
       histoToSave_leading->Fit("gaus", "", "", highestBin_l - 5, highestBin_l + 5);
 
       int highestBin_t = histoToSave_trailing->GetBinCenter(histoToSave_trailing->GetMaximumBin());
-      assert(highestBin_t >= 5);
+      assert(histoToSave_trailing->Integral() > 0);
       histoToSave_trailing->Fit("gaus", "", "", highestBin_t - 5, highestBin_t + 5);
 
       TF1* fit_l = histoToSave_leading->GetFunction("gaus");
@@ -621,19 +619,14 @@ void TimeCalibration::fitAndSaveParametersToFile(const std::string& filename, co
   results_fitTmp.close();
 }
 
-void TimeCalibration::writeHeaderIfNewFile(const std::string& filename)
+void TimeCalibration::writeHeader(const std::string& filename)
 {
   time_t local_time;
-  std::ofstream output(filename, std::ios::app); //open the final output file in append mode
-  if (output.tellp() == 0) {             //if the file is empty/new write the header
-    output << "# Time calibration constants" << std::endl;
-    output << "# For side A we apply only the correction from refference detector, for side B the correction is equal to the sum of the A-B" << std::endl;
-    output << "# correction and offset with respect to the refference detector. For side A we report the sigmas and chi2/ndf for fit to the time difference spectra with refference detector" << std::endl;
-    output << "# while the same quality variables for fits to the A-B time difference are given for B side section" << std::endl;
-    output << "# Description of the parameters: layer(1-3) | slot(1-48/96) | side(A-B) | threshold(1-4) | offset_value_leading | offset_uncertainty_leading | offset_value_trailing | offset_uncertainty_trailing | sigma_offset_leading | sigma_offset_trailing | (chi2/ndf)_leading | (chi2/ndf)_trailing" << std::endl;
-    output << "# Calibration started on " << ctime(&local_time);
-  } else {
-    output << "# Calibration started on " << ctime(&local_time); //if the file was already on disk write only the time at which the calibration started
-    output.close();
-  }
+  std::ofstream output(filename, std::ios::in);
+  output << "# Time calibration constants" << std::endl;
+  output << "# For side A we apply only the correction from refference detector, for side B the correction is equal to the sum of the A-B" << std::endl;
+  output << "# correction and offset with respect to the refference detector. For side A we report the sigmas and chi2/ndf for fit to the time difference spectra with refference detector" << std::endl;
+  output << "# while the same quality variables for fits to the A-B time difference are given for B side section" << std::endl;
+  output << "# Description of the parameters: layer(1-3) | slot(1-48/96) | side(A-B) | threshold(1-4) | offset_value_leading | offset_uncertainty_leading | offset_value_trailing | offset_uncertainty_trailing | sigma_offset_leading | sigma_offset_trailing | (chi2/ndf)_leading | (chi2/ndf)_trailing" << std::endl;
+  output << "# Calibration started on " << ctime(&local_time);
 }

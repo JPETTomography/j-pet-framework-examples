@@ -40,7 +40,7 @@ public:
 
 protected:
   static constexpr int kNumberOfThresholds = 4;
-  static void writeHeaderIfNewFile(const std::string& filename);
+  static void writeHeader(const std::string& filename);
 
   bool loadOptions();
   /// Methods loads the calibration constants from the file into the arrays.
