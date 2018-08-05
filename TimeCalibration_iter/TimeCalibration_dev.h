@@ -40,14 +40,16 @@ public:
 
 protected:
   static constexpr int kNumberOfThresholds = 4;
+  static void writeHeaderIfNewFile(const std::string& filename);
 
   bool loadOptions();
+  /// Methods loads the calibration constants from the file into the arrays.
   void loadFileWithParameters(const std::string& filename);
   void createHistograms();
   bool isInChosenStrip(const JPetHit& hit) const;
   const char* formatUniqueSlotDescription(const JPetBarrelSlot& slot, int threshold, const char* prefix);
   void fillHistosForHit(const JPetHit& hit, const std::vector<double>& RefTimesL, const std::vector<double>& RefTimesT);
-  void saveParametersToFile(const std::string& filename);
+  void fitAndSaveParametersToFile(const std::string& filename, const std::string& filenameTmp);
 
   /// Required options to be loaded from the json file.
   const std::string kPMIdRefOptName  = "TimeCalibration_PMIdRef_int";
