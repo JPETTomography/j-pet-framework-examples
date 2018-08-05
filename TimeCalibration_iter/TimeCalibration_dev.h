@@ -41,12 +41,12 @@ public:
 protected:
   static constexpr int kNumberOfThresholds = 4;
 
-  void createHistograms();
   bool loadOptions();
+  void loadFileWithParameters(const std::string& filename);
+  void createHistograms();
   bool isInChosenStrip(const JPetHit& hit) const;
   const char* formatUniqueSlotDescription(const JPetBarrelSlot& slot, int threshold, const char* prefix);
   void fillHistosForHit(const JPetHit& hit, const std::vector<double>& RefTimesL, const std::vector<double>& RefTimesT);
-  void loadFileWithParameters(const std::string& filename);
   void saveParametersToFile(const std::string& filename);
 
   /// Required options to be loaded from the json file.
@@ -61,31 +61,34 @@ protected:
 
   int kPMIdRef = 385;
   std::array<float, 2> TOTcut{{ -300000000., 300000000.}}; //TOT cuts for slot hits (sum of TOTs from both sides)
-  int fLayerToCalib = 0; //Layer of calibrated slot
-  int fStripToCalib = 0; //Slot to be calibrated
+  int fLayerToCalib = -1; //Layer of calibrated slot
+  int fStripToCalib = -1; //Slot to be calibrated
   bool fIsCorrection = true; //Flag for choosing the correction of times at the level of calibration module (use only if the calibration loader is not used)
   int fMaxIter = 1;   //Max number of iterations for calibration of one strip
   std::string fTimeConstantsCalibFileName = "TimeConstantsCalib.txt";
   std::string fTimeConstantsCalibFileNameTmp = "TimeConstantsCalibTmp.txt";
 
+  /// what is that ??
   const float Cl[3] = {0., 0.1418, 0.5003};  //[ns]
   const float SigCl[3] = {0., 0.0033, 0.0033}; //[ns]
 
   int Niter = 0;
 
-  float CAlTmp[5]    = {0., 0., 0., 0., 0.};
-  float SigCAlTmp[5] = {0., 0., 0., 0., 0.};
-  float CAtTmp[5]    = {0., 0., 0., 0., 0.};
-  float SigCAtTmp[5] = {0., 0., 0., 0., 0.};
-  float CBlTmp[5]    = {0., 0., 0., 0., 0.};
-  float SigCBlTmp[5] = {0., 0., 0., 0., 0.};
-  float CBtTmp[5]    = {0., 0., 0., 0., 0.};
-  float SigCBtTmp[5] = {0., 0., 0., 0., 0.};
+  /// Structures to save the results of the calibration procedures
+  /// Tmp are temporary results
+  std::array<float, 5> CAlTmp = {{0., 0., 0., 0., 0.}};
+  std::array<float, 5> SigCAlTmp = {{0., 0., 0., 0., 0.}};
+  std::array<float, 5> CAtTmp = {{0., 0., 0., 0., 0.}};
+  std::array<float, 5> SigCAtTmp = {{0., 0., 0., 0., 0.}};
+  std::array<float, 5> CBlTmp = {{0., 0., 0., 0., 0.}};
+  std::array<float, 5> SigCBlTmp = {{0., 0., 0., 0., 0.}};
+  std::array<float, 5> CBtTmp = {{0., 0., 0., 0., 0.}};
+  std::array<float, 5> SigCBtTmp = {{0., 0., 0., 0., 0.}};
 
-  float CAtCor[5] = {0., 0., 0., 0., 0.};
-  float CBtCor[5] = {0., 0., 0., 0., 0.};
-  float CAlCor[5] = {0., 0., 0., 0., 0.};
-  float CBlCor[5] = {0., 0., 0., 0., 0.};
+  std::array<float, 5> CAtCor = {{0., 0., 0., 0., 0.}};
+  std::array<float, 5> CBtCor = {{0., 0., 0., 0., 0.}};
+  std::array<float, 5> CAlCor = {{0., 0., 0., 0., 0.}};
+  std::array<float, 5> CBlCor = {{0., 0., 0., 0., 0.}};
 
   bool CheckIfExitIter(float CAl[], float  SigCAl[], float CBl[], float  SigCBl[], float CAt[], float SigCAt[], float CBt[], float SigCBt[], int Niter, int NiterM );
   std::unique_ptr<JPetGeomMapping> fMapper;

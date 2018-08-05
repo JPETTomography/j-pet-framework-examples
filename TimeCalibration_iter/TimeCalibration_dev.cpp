@@ -96,10 +96,10 @@ bool TimeCalibration::loadOptions()
     TOTcut[0] = getOptionAsFloat(opts, kTOTCutLowOptName);
 //------ Higher TOT cut from config (json) file
     TOTcut[1] = getOptionAsFloat(opts, kTOTCutHighOptName);
-//------ Packed strip and layer number from config (json) file
+    //------ Packed strip and layer number from config (json) file
     int code = getOptionAsInt(opts, kMainStripOptName);
-    fLayerToCalib = code / 100; // layer number
-    fStripToCalib = code % 100; // strip number
+    fLayerToCalib = code / 100;
+    fStripToCalib = code % 100;
     fIsCorrection = getOptionAsBool(opts, kLoadConstantsOptName);
 //------ Max number of iterations from config (json) file
     fMaxIter  = getOptionAsInt(opts, kMaxIterOptName);
@@ -116,25 +116,20 @@ bool TimeCalibration::loadOptions()
 void TimeCalibration::createHistograms()
 {
   for (int thr = 1; thr <= kNumberOfThresholds; thr++) {
-
+    assert(fLayerToCalib >= 0);
+    assert(fStripToCalib >= 0);
 //histos for leading edge
-//		  const char * histo_name_l = formatUniqueSlotDescription(scin.at()->getBarrelSlot(), thr, "timeDiffAB_leading_");
-//
     const char* histo_name_l = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffAB_leading_", fLayerToCalib, fStripToCalib, thr);
     getStatistics().createHistogram( new TH1F(histo_name_l, histo_name_l, 400, -20., 20.) );
-    //
-//histograms for leading edge refference detector time difference
+//hist0s for leading edge reference detector time difference
     const char* histo_name_Ref_l = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffRef_leading_", fLayerToCalib, fStripToCalib, thr);
     getStatistics().createHistogram( new TH1F(histo_name_Ref_l, histo_name_Ref_l, 800, -80., 80.) );
-    //
 //histos for trailing edge
     const char* histo_name_t = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffAB_trailing_", fLayerToCalib, fStripToCalib, thr);
     getStatistics().createHistogram( new TH1F(histo_name_t, histo_name_t, 400, -20., 20.) );
-    //
-//histograms for leading edge refference detector time difference
+//histos for trailing edge reference detector time difference
     const char* histo_name_Ref_t = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffRef_trailing_", fLayerToCalib, fStripToCalib, thr);
     getStatistics().createHistogram( new TH1F(histo_name_Ref_t, histo_name_Ref_t, 1000, -100., 100.) );
-    //
   }
 }
 
@@ -358,7 +353,7 @@ void TimeCalibration::loadFileWithParameters(const std::string& filename)
   char SideTmp = 0;
   int thrTmp = 0;
   std::string line;
-  //
+
   std::fstream inFile(filename, std::ios::in | std::ios::out);
   if (inFile.is_open()) { //if the tmp file exists read the content
     //read the whole file to load the latest constants fitted previously. Not smart but works..
