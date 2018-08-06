@@ -22,6 +22,7 @@ add_definitions(-std=c++11 -Wall -Wunused-parameter)
 ################################################################################
 # Add MLEM submodule
 add_subdirectory(j-pet-mlem)
+include_directories(j-pet-mlem ${MLEM_INCLUDE_DIRS})
 
 ################################################################################
 ## Enable rpath on OS X and point it to ROOT

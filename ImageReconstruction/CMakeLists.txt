@@ -24,11 +24,50 @@ file(GLOB SOURCES_WITHOUT_MAIN *.cpp)
 list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${UNIT_TEST_SOURCES})
 list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${MAIN_CPP})
 
+# add options from j-pet-mlem as compile flags removing PET_ prefix
+# j-pet-mlem set some parameters of the build by CMake using definitions, but they are limited to project
+# so I copy them here
+get_cmake_property(vars VARIABLES)
+foreach(var ${vars})
+  if(var MATCHES "^PET_" AND NOT var MATCHES "_DIR$")
+    string(REGEX REPLACE "^PET_" "" name ${var})
+    if(name MATCHES "_TYPE$")
+      string(REGEX REPLACE "_TYPE$" "" type_name ${name})
+      add_definitions(-DUSE_${${var}}_${type_name}=1)
+      add_definitions(-D${name}=${${var}})
+    elseif(${var})
+      if(${var} STREQUAL ON)
+        add_definitions(-D${name}=1)
+      else()
+        add_definitions(-D${name}=${${var}})
+      endif()
+    else()
+      add_definitions(-D${name}=0)
+    endif()
+  endif()
+endforeach()
+
+# add dependencies from j-pet-mlem
+set(use_modules_from ../j-pet-mlem)
+list(APPEND HEADERS ${use_modules_from}/src/util/png_writer.h)
+list(APPEND SOURCES ${use_modules_from}/src/util/png_writer.cpp)
+
+# libpng for output image generation
+find_package(PNG)
+if(NOT PNG_FOUND AND MSVC)
+  include(ExtPNG) # builds libpng automatically
+endif()
+if(PNG_FOUND)
+  add_definitions(-DHAVE_LIBPNG=1 ${PNG_DEFINITIONS})
+  include_directories(${PNG_INCLUDE_DIRS})
+  link_libraries(${PNG_LIBRARIES})
+endif()
+
 include_directories(${Framework_INCLUDE_DIRS})
 add_definitions(${Framework_DEFINITIONS})
 
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})
-target_link_libraries(${projectBinary} JPetFramework)
+target_link_libraries(${projectBinary} JPetFramework ${PNG_LIBRARIES})
 
 add_custom_target(clean_data_${projectName}
   COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root)
@@ -51,3 +90,4 @@ foreach(test_source ${UNIT_TEST_SOURCES})
 endforeach()
 
 add_custom_target(tests_ImageReconstruction DEPENDS ${test_binaries} )
+
