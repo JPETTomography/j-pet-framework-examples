@@ -25,22 +25,29 @@ using namespace std;
 
 int main(int argc, const char* argv[])
 {
-  JPetManager& manager = JPetManager::getManager();
+  try {
+    JPetManager& manager = JPetManager::getManager();
 
-  manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
-  manager.registerTask<SignalFinder>("SignalFinder");
-  manager.registerTask<SignalTransformer>("SignalTransformer"); 
-  manager.registerTask<HitFinder>("HitFinder"); 
-  manager.registerTask<EventFinder>("EventFinder");
-  manager.registerTask<EventCategorizerImaging>("EventCategorizerImaging");
-  
-  manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
-  manager.useTask("TimeCalibLoader", "tslot.raw", "tslot.calib");
-  manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
-  manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
-  manager.useTask("HitFinder", "phys.sig", "hits");
-  manager.useTask("EventFinder", "hits", "unk.evt");
-  manager.useTask("EventCategorizerImaging", "unk.evt", "imag.evt");
+    manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
+    manager.registerTask<SignalFinder>("SignalFinder");
+    manager.registerTask<SignalTransformer>("SignalTransformer"); 
+    manager.registerTask<HitFinder>("HitFinder"); 
+    manager.registerTask<EventFinder>("EventFinder");
+    manager.registerTask<EventCategorizerImaging>("EventCategorizerImaging");
     
-  manager.run(argc, argv);
+    manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
+    manager.useTask("TimeCalibLoader", "tslot.raw", "tslot.calib");
+    manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
+    manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
+    manager.useTask("HitFinder", "phys.sig", "hits");
+    manager.useTask("EventFinder", "hits", "unk.evt");
+    manager.useTask("EventCategorizerImaging", "unk.evt", "imag.evt");
+      
+    manager.run(argc, argv);
+  } catch (const std::exception& except) {
+    std::cerr << "Unrecoverable error occured:" << except.what() << "Exiting the program!" << std::endl;
+    return EXIT_FAILURE;
+  }
+  return EXIT_SUCCESS;
 }
+
