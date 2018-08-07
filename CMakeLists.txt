@@ -17,12 +17,16 @@ add_subdirectory(j-pet-framework)
 include_directories(j-pet-framework ${Framework_INCLUDE_DIRS})
 add_definitions(${Framework_DEFINITIONS})
 
-add_definitions(-std=c++11 -Wall -Wunused-parameter)
-
 ################################################################################
 # Add MLEM submodule
 add_subdirectory(j-pet-mlem)
-include_directories(j-pet-mlem ${MLEM_INCLUDE_DIRS})
+#SYSTEM keyword is a trick to disable all warnings from the j-pet-mlem package.
+#This code invokes some horrible warnings that we deliberately turn off, to
+#keep our build process clean.
+include_directories(SYSTEM j-pet-mlem ${MLEM_INCLUDE_DIRS})
+
+################################################################################
+add_definitions(-std=c++11 -Wall -Wunused-parameter)
 
 ################################################################################
 ## Enable rpath on OS X and point it to ROOT
