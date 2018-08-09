@@ -1,16 +1,15 @@
-# J-PET tool project using J-PET framework
-#
-# Author: Adam Strzelecki <adam.strzelecki@uj.edu.pl>
-#
-# Description:
-#   Builds project depending on J-PET framework.
+################################################################################
+## J-PET example project using J-PET framework
+## Description:
+##   Imaging stream project depending on J-PET framework.
+################################################################################
 
 cmake_minimum_required(VERSION 2.6)
 
-######################################################################
+################################################################################
 ### when creating a new project,
 ### set this section appropriately for your project
-######################################################################
+################################################################################
 set(projectName Imaging)
 
 # files to be copied from some other example directory, if any
@@ -33,14 +32,14 @@ project(${projectName} CXX) # using only C++
 file(GLOB HEADERS *.h)
 file(GLOB SOURCES *.cpp)
 
-######################################################################
+################################################################################
 ### Use source files of modules from LargeBarrelAnalysis
 ###
 ### If you are using your own version of some module which
 ### is also presenr in LargeBarrelAnalysis,
 ### comment out the respective lines below so as not to use
 ### this module's source from LargeBarrelAnalysis.
-######################################################################
+################################################################################
 set(use_modules_from ../LargeBarrelAnalysis)
 #
 list(APPEND HEADERS ${use_modules_from}/TimeWindowCreator.h)

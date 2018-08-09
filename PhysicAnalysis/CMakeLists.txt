@@ -1,9 +1,8 @@
-# J-PET tool project using J-PET framework
-#
-# Author: Adam Strzelecki <adam.strzelecki@uj.edu.pl>
-#
-# Description:
-#   Builds project depending on J-PET framework.
+################################################################################
+## J-PET example project using J-PET framework
+## Description:
+##   Physics stream project depending on J-PET framework.
+################################################################################
 
 cmake_minimum_required(VERSION 2.6)
 

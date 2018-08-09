@@ -92,7 +92,6 @@ BOOST_AUTO_TEST_CASE(checkFor3GammaTest)
   BOOST_REQUIRE(!EventCategorizerTools::checkFor3Gamma(event1, stats, false));
   BOOST_REQUIRE(EventCategorizerTools::checkFor3Gamma(event2, stats, false));
   BOOST_REQUIRE(EventCategorizerTools::checkFor3Gamma(event3, stats, false));
-
 }
 
 BOOST_AUTO_TEST_CASE(checkForPromptTest_checkTOTCalc)

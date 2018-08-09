@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2017 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -232,7 +232,7 @@ TVector3 EventCategorizerTools::calculateAnnihilationPoint(const JPetHit& firstH
 }
 
 /**
-* Calculation Time of flight
+* Calculation Time of Flight
 */
 double EventCategorizerTools::calculateTOF(const JPetHit& firstHit, const JPetHit& latterHit)
 {
@@ -250,14 +250,13 @@ double EventCategorizerTools::calculateTOF(const JPetHit& firstHit, const JPetHi
 /**
 * Calculating distance from the center of the decay plane
 */
-double EventCategorizerTools::calcDistanceOfSurfaceAndCenter(const JPetHit& firstHit, const JPetHit& secondHit, const JPetHit& thirdHit) 
+double EventCategorizerTools::calcDistanceOfSurfaceAndCenter(const JPetHit& firstHit, const JPetHit& secondHit, const JPetHit& thirdHit)
 {
-  TVector3 crossProd  = ( secondHit.getPos() - firstHit.getPos() ).Cross( thirdHit.getPos() - secondHit.getPos() );
+  TVector3 crossProd  = (secondHit.getPos() - firstHit.getPos()).Cross(thirdHit.getPos() - secondHit.getPos());
   double distCoef = -crossProd.X()*secondHit.getPosX() - crossProd.Y()*secondHit.getPosY() - crossProd.Z()*secondHit.getPosZ();
-  if( crossProd.Mag() != 0 )
+  if (crossProd.Mag() != 0)
     return fabs(distCoef) / crossProd.Mag();
-  else
-  {
+  } else {
     ERROR("One of the hit has zero position vector - unable to calculate distance from the center of the surface");
     return -1.;
   }
@@ -270,30 +269,26 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
   bool saveHistos, double b2bSlotThetaDiff, double b2bTimeDiff, double b2bDistanceFromCenter)
 {
   if (event.getHits().size() < 2) return false;
-  for(uint i = 0; i < event.getHits().size(); i++){
-    for(uint j = i+1; j < event.getHits().size(); j++){
+  for (uint i = 0; i < event.getHits().size(); i++) {
+    for(uint j = i+1; j < event.getHits().size(); j++) {
       JPetHit firstHit, secondHit;
-      if(event.getHits().at(i).getTime() < event.getHits().at(j).getTime()){
+      if(event.getHits().at(i).getTime() < event.getHits().at(j).getTime()) {
         firstHit = event.getHits().at(i);
         secondHit = event.getHits().at(j);
-      }else{
+      } else {
         firstHit = event.getHits().at(j);
         secondHit = event.getHits().at(i);
       }
       // Checking for back to back
-      
-      
-      
       double deltaLor = (secondHit.getTime() - firstHit.getTime())*kLightVelocity_cm_ns*1000./2.;
-      
       double thetaDiff = fabs(firstHit.getBarrelSlot().getTheta() - secondHit.getBarrelSlot().getTheta());
       double timeDiff = fabs( firstHit.getTime()/1000.0 - secondHit.getTime()/1000.0 );
       if(saveHistos){
-	stats.getHisto1D("DecayInto2_DLOR")->Fill(deltaLor);
-	stats.getHisto1D("DecayInto2_Angles")->Fill(thetaDiff);
-	stats.getHisto1D("DecayInto2_TimeDiff")->Fill(timeDiff);
+        stats.getHisto1D("DecayInto2_DLOR")->Fill(deltaLor);
+	      stats.getHisto1D("DecayInto2_Angles")->Fill(thetaDiff);
+	      stats.getHisto1D("DecayInto2_TimeDiff")->Fill(timeDiff);
       }
-      if( fabs( thetaDiff - 180.0 ) < b2bSlotThetaDiff && timeDiff < b2bTimeDiff ){
+      if (fabs( thetaDiff - 180.0 ) < b2bSlotThetaDiff && timeDiff < b2bTimeDiff) {
         if(saveHistos){
           TVector3 annhilationPoint = calculateAnnihilationPoint(firstHit, secondHit);
           stats.getHisto2D("DecayInto2_XY")->Fill(annhilationPoint.X(), annhilationPoint.Y());
@@ -313,9 +308,9 @@ bool EventCategorizerTools::checkFor3Gamma(const JPetEvent& event, JPetStatistic
   double d3SlotThetaMin, double d3TimeDiff, double d3DistanceFromCenter)
 {
   if (event.getHits().size() < 3) return false;
-  for(uint i = 0; i < event.getHits().size(); i++){
-    for(uint j = i+1; j < event.getHits().size(); j++){
-      for(uint k = j+1; k < event.getHits().size(); k++){
+  for (uint i = 0; i < event.getHits().size(); i++) {
+    for (uint j = i+1; j < event.getHits().size(); j++) {
+      for (uint k = j+1; k < event.getHits().size(); k++) {
         JPetHit firstHit = event.getHits().at(i);
         JPetHit secondHit = event.getHits().at(j);
         JPetHit thirdHit = event.getHits().at(k);
@@ -333,17 +328,18 @@ bool EventCategorizerTools::checkFor3Gamma(const JPetEvent& event, JPetStatistic
         sort(relativeAngles.begin(), relativeAngles.end());
         double transformedX = relativeAngles.at(1)+relativeAngles.at(0);
         double transformedY = relativeAngles.at(1)-relativeAngles.at(0);
-	double timeDiff = fabs( thirdHit.getTime()/1000. - firstHit.getTime()/1000. );
-	double distanceFromCenter = calcDistanceOfSurfaceAndCenter(firstHit, secondHit, thirdHit);
-	if(saveHistos){
-	  stats.getHisto2D("DecayInto3_Angles")->Fill(transformedX, transformedY);
-	  stats.getHisto1D("DecayInto3_Distance")->Fill(distanceFromCenter);
-	  stats.getHisto1D("DecayInto3_TimeDiff")->Fill(timeDiff);
-	}
-	if( transformedX > d3SlotThetaMin && timeDiff < d3TimeDiff && distanceFromCenter < d3DistanceFromCenter )
-	  return true;
+	      double timeDiff = fabs(thirdHit.getTime() - firstHit.getTime());
+	      double distanceFromCenter = calcDistanceOfSurfaceAndCenter(firstHit, secondHit, thirdHit);
+	      if (saveHistos) {
+          stats.getHisto2D("DecayInto3_Angles")->Fill(transformedX, transformedY);
+	        stats.getHisto1D("DecayInto3_Distance")->Fill(distanceFromCenter);
+	        stats.getHisto1D("DecayInto3_TimeDiff")->Fill(timeDiff/1000.);
+	      }
+	      if (transformedX > d3SlotThetaMin && timeDiff < d3TimeDiff && distanceFromCenter < d3DistanceFromCenter) {
+          return true;
+        }
       }
     }
   }
-  return true;
+  return false;
 }
