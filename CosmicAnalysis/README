@@ -1,0 +1,44 @@
+Aim
+---
+This example show a simple analysis of Cosmics, for data collected by the Big Barrel. 
+
+Expected output
+---------------
+No output to stdout.
+JPet.log file appears with the log of the processing and ROOT files with the following etensions are produced:
+ *.tslot.calib.root
+ *.raw.sig.root
+ *.phys.sig.root
+ *.hit.root
+ *.unk.evt.root
+ *.cat.evt.root
+
+where "*" stands for the name of the input file
+
+Input Data
+-----------
+For this example, user must provide their own data file(s) collected with the big barrel.
+
+
+Description
+--------------
+The analysis is split into tasks.
+
+Additional info
+--------------
+For description of possible parameters, that can be ised in useParams.json,
+see file PARAMETERS
+
+
+Compiling 
+------------
+make
+
+Running
+------------
+
+Author
+------------
+Kamil Dulski
+Elena Perez del Rio
+Please report any bugs and suggestions of corrections to: <kamil.dulski@gmail.com>
