@@ -13,32 +13,37 @@
  *  @file main.cpp
  */
 
-#include <JPetManager/JPetManager.h>
-#include "../LargeBarrelAnalysis/TimeWindowCreator.h"
+#include "../LargeBarrelAnalysis/EventCategorizer.h"
+#include "../LargeBarrelAnalysis/EventFinder.h"
+#include "../LargeBarrelAnalysis/HitFinder.h"
 #include "../LargeBarrelAnalysis/SignalFinder.h"
 #include "../LargeBarrelAnalysis/SignalTransformer.h"
-#include "../LargeBarrelAnalysis/HitFinder.h"
-#include "../LargeBarrelAnalysis/EventFinder.h"
-#include "../LargeBarrelAnalysis/EventCategorizer.h"
+#include "../LargeBarrelAnalysis/TimeWindowCreator.h"
+#include <JPetManager/JPetManager.h>
 using namespace std;
 
-int main(int argc, const char* argv[])
-{
-  JPetManager& manager = JPetManager::getManager();
+int main(int argc, const char* argv[]) {
+  try {
+    JPetManager& manager = JPetManager::getManager();
 
-  manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
-  manager.registerTask<SignalFinder>("SignalFinder");
-  manager.registerTask<SignalTransformer>("SignalTransformer");
-  manager.registerTask<HitFinder>("HitFinder");
-  manager.registerTask<EventFinder>("EventFinder");
-  manager.registerTask<EventCategorizer>("EventCategorizer");
+    manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
+    manager.registerTask<SignalFinder>("SignalFinder");
+    manager.registerTask<SignalTransformer>("SignalTransformer");
+    manager.registerTask<HitFinder>("HitFinder");
+    manager.registerTask<EventFinder>("EventFinder");
+    manager.registerTask<EventCategorizer>("EventCategorizer");
 
-  manager.useTask("TimeWindowCreator", "hld", "tslot.calib");
-  manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
-  manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
-  manager.useTask("HitFinder", "phys.sig", "hits");
-  manager.useTask("EventFinder", "hits", "unk.evt");
-  manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
+    manager.useTask("TimeWindowCreator", "hld", "tslot.calib");
+    manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
+    manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
+    manager.useTask("HitFinder", "phys.sig", "hits");
+    manager.useTask("EventFinder", "hits", "unk.evt");
+    manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
 
-  manager.run(argc, argv);
+    manager.run(argc, argv);
+  } catch (const std::exception& except) {
+    std::cerr << "Unrecoverable error occured:" << except.what() << "Exiting the program!" << std::endl;
+    return EXIT_FAILURE;
+  }
+  return EXIT_SUCCESS;
 }

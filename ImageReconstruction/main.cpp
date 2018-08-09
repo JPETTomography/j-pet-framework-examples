@@ -20,7 +20,8 @@
 #include "SinogramCreatorMC.h"
 using namespace std;
 
-int main(int argc, const char* argv[]) {
+int main(int argc, const char* argv[])
+{
   try {
     JPetManager& manager = JPetManager::getManager();
 
