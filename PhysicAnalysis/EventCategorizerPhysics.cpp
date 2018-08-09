@@ -32,51 +32,51 @@ bool EventCategorizerPhysics::init()
 
   fOutputEvents = new JPetTimeWindow("JPetEvent");
 
-  if ( isOptionSet(fParams.getOptions(), kMinAnnihilationParamKey) )
+  if ( isOptionSet(fParams.getOptions(), kMinAnnihilationParamKey) ) {
     fMinAnnihilationTOT = getOptionAsFloat(fParams.getOptions(), kMinAnnihilationParamKey);
-  else
+  } else {
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMinAnnihilationParamKey.c_str(), fMinAnnihilationTOT));
-
-  if ( isOptionSet(fParams.getOptions(), kMaxAnnihilationParamKey) )
+  }
+  if ( isOptionSet(fParams.getOptions(), kMaxAnnihilationParamKey) ) {
     fMaxAnnihilationTOT = getOptionAsFloat(fParams.getOptions(), kMaxAnnihilationParamKey);
-  else
+  } else {
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMaxAnnihilationParamKey.c_str(), fMaxAnnihilationTOT));
-
-  if ( isOptionSet(fParams.getOptions(), kMinDeexcitationParamKey) )
+  }
+  if ( isOptionSet(fParams.getOptions(), kMinDeexcitationParamKey) ) {
     fMinDeexcitationTOT = getOptionAsFloat(fParams.getOptions(), kMinDeexcitationParamKey);
-  else
+  } else {
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMinDeexcitationParamKey.c_str(), fMinDeexcitationTOT));
-
-  if ( isOptionSet(fParams.getOptions(), kMaxDeexcitationParamKey) )
+  }
+  if ( isOptionSet(fParams.getOptions(), kMaxDeexcitationParamKey) ) {
     fMaxDeexcitationTOT = getOptionAsFloat(fParams.getOptions(), kMaxDeexcitationParamKey);
-  else
+  } else {
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMaxDeexcitationParamKey.c_str(), fMaxDeexcitationTOT));
-
-  if ( isOptionSet(fParams.getOptions(), kMaxZPosParamKey) )
+  }
+  if ( isOptionSet(fParams.getOptions(), kMaxZPosParamKey) ) {
     fMaxZPos = getOptionAsFloat(fParams.getOptions(), kMaxZPosParamKey);
-  else
+  } else {
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMaxZPosParamKey.c_str(), fMaxZPos));
-
-  if ( isOptionSet(fParams.getOptions(), kMaxDistOfDecayPlaneFromCenterParamKey) )
+  }
+  if ( isOptionSet(fParams.getOptions(), kMaxDistOfDecayPlaneFromCenterParamKey) ) {
     fMaxDistOfDecayPlaneFromCenter = getOptionAsFloat(fParams.getOptions(), kMaxDistOfDecayPlaneFromCenterParamKey);
-  else
+  } else {
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMaxDistOfDecayPlaneFromCenterParamKey.c_str(), fMaxDistOfDecayPlaneFromCenter));
-
-  if ( isOptionSet(fParams.getOptions(), kMaxTimeDiffParamKey) )
+  }
+  if ( isOptionSet(fParams.getOptions(), kMaxTimeDiffParamKey) ) {
     fMaxTimeDiff = getOptionAsFloat(fParams.getOptions(), kMaxTimeDiffParamKey);
-  else
+  } else {
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMaxTimeDiffParamKey.c_str(), fMaxTimeDiff));
-
-  if ( isOptionSet(fParams.getOptions(), kBackToBackAngleWindowParamKey) )
+  }
+  if ( isOptionSet(fParams.getOptions(), kBackToBackAngleWindowParamKey) ) {
     fBackToBackAngleWindow = getOptionAsFloat(fParams.getOptions(), kBackToBackAngleWindowParamKey);
-  else
+  } else {
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kBackToBackAngleWindowParamKey.c_str(), fBackToBackAngleWindow));
-
-  if ( isOptionSet(fParams.getOptions(), kDecayInto3MinAngleParamKey) )
+  }
+  if ( isOptionSet(fParams.getOptions(), kDecayInto3MinAngleParamKey) ) {
     fDecayInto3MinAngle = getOptionAsFloat(fParams.getOptions(), kDecayInto3MinAngleParamKey);
-  else
+  } else {
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kDecayInto3MinAngleParamKey.c_str(), fDecayInto3MinAngle));
-
+  }
 
   if (fSaveControlHistos) {
 

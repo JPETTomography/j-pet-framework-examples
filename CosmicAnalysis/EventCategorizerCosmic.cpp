@@ -32,11 +32,11 @@ bool EventCategorizerCosmic::init()
 
   fOutputEvents = new JPetTimeWindow("JPetEvent");
 
-  if ( isOptionSet(fParams.getOptions(), kMinCosmicTOTParamKey) )
+  if ( isOptionSet(fParams.getOptions(), kMinCosmicTOTParamKey) ) {
     fMinCosmicTOT = getOptionAsFloat(fParams.getOptions(), kMinCosmicTOTParamKey);
-  else
+  } else {
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMinCosmicTOTParamKey.c_str(), fMinCosmicTOT));
-
+  }
 
   if (fSaveControlHistos) {
     getStatistics().createHistogram(
