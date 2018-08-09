@@ -42,15 +42,20 @@ InterThresholdCalibration::~InterThresholdCalibration()
 
 bool InterThresholdCalibration::init()
 {
+  
 
   JPetTimer timer;
 
   string local_time = timer.getAllMeasuredTimes();
 
-
 ////////////////////////
 
   fBarrelMap = new JPetGeomMapping(getParamBank());
+
+  for( int layer = 0; layer < getParamBank().getLayersSize(); layer++)
+  {
+    kSl_max.push_back(fBarrelMap->getSlotsCount( getParamBank().getLayer(layer) ) );
+  }
 
   fOutputEvents = new JPetTimeWindow("JPetEvent");
 
@@ -90,7 +95,7 @@ bool InterThresholdCalibration::init()
 
   //histograms
 
-  for (int lay = 1; lay <= 3; lay++) { // loop over layers
+  for (int lay = 1; lay <= kSl_max.size()+1; lay++) { // loop over layers
 
     for (int sl = 1; sl <= kSl_max[lay - 1]; sl++) { // loop over slots
 
@@ -180,7 +185,7 @@ bool InterThresholdCalibration::terminate()
   std::ofstream results_fit;
   results_fit.open(fOutputFile, std::ios::app);
   //
-  for (int lay = 1; lay <= 3; lay++) { // loop over layers
+  for (int lay = 1; lay <= kSl_max.size()+1; lay++) { // loop over layers
 
     for (int sl = 1; sl <= kSl_max[lay - 1]; sl++) { // loop over slots
 
