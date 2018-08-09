@@ -19,8 +19,8 @@
 #include <sstream>
 #include <cctype>
 #include "InterThresholdCalibration.h"
-#include "TF1.h"
-#include "TString.h"
+#include <TF1.h>
+#include <TString.h>
 #include <TDirectory.h>
 #include <vector>
 #include <stdio.h>
