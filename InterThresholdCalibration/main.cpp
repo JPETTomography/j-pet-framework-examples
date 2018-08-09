@@ -36,7 +36,7 @@ int main(int argc, const char* argv[])
     manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
     manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
     manager.useTask("HitFinder", "phys.sig", "hits");
-    manager.useTask("InterThresholdCalibration", "hits", "calib");
+    manager.useTask("InterThresholdCalibration", "hits", "hits.calib");
 
     manager.run(argc, argv);
   } catch (const std::exception& except) {
