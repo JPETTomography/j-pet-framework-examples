@@ -39,13 +39,13 @@ protected:
   void fillHistosForHit(const JPetHit& hit);
   JPetGeomMapping* fBarrelMap = nullptr;
   std::string fOutputFile = "TimeConstantsInterThrCalib.txt";
-  const std::string fOutputFileKey = "TimeConstantsInterThrCalibOutputFile_std::string";
-  const std::string fCalibRunKey = "TimeCalibRunNumber_int";
+  const std::string fOutputFileKey = "InterThresholdCalibration_TimeConstantsInterThrCalibOutputFile_std::string";
+  const std::string fCalibRunKey = "InterThresholdCalibration_TimeCalibRunNumber_int";
   int fCalibRun = 4; //Number of calibration run associated with Acquisition Campaign
   double fFrac_err = 0.3; //maximal fractional uncertainty of parameters accepted by calibration
-  const std::string fFrac_errKey = "Frac_err_double";
+  const std::string fFrac_errKey = "InterThresholdCalibration_Frac_err_double";
   int fMin_ev = 100;     //minimal number of events for a distribution to be fitted
-  const std::string fMin_evKey = "Min_ev_int";
+  const std::string fMin_evKey = "InterThresholdCalibration_Min_ev_int";
   const std::vector<double> kSl_max = {48, 48, 96}; //amount of slots per each layer
   double fThr_time_diff_t_A[5], fThr_time_diff_A[5];
   double fThr_time_diff_t_B[5], fThr_time_diff_B[5];
