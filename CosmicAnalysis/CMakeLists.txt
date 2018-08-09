@@ -5,8 +5,6 @@
 # Description:
 #   Builds project depending on J-PET framework.
 
-cmake_minimum_required(VERSION 2.6)
-
 ######################################################################
 ### when creating a new project,
 ### set this section appropriately for your project
