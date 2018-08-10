@@ -20,13 +20,18 @@ using namespace std;
 
 int main(int argc, const char* argv[])
 {
-  JPetManager& manager = JPetManager::getManager();
-
-  manager.registerTask<EventFinder>("EventFinder");
-  manager.registerTask<EventCategorizer>("EventCategorizer");
-
-  manager.useTask("EventFinder", "mc.hits", "unk.evt");
-  manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
-
-  manager.run(argc, argv);
+  try {
+    JPetManager& manager = JPetManager::getManager();
+    
+    manager.registerTask<EventFinder>("EventFinder");
+    manager.registerTask<EventCategorizer>("EventCategorizer");
+    
+    manager.useTask("EventFinder", "mc.hits", "unk.evt");
+    manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
+    
+    manager.run(argc, argv);
+  } catch () {
+    std::cerr << "Unrecoverable error occured:" << except.what() << "Exiting the program!" << std::endl;
+    return EXIT_FAILURE;
+  }
 }
