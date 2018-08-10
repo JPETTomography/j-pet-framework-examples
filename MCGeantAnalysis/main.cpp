@@ -30,7 +30,7 @@ int main(int argc, const char* argv[])
     manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
     
     manager.run(argc, argv);
-  } catch () {
+  } catch (const std::exception& except) {
     std::cerr << "Unrecoverable error occured:" << except.what() << "Exiting the program!" << std::endl;
     return EXIT_FAILURE;
   }
