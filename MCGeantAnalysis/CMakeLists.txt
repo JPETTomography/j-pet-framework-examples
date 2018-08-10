@@ -7,14 +7,13 @@
 
 cmake_minimum_required(VERSION 2.6)
 
-######################################################################
-### when creating a new project,
-### set this section appropriately for your project
-######################################################################
-set(projectName TimeCalibration)
+set(projectName MCGeantAnalysis)
 
+# files to be copied from the source directory, if any
 set(AUXILLIARY_FILES
   README
+  run.sh
+  userParams.json
   )
 
 set(ROOT_SCRIPTS
@@ -39,24 +38,6 @@ file(GLOB SOURCES *.cpp)
 ######################################################################
 set(use_modules_from ../LargeBarrelAnalysis)
 #
-list(APPEND HEADERS ${use_modules_from}/TimeWindowCreator.h)
-list(APPEND SOURCES ${use_modules_from}/TimeWindowCreator.cpp)
-list(APPEND HEADERS ${use_modules_from}/UniversalFileLoader.h)
-list(APPEND SOURCES ${use_modules_from}/UniversalFileLoader.cpp)
-#
-list(APPEND HEADERS ${use_modules_from}/SignalFinder.h)
-list(APPEND SOURCES ${use_modules_from}/SignalFinder.cpp)
-list(APPEND HEADERS ${use_modules_from}/SignalFinderTools.h)
-list(APPEND SOURCES ${use_modules_from}/SignalFinderTools.cpp)
-#
-list(APPEND HEADERS ${use_modules_from}/SignalTransformer.h)
-list(APPEND SOURCES ${use_modules_from}/SignalTransformer.cpp)
-#
-list(APPEND HEADERS ${use_modules_from}/HitFinder.h)
-list(APPEND SOURCES ${use_modules_from}/HitFinder.cpp)
-list(APPEND HEADERS ${use_modules_from}/HitFinderTools.h)
-list(APPEND SOURCES ${use_modules_from}/HitFinderTools.cpp)
-#
 list(APPEND HEADERS ${use_modules_from}/EventFinder.h)
 list(APPEND SOURCES ${use_modules_from}/EventFinder.cpp)
 #
@@ -64,9 +45,6 @@ list(APPEND HEADERS ${use_modules_from}/EventCategorizer.h)
 list(APPEND SOURCES ${use_modules_from}/EventCategorizer.cpp)
 list(APPEND HEADERS ${use_modules_from}/EventCategorizerTools.h)
 list(APPEND SOURCES ${use_modules_from}/EventCategorizerTools.cpp)
-
-message(STATUS "S: " ${SOURCES})
-message(STATUS "H: " ${HEADERS})
 
 include_directories(${Framework_INCLUDE_DIRS})
 add_definitions(${Framework_DEFINITIONS})
