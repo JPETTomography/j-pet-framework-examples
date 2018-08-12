@@ -15,8 +15,8 @@ set(projectName ScopeLoaderExample)
 ################################################################################
 ## Auxiliary files
 set(AUXILIARY_FILES
+  README.md
   run.sh
-  README
   cfg
   )
 

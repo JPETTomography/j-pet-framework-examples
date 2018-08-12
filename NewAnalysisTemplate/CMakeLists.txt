@@ -14,7 +14,7 @@ set(projectName NewProjectName)
 
 ## Add here any files, that you want to copy from the source directory
 set(AUXILIARY_FILES
-  README
+  README.md
   )
 
 set(ROOT_SCRIPTS

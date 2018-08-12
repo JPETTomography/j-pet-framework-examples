@@ -17,7 +17,7 @@ set(projectName VelocityCalibration)
 set(AUXILIARY_FILES
   run.sh
   userParams.json
-  README
+  README.md
   )
 
 set(ROOT_SCRIPTS

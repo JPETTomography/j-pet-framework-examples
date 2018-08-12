@@ -14,7 +14,7 @@ set(projectName TimeCalibration)
 
 ## Auxiliary files
 set(AUXILIARY_FILES
-  README
+  README.md
   )
 
 set(ROOT_SCRIPTS

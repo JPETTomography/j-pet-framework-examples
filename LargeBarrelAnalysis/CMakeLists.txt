@@ -17,7 +17,7 @@ set(AUXILIARY_FILES
   conf_trb3.xml
   userParams.json
   dummyCalibration.txt
-  README
+  README.md
   run.sh
 )
 

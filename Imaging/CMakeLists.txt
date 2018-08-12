@@ -18,7 +18,7 @@ set(USE_AUX_FILES_FROM ${projectName})
 
 set(AUXILIARY_FILES
   userParams.json
-  README
+  README.md
   )
 
 set(ROOT_SCRIPTS
