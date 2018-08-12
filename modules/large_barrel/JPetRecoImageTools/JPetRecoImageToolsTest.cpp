@@ -1,19 +1,18 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE JPetRecoImageToolsTests
-#include <boost/test/unit_test.hpp>
-#include <fstream>
-#include <iostream>
-#include <utility>
-#include <vector>
-
 #include "JPetCommonTools/JPetCommonTools.h"
-#include "./JPetFilterCosine.h"
-#include "./JPetFilterHamming.h"
-#include "./JPetFilterNone.h"
-#include "./JPetFilterRamLak.h"
-#include "./JPetFilterRidgelet.h"
+#include <boost/test/unit_test.hpp>
 #include "./JPetFilterSheppLogan.h"
 #include "./JPetRecoImageTools.h"
+#include "./JPetFilterRidgelet.h"
+#include "./JPetFilterHamming.h"
+#include "./JPetFilterCosine.h"
+#include "./JPetFilterRamLak.h"
+#include "./JPetFilterNone.h"
+#include <iostream>
+#include <fstream>
+#include <utility>
+#include <vector>
 
 BOOST_AUTO_TEST_SUITE(FirstSuite)
 

@@ -32,7 +32,7 @@ class HitFinderTools
 {
 public:
   static std::map<int, std::vector<JPetPhysSignal>> getSignalsSlotMap(
-    const JPetTimeWindow* timeWindow);
+        const JPetTimeWindow* timeWindow);
   static std::vector<JPetHit> matchSignals(
     JPetStatistics& stats,
     const std::map<int, std::vector<JPetPhysSignal>>& signalSlotMap,

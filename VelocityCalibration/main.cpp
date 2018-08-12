@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2017 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -13,16 +13,17 @@
  *  @file main.cpp
  */
 
-#include "../LargeBarrelAnalysis/HitFinder.h"
-#include "../LargeBarrelAnalysis/SignalFinder.h"
-#include "../LargeBarrelAnalysis/SignalTransformer.h"
 #include "../LargeBarrelAnalysis/TimeWindowCreator.h"
-#include "DeltaTFinder.h"
+#include "../LargeBarrelAnalysis/SignalTransformer.h"
+#include "../LargeBarrelAnalysis/SignalFinder.h"
+#include "../LargeBarrelAnalysis/HitFinder.h"
 #include <JPetManager/JPetManager.h>
+#include "DeltaTFinder.h"
 
 using namespace std;
 
-int main(int argc, const char* argv[]) {
+int main(int argc, const char* argv[])
+{
   try {
     JPetManager& manager = JPetManager::getManager();
 
@@ -32,8 +33,8 @@ int main(int argc, const char* argv[]) {
     manager.registerTask<HitFinder>("HitFinder");
     manager.registerTask<DeltaTFinder>("DeltaTFinder");
 
-    manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
-    manager.useTask("SignalFinder", "tslot.raw", "raw.sig");
+    manager.useTask("TimeWindowCreator", "hld", "tslot.calib");
+    manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
     manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
     manager.useTask("HitFinder", "phys.sig", "hits");
     manager.useTask("DeltaTFinder", "hits", "deltaT");

@@ -18,16 +18,15 @@
 #ifndef _JPETANALYSISMODULE_SDAMATCHLORS_H_
 #define _JPETANALYSISMODULE_SDAMATCHLORS_H_
 
-#include <TCanvas.h>
 #include "JPetUserTask/JPetUserTask.h"
 #include "JPetLOR/JPetLOR.h"
 #include "JPetHit/JPetHit.h"
+#include <TCanvas.h>
 
 class SDAMatchLORs: public JPetUserTask
 {
 
 public:
-
   SDAMatchLORs(const char* name);
   virtual ~SDAMatchLORs();
   virtual bool init() override;

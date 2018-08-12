@@ -19,8 +19,8 @@
 #ifndef _JPETANALYSISMODULE_SDAMAKEPHYSSIGNALS_H_
 #define _JPETANALYSISMODULE_SDAMAKEPHYSSIGNALS_H_
 
-#include <TCanvas.h>
 #include "JPetUserTask/JPetUserTask.h"
+#include <TCanvas.h>
 
 class SDAMakePhysSignals: public JPetUserTask
 {

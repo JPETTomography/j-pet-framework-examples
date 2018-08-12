@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(buildRawSignals_one_signal)
   double sigChEdgeMaxTime = 5.;
   double sigChLeadTrailMaxTime = 5.;
   auto results = SignalFinderTools::buildRawSignals(
-    sigChFromSamePM, numOfThresholds, stats, sigChEdgeMaxTime, sigChLeadTrailMaxTime, false);
+                   sigChFromSamePM, numOfThresholds, stats, sigChEdgeMaxTime, sigChLeadTrailMaxTime, false);
   auto points_trail = results.at(0).getPoints(JPetSigCh::Trailing);
   auto points_lead = results.at(0).getPoints(JPetSigCh::Leading);
   auto epsilon = 0.0001;
@@ -150,8 +150,8 @@ BOOST_AUTO_TEST_CASE(buildRawSignals_2)
   double sigChEdgeMaxTime = 5.;
   double sigChLeadTrailMaxTime = 5.;
   auto results =  SignalFinderTools::buildRawSignals(
-    sigChFromSamePM, numOfThresholds, stats,
-    sigChEdgeMaxTime , sigChLeadTrailMaxTime, false);
+                    sigChFromSamePM, numOfThresholds, stats,
+                    sigChEdgeMaxTime, sigChLeadTrailMaxTime, false);
   auto points_trail = results.at(0).getPoints(JPetSigCh::Trailing);
   auto points_lead = results.at(0).getPoints(JPetSigCh::Leading);
   auto epsilon = 0.0001;

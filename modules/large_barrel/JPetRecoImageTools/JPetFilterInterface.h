@@ -22,7 +22,7 @@ class JPetFilterInterface
 {
 public:
   JPetFilterInterface() {}
-  virtual ~JPetFilterInterface(){};
+  virtual ~JPetFilterInterface() {};
   virtual double operator()(double) = 0;
 };
 

@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(matchSignals_test_allSigsSameSide)
   double timeDiffAB = 10.0;
 
   std::vector<JPetHit> allHits = HitFinderTools::matchSignals(
-    stats, signalSlotMap, velocitiesMap, timeDiffAB, -1, false);
+                                   stats, signalSlotMap, velocitiesMap, timeDiffAB, -1, false);
 
   BOOST_REQUIRE(allHits.empty());
 }
@@ -207,7 +207,7 @@ BOOST_AUTO_TEST_CASE(matchSignals_test_smallTimeDiff)
   double timeDiffAB = 0.001;
 
   std::vector<JPetHit> allHits = HitFinderTools::matchSignals(
-    stats, signalSlotMap, velocitiesMap, timeDiffAB, -1, false);
+                                   stats, signalSlotMap, velocitiesMap, timeDiffAB, -1, false);
 
   BOOST_REQUIRE(allHits.empty());
 }
@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE(matchSignals_test_refDetSigs)
   double timeDiffAB = 1.1;
   JPetStatistics stats;
   std::vector<JPetHit> allHits = HitFinderTools::matchSignals(
-    stats, signalSlotMap, velocitiesMap, timeDiffAB, 999, false);
+                                   stats, signalSlotMap, velocitiesMap, timeDiffAB, 999, false);
 
   BOOST_REQUIRE_EQUAL(allHits.size(), 3);
 }
@@ -261,8 +261,8 @@ BOOST_AUTO_TEST_CASE(matchSignals_test)
 
   JPetTOMBChannel channel1(66);
   JPetTOMBChannel channel2(88);
-  JPetSigCh *sigCh1 = new JPetSigCh();
-  JPetSigCh *sigCh2 = new JPetSigCh();
+  JPetSigCh* sigCh1 = new JPetSigCh();
+  JPetSigCh* sigCh2 = new JPetSigCh();
   sigCh1->setTOMBChannel(channel1);
   sigCh2->setTOMBChannel(channel2);
   sigCh1->setThresholdNumber(1);
@@ -270,13 +270,13 @@ BOOST_AUTO_TEST_CASE(matchSignals_test)
   sigCh1->setPM(pm1A);
   sigCh2->setPM(pm1B);
 
-  JPetRawSignal *raw1 = new JPetRawSignal();
-  JPetRawSignal *raw2 = new JPetRawSignal();
+  JPetRawSignal* raw1 = new JPetRawSignal();
+  JPetRawSignal* raw2 = new JPetRawSignal();
   raw1->addPoint(*sigCh1);
   raw2->addPoint(*sigCh2);
 
-  JPetRecoSignal *reco1 = new JPetRecoSignal();
-  JPetRecoSignal *reco2 = new JPetRecoSignal();
+  JPetRecoSignal* reco1 = new JPetRecoSignal();
+  JPetRecoSignal* reco2 = new JPetRecoSignal();
   reco1->setRawSignal(*raw1);
   reco2->setRawSignal(*raw2);
 
@@ -327,7 +327,7 @@ BOOST_AUTO_TEST_CASE(matchSignals_test)
   auto epsilon = 0.0001;
   JPetStatistics stats;
   std::vector<JPetHit> allHits = HitFinderTools::matchSignals(
-    stats, signalSlotMap, velocitiesMap, timeDiffAB, -1, false);
+                                   stats, signalSlotMap, velocitiesMap, timeDiffAB, -1, false);
 
   BOOST_REQUIRE_EQUAL(allHits.size(), 3);
 
@@ -345,13 +345,13 @@ BOOST_AUTO_TEST_CASE(matchSignals_test)
   BOOST_REQUIRE_EQUAL(allHits.at(2).getSignalA().getPM().getScin().getID(), 23);
   BOOST_REQUIRE_EQUAL(allHits.at(2).getSignalB().getPM().getScin().getID(), 23);
 
-  BOOST_REQUIRE_CLOSE(allHits.at(0).getTime(), (1.0+1.5)/2, epsilon);
-  BOOST_REQUIRE_CLOSE(allHits.at(1).getTime(), (4.0+4.8)/2, epsilon);
-  BOOST_REQUIRE_CLOSE(allHits.at(2).getTime(), (6.5+7.2)/2, epsilon);
+  BOOST_REQUIRE_CLOSE(allHits.at(0).getTime(), (1.0 + 1.5) / 2, epsilon);
+  BOOST_REQUIRE_CLOSE(allHits.at(1).getTime(), (4.0 + 4.8) / 2, epsilon);
+  BOOST_REQUIRE_CLOSE(allHits.at(2).getTime(), (6.5 + 7.2) / 2, epsilon);
 
-  BOOST_REQUIRE_CLOSE(allHits.at(0).getTimeDiff(), 1.5-1.0, epsilon);
-  BOOST_REQUIRE_CLOSE(allHits.at(1).getTimeDiff(), 4.8-4.0, epsilon);
-  BOOST_REQUIRE_CLOSE(allHits.at(2).getTimeDiff(), 6.5-7.2, epsilon);
+  BOOST_REQUIRE_CLOSE(allHits.at(0).getTimeDiff(), 1.5 - 1.0, epsilon);
+  BOOST_REQUIRE_CLOSE(allHits.at(1).getTimeDiff(), 4.8 - 4.0, epsilon);
+  BOOST_REQUIRE_CLOSE(allHits.at(2).getTimeDiff(), 6.5 - 7.2, epsilon);
 
   BOOST_REQUIRE_CLOSE(allHits.at(0).getPosX(), 8.660254038, epsilon);
   BOOST_REQUIRE_CLOSE(allHits.at(1).getPosX(), 8.660254038, epsilon);
@@ -365,9 +365,9 @@ BOOST_AUTO_TEST_CASE(matchSignals_test)
   BOOST_REQUIRE_CLOSE(allHits.at(1).getPosZ(), 2.0 * allHits.at(1).getTimeDiff() / 2000.0, epsilon);
   BOOST_REQUIRE_CLOSE(allHits.at(2).getPosZ(), 2.0 * allHits.at(2).getTimeDiff() / 2000.0, epsilon);
 
-  BOOST_REQUIRE(allHits.at(0).getPosZ()>0.0);
-  BOOST_REQUIRE(allHits.at(1).getPosZ()>0.0);
-  BOOST_REQUIRE(allHits.at(2).getPosZ()<0.0);
+  BOOST_REQUIRE(allHits.at(0).getPosZ() > 0.0);
+  BOOST_REQUIRE(allHits.at(1).getPosZ() > 0.0);
+  BOOST_REQUIRE(allHits.at(2).getPosZ() < 0.0);
 }
 
 BOOST_AUTO_TEST_CASE(sortByTime_test)
@@ -398,9 +398,9 @@ BOOST_AUTO_TEST_CASE(sortByTime_test)
 
   std::vector<double> timesOrderedVector;
   std::vector<double> timesUnorderedVector;
-  for(auto sig1 : orderedVector)
+  for (auto sig1 : orderedVector)
     timesOrderedVector.push_back(sig1.getTime());
-  for(auto sig2 : unorderedVector)
+  for (auto sig2 : unorderedVector)
     timesUnorderedVector.push_back(sig2.getTime());
 
   BOOST_CHECK_EQUAL_COLLECTIONS(

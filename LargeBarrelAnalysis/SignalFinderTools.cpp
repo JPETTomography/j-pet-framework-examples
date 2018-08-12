@@ -20,7 +20,7 @@ using namespace std;
  * Method returns a map of vectors of JPetSigCh ordered by photomultiplier ID
  */
 map<int, vector<JPetSigCh>> SignalFinderTools::getSigChsPMMapById(
-  const JPetTimeWindow* timeWindow)
+                           const JPetTimeWindow* timeWindow)
 {
   map<int, vector<JPetSigCh>> sigChsPMMap;
   if (!timeWindow) {
@@ -58,12 +58,12 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
   vector<JPetRawSignal> allSignals;
   for (auto& sigChPair : sigChsPMMap) {
     vector<JPetRawSignal> currentSignals = buildRawSignals(
-      sigChPair.second,
-      numOfThresholds,
-      stats,
-      sigChEdgeMaxTime,
-      sigChLeadTrailMaxTime,
-      saveHistos);
+        sigChPair.second,
+        numOfThresholds,
+        stats,
+        sigChEdgeMaxTime,
+        sigChLeadTrailMaxTime,
+        saveHistos);
     allSignals.insert(
       allSignals.end(),
       currentSignals.begin(),
@@ -95,11 +95,11 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(
   vector<vector<JPetSigCh>> thrLeadingSigCh(numOfThresholds, tmpVec);
   vector<vector<JPetSigCh>> thrTrailingSigCh(numOfThresholds, tmpVec);
 
-  for (const JPetSigCh & sigCh : sigChFromSamePM) {
-    if(sigCh.getType() == JPetSigCh::Leading) {
-      thrLeadingSigCh.at(sigCh.getThresholdNumber()-1).push_back(sigCh);
-    } else if(sigCh.getType() == JPetSigCh::Trailing) {
-      thrTrailingSigCh.at(sigCh.getThresholdNumber()-1).push_back(sigCh);
+  for (const JPetSigCh& sigCh : sigChFromSamePM) {
+    if (sigCh.getType() == JPetSigCh::Leading) {
+      thrLeadingSigCh.at(sigCh.getThresholdNumber() - 1).push_back(sigCh);
+    } else if (sigCh.getType() == JPetSigCh::Trailing) {
+      thrTrailingSigCh.at(sigCh.getThresholdNumber() - 1).push_back(sigCh);
     }
   }
 
@@ -114,55 +114,55 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(
 
     // Searching for matching trailing on first THR
     int closestTrailingSigCh = findTrailingSigCh(
-      thrLeadingSigCh.at(0).at(0),
-      thrTrailingSigCh.at(0),
-      sigChLeadTrailMaxTime
-    );
+                                 thrLeadingSigCh.at(0).at(0),
+                                 thrTrailingSigCh.at(0),
+                                 sigChLeadTrailMaxTime
+                               );
 
-    if(closestTrailingSigCh != -1) {
+    if (closestTrailingSigCh != -1) {
       rawSig.addPoint(thrTrailingSigCh.at(0).at(closestTrailingSigCh));
-      if(saveHistos)
+      if (saveHistos)
         stats.getHisto1D("lead_trail_thr1_diff")->Fill(
           thrTrailingSigCh.at(0)
-            .at(closestTrailingSigCh).getValue()-thrLeadingSigCh.at(0).at(0).getValue()
+          .at(closestTrailingSigCh).getValue() - thrLeadingSigCh.at(0).at(0).getValue()
         );
-      thrTrailingSigCh.at(0).erase(thrTrailingSigCh.at(0).begin()+closestTrailingSigCh);
+      thrTrailingSigCh.at(0).erase(thrTrailingSigCh.at(0).begin() + closestTrailingSigCh);
     }
 
     // Procedure follows in loop for THR 2,3,4
     // First search for leading SigCh on iterated THR,
     // then search for trailing SigCh on iterated THR
-    for(uint kk=1;kk<numOfThresholds;kk++){
+    for (uint kk = 1; kk < numOfThresholds; kk++) {
       int nextThrSigChIndex = findSigChOnNextThr(
-        thrLeadingSigCh.at(0).at(0).getValue(),
-        thrLeadingSigCh.at(kk),
-        sigChEdgeMaxTime
-      );
+                                thrLeadingSigCh.at(0).at(0).getValue(),
+                                thrLeadingSigCh.at(kk),
+                                sigChEdgeMaxTime
+                              );
 
       if (nextThrSigChIndex != -1) {
         closestTrailingSigCh = findTrailingSigCh(
-          thrLeadingSigCh.at(0).at(0),
-          thrTrailingSigCh.at(kk),
-          sigChLeadTrailMaxTime
-        );
+                                 thrLeadingSigCh.at(0).at(0),
+                                 thrTrailingSigCh.at(kk),
+                                 sigChLeadTrailMaxTime
+                               );
 
         if (closestTrailingSigCh != -1) {
           rawSig.addPoint(thrTrailingSigCh.at(kk).at(closestTrailingSigCh));
-          if(saveHistos)
-            stats.getHisto1D(Form("lead_trail_thr%d_diff", kk+1))->Fill(
+          if (saveHistos)
+            stats.getHisto1D(Form("lead_trail_thr%d_diff", kk + 1))->Fill(
               thrTrailingSigCh.at(kk)
-                .at(closestTrailingSigCh).getValue()-thrLeadingSigCh.at(kk).at(nextThrSigChIndex).getValue()
+              .at(closestTrailingSigCh).getValue() - thrLeadingSigCh.at(kk).at(nextThrSigChIndex).getValue()
             );
-          thrTrailingSigCh.at(kk).erase(thrTrailingSigCh.at(kk).begin()+closestTrailingSigCh);
+          thrTrailingSigCh.at(kk).erase(thrTrailingSigCh.at(kk).begin() + closestTrailingSigCh);
         }
 
         rawSig.addPoint(thrLeadingSigCh.at(kk).at(nextThrSigChIndex));
-        if(saveHistos)
-          stats.getHisto1D(Form("lead_thr1_thr%d_diff", kk+1))->Fill(
+        if (saveHistos)
+          stats.getHisto1D(Form("lead_thr1_thr%d_diff", kk + 1))->Fill(
             thrLeadingSigCh.at(kk)
-              .at(nextThrSigChIndex).getValue()-thrLeadingSigCh.at(0).at(0).getValue()
+            .at(nextThrSigChIndex).getValue() - thrLeadingSigCh.at(0).at(0).getValue()
           );
-        thrLeadingSigCh.at(kk).erase(thrLeadingSigCh.at(kk).begin()+nextThrSigChIndex);
+        thrLeadingSigCh.at(kk).erase(thrLeadingSigCh.at(kk).begin() + nextThrSigChIndex);
       }
     }
 
@@ -172,12 +172,12 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(
   }
 
   // Filling controll histograms
-  if(saveHistos)
-    for(uint jj=0;jj<numOfThresholds;jj++){
+  if (saveHistos)
+    for (uint jj = 0; jj < numOfThresholds; jj++) {
       stats.getHisto1D("remainig_leading_sig_ch_per_thr")
-        ->Fill(jj+1, thrLeadingSigCh.at(jj).size());
+      ->Fill(jj + 1, thrLeadingSigCh.at(jj).size());
       stats.getHisto1D("remainig_trailing_sig_ch_per_thr")
-        ->Fill(jj+1, thrTrailingSigCh.at(jj).size());
+      ->Fill(jj + 1, thrTrailingSigCh.at(jj).size());
     }
   return rawSigVec;
 }

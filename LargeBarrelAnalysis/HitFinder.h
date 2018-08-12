@@ -35,11 +35,12 @@ class JPetWriter;
  * of Signals, time window for hit matching can be specified in user options,
  * default one is provided. Matching method is contained in tools class.
  */
-class HitFinder: public JPetUserTask {
+class HitFinder: public JPetUserTask
+{
 
 public:
   HitFinder(const char* name);
-  virtual ~HitFinder(){};
+  virtual ~HitFinder() {};
   virtual bool init() override;
   virtual bool exec() override;
   virtual bool terminate() override;

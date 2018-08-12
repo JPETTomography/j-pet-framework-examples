@@ -11,25 +11,24 @@ struct myFixtures {
       .slot = 1,
       .side = JPetPM::SideA,
       .thresholdNumber = 1,
-      .parameters = std::vector<double>{7.0,0.1,0.0,0.5,0.0,6.1,0.0,2.1}
+      .parameters = std::vector<double>{7.0, 0.1, 0.0, 0.5, 0.0, 6.1, 0.0, 2.1}
     },
     ConfRecord{
       .layer = 3,
       .slot = 2,
       .side = JPetPM::SideB,
       .thresholdNumber = 4,
-      .parameters = std::vector<double>{5.0,0.3,0.0,0.3,0.0,9.1,0.0,3.1}
+      .parameters = std::vector<double>{5.0, 0.3, 0.0, 0.3, 0.0, 9.1, 0.0, 3.1}
     },
     ConfRecord{
       .layer = 2,
       .slot = 90,
       .side = JPetPM::SideB,
       .thresholdNumber = 2,
-      .parameters = std::vector<double>{-3.0,0.2,4.0,0.3,0.0,2.1,0.0,4.5}
+      .parameters = std::vector<double>{-3.0, 0.2, 4.0, 0.3, 0.0, 2.1, 0.0, 4.5}
     }
   };
-  std::map<std::tuple<int, int, JPetPM::Side, int>, int> fCorrectTombMap =
-  {
+  std::map<std::tuple<int, int, JPetPM::Side, int>, int> fCorrectTombMap = {
     {std::make_tuple(1, 1, JPetPM::SideA, 1), 22},
     {std::make_tuple(3, 2, JPetPM::SideB, 4), 13},
     {std::make_tuple(2, 90, JPetPM::SideB, 2), 73}
@@ -41,10 +40,10 @@ BOOST_AUTO_TEST_SUITE (UniversalFileLoaderSuite)
 BOOST_AUTO_TEST_CASE (getConfigurationParameter)
 {
   UniversalFileLoader::TOMBChToParameter configuration = {
-    {0, std::vector<double>{0.5,0.1,0.0,0.5,0.0,6.1,0.0,2.1}},
-    {1, std::vector<double>{-1.2,0.1,0.0,0.5,0.0,6.1,0.0,2.1}},
-    {3, std::vector<double>{0.2,0.1,0.0,0.5,0.0,6.1,0.0,2.1}},
-    {4, std::vector<double>{-0.1,0.1,0.0,0.5,0.0,6.1,0.0,2.1}}
+    {0, std::vector<double>{0.5, 0.1, 0.0, 0.5, 0.0, 6.1, 0.0, 2.1}},
+    {1, std::vector<double>{-1.2, 0.1, 0.0, 0.5, 0.0, 6.1, 0.0, 2.1}},
+    {3, std::vector<double>{0.2, 0.1, 0.0, 0.5, 0.0, 6.1, 0.0, 2.1}},
+    {4, std::vector<double>{-0.1, 0.1, 0.0, 0.5, 0.0, 6.1, 0.0, 2.1}}
   };
   auto epsilon = 0.00001;
   BOOST_REQUIRE_CLOSE(UniversalFileLoader::getConfigurationParameter(configuration, 0), 0.5, epsilon);
@@ -53,8 +52,8 @@ BOOST_AUTO_TEST_CASE (getConfigurationParameter)
   BOOST_REQUIRE_CLOSE(UniversalFileLoader::getConfigurationParameter(configuration, 4), -0.1, epsilon);
 
   /// Nonexisting should return 0
-  BOOST_REQUIRE_CLOSE(UniversalFileLoader::getConfigurationParameter(configuration , 2),  0.0, epsilon);
-  BOOST_REQUIRE_CLOSE(UniversalFileLoader::getConfigurationParameter(configuration , 10),  0.0, epsilon);
+  BOOST_REQUIRE_CLOSE(UniversalFileLoader::getConfigurationParameter(configuration, 2),  0.0, epsilon);
+  BOOST_REQUIRE_CLOSE(UniversalFileLoader::getConfigurationParameter(configuration, 10),  0.0, epsilon);
 }
 
 BOOST_AUTO_TEST_CASE (getConfigurationParameter2)
@@ -62,15 +61,15 @@ BOOST_AUTO_TEST_CASE (getConfigurationParameter2)
   UniversalFileLoader::TOMBChToParameter configuration;
   auto epsilon = 0.00001;
   /// Nonexisting should return 0
-  BOOST_REQUIRE_CLOSE(UniversalFileLoader::getConfigurationParameter(configuration , 0),  0.0, epsilon);
-  BOOST_REQUIRE_CLOSE(UniversalFileLoader::getConfigurationParameter(configuration , 1),  0.0, epsilon);
-  BOOST_REQUIRE_CLOSE(UniversalFileLoader::getConfigurationParameter(configuration , 2),  0.0, epsilon);
+  BOOST_REQUIRE_CLOSE(UniversalFileLoader::getConfigurationParameter(configuration, 0),  0.0, epsilon);
+  BOOST_REQUIRE_CLOSE(UniversalFileLoader::getConfigurationParameter(configuration, 1),  0.0, epsilon);
+  BOOST_REQUIRE_CLOSE(UniversalFileLoader::getConfigurationParameter(configuration, 2),  0.0, epsilon);
 }
 
 BOOST_AUTO_TEST_CASE (fillConfRecord_empty_string)
 {
-  ConfRecord expected = {-1, -1, JPetPM::SideA, -1, {-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0}};
-  ConfRecord result = {-1, -1, JPetPM::SideA, -1, {-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0}};
+  ConfRecord expected = {-1, -1, JPetPM::SideA, -1, {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0}};
+  ConfRecord result = {-1, -1, JPetPM::SideA, -1, {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0}};
   BOOST_REQUIRE(!UniversalFileLoader::fillConfRecord("", result));
   auto epsilon = 0.00001;
   BOOST_REQUIRE_EQUAL(expected.layer, result.layer);
@@ -90,7 +89,7 @@ BOOST_AUTO_TEST_CASE (fillConfRecord_empty_string)
 BOOST_AUTO_TEST_CASE (fillConfRecord_ok_string)
 {
   ConfRecord expected = {1, 2, JPetPM::SideB, 4, {0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7}};
-  ConfRecord result = {-1, -1, JPetPM::SideA, -1, {-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0}};
+  ConfRecord result = {-1, -1, JPetPM::SideA, -1, {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0}};
   BOOST_REQUIRE(UniversalFileLoader::fillConfRecord("1 2 B 4 0.0 1.1 2.2 3.3 4.4 5.5 6.6 7.7", result));
   auto epsilon = 0.00001;
   BOOST_REQUIRE_EQUAL(expected.layer, result.layer);
@@ -110,8 +109,8 @@ BOOST_AUTO_TEST_CASE (fillConfRecord_ok_string)
 
 BOOST_AUTO_TEST_CASE (fillConfRecord_bad_side)
 {
-  ConfRecord expected = {-1, -1, JPetPM::SideA, -1, {-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0}};
-  ConfRecord result = {-1, -1, JPetPM::SideA, -1, {-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0}};
+  ConfRecord expected = {-1, -1, JPetPM::SideA, -1, {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0}};
+  ConfRecord result = {-1, -1, JPetPM::SideA, -1, {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0}};
   BOOST_REQUIRE(!UniversalFileLoader::fillConfRecord("1 2 C 4 0.0 1.1 2.2 3.3 4.4 5.5 6.6 7.7", result));
   auto epsilon = 0.00001;
   BOOST_REQUIRE_EQUAL(expected.layer, result.layer);
@@ -130,8 +129,8 @@ BOOST_AUTO_TEST_CASE (fillConfRecord_bad_side)
 
 BOOST_AUTO_TEST_CASE (fillConfRecord_too_few_numbers)
 {
-  ConfRecord expected = {-1, -1, JPetPM::SideA, -1, {-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0}};
-  ConfRecord result = {-1, -1, JPetPM::SideA, -1, {-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0}};
+  ConfRecord expected = {-1, -1, JPetPM::SideA, -1, {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0}};
+  ConfRecord result = {-1, -1, JPetPM::SideA, -1, {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0}};
   BOOST_REQUIRE(!UniversalFileLoader::fillConfRecord("1 2 B 4 4.3", result));
   auto epsilon = 0.00001;
   BOOST_REQUIRE_EQUAL(expected.layer, result.layer);
@@ -168,21 +167,21 @@ BOOST_AUTO_TEST_CASE (areConfRecordsValid)
       .slot = 1,
       .side = JPetPM::SideA,
       .thresholdNumber = 1,
-      .parameters = std::vector<double>{0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}
+      .parameters = std::vector<double>{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
     },
     ConfRecord{
       .layer = 3,
       .slot = 2,
       .side = JPetPM::SideB,
       .thresholdNumber = 4,
-      .parameters = std::vector<double>{0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}
+      .parameters = std::vector<double>{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
     },
     ConfRecord{
       .layer = 2,
       .slot = 90,
       .side = JPetPM::SideB,
       .thresholdNumber = 2,
-      .parameters = std::vector<double>{0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}
+      .parameters = std::vector<double>{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
     }
   };
   BOOST_REQUIRE(UniversalFileLoader::areConfRecordsValid(records));
@@ -196,21 +195,21 @@ BOOST_AUTO_TEST_CASE (areConfRecordsValid_wrong)
       .slot = 1,
       .side = JPetPM::SideA,
       .thresholdNumber = 1,
-      .parameters = std::vector<double>{0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}
+      .parameters = std::vector<double>{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
     },
     ConfRecord{
       .layer = 3,
       .slot = 2,
       .side = JPetPM::SideB,
       .thresholdNumber = 4,
-      .parameters = std::vector<double>{0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}
+      .parameters = std::vector<double>{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
     },
     ConfRecord{
       .layer = 2,
       .slot = 90,
       .side = JPetPM::SideB,
       .thresholdNumber = 5, // threshold >4
-      .parameters = std::vector<double>{0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}
+      .parameters = std::vector<double>{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
     }
   };
   BOOST_REQUIRE(!UniversalFileLoader::areConfRecordsValid(records));
@@ -224,21 +223,21 @@ BOOST_AUTO_TEST_CASE (areConfRecordsValid_wrong2)
       .slot = 1,
       .side = JPetPM::SideA,
       .thresholdNumber = 1,
-      .parameters = std::vector<double>{0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}
+      .parameters = std::vector<double>{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
     },
     ConfRecord{
       .layer = 3,
       .slot = 2,
       .side = JPetPM::SideB,
       .thresholdNumber = 4,
-      .parameters = std::vector<double>{0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}
+      .parameters = std::vector<double>{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
     },
     ConfRecord{
       .layer = 4, // layer > 3
       .slot = 90,
       .side = JPetPM::SideB,
       .thresholdNumber = 5,
-      .parameters = std::vector<double>{0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}
+      .parameters = std::vector<double>{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
     }
   };
   BOOST_REQUIRE(!UniversalFileLoader::areConfRecordsValid(records));

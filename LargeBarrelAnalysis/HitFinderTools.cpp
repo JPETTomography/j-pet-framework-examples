@@ -25,10 +25,8 @@ using namespace std;
 /**
  * Method mapping Signals according to Scintillator they belong to
  */
-map<int, vector<JPetPhysSignal>> HitFinderTools::getSignalsSlotMap(
-                                const JPetTimeWindow* timeWindow)
+map<int, vector<JPetPhysSignal>> HitFinderTools::getSignalsSlotMap(const JPetTimeWindow* timeWindow)
 {
-
   map<int, vector<JPetPhysSignal>> signalSlotMap;
   if (!timeWindow) {
     WARNING("Pointer of Time Window object is not set, returning empty map");
@@ -198,8 +196,8 @@ int HitFinderTools::getProperChannel(const JPetPhysSignal& signal)
 void HitFinderTools::sortByTime(vector<JPetPhysSignal>& sigVec)
 {
   sort(sigVec.begin(), sigVec.end(),
-  [](const JPetPhysSignal & sig1, const JPetPhysSignal & sig2) {
-    return sig1.getTime() < sig2.getTime();
-  }
-      );
+    [](const JPetPhysSignal & sig1, const JPetPhysSignal & sig2) {
+      return sig1.getTime() < sig2.getTime();
+    }
+  );
 }

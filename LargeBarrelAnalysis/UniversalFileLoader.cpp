@@ -14,11 +14,11 @@
  */
 
 #include <boost/algorithm/string/predicate.hpp>
+#include "UniversalFileLoader.h"
 #include <boost/filesystem.hpp>
+#include "JPetLoggerInclude.h"
 #include <algorithm>
 #include <sstream>
-#include "UniversalFileLoader.h"
-#include "JPetLoggerInclude.h"
 
 /**
  * Method returns a patameter for given TOMB channel
@@ -72,24 +72,24 @@ UniversalFileLoader::TOMBChToParameter UniversalFileLoader::generateConfiguratio
       std::inserter(
         configurationParamteres,
         configurationParamteres.begin()),
-        [&tombMap] (const ConfRecord & confRecord) {
-          auto key = std::make_tuple(confRecord.layer, confRecord.slot, confRecord.side, confRecord.thresholdNumber);
-          auto parameters = confRecord.parameters;
-          if (tombMap.find(key) != tombMap.end()) {
-            auto tombCh = tombMap.at(key);
-            return std::make_pair(tombCh, parameters);
-          } else {
-            ERROR("No TOMB channel number in TOMB MAP for the configuration: layer = "
+    [&tombMap] (const ConfRecord & confRecord) {
+      auto key = std::make_tuple(confRecord.layer, confRecord.slot, confRecord.side, confRecord.thresholdNumber);
+      auto parameters = confRecord.parameters;
+      if (tombMap.find(key) != tombMap.end()) {
+        auto tombCh = tombMap.at(key);
+        return std::make_pair(tombCh, parameters);
+      } else {
+        ERROR("No TOMB channel number in TOMB MAP for the configuration: layer = "
               + std::to_string(confRecord.layer)
               + ", slot = " + std::to_string(confRecord.slot)
               + ", side = " + std::to_string(confRecord.side)
               + ", thresholdNumber = " + std::to_string(confRecord.thresholdNumber));
-            std::vector<double> tmp = {-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0};
-            return std::make_pair(-1, tmp);
-          }
-        }
-      );
-    } else ERROR("Empty configuration shall be returned!");
+        std::vector<double> tmp = {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0};
+        return std::make_pair(-1, tmp);
+      }
+    }
+    );
+  } else ERROR("Empty configuration shall be returned!");
   return configurationParamteres;
 }
 
@@ -134,17 +134,17 @@ bool UniversalFileLoader::areConfRecordsValid(
   const auto kMinThr = 1;
   const auto kMaxThr = 4;
   return ! std::any_of(
-    confRecords.begin(),
-    confRecords.end(),
-    [](const ConfRecord & confRecord) {
-      return ((confRecord.layer < kMinLayer) ||
-        (confRecord.layer > kMaxLayer) ||
-        (confRecord.slot < kMinSlot) ||
-        (confRecord.slot > kMaxSlot) ||
-        (confRecord.thresholdNumber < kMinThr) ||
-        (confRecord.thresholdNumber > kMaxThr));
-    }
-  );
+           confRecords.begin(),
+           confRecords.end(),
+  [](const ConfRecord & confRecord) {
+    return ((confRecord.layer < kMinLayer) ||
+            (confRecord.layer > kMaxLayer) ||
+            (confRecord.slot < kMinSlot) ||
+            (confRecord.slot > kMaxSlot) ||
+            (confRecord.thresholdNumber < kMinThr) ||
+            (confRecord.thresholdNumber > kMaxThr));
+  }
+         );
 }
 
 /**
@@ -162,12 +162,12 @@ bool UniversalFileLoader::fillConfRecord(
   int slot = -1;
   char side = 'A';
   int thr = -1;
-  vector<double> inputParameters = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+  vector<double> inputParameters = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
   istringstream stream(input);
   stream >> layer >> slot >> side >> thr
-  >> inputParameters.at(0) >> inputParameters.at(1) >> inputParameters.at(2)
-  >> inputParameters.at(3) >> inputParameters.at(4) >> inputParameters.at(5)
-  >> inputParameters.at(6) >> inputParameters.at(7);
+         >> inputParameters.at(0) >> inputParameters.at(1) >> inputParameters.at(2)
+         >> inputParameters.at(3) >> inputParameters.at(4) >> inputParameters.at(5)
+         >> inputParameters.at(6) >> inputParameters.at(7);
   if (stream.fail() || (side != 'A' && side != 'B')) return false;
   else {
     outRecord.layer = layer;

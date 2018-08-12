@@ -64,6 +64,6 @@ bool SDARecoAmplitudeCalc::terminate()
   if (fEventNb != 0) {
     goodPercent = (fEventNb - fBadSignals) * 100.0 / fEventNb;
   }
-  INFO(Form("Amplitude calculation complete \nAmount of bad signals: %d \n %f %% of data is good" , fBadSignals, goodPercent) );
+  INFO(Form("Amplitude calculation complete \nAmount of bad signals: %d \n %f %% of data is good", fBadSignals, goodPercent) );
   return true;
 }

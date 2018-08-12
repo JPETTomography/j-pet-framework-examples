@@ -16,13 +16,13 @@
 #ifndef EVENTCATEGORIZERCOSMIC_H
 #define EVENTCATEGORIZERCOSMIC_H
 
-#include <vector>
-#include <JPetHit/JPetHit.h>
-#include <JPetUserTask/JPetUserTask.h>
 #include <JPetStatistics/JPetStatistics.h>
-#include <JPetHit/JPetHit.h>
-#include <JPetEvent/JPetEvent.h>
 #include <JPetEventType/JPetEventType.h>
+#include <JPetUserTask/JPetUserTask.h>
+#include <JPetEvent/JPetEvent.h>
+#include <JPetHit/JPetHit.h>
+#include <JPetHit/JPetHit.h>
+#include <vector>
 
 class JPetWriter;
 
@@ -30,21 +30,21 @@ class JPetWriter;
 #	define override
 #endif
 
-class EventCategorizerCosmic : public JPetUserTask{
-public:  
-	EventCategorizerCosmic(const char * name);
-	virtual ~EventCategorizerCosmic(){}
-	virtual bool init() override;
-	virtual bool exec() override;
-	virtual bool terminate() override;
-	JPetEvent cosmicAnalysis( std::vector<JPetHit> hits );
+class EventCategorizerCosmic: public JPetUserTask
+{
+public:
+  EventCategorizerCosmic(const char* name);
+  virtual ~EventCategorizerCosmic() {}
+  virtual bool init() override;
+  virtual bool exec() override;
+  virtual bool terminate() override;
+  JPetEvent cosmicAnalysis(std::vector<JPetHit> hits);
 
 protected:
-	double fMinCosmicTOT = 55000.0;
-	const std::string kMinCosmicTOTParamKey = "EventCategorizer_MinCosmicTOT_float";
-	
-	void saveEvents(const std::vector<JPetEvent>& event);
-	bool fSaveControlHistos = true;
+  double fMinCosmicTOT = 55000.0;
+  const std::string kMinCosmicTOTParamKey = "EventCategorizer_MinCosmicTOT_float";
+  void saveEvents(const std::vector<JPetEvent>& event);
+  bool fSaveControlHistos = true;
 };
 
-#endif /*  !EVENTCATEGORIZERCOSMIC_H */
+#endif /* !EVENTCATEGORIZERCOSMIC_H */

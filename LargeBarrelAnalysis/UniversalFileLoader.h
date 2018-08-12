@@ -24,9 +24,9 @@
  * and methods of reading and validating constatns.
  */
 
-#include <map>
-#include <string>
 #include "JPetPM/JPetPM.h"
+#include <string>
+#include <map>
 
 /**
  * POD structure, allowed values for fields (-1 corresponds to not set)

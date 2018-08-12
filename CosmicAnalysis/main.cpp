@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2017 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -13,13 +13,14 @@
  *  @file main.cpp
  */
 
-#include <JPetManager/JPetManager.h>
 #include "../LargeBarrelAnalysis/TimeWindowCreator.h"
-#include "../LargeBarrelAnalysis/SignalFinder.h"
 #include "../LargeBarrelAnalysis/SignalTransformer.h"
-#include "../LargeBarrelAnalysis/HitFinder.h"
+#include "../LargeBarrelAnalysis/SignalFinder.h"
 #include "../LargeBarrelAnalysis/EventFinder.h"
+#include "../LargeBarrelAnalysis/HitFinder.h"
+#include <JPetManager/JPetManager.h>
 #include "EventCategorizerCosmic.h"
+
 using namespace std;
 
 int main(int argc, const char* argv[])

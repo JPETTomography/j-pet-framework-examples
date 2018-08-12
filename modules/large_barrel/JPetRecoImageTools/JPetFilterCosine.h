@@ -30,8 +30,8 @@ public:
   }
 
 private:
-  JPetFilterCosine(const JPetFilterCosine &) = delete;
-  JPetFilterCosine &operator=(const JPetFilterCosine &) = delete;
+  JPetFilterCosine(const JPetFilterCosine&) = delete;
+  JPetFilterCosine& operator=(const JPetFilterCosine&) = delete;
 };
 
 #endif /*  !_JPetFilterCosine_H_ */

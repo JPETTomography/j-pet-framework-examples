@@ -18,9 +18,9 @@
 #ifndef _JPETANALYSISMODULE_DRAWALLCHARGES_H_
 #define _JPETANALYSISMODULE_DRAWALLCHARGES_H_
 
-#include <map>
-#include <TCanvas.h>
 #include "JPetUserTask/JPetUserTask.h"
+#include <TCanvas.h>
+#include <map>
 
 class SDARecoDrawAllCharges: public JPetUserTask
 {

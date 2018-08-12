@@ -25,7 +25,10 @@ class JPetFilterHamming : public JPetFilterInterface
 {
 public:
   JPetFilterHamming() {}
-  JPetFilterHamming(double alphaValue) { alpha = alphaValue; }
+  JPetFilterHamming(double alphaValue)
+  {
+    alpha = alphaValue;
+  }
   virtual double operator()(double radius) override
   {
     return radius * (alpha + (1. - alpha * std::cos(2. * M_PI * radius)));
@@ -33,8 +36,8 @@ public:
 
 private:
   double alpha = 0.54;
-  JPetFilterHamming(const JPetFilterHamming &) = delete;
-  JPetFilterHamming &operator=(const JPetFilterHamming &) = delete;
+  JPetFilterHamming(const JPetFilterHamming&) = delete;
+  JPetFilterHamming& operator=(const JPetFilterHamming&) = delete;
 };
 
 #endif /*  !_JPetFilterHamming_H_ */

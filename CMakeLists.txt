@@ -1,14 +1,12 @@
 ################################################################################
-## J-PET tools and examples
-##
-## Author: Adam Strzelecki <adam.strzelecki@uj.edu.pl>
+## Set of projects based on J-PET Framework
+## Created by J-PET Framework developers 2016-2018
 ##
 ## Description:
-##   Builds J-PET tools and examples depending on Framework.
+##   Script for building J-PET Framework, J-PET MLEM and all the examples
 ################################################################################
 
 cmake_minimum_required(VERSION 2.6)
-
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/j-pet-framework/cmake)
 
 ################################################################################
@@ -18,11 +16,11 @@ include_directories(j-pet-framework ${Framework_INCLUDE_DIRS})
 add_definitions(${Framework_DEFINITIONS})
 
 ################################################################################
-# Add MLEM submodule
+## Add MLEM submodule
 add_subdirectory(j-pet-mlem)
-#SYSTEM keyword is a trick to disable all warnings from the j-pet-mlem package.
-#This code invokes some horrible warnings that we deliberately turn off, to
-#keep our build process clean.
+## SYSTEM keyword is a trick to disable all warnings from the j-pet-mlem package.
+## This code invokes some horrible warnings that we deliberately turn off,
+## in order to keep our build process clean.
 include_directories(SYSTEM j-pet-mlem ${MLEM_INCLUDE_DIRS})
 
 ################################################################################
@@ -38,7 +36,7 @@ if(APPLE)
 endif()
 
 ################################################################################
-## Download input and config files
+## Download input and configuration files
 ## The script shouldn't do anything if the data is present and correct.
 set(DOWNLOAD_MORE_DATA ${CMAKE_CURRENT_SOURCE_DIR}/download_reformed_data.sh ${CMAKE_CURRENT_SOURCE_DIR})
 execute_process(COMMAND ${DOWNLOAD_MORE_DATA})
@@ -48,15 +46,11 @@ execute_process(COMMAND ${DOWNLOAD_MORE_DATA})
 add_subdirectory(LargeBarrelAnalysis)
 add_subdirectory(VelocityCalibration)
 add_subdirectory(NewAnalysisTemplate)
+add_subdirectory(ImageReconstruction)
 add_subdirectory(ScopeLoaderExample)
 add_subdirectory(TimeCalibration)
-add_subdirectory(ScopeAnalysis)
-add_subdirectory(modules)
-add_subdirectory(ImageReconstruction)
-add_subdirectory(MCGeantAnalysis)
 add_subdirectory(PhysicAnalysis)
 add_subdirectory(CosmicAnalysis)
+add_subdirectory(ScopeAnalysis)
 add_subdirectory(Imaging)
-
-
-
+add_subdirectory(modules)

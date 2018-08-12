@@ -19,8 +19,9 @@
 #ifndef _JPETANALYSISMODULE_SDARECOOFFSETCALC_H_
 #define _JPETANALYSISMODULE_SDARECOOFFSETCALC_H_
 
-#include <TCanvas.h>
 #include "JPetUserTask/JPetUserTask.h"
+#include <TCanvas.h>
+
 class SDARecoOffsetsCalc: public JPetUserTask
 {
 public:
@@ -32,7 +33,7 @@ public:
 private:
   double fOffset = 0;
   int fBadSignals = 0;
-  int fCurrentEventNumber = 0; 
+  int fCurrentEventNumber = 0;
 };
 
 #endif

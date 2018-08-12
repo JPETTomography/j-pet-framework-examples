@@ -16,13 +16,13 @@
 #ifndef TimeWindowCreator_H
 #define TimeWindowCreator_H
 
-#include <JPetUserTask/JPetUserTask.h>
-#include <JPetTimeWindow/JPetTimeWindow.h>
-#include <JPetParamBank/JPetParamBank.h>
 #include <JPetParamManager/JPetParamManager.h>
 #include <JPetTOMBChannel/JPetTOMBChannel.h>
-#include <set>
+#include <JPetTimeWindow/JPetTimeWindow.h>
+#include <JPetParamBank/JPetParamBank.h>
+#include <JPetUserTask/JPetUserTask.h>
 #include <map>
+#include <set>
 
 class JPetWriter;
 
@@ -43,30 +43,30 @@ class JPetWriter;
 class TimeWindowCreator: public JPetUserTask
 {
 public:
-	TimeWindowCreator(const char* name);
-	virtual ~TimeWindowCreator();
-	virtual bool init() override;
-	virtual bool exec() override;
-	virtual bool terminate() override;
+  TimeWindowCreator(const char* name);
+  virtual ~TimeWindowCreator();
+  virtual bool init() override;
+  virtual bool exec() override;
+  virtual bool terminate() override;
 
 protected:
-	bool filter(const JPetTOMBChannel& channel) const;
-	JPetSigCh generateSigCh(const JPetTOMBChannel& channel, JPetSigCh::EdgeType edge) const;
-	const std::string kMainStripKey = "TimeWindowCreator_MainStrip_int";
-	const std::string kMaxTimeParamKey = "TimeWindowCreator_MaxTime_float";
-	const std::string kMinTimeParamKey = "TimeWindowCreator_MinTime_float";
-	const std::string kTimeCalibFileParamKey = "TimeCalibLoader_ConfigFile_std::string";
-	const std::string kThresholdFileParamKey = "ThresholdLoader_ConfigFile_std::string";
-	const std::string kSaveControlHistosParamKey = "Save_Cotrol_Histograms_bool";
-	std::map<unsigned int, std::vector<double>> fTimeCalibration;
-	std::map<unsigned int, std::vector<double>> fThresholds;
-	std::pair<int,int> fMainStrip;
-	std::set<int> fAllowedChannels;
-	long long int fCurrEventNumber = 0;
-	bool fSaveControlHistos = true;
-	bool fMainStripSet = false;
-	double fMinTime = -1.e6;
-	double fMaxTime = 0.;
+  bool filter(const JPetTOMBChannel& channel) const;
+  JPetSigCh generateSigCh(const JPetTOMBChannel& channel, JPetSigCh::EdgeType edge) const;
+  const std::string kMainStripKey = "TimeWindowCreator_MainStrip_int";
+  const std::string kMaxTimeParamKey = "TimeWindowCreator_MaxTime_float";
+  const std::string kMinTimeParamKey = "TimeWindowCreator_MinTime_float";
+  const std::string kTimeCalibFileParamKey = "TimeCalibLoader_ConfigFile_std::string";
+  const std::string kThresholdFileParamKey = "ThresholdLoader_ConfigFile_std::string";
+  const std::string kSaveControlHistosParamKey = "Save_Cotrol_Histograms_bool";
+  std::map<unsigned int, std::vector<double>> fTimeCalibration;
+  std::map<unsigned int, std::vector<double>> fThresholds;
+  std::pair<int, int> fMainStrip;
+  std::set<int> fAllowedChannels;
+  long long int fCurrEventNumber = 0;
+  bool fSaveControlHistos = true;
+  bool fMainStripSet = false;
+  double fMinTime = -1.e6;
+  double fMaxTime = 0.;
 };
 
 #endif /*  !TimeWindowCreator_H */

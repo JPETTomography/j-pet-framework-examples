@@ -27,17 +27,17 @@ bool SignalTransformer::init()
 
 bool SignalTransformer::exec()
 {
-  if(auto & timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
+  if (auto& timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     uint n = timeWindow->getNumberOfEvents();
-    for(uint i=0;i<n;++i){
-      const JPetRawSignal & currSignal = dynamic_cast<const JPetRawSignal&>(timeWindow->operator[](i));
+    for (uint i = 0; i < n; ++i) {
+      const JPetRawSignal& currSignal = dynamic_cast<const JPetRawSignal&>(timeWindow->operator[](i));
       // Make Reco Signal from Raw Signal
       auto recoSignal = createRecoSignal(currSignal);
       // Make Phys Signal from Reco Signal and save
       auto physSignal = createPhysSignal(recoSignal);
       fOutputEvents->add<JPetPhysSignal>(physSignal);
     }
-  }else return false;
+  } else return false;
   return true;
 }
 
@@ -74,7 +74,7 @@ JPetPhysSignal SignalTransformer::createPhysSignal(const JPetRecoSignal& recoSig
   physSignal.setPhe(-1.0);
   physSignal.setQualityOfPhe(0.0);
   std::vector<JPetSigCh> leadingSigChVec = recoSignal.getRawSignal().getPoints(
-  JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+        JPetSigCh::Leading, JPetRawSignal::ByThrNum);
   physSignal.setTime(leadingSigChVec.at(0).getValue());
   physSignal.setQualityOfTime(0.0);
   return physSignal;

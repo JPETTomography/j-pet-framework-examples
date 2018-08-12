@@ -13,18 +13,19 @@
  *  @file main.cpp
  */
 
-#include <JPetMakePhysSignal/SDAMakePhysSignals.h>
-#include <JPetManager/JPetManager.h>
-#include <JPetMatchHits/SDAMatchHits.h>
-#include <JPetMatchLORs/SDAMatchLORs.h>
-#include <JPetRecoAmplitudeCalc/SDARecoAmplitudeCalc.h>
-#include <JPetRecoChargeCalc/SDARecoChargeCalc.h>
 #include <JPetRecoDrawAllCharges/SDARecoDrawAllCharges.h>
+#include <JPetRecoAmplitudeCalc/SDARecoAmplitudeCalc.h>
+#include <JPetMakePhysSignal/SDAMakePhysSignals.h>
 #include <JPetRecoOffsetCalc/SDARecoOffsetsCalc.h>
+#include <JPetRecoChargeCalc/SDARecoChargeCalc.h>
+#include <JPetMatchLORs/SDAMatchLORs.h>
+#include <JPetMatchHits/SDAMatchHits.h>
+#include <JPetManager/JPetManager.h>
 
 using namespace std;
 
-int main(int argc, const char* argv[]) {
+int main(int argc, const char* argv[])
+{
   try {
     JPetManager& manager = JPetManager::getManager();
 

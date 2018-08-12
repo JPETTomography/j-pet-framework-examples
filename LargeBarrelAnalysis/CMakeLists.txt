@@ -1,10 +1,9 @@
 ################################################################################
-## J-PET tool project using J-PET framework
-##
-## Author: Adam Strzelecki <adam.strzelecki@uj.edu.pl>
+## Data analysis project based on J-PET Framework
+## Created by J-PET Framework developers 2016-2018
 ##
 ## Description:
-##   Builds project depending on J-PET framework.
+##   Basic reconstruction for Large Barrel setup
 ################################################################################
 
 cmake_minimum_required(VERSION 2.6)
@@ -13,11 +12,12 @@ cmake_minimum_required(VERSION 2.6)
 ## Project name
 set(projectName LargeBarrelAnalysis)
 
+## Auxiliary files
 set(AUXILIARY_FILES
   conf_trb3.xml
   userParams.json
   dummyCalibration.txt
-  README
+  README.md
   run.sh
 )
 
@@ -27,7 +27,7 @@ set(ROOT_SCRIPTS
 )
 
 ################################################################################
-## Build targets
+## Binary, header and source files definitions
 set(projectBinary ${projectName}.x)
 project(${projectName} CXX)
 
@@ -49,13 +49,12 @@ target_link_libraries(${projectBinary} JPetFramework)
 add_custom_target(clean_data_largebarrelextended
   COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root)
 
-set(copy_depends) #create variable for list with depends files path
+## Create variable for list with depends files path
+set(copy_depends)
 
-################################################################################
 ## Copy the example auxiliary files
 foreach( file_i ${AUXILIARY_FILES})
   list(APPEND copy_depends ${CMAKE_CURRENT_BINARY_DIR}/${file_i})
-
   if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${file_i})
     set(CP_CMD copy_directory)
   else()
@@ -68,7 +67,6 @@ foreach( file_i ${AUXILIARY_FILES})
     )
 endforeach( file_i )
 
-################################################################################
 ## Copy the ROOT scripts
 foreach( file_i ${ROOT_SCRIPTS})
   list(APPEND copy_depends ${CMAKE_CURRENT_BINARY_DIR}/${file_i})
@@ -79,7 +77,6 @@ foreach( file_i ${ROOT_SCRIPTS})
     )
 endforeach( file_i )
 
-################################################################################
 ## Add new target that depends on copied files
 add_custom_target(copy_files DEPENDS ${copy_depends})
 ## Add dependencies between building project and copy files

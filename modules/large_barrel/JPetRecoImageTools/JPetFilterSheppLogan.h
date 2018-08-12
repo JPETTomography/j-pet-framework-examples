@@ -31,8 +31,8 @@ public:
   }
 
 private:
-  JPetFilterSheppLogan(const JPetFilterSheppLogan &) = delete;
-  JPetFilterSheppLogan &operator=(const JPetFilterSheppLogan &) = delete;
+  JPetFilterSheppLogan(const JPetFilterSheppLogan&) = delete;
+  JPetFilterSheppLogan& operator=(const JPetFilterSheppLogan&) = delete;
 };
 
 #endif /*  !_JPetFilterSheppLogan_H_ */

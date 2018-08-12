@@ -13,17 +13,18 @@
  *  @file main.cpp
  */
 
-#include "EventCategorizer.h"
-#include "EventFinder.h"
-#include "HitFinder.h"
-#include "SignalFinder.h"
+#include <JPetManager/JPetManager.h>
 #include "SignalTransformer.h"
 #include "TimeWindowCreator.h"
-#include <JPetManager/JPetManager.h>
+#include "EventCategorizer.h"
+#include "SignalFinder.h"
+#include "EventFinder.h"
+#include "HitFinder.h"
 
 using namespace std;
 
-int main(int argc, const char* argv[]) {
+int main(int argc, const char* argv[])
+{
   try {
     JPetManager& manager = JPetManager::getManager();
 

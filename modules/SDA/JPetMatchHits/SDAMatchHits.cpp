@@ -15,16 +15,10 @@
 
 #include "SDAMatchHits.h"
 using namespace std;
-SDAMatchHits::SDAMatchHits(const char* name)
-  : JPetUserTask(name),
-    fMatched(0),
-    fCurrentEventNumber(0)
-{
-}
 
-SDAMatchHits::~SDAMatchHits()
-{
-}
+SDAMatchHits::SDAMatchHits(const char* name): JPetUserTask(name), fMatched(0), fCurrentEventNumber(0){}
+
+SDAMatchHits::~SDAMatchHits(){}
 
 bool SDAMatchHits::init()
 {
@@ -56,7 +50,7 @@ bool SDAMatchHits::exec()
 bool SDAMatchHits::terminate()
 {
   int fEventNb = fCurrentEventNumber;
-  INFO(Form("Matching complete \nAmount of fMatched hits: %d out of initial %d signals" , fMatched, fEventNb) );
+  INFO(Form("Matching complete \nAmount of fMatched hits: %d out of initial %d signals", fMatched, fEventNb) );
   return true;
 }
 
