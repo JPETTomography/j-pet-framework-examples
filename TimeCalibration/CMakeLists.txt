@@ -101,4 +101,4 @@ endforeach(file_i)
 add_custom_target(copy_files_${projectName} DEPENDS ${copy_depends})
 
 ## Add dependencies between building project and copy files
-add_dependencies(${projectBinary} copy_files) #add dependencies between building project and copy files
+add_dependencies(${projectBinary} copy_files)
