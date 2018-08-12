@@ -266,7 +266,7 @@ double EventCategorizerTools::calcDistanceOfSurfaceAndCenter(const JPetHit& firs
 * Method for determining type of event - back to back 2 gamma
 */
 bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats,
-    bool saveHistos, double b2bSlotThetaDiff, double b2bTimeDiff, double b2bDistanceFromCenter)
+    bool saveHistos, double b2bSlotThetaDiff, double b2bTimeDiff)
 {
   if (event.getHits().size() < 2) return false;
   for (uint i = 0; i < event.getHits().size(); i++) {
@@ -288,7 +288,7 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
         stats.getHisto1D("DecayInto2_Angles")->Fill(thetaDiff);
         stats.getHisto1D("DecayInto2_TimeDiff")->Fill(timeDiff);
       }
-      if (fabs( thetaDiff - 180.0 ) < b2bSlotThetaDiff && timeDiff < b2bTimeDiff) {
+      if (fabs(thetaDiff - 180.0) < b2bSlotThetaDiff && timeDiff < b2bTimeDiff) {
         if (saveHistos) {
           TVector3 annhilationPoint = calculateAnnihilationPoint(firstHit, secondHit);
           stats.getHisto2D("DecayInto2_XY")->Fill(annhilationPoint.X(), annhilationPoint.Y());

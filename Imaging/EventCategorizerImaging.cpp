@@ -250,24 +250,22 @@ JPetEvent EventCategorizerImaging::imageReconstruction(vector<JPetHit> hits)
   JPetEvent imagingEvent;
   for (unsigned i = 0; i < hits.size(); i++) {
     double TOTofHit = EventCategorizerTools::calculateTOT(hits[i]);
-    if (TOTofHit >= fMinAnnihilationTOT
-        && TOTofHit <= fMaxAnnihilationTOT
-        && fabs(hits[i].getPosZ()) < fMaxZPos) {
+    if (TOTofHit >= fMinAnnihilationTOT && TOTofHit <= fMaxAnnihilationTOT && fabs(hits[i].getPosZ()) < fMaxZPos) {
       imagingEvent.addHit(hits[i]);
     }
   }
   if (EventCategorizerTools::checkFor2Gamma(imagingEvent, getStatistics(),
-      fSaveControlHistos, fBackToBackAngleWindow, fMaxTimeDiff, fMaxDistOfDecayPlaneFromCenter)) {
-    if (imagingEvent.isOnlyTypeOf(JPetEventType::kUnknown) {
-    imagingEvent.setEventType(JPetEventType::k2Gamma);
+      fSaveControlHistos, fBackToBackAngleWindow, fMaxTimeDiff)) {
+    if (imagingEvent.isOnlyTypeOf(JPetEventType::kUnknown)) {
+      imagingEvent.setEventType(JPetEventType::k2Gamma);
     } else {
       imagingEvent.addEventType(JPetEventType::k2Gamma);
     }
   }
   if (EventCategorizerTools::checkFor3Gamma(imagingEvent, getStatistics(),
       fSaveControlHistos, fDecayInto3MinAngle, fMaxTimeDiff, fMaxDistOfDecayPlaneFromCenter)) {
-    if (imagingEvent.isOnlyTypeOf(JPetEventType::kUnknown) {
-    imagingEvent.setEventType(JPetEventType::k3Gamma);
+    if (imagingEvent.isOnlyTypeOf(JPetEventType::kUnknown)) {
+      imagingEvent.setEventType(JPetEventType::k3Gamma);
     } else {
       imagingEvent.addEventType(JPetEventType::k3Gamma);
     }
