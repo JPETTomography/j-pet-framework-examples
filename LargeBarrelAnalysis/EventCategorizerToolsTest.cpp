@@ -202,7 +202,7 @@ BOOST_AUTO_TEST_CASE(checkForPromptTest_checkTOTCalc)
   rawSig3B.addPoint(sigCh7);
   rawSig3B.addPoint(sigCh8);
 
- 	JPetRecoSignal recoSignal1A;
+  JPetRecoSignal recoSignal1A;
   JPetRecoSignal recoSignal1B;
   JPetRecoSignal recoSignal2A;
   JPetRecoSignal recoSignal2B;
@@ -273,8 +273,8 @@ BOOST_AUTO_TEST_CASE(checkForScatterTest)
   JPetHit secondHit;
   firstHit.setTime(25.7);
   secondHit.setTime(25.2);
-  firstHit.setPos(10000.0,10000.0,10000.0);
-  secondHit.setPos(-10000.0,-10000.0,-10000.0);
+  firstHit.setPos(10000.0, 10000.0, 10000.0);
+  secondHit.setPos(-10000.0, -10000.0, -10000.0);
 
   JPetEvent event;
   event.addHit(firstHit);
@@ -343,8 +343,8 @@ BOOST_AUTO_TEST_CASE(pointAtCenter)
   JPetHit secondHit;
   firstHit.setTime(300.0);
   secondHit.setTime(300.0);
-  firstHit.setPos(5.0,5.0,0.0);
-  secondHit.setPos(-5.0,-5.0,0.0);
+  firstHit.setPos(5.0, 5.0, 0.0);
+  secondHit.setPos(-5.0, -5.0, 0.0);
   firstHit.setBarrelSlot(firstSlot);
   secondHit.setBarrelSlot(secondSlot);
   TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit);
@@ -356,14 +356,14 @@ BOOST_AUTO_TEST_CASE(pointAtCenter)
 BOOST_AUTO_TEST_CASE(pointAt0x_5y_0z)
 {
   JPetHit firstHit;
-  firstHit.setTime(1333.0/2.0);
-  firstHit.setPos(0.0,45.0,0.0);
+  firstHit.setTime(1333.0 / 2.0);
+  firstHit.setPos(0.0, 45.0, 0.0);
   JPetBarrelSlot firstSlot(1, true, "first", 90, 1);
   firstHit.setBarrelSlot( firstSlot );
 
   JPetHit secondHit;
-  secondHit.setTime(1667.0/2.0);
-  secondHit.setPos(0.0,-45.0,0.0);
+  secondHit.setTime(1667.0 / 2.0);
+  secondHit.setPos(0.0, -45.0, 0.0);
   JPetBarrelSlot secondSlot(2, true, "second", 270, 2);
   secondHit.setBarrelSlot(secondSlot);
 
@@ -376,14 +376,14 @@ BOOST_AUTO_TEST_CASE(pointAt0x_5y_0z)
 BOOST_AUTO_TEST_CASE(pointAt0x_m5y_0z)
 {
   JPetHit firstHit;
-  firstHit.setTime(1333.0/2.0);
-  firstHit.setPos(0.0,-45.0,0.0);
+  firstHit.setTime(1333.0 / 2.0);
+  firstHit.setPos(0.0, -45.0, 0.0);
   JPetBarrelSlot firstSlot(1, true, "first", 270, 1);
   firstHit.setBarrelSlot( firstSlot );
 
   JPetHit secondHit;
-  secondHit.setTime(1667.0/2.0);
-  secondHit.setPos(0.0,45.0,0.0);
+  secondHit.setTime(1667.0 / 2.0);
+  secondHit.setPos(0.0, 45.0, 0.0);
   JPetBarrelSlot secondSlot(2, true, "second", 90, 2);
   secondHit.setBarrelSlot(secondSlot);
 

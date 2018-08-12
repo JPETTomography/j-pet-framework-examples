@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2017 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -22,8 +22,8 @@
 #define override
 #endif
 
-#include "JPetUserTask/JPetUserTask.h"
 #include "JPetGeomMapping/JPetGeomMapping.h"
+#include "JPetUserTask/JPetUserTask.h"
 #include "SinogramCreatorTools.h"
 #include "JPetHit/JPetHit.h"
 #include <vector>
@@ -46,21 +46,21 @@
 class SinogramCreator : public JPetUserTask
 {
 public:
-  SinogramCreator(const char *name);
+  SinogramCreator(const char* name);
   virtual ~SinogramCreator();
   virtual bool init() override;
   virtual bool exec() override;
   virtual bool terminate() override;
 
 private:
-  SinogramCreator(const SinogramCreator &) = delete;
-  SinogramCreator &operator=(const SinogramCreator &) = delete;
+  SinogramCreator(const SinogramCreator&) = delete;
+  SinogramCreator& operator=(const SinogramCreator&) = delete;
 
   void setUpOptions();
   bool checkSplitRange(float firstZ, float secondZ, int i);
   using SinogramResultType = std::vector<std::vector<unsigned int>>;
 
-  SinogramResultType **fSinogram = nullptr;
+  SinogramResultType** fSinogram = nullptr;
 
   const std::string kOutFileNameKey = "SinogramCreator_OutFileName_std::string";
   const std::string kReconstructionDistanceAccuracy = "SinogramCreator_ReconstructionDistanceAccuracy_float";
@@ -73,8 +73,8 @@ private:
   std::vector<std::pair<float, float>> fZSplitRange;
 
   std::string fOutFileName = "sinogram";
-  int *fMaxValueInSinogram = nullptr; // to fill later in output file
-  int *fCurrentValueInSinogram = nullptr;
+  int* fMaxValueInSinogram = nullptr; // to fill later in output file
+  int* fCurrentValueInSinogram = nullptr;
 
   float fMaxReconstructionLayerRadius = 0.f;    //in cm
   float fReconstructionDistanceAccuracy = 0.1f; //in cm, 1mm accuracy

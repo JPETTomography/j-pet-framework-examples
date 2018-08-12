@@ -19,8 +19,8 @@
 #ifndef _JPETANALYSISMODULE_SDACHARGE_H_
 #define _JPETANALYSISMODULE_SDACHARGE_H_
 
-#include <TCanvas.h>
 #include "JPetUserTask/JPetUserTask.h"
+#include <TCanvas.h>
 
 class SDARecoChargeCalc: public JPetUserTask
 {
@@ -36,4 +36,3 @@ private:
 };
 
 #endif
-

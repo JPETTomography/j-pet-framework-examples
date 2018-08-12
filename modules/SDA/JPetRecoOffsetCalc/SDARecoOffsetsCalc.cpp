@@ -13,10 +13,10 @@
  *  @file SDARecoOffsetsCalc.cpp
  */
 
-#include <sstream>
-#include <stdlib.h>
 #include "../../tools/JPetRecoSignalTools/JPetRecoSignalTools.h"
 #include "SDARecoOffsetsCalc.h"
+#include <stdlib.h>
+#include <sstream>
 
 SDARecoOffsetsCalc::SDARecoOffsetsCalc(const char* name)
   : JPetUserTask(name), fCurrentEventNumber(0) {}
@@ -58,6 +58,6 @@ bool SDARecoOffsetsCalc::terminate()
   int fEventNb = fCurrentEventNumber;
   double goodPercent = (fEventNb - fBadSignals) * 100.0 / fEventNb;
   INFO(Form("Amount of signals in input file: %d", fEventNb ) );
-  INFO(Form("Offset calculation complete \nAmount of bad signals: %d \n %f %% of data is good" , fBadSignals, goodPercent) );
+  INFO(Form("Offset calculation complete \nAmount of bad signals: %d \n %f %% of data is good", fBadSignals, goodPercent) );
   return true;
 }

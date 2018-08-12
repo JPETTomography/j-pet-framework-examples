@@ -15,12 +15,8 @@
 
 #include "SDAMatchLORs.h"
 using namespace std;
-SDAMatchLORs::SDAMatchLORs(const char* name) :
-  JPetUserTask(name),
-  fMatched(0),
-  fCurrentEventNumber(0)
-{
-}
+
+SDAMatchLORs::SDAMatchLORs(const char* name): JPetUserTask(name), fMatched(0), fCurrentEventNumber(0){}
 
 SDAMatchLORs::~SDAMatchLORs() {}
 
@@ -54,9 +50,9 @@ bool SDAMatchLORs::exec()
 bool SDAMatchLORs::terminate()
 {
   int fEventNb = fCurrentEventNumber;
-  INFO(Form("Matching complete \nAmount of LORs mathed: %d out of %d hits" , fMatched, fEventNb) );
+  INFO(Form("Matching complete \nAmount of LORs mathed: %d out of %d hits", fMatched, fEventNb) );
   double goodPercent = fMatched * 100.0 / fEventNb ;
-  INFO(Form("%f %% of data was matched \n " , goodPercent) );
+  INFO(Form("%f %% of data was matched \n ", goodPercent) );
   return true;
 }
 

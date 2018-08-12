@@ -19,11 +19,11 @@
 #ifndef _JPETANALYSISMODULE_SDAMATCHHITS_H_
 #define _JPETANALYSISMODULE_SDAMATCHHITS_H_
 
-#include <map>
-#include <TCanvas.h>
+#include "JPetPhysSignal/JPetPhysSignal.h"
 #include "JPetUserTask/JPetUserTask.h"
 #include "JPetHit/JPetHit.h"
-#include "JPetPhysSignal/JPetPhysSignal.h"
+#include <TCanvas.h>
+#include <map>
 
 class SDAMatchHits: public JPetUserTask
 {

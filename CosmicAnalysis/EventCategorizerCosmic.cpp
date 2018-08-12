@@ -29,24 +29,28 @@ bool EventCategorizerCosmic::init()
 {
   INFO("Cosmic streaming started.");
 
+  INFO("Event categorization started.");
+
   fOutputEvents = new JPetTimeWindow("JPetEvent");
 
-  if (isOptionSet(fParams.getOptions(), kMinCosmicTOTParamKey)) {
-	 fMinCosmicTOT = getOptionAsFloat(fParams.getOptions(), kMinCosmicTOTParamKey);
+  if ( isOptionSet(fParams.getOptions(), kMinCosmicTOTParamKey) ) {
+    fMinCosmicTOT = getOptionAsFloat(fParams.getOptions(), kMinCosmicTOTParamKey);
+  } else {
+    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMinCosmicTOTParamKey.c_str(), fMinCosmicTOT));
   }
 
   if (fSaveControlHistos) {
     getStatistics().createHistogram(
-	      new TH1F("Cosmic_TOT", "TOT of Cosmic Hits", 1000, -0.5, 99.5)
+      new TH1F("Cosmic_TOT", "TOT of Cosmic Hits", 1000, -0.5, 99.5)
     );
     getStatistics().getHisto1D("Cosmic_TOT")->SetXTitle("TOT [ns]");
     getStatistics().getHisto1D("Cosmic_TOT")->SetYTitle("Counts");
 
-	  getStatistics().createHistogram(
-	     new TH1F("Cosmic_Hits_in_event", "Number of Cosmic Hits in Event", 50, -0.5, 49.5)
-	  );
+    getStatistics().createHistogram(
+      new TH1F("Cosmic_Hits_in_event", "Number of Cosmic Hits in Event", 50, -0.5, 49.5)
+    );
     getStatistics().getHisto1D("Cosmic_Hits_in_event")->SetXTitle("Number of Cosmic Hits in Event");
-	  getStatistics().getHisto1D("Cosmic_Hits_in_event")->SetYTitle("Counts");
+    getStatistics().getHisto1D("Cosmic_Hits_in_event")->SetYTitle("Counts");
   }
   return true;
 }
@@ -59,11 +63,17 @@ bool EventCategorizerCosmic::exec()
     for (uint i = 0; i < n; ++i) {
       const auto& event = dynamic_cast<const JPetEvent&>(timeWindow->operator[](i));
       vector<JPetHit> hits = event.getHits();
-	    JPetEvent cosmicEvent = cosmicAnalysis(hits);
-	    if(cosmicEvent.getHits().size()) { events.push_back(cosmicEvent); }
+      JPetEvent cosmicEvent = cosmicAnalysis(hits);
+      if (cosmicEvent.getHits().size()) {
+        events.push_back(cosmicEvent);
+      }
     }
-  } else { return false; }
-  if(events.size()){ saveEvents(events); }
+  } else {
+    return false;
+  }
+  if (events.size()) {
+    saveEvents(events);
+  }
   events.clear();
   return true;
 }
@@ -82,23 +92,23 @@ void EventCategorizerCosmic::saveEvents(const vector<JPetEvent>& events)
 
 JPetEvent EventCategorizerCosmic::cosmicAnalysis(vector<JPetHit> hits)
 {
-	JPetEvent cosmicEvent;
-	for (unsigned i=0; i<hits.size(); i++) {
-		double TOTofHit = EventCategorizerTools::calculateTOT(hits[i]);
-		if (TOTofHit >= fMinCosmicTOT) {
-			cosmicEvent.addHit(hits[i]);
-			/* Uncomment if kCosmic type will be avalible
-			if (cosmicEvent.getEventType() != JPetEventType::kCosmic)
-				cosmicEvent.setEventType(JPetEventType::kCosmic);
+  JPetEvent cosmicEvent;
+  for (unsigned i = 0; i < hits.size(); i++) {
+    double TOTofHit = EventCategorizerTools::calculateTOT(hits[i]);
+    if (TOTofHit >= fMinCosmicTOT) {
+      cosmicEvent.addHit(hits[i]);
+      /* Uncomment if kCosmic type will be avalible
+      if (cosmicEvent.getEventType() != JPetEventType::kCosmic)
+      	cosmicEvent.setEventType(JPetEventType::kCosmic);
       */
-			if(fSaveControlHistos) {
-			  getStatistics().getHisto1D("Cosmic_TOT")->Fill(TOTofHit/1000.);
-			}
-		}
-	}
-	if(fSaveControlHistos) {
-		getStatistics().getHisto1D("Cosmic_Hits_in_event")
-      ->Fill(cosmicEvent.getHits().size());
-	}
-	return cosmicEvent;
+      if (fSaveControlHistos) {
+        getStatistics().getHisto1D("Cosmic_TOT")->Fill(TOTofHit / 1000.);
+      }
+    }
+  }
+  if (fSaveControlHistos) {
+    getStatistics().getHisto1D("Cosmic_Hits_in_event")
+    ->Fill(cosmicEvent.getHits().size());
+  }
+  return cosmicEvent;
 }

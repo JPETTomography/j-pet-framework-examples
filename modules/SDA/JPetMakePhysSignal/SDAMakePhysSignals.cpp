@@ -16,18 +16,15 @@
 #include "../../tools/JPetRecoSignalTools/JPetRecoSignalTools.h"
 #include "SDAMakePhysSignals.h"
 
-SDAMakePhysSignals::SDAMakePhysSignals(const char* name)
-  : JPetUserTask(name)
-{}
+SDAMakePhysSignals::SDAMakePhysSignals(const char* name): JPetUserTask(name){}
 
-SDAMakePhysSignals::~SDAMakePhysSignals() {}
+SDAMakePhysSignals::~SDAMakePhysSignals(){}
 
 bool SDAMakePhysSignals::init()
 {
   fOutputEvents = new JPetTimeWindow("JPetPhysSignal");
   return true;
 }
-
 
 bool SDAMakePhysSignals::exec()
 {

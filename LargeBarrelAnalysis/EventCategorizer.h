@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2017 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -37,26 +37,27 @@ class JPetWriter;
  * These methods are defined in tools class. More than one type can be added to an event.
  * Set of controll histograms are created, unless the user decides not to produce them.
  */
-class EventCategorizer : public JPetUserTask{
+class EventCategorizer : public JPetUserTask
+{
 public:
-	EventCategorizer(const char * name);
-	virtual ~EventCategorizer(){}
-	virtual bool init() override;
-	virtual bool exec() override;
-	virtual bool terminate() override;
+  EventCategorizer(const char* name);
+  virtual ~EventCategorizer() {}
+  virtual bool init() override;
+  virtual bool exec() override;
+  virtual bool terminate() override;
 
 protected:
-	const std::string kScatterTOFTimeDiffParamKey = "Scatter_Categorizer_TOF_TimeDiff_float";
+  const std::string kScatterTOFTimeDiffParamKey = "Scatter_Categorizer_TOF_TimeDiff_float";
   const std::string kBack2BackSlotThetaDiffParamKey = "Back2Back_Categorizer_SlotThetaDiff_float";
-	const std::string kDeexTOTCutMinParamKey = "Deex_Categorizer_TOT_Cut_Min_float";
-	const std::string kDeexTOTCutMaxParamKey = "Deex_Categorizer_TOT_Cut_Max_float";
-	const std::string kSaveControlHistosParamKey = "Save_Cotrol_Histograms_bool";
-	void saveEvents(const std::vector<JPetEvent>& event);
-	double fScatterTOFTimeDiff = 2000.0;
-	double fB2BSlotThetaDiff = 3.0;
-	double fDeexTOTCutMin = 30000.0;
-	double fDeexTOTCutMax = 50000.0;
-	bool fSaveControlHistos = true;
-	void initialiseHistograms();
+  const std::string kDeexTOTCutMinParamKey = "Deex_Categorizer_TOT_Cut_Min_float";
+  const std::string kDeexTOTCutMaxParamKey = "Deex_Categorizer_TOT_Cut_Max_float";
+  const std::string kSaveControlHistosParamKey = "Save_Cotrol_Histograms_bool";
+  void saveEvents(const std::vector<JPetEvent>& event);
+  double fScatterTOFTimeDiff = 2000.0;
+  double fB2BSlotThetaDiff = 3.0;
+  double fDeexTOTCutMin = 30000.0;
+  double fDeexTOTCutMax = 50000.0;
+  bool fSaveControlHistos = true;
+  void initialiseHistograms();
 };
 #endif /*  !EVENTCATEGORIZER_H */

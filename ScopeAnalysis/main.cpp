@@ -13,36 +13,42 @@
  *  @file main.cpp
  */
 
-#include <JPetManager/JPetManager.h>
+#include <JPetRecoDrawAllCharges/SDARecoDrawAllCharges.h>
+#include <JPetRecoAmplitudeCalc/SDARecoAmplitudeCalc.h>
+#include <JPetMakePhysSignal/SDAMakePhysSignals.h>
 #include <JPetRecoOffsetCalc/SDARecoOffsetsCalc.h>
 #include <JPetRecoChargeCalc/SDARecoChargeCalc.h>
-#include <JPetRecoAmplitudeCalc/SDARecoAmplitudeCalc.h>
-#include <JPetRecoDrawAllCharges/SDARecoDrawAllCharges.h>
-#include <JPetMakePhysSignal/SDAMakePhysSignals.h>
-#include <JPetMatchHits/SDAMatchHits.h>
 #include <JPetMatchLORs/SDAMatchLORs.h>
+#include <JPetMatchHits/SDAMatchHits.h>
+#include <JPetManager/JPetManager.h>
 
 using namespace std;
 
 int main(int argc, const char* argv[])
 {
-  JPetManager& manager = JPetManager::getManager();
+  try {
+    JPetManager& manager = JPetManager::getManager();
 
-  manager.registerTask<SDARecoOffsetsCalc>("SDARecoOffsetsCalc");
-  manager.registerTask<SDARecoChargeCalc>("SDARecoChargeCalc");
-  manager.registerTask<SDARecoAmplitudeCalc>("SDARecoAmplitudeCalc");
-  manager.registerTask<SDARecoDrawAllCharges>("SDARecoDrawAllCharges");
-  manager.registerTask<SDAMakePhysSignals>("SDAMakePhysSignals");
-  manager.registerTask<SDAMatchHits>("SDAMatchHits");
-  manager.registerTask<SDAMatchLORs>("SDAMatchLORs");
+    manager.registerTask<SDARecoOffsetsCalc>("SDARecoOffsetsCalc");
+    manager.registerTask<SDARecoChargeCalc>("SDARecoChargeCalc");
+    manager.registerTask<SDARecoAmplitudeCalc>("SDARecoAmplitudeCalc");
+    manager.registerTask<SDARecoDrawAllCharges>("SDARecoDrawAllCharges");
+    manager.registerTask<SDAMakePhysSignals>("SDAMakePhysSignals");
+    manager.registerTask<SDAMatchHits>("SDAMatchHits");
+    manager.registerTask<SDAMatchLORs>("SDAMatchLORs");
 
-  manager.useTask("SDARecoOffsetsCalc", "reco.sig", "reco.sig.offsets");
-  manager.useTask("SDARecoChargeCalc", "reco.sig.offsets", "reco.sig.offsets.charges");
-  manager.useTask("SDARecoAmplitudeCalc", "reco.sig.offsets.charges", "reco.sig.offsets.charges.ampl");
-  manager.useTask("SDARecoDrawAllCharges", "reco.sig.offsets.charges.ampl", "reco.sig.offsets.charges.ampl.draw");
-  manager.useTask("SDAMakePhysSignals", "reco.sig.offsets.charges.ampl", "phys.sig");
-  manager.useTask("SDAMatchHits", "phys.sig", "phys.hit");
-  manager.useTask("SDAMatchLORs", "phys.hit", "phys.lor");
+    manager.useTask("SDARecoOffsetsCalc", "reco.sig", "reco.sig.offsets");
+    manager.useTask("SDARecoChargeCalc", "reco.sig.offsets", "reco.sig.offsets.charges");
+    manager.useTask("SDARecoAmplitudeCalc", "reco.sig.offsets.charges", "reco.sig.offsets.charges.ampl");
+    manager.useTask("SDARecoDrawAllCharges", "reco.sig.offsets.charges.ampl", "reco.sig.offsets.charges.ampl.draw");
+    manager.useTask("SDAMakePhysSignals", "reco.sig.offsets.charges.ampl", "phys.sig");
+    manager.useTask("SDAMatchHits", "phys.sig", "phys.hit");
+    manager.useTask("SDAMatchLORs", "phys.hit", "phys.lor");
 
-  manager.run(argc, argv);
+    manager.run(argc, argv);
+  } catch (const std::exception& except) {
+    std::cerr << "Unrecoverable error occured:" << except.what() << "Exiting the program!" << std::endl;
+    return EXIT_FAILURE;
+  }
+  return EXIT_SUCCESS;
 }

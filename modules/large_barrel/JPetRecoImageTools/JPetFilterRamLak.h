@@ -24,7 +24,10 @@ class JPetFilterRamLak : public JPetFilterInterface
 {
 public:
   JPetFilterRamLak() {}
-  JPetFilterRamLak(double maxThreshold) { threshold = maxThreshold; }
+  JPetFilterRamLak(double maxThreshold)
+  {
+    threshold = maxThreshold;
+  }
   virtual double operator()(double radius) override
   {
     return radius < threshold ? radius : 0.;

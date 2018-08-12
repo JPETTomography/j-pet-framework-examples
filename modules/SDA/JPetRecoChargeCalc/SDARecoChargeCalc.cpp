@@ -16,11 +16,7 @@
 #include "../../tools/JPetRecoSignalTools/JPetRecoSignalTools.h"
 #include "SDARecoChargeCalc.h"
 
-SDARecoChargeCalc::SDARecoChargeCalc(const char* name)
-  : JPetUserTask(name),
-    fBadSignals(0),
-    fCurrentEventNumber(0)
-{}
+SDARecoChargeCalc::SDARecoChargeCalc(const char* name): JPetUserTask(name), fBadSignals(0), fCurrentEventNumber(0) {}
 
 SDARecoChargeCalc::~SDARecoChargeCalc() {}
 
@@ -63,6 +59,6 @@ bool SDARecoChargeCalc::terminate()
   DEBUG("SDARecoChargeCalc::terminate()");
   int fEventNb = fCurrentEventNumber;
   double goodPercent = (fEventNb - fBadSignals) * 100.0 / fEventNb;
-  INFO(Form("Charge` calculation complete \nAmount of bad signals: %d \n %f %% of data is good" , fBadSignals, goodPercent));
+  INFO(Form("Charge` calculation complete \nAmount of bad signals: %d \n %f %% of data is good", fBadSignals, goodPercent));
   return true;
 }

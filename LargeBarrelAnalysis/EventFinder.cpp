@@ -36,25 +36,25 @@ bool EventFinder::init()
     fEventTimeWindow = getOptionAsFloat(fParams.getOptions(), kEventTimeParamKey);
   else
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
-      kEventTimeParamKey.c_str(), fEventTimeWindow));
+                 kEventTimeParamKey.c_str(), fEventTimeWindow));
   // Minimum number of hits in an event to save an event
   if (isOptionSet(fParams.getOptions(), kEventMinMultiplicity))
     fMinMultiplicity = getOptionAsInt(fParams.getOptions(), kEventMinMultiplicity);
   else
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %d.",
-      kEventMinMultiplicity.c_str(), fMinMultiplicity));
+                 kEventMinMultiplicity.c_str(), fMinMultiplicity));
   // Getting bool for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey))
     fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
 
   // Control histograms
-  if (fSaveControlHistos){
+  if (fSaveControlHistos) {
     getStatistics().createHistogram(
       new TH1F("hits_per_event", "Number of Hits in Event", 20, 0.5, 20.5));
     getStatistics().getHisto1D("hits_per_event")
-      ->GetXaxis()->SetTitle("Hits in Event");
+    ->GetXaxis()->SetTitle("Hits in Event");
     getStatistics().getHisto1D("hits_per_event")
-      ->GetYaxis()->SetTitle("Number of Hits");
+    ->GetYaxis()->SetTitle("Number of Hits");
   }
 
   return true;
@@ -85,24 +85,24 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
   vector<JPetEvent> eventVec;
   const unsigned int nHits = timeWindow.getNumberOfEvents();
   unsigned int count = 0;
-  while(count<nHits){
+  while (count < nHits) {
     JPetEvent event;
     event.setEventType(JPetEventType::kUnknown);
     JPetHit hit = dynamic_cast<const JPetHit&>(timeWindow.operator[](count));
     event.addHit(hit);
 
     unsigned int nextCount = 1;
-    while(count+nextCount<nHits){
-      JPetHit nextHit = dynamic_cast<const JPetHit&>(timeWindow.operator[](count+nextCount));
+    while (count + nextCount < nHits) {
+      JPetHit nextHit = dynamic_cast<const JPetHit&>(timeWindow.operator[](count + nextCount));
       if (fabs(nextHit.getTime() - hit.getTime()) < fEventTimeWindow) {
         event.addHit(nextHit);
         nextCount++;
       } else break;
     }
-    count+=nextCount;
-    if(event.getHits().size()>=fMinMultiplicity){
+    count += nextCount;
+    if (event.getHits().size() >= fMinMultiplicity) {
       eventVec.push_back(event);
-      if(fSaveControlHistos)
+      if (fSaveControlHistos)
         getStatistics().getHisto1D("hits_per_event")->Fill(event.getHits().size());
     }
   }

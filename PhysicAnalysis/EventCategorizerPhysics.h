@@ -33,35 +33,35 @@ class JPetWriter;
 class EventCategorizerPhysics: public JPetUserTask
 {
 public:
-	EventCategorizerPhysics(const char * name);
-	virtual ~EventCategorizerPhysics(){}
-	virtual bool init() override;
-	virtual bool exec() override;
-	virtual bool terminate() override;
-	JPetEvent physicsAnalysis(std::vector<JPetHit> hits);
+  EventCategorizerPhysics(const char* name);
+  virtual ~EventCategorizerPhysics() {}
+  virtual bool init() override;
+  virtual bool exec() override;
+  virtual bool terminate() override;
+  JPetEvent physicsAnalysis(std::vector<JPetHit> hits);
 
 protected:
-	const std::string kMaxDistOfDecayPlaneFromCenterParamKey = "EventCategorizer_MaxDistOfDecayPlaneFromCenter_float";
-	const std::string kBackToBackAngleWindowParamKey = "EventCategorizer_BackToBackAngleWindow_float";
-	const std::string kDecayInto3MinAngleParamKey = "EventCategorizer_DecayInto3MinAngle_float";
-	const std::string kMinAnnihilationParamKey = "EventCategorizer_MinAnnihilationTOT_float";
-	const std::string kMaxAnnihilationParamKey = "EventCategorizer_MaxAnnihilationTOT_float";
-	const std::string kMinDeexcitationParamKey = "EventCategorizer_MinDeexcitationTOT_float";
-	const std::string kMaxDeexcitationParamKey = "EventCategorizer_MaxDeexcitationTOT_float";
-	const std::string kMaxTimeDiffParamKey = "EventCategorizer_MaxTimeDiff_float";
-	const std::string kMaxZPosParamKey = "EventCategorizer_MaxHitZPos_float";
-	double fMaxDistOfDecayPlaneFromCenter = 5.;
-	double fMinAnnihilationTOT = 10000.0;
-	double fMaxAnnihilationTOT = 25000.0;
-	double fMinDeexcitationTOT = 30000.0;
-	double fMaxDeexcitationTOT = 50000.0;
-	double fScatterTOFTimeDiff = 2000.0;
-	double fBackToBackAngleWindow = 3.;
-	double fDecayInto3MinAngle = 190.;
-	double fMaxTimeDiff = 1.;
-	double fMaxZPos = 23.;
-	bool fSaveControlHistos = true;
-	void saveEvents(const std::vector<JPetEvent>& event);
+  const std::string kMaxDistOfDecayPlaneFromCenterParamKey = "EventCategorizer_MaxDistOfDecayPlaneFromCenter_float";
+  const std::string kBackToBackAngleWindowParamKey = "EventCategorizer_BackToBackAngleWindow_float";
+  const std::string kDecayInto3MinAngleParamKey = "EventCategorizer_DecayInto3MinAngle_float";
+  const std::string kMinAnnihilationParamKey = "EventCategorizer_MinAnnihilationTOT_float";
+  const std::string kMaxAnnihilationParamKey = "EventCategorizer_MaxAnnihilationTOT_float";
+  const std::string kMinDeexcitationParamKey = "EventCategorizer_MinDeexcitationTOT_float";
+  const std::string kMaxDeexcitationParamKey = "EventCategorizer_MaxDeexcitationTOT_float";
+  const std::string kMaxTimeDiffParamKey = "EventCategorizer_MaxTimeDiff_float";
+  const std::string kMaxZPosParamKey = "EventCategorizer_MaxHitZPos_float";
+  double fMaxDistOfDecayPlaneFromCenter = 5.;
+  double fMinAnnihilationTOT = 10000.0;
+  double fMaxAnnihilationTOT = 25000.0;
+  double fMinDeexcitationTOT = 30000.0;
+  double fMaxDeexcitationTOT = 50000.0;
+  double fScatterTOFTimeDiff = 2000.0;
+  double fBackToBackAngleWindow = 3.;
+  double fDecayInto3MinAngle = 190.;
+  double fMaxTimeDiff = 1.;
+  double fMaxZPos = 23.;
+  bool fSaveControlHistos = true;
+  void saveEvents(const std::vector<JPetEvent>& event);
 };
 
 #endif /* !EVENTCATEGORIZERPHYSICS_H */

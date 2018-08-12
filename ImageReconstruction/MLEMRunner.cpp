@@ -13,12 +13,12 @@
  *  @file MLEMRunner.cpp
  */
 
-#include "MLEMRunner.h"
+#include "JPetGeomMapping/JPetGeomMapping.h"
 #include "2d/gate/gate_scanner_builder.h"
 #include "2d/gate/gate_volume_builder.h"
-#include "JPetGeomMapping/JPetGeomMapping.h"
-#include "JPetHit/JPetHit.h"
 #include "JPetParamBank/JPetParamBank.h"
+#include "JPetHit/JPetHit.h"
+#include "MLEMRunner.h"
 #include <iomanip> //std::setprecision
 
 using namespace jpet_options_tools;

@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2017 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -38,8 +38,8 @@ public:
 private:
   SinogramCreatorTools() = delete;
   ~SinogramCreatorTools() = delete;
-  SinogramCreatorTools(const SinogramCreatorTools &) = delete;
-  SinogramCreatorTools &operator=(const SinogramCreatorTools &) = delete;
+  SinogramCreatorTools(const SinogramCreatorTools&) = delete;
+  SinogramCreatorTools& operator=(const SinogramCreatorTools&) = delete;
 
   static float calculateNorm(float firstX, float firstY, float secondX, float secondY);
 };

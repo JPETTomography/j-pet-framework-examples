@@ -30,8 +30,8 @@ public:
   }
 
 private:
-  JPetFilterRidgelet(const JPetFilterRidgelet &) = delete;
-  JPetFilterRidgelet &operator=(const JPetFilterRidgelet &) = delete;
+  JPetFilterRidgelet(const JPetFilterRidgelet&) = delete;
+  JPetFilterRidgelet& operator=(const JPetFilterRidgelet&) = delete;
 };
 
 #endif /*  !_JPetFilterRidgelet_H_ */

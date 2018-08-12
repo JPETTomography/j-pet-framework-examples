@@ -24,12 +24,12 @@
 
 class FindConstant
 {
- public:
+public:
   FindConstant(const std::vector<double>& inputEvents, const TString file, const double sourcePos, const int scinID);
   double execute();
   double returnEnergyResolution();
 
- private:
+private:
   void drawChi2AndFitPol2(const std::vector<double>& res, const std::vector<double>& chi2);
   void aproximateParameters();
   void saveFitResultToTxt(std::string name);
@@ -61,5 +61,5 @@ class FindConstant
   std::vector<double> alphasForStripes;
   double upperCut, lowerCut;
 };
-#endif
 
+#endif /* !FINDCONSTANT_H */

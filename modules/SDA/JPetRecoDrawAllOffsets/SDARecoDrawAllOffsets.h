@@ -12,16 +12,17 @@
  *
  *  @file SDARecoDrawAllOffsets.h
  *  @brief Draws charges spectra for PMT
- *  Reads a TTree of JPetRecoSignals and fills offset values from PMTs to the histo. 
+ *  Reads a TTree of JPetRecoSignals and fills offset values from PMTs to the histo.
  */
 
 #ifndef _JPETANALYSISMODULE_DRAWALLOFFSETS_H_
 #define _JPETANALYSISMODULE_DRAWALLOFFSETS_H_
 
-#include <TCanvas.h>
 #include "JPetUserTask/JPetUserTask.h"
+#include <TCanvas.h>
 
-class SDARecoDrawAllOffsets: public JPetUserTask{
+class SDARecoDrawAllOffsets: public JPetUserTask
+{
 public:
   SDARecoDrawAllOffsets(const char* name);
   virtual ~SDARecoDrawAllOffsets();
@@ -29,11 +30,11 @@ public:
   virtual bool exec()override;
   virtual bool terminate() override;
 private:
-    std::vector<TH1F*> fOffsetHistos;
-    std::vector<std::vector<double> > fOffsets;
-    double fOffset;
-    std::vector<int> fIDs;
-    unsigned int fNumberOfPMTs;
-    std::string fFileName;
+  std::vector<TH1F*> fOffsetHistos;
+  std::vector<std::vector<double> > fOffsets;
+  double fOffset;
+  std::vector<int> fIDs;
+  unsigned int fNumberOfPMTs;
+  std::string fFileName;
 };
 #endif

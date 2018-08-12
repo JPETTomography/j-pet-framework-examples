@@ -16,10 +16,10 @@
 #ifndef SIGNALFINDER_H
 #define SIGNALFINDER_H
 
-#include <vector>
-#include <JPetUserTask/JPetUserTask.h>
-#include <JPetRawSignal/JPetRawSignal.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
+#include <JPetRawSignal/JPetRawSignal.h>
+#include <JPetUserTask/JPetUserTask.h>
+#include <vector>
 
 class JPetWriter;
 

@@ -14,15 +14,14 @@
  */
 
 #include "./JPetRecoSignalTools.h"
-#include <cmath>
-#include <sstream>
+#include <TUnixSystem.h>
 #include <sys/stat.h>
-
-#include <TFile.h>
 #include <TCanvas.h>
 #include <TLegend.h>
+#include <TFile.h>
 #include <TLine.h>
-#include <TUnixSystem.h>
+#include <sstream>
+#include <cmath>
 
 void JPetRecoSignalTools::saveBadSignalIntoRootFile(const JPetRecoSignal& signal, const int numberOfBadSignals, const std::string fileName)
 {
@@ -38,11 +37,9 @@ void JPetRecoSignalTools::saveBadSignalIntoRootFile(const JPetRecoSignal& signal
   ss << signal.getPM().getID();
   std::string PMT = ss.str();
   title = "badSignal_PMT" + PMT + "_" + str;
-
   TFile* outFile = new TFile(fileName.c_str(), "update");
   badSignal->SetTitle(title.c_str());
   badSignal->Write();
-
   delete badSignal;
   delete c1;
   outFile->Close();
@@ -57,7 +54,7 @@ void JPetRecoSignalTools::savePNGOfBadSignal(const JPetRecoSignal& signal, int n
   std::stringstream ss;
   ss << numberOfBadSignals;
   std::string str = ss.str();
-  ss.str( std::string() );
+  ss.str(std::string());
   ss.clear();
   ss << signal.getPM().getID();
   std::string PMT = ss.str();
@@ -79,13 +76,11 @@ void JPetRecoSignalTools::savePNGwithMarkedOffsetsAndStartingPoints(const JPetRe
   for (unsigned int i = 0; i < signalPoints.size(); ++i) {
     amplitudePoints.push_back(signalPoints[i].amplitude - offset);
   }
-
   TLine* offsetLine = new TLine(signalPoints[0].time / 1000, offset - 100, signal.getRecoTimeAtThreshold(-100) / 1000, offset - 100);
   std::cout << "Time at thr: " << signal.getRecoTimeAtThreshold(-100) / 1000 << std::endl;
   offsetLine->SetLineWidth(2);
   offsetLine->SetLineColor(2);
   offsetLine->Draw();
-
   std::string title;
   std::stringstream ss;
   ss << number;
@@ -95,11 +90,10 @@ void JPetRecoSignalTools::savePNGwithMarkedOffsetsAndStartingPoints(const JPetRe
   ss << signal.getPM().getID();
   std::string PMT = ss.str();
   TUnixSystem* system = new TUnixSystem();
-  system->mkdir( "Signals" , 1);
+  system->mkdir( "Signals", 1);
   title = "Signals/badSignal_PMT" + PMT + "_" + str + ".root";
   c1->Update();
   c1->SaveAs(title.c_str());
-
   delete system;
   delete badSignal;
   delete c1;
@@ -111,14 +105,13 @@ double JPetRecoSignalTools::calculateTimeAtThreshold(const JPetRecoSignal& signa
   if (threshold < 0) {
     isConstantThreshold = false;
   }
-
   if (signal.getOffset() == JPetRecoSignalTools::ERRORS::badOffset) {
     return JPetRecoSignalTools::ERRORS::badTimeAtThr;
   }
-
   if (isConstantThreshold) {
     return calculateConstantThreshold(signal, -1.0 * threshold);
   } else {
+    /* ??? */
   }
   return JPetRecoSignalTools::ERRORS::badTimeAtThr;
 }
@@ -126,21 +119,17 @@ double JPetRecoSignalTools::calculateTimeAtThreshold(const JPetRecoSignal& signa
 double JPetRecoSignalTools::calculateConstantThreshold(const JPetRecoSignal& signal, const double threshold)
 {
   const std::vector< shapePoint > signalPoints = signal.getShape();
-
   std::vector<double> amplitudePoints;
   std::vector<double> timePoints;
   for (unsigned int i = 0; i < signalPoints.size(); ++i) {
-    amplitudePoints.push_back( (signalPoints[i].amplitude) );
-    timePoints.push_back( (signalPoints[i].time));
+    amplitudePoints.push_back((signalPoints[i].amplitude));
+    timePoints.push_back((signalPoints[i].time));
   }
-
   double timeAtThr = 0;
-
   double thresholdPlusOffset =  threshold + signal.getOffset();
   double slope = 1;
   double intercept = 0;
   for (int i = 0 ; i < findIndexAtValue(min(amplitudePoints), amplitudePoints); i++) {
-
     if (amplitudePoints[i + 1] < thresholdPlusOffset && amplitudePoints[i] > thresholdPlusOffset) {
       slope = (amplitudePoints[i + 1] - amplitudePoints[i]) / (timePoints[i + 1] - timePoints[i]);
       intercept = amplitudePoints[i] - (amplitudePoints[i + 1] - amplitudePoints[i]) / (timePoints[i + 1] - timePoints[i]) * timePoints[i];
@@ -155,7 +144,6 @@ double JPetRecoSignalTools::calculateConstantFraction(const JPetRecoSignal& sign
 {
   double amplitude = signal.getAmplitude();
   double fractionValue = amplitude * threshold * -1;
-
   return calculateConstantThreshold(signal, fractionValue);
 }
 
@@ -165,12 +153,10 @@ double JPetRecoSignalTools::calculateAreaFromStartingIndex(const JPetRecoSignal&
     return JPetRecoSignalTools::ERRORS::badCharge;
   }
   const std::vector< shapePoint >& signalPoints = signal.getShape();
-
   std::vector<double> amplitudePoints;
   std::vector<double> timePoints;
   double offset = signal.getOffset();
   int startingIndex = findStartingIndex(signal);
-
   if (startingIndex == JPetRecoSignalTools::badStartingIndex) {
     return JPetRecoSignalTools::ERRORS::badCharge;
   }
@@ -179,10 +165,9 @@ double JPetRecoSignalTools::calculateAreaFromStartingIndex(const JPetRecoSignal&
     amplitudePoints.push_back( (signalPoints[i].amplitude) - offset );
     timePoints.push_back( (signalPoints[i].time));
   }
-
   double area = 0;
   for (unsigned int i = 0; i < timePoints.size() - 1; i++) {
-    if ( (amplitudePoints[i] > 0 && amplitudePoints[i + 1] < 0) || (amplitudePoints[i] < 0 && amplitudePoints[i + 1] > 0) ) {
+    if ((amplitudePoints[i] > 0 && amplitudePoints[i + 1] < 0) || (amplitudePoints[i] < 0 && amplitudePoints[i + 1] > 0) ) {
       double xZero = pktPrzecieciaOX(timePoints[i], amplitudePoints[i], timePoints[i + 1], amplitudePoints[i + 1]);
       if (amplitudePoints[i] > 0 && amplitudePoints[i + 1] < 0) {
         area = area + 0.5 * (xZero - timePoints[i]) * amplitudePoints[i] + 0.5 * (timePoints[i + 1] - xZero) * amplitudePoints[i + 1];
@@ -190,9 +175,7 @@ double JPetRecoSignalTools::calculateAreaFromStartingIndex(const JPetRecoSignal&
       if (amplitudePoints[i] < 0 && amplitudePoints[i + 1] > 0) {
         area = area + 0.5 * (xZero - timePoints[i]) * amplitudePoints[i] + 0.5 * (timePoints[i + 1] - xZero) * amplitudePoints[i + 1];
       }
-    }
-
-    else {
+    } else {
       if (amplitudePoints[i] < amplitudePoints[i + 1]) { // different slopes
         area = area + amplitudePoints[i] * (timePoints[i + 1] - timePoints[i]) + 0.5 * (amplitudePoints[i + 1] - amplitudePoints[i]) * (timePoints[i + 1] - timePoints[i]);
       } else {
@@ -200,10 +183,8 @@ double JPetRecoSignalTools::calculateAreaFromStartingIndex(const JPetRecoSignal&
       }
     }
   }
-
   const double resistance = 50 ; //Ohms
   area = area / resistance / 1000; //50 ohms resistance and units change to pC from m * p t
-
   timePoints.clear();
   amplitudePoints.clear();
   return area * -1;
@@ -216,18 +197,15 @@ double JPetRecoSignalTools::calculateArea(const JPetRecoSignal& signal)
     return 999999;
   }
   const std::vector< shapePoint > signalPoints = signal.getShape();
-
   std::vector<double> amplitudePoints;
   std::vector<double> timePoints;
-
   for (unsigned int i = 0; i < signalPoints.size(); ++i) {
     amplitudePoints.push_back( (signalPoints[i].amplitude) );
     timePoints.push_back( (signalPoints[i].time));
   }
-
   double area = 0;
   for (unsigned int i = 0; i < timePoints.size() - 1; i++) {
-    if ( (amplitudePoints[i] > 0 && amplitudePoints[i + 1] < 0) || (amplitudePoints[i] < 0 && amplitudePoints[i + 1] > 0) ) {
+    if ((amplitudePoints[i] > 0 && amplitudePoints[i + 1] < 0) || (amplitudePoints[i] < 0 && amplitudePoints[i + 1] > 0)) {
       double xZero = pktPrzecieciaOX(timePoints[i], amplitudePoints[i], timePoints[i + 1], amplitudePoints[i + 1]);
       if (amplitudePoints[i] > 0 && amplitudePoints[i + 1] < 0) {
         area = area + 0.5 * (xZero - timePoints[i]) * amplitudePoints[i] + 0.5 * (timePoints[i + 1] - xZero) * amplitudePoints[i + 1];
@@ -235,9 +213,7 @@ double JPetRecoSignalTools::calculateArea(const JPetRecoSignal& signal)
       if (amplitudePoints[i] < 0 && amplitudePoints[i + 1] > 0) {
         area = area + 0.5 * (xZero - timePoints[i]) * amplitudePoints[i] + 0.5 * (timePoints[i + 1] - xZero) * amplitudePoints[i + 1];
       }
-    }
-
-    else {
+    } else {
       if (amplitudePoints[i] < amplitudePoints[i + 1]) { // different slopes
         area = area + amplitudePoints[i] * (timePoints[i + 1] - timePoints[i]) + 0.5 * (amplitudePoints[i + 1] - amplitudePoints[i]) * (timePoints[i + 1] - timePoints[i]);
       } else {
@@ -246,23 +222,16 @@ double JPetRecoSignalTools::calculateArea(const JPetRecoSignal& signal)
     }
     //~ std::cout<<area<<std::endl;
   }
-
-
   area = area / 50 * 1000 ; //50 ohms resistance and units change to pC from m * p t
-
   double range = 0;
-
   if (timePoints[timePoints.size() - 1] < 0 && timePoints[0] > 0) range = timePoints[0] - timePoints[timePoints.size() - 1];
   else range = (timePoints[timePoints.size() - 1] - timePoints[0]);
   double offsetArea = signal.getOffset() * range / 50 * 1000;
-
   area -= offsetArea;
-
   timePoints.clear();
   amplitudePoints.clear();
   return area * -1;
 }
-
 
 double JPetRecoSignalTools::calculateAmplitude(const JPetRecoSignal& signal)
 {
@@ -271,54 +240,43 @@ double JPetRecoSignalTools::calculateAmplitude(const JPetRecoSignal& signal)
     return ERRORS::badAmplitude;
   }
   const std::vector< shapePoint > signalPoints = signal.getShape();
-
   std::vector<double> amplitudePoints;
   for (unsigned int i = 0; i < signalPoints.size(); ++i) {
     amplitudePoints.push_back(signalPoints[i].amplitude);
   }
-  return -1 * (min(amplitudePoints)  - signal.getOffset());
+  return -1 * (min(amplitudePoints) - signal.getOffset());
 }
 
 int JPetRecoSignalTools::findStartingIndex(const JPetRecoSignal& signal)
 {
   const std::vector< shapePoint >& signalPoints = signal.getShape();
-
   std::vector<double> amplitudePoints;
   for (unsigned int i = 0; i < signalPoints.size(); ++i) {
     amplitudePoints.push_back(signalPoints[i].amplitude);
   }
-
   //Finding place where minimum of signal is
   int indexAtMinimumOfSignal = findIndexAtValue( min(amplitudePoints), amplitudePoints);
-
   //Calculating approximate mean and std deviation of noise, estimating on first 20 points
   const int numberOfPointsTakenForAproximation = 20;
   double first20PointsMean = calculateArithmeticMean( amplitudePoints, numberOfPointsTakenForAproximation );
   double first20PointsDeviation = calculateStandardDeviation( amplitudePoints, numberOfPointsTakenForAproximation );
-
   //Checking if index was calculated correctly
-
   if (indexAtMinimumOfSignal == JPetRecoSignalTools::ERRORS::badIndexAtMinimumValue) {
     std::cout << "Problem with finding proper index at findStartingIndex\n";
     return JPetRecoSignalTools::ERRORS::badStartingIndex;
   }
-
   //Checking if minimum was not in first 20 points, which means that signal was not aquisited properly
   if ( indexAtMinimumOfSignal < numberOfPointsTakenForAproximation ) {
     std::cout << "Bad signal found\n";
     return JPetRecoSignalTools::ERRORS::badStartingIndex;
   }
-
   //Take only those points which are up to minimum
   amplitudePoints = copyVectorWithNumbersUpToIndex(amplitudePoints, indexAtMinimumOfSignal);
-
   //Start searching for last point in noise, go point by point to left from minium on signal
   //as long as noise will be found
-
   int index = indexAtMinimumOfSignal;
-
   while (index > numberOfPointsTakenForAproximation) {
-    if ( isPointFromRecoSignalInNoise( first20PointsMean, first20PointsDeviation, amplitudePoints[index] ) ) {
+    if (isPointFromRecoSignalInNoise( first20PointsMean, first20PointsDeviation, amplitudePoints[index])) {
       return index;
     }
     index -= 1;
@@ -330,33 +288,26 @@ double JPetRecoSignalTools::calculateOffset(const JPetRecoSignal& signal)
 {
   //Get points for signal
   const std::vector< shapePoint >& signalPoints = signal.getShape();
-
   //Get only amplitudePoints
   std::vector<double> amplitudePoints;
   for (unsigned int i = 0; i < signalPoints.size(); ++i) {
     amplitudePoints.push_back(signalPoints[i].amplitude);
   }
-
   //Finding place where minimum of signal is
   const int indexAtMinimumOfSignal = findIndexAtValue( min(amplitudePoints), amplitudePoints);
-
   //Checking if index was calculated correctly
   if (indexAtMinimumOfSignal == JPetRecoSignalTools::ERRORS::badIndexAtValue) {
     return JPetRecoSignalTools::ERRORS::badOffset;
   }
-
   const int numberOfPointsTakenForAproximation = 20;
   //Checking if minimum was not in first 20 points, which means that signal was not aquisited properly
   if ( indexAtMinimumOfSignal < numberOfPointsTakenForAproximation ) {
     return JPetRecoSignalTools::ERRORS::badOffset;
   }
-
   //Calculating approximate mean and std deviation of noise, estimating on numberOfPointsTakenForAproximation points
   double first20PointsMean = calculateArithmeticMean( amplitudePoints, numberOfPointsTakenForAproximation );
   double first20PointsDeviation = calculateStandardDeviation( amplitudePoints, numberOfPointsTakenForAproximation );
-
-  //Start searching for last point in noise, go point by point to left from minium on signal
-  //as long as noise will be found
+  //Start searching for last point in noise, go point by point to left from minium on signal as long as noise will be found
   int index = indexAtMinimumOfSignal;
   while (index > numberOfPointsTakenForAproximation) {
     if ( isPointFromRecoSignalInNoise( first20PointsMean, first20PointsDeviation, amplitudePoints[index] ) ) {
@@ -364,14 +315,12 @@ double JPetRecoSignalTools::calculateOffset(const JPetRecoSignal& signal)
     }
     index -= 1;
   }
-
   return first20PointsMean;
 }
 
 bool JPetRecoSignalTools::isPointFromRecoSignalInNoise(const double noiseMean, const double noiseDeviation, const double point)
 {
   const double topBorder = noiseMean + 3 * noiseDeviation, bottomBorder = noiseMean - 3 * noiseDeviation;
-
   return ( ( point < topBorder ) && ( point > bottomBorder ) );
 }
 
@@ -381,12 +330,10 @@ double JPetRecoSignalTools::calculateStandardDeviation(const std::vector<double>
     std::cout << "Cannot calculate standard deviation for this vector!\n";
     return -1;
   }
-
   double mean = calculateArithmeticMean(vector, vector.size() - 1);
   double deviation = 0;
-  for ( int index = 0; index < upToIndex + 1; ++index) {
-    deviation += pow( (vector[index] - mean) , 2 );
-
+  for (int index = 0; index < upToIndex + 1; ++index) {
+    deviation += pow( (vector[index] - mean), 2 );
   }
   return pow(deviation / ( (upToIndex + 1) * (upToIndex ) ), 0.5);
 }
@@ -394,12 +341,10 @@ double JPetRecoSignalTools::calculateStandardDeviation(const std::vector<double>
 std::vector<double> JPetRecoSignalTools::copyVectorWithNumbersUpToIndex(std::vector<double>& vector, int index)
 {
   std::vector<double> copy;
-
   if ( (unsigned int) index > vector.size()) {
     std::cout << "Given index is bigger than vector size\n";
     return copy;
   }
-
   for (unsigned int i = 0; i < (unsigned int) (index + 1); ++i) {
     copy.push_back(vector[i]);
   }
@@ -463,21 +408,18 @@ double JPetRecoSignalTools::max(const std::vector<double>& vector)
   return max;
 }
 
-
 int JPetRecoSignalTools::findIndexAtValue(double value, std::vector<double>& vector)
 {
   double epsilon = 0.001;
   for (unsigned int index = 0; index < vector.size(); ++index) {
     if ( absolute(vector[index] - value) < epsilon ) {
       return index;
-
     }
   }
-
   return JPetRecoSignalTools::ERRORS::badIndexAtValue;
 }
 
-double JPetRecoSignalTools::absolute ( const double number )
+double JPetRecoSignalTools::absolute(const double number)
 {
   if ( number > 0 ) {
     return number;
@@ -487,14 +429,12 @@ double JPetRecoSignalTools::absolute ( const double number )
 TGraph* JPetRecoSignalTools::plotJPetRecoSignal(const JPetRecoSignal& signal)
 {
   const std::vector< shapePoint > signalPoints = signal.getShape();
-
   std::vector<double> amplitudePoints;
   std::vector<double> timePoints;
   for (unsigned int i = 0; i < signalPoints.size(); ++i) {
     amplitudePoints.push_back( ((signalPoints[i].amplitude)) );
     timePoints.push_back( (signalPoints[i].time) / 1000);
   }
-
   TGraph* gr = new TGraph(signalPoints.size(), &timePoints[0], &amplitudePoints[0]);
   gr->SetTitle("");
   gr->GetXaxis()->SetTitle("Time [ns]");
@@ -505,7 +445,6 @@ TGraph* JPetRecoSignalTools::plotJPetRecoSignal(const JPetRecoSignal& signal)
   return gr;
 }
 
-
 void JPetRecoSignalTools::saveTH1FsToRootFile(std::vector<TH1F*> histoCollection, std::string fileName, std::string pdfName)
 {
   /*	Saves histos in vector to rootfile of name fileName.root in directoryName
@@ -515,11 +454,9 @@ void JPetRecoSignalTools::saveTH1FsToRootFile(std::vector<TH1F*> histoCollection
    *  this function is bad as hell!
    */
   TFile* testFile = new TFile(fileName.c_str(), "update");  //plik do historyjek
-
   for (unsigned i = 0; i < histoCollection.size(); i++) {
     histoCollection[i]->Write();
   }
-
   TCanvas* c1 = new TCanvas("c1", "", 710, 500);
   c1->SetHighLightColor(2);
   c1->Range(-11.27313, -51.28112, 87.54292, 330.6564);
@@ -533,15 +470,12 @@ void JPetRecoSignalTools::saveTH1FsToRootFile(std::vector<TH1F*> histoCollection
   c1->SetFrameBorderMode(0);
   c1->SetFrameLineWidth(2);
   c1->SetFrameBorderMode(0);
-
   int maxIndex = findIndexOfMaxHisto(histoCollection);
   histoCollection[maxIndex]->Draw("");
   histoCollection[maxIndex]->SetLineWidth(4);
   histoCollection[maxIndex]->SetLineColor(maxIndex + 1);
   histoCollection[maxIndex]->SetLineStyle(maxIndex + 1);
-
   for (unsigned int i = 0; i < histoCollection.size(); i++) {
-
     if (i != (unsigned int)maxIndex) {
       std::cout << i << std::endl;
       histoCollection[i]->SetLineColor(1 + i);
@@ -549,21 +483,15 @@ void JPetRecoSignalTools::saveTH1FsToRootFile(std::vector<TH1F*> histoCollection
       histoCollection[i]->SetLineStyle(i + 1);
       histoCollection[i]->Draw("same");
     }
-
   }
-
   TLegend* legend = new TLegend(0.6, 0.65, 0.88, 0.85);
   legend->SetTextFont(72);
   legend->SetTextSize(0.04);
-
   for (unsigned int i = 0; i < histoCollection.size(); i++) {
     legend->AddEntry(histoCollection[i], histoCollection[i]->GetTitle(), "l");
   }
   legend->Draw();
-
   c1->Write(pdfName.c_str());
-
-
   c1->SaveAs( (pdfName + ".png").c_str());
   delete c1;
   testFile->Close();
@@ -574,7 +502,6 @@ int JPetRecoSignalTools::findIndexOfMaxHisto(std::vector<TH1F*> histoCollection)
   int max = -100000.;
   int histoMax = 0;
   int maxIndex = histoCollection.size() + 5;
-
   for (unsigned int histoNumber = 0; histoNumber < histoCollection.size(); histoNumber++) {
     histoMax = histoCollection[histoNumber]->GetBinContent( histoCollection[histoNumber]->GetMaximumBin() ) ;
     if (histoMax > max) {
@@ -582,7 +509,5 @@ int JPetRecoSignalTools::findIndexOfMaxHisto(std::vector<TH1F*> histoCollection)
       maxIndex = histoNumber;
     }
   }
-
   return maxIndex;
 }
-

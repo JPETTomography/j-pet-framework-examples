@@ -24,11 +24,14 @@ class JPetFilterNone : public JPetFilterInterface
 {
 public:
   JPetFilterNone() {}
-  virtual double operator()(double) override { return 1.; }
+  virtual double operator()(double) override
+  {
+    return 1.;
+  }
 
 private:
-  JPetFilterNone(const JPetFilterNone &) = delete;
-  JPetFilterNone &operator=(const JPetFilterNone &) = delete;
+  JPetFilterNone(const JPetFilterNone&) = delete;
+  JPetFilterNone& operator=(const JPetFilterNone&) = delete;
 };
 
 #endif /*  !_JPetFilterNone_H_ */

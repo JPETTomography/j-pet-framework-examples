@@ -22,35 +22,31 @@
 #define override
 #endif
 
-#include "JPetEvent/JPetEvent.h"
-#include "JPetLoggerInclude.h"
-#include "JPetUserTask/JPetUserTask.h"
-#include <fstream>
-
-#include "util/png_writer.h"
-#include "util/progress.h"
-#include "util/random.h"
-
-#include "2d/barrel/generic_scanner.h"
-#include "2d/barrel/geometry.h"
 #include "2d/barrel/matrix_pixel_major.h"
-#include "2d/barrel/monte_carlo.h"
-#include "2d/barrel/options.h"
+#include "JPetUserTask/JPetUserTask.h"
+#include "3d/hybrid/reconstruction.h"
+#include "2d/barrel/generic_scanner.h"
 #include "2d/barrel/scanner_builder.h"
 #include "2d/barrel/square_detector.h"
 #include "2d/strip/gaussian_kernel.h"
-
+#include "2d/barrel/monte_carlo.h"
+#include "JPetEvent/JPetEvent.h"
+#include "2d/barrel/geometry.h"
+#include "2d/barrel/options.h"
 #include "2d/geometry/pixel.h"
-
-#include "3d/hybrid/reconstruction.h"
 #include "3d/hybrid/scanner.h"
+#include "JPetLoggerInclude.h"
+#include "util/png_writer.h"
+#include "util/progress.h"
 #include "common/model.h"
+#include "util/random.h"
+#include <fstream>
 
 /**
  * @brief Module translating data to format accepted by A.Strzelecki MLEM package and running reconstruction.
  *  It automatically generate system matrix if needed or load it from file.
  *  Reconstructed image can be viewed by: MRIcroGL (http://www.mccauslandcenter.sc.edu/mricrogl/)
- * 
+ *
  * Input: *.reco.unk.evt
  * Output: none
  *
@@ -69,7 +65,8 @@
  *  "MLEMRunner_ReconstuctionIterations_int" : number of iterations in reconstruction
  */
 
-class MLEMRunner : public JPetUserTask {
+class MLEMRunner : public JPetUserTask
+{
 public:
   MLEMRunner(const char* name);
   virtual ~MLEMRunner();

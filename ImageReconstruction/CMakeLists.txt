@@ -1,17 +1,21 @@
-# J-PET tool project using J-PET framework
-#
-# Author: Adam Strzelecki <adam.strzelecki@uj.edu.pl>
-#
-# Description:
-#   Builds project depending on J-PET framework.
+################################################################################
+## Data analysis project based on J-PET Framework
+## Created by J-PET Framework developers 2016-2018
+##
+## Description:
+##   Image reconstruction for Large Barrel setup
+################################################################################
 
 cmake_minimum_required(VERSION 2.6)
 
+################################################################################
+## Project name
 set(projectName ImageReconstruction)
 
 set(projectBinary ${projectName}.x)
 
-project(${projectName} CXX) # using only C++
+## Project is using only C++
+project(${projectName} CXX)
 
 file(GLOB HEADERS *.h)
 file(GLOB SOURCES *.cpp)
@@ -24,9 +28,9 @@ file(GLOB SOURCES_WITHOUT_MAIN *.cpp)
 list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${UNIT_TEST_SOURCES})
 list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${MAIN_CPP})
 
-# add options from j-pet-mlem as compile flags removing PET_ prefix
-# j-pet-mlem set some parameters of the build by CMake using definitions, but they are limited to project
-# so I copy them here
+## Add options from j-pet-mlem as compile flags removing PET_ prefix
+## j-pet-mlem sets some parameters of the CMake build by using definitions,
+## that are limited to project, it is necessary to copy them here
 get_cmake_property(vars VARIABLES)
 foreach(var ${vars})
   if(var MATCHES "^PET_" AND NOT var MATCHES "_DIR$")
@@ -47,12 +51,12 @@ foreach(var ${vars})
   endif()
 endforeach()
 
-# add dependencies from j-pet-mlem
+## Add dependencies from j-pet-mlem
 set(use_modules_from ../j-pet-mlem)
 list(APPEND HEADERS ${use_modules_from}/src/util/png_writer.h)
 list(APPEND SOURCES ${use_modules_from}/src/util/png_writer.cpp)
 
-# libpng for output image generation
+## libpng for output image generation
 find_package(PNG)
 if(NOT PNG_FOUND AND MSVC)
   include(ExtPNG) # builds libpng automatically
@@ -72,7 +76,7 @@ target_link_libraries(${projectBinary} JPetFramework ${PNG_LIBRARIES})
 add_custom_target(clean_data_${projectName}
   COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root)
 
-# unit tests
+## Unit tests
 set(TESTS_DIR ${CMAKE_CURRENT_BINARY_DIR}/tests)
 file(MAKE_DIRECTORY ${TESTS_DIR})
 foreach(test_source ${UNIT_TEST_SOURCES})
@@ -89,5 +93,4 @@ foreach(test_source ${UNIT_TEST_SOURCES})
     )
 endforeach()
 
-add_custom_target(tests_ImageReconstruction DEPENDS ${test_binaries} )
-
+add_custom_target(tests_ImageReconstruction DEPENDS ${test_binaries})

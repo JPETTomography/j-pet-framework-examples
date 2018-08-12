@@ -30,6 +30,7 @@ script:
     - ./LargeBarrelAnalysis.x -t hld -f dabc_17025151847.hld -l setupRun3.json -i 3 -r 0 100 -o outdir
     - ./LargeBarrelAnalysis.x -t root -f dabc_17025151847.hld.root -l setupRun3.json -i 3 -r 0 100
     - sed -i 's/manager.useTask("TimeWindowCreator", "hld", "tslot.calib");//' ../../LargeBarrelAnalysis/main.cpp
+    - make
     - ./LargeBarrelAnalysis.x -t root -f dabc_17025151847.tslot.calib.root   -r 0 100
 notifications:
   email:

@@ -13,13 +13,15 @@
  *  @file SDARecoDrawAllCharges.cpp
  */
 
-#include <sstream>
-#include <THStack.h>
-#include <TLegend.h>
 #include "../../tools/JPetRecoSignalTools/JPetRecoSignalTools.h"
 #include "SDARecoDrawAllCharges.h"
+#include <THStack.h>
+#include <TLegend.h>
+#include <sstream>
 using namespace std;
+
 SDARecoDrawAllCharges::SDARecoDrawAllCharges(const char* name): JPetUserTask(name) {}
+
 SDARecoDrawAllCharges::~SDARecoDrawAllCharges() {}
 
 bool SDARecoDrawAllCharges::init()
@@ -80,7 +82,7 @@ bool SDARecoDrawAllCharges::terminate()
     stringstream ss;
     ss << id_vec_pair.first;
     string title = "Charge for PMT" + ss.str();
-    fChargeHistos[id_vec_pair.first] = new TH1F( title.c_str(), title.c_str() , bins, minimum, maximum );
+    fChargeHistos[id_vec_pair.first] = new TH1F( title.c_str(), title.c_str(), bins, minimum, maximum );
     for (size_t i = 0; i < fCharges[id_vec_pair.first].size(); ++i)
       fChargeHistos[id_vec_pair.first]->Fill(fCharges[id_vec_pair.first][i], 1);
   }
@@ -104,4 +106,3 @@ bool SDARecoDrawAllCharges::terminate()
   delete stack;
   return true;
 }
-

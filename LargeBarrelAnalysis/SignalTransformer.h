@@ -36,13 +36,13 @@ class JPetWriter;
 class SignalTransformer: public JPetUserTask
 {
 public:
-	SignalTransformer(const char* name);
-	virtual bool init() override;
-	virtual bool exec() override;
-	virtual bool terminate() override;
+  SignalTransformer(const char* name);
+  virtual bool init() override;
+  virtual bool exec() override;
+  virtual bool terminate() override;
 
 protected:
-	JPetRecoSignal createRecoSignal(const JPetRawSignal& rawSignal);
-	JPetPhysSignal createPhysSignal(const JPetRecoSignal& signals);
+  JPetRecoSignal createRecoSignal(const JPetRawSignal& rawSignal);
+  JPetPhysSignal createPhysSignal(const JPetRecoSignal& signals);
 };
 #endif /*  !SIGNALTRANSFORMER_H */

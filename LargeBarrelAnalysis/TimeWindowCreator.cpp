@@ -31,40 +31,48 @@ bool TimeWindowCreator::init()
 
   // Reading values from the user options if available
   // Min allowed signal time
-  if (isOptionSet(fParams.getOptions(), kMinTimeParamKey))
+  if (isOptionSet(fParams.getOptions(), kMinTimeParamKey)) {
     fMinTime = getOptionAsFloat(fParams.getOptions(), kMinTimeParamKey);
-  else
+  } else {
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
-      kMinTimeParamKey.c_str(), fMinTime));
+                 kMinTimeParamKey.c_str(), fMinTime));
+  }
   // Max allowed signal time
-  if (isOptionSet(fParams.getOptions(), kMaxTimeParamKey))
+  if (isOptionSet(fParams.getOptions(), kMaxTimeParamKey)) {
     fMaxTime = getOptionAsFloat(fParams.getOptions(), kMaxTimeParamKey);
-  else
+  } else {
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
-      kMaxTimeParamKey.c_str(), fMaxTime));
+                 kMaxTimeParamKey.c_str(), fMaxTime));
+  }
   // Getting time calibration file from user options
   auto calibFile = std::string("dummyCalibration.txt");
-  if (isOptionSet(fParams.getOptions(), kTimeCalibFileParamKey))
+  if (isOptionSet(fParams.getOptions(), kTimeCalibFileParamKey)) {
     calibFile = getOptionAsString(fParams.getOptions(), kTimeCalibFileParamKey);
-  else
+  } else {
     WARNING("No path to the time calibration file was provided in user options.");
+  }
   // Getting threshold values file from user options
   auto thresholdFile = std::string("dummyCalibration.txt");
-  if (isOptionSet(fParams.getOptions(), kThresholdFileParamKey))
+  if (isOptionSet(fParams.getOptions(), kThresholdFileParamKey)) {
     thresholdFile = getOptionAsString(fParams.getOptions(), kThresholdFileParamKey);
-  else
+  } else {
     WARNING("No path to the file with threshold values was provided in user options.");
+  }
   // Getting bool for saving histograms
-  if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey))
+  if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey)) {
     fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
-
+  }
   // Use of Time Calibratin and Thresholds files
   JPetGeomMapping mapper(getParamBank());
   auto tombMap = mapper.getTOMBMapping();
   fTimeCalibration = UniversalFileLoader::loadConfigurationParameters(calibFile, tombMap);
-  if (fTimeCalibration.empty()) ERROR("Time Calibration seems to be empty");
+  if (fTimeCalibration.empty()) {
+    ERROR("Time Calibration seems to be empty");
+  }
   fThresholds = UniversalFileLoader::loadConfigurationParameters(thresholdFile, tombMap);
-  if (fThresholds.empty()) ERROR("Thresholds values seem to be empty");
+  if (fThresholds.empty()) {
+    ERROR("Thresholds values seem to be empty");
+  }
 
   // Reference Detector
   // Take coordinates of the main (irradiated strip) from user parameters
@@ -75,18 +83,18 @@ bool TimeWindowCreator::init()
     fMainStrip.second = code % 100; // strip number
 
     INFO(Form("Filtering of SigCh-s was requested. Only data from strip %d in layer %d will be used.",
-	      fMainStrip.second, fMainStrip.first));
+              fMainStrip.second, fMainStrip.first));
 
     // build a list of allowed channels
     JPetGeomMapping mapper(getParamBank());
-    for(int thr=1;thr<=4;++thr){
+    for (int thr = 1; thr <= 4; ++thr) {
       int tombNumber = mapper.getTOMB(fMainStrip.first, fMainStrip.second, JPetPM::SideA, thr);
       fAllowedChannels.insert(tombNumber);
       tombNumber = mapper.getTOMB(fMainStrip.first, fMainStrip.second, JPetPM::SideB, thr);
       fAllowedChannels.insert(tombNumber);
     }
     // Add all reference detector channels to allowed channels list
-    for(int thr=1;thr<=4;++thr){
+    for (int thr = 1; thr <= 4; ++thr) {
       int tombNumber = mapper.getTOMB(4, 1, JPetPM::SideA, thr);
       fAllowedChannels.insert(tombNumber);
       tombNumber = mapper.getTOMB(4, 1, JPetPM::SideB, thr);
@@ -95,25 +103,26 @@ bool TimeWindowCreator::init()
   }
 
   // Control histogram
-  if(fSaveControlHistos){
+  if (fSaveControlHistos) {
     getStatistics().createHistogram(
       new TH1F("sig_ch_per_time_slot",
-        "Signal Channels Per Time Slot",
-        250, -0.5, 999.5));
+               "Signal Channels Per Time Slot",
+               250, -0.5, 999.5));
     getStatistics().getHisto1D("sig_ch_per_time_slot")
-      ->GetXaxis()->SetTitle("Signal Channels in Time Slot");
+    ->GetXaxis()->SetTitle("Signal Channels in Time Slot");
     getStatistics().getHisto1D("sig_ch_per_time_slot")
-      ->GetYaxis()->SetTitle("Number of Time Slots");
+    ->GetYaxis()->SetTitle("Number of Time Slots");
   }
   return true;
 }
 
 TimeWindowCreator::~TimeWindowCreator() {}
 
-bool TimeWindowCreator::exec() {
-  if (auto event = dynamic_cast <EventIII * const > (fEvent)) {
+bool TimeWindowCreator::exec()
+{
+  if (auto event = dynamic_cast <EventIII* const > (fEvent)) {
     int kTDCChannels = event->GetTotalNTDCChannels();
-    if(fSaveControlHistos)
+    if (fSaveControlHistos)
       getStatistics().getHisto1D("sig_ch_per_time_slot")->Fill(kTDCChannels);
 
     // Loop over all TDC channels in file
@@ -143,10 +152,10 @@ bool TimeWindowCreator::exec() {
         // The times should be negative (measured w.r.t end of time window)
         // and not smaller than -1*timeWindowWidth (which can vary for different)
         // data but shoudl not exceed 1 ms, i.e. 1.e6 ns)
-        if(tdcChannel->GetLeadTime(j) > fMaxTime ||
-             tdcChannel->GetLeadTime(j) < fMinTime ) continue;
-        if(tdcChannel->GetTrailTime(j) > fMaxTime ||
-             tdcChannel->GetTrailTime(j) < fMinTime ) continue;
+        if (tdcChannel->GetLeadTime(j) > fMaxTime ||
+            tdcChannel->GetLeadTime(j) < fMinTime ) continue;
+        if (tdcChannel->GetTrailTime(j) > fMaxTime ||
+            tdcChannel->GetTrailTime(j) < fMinTime ) continue;
 
         // Create Signal Channels for leading and trailing edge
         JPetSigCh sigChTmpLead = generateSigCh(tombChannel, JPetSigCh::Leading);
@@ -156,26 +165,27 @@ bool TimeWindowCreator::exec() {
         // and add Time Calibration [also in ns]
         sigChTmpLead.setValue(
           1000.*(tdcChannel->GetLeadTime(j)
-            +UniversalFileLoader::getConfigurationParameter(
-              fTimeCalibration, sigChTmpLead.getTOMBChannel().getChannel())));
+                 + UniversalFileLoader::getConfigurationParameter(
+                   fTimeCalibration, sigChTmpLead.getTOMBChannel().getChannel())));
         sigChTmpTrail.setValue(
           1000.*(tdcChannel->GetTrailTime(j)
-            +UniversalFileLoader::getConfigurationParameter(
-              fTimeCalibration, sigChTmpTrail.getTOMBChannel().getChannel())));
+                 + UniversalFileLoader::getConfigurationParameter(
+                   fTimeCalibration, sigChTmpTrail.getTOMBChannel().getChannel())));
 
         // Save created Signal Channels
-	      fOutputEvents->add<JPetSigCh>(sigChTmpLead);
-	      fOutputEvents->add<JPetSigCh>(sigChTmpTrail);
+        fOutputEvents->add<JPetSigCh>(sigChTmpLead);
+        fOutputEvents->add<JPetSigCh>(sigChTmpTrail);
       }
     }
     fCurrEventNumber++;
-  }else{
+  } else {
     return false;
   }
   return true;
 }
 
-bool TimeWindowCreator::terminate() {
+bool TimeWindowCreator::terminate()
+{
   INFO("TimeSlot Creation Ended");
   return true;
 }
@@ -185,7 +195,8 @@ bool TimeWindowCreator::terminate() {
  */
 JPetSigCh TimeWindowCreator::generateSigCh(
   const JPetTOMBChannel& channel,
-  JPetSigCh::EdgeType edge) const {
+  JPetSigCh::EdgeType edge) const
+{
   JPetSigCh sigCh;
   sigCh.setDAQch(channel.getChannel());
   sigCh.setType(edge);
@@ -203,10 +214,11 @@ JPetSigCh TimeWindowCreator::generateSigCh(
  * Reference Detector
  * Returns true if signal from the channel given as argument should be passed
  */
-bool TimeWindowCreator::filter(const JPetTOMBChannel& channel) const{
+bool TimeWindowCreator::filter(const JPetTOMBChannel& channel) const
+{
   // If main strip was not defined, pass all channels
-  if(!fMainStripSet) return true;
-  if(fAllowedChannels.find(channel.getChannel())
-    != fAllowedChannels.end()) return true;
+  if (!fMainStripSet) return true;
+  if (fAllowedChannels.find(channel.getChannel())
+      != fAllowedChannels.end()) return true;
   return false;
 }

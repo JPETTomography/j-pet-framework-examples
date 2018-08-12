@@ -31,22 +31,22 @@
 class SinogramCreatorMC : public JPetUserTask
 {
 public:
-  SinogramCreatorMC(const char *name);
+  SinogramCreatorMC(const char* name);
   virtual ~SinogramCreatorMC();
   virtual bool init() override;
   virtual bool exec() override;
   virtual bool terminate() override;
 
 private:
-  SinogramCreatorMC(const SinogramCreatorMC &) = delete;
-  SinogramCreatorMC &operator=(const SinogramCreatorMC &) = delete;
+  SinogramCreatorMC(const SinogramCreatorMC&) = delete;
+  SinogramCreatorMC& operator=(const SinogramCreatorMC&) = delete;
 
   void generateSinogram();
   void setUpOptions();
   bool checkSplitRange(float firstZ, float secondZ, int i);
   using SinogramResultType = std::vector<std::vector<unsigned int>>;
 
-  SinogramResultType **fSinogram = nullptr;
+  SinogramResultType** fSinogram = nullptr;
 
   const std::string kOutFileNameKey = "SinogramCreatorMC_OutFileName_std::string";
   const std::string kReconstructionDistanceAccuracy = "SinogramCreatorMC_ReconstructionDistanceAccuracy_float";
@@ -62,8 +62,8 @@ private:
 
   std::string fOutFileName = "sinogramMC";
   std::string fInputData = "sinogram_data.txt";
-  int *fMaxValueInSinogram = nullptr; // to fill later in output file
-  int *fCurrentValueInSinogram = nullptr;
+  int* fMaxValueInSinogram = nullptr; // to fill later in output file
+  int* fCurrentValueInSinogram = nullptr;
 
   float fMaxReconstructionLayerRadius = 0.f;    //in cm
   float fReconstructionDistanceAccuracy = 0.1f; //in cm, 1mm accuracy

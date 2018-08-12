@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2017 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -14,7 +14,6 @@
  */
 
 #include "SinogramCreatorTools.h"
-
 #include <iostream> //TODO DELETE
 
 unsigned int SinogramCreatorTools::roundToNearesMultiplicity(float numberToRound, float accuracy)
@@ -37,14 +36,12 @@ int SinogramCreatorTools::calculateAngle(float firstX, float firstY, float secon
 
 float SinogramCreatorTools::calculateDistance(float firstX, float firstY, float secondX, float secondY)
 {
-  if (firstX > secondX)
-  {
+  if (firstX > secondX) {
     std::swap(firstX, secondX);
     std::swap(firstY, secondY);
   }
   float norm = calculateNorm(firstX, firstY, secondX, secondY);
-  if (std::abs(norm) < 0.000001f)
-  {
+  if (std::abs(norm) < 0.000001f) {
     return 0;
   }
   return ((secondX * firstY) - (secondY * firstX)) / norm;
