@@ -245,7 +245,7 @@ JPetEvent EventCategorizerImaging::imageReconstruction( vector<JPetHit> hits )
       imagingEvent.addHit(hits[i]);
     }
   }
-  if ( EventCategorizerTools::checkFor2Gamma(imagingEvent, getStatistics(), fSaveControlHistos, fBackToBackAngleWindow, fMaxTimeDiff, fMaxDistOfDecayPlaneFromCenter) ) {
+  if ( EventCategorizerTools::checkFor2Gamma(imagingEvent, getStatistics(), fSaveControlHistos, fBackToBackAngleWindow, fMaxTimeDiff) ) {
     imagingEvent.addEventType(JPetEventType::k2Gamma);
   }
   if ( EventCategorizerTools::checkFor3Gamma(imagingEvent, getStatistics(), fSaveControlHistos, fDecayInto3MinAngle, fMaxTimeDiff, fMaxDistOfDecayPlaneFromCenter) ) {

@@ -30,7 +30,7 @@ class JPetWriter;
 #endif
 
 class EventCategorizerImaging : public JPetUserTask{
-public:  
+public:
 	EventCategorizerImaging(const char * name);
 	virtual ~EventCategorizerImaging(){}
 	virtual bool init() override;
@@ -39,12 +39,11 @@ public:
 	JPetEvent imageReconstruction( std::vector<JPetHit> hits );
 
 protected:
-        double fScatterTOFTimeDiff = 2000.0;
+  double fScatterTOFTimeDiff = 2000.0;
 	double fMinAnnihilationTOT = 10000.0;
 	double fMaxAnnihilationTOT = 25000.0;
 	const std::string kMinAnnihilationParamKey = "EventCategorizer_MinAnnihilationTOT_float";
 	const std::string kMaxAnnihilationParamKey = "EventCategorizer_MaxAnnihilationTOT_float";
-	
 	double fMaxZPos = 23.;
 	double fMaxDistOfDecayPlaneFromCenter = 5.;
 	double fMaxTimeDiff = 1.;
@@ -55,11 +54,9 @@ protected:
 	const std::string kMaxTimeDiffParamKey = "EventCategorizer_MaxTimeDiff_float";
 	const std::string kBackToBackAngleWindowParamKey = "EventCategorizer_BackToBackAngleWindow_float";
 	const std::string kDecayInto3MinAngleParamKey = "EventCategorizer_DecayInto3MinAngle_float";
-	
 	void saveEvents(const std::vector<JPetEvent>& event);
 	bool fSaveControlHistos = true;
 };
 
 
 #endif
-

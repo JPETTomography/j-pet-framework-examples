@@ -30,7 +30,7 @@ class JPetWriter;
 #endif
 
 class EventCategorizerPhysics : public JPetUserTask{
-public:  
+public:
 	EventCategorizerPhysics(const char * name);
 	virtual ~EventCategorizerPhysics(){}
 	virtual bool init() override;
@@ -39,17 +39,15 @@ public:
 	JPetEvent physicsAnalysis( std::vector<JPetHit> hits );
 
 protected:
-        double fScatterTOFTimeDiff = 2000.0;
+  double fScatterTOFTimeDiff = 2000.0;
 	double fMinAnnihilationTOT = 10000.0;
 	double fMaxAnnihilationTOT = 25000.0;
 	const std::string kMinAnnihilationParamKey = "EventCategorizer_MinAnnihilationTOT_float";
 	const std::string kMaxAnnihilationParamKey = "EventCategorizer_MaxAnnihilationTOT_float";
-	
 	double fMinDeexcitationTOT = 30000.0;
 	double fMaxDeexcitationTOT = 50000.0;
 	const std::string kMinDeexcitationParamKey = "EventCategorizer_MinDeexcitationTOT_float";
 	const std::string kMaxDeexcitationParamKey = "EventCategorizer_MaxDeexcitationTOT_float";
-	
 	double fMaxZPos = 23.;
 	double fMaxDistOfDecayPlaneFromCenter = 5.;
 	double fMaxTimeDiff = 1.;
@@ -60,11 +58,9 @@ protected:
 	const std::string kMaxTimeDiffParamKey = "EventCategorizer_MaxTimeDiff_float";
 	const std::string kBackToBackAngleWindowParamKey = "EventCategorizer_BackToBackAngleWindow_float";
 	const std::string kDecayInto3MinAngleParamKey = "EventCategorizer_DecayInto3MinAngle_float";
-	
 	void saveEvents(const std::vector<JPetEvent>& event);
 	bool fSaveControlHistos = true;
 };
 
 
 #endif
-
