@@ -125,7 +125,7 @@ void EventCategorizer::initialiseHistograms(){
   getStatistics().getHisto1D("2Gamma_TimeDiff")->GetYaxis()->SetTitle("Number of Hit Pairs");
 
   getStatistics().createHistogram(
-    new TH1F("2Gamma_Dist", "B2B hits distance", 200, -100.0, 100.0));
+    new TH1F("2Gamma_Dist", "B2B hits distance", 150, 0.0, 150.0));
   getStatistics().getHisto1D("2Gamma_Dist")->GetXaxis()->SetTitle("Distance [cm]");
   getStatistics().getHisto1D("2Gamma_Dist")->GetYaxis()->SetTitle("Number of Hit Pairs");
 

@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2017 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -43,11 +43,11 @@ public:
   static double calculateScatteringAngle(const JPetHit& hit1, const JPetHit& hit2);
   static double calculateTOF(const JPetHit& firstHit, const JPetHit& latterHit);
   static TVector3 calculateAnnihilationPoint(const JPetHit& firstHit, const JPetHit& latterHit);
-  static double calcDistanceOfSurfaceAndCenter(const JPetHit& firstHit,
+  static double calculatePlaneCenterDistance(const JPetHit& firstHit,
     const JPetHit& secondHit, const JPetHit& thirdHit);
-  static bool checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats,
+  static bool stream2Gamma(const JPetEvent& event, JPetStatistics& stats,
     bool saveHistos, double b2bSlotThetaDiff, double b2bTimeDiff);
-  static bool checkFor3Gamma(const JPetEvent& event, JPetStatistics& stats,
+  static bool stream3Gamma(const JPetEvent& event, JPetStatistics& stats,
     bool saveHistos, double d3SlotThetaMin, double d3TimeDiff, double d3DistanceFromCenter);
 };
 
