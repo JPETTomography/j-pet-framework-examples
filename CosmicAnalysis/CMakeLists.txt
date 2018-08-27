@@ -11,6 +11,7 @@
 ######################################################################
 set(projectName CosmicAnalysis)
 
+# files to be copied from the source directory, if any
 set(AUXILLIARY_FILES
   userParams.json
   README
