@@ -7,10 +7,6 @@
 
 cmake_minimum_required(VERSION 2.6)
 
-######################################################################
-### when creating a new project,
-### set this section appropriately for your project
-######################################################################
 set(projectName InterThresholdCalibration)
 
 # files to be copied from some other example directory, if any
@@ -33,11 +29,6 @@ file(GLOB SOURCES *.cpp)
 
 ######################################################################
 ### Use source files of modules from LargeBarrelAnalysis
-###
-### If you are using your own version of some module which
-### is also presenr in LargeBarrelAnalysis,
-### comment out the respective lines below so as not to use
-### this module's source from LargeBarrelAnalysis.
 ######################################################################
 set(use_modules_from ../LargeBarrelAnalysis)
 #
@@ -109,4 +100,4 @@ foreach( file_i ${ROOT_SCRIPTS})
 endforeach( file_i )
 
 add_custom_target(copy_files_${projectName} DEPENDS ${copy_depends}) #add new target that depends on copied files
-add_dependencies(${projectBinary} copy_files$_${projectName}) #add dependencies between building project and copy files
+add_dependencies(${projectBinary} copy_files_${projectName}) #add dependencies between building project and copy files
