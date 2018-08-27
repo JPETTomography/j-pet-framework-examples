@@ -50,9 +50,6 @@ list(APPEND SOURCES ${use_modules_from}/HitFinder.cpp)
 list(APPEND HEADERS ${use_modules_from}/HitFinderTools.h)
 list(APPEND SOURCES ${use_modules_from}/HitFinderTools.cpp)
 
-message(STATUS "S: " ${SOURCES})
-message(STATUS "H: " ${HEADERS})
-
 include_directories(${Framework_INCLUDE_DIRS})
 add_definitions(${Framework_DEFINITIONS})
 
@@ -77,7 +74,7 @@ set(copy_depends) #create variable for list with depends files path
 foreach( file_i ${AUXILLIARY_FILES})
   list(APPEND copy_depends ${CMAKE_CURRENT_BINARY_DIR}/${file_i})
 
-  if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../${USE_AUX_FILES_FROM}/${file_i})
+  if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${file_i})
     set(CP_CMD copy_directory)
   else()
     set(CP_CMD copy)
