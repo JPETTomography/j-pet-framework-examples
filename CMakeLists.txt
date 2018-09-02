@@ -17,6 +17,15 @@ add_subdirectory(j-pet-framework)
 include_directories(j-pet-framework ${Framework_INCLUDE_DIRS})
 add_definitions(${Framework_DEFINITIONS})
 
+################################################################################
+# Add MLEM submodule
+add_subdirectory(j-pet-mlem)
+#SYSTEM keyword is a trick to disable all warnings from the j-pet-mlem package.
+#This code invokes some horrible warnings that we deliberately turn off, to
+#keep our build process clean.
+include_directories(SYSTEM j-pet-mlem ${MLEM_INCLUDE_DIRS})
+
+################################################################################
 add_definitions(-std=c++11 -Wall -Wunused-parameter)
 
 ################################################################################
@@ -42,5 +51,13 @@ add_subdirectory(NewAnalysisTemplate)
 add_subdirectory(ScopeLoaderExample)
 add_subdirectory(TimeCalibration)
 add_subdirectory(ScopeAnalysis)
+add_subdirectory(InterThresholdCalibration)
 add_subdirectory(modules)
 add_subdirectory(ImageReconstruction)
+add_subdirectory(MCGeantAnalysis)
+add_subdirectory(PhysicAnalysis)
+add_subdirectory(CosmicAnalysis)
+add_subdirectory(Imaging)
+
+
+

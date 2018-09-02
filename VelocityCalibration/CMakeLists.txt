@@ -85,6 +85,13 @@ foreach( file_i ${ROOT_SCRIPTS})
     )
 endforeach( file_i )
 
-add_custom_target(copy_files_velocity DEPENDS ${copy_depends}) #add new target that depends on copied files
+set(TESTS_DIR ${CMAKE_CURRENT_BINARY_DIR}/tests)
+file(MAKE_DIRECTORY ${TESTS_DIR})
+add_custom_command(OUTPUT ${TESTS_DIR}/unitTestData
+  COMMAND ln -s ${CMAKE_SOURCE_DIR}/unitTestData ${TESTS_DIR}/unitTestData
+)
+
+add_custom_target(copy_files_velocity DEPENDS ${copy_depends} ${TESTS_DIR}/unitTestData) #add new target that depends on copied files
+
 add_dependencies(${projectBinary} copy_files_velocity) #add dependencies between building project and copy files
 

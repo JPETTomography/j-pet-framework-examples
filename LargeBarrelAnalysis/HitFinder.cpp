@@ -51,7 +51,7 @@ bool HitFinder::init()
     fRefDetScinID = getOptionAsInt(fParams.getOptions(), kRefDetScinIDParamKey);
   else
     WARNING(Form("No value of the %s parameter provided by the user, indicating that Reference Detector was not used.",
-    kRefDetScinIDParamKey.c_str()));
+                 kRefDetScinIDParamKey.c_str()));
   // Getting bool for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey))
     fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
@@ -60,47 +60,49 @@ bool HitFinder::init()
   JPetGeomMapping mapper(getParamBank());
   auto tombMap = mapper.getTOMBMapping();
   fVelocities = UniversalFileLoader::loadConfigurationParameters(velocitiesFile, tombMap);
-  if(fVelocities.empty()) ERROR("Velocities map seems to be empty");
+  if (fVelocities.empty())  {
+    ERROR("Velocities map seems to be empty");
+  }
 
   // Control histograms
-  if(fSaveControlHistos){
+  if (fSaveControlHistos) {
     getStatistics().createHistogram(
       new TH1F("hits_per_time_slot",
-        "Number of Hits in Time Window",
-        101, -0.5, 100.5));
+               "Number of Hits in Time Window",
+               101, -0.5, 100.5));
     getStatistics().getHisto1D("hits_per_time_slot")
-      ->GetXaxis()->SetTitle("Hits in Time Slot");
+    ->GetXaxis()->SetTitle("Hits in Time Slot");
     getStatistics().getHisto1D("hits_per_time_slot")
-      ->GetYaxis()->SetTitle("Number of Time Slots");
+    ->GetYaxis()->SetTitle("Number of Time Slots");
 
     getStatistics().createHistogram(
       new TH1F("remain_signals_per_scin",
-          "Number of Unused Signals in Scintillator",
-          192, 0.5, 192.5));
+               "Number of Unused Signals in Scintillator",
+               192, 0.5, 192.5));
     getStatistics().getHisto1D("remain_signals_per_scin")
-      ->GetXaxis()->SetTitle("ID of Scintillator");
+    ->GetXaxis()->SetTitle("ID of Scintillator");
     getStatistics().getHisto1D("remain_signals_per_scin")
-      ->GetYaxis()->SetTitle("Number of Unused Signals in Scintillator");
+    ->GetYaxis()->SetTitle("Number of Unused Signals in Scintillator");
 
     getStatistics().createHistogram(
       new TH2F("time_diff_per_scin",
-        "Signals Time Difference per Scintillator ID",
-        200, -2*fABTimeDiff, 2*fABTimeDiff,
-        192, 0.5, 192.5));
+               "Signals Time Difference per Scintillator ID",
+               200, -2 * fABTimeDiff, 2 * fABTimeDiff,
+               192, 0.5, 192.5));
     getStatistics().getHisto2D("time_diff_per_scin")
-      ->GetXaxis()->SetTitle("A-B time difference");
+    ->GetXaxis()->SetTitle("A-B time difference");
     getStatistics().getHisto2D("time_diff_per_scin")
-      ->GetYaxis()->SetTitle("ID of Scintillator");
+    ->GetYaxis()->SetTitle("ID of Scintillator");
 
     getStatistics().createHistogram(
       new TH2F("hit_pos_per_scin",
-        "Hit Position per Scintillator ID",
-        200, -50.0, 50.0,
-        192, 0.5, 192.5));
+               "Hit Position per Scintillator ID",
+               200, -50.0, 50.0,
+               192, 0.5, 192.5));
     getStatistics().getHisto2D("hit_pos_per_scin")
-      ->GetXaxis()->SetTitle("Hit z position [cm]");
+    ->GetXaxis()->SetTitle("Hit z position [cm]");
     getStatistics().getHisto2D("hit_pos_per_scin")
-      ->GetYaxis()->SetTitle("ID of Scintillator");
+    ->GetYaxis()->SetTitle("ID of Scintillator");
   }
   return true;
 }
@@ -110,8 +112,8 @@ bool HitFinder::exec()
   if (auto& timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     map<int, vector<JPetPhysSignal>> signalSlotMap = HitFinderTools::getSignalsSlotMap(timeWindow);
     vector<JPetHit> allHits = HitFinderTools::matchSignals(getStatistics(), signalSlotMap,
-      fVelocities, fABTimeDiff, fRefDetScinID, fSaveControlHistos);
-    if(fSaveControlHistos)
+                              fVelocities, fABTimeDiff, fRefDetScinID, fSaveControlHistos);
+    if (fSaveControlHistos)
       getStatistics().getHisto1D("hits_per_time_slot")->Fill(allHits.size());
     saveHits(allHits);
   } else return false;

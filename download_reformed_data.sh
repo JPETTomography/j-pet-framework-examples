@@ -10,7 +10,6 @@ if [ ! -z $1 ]; then
   BASE_PATH=$1
 fi
 
-
 function check_sums {
 	local CUR_DIR=$PWD
 	cd $BASE_PATH
@@ -33,19 +32,21 @@ declare -a WGET_FLAGS=(-x -nH -nv --cut-dirs=1)
 
 # We want the directory structure to be flatter than on sphinx, so here is some magic allowing for that.
 ln -s $BASE_PATH $BASE_PATH/ExamplesReformed
-#downloading test data via wget
+# downloading test data via wget
 # first get and check the checksums
 wget "${TEST_CHECKSUM_URL}" "${WGET_FLAGS[@]}" -P "${TEST_OUTPUT}"
 for FILE in $($CHECKSUM_COMMAND $LOCAL_TEST_CHECKSUM_FILE | grep 'FAIL' | sed 's/:.*//'); do
   TEST_FILE_URL=$TEST_BASE_URL/$FILE
   wget "${TEST_FILE_URL}" "${WGET_FLAGS[@]}" -P "${TEST_OUTPUT}"
 done
+
 if $CHECKSUM_COMMAND $LOCAL_TEST_CHECKSUM_FILE | grep 'FAIL'; then
   echo "The downloaded data does not match the checksum!"
   exit 1
 else
   echo "All unit test data OK."
 fi
+
+# Undo the magic
 rm $LOCAL_TEST_CHECKSUM_FILE
-# Undo the magic.
 unlink $BASE_PATH/ExamplesReformed

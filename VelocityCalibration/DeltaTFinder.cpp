@@ -126,7 +126,11 @@ bool DeltaTFinder::terminate()
   thresholdConversionMap[4] = 'd';
 
   TString results_folder_name = (fOutputPath + "Results/position_" + boost::lexical_cast<std::string>(fPos)).c_str();
-  system("mkdir -p " + results_folder_name);
+  int res = system("mkdir -p " + results_folder_name);
+  if (res == -1) {
+    ERROR("Error while creating the folder:" +results_folder_name);
+    return false;
+  }
 
   for (auto & slot : getParamBank().getBarrelSlots()) {
     for (int thr = 1; thr <= 4; thr++) {

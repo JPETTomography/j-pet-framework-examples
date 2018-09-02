@@ -104,4 +104,4 @@ foreach( file_i ${ROOT_SCRIPTS})
 endforeach( file_i )
 
 add_custom_target(copy_files_${projectName} DEPENDS ${copy_depends}) #add new target that depends on copied files
-add_dependencies(${projectBinary} copy_files) #add dependencies between building project and copy files
+add_dependencies(${projectBinary} copy_files_${projectName}) #add dependencies between building project and copy files
