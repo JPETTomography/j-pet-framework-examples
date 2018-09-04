@@ -13,7 +13,8 @@ JPet.log file appears with the log of the processing and ROOT files with the fol
  *.unk.evt.root
  *.cat.evt.root
 
-where "*" stands for the name of the input file
+where "*" stands for the name of the input file.
+Please note that if the "-o output_directory_path" command line option is provided, the output files will be created in the specified output path rather than in the current working directory.
 
 Input Data
 -----------
@@ -35,7 +36,8 @@ make
 Running
 ------------
 The script run.sh contains an example of running the analysis. Note, however, that
-the user must fill the input data file name and the number of run
+the user must fill the input data file name and the number of run.
+Please consult the contents of the run.sh script for the command-line options that need to be provided in order to run the data analysis correctly.
 
 Authors
 ------------
