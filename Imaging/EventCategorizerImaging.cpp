@@ -74,13 +74,13 @@ bool EventCategorizerImaging::init()
     getStatistics().getHisto1D("2Gamma_TimeDiff")->SetYTitle("Counts");
 
     getStatistics().createHistogram(
-      new TH1F("2Gamma_ThetaDiff", "2 Gamma Hits angles", 360, -0.5, 179.5)
+      new TH1F("2Gamma_ThetaDiff", "2 Gamma Hits angles", 180, -0.5, 179.5)
     );
     getStatistics().getHisto1D("2Gamma_ThetaDiff")->SetXTitle("Hits theta diff [deg]");
     getStatistics().getHisto1D("2Gamma_ThetaDiff")->SetYTitle("Counts");
 
     getStatistics().createHistogram(
-      new TH1F("2Gamma_DLOR", "Delta LOR distance", 100, -0.5, 49.5)
+      new TH1F("2Gamma_DLOR", "Delta LOR distance", 100, 0.0, 50.0)
     );
     getStatistics().getHisto1D("2Gamma_DLOR")->SetXTitle("Delta LOR [cm]");
     getStatistics().getHisto1D("2Gamma_DLOR")->SetYTitle("Counts");
@@ -99,7 +99,7 @@ bool EventCategorizerImaging::init()
     getStatistics().getHisto1D("2Annih_ThetaDiff")->SetYTitle("Counts");
 
     getStatistics().createHistogram(
-      new TH1F("2Annih_DLOR", "Delta LOR distance", 100, -0.5, 49.5)
+      new TH1F("2Annih_DLOR", "Delta LOR distance", 100, 0.0, 50.0)
     );
     getStatistics().getHisto1D("2Annih_ThetaDiff")->SetXTitle("Annihilation hits Delta LOR [cm]");
     getStatistics().getHisto1D("2Annih_ThetaDiff")->SetYTitle("Counts");
@@ -123,7 +123,7 @@ bool EventCategorizerImaging::init()
     getStatistics().getHisto2D("3GammaThetas")->SetYTitle("Transformed thetas 2-3 [deg]");
 
     getStatistics().createHistogram(
-      new TH1F("3GammaPlaneDist", "3 Gamma Plane Distance to Center", 500, 0.0, 10.0)
+      new TH1F("3GammaPlaneDist", "3 Gamma Plane Distance to Center", 100, 0.0, 10.0)
     );
     getStatistics().getHisto1D("3GammaPlaneDist")->SetXTitle("Distance [cm]");
     getStatistics().getHisto1D("3GammaPlaneDist")->SetYTitle("Counts");
@@ -142,7 +142,10 @@ bool EventCategorizerImaging::init()
     getStatistics().getHisto1D("3AnnihPlaneDist")->SetYTitle("Counts");
 
     getStatistics().createHistogram(
-      new TH1F("3AnnihTimeDiff", "3 gamma Annihilation last and first hit time difference", 200, 0.0, fMaxTimeDiff/1000.0)
+      new TH1F(
+        "3AnnihTimeDiff", "3 gamma Annihilation last and first hit time difference",
+        200, 0.0, fMaxTimeDiff/1000.0
+      )
     );
     getStatistics().getHisto1D("3AnnihTimeDiff")->SetXTitle("Time difference [ns]");
     getStatistics().getHisto1D("3AnnihTimeDiff")->SetYTitle("Counts");

@@ -79,7 +79,7 @@ bool EventCategorizerPhysics::init()
 
   if (fSaveControlHistos) {
     getStatistics().createHistogram(
-      new TH1F("AllHitTOT", "TOT of all Hits in physics stream", 200, -0.5, 99.5)
+      new TH1F("AllHitTOT", "TOT of all Hits in physics stream", 200, 0.0, 100.0)
     );
     getStatistics().getHisto1D("AllHitTOT")->SetXTitle("TOT [ns]");
     getStatistics().getHisto1D("AllHitTOT")->SetYTitle("Number of hits");
@@ -97,7 +97,7 @@ bool EventCategorizerPhysics::init()
     getStatistics().getHisto1D("DeexHitsNumber")->SetYTitle("Counts");
 
     getStatistics().createHistogram(
-      new TH1F("DeexAnnihTimeDiff", "Deexcitation-Annihilation Hits Time Difference", 200, -195.5, 195.5)
+      new TH1F("DeexAnnihTimeDiff", "Deexcitation-Annihilation Hits Time Difference", 200, -200.0, 200.0)
     );
     getStatistics().getHisto1D("DeexAnnihTimeDiff")->SetXTitle("Time difference between deexcitation and annihilation hits [ns]");
     getStatistics().getHisto1D("DeexAnnihTimeDiff")->SetYTitle("Counts");
@@ -109,13 +109,13 @@ bool EventCategorizerPhysics::init()
     getStatistics().getHisto1D("2Gamma_TimeDiff")->SetYTitle("Counts");
 
     getStatistics().createHistogram(
-      new TH1F("2Gamma_ThetaDiff", "2 Gamma Hits angles", 360, -0.5, 179.5)
+      new TH1F("2Gamma_ThetaDiff", "2 Gamma Hits angles", 180, -0.5, 179.5)
     );
     getStatistics().getHisto1D("2Gamma_ThetaDiff")->SetXTitle("Hits theta diff [deg]");
     getStatistics().getHisto1D("2Gamma_ThetaDiff")->SetYTitle("Counts");
 
     getStatistics().createHistogram(
-      new TH1F("2Gamma_DLOR", "Delta LOR distance", 100, -0.5, 49.5)
+      new TH1F("2Gamma_DLOR", "Delta LOR distance", 100, 0.0, 50.0)
     );
     getStatistics().getHisto1D("2Gamma_DLOR")->SetXTitle("Delta LOR [cm]");
     getStatistics().getHisto1D("2Gamma_DLOR")->SetYTitle("Counts");
@@ -134,7 +134,7 @@ bool EventCategorizerPhysics::init()
     getStatistics().getHisto1D("2Annih_ThetaDiff")->SetYTitle("Counts");
 
     getStatistics().createHistogram(
-      new TH1F("2Annih_DLOR", "Delta LOR distance", 100, -0.5, 49.5)
+      new TH1F("2Annih_DLOR", "Delta LOR distance", 100, 0.0, 50.0)
     );
     getStatistics().getHisto1D("2Annih_ThetaDiff")->SetXTitle("Annihilation hits Delta LOR [cm]");
     getStatistics().getHisto1D("2Annih_ThetaDiff")->SetYTitle("Counts");

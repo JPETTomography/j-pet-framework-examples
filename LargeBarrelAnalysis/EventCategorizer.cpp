@@ -130,7 +130,7 @@ void EventCategorizer::initialiseHistograms(){
   getStatistics().getHisto1D("2Gamma_Dist")->GetYaxis()->SetTitle("Number of Hit Pairs");
 
   getStatistics().createHistogram(
-    new TH1F("Annih_TOF", "Annihilation pairs Time of Flight", 200, -3000.0,3000.0));
+    new TH1F("Annih_TOF", "Annihilation pairs Time of Flight", 200, -3000.0, 3000.0));
   getStatistics().getHisto1D("Annih_TOF")->GetXaxis()->SetTitle("Time of Flight [ps]");
   getStatistics().getHisto1D("Annih_TOF")->GetYaxis()->SetTitle("Number of Annihilation Pairs");
 
