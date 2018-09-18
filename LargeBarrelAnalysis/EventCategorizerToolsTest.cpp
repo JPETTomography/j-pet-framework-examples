@@ -10,8 +10,8 @@ BOOST_AUTO_TEST_CASE(checkFor2GammaTest)
 {
   JPetBarrelSlot firstSlot(1, true, "first", 10.0, 1);
   JPetBarrelSlot secondSlot(2, true, "second", 190.0, 2);
-  JPetBarrelSlot thirdSlot(3, true, "second", 45.5, 3);
-  JPetBarrelSlot fourthSlot(4, true, "second", 226.25, 4);
+  JPetBarrelSlot thirdSlot(3, true, "third", 45.5, 3);
+  JPetBarrelSlot fourthSlot(4, true, "fourth", 226.25, 4);
 
   JPetHit firstHit;
   JPetHit secondHit;
@@ -56,8 +56,8 @@ BOOST_AUTO_TEST_CASE(checkFor3GammaTest)
 {
   JPetBarrelSlot firstSlot(1, true, "first", 10.0, 1);
   JPetBarrelSlot secondSlot(2, true, "second", 190.0, 2);
-  JPetBarrelSlot thirdSlot(3, true, "second", 45.5, 3);
-  JPetBarrelSlot fourthSlot(4, true, "second", 226.25, 4);
+  JPetBarrelSlot thirdSlot(3, true, "third", 45.5, 3);
+  JPetBarrelSlot fourthSlot(4, true, "fourth", 226.25, 4);
 
   JPetHit firstHit;
   JPetHit secondHit;
@@ -92,7 +92,6 @@ BOOST_AUTO_TEST_CASE(checkFor3GammaTest)
   BOOST_REQUIRE(!EventCategorizerTools::checkFor3Gamma(event1, stats, false));
   BOOST_REQUIRE(EventCategorizerTools::checkFor3Gamma(event2, stats, false));
   BOOST_REQUIRE(EventCategorizerTools::checkFor3Gamma(event3, stats, false));
-
 }
 
 BOOST_AUTO_TEST_CASE(checkForPromptTest_checkTOTCalc)
@@ -274,8 +273,8 @@ BOOST_AUTO_TEST_CASE(checkForScatterTest)
   JPetHit secondHit;
   firstHit.setTime(25.7);
   secondHit.setTime(25.2);
-  firstHit.setPos(10000.0,10000.0,10000.0);
-  secondHit.setPos(-10000.0,-10000.0,-10000.0);
+  firstHit.setPos(10.0,10.0,10.0);
+  secondHit.setPos(-10.0,-10.0,-10.0);
 
   JPetEvent event;
   event.addHit(firstHit);
@@ -285,9 +284,9 @@ BOOST_AUTO_TEST_CASE(checkForScatterTest)
   event1.addHit(firstHit);
 
   JPetStatistics stats;
-  BOOST_REQUIRE(EventCategorizerTools::checkForScatter(event, stats, false, 1.0));
+  BOOST_REQUIRE(EventCategorizerTools::checkForScatter(event, stats, false, 2000.0));
   BOOST_REQUIRE(!EventCategorizerTools::checkForScatter(event, stats, false, 0.000001));
-  BOOST_REQUIRE(!EventCategorizerTools::checkForScatter(event1, stats, false, 1.0));
+  BOOST_REQUIRE(!EventCategorizerTools::checkForScatter(event1, stats, false, 2000.0));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -392,6 +391,68 @@ BOOST_AUTO_TEST_CASE(pointAt0x_m5y_0z)
   BOOST_REQUIRE_CLOSE(point.X(), 0.0, 0.1);
   BOOST_REQUIRE_CLOSE(point.Y(), -5.0, 0.5);
   BOOST_REQUIRE_CLOSE(point.Z(), 0.0, 0.1);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(StreamingToolsSuite)
+
+BOOST_AUTO_TEST_CASE(stream2GammaTest)
+{
+  JPetBarrelSlot firstSlot(1, true, "first", 1.0, 1);
+  JPetBarrelSlot secondSlot(2, true, "second", 182.0, 2);
+
+  JPetHit firstHit;
+  JPetHit secondHit;
+
+  firstHit.setBarrelSlot(firstSlot);
+  secondHit.setBarrelSlot(secondSlot);
+
+  firstHit.setTime(500.0);
+  secondHit.setTime(700.0);
+
+  JPetEvent event;
+  event.addHit(firstHit);
+  event.addHit(secondHit);
+
+  JPetStatistics stats;
+  BOOST_REQUIRE(EventCategorizerTools::stream2Gamma(event, stats, false, 5.0, 1000.0));
+  BOOST_REQUIRE(!EventCategorizerTools::stream2Gamma(event, stats, false, 1.0, 1000.0));
+  BOOST_REQUIRE(!EventCategorizerTools::stream2Gamma(event, stats, false, 5.0, 10.0));
+}
+
+BOOST_AUTO_TEST_CASE(stream3GammaTest)
+{
+  JPetBarrelSlot firstSlot(1, true, "first", 10.0, 1);
+  JPetBarrelSlot secondSlot(2, true, "second", 130.0, 2);
+  JPetBarrelSlot thirdSlot(3, true, "third", 250., 3);
+
+  JPetHit firstHit;
+  JPetHit secondHit;
+  JPetHit thirdHit;
+
+  firstHit.setBarrelSlot(firstSlot);
+  secondHit.setBarrelSlot(secondSlot);
+  thirdHit.setBarrelSlot(thirdSlot);
+
+  firstHit.setTime(200.0);
+  secondHit.setTime(500.0);
+  thirdHit.setTime(700.0);
+
+  firstHit.setPos(2.1,4.1,5.6);
+  secondHit.setPos(2.8,8.3,9.2);
+  thirdHit.setPos(7.3,5.2,6.1);
+
+  JPetEvent event;
+  event.addHit(firstHit);
+  event.addHit(secondHit);
+  event.addHit(thirdHit);
+
+  JPetStatistics stats;
+  BOOST_REQUIRE(EventCategorizerTools::stream3Gamma(event, stats, false, 190.0, 1000.0, 5.0));
+  BOOST_REQUIRE(!EventCategorizerTools::stream3Gamma(event, stats, false, 300.0, 1000.0, 5.0));
+  BOOST_REQUIRE(!EventCategorizerTools::stream3Gamma(event, stats, false, 190.0, 10.0, 5.0));
+  BOOST_REQUIRE(!EventCategorizerTools::stream3Gamma(event, stats, false, 190.0, 1000.0, 0.1));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
