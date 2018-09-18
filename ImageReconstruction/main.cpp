@@ -13,26 +13,25 @@
  *  @file main.cpp
  */
 
-#include "JPetManager/JPetManager.h"
 #include "FilterEvents.h"
 #include "ImageReco.h"
+#include "JPetManager/JPetManager.h"
 #include "SinogramCreator.h"
 #include "SinogramCreatorMC.h"
 using namespace std;
 
-int main(int argc, const char *argv[])
-{
-  JPetManager &manager = JPetManager::getManager();
+int main(int argc, const char* argv[]) {
+  JPetManager& manager = JPetManager::getManager();
 
   manager.registerTask<FilterEvents>("FilterEvents");
   manager.registerTask<ImageReco>("ImageReco");
   manager.registerTask<SinogramCreator>("SinogramCreator");
   manager.registerTask<SinogramCreatorMC>("SinogramCreatorMC");
 
-  manager.useTask("FilterEvents", "unk.evt", "reco.unk.evt");
-  manager.useTask("ImageReco", "reco.unk.evt", "reco");
+  // manager.useTask("FilterEvents", "unk.evt", "reco.unk.evt");
+  // manager.useTask("ImageReco", "reco.unk.evt", "reco");
   manager.useTask("SinogramCreator", "reco.unk.evt", "sino");
-  manager.useTask("SinogramCreatorMC", "reco.unk.evt", "sino.mc");
+  // manager.useTask("SinogramCreatorMC", "reco.unk.evt", "sino.mc");
 
   manager.run(argc, argv);
 }

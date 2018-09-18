@@ -29,8 +29,8 @@
 #include <string>
 #include <vector>
 
-#include "../modules/large_barrel/JPetRecoImageTools/JPetFilterNone.h"
-#include "../modules/large_barrel/JPetRecoImageTools/JPetRecoImageTools.h"
+#include "JPetFilterNone.h"
+#include "JPetRecoImageTools.h"
 
 /**
  * @brief Module creating sinogram from data

@@ -24,11 +24,14 @@ file(GLOB SOURCES_WITHOUT_MAIN *.cpp)
 list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${UNIT_TEST_SOURCES})
 list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${MAIN_CPP})
 
+find_package(FFTW REQUIRED)
+include_directories(${FFTW_INCLUDE_DIRS})
+
 include_directories(${Framework_INCLUDE_DIRS})
 add_definitions(${Framework_DEFINITIONS})
 
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})
-target_link_libraries(${projectBinary} JPetFramework)
+target_link_libraries(${projectBinary} JPetFramework ${FFTW_LIBRARIES})
 
 add_custom_target(clean_data_${projectName}
   COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root)
@@ -47,6 +50,7 @@ foreach(test_source ${UNIT_TEST_SOURCES})
   target_link_libraries(${test}.x
     JPetFramework
     ${Boost_LIBRARIES}
+    ${FFTW_LIBRARIES}
     )
 endforeach()
 
