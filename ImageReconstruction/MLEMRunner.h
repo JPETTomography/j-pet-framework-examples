@@ -50,7 +50,7 @@
  * @brief Module translating data to format accepted by A.Strzelecki MLEM package and running reconstruction.
  *  It automatically generate system matrix if needed or load it from file.
  *  Reconstructed image can be viewed by: MRIcroGL (http://www.mccauslandcenter.sc.edu/mricrogl/)
- * 
+ *
  * Input: *.reco.unk.evt
  * Output: none
  *
@@ -67,9 +67,12 @@
  *  "MLEMRunner_SystemMatrixSaveFull_bool" : if true full system matrix will be saved
  *  "MLEMRunner_ReconstructionOutputPath_std::string" : path where reconstructed image will be saved
  *  "MLEMRunner_ReconstuctionIterations_int" : number of iterations in reconstruction
+ *  "MLEMRunner_TOFSigmaAlongZAxis_float" : TOF sigma along Z axis
+ *  "MLEMRunner_TOFSigmaAxis_float" : TOF sigma axis
  */
 
-class MLEMRunner : public JPetUserTask {
+class MLEMRunner : public JPetUserTask
+{
 public:
   MLEMRunner(const char* name);
   virtual ~MLEMRunner();
@@ -113,6 +116,8 @@ private:
   const std::string kStartPixelForPartialMatrixKey = "MLEMRunner_StartPixelForPartialMatrix_int";
   const std::string kNumberOfEmissionsPerPixelKey = "MLEMRunner_NumberOfEmissionsPerPixel_int";
   const std::string kTOFStepKey = "MLEMRunner_TOFStepSize_double";
+  const std::string kTOFSigmaAxisKey = "MLEMRunner_TOFSigmaAxis_float";
+  const std::string kTOFSigmaAlongZAxisKey = "MLEMRunner_TOFSigmaAlongZAxis_float";
   const std::string kVerboseKey = "MLEMRunner_DisplayInfo_bool";
   const std::string kSystemMatrixOutputPathKey = "MLEMRunner_SystemMatrixOutputPath_std::string";
   const std::string kSystemMatrixSaveFullKey = "MLEMRunner_SystemMatrixSaveFull_bool";
@@ -140,6 +145,8 @@ private:
   unsigned int fStartPixelForPartialMatrix = 0u;       // Starting position of matrix
   unsigned int fNumberOfEmissionsPerPixel = 100000000; // Number of emissions per pixel for system matrix
   double fTOFStep = 0.;
+  float fTOFSigmaAxis = 0.06f;
+  float fTOFSigmaAlongZAxis = 0.015f;
 
   bool fVerbose = true;               // if true prints extra information about reconstruction to cerr
   bool fSystemMatrixSaveFull = true;  // if true generate and save full system matrix, if not only 1/8 of it and then converts to full
