@@ -31,9 +31,11 @@ public:
   using Point = std::pair<float, float>;
 
   static unsigned int roundToNearesMultiplicity(float numberToRound, float muliFactor);
-  static int calculateAngle(float firstX, float firstY, float secondX, float secondY);
+  static float calculateAngle(float firstX, float firstY, float secondX, float secondY);
 
   static float calculateDistance(float firstX, float firstY, float secondX, float secondY);
+
+  static std::pair<int, int> getSinogramRepresentation(float firstX, float firstY, float secondX, float secondY, float fMaxReconstructionLayerRadius, float fReconstructionDistanceAccuracy, int maxDistanceNumber, int kReconstructionMaxAngle);
 
 private:
   SinogramCreatorTools() = delete;
@@ -41,6 +43,7 @@ private:
   SinogramCreatorTools(const SinogramCreatorTools &) = delete;
   SinogramCreatorTools &operator=(const SinogramCreatorTools &) = delete;
 
+  static void swapIfNeeded(float &firstX, float &firstY, float &secondX, float &secondY);
   static float calculateNorm(float firstX, float firstY, float secondX, float secondY);
 };
 
