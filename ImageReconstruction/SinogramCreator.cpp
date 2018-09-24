@@ -51,6 +51,7 @@ bool SinogramCreator::init() {
 }
 
 bool SinogramCreator::exec() {
+
   const int maxDistanceNumber = std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
   if (fSinogram == nullptr) {
     fSinogram = new JPetRecoImageTools::Matrix2DProj*[fZSplitNumber];
@@ -83,8 +84,15 @@ bool SinogramCreator::exec() {
         const auto sinogramResult =
             SinogramCreatorTools::getSinogramRepresentation(firstX, firstY, secondX, secondY, fMaxReconstructionLayerRadius,
                                                             fReconstructionDistanceAccuracy, maxDistanceNumber, kReconstructionMaxAngle);
+
         fCurrentValueInSinogram[i] = ++fSinogram[i]->at(sinogramResult.first).at(sinogramResult.second);
-        fTOFInformation.at(sinogramResult.first).at(sinogramResult.second).push_back((secondHit.getTime() - firstHit.getTime()) / 2);
+        auto tofInfo = fTOFInformation.find(sinogramResult);
+        float tofResult = (secondHit.getTime() - firstHit.getTime()) / 2.;
+        if (tofInfo != fTOFInformation.end()) {
+          tofInfo->second.push_back(tofResult);
+        } else {
+          fTOFInformation.insert(std::make_pair(sinogramResult, std::vector<float>{tofResult}));
+        }
         if (fCurrentValueInSinogram[i] > fMaxValueInSinogram[i]) {
           fMaxValueInSinogram[i] = fCurrentValueInSinogram[i]; // save max value of sinogram
         }
@@ -113,22 +121,11 @@ int SinogramCreator::getMaxValue(const JPetRecoImageTools::Matrix2DProj& result)
 }
 
 void SinogramCreator::saveResult(const JPetRecoImageTools::Matrix2DProj& result, const std::string& outputFileName) {
-  int maxValue = getMaxValue(result);
-  std::ofstream res(outputFileName);
-  res << "P2" << std::endl;
-  res << result[0].size() << " " << result.size() << std::endl;
-  res << maxValue << std::endl;
+  util::png_writer png(outputFileName, 300);
+  png.write_header(result.size(), result[0].size());
   for (unsigned int i = 0; i < result.size(); i++) {
-    for (unsigned int j = 0; j < result[0].size(); j++) {
-      int resultInt = static_cast<int>(result[i][j]);
-      if (resultInt < 0) {
-        resultInt = 0;
-      }
-      res << resultInt << " ";
-    }
-    res << std::endl;
+    png.write_row<double>(const_cast<double*>(result[i].data()));
   }
-  res.close();
 }
 
 bool SinogramCreator::terminate() {
@@ -139,7 +136,7 @@ bool SinogramCreator::terminate() {
   JPetRecoImageTools::Matrix2DProj result =
       JPetRecoImageTools::backProjectWithTOF(filteredSinogram, fTOFInformation, sinogram[0].size(), JPetRecoImageTools::nonRescale, 0, 255);
 
-  saveResult(result, "reconstruction_with_tof.ppm");
+  saveResult(result, "reconstruction_with_tof.png");
 
   for (int i = 0; i < fZSplitNumber; i++) {
     std::ofstream res(fOutFileName + "_" + std::to_string(i) + ".ppm");

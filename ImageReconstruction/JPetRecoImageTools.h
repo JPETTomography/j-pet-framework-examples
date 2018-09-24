@@ -18,6 +18,7 @@
 
 #include <cmath>
 #include <functional>
+#include <unordered_map>
 #include <vector>
 
 #include <cassert>
@@ -31,11 +32,19 @@
 #include <boost/function_types/parameter_types.hpp>
 #include <boost/function_types/result_type.hpp>
 
-class JPetRecoImageTools {
+template <class T, typename U> struct PairHash {
+  size_t operator()(const std::pair<T, U>& key) const
+  {
+    return std::hash<T>()(key.first) ^ std::hash<U>()(key.second);
+  }
+};
+
+class JPetRecoImageTools
+{
 public:
   using Matrix2D = std::vector<std::vector<int>>;
   using Matrix2DProj = std::vector<std::vector<double>>;
-  using Matrix2DTOF = std::vector<std::vector<std::vector<float>>>;
+  using Matrix2DTOF = std::unordered_map<std::pair<int, int>, std::vector<float>, PairHash<int, int>>;
   using InterpolationFunc = std::function<double(int i, double y, std::function<double(int, int)>&)>;
   using RescaleFunc = std::function<void(Matrix2DProj& v, double minCutoff, double rescaleFactor)>;
   using FourierTransformFunction = std::function<Matrix2DProj(Matrix2DProj& sinogram, JPetFilterInterface& filterFunction)>;
@@ -73,7 +82,10 @@ public:
   /// The final value range is from 0 to rescaleFactor
   static void rescale(Matrix2DProj& v, double minCutoff, double rescaleFactor);
   /// PseudoRescale which does nothing
-  static void nonRescale(Matrix2DProj&, double, double) { return; }
+  static void nonRescale(Matrix2DProj&, double, double)
+  {
+    return;
+  }
 
   /*! \brief Function returning sinogram matrix.
    *  \param emissionMatrix matrix,  needs to be NxN
@@ -89,8 +101,8 @@ public:
    * default no rescaling)
    */
   static Matrix2DProj createSinogramWithSingleInterpolation(Matrix2D& emissionMatrix, int nViews, int nScans, double angleBeg = 0,
-                                                            double angleEnd = 180, InterpolationFunc interpolationFunction = linear,
-                                                            RescaleFunc rescaleFunc = nonRescale, int rescaleMinCutoff = 0, int rescaleFactor = 255);
+      double angleEnd = 180, InterpolationFunc interpolationFunction = linear,
+      RescaleFunc rescaleFunc = nonRescale, int rescaleMinCutoff = 0, int rescaleFactor = 255);
 
   static double calculateProjection(const Matrix2D& emissionMatrix, double phi, int scanNumber, int nScans, InterpolationFunc& interpolationFunction);
 
@@ -103,7 +115,7 @@ public:
    *  \param rescaleFactor max value to set in rescale (Optional)
    */
   static Matrix2DProj createSinogramWithDoubleInterpolation(Matrix2D& emissionMatrix, int nAngles, RescaleFunc rescaleFunc = nonRescale,
-                                                            int rescaleMinCutoff = 0, int rescaleFactor = 255);
+      int rescaleMinCutoff = 0, int rescaleFactor = 255);
 
   static double calculateProjection2(int step, double cos, double sin, int imageSize, double center, double length,
                                      std::function<double(int, int)> matrixGet);
@@ -162,7 +174,8 @@ private:
 
   static void doFFTSLOWI(std::vector<double>& Re, std::vector<double>& Im, int size, int shift);
 
-  static inline double setToZeroIfSmall(double value, double epsilon) {
+  static inline double setToZeroIfSmall(double value, double epsilon)
+  {
     if (std::abs(value) < epsilon)
       return 0;
     else

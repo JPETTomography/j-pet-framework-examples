@@ -30,8 +30,19 @@ include_directories(${FFTW_INCLUDE_DIRS})
 include_directories(${Framework_INCLUDE_DIRS})
 add_definitions(${Framework_DEFINITIONS})
 
+# libpng for output image generation
+find_package(PNG)
+if(NOT PNG_FOUND AND MSVC)
+  include(ExtPNG) # builds libpng automatically
+endif()
+if(PNG_FOUND)
+  add_definitions(-DHAVE_LIBPNG=1 ${PNG_DEFINITIONS})
+  include_directories(${PNG_INCLUDE_DIRS})
+  # link_libraries(${PNG_LIBRARIES})
+endif()
+
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})
-target_link_libraries(${projectBinary} JPetFramework ${FFTW_LIBRARIES})
+target_link_libraries(${projectBinary} JPetFramework ${FFTW_LIBRARIES} ${PNG_LIBRARIES})
 
 add_custom_target(clean_data_${projectName}
   COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root)
@@ -51,6 +62,7 @@ foreach(test_source ${UNIT_TEST_SOURCES})
     JPetFramework
     ${Boost_LIBRARIES}
     ${FFTW_LIBRARIES}
+    ${PNG_LIBRARIES}
     )
 endforeach()
 

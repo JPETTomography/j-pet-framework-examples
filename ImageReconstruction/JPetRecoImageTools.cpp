@@ -265,9 +265,17 @@ JPetRecoImageTools::Matrix2DProj JPetRecoImageTools::backProjectWithTOF(Matrix2D
         if (yMinusCenter2 + xMinusCenter2 < center2) {
           double t = ttemp - yMinusCenter * sin;
           int n = std::floor(t + 0.5F);
-          for (int i = 0; i < sinogram[n][angle]; i++) {
-            std::cout << normalDistributionProbability(std::sqrt(x * x + y * y), tof[n][angle][i], 100) << std::endl;
-            reconstructedProjection[y][x] += normalDistributionProbability(std::sqrt(x * x + y * y), tof[n][angle][i], 100);
+          auto tofInfo = tof.find(std::make_pair(n, angle));
+          std::vector<float> tofVector;
+          if (tofInfo != tof.end()) {
+            tofVector = tofInfo->second;
+          } else {
+            break;
+          }
+          for (unsigned int i = 0; i < tofVector.size(); i++) {
+            double distributionProbability = normalDistributionProbability(std::sqrt(x * x + y * y), tofVector[i], 100);
+            distributionProbability = distributionProbability > 0.5 ? 1 - distributionProbability : distributionProbability;
+            reconstructedProjection[y][x] += 2 * distributionProbability;
           }
         }
       }
@@ -277,7 +285,6 @@ JPetRecoImageTools::Matrix2DProj JPetRecoImageTools::backProjectWithTOF(Matrix2D
   for (int x = 0; x < imageSize; x++) {
     for (int y = 0; y < imageSize; y++) {
       reconstructedProjection[y][x] *= angleStep;
-      reconstructedProjection[y][x] = std::round(reconstructedProjection[y][x]);
     }
   }
   rescaleFunc(reconstructedProjection, rescaleMinCutoff, rescaleFactor);

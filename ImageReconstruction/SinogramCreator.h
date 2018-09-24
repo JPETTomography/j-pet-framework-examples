@@ -31,6 +31,7 @@
 
 #include "JPetFilterNone.h"
 #include "JPetRecoImageTools.h"
+#include "png_writer.h"
 
 /**
  * @brief Module creating sinogram from data
