@@ -67,8 +67,8 @@
  *  "MLEMRunner_SystemMatrixSaveFull_bool" : if true full system matrix will be saved
  *  "MLEMRunner_ReconstructionOutputPath_std::string" : path where reconstructed image will be saved
  *  "MLEMRunner_ReconstuctionIterations_int" : number of iterations in reconstruction
- *  "MLEMRunner_TOFSigmaAlongZAxis_float" : TOF sigma along Z axis
- *  "MLEMRunner_TOFSigmaAxis_float" : TOF sigma axis
+ *  "MLEMRunner_TOFSigmaAlongZAxis_float" : error of measurement of Z position along scintillator in meters
+ *  "MLEMRunner_TOFSigmaAxis_float" :  error of measurement TOF along LOR (or TOR in case of 3D) in meters
  */
 
 class MLEMRunner : public JPetUserTask
