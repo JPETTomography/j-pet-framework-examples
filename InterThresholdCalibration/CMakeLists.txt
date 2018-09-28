@@ -1,50 +1,48 @@
-# J-PET tool project using J-PET framework
-#
-# Author: Adam Strzelecki <adam.strzelecki@uj.edu.pl>
-#
-# Description:
-#   Builds project depending on J-PET framework.
+################################################################################
+## Data analysis project based on J-PET Framework
+## Created by J-PET Framework developers 2016-2018
+##
+## Description:
+##   Builds calibration procedure between thresholds
+################################################################################
 
 cmake_minimum_required(VERSION 2.6)
 
+################################################################################
+## Project name
 set(projectName InterThresholdCalibration)
 
-# files to be copied from some other example directory, if any
+## Auxiliary files
 set(AUXILLIARY_FILES
   userParams.json
-  README
-  )
+  README.md
+)
 
 set(ROOT_SCRIPTS
   rootlogon.C
   rootalias.C
-  )
+)
 
+################################################################################
+## Binary, header and source files definitions
 set(projectBinary ${projectName}.x)
-
-project(${projectName} CXX) # using only C++
-
+project(${projectName} CXX)
 file(GLOB HEADERS *.h)
 file(GLOB SOURCES *.cpp)
 
 ######################################################################
-### Use source files of modules from LargeBarrelAnalysis
-######################################################################
+## Use source files of modules from LargeBarrelAnalysis
 set(use_modules_from ../LargeBarrelAnalysis)
-#
 list(APPEND HEADERS ${use_modules_from}/TimeWindowCreator.h)
 list(APPEND SOURCES ${use_modules_from}/TimeWindowCreator.cpp)
 list(APPEND HEADERS ${use_modules_from}/UniversalFileLoader.h)
 list(APPEND SOURCES ${use_modules_from}/UniversalFileLoader.cpp)
-#
 list(APPEND HEADERS ${use_modules_from}/SignalFinder.h)
 list(APPEND SOURCES ${use_modules_from}/SignalFinder.cpp)
 list(APPEND HEADERS ${use_modules_from}/SignalFinderTools.h)
 list(APPEND SOURCES ${use_modules_from}/SignalFinderTools.cpp)
-#
 list(APPEND HEADERS ${use_modules_from}/SignalTransformer.h)
 list(APPEND SOURCES ${use_modules_from}/SignalTransformer.cpp)
-#
 list(APPEND HEADERS ${use_modules_from}/HitFinder.h)
 list(APPEND SOURCES ${use_modules_from}/HitFinder.cpp)
 list(APPEND HEADERS ${use_modules_from}/HitFinderTools.h)
@@ -57,44 +55,38 @@ add_executable(${projectBinary} ${SOURCES} ${HEADERS})
 target_link_libraries(${projectBinary} JPetFramework)
 
 add_custom_target(clean_data_${projectName}
-  COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root)
-
-# copy the DB config file to an expected location
-set(db_config_dir ${CMAKE_CURRENT_BINARY_DIR}/../DBConfig)
-
-add_custom_command(TARGET ${projectBinary}
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND}
-  ARGS -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/../j-pet-framework/DBHandler/Config ${db_config_dir}
+  COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root
 )
 
-set(copy_depends) #create variable for list with depends files path
+## Create variable for list with depends files path
+set(copy_depends)
 
-# copy the example auxilliary files
-foreach( file_i ${AUXILLIARY_FILES})
+################################################################################
+## Copy the example auxiliary files
+foreach(file_i ${AUXILLIARY_FILES})
   list(APPEND copy_depends ${CMAKE_CURRENT_BINARY_DIR}/${file_i})
-
   if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${file_i})
     set(CP_CMD copy_directory)
   else()
     set(CP_CMD copy)
   endif()
   add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND}
+    POST_BUILD COMMAND ${CMAKE_COMMAND}
     ARGS -E ${CP_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
-    )
-endforeach( file_i )
+  )
+endforeach(file_i)
 
-# copy the ROOT scripts
-foreach( file_i ${ROOT_SCRIPTS})
+## Copy the ROOT scripts
+foreach(file_i ${ROOT_SCRIPTS})
   list(APPEND copy_depends ${CMAKE_CURRENT_BINARY_DIR}/${file_i})
   add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND}
+    POST_BUILD COMMAND ${CMAKE_COMMAND}
     ARGS -E ${CP_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
-    )
-endforeach( file_i )
+  )
+endforeach(file_i)
 
-add_custom_target(copy_files_${projectName} DEPENDS ${copy_depends}) #add new target that depends on copied files
-add_dependencies(${projectBinary} copy_files_${projectName}) #add dependencies between building project and copy files
+################################################################################
+## Add new target that depends on copied files
+add_custom_target(copy_files DEPENDS ${copy_depends})
+## Add dependencies between building project and copy files
+add_dependencies(${projectBinary} copy_files)

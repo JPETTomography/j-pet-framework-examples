@@ -13,14 +13,12 @@
  *  @file main.cpp
  */
 
-#include "../LargeBarrelAnalysis/EventCategorizer.h"
-#include "../LargeBarrelAnalysis/EventFinder.h"
-#include "../LargeBarrelAnalysis/HitFinder.h"
-#include "../LargeBarrelAnalysis/SignalFinder.h"
-#include "../LargeBarrelAnalysis/SignalTransformer.h"
 #include "../LargeBarrelAnalysis/TimeWindowCreator.h"
-#include "TimeCalibration.h"
+#include "../LargeBarrelAnalysis/SignalTransformer.h"
+#include "../LargeBarrelAnalysis/SignalFinder.h"
+#include "../LargeBarrelAnalysis/HitFinder.h"
 #include <JPetManager/JPetManager.h>
+#include "TimeCalibration.h"
 using namespace std;
 
 int main(int argc, const char* argv[]) {
