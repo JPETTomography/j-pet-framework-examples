@@ -85,7 +85,7 @@ foreach(file_i ${AUXILIARY_FILES})
     set(CP_CMD copy)
   endif()
   add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
-    POST_BUILDCOMMAND ${CMAKE_COMMAND}
+    POST_BUILD COMMAND ${CMAKE_COMMAND}
     ARGS -E ${CP_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/../${USE_AUX_FILES_FROM}/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
   )
 endforeach(file_i)
