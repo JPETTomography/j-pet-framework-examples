@@ -31,7 +31,7 @@ include_directories(${Framework_INCLUDE_DIRS})
 add_definitions(${Framework_DEFINITIONS})
 
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})
-target_link_libraries(${projectBinary} JPetFramework ${FFTW_LIBRARIES} ${PNG_LIBRARIES})
+target_link_libraries(${projectBinary} JPetFramework ${FFTW_LIBRARIES})
 
 add_custom_target(clean_data_${projectName}
   COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root)
@@ -51,7 +51,6 @@ foreach(test_source ${UNIT_TEST_SOURCES})
     JPetFramework
     ${Boost_LIBRARIES}
     ${FFTW_LIBRARIES}
-    ${PNG_LIBRARIES}
     )
 endforeach()
 
