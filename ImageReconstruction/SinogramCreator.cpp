@@ -143,12 +143,12 @@ bool SinogramCreator::terminate() {
   JPetRecoImageTools::Matrix2DProj result =
       JPetRecoImageTools::backProjectWithTOF((*fSinogram[0]), fTOFInformation, (*fSinogram[0])[0].size(), JPetRecoImageTools::nonRescale, 0, 255);
 
-  for (int i = 0; i < result.size(); i++) {
-    for (int j = 0; j < result[0].size(); j++) {
-      std::cout << result[i][j] << " ";
-    }
-    std::cout << std::endl;
-  }
+  // for (int i = 0; i < result.size(); i++) {
+  //  for (int j = 0; j < result[0].size(); j++) {
+  //    std::cout << result[i][j] << " ";
+  //  }
+  //  std::cout << std::endl;
+  //}
   saveResult(result, "reconstruction_with_tof.ppm");
 
   JPetFilterNone noneFilter;
