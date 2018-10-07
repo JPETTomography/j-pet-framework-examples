@@ -34,5 +34,5 @@ script:
     - ./LargeBarrelAnalysis.x -t root -f dabc_17025151847.tslot.calib.root   -r 0 100
 notifications:
   email:
-    - aleksander.gajos@doctoral.uj.edu.pl
+    - aleksander.gajos@uj.edu.pl
     - wojciech.krzemien@ncbj.gov.pl

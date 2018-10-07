@@ -10,6 +10,7 @@ cmake_minimum_required(VERSION 2.6)
 ######################################################################
 ### when creating a new project,
 ### set this section appropriately for your project
+### (please remove this comment in your template-derived analysis)
 ######################################################################
 set(projectName NewProjectName)
 
@@ -37,6 +38,7 @@ file(GLOB SOURCES *.cpp)
 ### is also presenr in LargeBarrelAnalysis,
 ### comment out the respective lines below so as not to use
 ### this module's source from LargeBarrelAnalysis.
+### (please remove this comment in your template-derived analysis)
 ######################################################################
 set(use_modules_from ../LargeBarrelAnalysis)
 #

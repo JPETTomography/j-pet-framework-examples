@@ -7,10 +7,6 @@
 
 cmake_minimum_required(VERSION 2.6)
 
-######################################################################
-### when creating a new project,
-### set this section appropriately for your project
-######################################################################
 set(projectName InterThresholdCalibration)
 
 # files to be copied from some other example directory, if any
@@ -33,11 +29,6 @@ file(GLOB SOURCES *.cpp)
 
 ######################################################################
 ### Use source files of modules from LargeBarrelAnalysis
-###
-### If you are using your own version of some module which
-### is also presenr in LargeBarrelAnalysis,
-### comment out the respective lines below so as not to use
-### this module's source from LargeBarrelAnalysis.
 ######################################################################
 set(use_modules_from ../LargeBarrelAnalysis)
 #
@@ -60,9 +51,6 @@ list(APPEND HEADERS ${use_modules_from}/HitFinder.h)
 list(APPEND SOURCES ${use_modules_from}/HitFinder.cpp)
 list(APPEND HEADERS ${use_modules_from}/HitFinderTools.h)
 list(APPEND SOURCES ${use_modules_from}/HitFinderTools.cpp)
-
-message(STATUS "S: " ${SOURCES})
-message(STATUS "H: " ${HEADERS})
 
 include_directories(${Framework_INCLUDE_DIRS})
 add_definitions(${Framework_DEFINITIONS})
@@ -88,7 +76,7 @@ set(copy_depends) #create variable for list with depends files path
 foreach( file_i ${AUXILLIARY_FILES})
   list(APPEND copy_depends ${CMAKE_CURRENT_BINARY_DIR}/${file_i})
 
-  if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../${USE_AUX_FILES_FROM}/${file_i})
+  if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${file_i})
     set(CP_CMD copy_directory)
   else()
     set(CP_CMD copy)
@@ -96,7 +84,7 @@ foreach( file_i ${AUXILLIARY_FILES})
   add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
     POST_BUILD
     COMMAND ${CMAKE_COMMAND}
-    ARGS -E ${CP_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/../${USE_AUX_FILES_FROM}/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
+    ARGS -E ${CP_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
     )
 endforeach( file_i )
 

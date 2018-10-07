@@ -11,9 +11,7 @@
 ######################################################################
 set(projectName PhysicAnalysis)
 
-# files to be copied from some other example directory, if any
-set(USE_AUX_FILES_FROM  ${projectName})
-
+# files to be copied from the source directory, if any
 set(AUXILLIARY_FILES
   userParams.json
   README
@@ -84,7 +82,7 @@ set(copy_depends) #create variable for list with depends files path
 foreach( file_i ${AUXILLIARY_FILES})
   list(APPEND copy_depends ${CMAKE_CURRENT_BINARY_DIR}/${file_i})
 
-  if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../${USE_AUX_FILES_FROM}/${file_i})
+  if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${file_i})
     set(CP_CMD copy_directory)
   else()
     set(CP_CMD copy)
@@ -92,7 +90,7 @@ foreach( file_i ${AUXILLIARY_FILES})
   add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
     POST_BUILD
     COMMAND ${CMAKE_COMMAND}
-    ARGS -E ${CP_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/../${USE_AUX_FILES_FROM}/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
+    ARGS -E ${CP_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
     )
 endforeach( file_i )
 

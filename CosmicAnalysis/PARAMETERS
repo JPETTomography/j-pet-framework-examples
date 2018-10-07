@@ -49,19 +49,6 @@ EventFinder_MinEventMultiplicity_int
 --- events of minimum multiplicity will only be saved in output file. Default
 value is 1, so all events are saved.
 
-Scatter_Categorizer_TOF_TimeDiff_float
---- categorizer tool for recognizing scatterings. User can constrain allowed discrepancy
-between calculated time of flight of scatter candidate and difference of two hit times.
-
-Back2Back_Categorizer_SlotThetaDiff_float
---- denotes acceptable difference in degrees between opposite slots, to categorize
-two hits as back-to-back type. Default value is 3.0 degrees, so accepted slot theta
-difference will be between 177.0 and 183.0 degrees.
-
-Deex_Categorizer_TOT_Cut_Min_float
---- denotes Time over Threshold cut minimal value for simple selection of deexcitation photons
-Default value: 30 000 ps.
-
-Deex_Categorizer_TOT_Cut_Max_float
---- denotes Time over Threshold cut maximal value for simple selection of deexcitation photons
-Default value: 50 000 ps.
+EventCategorizer_MinCosmicTOT_float
+--- denotes Time over Threshold cut minimal value for simple selection of cosmic particles
+Default value: 55 000 ps.
