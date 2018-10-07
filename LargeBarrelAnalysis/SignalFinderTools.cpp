@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2016 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -10,210 +10,167 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- *  @file SignalFinderToolsTools.cpp
+ *  @file SignalFinderTools.cpp
  */
 
 #include "SignalFinderTools.h"
 using namespace std;
 
 /**
- * Method returns a map of vectors of JPetSigCh ordered by photomultiplier ID
+ * Distributing Signal Channels to PMs and checking RecoFlag
  */
-map<int, vector<JPetSigCh>> SignalFinderTools::getSigChsPMMapById(
-  const JPetTimeWindow* timeWindow)
-{
-  map<int, vector<JPetSigCh>> sigChsPMMap;
+vector<vector<JPetSigCh>> SignalFinderTools::getSigChByPM(
+  const JPetTimeWindow* timeWindow, const JPetParamBank& paramBank, bool useCorrupts
+){
   if (!timeWindow) {
-    WARNING("Pointer of Time Window object is not set, returning empty map");
-    return sigChsPMMap;
+    WARNING("Pointer of Time Window object is not set, returning empty vector.");
+    vector<vector<JPetSigCh>> emptyVec;
+    return emptyVec;
   }
-
-  // Map Signal Channels according to PM they belong to
+  // Init return vector
+  int pmNumber = paramBank.getPMsSize();
+  vector<JPetSigCh> sigChVec;
+  vector<vector<JPetSigCh>> pmSigChVec(pmNumber, sigChVec);
+  // Distribute Signal Channels according to PM they belong to
   const unsigned int nSigChs = timeWindow->getNumberOfEvents();
   for (unsigned int i = 0; i < nSigChs; i++) {
-    JPetSigCh sigCh = dynamic_cast<const JPetSigCh&>(timeWindow->operator[](i));
-    int pmtID = sigCh.getPM().getID();
-    auto search = sigChsPMMap.find(pmtID);
-    if (search == sigChsPMMap.end()) {
-      vector<JPetSigCh> tmp;
-      tmp.push_back(sigCh);
-      sigChsPMMap.insert(pair<int, vector<JPetSigCh>>(pmtID, tmp));
-    } else search->second.push_back(sigCh);
+    auto sigCh = dynamic_cast<const JPetSigCh&>(timeWindow->operator[](i));
+    // If it is set not to use Corrupted SigChs, such flagged objects will be skipped
+    if(!useCorrupts && sigCh.getRecoFlag() == JPetSigCh::Corrupted) { continue; }
+    int pmID = sigCh.getPM().getID();
+    pmSigChVec.at(pmID-1).push_back(sigCh);
   }
-  return sigChsPMMap;
+  return pmSigChVec;
 }
 
 /**
- * Method invoking Raw Signal building method
- * for each PM separately, looping over whole PM map
+ * Method invoking Raw Signal building method for each PM separately
  */
 vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
-  map<int, vector<JPetSigCh>> sigChsPMMap,
-  unsigned int numOfThresholds,
-  JPetStatistics& stats,
-  double sigChEdgeMaxTime,
-  double sigChLeadTrailMaxTime,
-  bool saveHistos)
-{
+  vector<vector<JPetSigCh>> sigChByPM, int numOfThresholds,
+  double sigChEdgeMaxTime, double sigChLeadTrailMaxTime,
+  JPetStatistics& stats, bool saveHistos
+){
   vector<JPetRawSignal> allSignals;
-  for (auto& sigChPair : sigChsPMMap) {
-    vector<JPetRawSignal> currentSignals = buildRawSignals(
-      sigChPair.second,
-      numOfThresholds,
-      stats,
-      sigChEdgeMaxTime,
-      sigChLeadTrailMaxTime,
-      saveHistos);
-    allSignals.insert(
-      allSignals.end(),
-      currentSignals.begin(),
-      currentSignals.end());
+  for (auto sigChVec : sigChByPM) {
+    auto signals = buildRawSignals(
+      sigChVec, numOfThresholds, sigChEdgeMaxTime, sigChLeadTrailMaxTime, stats, saveHistos
+    );
+    allSignals.insert(allSignals.end(), signals.begin(), signals.end());
   }
-  return allSignals;
+return allSignals;
 }
 
 /**
- * Method reconstructs Raw Signals based on Signal Channels on one PM
+ * @brief Reconstruction of Raw Signals based on Signal Channels on the same PM
+ *
+ * RawSignal is created with all Leading SigChs that are found within first
+ * time window (sigChEdgeMaxTime parameter) and all Trailing SigChs that conform
+ * to second time window (sigChLeadTrailMaxTime parameter).
+ * Also invokes validation method.
  */
 vector<JPetRawSignal> SignalFinderTools::buildRawSignals(
-  const vector<JPetSigCh>& sigChFromSamePM,
-  unsigned int numOfThresholds,
-  JPetStatistics& stats,
-  double sigChEdgeMaxTime,
-  double sigChLeadTrailMaxTime,
-  bool saveHistos)
+  vector<JPetSigCh> sigChFromSamePM, int numOfThresholds,
+  double sigChEdgeMaxTime, double sigChLeadTrailMaxTime,
+  JPetStatistics& stats, bool saveHistos)
 {
   vector<JPetRawSignal> rawSigVec;
-
   // Threshold number check - fixed number equal 4
   if (numOfThresholds != 4) {
     ERROR("This function is meant to work with 4 thresholds only!");
     return rawSigVec;
   }
 
-  vector<JPetSigCh> tmpVec;
-  vector<vector<JPetSigCh>> thrLeadingSigCh(numOfThresholds, tmpVec);
-  vector<vector<JPetSigCh>> thrTrailingSigCh(numOfThresholds, tmpVec);
+  auto leadSigChs = getSigChsByEdge(sigChFromSamePM, JPetSigCh::Leading);
+  auto trailSigChs = getSigChsByEdge(sigChFromSamePM, JPetSigCh::Trailing);
+  int trailingIterator = 0;
 
-  for (const JPetSigCh & sigCh : sigChFromSamePM) {
-    if(sigCh.getType() == JPetSigCh::Leading) {
-      thrLeadingSigCh.at(sigCh.getThresholdNumber()-1).push_back(sigCh);
-    } else if(sigCh.getType() == JPetSigCh::Trailing) {
-      thrTrailingSigCh.at(sigCh.getThresholdNumber()-1).push_back(sigCh);
-    }
-  }
-
-  assert(thrLeadingSigCh.size() > 0);
-  while (thrLeadingSigCh.at(0).size() > 0) {
+  for(unsigned int i = 0; i<leadSigChs.size(); i++) {
     JPetRawSignal rawSig;
-    rawSig.setPM(thrLeadingSigCh.at(0).at(0).getPM());
-    rawSig.setBarrelSlot(thrLeadingSigCh.at(0).at(0).getPM().getBarrelSlot());
-
-    // First THR leading added by default
-    rawSig.addPoint(thrLeadingSigCh.at(0).at(0));
-
-    // Searching for matching trailing on first THR
-    int closestTrailingSigCh = findTrailingSigCh(
-      thrLeadingSigCh.at(0).at(0),
-      thrTrailingSigCh.at(0),
-      sigChLeadTrailMaxTime
-    );
-
-    if(closestTrailingSigCh != -1) {
-      rawSig.addPoint(thrTrailingSigCh.at(0).at(closestTrailingSigCh));
-      if(saveHistos)
-        stats.getHisto1D("lead_trail_thr1_diff")->Fill(
-          thrTrailingSigCh.at(0)
-            .at(closestTrailingSigCh).getValue()-thrLeadingSigCh.at(0).at(0).getValue()
-        );
-      thrTrailingSigCh.at(0).erase(thrTrailingSigCh.at(0).begin()+closestTrailingSigCh);
-    }
-
-    // Procedure follows in loop for THR 2,3,4
-    // First search for leading SigCh on iterated THR,
-    // then search for trailing SigCh on iterated THR
-    for(uint kk=1;kk<numOfThresholds;kk++){
-      int nextThrSigChIndex = findSigChOnNextThr(
-        thrLeadingSigCh.at(0).at(0).getValue(),
-        thrLeadingSigCh.at(kk),
-        sigChEdgeMaxTime
-      );
-
-      if (nextThrSigChIndex != -1) {
-        closestTrailingSigCh = findTrailingSigCh(
-          thrLeadingSigCh.at(0).at(0),
-          thrTrailingSigCh.at(kk),
-          sigChLeadTrailMaxTime
-        );
-
-        if (closestTrailingSigCh != -1) {
-          rawSig.addPoint(thrTrailingSigCh.at(kk).at(closestTrailingSigCh));
-          if(saveHistos)
-            stats.getHisto1D(Form("lead_trail_thr%d_diff", kk+1))->Fill(
-              thrTrailingSigCh.at(kk)
-                .at(closestTrailingSigCh).getValue()-thrLeadingSigCh.at(kk).at(nextThrSigChIndex).getValue()
-            );
-          thrTrailingSigCh.at(kk).erase(thrTrailingSigCh.at(kk).begin()+closestTrailingSigCh);
+    rawSig.setPM(leadSigChs.at(i).getPM());
+    rawSig.setBarrelSlot(leadSigChs.at(i).getPM().getBarrelSlot());
+    rawSig.addPoint(leadSigChs.at(i));
+    double referenceValue = leadSigChs.at(i).getValue();
+    // Check for fitting trailing signal channels
+    for(unsigned int k = trailingIterator; k<trailSigChs.size(); k++) {
+      if(fabs(referenceValue-trailSigChs.at(k).getValue()) < sigChLeadTrailMaxTime) {
+        rawSig.addPoint(trailSigChs.at(k));
+        if(saveHistos) {
+          stats.getHisto1D("LT_time_diff")->Fill(fabs(referenceValue-trailSigChs.at(k).getValue()));
         }
-
-        rawSig.addPoint(thrLeadingSigCh.at(kk).at(nextThrSigChIndex));
-        if(saveHistos)
-          stats.getHisto1D(Form("lead_thr1_thr%d_diff", kk+1))->Fill(
-            thrLeadingSigCh.at(kk)
-              .at(nextThrSigChIndex).getValue()-thrLeadingSigCh.at(0).at(0).getValue()
-          );
-        thrLeadingSigCh.at(kk).erase(thrLeadingSigCh.at(kk).begin()+nextThrSigChIndex);
+      } else {
+        trailingIterator = k;
+        break;
       }
     }
-
-    // Adding created Raw Signal to vector
-    rawSigVec.push_back(rawSig);
-    thrLeadingSigCh.at(0).erase(thrLeadingSigCh.at(0).begin());
-  }
-
-  // Filling controll histograms
-  if(saveHistos)
-    for(uint jj=0;jj<numOfThresholds;jj++){
-      stats.getHisto1D("remainig_leading_sig_ch_per_thr")
-        ->Fill(jj+1, thrLeadingSigCh.at(jj).size());
-      stats.getHisto1D("remainig_trailing_sig_ch_per_thr")
-        ->Fill(jj+1, thrTrailingSigCh.at(jj).size());
+    // Check for other fitting leading signal channels
+    for(unsigned int j = i+1; j<leadSigChs.size(); j++) {
+      if(fabs(referenceValue-leadSigChs.at(j).getValue())<sigChEdgeMaxTime) {
+        rawSig.addPoint(leadSigChs.at(j));
+        if(saveHistos) {
+          stats.getHisto1D("L_time_diff")->Fill(fabs(referenceValue-leadSigChs.at(j).getValue()));
+        }
+      } else {
+        i = j;
+        break;
+      }
     }
+    if(validateSignal(rawSig, numOfThresholds)){
+      rawSig.setRecoFlag(JPetRawSignal::Good);
+      if(saveHistos) {
+        stats.getHisto1D("good_v_bad_raw_sigs")->Fill(1);
+      }
+    }else{
+      rawSig.setRecoFlag(JPetRawSignal::Corrupted);
+      if(saveHistos) {
+        stats.getHisto1D("good_v_bad_raw_sigs")->Fill(2);
+      }
+    }
+    rawSigVec.push_back(rawSig);
+  }
   return rawSigVec;
 }
 
 /**
- * Method finds Signal Channels that belong to the same leading edge
+ * Destributing Signal Channels to vectors, according to the Edge Type
  */
-int SignalFinderTools::findSigChOnNextThr(
-  double sigChValue,
-  const vector<JPetSigCh>& sigChVec,
-  double sigChEdgeMaxTime)
-{
-  for (size_t i = 0; i < sigChVec.size(); i++) {
-    if (fabs(sigChValue - sigChVec.at(i).getValue()) < sigChEdgeMaxTime)
-      return i;
+vector<JPetSigCh> SignalFinderTools::getSigChsByEdge(
+  vector<JPetSigCh> sigChFromSamePM, JPetSigCh::EdgeType edgeType
+){
+  vector<JPetSigCh> sameEdgeSigCh;
+  for (auto sigCh : sigChFromSamePM) {
+    if(sigCh.getType() == edgeType) { sameEdgeSigCh.push_back(sigCh); }
   }
-  return -1;
+  return sameEdgeSigCh;
 }
 
 /**
- * Method finds trailing edge Signal Channel that suits certian leading edge
- * Signal Channel, if more than one trailing edge Signal Channel found,
- * returning the one with the smallest index, that is equivalent of SigCh
- * earliest in time
+ * @brief Method validating a signal - setting Reco Flag to Good or Corrupted.
+ *
+ * Good has Signal a THR with a pair of SigChs of Leading and Trailing edge
+ * or is empty. If other case found - Corrupted Flag. Also if any of
+ * the used SigChs has RecoFlag::Corrupted, that RawSignal inherits that setting.
  */
-int SignalFinderTools::findTrailingSigCh(
-  const JPetSigCh& leadingSigCh,
-  const vector<JPetSigCh>& trailingSigChVec,
-  double sigChLeadTrailMaxTime)
+bool SignalFinderTools::validateSignal(JPetRawSignal rawSignal, int numOfThresholds)
 {
-  vector<int> trailingFoundIdices;
-  for (size_t i = 0; i < trailingSigChVec.size(); i++) {
-    if (fabs(leadingSigCh.getValue() - trailingSigChVec.at(i).getValue()) < sigChLeadTrailMaxTime)
-      trailingFoundIdices.push_back(i);
+  vector<JPetSigCh> tmpVec;
+  vector<vector<JPetSigCh>> thrLeadSigChs(numOfThresholds, tmpVec);
+  vector<vector<JPetSigCh>> thrTrailSigChs(numOfThresholds, tmpVec);
+  auto leadSigChs = rawSignal.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+  auto trailSigChs = rawSignal.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+  for(auto sigCh : leadSigChs) {
+    if(sigCh.getRecoFlag() == JPetSigCh::Corrupted) { return false; }
+    thrLeadSigChs.at(sigCh.getThresholdNumber()-1).push_back(sigCh);
   }
-  if (trailingFoundIdices.size() == 0) return -1;
-  sort(trailingFoundIdices.begin(), trailingFoundIdices.end());
-  return trailingFoundIdices.at(0);
+  for(auto sigCh : trailSigChs) {
+    if(sigCh.getRecoFlag() == JPetSigCh::Corrupted){ return false; }
+    thrTrailSigChs.at(sigCh.getThresholdNumber()-1).push_back(sigCh);
+  }
+  for(int i=1; i<numOfThresholds; i++){
+    if(!(thrLeadSigChs.at(i).size()==0 && thrTrailSigChs.at(i).size()==0)
+      && !(thrLeadSigChs.at(i).size()==1 && thrTrailSigChs.at(i).size()==1)) {
+        return false;
+    }
+  }
+  return true;
 }

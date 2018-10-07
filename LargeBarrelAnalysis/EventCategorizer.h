@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2017 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -40,14 +40,14 @@ class JPetWriter;
 class EventCategorizer : public JPetUserTask{
 public:
 	EventCategorizer(const char * name);
-	virtual ~EventCategorizer(){}
+	virtual ~EventCategorizer();
 	virtual bool init() override;
 	virtual bool exec() override;
 	virtual bool terminate() override;
 
 protected:
+	const std::string kBack2BackSlotThetaDiffParamKey = "Back2Back_Categorizer_SlotThetaDiff_float";
 	const std::string kScatterTOFTimeDiffParamKey = "Scatter_Categorizer_TOF_TimeDiff_float";
-  const std::string kBack2BackSlotThetaDiffParamKey = "Back2Back_Categorizer_SlotThetaDiff_float";
 	const std::string kDeexTOTCutMinParamKey = "Deex_Categorizer_TOT_Cut_Min_float";
 	const std::string kDeexTOTCutMaxParamKey = "Deex_Categorizer_TOT_Cut_Max_float";
 	const std::string kSaveControlHistosParamKey = "Save_Cotrol_Histograms_bool";
@@ -59,4 +59,4 @@ protected:
 	bool fSaveControlHistos = true;
 	void initialiseHistograms();
 };
-#endif /*  !EVENTCATEGORIZER_H */
+#endif /* !EVENTCATEGORIZER_H */

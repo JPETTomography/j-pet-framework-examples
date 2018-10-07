@@ -194,6 +194,14 @@ void MLEMRunner::setUpOptions()
   if (isOptionSet(opts, kReconstructionIterationsKey)) {
     fReconstructionIterations = getOptionAsInt(opts, kReconstructionIterationsKey);
   }
+
+  if (isOptionSet(opts, kTOFSigmaAxisKey)) {
+    fTOFSigmaAxis = getOptionAsFloat(opts, kTOFSigmaAxisKey);
+  }
+
+  if (isOptionSet(opts, kTOFSigmaAlongZAxisKey)) {
+    fTOFSigmaAlongZAxis = getOptionAsFloat(opts, kTOFSigmaAlongZAxisKey);
+  }
 }
 
 void MLEMRunner::setSystemMatrix()
@@ -232,11 +240,9 @@ bool MLEMRunner::setUpRunReconstructionWithMatrix()
   }
 
   float scannerLenght = 2.f;
-  float fTOFsigmaAlongZAxis = 0.015f;
-  float fTOFSigmaAxis = 0.06f;
 
   fScannerReconstruction = new ScannerReconstruction(fSymmetryDescriptor, scannerLenght);
-  fScannerReconstruction->set_sigmas(fTOFsigmaAlongZAxis, fTOFSigmaAxis);
+  fScannerReconstruction->set_sigmas(fTOFSigmaAlongZAxis, fTOFSigmaAxis);
 
   if (fMatrix->n_detectors() != (int)fScannerReconstruction->barrel.size()) {
     ERROR("Number of detectors in system matrix and reconstruction scanner mismatch, returning from reconstruction");

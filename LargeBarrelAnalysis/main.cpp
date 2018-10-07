@@ -13,13 +13,13 @@
  *  @file main.cpp
  */
 
+#include <JPetManager/JPetManager.h>
+#include "TimeWindowCreator.h"
+#include "SignalTransformer.h"
 #include "EventCategorizer.h"
+#include "SignalFinder.h"
 #include "EventFinder.h"
 #include "HitFinder.h"
-#include "SignalFinder.h"
-#include "SignalTransformer.h"
-#include "TimeWindowCreator.h"
-#include <JPetManager/JPetManager.h>
 
 using namespace std;
 

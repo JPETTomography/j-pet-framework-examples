@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2016 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -18,6 +18,7 @@
 
 #include <JPetStatistics/JPetStatistics.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
+#include <JPetParamBank/JPetParamBank.h>
 #include <JPetHit/JPetHit.h>
 #include <vector>
 
@@ -31,24 +32,28 @@
 class HitFinderTools
 {
 public:
-  static std::map<int, std::vector<JPetPhysSignal>> getSignalsSlotMap(
-    const JPetTimeWindow* timeWindow);
-  static std::vector<JPetHit> matchSignals(
-    JPetStatistics& stats,
-    const std::map<int, std::vector<JPetPhysSignal>>& signalSlotMap,
+  static std::vector<JPetPhysSignal> sortByTime(std::vector<JPetPhysSignal> signals);
+  static std::vector<std::vector<JPetPhysSignal>> getSignalsBySlot(
+    const JPetTimeWindow* timeWindow, const JPetParamBank& paramBank, bool useCorrupts
+  );
+  static std::vector<JPetHit> matchAllSignals(
+    const std::vector<std::vector<JPetPhysSignal>>& allSignals,
     const std::map<unsigned int, std::vector<double>>& velocitiesMap,
-    double timeDiffAB,
-    int refDetScinId,
-    bool saveHistos
+    double timeDiffAB, int refDetScinId, JPetStatistics& stats, bool saveHistos
+  );
+  static std::vector<JPetHit> matchSignals(
+    const std::vector<JPetPhysSignal>& slotSignals,
+    const std::map<unsigned int, std::vector<double>>& velocitiesMap,
+    double timeDiffAB, int refDetScinId, JPetStatistics& stats, bool saveHistos
   );
   static JPetHit createHit(
-    const JPetPhysSignal& signalA,
-    const JPetPhysSignal& signalB,
-    const std::map<unsigned int, std::vector<double>>& velocitiesMap);
-  static JPetHit createDummyRefDetHit(const JPetPhysSignal& signalB);
-  static void checkTheta(const double& theta);
+    const JPetPhysSignal& signal1, const JPetPhysSignal& signal2,
+    const std::map<unsigned int, std::vector<double>>& velocitiesMap,
+    JPetStatistics& stats, bool saveHistos
+  );
+  static JPetHit createDummyRefDetHit(const JPetPhysSignal& signal);
   static int getProperChannel(const JPetPhysSignal& signal);
-  static void sortByTime(std::vector<JPetPhysSignal>& side);
+  static void checkTheta(const double& theta);
 };
 
-#endif /*  !HITFINDERTOOLS_H */
+#endif /* !HITFINDERTOOLS_H */

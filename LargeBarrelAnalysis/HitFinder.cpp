@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2016 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -28,33 +28,58 @@ using namespace std;
 
 using namespace jpet_options_tools;
 
-HitFinder::HitFinder(const char* name) : JPetUserTask(name) { }
+/**
+ * Constructor
+ */
+HitFinder::HitFinder(const char* name) : JPetUserTask(name) {}
 
+/**
+ * Destructor
+ */
+HitFinder::~HitFinder() {}
+
+/**
+ * Init Hit Finder
+ */
 bool HitFinder::init()
 {
   INFO("Hit finding Started");
-
   fOutputEvents = new JPetTimeWindow("JPetHit");
 
   // Reading values from the user options if available
+  // Getting bool for using bad signals
+  if (isOptionSet(fParams.getOptions(), kUseCorruptedSignalsParamKey)) {
+    fUseCorruptedSignals = getOptionAsBool(fParams.getOptions(), kUseCorruptedSignalsParamKey);
+    if(fUseCorruptedSignals){
+      WARNING("Hit Finder is using Corrupted Signals, as set by the user");
+    } else{
+      WARNING("Hit Finder is NOT using Corrupted Signals, as set by the user");
+    }
+  } else {
+    WARNING("Hit Finder is not using Corrupted Signals (default option)");
+  }
   // Allowed time difference between signals on A and B sides
-  if (isOptionSet(fParams.getOptions(), kABTimeDiffParamKey))
+  if (isOptionSet(fParams.getOptions(), kABTimeDiffParamKey)) {
     fABTimeDiff = getOptionAsFloat(fParams.getOptions(), kABTimeDiffParamKey);
+  }
   // Getting velocities file from user options
   auto velocitiesFile = std::string("dummyCalibration.txt");
-  if (isOptionSet(fParams.getOptions(), kVelocityFileParamKey))
+  if (isOptionSet(fParams.getOptions(), kVelocityFileParamKey)) {
     velocitiesFile = getOptionAsString(fParams.getOptions(), kVelocityFileParamKey);
-  else
+  } else {
     WARNING("No path to the file with velocities was provided in user options.");
+  }
   // Getting number of Reference Detector Scintillator ID
-  if (isOptionSet(fParams.getOptions(), kRefDetScinIDParamKey))
+  if (isOptionSet(fParams.getOptions(), kRefDetScinIDParamKey)) {
     fRefDetScinID = getOptionAsInt(fParams.getOptions(), kRefDetScinIDParamKey);
-  else
+  } else {
     WARNING(Form("No value of the %s parameter provided by the user, indicating that Reference Detector was not used.",
-                 kRefDetScinIDParamKey.c_str()));
+      kRefDetScinIDParamKey.c_str()));
+  }
   // Getting bool for saving histograms
-  if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey))
+  if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey)) {
     fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
+  }
 
   // Use of velocities file
   JPetGeomMapping mapper(getParamBank());
@@ -65,69 +90,88 @@ bool HitFinder::init()
   }
 
   // Control histograms
-  if (fSaveControlHistos) {
-    getStatistics().createHistogram(
-      new TH1F("hits_per_time_slot",
-               "Number of Hits in Time Window",
-               101, -0.5, 100.5));
-    getStatistics().getHisto1D("hits_per_time_slot")
-    ->GetXaxis()->SetTitle("Hits in Time Slot");
-    getStatistics().getHisto1D("hits_per_time_slot")
-    ->GetYaxis()->SetTitle("Number of Time Slots");
-
-    getStatistics().createHistogram(
-      new TH1F("remain_signals_per_scin",
-               "Number of Unused Signals in Scintillator",
-               192, 0.5, 192.5));
-    getStatistics().getHisto1D("remain_signals_per_scin")
-    ->GetXaxis()->SetTitle("ID of Scintillator");
-    getStatistics().getHisto1D("remain_signals_per_scin")
-    ->GetYaxis()->SetTitle("Number of Unused Signals in Scintillator");
-
-    getStatistics().createHistogram(
-      new TH2F("time_diff_per_scin",
-               "Signals Time Difference per Scintillator ID",
-               200, -2 * fABTimeDiff, 2 * fABTimeDiff,
-               192, 0.5, 192.5));
-    getStatistics().getHisto2D("time_diff_per_scin")
-    ->GetXaxis()->SetTitle("A-B time difference");
-    getStatistics().getHisto2D("time_diff_per_scin")
-    ->GetYaxis()->SetTitle("ID of Scintillator");
-
-    getStatistics().createHistogram(
-      new TH2F("hit_pos_per_scin",
-               "Hit Position per Scintillator ID",
-               200, -50.0, 50.0,
-               192, 0.5, 192.5));
-    getStatistics().getHisto2D("hit_pos_per_scin")
-    ->GetXaxis()->SetTitle("Hit z position [cm]");
-    getStatistics().getHisto2D("hit_pos_per_scin")
-    ->GetYaxis()->SetTitle("ID of Scintillator");
-  }
+  if(fSaveControlHistos) { initialiseHistograms(); }
   return true;
 }
 
+/**
+ * Execute Hit Finder
+ */
 bool HitFinder::exec()
 {
   if (auto& timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
-    map<int, vector<JPetPhysSignal>> signalSlotMap = HitFinderTools::getSignalsSlotMap(timeWindow);
-    vector<JPetHit> allHits = HitFinderTools::matchSignals(getStatistics(), signalSlotMap,
-                              fVelocities, fABTimeDiff, fRefDetScinID, fSaveControlHistos);
-    if (fSaveControlHistos)
+    auto signalsBySlot = HitFinderTools::getSignalsBySlot(
+      timeWindow, getParamBank(), fUseCorruptedSignals
+    );
+    auto allHits = HitFinderTools::matchAllSignals(
+      signalsBySlot, fVelocities, fABTimeDiff, fRefDetScinID, getStatistics(), fSaveControlHistos
+    );
+    if (fSaveControlHistos) {
       getStatistics().getHisto1D("hits_per_time_slot")->Fill(allHits.size());
+    }
     saveHits(allHits);
   } else return false;
   return true;
 }
 
+/**
+ * Terminate Hit Finder
+ */
 bool HitFinder::terminate()
 {
   INFO("Hit finding ended");
   return true;
 }
 
+/**
+ * Saving method
+ */
 void HitFinder::saveHits(const std::vector<JPetHit>& hits)
 {
   auto sortedHits = JPetAnalysisTools::getHitsOrderedByTime(hits);
   for (const auto& hit : sortedHits) fOutputEvents->add<JPetHit>(hit);
+}
+
+/**
+ * Init histograms
+ */
+void HitFinder::initialiseHistograms(){
+  getStatistics().createHistogram(new TH1F(
+    "good_vs_bad_hits", "Number of good and corrupted Hits created", 2, 0.5, 2.5
+  ));
+  getStatistics().getHisto1D("good_vs_bad_hits")->GetXaxis()->SetBinLabel(1,"GOOD");
+  getStatistics().getHisto1D("good_vs_bad_hits")->GetXaxis()->SetBinLabel(2,"CORRUPTED");
+  getStatistics().getHisto1D("good_vs_bad_hits")->GetYaxis()->SetTitle("Number of Hits");
+
+  getStatistics().createHistogram(new TH1F(
+    "hits_per_time_slot", "Number of Hits in Time Window", 101, -0.5, 100.5
+  ));
+  getStatistics().getHisto1D("hits_per_time_slot")->GetXaxis()->SetTitle("Hits in Time Slot");
+  getStatistics().getHisto1D("hits_per_time_slot")->GetYaxis()->SetTitle("Number of Time Slots");
+
+  getStatistics().createHistogram(new TH1F(
+    "remain_signals_per_scin", "Number of Unused Signals in Scintillator", 192, 0.5, 192.5
+  ));
+  getStatistics().getHisto1D("remain_signals_per_scin")
+    ->GetXaxis()->SetTitle("ID of Scintillator");
+  getStatistics().getHisto1D("remain_signals_per_scin")
+    ->GetYaxis()->SetTitle("Number of Unused Signals in Scintillator");
+
+  getStatistics().createHistogram(new TH2F(
+    "time_diff_per_scin", "Signals Time Difference per Scintillator ID",
+    200, -2 * fABTimeDiff, 2 * fABTimeDiff, 192, 0.5, 192.5
+  ));
+  getStatistics().getHisto2D("time_diff_per_scin")
+    ->GetXaxis()->SetTitle("A-B time difference");
+  getStatistics().getHisto2D("time_diff_per_scin")
+    ->GetYaxis()->SetTitle("ID of Scintillator");
+
+  getStatistics().createHistogram(new TH2F(
+    "hit_pos_per_scin", "Hit Position per Scintillator ID",
+    200, -50.0, 50.0, 192, 0.5, 192.5
+  ));
+  getStatistics().getHisto2D("hit_pos_per_scin")
+    ->GetXaxis()->SetTitle("Hit z position [cm]");
+  getStatistics().getHisto2D("hit_pos_per_scin")
+    ->GetYaxis()->SetTitle("ID of Scintillator");
 }

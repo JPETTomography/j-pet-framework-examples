@@ -15,13 +15,13 @@ set(projectName InterThresholdCalibration)
 
 # files to be copied from some other example directory, if any
 set(AUXILLIARY_FILES
-  userParams.json
-  README
+  #userParams.json
+  #README
   )
 
 set(ROOT_SCRIPTS
-  rootlogon.C
-  rootalias.C
+  #rootlogon.C
+  #rootalias.C
   )
 
 set(projectBinary ${projectName}.x)
@@ -43,6 +43,8 @@ set(use_modules_from ../LargeBarrelAnalysis)
 #
 list(APPEND HEADERS ${use_modules_from}/TimeWindowCreator.h)
 list(APPEND SOURCES ${use_modules_from}/TimeWindowCreator.cpp)
+list(APPEND HEADERS ${use_modules_from}/TimeWindowCreatorTools.h)
+list(APPEND SOURCES ${use_modules_from}/TimeWindowCreatorTools.cpp)
 list(APPEND HEADERS ${use_modules_from}/UniversalFileLoader.h)
 list(APPEND SOURCES ${use_modules_from}/UniversalFileLoader.cpp)
 #
@@ -109,4 +111,4 @@ foreach( file_i ${ROOT_SCRIPTS})
 endforeach( file_i )
 
 add_custom_target(copy_files_${projectName} DEPENDS ${copy_depends}) #add new target that depends on copied files
-add_dependencies(${projectBinary} copy_files$_${projectName}) #add dependencies between building project and copy files
+add_dependencies(${projectBinary} copy_files_${projectName}) #add dependencies between building project and copy files

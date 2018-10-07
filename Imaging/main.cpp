@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2017 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -13,12 +13,12 @@
  *  @file main.cpp
  */
 
-#include <JPetManager/JPetManager.h>
 #include "../LargeBarrelAnalysis/TimeWindowCreator.h"
-#include "../LargeBarrelAnalysis/SignalFinder.h"
 #include "../LargeBarrelAnalysis/SignalTransformer.h"
-#include "../LargeBarrelAnalysis/HitFinder.h"
+#include "../LargeBarrelAnalysis/SignalFinder.h"
 #include "../LargeBarrelAnalysis/EventFinder.h"
+#include "../LargeBarrelAnalysis/HitFinder.h"
+#include <JPetManager/JPetManager.h>
 #include "EventCategorizerImaging.h"
 
 using namespace std;
@@ -30,19 +30,18 @@ int main(int argc, const char* argv[])
 
     manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
     manager.registerTask<SignalFinder>("SignalFinder");
-    manager.registerTask<SignalTransformer>("SignalTransformer"); 
-    manager.registerTask<HitFinder>("HitFinder"); 
+    manager.registerTask<SignalTransformer>("SignalTransformer");
+    manager.registerTask<HitFinder>("HitFinder");
     manager.registerTask<EventFinder>("EventFinder");
     manager.registerTask<EventCategorizerImaging>("EventCategorizerImaging");
-    
-    manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
-    manager.useTask("TimeCalibLoader", "tslot.raw", "tslot.calib");
+
+    manager.useTask("TimeWindowCreator", "hld", "tslot.calib");
     manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
     manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
     manager.useTask("HitFinder", "phys.sig", "hits");
     manager.useTask("EventFinder", "hits", "unk.evt");
     manager.useTask("EventCategorizerImaging", "unk.evt", "imag.evt");
-      
+
     manager.run(argc, argv);
   } catch (const std::exception& except) {
     std::cerr << "Unrecoverable error occured:" << except.what() << "Exiting the program!" << std::endl;
@@ -50,4 +49,3 @@ int main(int argc, const char* argv[])
   }
   return EXIT_SUCCESS;
 }
-

@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2016 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -23,26 +23,31 @@
 #define override
 #endif
 
+class JPetWriter;
+
 /**
  * @brief User Task: method rewriting Raw Signals to Reco and Phys Signals.
  *
- * Task organizes rewrites Raw Signals to Reco Signals and Physical Signals,
- * saving JPetPhysSignal. Only time of the signal is set, the rest of available
- * fields are set to -1.
+ * Task rewrites Raw Signals to Reco Signals and Physical Signals, saving JPetPhysSignal.
+ * Only time of the signal is set, the rest of available fields are set to -1,
+ * also using corrupted signal, if indicated by user.
  */
-
-class JPetWriter;
-
 class SignalTransformer: public JPetUserTask
 {
 public:
 	SignalTransformer(const char* name);
+	virtual ~SignalTransformer();
 	virtual bool init() override;
 	virtual bool exec() override;
 	virtual bool terminate() override;
 
 protected:
+	void initialiseHistograms();
 	JPetRecoSignal createRecoSignal(const JPetRawSignal& rawSignal);
 	JPetPhysSignal createPhysSignal(const JPetRecoSignal& signals);
+	const std::string kUseCorruptedSignalsParamKey = "SignalTransformer_UseCorruptedSignals_bool";
+	const std::string kSaveControlHistosParamKey = "Save_Cotrol_Histograms_bool";
+	bool fUseCorruptedSignals = false;
+	bool fSaveControlHistos = true;
 };
-#endif /*  !SIGNALTRANSFORMER_H */
+#endif /* !SIGNALTRANSFORMER_H */

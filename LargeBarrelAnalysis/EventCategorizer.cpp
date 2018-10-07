@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2017 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -22,37 +22,61 @@
 using namespace jpet_options_tools;
 using namespace std;
 
+/**
+ * Constructor
+ */
 EventCategorizer::EventCategorizer(const char* name): JPetUserTask(name) {}
 
+/**
+ * Destructor
+ */
+EventCategorizer::~EventCategorizer() {}
+
+/**
+ * Init Event Categorizer
+ */
 bool EventCategorizer::init()
 {
   INFO("Event categorization started.");
   // Parameter for back to back categorization
-  if (isOptionSet(fParams.getOptions(), kBack2BackSlotThetaDiffParamKey))
+  if (isOptionSet(fParams.getOptions(), kBack2BackSlotThetaDiffParamKey)){
     fB2BSlotThetaDiff = getOptionAsFloat(fParams.getOptions(), kBack2BackSlotThetaDiffParamKey);
-  else
-    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
-      kBack2BackSlotThetaDiffParamKey.c_str(), fB2BSlotThetaDiff));
+  } else {
+    WARNING(Form(
+      "No value of the %s parameter provided by the user. Using default value of %lf.",
+      kBack2BackSlotThetaDiffParamKey.c_str(), fB2BSlotThetaDiff
+    ));
+  }
   // Parameter for scattering determination
-  if (isOptionSet(fParams.getOptions(), kScatterTOFTimeDiffParamKey))
+  if (isOptionSet(fParams.getOptions(), kScatterTOFTimeDiffParamKey)) {
     fScatterTOFTimeDiff = getOptionAsFloat(fParams.getOptions(), kScatterTOFTimeDiffParamKey);
-  else
-    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
-      kScatterTOFTimeDiffParamKey.c_str(), fScatterTOFTimeDiff));
+  } else {
+    WARNING(Form(
+      "No value of the %s parameter provided by the user. Using default value of %lf.",
+      kScatterTOFTimeDiffParamKey.c_str(), fScatterTOFTimeDiff
+    ));
+  }
   // Parameters for deexcitation TOT cut
-  if (isOptionSet(fParams.getOptions(), kDeexTOTCutMinParamKey))
+  if (isOptionSet(fParams.getOptions(), kDeexTOTCutMinParamKey)) {
     fDeexTOTCutMin = getOptionAsFloat(fParams.getOptions(), kDeexTOTCutMinParamKey);
-  else
-    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
-      kDeexTOTCutMinParamKey.c_str(), fDeexTOTCutMin));
-  if (isOptionSet(fParams.getOptions(), kDeexTOTCutMaxParamKey))
+  } else {
+    WARNING(Form(
+      "No value of the %s parameter provided by the user. Using default value of %lf.",
+      kDeexTOTCutMinParamKey.c_str(), fDeexTOTCutMin
+    ));
+  }
+  if (isOptionSet(fParams.getOptions(), kDeexTOTCutMaxParamKey)) {
     fDeexTOTCutMax = getOptionAsFloat(fParams.getOptions(), kDeexTOTCutMaxParamKey);
-  else
-    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.",
-      kDeexTOTCutMaxParamKey.c_str(), fDeexTOTCutMax));
+  } else {
+    WARNING(Form(
+      "No value of the %s parameter provided by the user. Using default value of %lf.",
+      kDeexTOTCutMaxParamKey.c_str(), fDeexTOTCutMax
+    ));
+  }
   // Getting bool for saving histograms
-  if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey))
+  if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey)) {
     fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
+  }
 
   // Input events type
   fOutputEvents = new JPetTimeWindow("JPetEvent");
@@ -61,6 +85,9 @@ bool EventCategorizer::init()
   return true;
 }
 
+/**
+ * Execute Event Categorizer
+ */
 bool EventCategorizer::exec()
 {
   if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
@@ -69,13 +96,18 @@ bool EventCategorizer::exec()
       const auto& event = dynamic_cast<const JPetEvent&>(timeWindow->operator[](i));
 
       // Check types of current event
-      bool is2Gamma = EventCategorizerTools::checkFor2Gamma(event, getStatistics(),
-        fSaveControlHistos, fB2BSlotThetaDiff);
-      bool is3Gamma = EventCategorizerTools::checkFor3Gamma(event, getStatistics(), fSaveControlHistos);
-      bool isPrompt = EventCategorizerTools::checkForPrompt(event, getStatistics(),
-        fSaveControlHistos, fDeexTOTCutMin, fDeexTOTCutMax);
-      bool isScattered = EventCategorizerTools::checkForScatter(event, getStatistics(),
-        fSaveControlHistos, fScatterTOFTimeDiff);
+      bool is2Gamma = EventCategorizerTools::checkFor2Gamma(
+        event, getStatistics(), fSaveControlHistos, fB2BSlotThetaDiff
+      );
+      bool is3Gamma = EventCategorizerTools::checkFor3Gamma(
+        event, getStatistics(), fSaveControlHistos
+      );
+      bool isPrompt = EventCategorizerTools::checkForPrompt(
+        event, getStatistics(), fSaveControlHistos, fDeexTOTCutMin, fDeexTOTCutMax
+      );
+      bool isScattered = EventCategorizerTools::checkForScatter(
+        event, getStatistics(), fSaveControlHistos, fScatterTOFTimeDiff
+      );
 
       JPetEvent newEvent = event;
       if(is2Gamma) newEvent.addEventType(JPetEventType::k2Gamma);
@@ -84,16 +116,20 @@ bool EventCategorizer::exec()
       if(isScattered) newEvent.addEventType(JPetEventType::kScattered);
 
       if(fSaveControlHistos){
-        for(auto hit : event.getHits())
+        for(auto hit : event.getHits()){
           getStatistics().getHisto2D("All_XYpos")->Fill(hit.getPosX(), hit.getPosY());
+        }
       }
       events.push_back(newEvent);
     }
     saveEvents(events);
-  } else return false;
+  } else { return false; }
   return true;
 }
 
+/**
+ * Terminate Event Categorizer
+ */
 bool EventCategorizer::terminate()
 {
   INFO("Event categorization completed.");
@@ -102,9 +138,12 @@ bool EventCategorizer::terminate()
 
 void EventCategorizer::saveEvents(const vector<JPetEvent>& events)
 {
-  for (const auto& event : events) fOutputEvents->add<JPetEvent>(event);
+  for (const auto& event : events) { fOutputEvents->add<JPetEvent>(event); }
 }
 
+/**
+ * Init histograms
+ */
 void EventCategorizer::initialiseHistograms(){
 
   // General histograms

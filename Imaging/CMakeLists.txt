@@ -43,6 +43,8 @@ set(use_modules_from ../LargeBarrelAnalysis)
 #
 list(APPEND HEADERS ${use_modules_from}/TimeWindowCreator.h)
 list(APPEND SOURCES ${use_modules_from}/TimeWindowCreator.cpp)
+list(APPEND HEADERS ${use_modules_from}/TimeWindowCreatorTools.h)
+list(APPEND SOURCES ${use_modules_from}/TimeWindowCreatorTools.cpp)
 #
 list(APPEND HEADERS ${use_modules_from}/UniversalFileLoader.h)
 list(APPEND SOURCES ${use_modules_from}/UniversalFileLoader.cpp)
