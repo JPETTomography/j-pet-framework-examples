@@ -54,11 +54,15 @@ Optional, if you want to generate documentation: [Doxygen](www.doxygen.org)
 3. Debian GNU/Linux Sid; gcc-4.9.real 4.9.2; ROOT 5.34/26
 4. Fedora 20
 5. Ubuntu 18.04.1 LTS; gcc 7.3.0; ROOT 6.10/08
+6. Arch Linux; gcc 7.3.1; ROOT 6.12/06
 
 ## Requirements installation
 
 For Ubuntu:  
-`sudo apt-get -y install git cmake libboost-all-dev libtinyxml2-dev doxygen libfftw3-3 libfftw3-dev`
+`sudo apt-get -y install git cmake libboost-all-dev doxygen libfftw3-3 libfftw3-dev`
 
 For Fedora 20:  
-`sudo yum install boost-devel cmake tinyxml-devel doxygen fftw3-devel`
+`sudo yum install boost-devel cmake doxygen fftw3-devel`
+
+For Arch Linux:
+`sudo pacman -S boost boost-libs cmake doxygen fftw`

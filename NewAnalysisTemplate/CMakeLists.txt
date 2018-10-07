@@ -38,6 +38,7 @@ file(GLOB SOURCES *.cpp)
 ## If you are using your own version of some module which is also present
 ## in LargeBarrelAnalysis, comment out the respective lines below
 ## so as not to use this module's source from LargeBarrelAnalysis.
+## (please remove this comment in your template-derived analysis)
 set(use_modules_from ../LargeBarrelAnalysis)
 list(APPEND HEADERS ${use_modules_from}/TimeWindowCreator.h)
 list(APPEND SOURCES ${use_modules_from}/TimeWindowCreator.cpp)

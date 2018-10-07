@@ -12,6 +12,7 @@ cmake_minimum_required(VERSION 2.6)
 ## Project name
 set(projectName TimeCalibration)
 
+################################################################################
 ## Auxiliary files
 set(AUXILIARY_FILES
   README.md
