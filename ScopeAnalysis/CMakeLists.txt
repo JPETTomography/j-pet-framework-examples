@@ -1,25 +1,30 @@
-# J-PET tool project using J-PET framework
-#
+################################################################################
+## Data analysis project based on J-PET Framework
+## Created by J-PET Framework developers 2016-2018
+##
+## Description:
+##   Analysis of the scope data.
+################################################################################
 
 cmake_minimum_required(VERSION 2.6)
 
-######################################################################
-### when creating a new project,
-### set this section appropriately for your project
-######################################################################
+################################################################################
+## Project name
 set(projectName ScopeAnalysis)
 
-set(AUXILLIARY_FILES
+################################################################################
+## Auxiliary files
+set(AUXILIARY_FILES
+  README.md
   run.sh
-  README
-  )
+)
 
-######################################################################
-### this section should not need to be modified for a new project
-######################################################################
+################################################################################
+## Binary, header and source files and additional sources definitions
 set(projectBinary ${projectName}.x)
 
-project(${projectName} CXX) # using only C++
+## Project is using only C++
+project(${projectName} CXX)
 
 file(GLOB HEADERS *.h)
 file(GLOB SOURCES *.cpp)
@@ -31,7 +36,8 @@ add_definitions(${Framework_DEFINITIONS})
 set(ADDITIONAL_SOURCES
   ../modules/SDA
   ../modules/tools
-  )
+)
+
 foreach(dir ${ADDITIONAL_SOURCES})
   file(GLOB HEADERS_TMP ${dir}/JPet*/*.h)
   file(GLOB SOURCES_TMP ${dir}/JPet*/*.cpp)
@@ -43,21 +49,19 @@ foreach(dir ${ADDITIONAL_SOURCES})
 endforeach()
 include_directories(${FOLDERS})
 
+################################################################################
+## Build definitions and libraries linking
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})
 target_link_libraries(${projectBinary} JPetFramework)
 
-# copy the example auxilliary files
-foreach( file_i ${AUXILLIARY_FILES})
+## Copy the auxiliary files
+foreach(file_i ${AUXILIARY_FILES})
   if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${file_i})
     set(CP_CMD copy_directory)
   else()
     set(CP_CMD copy)
   endif()
-    
-  add_custom_command(
-    TARGET ${projectBinary}
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND}
+  add_custom_command(TARGET ${projectBinary} POST_BUILD COMMAND ${CMAKE_COMMAND}
     ARGS -E ${CP_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
-    )
-endforeach( file_i )
+  )
+endforeach(file_i)

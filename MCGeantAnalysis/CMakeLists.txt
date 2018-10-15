@@ -1,46 +1,41 @@
-# J-PET tool project using J-PET framework
-#
-# Author: Adam Strzelecki <adam.strzelecki@uj.edu.pl>
-#
-# Description:
-#   Builds project depending on J-PET framework.
+################################################################################
+## Data analysis project based on J-PET Framework
+## Created by J-PET Framework developers 2016-2018
+##
+## Description:
+##   Builds project for analysis of Monte Carlo generated data
+################################################################################
 
 cmake_minimum_required(VERSION 2.6)
 
+################################################################################
+## Project name
 set(projectName MCGeantAnalysis)
 
-# files to be copied from the source directory, if any
+## Auxiliary files
 set(AUXILLIARY_FILES
-  README
-  run.sh
   userParams.json
-  )
+  README.md
+  run.sh
+)
 
 set(ROOT_SCRIPTS
   rootlogon.C
   rootalias.C
-  )
+)
 
+################################################################################
+## Binary, header and source files definitions
 set(projectBinary ${projectName}.x)
-
-project(${projectName} CXX) # using only C++
-
+project(${projectName} CXX)
 file(GLOB HEADERS *.h)
 file(GLOB SOURCES *.cpp)
 
 ######################################################################
-### Use source files of modules from LargeBarrelAnalysis
-###
-### If you are using your own version of some module which
-### is also presenr in LargeBarrelAnalysis,
-### comment out the respective lines below so as not to use
-### this module's source from LargeBarrelAnalysis.
-######################################################################
+## Use source files of modules from LargeBarrelAnalysis
 set(use_modules_from ../LargeBarrelAnalysis)
-#
 list(APPEND HEADERS ${use_modules_from}/EventFinder.h)
 list(APPEND SOURCES ${use_modules_from}/EventFinder.cpp)
-#
 list(APPEND HEADERS ${use_modules_from}/EventCategorizer.h)
 list(APPEND SOURCES ${use_modules_from}/EventCategorizer.cpp)
 list(APPEND HEADERS ${use_modules_from}/EventCategorizerTools.h)
@@ -53,35 +48,38 @@ add_executable(${projectBinary} ${SOURCES} ${HEADERS})
 target_link_libraries(${projectBinary} JPetFramework)
 
 add_custom_target(clean_data_${projectName}
-  COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root)
+  COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root
+)
 
-set(copy_depends) #create variable for list with depends files path
+## Create variable for list with depends files path
+set(copy_depends)
 
-# copy the example auxilliary files
-foreach( file_i ${AUXILLIARY_FILES})
+################################################################################
+## Copy the example auxiliary files
+foreach(file_i ${AUXILLIARY_FILES})
   list(APPEND copy_depends ${CMAKE_CURRENT_BINARY_DIR}/${file_i})
-
   if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${file_i})
     set(CP_CMD copy_directory)
   else()
     set(CP_CMD copy)
   endif()
   add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND}
+    POST_BUILD COMMAND ${CMAKE_COMMAND}
     ARGS -E ${CP_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
-    )
-endforeach( file_i )
+  )
+endforeach(file_i)
 
-# copy the ROOT scripts
-foreach( file_i ${ROOT_SCRIPTS})
+## Copy the ROOT scripts
+foreach(file_i ${ROOT_SCRIPTS})
   list(APPEND copy_depends ${CMAKE_CURRENT_BINARY_DIR}/${file_i})
   add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND}
+    POST_BUILD COMMAND ${CMAKE_COMMAND}
     ARGS -E ${CP_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
-    )
-endforeach( file_i )
+  )
+endforeach(file_i)
 
-add_custom_target(copy_files_${projectName} DEPENDS ${copy_depends}) #add new target that depends on copied files
-add_dependencies(${projectBinary} copy_files_${projectName}) #add dependencies between building project and copy files
+################################################################################
+## Add new target that depends on copied files
+add_custom_target(copy_files_${projectName} DEPENDS ${copy_depends})
+## Add dependencies between building project and copy files
+add_dependencies(${projectBinary} copy_files_${projectName})
