@@ -36,36 +36,39 @@ vector<JPetSigCh> TimeWindowCreatorTools::sortByValue(vector<JPetSigCh> input)
  * Building all Signal Chnnels from one TDC
  */
 vector<JPetSigCh> TimeWindowCreatorTools::buildSigChs(
-  TDCChannel* tdcChannel, JPetTOMBChannel tombChannel, double maxTime, double minTime,
+  TDCChannel* tdcChannel, TRef tombRef,
   map<unsigned int, vector<double>> timeCalibrationMap,
   map<unsigned int, vector<double>> thresholdsMap,
-  bool setTHRValuesFromChannels, JPetStatistics& stats, bool saveHistos
+  double maxTime, double minTime, bool setTHRValuesFromChannels,
+  JPetStatistics& stats, bool saveHistos
 ){
   vector<JPetSigCh> allTDCSigChs;
   // Loop over all entries on leading edge in current TOMBChannel and create SigCh
   for (int j = 0; j < tdcChannel->GetLeadHitsNum(); j++) {
-    if (tdcChannel->GetLeadTime(j) > maxTime || tdcChannel->GetLeadTime(j) < minTime ) { continue; }
+    auto leadTime = tdcChannel->GetLeadTime(j);
+    if (leadTime > maxTime || leadTime < minTime ) { continue; }
     auto leadSigCh = generateSigCh(
-      tdcChannel->GetLeadTime(j), tombChannel, JPetSigCh::Leading,
-      timeCalibrationMap, thresholdsMap, setTHRValuesFromChannels
+      leadTime, tombRef, timeCalibrationMap, thresholdsMap, JPetSigCh::Leading, setTHRValuesFromChannels
     );
     allTDCSigChs.push_back(leadSigCh);
     if (saveHistos){
-      stats.getHisto1D(Form("pm_occupation_thr%d", tombChannel.getLocalChannelNumber()))
-        ->Fill(tombChannel.getPM().getID());
+      auto channel = dynamic_cast<JPetTOMBChannel&>(*tombRef.GetObject());
+      stats.getHisto1D(Form("pm_occupation_thr%d", channel.getLocalChannelNumber()))
+        ->Fill(channel.getPM().getID());
     }
   }
   // Loop over all entries on trailing edge in current TOMBChannel and create SigCh
   for (int j = 0; j < tdcChannel->GetTrailHitsNum(); j++) {
-    if (tdcChannel->GetTrailTime(j) > maxTime || tdcChannel->GetTrailTime(j) < minTime ) { continue; }
+    auto trailTime = tdcChannel->GetTrailTime(j);
+    if (trailTime > maxTime || trailTime < minTime ) { continue; }
     auto trailSigCh = generateSigCh(
-      tdcChannel->GetTrailTime(j), tombChannel, JPetSigCh::Trailing,
-      timeCalibrationMap, thresholdsMap, setTHRValuesFromChannels
+      trailTime, tombRef, timeCalibrationMap, thresholdsMap, JPetSigCh::Trailing, setTHRValuesFromChannels
     );
     allTDCSigChs.push_back(trailSigCh);
     if (saveHistos){
-      stats.getHisto1D(Form("pm_occupation_thr%d", tombChannel.getLocalChannelNumber()))
-        ->Fill(tombChannel.getPM().getID());
+      auto channel = dynamic_cast<JPetTOMBChannel&>(*tombRef.GetObject());
+      stats.getHisto1D(Form("pm_occupation_thr%d", channel.getLocalChannelNumber()))
+        ->Fill(channel.getPM().getID());
     }
   }
   return allTDCSigChs;
@@ -75,15 +78,41 @@ vector<JPetSigCh> TimeWindowCreatorTools::buildSigChs(
  * Method for investigation of repetated Leading edges - setting RecoFlag for each SigCh
  */
 vector<JPetSigCh> TimeWindowCreatorTools::flagSigChs(
-  vector<JPetSigCh> inputSigChs, const JPetParamBank& paramBank,
-  int numOfThresholds, JPetStatistics& stats, bool saveHistos
+  vector<JPetSigCh> inputSigChs, JPetStatistics& stats, bool saveHistos
 ) {
   vector<JPetSigCh> flaggedSigChs;
-  auto mappedSigChs = sigChByPMTHR(inputSigChs, paramBank, numOfThresholds);
-  for(auto pmSigCh : mappedSigChs){
-    for(auto thrSigCh : pmSigCh){
-      auto flggedTHRSigChs = flagTHRSigChs(thrSigCh, stats, saveHistos);
-      flaggedSigChs.insert(flaggedSigChs.end(), flggedTHRSigChs.begin(), flggedTHRSigChs.end());
+  for(unsigned int i=0; i<inputSigChs.size(); i++) {
+    auto sigCh1 = inputSigChs.at(i);
+    if(sigCh1.getType() == JPetSigCh::Trailing) {
+      sigCh1.setRecoFlag(JPetSigCh::Good);
+      flaggedSigChs.push_back(sigCh1);
+      if(saveHistos){
+        stats.getHisto1D("good_vs_bad_sigch")->Fill(1);
+      }
+      continue;
+    }
+    for(unsigned int j=i+1; j<inputSigChs.size(); j++) {
+      auto sigCh2 = inputSigChs.at(j);
+      if(sigCh1.getPM().getID() != sigCh2.getPM().getID()) { continue; }
+      if(sigCh1.getThresholdNumber() != sigCh2.getThresholdNumber()) { continue; }
+      if(sigCh2.getType() == JPetSigCh::Leading) {
+        sigCh1.setRecoFlag(JPetSigCh::Corrupted);
+        flaggedSigChs.push_back(sigCh1);
+        if(saveHistos){
+          stats.getHisto1D("good_vs_bad_sigch")->Fill(2);
+          stats.getHisto1D("LL_per_PM")->Fill(sigCh1.getPM().getID());
+          stats.getHisto1D("LL_per_THR")->Fill(sigCh1.getThresholdNumber());
+          stats.getHisto1D("LL_time_diff")->Fill(sigCh2.getValue()-sigCh1.getValue());
+        }
+        break;
+      } else if(sigCh2.getType()==JPetSigCh::Trailing) {
+        sigCh1.setRecoFlag(JPetSigCh::Good);
+        flaggedSigChs.push_back(sigCh1);
+        if(saveHistos){
+          stats.getHisto1D("LT_time_diff")->Fill(sigCh2.getValue()-sigCh1.getValue());
+        }
+        break;
+      }
     }
   }
   return flaggedSigChs;
@@ -93,17 +122,19 @@ vector<JPetSigCh> TimeWindowCreatorTools::flagSigChs(
 * Sets up Signal Channel fields
 */
 JPetSigCh TimeWindowCreatorTools::generateSigCh(
-  double tdcChannelTime, const JPetTOMBChannel& channel, JPetSigCh::EdgeType edge,
+  double tdcChannelTime, TRef tombRef,
   map<unsigned int, vector<double>> timeCalibrationMap,
   map<unsigned int, vector<double>> thresholdsMap,
-  bool setTHRValuesFromChannels
+  JPetSigCh::EdgeType edge, bool setTHRValuesFromChannels
 ) {
+  // Get channel for corresponding number
+  auto channel = dynamic_cast<JPetTOMBChannel&>(*tombRef.GetObject());
   JPetSigCh sigCh;
   sigCh.setValue(1000.*(tdcChannelTime
     + UniversalFileLoader::getConfigurationParameter(timeCalibrationMap, channel.getChannel())
   ));
   sigCh.setType(edge);
-  sigCh.setTOMBChannel(channel);
+  sigCh.setTOMBChannel(dynamic_cast<JPetTOMBChannel&>(*tombRef.GetObject()));
   sigCh.setPM(channel.getPM());
   sigCh.setFEB(channel.getFEB());
   sigCh.setTRB(channel.getTRB());
@@ -117,60 +148,4 @@ JPetSigCh TimeWindowCreatorTools::generateSigCh(
     );
   }
   return sigCh;
-}
-
-/**
- * Method distributes JPetSigCh by PMs and THR they belong to
- */
-vector<vector<vector<JPetSigCh>>> TimeWindowCreatorTools::sigChByPMTHR(
-  vector<JPetSigCh> inputSigChs, const JPetParamBank& paramBank, int numOfThresholds
-){
-  int pmNumber = paramBank.getPMsSize();
-  vector<JPetSigCh> sigChVec;
-  vector<vector<JPetSigCh>> thrVec(numOfThresholds, sigChVec);
-  vector<vector<vector<JPetSigCh>>> pmThrVec(pmNumber, thrVec);
-  for(auto sigCh : inputSigChs){
-    int pmID = sigCh.getPM().getID();
-    int thrNum = sigCh.getThresholdNumber();
-    pmThrVec.at(pmID-1).at(thrNum-1).push_back(sigCh);
-  }
-  return pmThrVec;
-}
-
-/**
- * Submethod for RecoFlags setting
- */
-vector<JPetSigCh> TimeWindowCreatorTools::flagTHRSigChs(
-  vector<JPetSigCh> thrSigChs, JPetStatistics& stats, bool saveHistos
-){
-  auto sortedTHRSigChs = sortByValue(thrSigChs);
-  for(uint i=0; i<sortedTHRSigChs.size(); i++) {
-    auto sigCh1 = sortedTHRSigChs.at(i);
-    if(sigCh1.getType()==JPetSigCh::Trailing) {
-      sigCh1.setRecoFlag(JPetSigCh::Good);
-      if(saveHistos){
-        stats.getHisto1D("good_vs_bad_sigch")->Fill(1);
-      }
-      continue;
-    }
-    for(uint j=i+1; j<sortedTHRSigChs.size(); j++) {
-      auto sigCh2 = sortedTHRSigChs.at(j);
-      if (sigCh2.getType()==JPetSigCh::Leading) {
-        sigCh1.setRecoFlag(JPetSigCh::Corrupted);
-        if(saveHistos){
-          stats.getHisto1D("good_vs_bad_sigch")->Fill(2);
-          stats.getHisto1D("LL_per_PM")->Fill(sigCh1.getPM().getID());
-          stats.getHisto1D("LL_per_THR")->Fill(sigCh1.getThresholdNumber());
-          stats.getHisto1D("LL_time_diff")->Fill(sigCh2.getValue()-sigCh1.getValue());
-        }
-      } else if(sigCh2.getType()==JPetSigCh::Trailing) {
-        sigCh1.setRecoFlag(JPetSigCh::Good);
-        if(saveHistos){
-          stats.getHisto1D("LT_time_diff")->Fill(sigCh2.getValue()-sigCh1.getValue());
-        }
-        break;
-      }
-    }
-  }
-  return sortedTHRSigChs;
 }

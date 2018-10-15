@@ -33,6 +33,7 @@
 class SignalFinderTools
 {
 public:
+  static std::vector<JPetSigCh> sortByValue(std::vector<JPetSigCh> input);
   static std::vector<std::vector<JPetSigCh>> getSigChByPM(
     const JPetTimeWindow* timeWindow, const JPetParamBank& paramBank, bool useCorrupts
   );
@@ -46,9 +47,5 @@ public:
     double sigChEdgeMaxTime, double sigChLeadTrailMaxTime,
     JPetStatistics& stats, bool saveHistos
   );
-  static std::vector<JPetSigCh> getSigChsByEdge(
-    std::vector<JPetSigCh> sigChFromSamePM, JPetSigCh::EdgeType edgeType
-  );
-  static bool validateSignal(JPetRawSignal rawSignal, int numOfThresholds);
 };
 #endif /* !SIGNALFINDERTOOLS_H */

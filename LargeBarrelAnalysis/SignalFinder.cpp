@@ -153,4 +153,10 @@ void SignalFinder::initialiseHistograms(){
   getStatistics().getHisto1D("good_v_bad_raw_sigs")->GetXaxis()->SetBinLabel(1,"GOOD");
   getStatistics().getHisto1D("good_v_bad_raw_sigs")->GetXaxis()->SetBinLabel(2,"CORRUPTED");
   getStatistics().getHisto1D("good_v_bad_raw_sigs")->GetYaxis()->SetTitle("Number of Raw Signals");
+
+  getStatistics().createHistogram(new TH1F(
+    "unused_trails", "Number of unused Trailing Signal Channels per THR ", 4, 0.5, 4.5
+  ));
+  getStatistics().getHisto1D("unused_trails")->GetXaxis()->SetTitle("Threshold number");
+  getStatistics().getHisto1D("unused_trails")->GetYaxis()->SetTitle("Number of Sign Channels");
 }

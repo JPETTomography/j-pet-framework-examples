@@ -34,26 +34,20 @@ class TimeWindowCreatorTools
 public:
   static std::vector<JPetSigCh> sortByValue(std::vector<JPetSigCh> input);
   static std::vector<JPetSigCh> buildSigChs(
-    TDCChannel* tdcChannel, JPetTOMBChannel tombChannel, double maxTime, double minTime,
+    TDCChannel* tdcChannel, TRef tombRef,
     std::map<unsigned int, std::vector<double>> timeCalibrationMap,
     std::map<unsigned int, std::vector<double>> thresholdsMap,
-    bool setTHRValuesFromChannels, JPetStatistics& stats, bool saveHistos
+    double maxTime, double minTime, bool setTHRValuesFromChannels,
+    JPetStatistics& stats, bool saveHistos
   );
   static std::vector<JPetSigCh> flagSigChs(
-    std::vector<JPetSigCh> inputSigChs, const JPetParamBank& paramBank,
-    int numOfThresholds, JPetStatistics& stats, bool saveHistos
+    std::vector<JPetSigCh> inputSigChs, JPetStatistics& stats, bool saveHistos
   );
   static JPetSigCh generateSigCh(
-    double tdcChannelTime, const JPetTOMBChannel& channel, JPetSigCh::EdgeType edge,
+    double tdcChannelTime, TRef tombRef,
     std::map<unsigned int, std::vector<double>> timeCalibrationMap,
     std::map<unsigned int, std::vector<double>> thresholdsMap,
-    bool setTHRValuesFromChannels
-  );
-  static std::vector<std::vector<std::vector<JPetSigCh>>> sigChByPMTHR(
-    std::vector<JPetSigCh> inputSigChs, const JPetParamBank& paramBank, int numOfThresholds
-  );
-  static std::vector<JPetSigCh> flagTHRSigChs(
-    std::vector<JPetSigCh> thrSigCh, JPetStatistics& stats, bool saveHistos
+    JPetSigCh::EdgeType edge, bool setTHRValuesFromChannels
   );
 };
 

@@ -44,13 +44,13 @@ BOOST_AUTO_TEST_CASE(sortByTime_test)
   sigVec.push_back(sig3);
   sigVec.push_back(sig4);
   sigVec.push_back(sig5);
-  auto result =  HitFinderTools::sortByTime(sigVec);
+  auto result = HitFinderTools::sortByTime(sigVec);
   auto epsilon = 0.001;
-  BOOST_REQUIRE_CLOSE(results1.at(0).getTime(), 1.0, epsilon);
-  BOOST_REQUIRE_CLOSE(results1.at(0).getTime(), 4.0, epsilon);
-  BOOST_REQUIRE_CLOSE(results1.at(0).getTime(), 7.0, epsilon);
-  BOOST_REQUIRE_CLOSE(results1.at(0).getTime(), 9.0, epsilon);
-  BOOST_REQUIRE_CLOSE(results1.at(0).getTime(), 16.0, epsilon);
+  BOOST_REQUIRE_CLOSE(result.at(0).getTime(), 1.0, epsilon);
+  BOOST_REQUIRE_CLOSE(result.at(0).getTime(), 4.0, epsilon);
+  BOOST_REQUIRE_CLOSE(result.at(0).getTime(), 7.0, epsilon);
+  BOOST_REQUIRE_CLOSE(result.at(0).getTime(), 9.0, epsilon);
+  BOOST_REQUIRE_CLOSE(result.at(0).getTime(), 16.0, epsilon);
 }
 
 BOOST_AUTO_TEST_CASE(getSignalsBySlot_test_empty)
@@ -115,12 +115,12 @@ BOOST_AUTO_TEST_CASE(getSignalsBySlot_test)
   slot.add<JPetPhysSignal>(physSig7);
   slot.add<JPetPhysSignal>(physSig8);
 
-  auto results1 = HitFinderTools::getSignalsSlotMap(
-    slot, paramBank, true
+  auto results1 = HitFinderTools::getSignalsBySlot(
+    &slot, paramBank, true
   );
 
-  auto results2 = HitFinderTools::getSignalsSlotMap(
-    slot, paramBank, false
+  auto results2 = HitFinderTools::getSignalsBySlot(
+    &slot, paramBank, false
   );
 
   BOOST_REQUIRE_EQUAL(results1.size(), 3);
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(matchSignals_test_sameSide)
   physSig1.setTime(1.0);
   physSig2.setTime(2.0);
   physSig3.setTime(3.0);
-  vector<JPetPhysSignal> slotSignals;
+  std::vector<JPetPhysSignal> slotSignals;
   slotSignals.push_back(physSig1);
   slotSignals.push_back(physSig2);
   slotSignals.push_back(physSig3);
@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE(matchSignals_test_timeDiff)
   physSig4.setTime(40.0);
   physSig5.setTime(50.0);
   physSig6.setTime(52.0);
-  vector<JPetPhysSignal> slotSignals;
+  std::vector<JPetPhysSignal> slotSignals;
   slotSignals.push_back(physSig1);
   slotSignals.push_back(physSig2);
   slotSignals.push_back(physSig3);
@@ -206,7 +206,7 @@ BOOST_AUTO_TEST_CASE(matchSignals_test_refDetSigs)
   physSig1.setTime(1.0);
   physSig2.setTime(2.0);
   physSig3.setTime(3.0);
-  vector<JPetPhysSignal> slotSignals;
+  std::vector<JPetPhysSignal> slotSignals;
   slotSignals.push_back(physSig1);
   slotSignals.push_back(physSig2);
   slotSignals.push_back(physSig3);
@@ -279,7 +279,7 @@ BOOST_AUTO_TEST_CASE(matchSignals_test)
   physSig2B.setTime(4.8);
   physSig3A.setTime(7.2);
   physSig3B.setTime(6.5);
-  vector<JPetPhysSignal> slotSignals;
+  std::vector<JPetPhysSignal> slotSignals;
   slotSignals.push_back(physSigA);
   slotSignals.push_back(physSig1A);
   slotSignals.push_back(physSig1B);

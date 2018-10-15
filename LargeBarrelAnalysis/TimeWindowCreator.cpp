@@ -102,11 +102,10 @@ bool TimeWindowCreator::init()
     fMainStrip.first = code / 100;  // layer number
     fMainStrip.second = code % 100; // strip number
 
-    INFO(
-      Form("Filtering of SigCh-s was requested. Only data from strip %d in layer %d will be used.",
-        fMainStrip.second, fMainStrip.first
-      )
-    );
+    INFO(Form(
+      "Filtering of SigCh-s was requested. Only data from strip %d in layer %d will be used.",
+      fMainStrip.second, fMainStrip.first
+    ));
 
     // Build a list of allowed channels
     JPetGeomMapping mapper(getParamBank());
@@ -135,7 +134,7 @@ bool TimeWindowCreator::init()
  */
 bool TimeWindowCreator::exec()
 {
-  if (auto event = dynamic_cast <EventIII* const > (fEvent)) {
+  if (auto event = dynamic_cast<EventIII* const> (fEvent)) {
     int kTDCChannels = event->GetTotalNTDCChannels();
     if (fSaveControlHistos){
       getStatistics().getHisto1D("sig_ch_per_time_slot")->Fill(kTDCChannels);
@@ -143,7 +142,7 @@ bool TimeWindowCreator::exec()
     // Loop over all TDC channels in file
     auto tdcChannels = event->GetTDCChannelsArray();
     for (int i = 0; i < kTDCChannels; ++i) {
-      auto tdcChannel = dynamic_cast <TDCChannel* const > (tdcChannels->At(i));
+      auto tdcChannel = dynamic_cast<TDCChannel* const> (tdcChannels->At(i));
       auto tombNumber =  tdcChannel->GetChannel();
       // Skip trigger signals from TRB - every 65th
       if (tombNumber % 65 == 0) continue;
@@ -154,21 +153,24 @@ bool TimeWindowCreator::exec()
         );
         continue;
       }
-      // Get channel for corresponding number
-      JPetTOMBChannel& tombChannel = getParamBank().getTOMBChannel(tombNumber);
+
+      // Get reference to TOMBChannel object
+      TRef tombRef = &getParamBank().getTOMBChannel(tombNumber);
 
       // Reference Detector
       // Ignore irrelevant channels
-      if (!filter(tombChannel)) continue;
+      if (!filter(tombRef)) continue;
 
       auto allSigChs = TimeWindowCreatorTools::buildSigChs(
-        tdcChannel, tombChannel, fMaxTime, fMinTime,
-        fTimeCalibration, fThresholds, fSetTHRValuesFromChannels,
+        tdcChannel, tombRef, fTimeCalibration, fThresholds,
+        fMaxTime, fMinTime, fSetTHRValuesFromChannels,
         getStatistics(), fSaveControlHistos
       );
 
+      allSigChs = TimeWindowCreatorTools::sortByValue(allSigChs);
+
       auto flaggedSigChs = TimeWindowCreatorTools::flagSigChs(
-        allSigChs, getParamBank(), kNumOfThresholds, getStatistics(), fSaveControlHistos
+        allSigChs, getStatistics(), fSaveControlHistos
       );
 
       saveSigChs(flaggedSigChs);
@@ -199,10 +201,11 @@ void TimeWindowCreator::saveSigChs(const vector<JPetSigCh>& sigChVec)
  * Reference Detector
  * Returns true if signal from the channel given as argument should be passed
  */
-bool TimeWindowCreator::filter(const JPetTOMBChannel& channel) const
+bool TimeWindowCreator::filter(TRef tombRef) const
 {
   // If main strip was not defined, pass all channels
   if (!fMainStripSet) return true;
+  auto channel = (JPetTOMBChannel&) *tombRef.GetObject();
   if (fAllowedChannels.find(channel.getChannel()) != fAllowedChannels.end()) {
     return true;
   }
@@ -240,7 +243,7 @@ void TimeWindowCreator::initialiseHistograms(){
   }
 
   getStatistics().createHistogram(
-    new TH1F("good_vs_bad_sigch", "Number of good and corrupted Events created", 2, 0.5, 2.5)
+    new TH1F("good_vs_bad_sigch", "Number of good and corrupted SigChs created", 2, 0.5, 2.5)
   );
   getStatistics().getHisto1D("good_vs_bad_sigch")->GetXaxis()->SetBinLabel(1,"GOOD");
   getStatistics().getHisto1D("good_vs_bad_sigch")->GetXaxis()->SetBinLabel(2,"CORRUPTED");

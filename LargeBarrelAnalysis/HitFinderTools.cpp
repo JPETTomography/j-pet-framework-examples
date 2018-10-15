@@ -213,8 +213,9 @@ JPetHit HitFinderTools::createDummyRefDetHit(const JPetPhysSignal& signalB)
  */
 int HitFinderTools::getProperChannel(const JPetPhysSignal& signal)
 {
-  JPetSigCh someSigCh = signal.getRecoSignal().getRawSignal()
-    .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum)[0];
+  auto someSigCh = signal.getRecoSignal().getRawSignal()
+    .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrValue)[0];
+  // INFO(someSigCh.getTOMBChannel().GetObject());
   return someSigCh.getTOMBChannel().getChannel();
 }
 
