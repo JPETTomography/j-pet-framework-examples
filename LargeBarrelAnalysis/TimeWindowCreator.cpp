@@ -153,27 +153,28 @@ bool TimeWindowCreator::exec()
         );
         continue;
       }
-
-      // Get reference to TOMBChannel object
-      TRef tombRef = &getParamBank().getTOMBChannel(tombNumber);
+      // Get channel for corresponding number
+      auto& tombChannel = getParamBank().getTOMBChannel(tombNumber);
 
       // Reference Detector
       // Ignore irrelevant channels
-      if (!filter(tombRef)) continue;
+      if (!filter(tombChannel)) continue;
 
+      // Building Signal Channels for this TOMB Channel
       auto allSigChs = TimeWindowCreatorTools::buildSigChs(
-        tdcChannel, tombRef, fTimeCalibration, fThresholds,
+        tdcChannel, tombChannel, fTimeCalibration, fThresholds,
         fMaxTime, fMinTime, fSetTHRValuesFromChannels,
         getStatistics(), fSaveControlHistos
       );
 
-      allSigChs = TimeWindowCreatorTools::sortByValue(allSigChs);
+      // Sort Signal Channels in time
+      TimeWindowCreatorTools::sortByValue(allSigChs);
 
-      auto flaggedSigChs = TimeWindowCreatorTools::flagSigChs(
-        allSigChs, getStatistics(), fSaveControlHistos
-      );
+      // Flag with Good or Corrupted
+      TimeWindowCreatorTools::flagSigChs(allSigChs, getStatistics(), fSaveControlHistos);
 
-      saveSigChs(flaggedSigChs);
+      // Save result
+      saveSigChs(allSigChs);
     }
     fCurrEventNumber++;
   } else { return false; }
@@ -201,12 +202,11 @@ void TimeWindowCreator::saveSigChs(const vector<JPetSigCh>& sigChVec)
  * Reference Detector
  * Returns true if signal from the channel given as argument should be passed
  */
-bool TimeWindowCreator::filter(TRef tombRef) const
+bool TimeWindowCreator::filter(JPetTOMBChannel& tombChannel) const
 {
   // If main strip was not defined, pass all channels
   if (!fMainStripSet) return true;
-  auto channel = (JPetTOMBChannel&) *tombRef.GetObject();
-  if (fAllowedChannels.find(channel.getChannel()) != fAllowedChannels.end()) {
+  if (fAllowedChannels.find(tombChannel.getChannel()) != fAllowedChannels.end()) {
     return true;
   }
   return false;

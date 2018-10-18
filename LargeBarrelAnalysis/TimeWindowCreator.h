@@ -49,7 +49,7 @@ public:
 
 protected:
 	void saveSigChs(const std::vector<JPetSigCh>& sigChVec);
-	bool filter(TRef tombRef) const;
+	bool filter(JPetTOMBChannel& tombChannel) const;
 	void initialiseHistograms();
 	const std::string kTimeCalibFileParamKey = "TimeCalibLoader_ConfigFile_std::string";
 	const std::string kThresholdFileParamKey = "ThresholdLoader_ConfigFile_std::string";

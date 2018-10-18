@@ -44,13 +44,18 @@ BOOST_AUTO_TEST_CASE(sortByTime_test)
   sigVec.push_back(sig3);
   sigVec.push_back(sig4);
   sigVec.push_back(sig5);
-  auto result = HitFinderTools::sortByTime(sigVec);
   auto epsilon = 0.001;
-  BOOST_REQUIRE_CLOSE(result.at(0).getTime(), 1.0, epsilon);
-  BOOST_REQUIRE_CLOSE(result.at(0).getTime(), 4.0, epsilon);
-  BOOST_REQUIRE_CLOSE(result.at(0).getTime(), 7.0, epsilon);
-  BOOST_REQUIRE_CLOSE(result.at(0).getTime(), 9.0, epsilon);
-  BOOST_REQUIRE_CLOSE(result.at(0).getTime(), 16.0, epsilon);
+  BOOST_REQUIRE_CLOSE(sigVec.at(0).getTime(), 7.0, epsilon);
+  BOOST_REQUIRE_CLOSE(sigVec.at(1).getTime(), 4.0, epsilon);
+  BOOST_REQUIRE_CLOSE(sigVec.at(2).getTime(), 16.0, epsilon);
+  BOOST_REQUIRE_CLOSE(sigVec.at(3).getTime(), 1.0, epsilon);
+  BOOST_REQUIRE_CLOSE(sigVec.at(4).getTime(), 9.0, epsilon);
+  HitFinderTools::sortByTime(sigVec);
+  BOOST_REQUIRE_CLOSE(sigVec.at(0).getTime(), 1.0, epsilon);
+  BOOST_REQUIRE_CLOSE(sigVec.at(1).getTime(), 4.0, epsilon);
+  BOOST_REQUIRE_CLOSE(sigVec.at(2).getTime(), 7.0, epsilon);
+  BOOST_REQUIRE_CLOSE(sigVec.at(3).getTime(), 9.0, epsilon);
+  BOOST_REQUIRE_CLOSE(sigVec.at(4).getTime(), 16.0, epsilon);
 }
 
 BOOST_AUTO_TEST_CASE(getSignalsBySlot_test_empty)
@@ -62,39 +67,25 @@ BOOST_AUTO_TEST_CASE(getSignalsBySlot_test_empty)
 
 BOOST_AUTO_TEST_CASE(getSignalsBySlot_test)
 {
-  JPetScin scin1(1);
-  JPetScin scin2(2);
-  JPetScin scin3(3);
+  JPetBarrelSlot slot1(1, true, "one", 15.0, 1);
+  JPetBarrelSlot slot2(2, true, "two", 25.0, 1);
+  JPetBarrelSlot slot3(3, true, "three", 35.0, 1);
 
   JPetParamBank paramBank;
-  paramBank.addScintillator(scin1);
-  paramBank.addScintillator(scin2);
-  paramBank.addScintillator(scin3);
-
-  JPetPM pm1(1, "first");
-  JPetPM pm2(2, "second");
-  JPetPM pm3(3, "third");
-  JPetPM pm4(4, "fourth");
-  JPetPM pm5(5, "fifth");
-  JPetPM pm6(6, "sixth");
-
-  pm1.setScin(scin1);
-  pm2.setScin(scin1);
-  pm3.setScin(scin2);
-  pm4.setScin(scin2);
-  pm5.setScin(scin3);
-  pm6.setScin(scin3);
+  paramBank.addBarrelSlot(slot1);
+  paramBank.addBarrelSlot(slot2);
+  paramBank.addBarrelSlot(slot3);
 
   JPetPhysSignal physSig1, physSig2, physSig3, physSig4;
   JPetPhysSignal physSig5, physSig6, physSig7, physSig8;
-  physSig1.setPM(pm1);
-  physSig2.setPM(pm1);
-  physSig3.setPM(pm2);
-  physSig4.setPM(pm2);
-  physSig5.setPM(pm2);
-  physSig6.setPM(pm3);
-  physSig7.setPM(pm4);
-  physSig8.setPM(pm5);
+  physSig1.setBarrelSlot(slot1);
+  physSig2.setBarrelSlot(slot1);
+  physSig3.setBarrelSlot(slot2);
+  physSig4.setBarrelSlot(slot2);
+  physSig5.setBarrelSlot(slot3);
+  physSig6.setBarrelSlot(slot3);
+  physSig7.setBarrelSlot(slot3);
+  physSig8.setBarrelSlot(slot3);
 
   physSig1.setRecoFlag(JPetBaseSignal::Good);
   physSig2.setRecoFlag(JPetBaseSignal::Good);
@@ -125,21 +116,26 @@ BOOST_AUTO_TEST_CASE(getSignalsBySlot_test)
 
   BOOST_REQUIRE_EQUAL(results1.size(), 3);
   BOOST_REQUIRE_EQUAL(results2.size(), 3);
-  BOOST_REQUIRE_EQUAL(results1.at(0).size(), 5);
+  BOOST_REQUIRE_EQUAL(results1.at(0).size(), 2);
   BOOST_REQUIRE_EQUAL(results1.at(1).size(), 2);
-  BOOST_REQUIRE_EQUAL(results1.at(2).size(), 1);
-  BOOST_REQUIRE_EQUAL(results2.at(0).size(), 4);
-  BOOST_REQUIRE_EQUAL(results2.at(1).size(), 2);
-  BOOST_REQUIRE_EQUAL(results2.at(2).size(), 0);
+  BOOST_REQUIRE_EQUAL(results1.at(2).size(), 4);
+  BOOST_REQUIRE_EQUAL(results2.at(0).size(), 2);
+  BOOST_REQUIRE_EQUAL(results2.at(1).size(), 1);
+  BOOST_REQUIRE_EQUAL(results2.at(2).size(), 3);
 }
 
 BOOST_AUTO_TEST_CASE(matchSignals_test_sameSide)
 {
+  JPetBarrelSlot slot1(1, true, "one", 15.0, 1);
   JPetScin scin1(1);
   JPetPM pm1(11, "first");
+  pm1.setBarrelSlot(slot1);
   pm1.setScin(scin1);
   pm1.setSide(JPetPM::SideA);
   JPetPhysSignal physSig1, physSig2, physSig3;
+  physSig1.setBarrelSlot(slot1);
+  physSig2.setBarrelSlot(slot1);
+  physSig3.setBarrelSlot(slot1);
   physSig1.setPM(pm1);
   physSig2.setPM(pm1);
   physSig3.setPM(pm1);
@@ -156,80 +152,20 @@ BOOST_AUTO_TEST_CASE(matchSignals_test_sameSide)
   BOOST_REQUIRE(result.empty());
 }
 
-BOOST_AUTO_TEST_CASE(matchSignals_test_timeDiff)
-{
-  JPetScin scin1(1);
-  JPetPM pm1(11, "first");
-  JPetPM pm2(22, "second");
-  pm1.setScin(scin1);
-  pm2.setScin(scin1);
-  pm1.setSide(JPetPM::SideA);
-  pm2.setSide(JPetPM::SideB);
-  JPetPhysSignal physSig1, physSig2, physSig3, physSig4, physSig5, physSig6;
-  physSig1.setPM(pm1);
-  physSig2.setPM(pm2);
-  physSig3.setPM(pm1);
-  physSig4.setPM(pm2);
-  physSig5.setPM(pm1);
-  physSig6.setPM(pm2);
-  physSig1.setTime(10.0);
-  physSig2.setTime(20.0);
-  physSig3.setTime(30.0);
-  physSig4.setTime(40.0);
-  physSig5.setTime(50.0);
-  physSig6.setTime(52.0);
-  std::vector<JPetPhysSignal> slotSignals;
-  slotSignals.push_back(physSig1);
-  slotSignals.push_back(physSig2);
-  slotSignals.push_back(physSig3);
-  slotSignals.push_back(physSig4);
-  slotSignals.push_back(physSig5);
-  slotSignals.push_back(physSig6);
-  JPetStatistics stats;
-  std::map<unsigned int, std::vector<double>> velocitiesMap;
-  auto result = HitFinderTools::matchSignals(slotSignals, velocitiesMap, 5.0, -1, stats, false);
-  BOOST_REQUIRE_EQUAL(result.size(), 1);
-}
-
-BOOST_AUTO_TEST_CASE(matchSignals_test_refDetSigs)
-{
-  JPetBarrelSlot refBarrelSlot(193, true, "refBS", 45.0, 193);
-  JPetScin refScin(193);
-  JPetPM refPm(11, "ref");
-  refPm.setScin(refScin);
-  refPm.setBarrelSlot(refBarrelSlot);
-
-  JPetPhysSignal physSig1, physSig2, physSig3;
-  physSig1.setPM(refPm);
-  physSig2.setPM(refPm);
-  physSig3.setPM(refPm);
-  physSig1.setTime(1.0);
-  physSig2.setTime(2.0);
-  physSig3.setTime(3.0);
-  std::vector<JPetPhysSignal> slotSignals;
-  slotSignals.push_back(physSig1);
-  slotSignals.push_back(physSig2);
-  slotSignals.push_back(physSig3);
-
-  JPetStatistics stats;
-  std::map<unsigned int, std::vector<double>> velocitiesMap;
-  auto result = HitFinderTools::matchSignals(slotSignals, velocitiesMap, 5.0, 193, stats, false);
-  BOOST_REQUIRE_EQUAL(result.size(), 3);
-}
-
 BOOST_AUTO_TEST_CASE(matchSignals_test)
 {
   JPetLayer layer1(1, true, "layer1", 10.0);
-  JPetBarrelSlot barrelSlot1(23, true, "barel1", 30.0, 23);
-  barrelSlot1.setLayer(layer1);
+  JPetBarrelSlot slot1(23, true, "barel1", 30.0, 23);
+  slot1.setLayer(layer1);
 
   JPetScin scin1(23);
+  scin1.setBarrelSlot(slot1);
   JPetPM pm1A(31, "1A");
   JPetPM pm1B(75, "1B");
   pm1A.setScin(scin1);
   pm1B.setScin(scin1);
-  pm1A.setBarrelSlot(barrelSlot1);
-  pm1B.setBarrelSlot(barrelSlot1);
+  pm1A.setBarrelSlot(slot1);
+  pm1B.setBarrelSlot(slot1);
   pm1A.setSide(JPetPM::SideA);
   pm1B.setSide(JPetPM::SideB);
 
@@ -248,16 +184,27 @@ BOOST_AUTO_TEST_CASE(matchSignals_test)
   JPetRawSignal raw2;
   raw1.addPoint(sigCh1);
   raw2.addPoint(sigCh2);
+  raw1.setBarrelSlot(slot1);
+  raw2.setBarrelSlot(slot1);
 
   JPetRecoSignal reco1;
   JPetRecoSignal reco2;
   reco1.setRawSignal(raw1);
   reco2.setRawSignal(raw2);
+  reco1.setBarrelSlot(slot1);
+  reco2.setBarrelSlot(slot1);
 
   JPetPhysSignal physSig1A, physSig1B;
   JPetPhysSignal physSig2A, physSig2B;
   JPetPhysSignal physSig3A, physSig3B;
   JPetPhysSignal physSigA;
+  physSigA.setBarrelSlot(slot1);
+  physSig1A.setBarrelSlot(slot1);
+  physSig1B.setBarrelSlot(slot1);
+  physSig2A.setBarrelSlot(slot1);
+  physSig2B.setBarrelSlot(slot1);
+  physSig3A.setBarrelSlot(slot1);
+  physSig3B.setBarrelSlot(slot1);
   physSigA.setRecoSignal(reco1);
   physSig1A.setRecoSignal(reco1);
   physSig2A.setRecoSignal(reco1);

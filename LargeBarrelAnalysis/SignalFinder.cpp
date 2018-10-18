@@ -62,7 +62,7 @@ bool SignalFinder::init()
       kLeadTrailMaxTimeParamKey.c_str(), fSigChLeadTrailMaxTime));
   }
 
-  // Get bool for using bad Signal Channels
+  // Get bool for using corrupted Signal Channels
   if (isOptionSet(fParams.getOptions(), kUseCorruptedSigChParamKey)) {
     fUseCorruptedSigCh = getOptionAsBool(fParams.getOptions(), kUseCorruptedSigChParamKey);
     if(fUseCorruptedSigCh){
@@ -92,7 +92,7 @@ bool SignalFinder::exec()
   // Getting the data from event in an apropriate format
   if(auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     // Distribute signal channels by PM IDs and filter out Corrupted SigChs if requested
-    auto sigChByPM = SignalFinderTools::getSigChByPM(timeWindow, getParamBank(), fUseCorruptedSigCh);
+    auto& sigChByPM = SignalFinderTools::getSigChByPM(timeWindow, getParamBank(), fUseCorruptedSigCh);
     // Building signals
     auto allSignals = SignalFinderTools::buildAllSignals(
       sigChByPM, kNumOfThresholds, fSigChEdgeMaxTime, fSigChLeadTrailMaxTime,
@@ -125,25 +125,84 @@ void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& rawSigVec)
  * Init histograms
  */
 void SignalFinder::initialiseHistograms(){
+  getStatistics().createHistogram(new TH1F(
+    "remainig_leading_sig_ch_per_thr", "Remainig Leading Signal Channels",
+    4, 0.5, 4.5)
+  );
+  getStatistics().getHisto1D("remainig_leading_sig_ch_per_thr")
+    ->GetXaxis()->SetTitle("Threshold Number");
+  getStatistics().getHisto1D("remainig_leading_sig_ch_per_thr")
+    ->GetYaxis()->SetTitle("Number of Signal Channels");
 
   getStatistics().createHistogram(new TH1F(
-    "L_time_diff",
-    "Time Difference between leading Signal Channels in found Raw Signals",
-    200, 0.0, fSigChEdgeMaxTime
-  ));
-  getStatistics().getHisto1D("L_time_diff")
-    ->GetXaxis()->SetTitle("Time difference [ps]");
-  getStatistics().getHisto1D("L_time_diff")
+    "remainig_trailing_sig_ch_per_thr", "Remainig Trailing Signal Channels",
+    4, 0.5, 4.5));
+  getStatistics().getHisto1D("remainig_trailing_sig_ch_per_thr")
+    ->GetXaxis()->SetTitle("Threshold Number");
+  getStatistics().getHisto1D("remainig_trailing_sig_ch_per_thr")
+    ->GetYaxis()->SetTitle("Number of Signal Channels");
+
+  getStatistics().createHistogram(new TH1F(
+    "lead_thr1_thr2_diff", "Time Difference between leading Signal Channels THR1 and THR2 in found signals",
+    200, -fSigChEdgeMaxTime, fSigChEdgeMaxTime)
+  );
+  getStatistics().getHisto1D("lead_thr1_thr2_diff")
+    ->GetXaxis()->SetTitle("time diff [ps]");
+  getStatistics().getHisto1D("lead_thr1_thr2_diff")
     ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
 
   getStatistics().createHistogram(new TH1F(
-    "LT_time_diff",
-    "Time Difference between leading and trailing Signal Channels in found signals",
-    200, 0.0, fSigChLeadTrailMaxTime
-  ));
-  getStatistics().getHisto1D("LT_time_diff")
-    ->GetXaxis()->SetTitle("Time difference [ps]");
-  getStatistics().getHisto1D("LT_time_diff")
+    "lead_thr1_thr3_diff", "Time Difference between leading Signal Channels THR1 and THR3 in found signals",
+    200, -fSigChEdgeMaxTime, fSigChEdgeMaxTime)
+  );
+  getStatistics().getHisto1D("lead_thr1_thr3_diff")
+    ->GetXaxis()->SetTitle("time diff [ps]");
+  getStatistics().getHisto1D("lead_thr1_thr3_diff")
+    ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
+
+  getStatistics().createHistogram(new TH1F(
+    "lead_thr1_thr4_diff", "Time Difference between leading Signal Channels THR1 and THR4 in found signals",
+    200, -fSigChEdgeMaxTime, fSigChEdgeMaxTime)
+  );
+  getStatistics().getHisto1D("lead_thr1_thr4_diff")
+    ->GetXaxis()->SetTitle("time diff [ps]");
+  getStatistics().getHisto1D("lead_thr1_thr4_diff")
+    ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
+
+  getStatistics().createHistogram(new TH1F(
+    "lead_trail_thr1_diff", "Time Difference between leading and trailing Signal Channels THR1 in found signals",
+    200, 0.0, fSigChLeadTrailMaxTime)
+  );
+  getStatistics().getHisto1D("lead_trail_thr1_diff")
+    ->GetXaxis()->SetTitle("time diff [ps]");
+  getStatistics().getHisto1D("lead_trail_thr1_diff")
+    ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
+
+  getStatistics().createHistogram(new TH1F(
+    "lead_trail_thr2_diff", "Time Difference between leading and trailing Signal Channels THR2 in found signals",
+    200, 0.0, fSigChLeadTrailMaxTime)
+  );
+  getStatistics().getHisto1D("lead_trail_thr2_diff")
+    ->GetXaxis()->SetTitle("time diff [ps]");
+  getStatistics().getHisto1D("lead_trail_thr2_diff")
+    ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
+
+  getStatistics().createHistogram(new TH1F(
+    "lead_trail_thr3_diff", "Time Difference between leading and trailing Signal Channels THR3 in found signals",
+    200, 0.0, fSigChLeadTrailMaxTime)
+  );
+  getStatistics().getHisto1D("lead_trail_thr3_diff")
+    ->GetXaxis()->SetTitle("time diff [ps]");
+  getStatistics().getHisto1D("lead_trail_thr3_diff")
+    ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
+
+  getStatistics().createHistogram(new TH1F(
+    "lead_trail_thr4_diff", "Time Difference between leading and trailing Signal Channels THR4 in found signals",
+    200, 0.0, fSigChLeadTrailMaxTime)
+  );
+  getStatistics().getHisto1D("lead_trail_thr4_diff")
+    ->GetXaxis()->SetTitle("time diff [ps]");
+  getStatistics().getHisto1D("lead_trail_thr4_diff")
     ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
 
   getStatistics().createHistogram(new TH1F(
@@ -153,10 +212,4 @@ void SignalFinder::initialiseHistograms(){
   getStatistics().getHisto1D("good_v_bad_raw_sigs")->GetXaxis()->SetBinLabel(1,"GOOD");
   getStatistics().getHisto1D("good_v_bad_raw_sigs")->GetXaxis()->SetBinLabel(2,"CORRUPTED");
   getStatistics().getHisto1D("good_v_bad_raw_sigs")->GetYaxis()->SetTitle("Number of Raw Signals");
-
-  getStatistics().createHistogram(new TH1F(
-    "unused_trails", "Number of unused Trailing Signal Channels per THR ", 4, 0.5, 4.5
-  ));
-  getStatistics().getHisto1D("unused_trails")->GetXaxis()->SetTitle("Threshold number");
-  getStatistics().getHisto1D("unused_trails")->GetYaxis()->SetTitle("Number of Sign Channels");
 }

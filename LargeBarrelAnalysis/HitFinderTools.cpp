@@ -25,21 +25,19 @@ using namespace std;
 /**
  * Helper method for sotring signals in vector
  */
-vector<JPetPhysSignal> HitFinderTools::sortByTime(vector<JPetPhysSignal> input)
+void HitFinderTools::sortByTime(vector<JPetPhysSignal>& sigVec)
 {
-  auto sortedSigs(input);
-  sort(sortedSigs.begin(), sortedSigs.end(),
+  sort(sigVec.begin(), sigVec.end(),
     [](const JPetPhysSignal & sig1, const JPetPhysSignal & sig2) {
       return sig1.getTime() < sig2.getTime();
     }
   );
-  return sortedSigs;
-}
+ }
 
 /**
  * Method distributing Signals according to Scintillator they belong to
  */
-vector<vector<JPetPhysSignal>> HitFinderTools::getSignalsBySlot(
+const vector<vector<JPetPhysSignal>> HitFinderTools::getSignalsBySlot(
   const JPetTimeWindow* timeWindow, const JPetParamBank& paramBank, bool useCorrupts
 ){
   if (!timeWindow) {
@@ -48,7 +46,7 @@ vector<vector<JPetPhysSignal>> HitFinderTools::getSignalsBySlot(
     return emptyVec;
   }
   // Init return vector
-  int slotNumber = paramBank.getScintillatorsSize();
+  int slotNumber = paramBank.getBarrelSlotsSize();
   vector<JPetPhysSignal> signalVec;
   vector<vector<JPetPhysSignal>> slotSignalVec(slotNumber, signalVec);
   // Map Signals according to Slot they belong to
@@ -72,7 +70,7 @@ vector<JPetHit> HitFinderTools::matchAllSignals(
   double timeDiffAB, int refDetScinId, JPetStatistics& stats, bool saveHistos
 ) {
   vector<JPetHit> allHits;
-  for (auto& slotSigals : allSignals) {
+  for (auto slotSigals : allSignals) {
     auto slotHits = matchSignals(
       slotSigals, velocitiesMap, timeDiffAB, refDetScinId, stats, saveHistos
     );
@@ -85,45 +83,45 @@ vector<JPetHit> HitFinderTools::matchAllSignals(
  * Method matching signals on the same Scintillator
  */
 vector<JPetHit> HitFinderTools::matchSignals(
-  const vector<JPetPhysSignal>& slotSignals,
+  vector<JPetPhysSignal>& slotSignals,
   const map<unsigned int, vector<double>>& velocitiesMap,
   double timeDiffAB, int refDetScinId, JPetStatistics& stats, bool saveHistos
 ) {
   vector<JPetHit> slotHits;
   vector<JPetPhysSignal> remainSignals;
-  auto sortedSigs = sortByTime(slotSignals);
-  while (sortedSigs.size() > 0) {
-    auto physSig = sortedSigs.at(0);
+  sortByTime(slotSignals);
+  while (slotSignals.size() > 0) {
+    auto physSig = slotSignals.at(0);
     if (physSig.getBarrelSlot().getID() == refDetScinId) {
       auto refHit = createDummyRefDetHit(physSig);
       slotHits.push_back(refHit);
-      sortedSigs.erase(sortedSigs.begin() + 0);
+      slotSignals.erase(slotSignals.begin() + 0);
       continue;
     }
-    if(sortedSigs.size() == 1){
+    if(slotSignals.size() == 1){
       remainSignals.push_back(physSig);
       break;
     }
-    for (unsigned int j = 1; j < sortedSigs.size(); j++) {
-      if (sortedSigs.at(j).getTime() - physSig.getTime() < timeDiffAB) {
-        if (physSig.getPM().getSide() != sortedSigs.at(j).getPM().getSide()) {
+    for (unsigned int j = 1; j < slotSignals.size(); j++) {
+      if (slotSignals.at(j).getTime() - physSig.getTime() < timeDiffAB) {
+        if (physSig.getPM().getSide() != slotSignals.at(j).getPM().getSide()) {
           JPetHit hit = createHit(
-            physSig, sortedSigs.at(j), velocitiesMap, stats, saveHistos
+            physSig, slotSignals.at(j), velocitiesMap, stats, saveHistos
           );
           slotHits.push_back(hit);
-          sortedSigs.erase(sortedSigs.begin() + j);
-          sortedSigs.erase(sortedSigs.begin() + 0);
+          slotSignals.erase(slotSignals.begin() + j);
+          slotSignals.erase(slotSignals.begin() + 0);
           break;
         } else {
-          if (j == sortedSigs.size() - 1) {
+          if (j == slotSignals.size() - 1) {
             remainSignals.push_back(physSig);
-            sortedSigs.erase(sortedSigs.begin() + 0);
+            slotSignals.erase(slotSignals.begin() + 0);
             break;
           } else { continue; }
         }
       } else {
         remainSignals.push_back(physSig);
-        sortedSigs.erase(sortedSigs.begin() + 0);
+        slotSignals.erase(slotSignals.begin() + 0);
         break;
       }
     }

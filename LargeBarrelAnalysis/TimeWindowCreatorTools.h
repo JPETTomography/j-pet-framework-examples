@@ -32,21 +32,21 @@
 class TimeWindowCreatorTools
 {
 public:
-  static std::vector<JPetSigCh> sortByValue(std::vector<JPetSigCh> input);
+  static void sortByValue(std::vector<JPetSigCh>& input);
   static std::vector<JPetSigCh> buildSigChs(
-    TDCChannel* tdcChannel, TRef tombRef,
-    std::map<unsigned int, std::vector<double>> timeCalibrationMap,
-    std::map<unsigned int, std::vector<double>> thresholdsMap,
+    TDCChannel* tdcChannel, const JPetTOMBChannel& channel,
+    std::map<unsigned int, std::vector<double>>& timeCalibrationMap,
+    std::map<unsigned int, std::vector<double>>& thresholdsMap,
     double maxTime, double minTime, bool setTHRValuesFromChannels,
     JPetStatistics& stats, bool saveHistos
   );
-  static std::vector<JPetSigCh> flagSigChs(
-    std::vector<JPetSigCh> inputSigChs, JPetStatistics& stats, bool saveHistos
+  static void flagSigChs(
+    std::vector<JPetSigCh>& inputSigChs, JPetStatistics& stats, bool saveHistos
   );
   static JPetSigCh generateSigCh(
-    double tdcChannelTime, TRef tombRef,
-    std::map<unsigned int, std::vector<double>> timeCalibrationMap,
-    std::map<unsigned int, std::vector<double>> thresholdsMap,
+    double tdcChannelTime, const JPetTOMBChannel& channel,
+    std::map<unsigned int, std::vector<double>>& timeCalibrationMap,
+    std::map<unsigned int, std::vector<double>>& thresholdsMap,
     JPetSigCh::EdgeType edge, bool setTHRValuesFromChannels
   );
 };

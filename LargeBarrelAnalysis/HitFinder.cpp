@@ -100,7 +100,7 @@ bool HitFinder::init()
 bool HitFinder::exec()
 {
   if (auto& timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
-    auto signalsBySlot = HitFinderTools::getSignalsBySlot(
+    auto& signalsBySlot = HitFinderTools::getSignalsBySlot(
       timeWindow, getParamBank(), fUseCorruptedSignals
     );
     auto allHits = HitFinderTools::matchAllSignals(

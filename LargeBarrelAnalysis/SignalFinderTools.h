@@ -33,19 +33,26 @@
 class SignalFinderTools
 {
 public:
-  static std::vector<JPetSigCh> sortByValue(std::vector<JPetSigCh> input);
-  static std::vector<std::vector<JPetSigCh>> getSigChByPM(
+  static const std::vector<std::vector<JPetSigCh>> getSigChByPM(
     const JPetTimeWindow* timeWindow, const JPetParamBank& paramBank, bool useCorrupts
   );
   static std::vector<JPetRawSignal> buildAllSignals(
-    std::vector<std::vector<JPetSigCh>> sigChByPM, int numOfThresholds,
+    const std::vector<std::vector<JPetSigCh>>& sigChByPM, unsigned int numOfThresholds,
     double sigChEdgeMaxTime, double sigChLeadTrailMaxTime,
     JPetStatistics& stats, bool saveHistos
   );
   static std::vector<JPetRawSignal> buildRawSignals(
-    std::vector<JPetSigCh> sigChFromSamePM, int numOfThresholds,
+    const std::vector<JPetSigCh>& sigChFromSamePM, unsigned int numOfThresholds,
     double sigChEdgeMaxTime, double sigChLeadTrailMaxTime,
     JPetStatistics& stats, bool saveHistos
+  );
+  static int findSigChOnNextThr(
+    double sigChValue, double sigChEdgeMaxTime,
+    const std::vector<JPetSigCh>& sigChVec
+  );
+  static int findTrailingSigCh(
+    const JPetSigCh& leadingSigCh,double sigChLeadTrailMaxTime,
+    const std::vector<JPetSigCh>& trailingSigChVec
   );
 };
 #endif /* !SIGNALFINDERTOOLS_H */

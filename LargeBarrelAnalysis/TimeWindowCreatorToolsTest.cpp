@@ -23,36 +23,43 @@ BOOST_AUTO_TEST_SUITE(TimeWindowCreatorToolsTestSuite)
 
 BOOST_AUTO_TEST_CASE(sortByValue_test)
 {
+  JPetPM pm1(1, "first");
+
   JPetSigCh sigCh1(JPetSigCh::Leading, 1.0);
   JPetSigCh sigCh2(JPetSigCh::Trailing, 4.0);
   JPetSigCh sigCh3(JPetSigCh::Leading, 2.0);
   JPetSigCh sigCh4(JPetSigCh::Leading, 6.0);
   JPetSigCh sigCh5(JPetSigCh::Trailing, 5.0);
   JPetSigCh sigCh6(JPetSigCh::Leading, 3.0);
+  sigCh1.setPM(pm1);
+  sigCh2.setPM(pm1);
+  sigCh3.setPM(pm1);
+  sigCh4.setPM(pm1);
+  sigCh5.setPM(pm1);
+  sigCh6.setPM(pm1);
 
-  std::vector<JPetSigCh> unsorted;
-  unsorted.push_back(sigCh1);
-  unsorted.push_back(sigCh2);
-  unsorted.push_back(sigCh3);
-  unsorted.push_back(sigCh4);
-  unsorted.push_back(sigCh5);
-  unsorted.push_back(sigCh6);
+  std::vector<JPetSigCh> sigChs;
+  sigChs.push_back(sigCh1);
+  sigChs.push_back(sigCh2);
+  sigChs.push_back(sigCh3);
+  sigChs.push_back(sigCh4);
+  sigChs.push_back(sigCh5);
+  sigChs.push_back(sigCh6);
 
-  auto sorted = TimeWindowCreatorTools::sortByValue(unsorted);
+  BOOST_REQUIRE_EQUAL(sigChs.at(0).getValue(), 1.0);
+  BOOST_REQUIRE_EQUAL(sigChs.at(1).getValue(), 4.0);
+  BOOST_REQUIRE_EQUAL(sigChs.at(2).getValue(), 2.0);
+  BOOST_REQUIRE_EQUAL(sigChs.at(3).getValue(), 6.0);
+  BOOST_REQUIRE_EQUAL(sigChs.at(4).getValue(), 5.0);
+  BOOST_REQUIRE_EQUAL(sigChs.at(5).getValue(), 3.0);
 
-  BOOST_REQUIRE_EQUAL(unsorted.at(0).getValue(), 1.0);
-  BOOST_REQUIRE_EQUAL(unsorted.at(1).getValue(), 4.0);
-  BOOST_REQUIRE_EQUAL(unsorted.at(2).getValue(), 2.0);
-  BOOST_REQUIRE_EQUAL(unsorted.at(3).getValue(), 6.0);
-  BOOST_REQUIRE_EQUAL(unsorted.at(4).getValue(), 5.0);
-  BOOST_REQUIRE_EQUAL(unsorted.at(5).getValue(), 3.0);
-
-  BOOST_REQUIRE_EQUAL(sorted.at(0).getValue(), 1.0);
-  BOOST_REQUIRE_EQUAL(sorted.at(1).getValue(), 2.0);
-  BOOST_REQUIRE_EQUAL(sorted.at(2).getValue(), 3.0);
-  BOOST_REQUIRE_EQUAL(sorted.at(3).getValue(), 4.0);
-  BOOST_REQUIRE_EQUAL(sorted.at(4).getValue(), 5.0);
-  BOOST_REQUIRE_EQUAL(sorted.at(5).getValue(), 6.0);
+  TimeWindowCreatorTools::sortByValue(sigChs);
+  BOOST_REQUIRE_EQUAL(sigChs.at(0).getValue(), 1.0);
+  BOOST_REQUIRE_EQUAL(sigChs.at(1).getValue(), 2.0);
+  BOOST_REQUIRE_EQUAL(sigChs.at(2).getValue(), 3.0);
+  BOOST_REQUIRE_EQUAL(sigChs.at(3).getValue(), 4.0);
+  BOOST_REQUIRE_EQUAL(sigChs.at(4).getValue(), 5.0);
+  BOOST_REQUIRE_EQUAL(sigChs.at(5).getValue(), 6.0);
 }
 
 
@@ -69,7 +76,6 @@ BOOST_AUTO_TEST_CASE(generateSigCh_test)
   channel.setPM(pm);
   channel.setThreshold(34.5);
   channel.setLocalChannelNumber(1);
-  TRef tombRef = &channel;
 
   std::map<unsigned int, std::vector<double>> thresholdsMap;
   std::map<unsigned int, std::vector<double>> timeCalibrationMap;
@@ -80,7 +86,7 @@ BOOST_AUTO_TEST_CASE(generateSigCh_test)
   timeCalibrationMap[123] = calibVec;
 
   auto sigCh = TimeWindowCreatorTools::generateSigCh(
-    50.0, tombRef, timeCalibrationMap, thresholdsMap, JPetSigCh::Trailing, true
+    50.0, channel, timeCalibrationMap, thresholdsMap, JPetSigCh::Trailing, true
   );
 
   auto epsilon = 0.0001;
@@ -96,15 +102,25 @@ BOOST_AUTO_TEST_CASE(generateSigCh_test)
 
 BOOST_AUTO_TEST_CASE(flagSigChs_test)
 {
+  JPetPM pm1(1, "first");
+
   JPetSigCh sigChA1(JPetSigCh::Leading, 10.0);
   JPetSigCh sigChA2(JPetSigCh::Trailing, 11.0);
   JPetSigCh sigChA3(JPetSigCh::Leading, 12.0);
   JPetSigCh sigChA4(JPetSigCh::Trailing, 13.0);
+  sigChA1.setPM(pm1);
+  sigChA2.setPM(pm1);
+  sigChA3.setPM(pm1);
+  sigChA4.setPM(pm1);
 
   JPetSigCh sigChB1(JPetSigCh::Leading, 20.0);
   JPetSigCh sigChB2(JPetSigCh::Trailing, 21.0);
   JPetSigCh sigChB3(JPetSigCh::Leading, 22.0);
   JPetSigCh sigChB4(JPetSigCh::Trailing, 23.0);
+  sigChB1.setPM(pm1);
+  sigChB2.setPM(pm1);
+  sigChB3.setPM(pm1);
+  sigChB4.setPM(pm1);
 
   JPetSigCh sigChC1(JPetSigCh::Leading, 30.0);
   JPetSigCh sigChC2(JPetSigCh::Trailing, 31.0);
@@ -115,6 +131,15 @@ BOOST_AUTO_TEST_CASE(flagSigChs_test)
   JPetSigCh sigChC7(JPetSigCh::Leading, 36.0);
   JPetSigCh sigChC8(JPetSigCh::Leading, 37.0);
   JPetSigCh sigChC9(JPetSigCh::Trailing, 38.0);
+  sigChC1.setPM(pm1);
+  sigChC2.setPM(pm1);
+  sigChC3.setPM(pm1);
+  sigChC4.setPM(pm1);
+  sigChC5.setPM(pm1);
+  sigChC6.setPM(pm1);
+  sigChC7.setPM(pm1);
+  sigChC8.setPM(pm1);
+  sigChC9.setPM(pm1);
 
   std::vector<JPetSigCh> thrSigCh;
   thrSigCh.push_back(sigChA1);
@@ -136,24 +161,24 @@ BOOST_AUTO_TEST_CASE(flagSigChs_test)
   thrSigCh.push_back(sigChC9);
 
   JPetStatistics stats;
-  auto results = TimeWindowCreatorTools::flagSigChs(thrSigCh, stats, false);
-  BOOST_REQUIRE_EQUAL(results.at(0).getRecoFlag(), JPetSigCh::Good);
-  BOOST_REQUIRE_EQUAL(results.at(1).getRecoFlag(), JPetSigCh::Good);
-  BOOST_REQUIRE_EQUAL(results.at(2).getRecoFlag(), JPetSigCh::Good);
-  BOOST_REQUIRE_EQUAL(results.at(3).getRecoFlag(), JPetSigCh::Good);
-  BOOST_REQUIRE_EQUAL(results.at(4).getRecoFlag(), JPetSigCh::Good);
-  BOOST_REQUIRE_EQUAL(results.at(5).getRecoFlag(), JPetSigCh::Good);
-  BOOST_REQUIRE_EQUAL(results.at(6).getRecoFlag(), JPetSigCh::Good);
-  BOOST_REQUIRE_EQUAL(results.at(7).getRecoFlag(), JPetSigCh::Good);
-  BOOST_REQUIRE_EQUAL(results.at(8).getRecoFlag(), JPetSigCh::Good);
-  BOOST_REQUIRE_EQUAL(results.at(9).getRecoFlag(), JPetSigCh::Good);
-  BOOST_REQUIRE_EQUAL(results.at(10).getRecoFlag(), JPetSigCh::Corrupted);
-  BOOST_REQUIRE_EQUAL(results.at(11).getRecoFlag(), JPetSigCh::Good);
-  BOOST_REQUIRE_EQUAL(results.at(12).getRecoFlag(), JPetSigCh::Good);
-  BOOST_REQUIRE_EQUAL(results.at(13).getRecoFlag(), JPetSigCh::Corrupted);
-  BOOST_REQUIRE_EQUAL(results.at(14).getRecoFlag(), JPetSigCh::Corrupted);
-  BOOST_REQUIRE_EQUAL(results.at(15).getRecoFlag(), JPetSigCh::Good);
-  BOOST_REQUIRE_EQUAL(results.at(16).getRecoFlag(), JPetSigCh::Good);
+  TimeWindowCreatorTools::flagSigChs(thrSigCh, stats, false);
+  BOOST_REQUIRE_EQUAL(thrSigCh.at(0).getRecoFlag(), JPetSigCh::Good);
+  BOOST_REQUIRE_EQUAL(thrSigCh.at(1).getRecoFlag(), JPetSigCh::Good);
+  BOOST_REQUIRE_EQUAL(thrSigCh.at(2).getRecoFlag(), JPetSigCh::Good);
+  BOOST_REQUIRE_EQUAL(thrSigCh.at(3).getRecoFlag(), JPetSigCh::Good);
+  BOOST_REQUIRE_EQUAL(thrSigCh.at(4).getRecoFlag(), JPetSigCh::Good);
+  BOOST_REQUIRE_EQUAL(thrSigCh.at(5).getRecoFlag(), JPetSigCh::Good);
+  BOOST_REQUIRE_EQUAL(thrSigCh.at(6).getRecoFlag(), JPetSigCh::Good);
+  BOOST_REQUIRE_EQUAL(thrSigCh.at(7).getRecoFlag(), JPetSigCh::Good);
+  BOOST_REQUIRE_EQUAL(thrSigCh.at(8).getRecoFlag(), JPetSigCh::Good);
+  BOOST_REQUIRE_EQUAL(thrSigCh.at(9).getRecoFlag(), JPetSigCh::Good);
+  BOOST_REQUIRE_EQUAL(thrSigCh.at(10).getRecoFlag(), JPetSigCh::Corrupted);
+  BOOST_REQUIRE_EQUAL(thrSigCh.at(11).getRecoFlag(), JPetSigCh::Good);
+  BOOST_REQUIRE_EQUAL(thrSigCh.at(12).getRecoFlag(), JPetSigCh::Good);
+  BOOST_REQUIRE_EQUAL(thrSigCh.at(13).getRecoFlag(), JPetSigCh::Corrupted);
+  BOOST_REQUIRE_EQUAL(thrSigCh.at(14).getRecoFlag(), JPetSigCh::Corrupted);
+  BOOST_REQUIRE_EQUAL(thrSigCh.at(15).getRecoFlag(), JPetSigCh::Good);
+  BOOST_REQUIRE_EQUAL(thrSigCh.at(16).getRecoFlag(), JPetSigCh::Good);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

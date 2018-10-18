@@ -32,8 +32,8 @@
 class HitFinderTools
 {
 public:
-  static std::vector<JPetPhysSignal> sortByTime(std::vector<JPetPhysSignal> signals);
-  static std::vector<std::vector<JPetPhysSignal>> getSignalsBySlot(
+  static void sortByTime(std::vector<JPetPhysSignal>& signals);
+  static const std::vector<std::vector<JPetPhysSignal>> getSignalsBySlot(
     const JPetTimeWindow* timeWindow, const JPetParamBank& paramBank, bool useCorrupts
   );
   static std::vector<JPetHit> matchAllSignals(
@@ -42,7 +42,7 @@ public:
     double timeDiffAB, int refDetScinId, JPetStatistics& stats, bool saveHistos
   );
   static std::vector<JPetHit> matchSignals(
-    const std::vector<JPetPhysSignal>& slotSignals,
+    std::vector<JPetPhysSignal>& slotSignals,
     const std::map<unsigned int, std::vector<double>>& velocitiesMap,
     double timeDiffAB, int refDetScinId, JPetStatistics& stats, bool saveHistos
   );

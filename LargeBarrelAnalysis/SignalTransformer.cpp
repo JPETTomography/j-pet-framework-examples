@@ -103,6 +103,7 @@ JPetRecoSignal SignalTransformer::createRecoSignal(const JPetRawSignal& rawSigna
   recoSignal.setOffset(-1.0);
   recoSignal.setCharge(-1.0);
   recoSignal.setDelay(-1.0);
+  recoSignal.setRecoFlag(rawSignal.getRecoFlag());
   return recoSignal;
 }
 
@@ -118,13 +119,11 @@ JPetPhysSignal SignalTransformer::createPhysSignal(const JPetRecoSignal& recoSig
   physSignal.setPhe(-1.0);
   physSignal.setQualityOfPhe(0.0);
   physSignal.setQualityOfTime(0.0);
+  physSignal.setRecoFlag(recoSignal.getRecoFlag());
   std::vector<JPetSigCh> leadingSigChVec = recoSignal.getRawSignal().getPoints(
     JPetSigCh::Leading, JPetRawSignal::ByThrValue
   );
   physSignal.setTime(leadingSigChVec.at(0).getValue());
-  if(fSaveControlHistos) {
-    getStatistics().getHisto1D("thr_used_for_time")->Fill(leadingSigChVec.at(0).getThresholdNumber());
-  }
   return physSignal;
 }
 
@@ -138,10 +137,4 @@ void SignalTransformer::initialiseHistograms(){
   getStatistics().getHisto1D("good_vs_bad_signals")->GetXaxis()->SetBinLabel(1,"GOOD");
   getStatistics().getHisto1D("good_vs_bad_signals")->GetXaxis()->SetBinLabel(2,"CORRUPTED");
   getStatistics().getHisto1D("good_vs_bad_signals")->GetYaxis()->SetTitle("Number of Signals");
-
-  getStatistics().createHistogram(
-    new TH1F("thr_used_for_time", "Number of THR that was used for Signal Time setting", 4, 0.5, 4.5)
-  );
-  getStatistics().getHisto1D("thr_used_for_time")->GetXaxis()->SetTitle("THR Number");
-  getStatistics().getHisto1D("thr_used_for_time")->GetYaxis()->SetTitle("Number of Signals");
 }
