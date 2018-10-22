@@ -283,14 +283,15 @@ JPetRecoImageTools::Matrix2DProj JPetRecoImageTools::backProjectWithTOF(Matrix2D
             break;
           }
           assert(sinogram[n][angle] == tofVector.size());
+          float lor_center_x = std::cos((angle * M_PI) / 180.f) * n;
+          float lor_center_y = std::sin((angle * M_PI) / 180.f) * n;
+
           for (unsigned int i = 0; i < tofVector.size(); i++) {
-            // std::cout << "vector size: " << tofVector.size() << std::endl;
-            double distributionProbability = normalDistributionProbability(std::sqrt(std::pow(center - x, 2) + std::pow(center - y, 2)),
-                                             tofVector[i] * 0.299792458, 400 * 0.299792458); // change ps to ps/mm
+            float delta = tofVector[i] * 0.299792458;
+            double distributionProbability =
+              normalDistributionProbability(std::sqrt(std::pow(lor_center_x - x, 2) + std::pow(lor_center_y - y, 2)), delta,
+                                            400); // change ps to ps/mm
             distributionProbability = distributionProbability > 0.5 ? 1 - distributionProbability : distributionProbability;
-            // std::cout << "x/y: " << x << "/" << y << " arg: " << std::sqrt(std::pow(center - x, 2) + std::pow(center - y, 2))
-            //          << " mean: " << tofVector[i] * 0.299792458 << " stddev: " << 400 << " result: " << distributionProbability
-            //          << " timediff: " << tofVector[i] << std::endl;
             reconstructedProjection[y][x] += 100 * distributionProbability;
           }
         }
