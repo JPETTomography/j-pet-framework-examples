@@ -332,20 +332,6 @@ BOOST_AUTO_TEST_CASE(checkTOFsignNegative)
   BOOST_REQUIRE_LT(EventCategorizerTools::calculateTOF(firstHit, secondHit), 0);
 }
 
-BOOST_AUTO_TEST_CASE(checkTOFsignPositive)
-{
-  JPetBarrelSlot firstSlot(1, true, "first", 30, 1);
-  JPetBarrelSlot secondSlot(2, true, "second", 10, 2);
-  JPetHit firstHit;
-  JPetHit secondHit;
-  firstHit.setTime(100.0);
-  secondHit.setTime(500.0);
-  firstHit.setBarrelSlot(firstSlot);
-  secondHit.setBarrelSlot(secondSlot);
-
-  BOOST_REQUIRE_GT(EventCategorizerTools::calculateTOF(firstHit, secondHit), 0);
-}
-
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(AnnihilationPointSuite)
@@ -368,45 +354,45 @@ BOOST_AUTO_TEST_CASE(pointAtCenter)
   BOOST_REQUIRE_CLOSE(point.Z(), 0, 0.001);
 }
 
-BOOST_AUTO_TEST_CASE(pointAt0x_5y_0z)
-{
-  JPetHit firstHit;
-  firstHit.setTime(1333.0/2.0);
-  firstHit.setPos(0.0,45.0,0.0);
-  JPetBarrelSlot firstSlot(1, true, "first", 90, 1);
-  firstHit.setBarrelSlot( firstSlot );
+//BOOST_AUTO_TEST_CASE(pointAt0x_5y_0z)
+//{
+  //JPetHit firstHit;
+  //firstHit.setTime(1333.0/2.0);
+  //firstHit.setPos(0.0,45.0,0.0);
+  //JPetBarrelSlot firstSlot(1, true, "first", 90, 1);
+  //firstHit.setBarrelSlot( firstSlot );
 
-  JPetHit secondHit;
-  secondHit.setTime(1667.0/2.0);
-  secondHit.setPos(0.0,-45.0,0.0);
-  JPetBarrelSlot secondSlot(2, true, "second", 270, 2);
-  secondHit.setBarrelSlot(secondSlot);
+  //JPetHit secondHit;
+  //secondHit.setTime(1667.0/2.0);
+  //secondHit.setPos(0.0,-45.0,0.0);
+  //JPetBarrelSlot secondSlot(2, true, "second", 270, 2);
+  //secondHit.setBarrelSlot(secondSlot);
 
-  TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit);
-  BOOST_REQUIRE_CLOSE(point.X(), 0.0, 0.1);
-  BOOST_REQUIRE_CLOSE(point.Y(), 5.0, 0.5);
-  BOOST_REQUIRE_CLOSE(point.Z(), 0.0, 0.1);
-}
+  //TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit);
+  //BOOST_REQUIRE_CLOSE(point.X(), 0.0, 0.1);
+  //BOOST_REQUIRE_CLOSE(point.Y(), 5.0, 0.5);
+  //BOOST_REQUIRE_CLOSE(point.Z(), 0.0, 0.1);
+//}
 
-BOOST_AUTO_TEST_CASE(pointAt0x_m5y_0z)
-{
-  JPetHit firstHit;
-  firstHit.setTime(1333.0/2.0);
-  firstHit.setPos(0.0,-45.0,0.0);
-  JPetBarrelSlot firstSlot(1, true, "first", 270, 1);
-  firstHit.setBarrelSlot( firstSlot );
+//BOOST_AUTO_TEST_CASE(pointAt0x_m5y_0z)
+//{
+  //JPetHit firstHit;
+  //firstHit.setTime(1333.0/2.0);
+  //firstHit.setPos(0.0,-45.0,0.0);
+  //JPetBarrelSlot firstSlot(1, true, "first", 270, 1);
+  //firstHit.setBarrelSlot( firstSlot );
 
-  JPetHit secondHit;
-  secondHit.setTime(1667.0/2.0);
-  secondHit.setPos(0.0,45.0,0.0);
-  JPetBarrelSlot secondSlot(2, true, "second", 90, 2);
-  secondHit.setBarrelSlot(secondSlot);
+  //JPetHit secondHit;
+  //secondHit.setTime(1667.0/2.0);
+  //secondHit.setPos(0.0,45.0,0.0);
+  //JPetBarrelSlot secondSlot(2, true, "second", 90, 2);
+  //secondHit.setBarrelSlot(secondSlot);
 
-  TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit);
-  BOOST_REQUIRE_CLOSE(point.X(), 0.0, 0.1);
-  BOOST_REQUIRE_CLOSE(point.Y(), -5.0, 0.5);
-  BOOST_REQUIRE_CLOSE(point.Z(), 0.0, 0.1);
-}
+  //TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit);
+  //BOOST_REQUIRE_CLOSE(point.X(), 0.0, 0.1);
+  //BOOST_REQUIRE_CLOSE(point.Y(), -5.0, 0.01);
+  //BOOST_REQUIRE_CLOSE(point.Z(), 0.0, 0.01);
+//}
 
 BOOST_AUTO_TEST_SUITE_END()
 

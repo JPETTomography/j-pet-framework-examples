@@ -211,26 +211,17 @@ double EventCategorizerTools::calculateScatteringAngle(const JPetHit& hit1, cons
 /**
 * Calculation point in 3D, where annihilation occured
 */
-TVector3 EventCategorizerTools::calculateAnnihilationPoint(const JPetHit& firstHit, const JPetHit& latterHit)
+TVector3 EventCategorizerTools::calculateAnnihilationPoint(const JPetHit& firstHit, const JPetHit& secondHit)
 {
-  double LORlength = calculateDistance(firstHit, latterHit);
+  TVector3 middleOfLOR = 0.5 * (firstHit.getPos() + secondHit.getPos());
 
-  TVector3 middleOfLOR;
-  middleOfLOR.SetX((firstHit.getPosX() + latterHit.getPosX()) / 2.0);
-  middleOfLOR.SetY((firstHit.getPosY() + latterHit.getPosY()) / 2.0);
-  middleOfLOR.SetZ((firstHit.getPosZ() + latterHit.getPosZ()) / 2.0);
+  TVector3 versorOnLOR = (secondHit.getPos() - firstHit.getPos()).Unit()  ;
 
-  TVector3 versorOnLOR;
-  versorOnLOR.SetX(fabs((latterHit.getPosX() - firstHit.getPosX()) / LORlength));
-  versorOnLOR.SetY(fabs((latterHit.getPosY() - firstHit.getPosY()) / LORlength));
-  versorOnLOR.SetZ(fabs((latterHit.getPosZ() - firstHit.getPosZ()) / LORlength));
-
-  TVector3 annihilationPoint;
-  annihilationPoint.SetX(middleOfLOR.X() - versorOnLOR.X()*calculateTOF(firstHit, latterHit)*kLightVelocity_cm_ns / 1000.0);
-  annihilationPoint.SetY(middleOfLOR.Y() - versorOnLOR.Y()*calculateTOF(firstHit, latterHit)*kLightVelocity_cm_ns / 1000.0);
-  annihilationPoint.SetZ(middleOfLOR.Z() - versorOnLOR.Z()*calculateTOF(firstHit, latterHit)*kLightVelocity_cm_ns / 1000.0);
-
-  return annihilationPoint;
+  double shift = calculateTOF(firstHit, secondHit)*kLightVelocity_cm_ns / 1000.0;
+  TVector3 anihillationPoint(middleOfLOR.X() + shift * std::abs(versorOnLOR.X()),
+                             middleOfLOR.Y() + shift * std::abs(versorOnLOR.Y()),
+                             middleOfLOR.Z() + shift * std::abs(versorOnLOR.Z()));
+  return anihillationPoint;
 }
 
 /**
@@ -238,17 +229,13 @@ TVector3 EventCategorizerTools::calculateAnnihilationPoint(const JPetHit& firstH
 */
 double EventCategorizerTools::calculateTOF(const JPetHit& firstHit, const JPetHit& latterHit)
 {
-  // double TOF = kUndefinedValue;
+  double TOF = kUndefinedValue;
+  
   if (firstHit.getTime() > latterHit.getTime()) {
     ERROR("First hit time should be earlier than later hit");
     return kUndefinedValue;
   }
-  auto TOF = firstHit.getTime() - latterHit.getTime();
-  if (firstHit.getBarrelSlot().getTheta() < latterHit.getBarrelSlot().getTheta()){
-    return TOF;
-  } else {
-    return -1.0 * TOF;
-  }
+  return (firstHit.getTime() - latterHit.getTime())/2.;
 }
 
 /**
