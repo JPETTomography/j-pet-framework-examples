@@ -124,6 +124,47 @@ BOOST_AUTO_TEST_CASE(getSignalsBySlot_test)
   BOOST_REQUIRE_EQUAL(results2.at(2).size(), 3);
 }
 
+BOOST_AUTO_TEST_CASE(matchAllSignals_test_refDetID)
+{
+  JPetBarrelSlot slot(1, true, "one", 15.0, 1);
+  JPetBarrelSlot refSlot(193, true, "refDet", 15.0, 1);
+  JPetPM pm(11, "first");
+  JPetPM refPM(385, "reference");
+  pm.setBarrelSlot(slot);
+  refPM.setBarrelSlot(refSlot);
+  JPetPhysSignal physSig1, physSig2, physSig3;
+  physSig1.setBarrelSlot(slot1);
+  physSig2.setBarrelSlot(refSlot);
+  physSig3.setBarrelSlot(refSlot);
+  physSig1.setPM(pm);
+  physSig2.setPM(refPM);
+  physSig3.setPM(refPM);
+  physSig1.setTime(1.0);
+  physSig2.setTime(2.0);
+  physSig3.setTime(3.0);
+  std::vector<JPetPhysSignal> slotSignals;
+  slotSignals.push_back(physSig1);
+  std::vector<JPetPhysSignal> refSignals;
+  refSignals.push_back(physSig2);
+  refSignals.push_back(physSig3);
+  std::map<int, std::vector<JPetPhysSignal>> allSignals;
+  allSignals.insert(std::make_pair(1, slotSignals));
+  allSignals.insert(std::make_pair(193, refSignals));
+  JPetStatistics stats;
+  std::map<unsigned int, std::vector<double>> velocitiesMap;
+
+  auto resut1 = HitFinderTools::matchAllSignals(
+    &allSignals, &velocitiesMap, 5.0, 193, stats, false
+  );
+
+  auto resut2 = HitFinderTools::matchAllSignals(
+    &allSignals, &velocitiesMap, 5.0, 1, stats, false
+  );
+
+  BOOST_REQUIRE_EQUAL(result1.size(), 2);
+  BOOST_REQUIRE_EQUAL(result1.size(), 1);
+}
+
 BOOST_AUTO_TEST_CASE(matchSignals_test_sameSide)
 {
   JPetBarrelSlot slot1(1, true, "one", 15.0, 1);
@@ -148,7 +189,7 @@ BOOST_AUTO_TEST_CASE(matchSignals_test_sameSide)
   slotSignals.push_back(physSig3);
   JPetStatistics stats;
   std::map<unsigned int, std::vector<double>> velocitiesMap;
-  auto result = HitFinderTools::matchSignals(slotSignals, velocitiesMap, 5.0, -1, stats, false);
+  auto result = HitFinderTools::matchSignals(slotSignals, velocitiesMap, 5.0, stats, false);
   BOOST_REQUIRE(result.empty());
 }
 
@@ -226,6 +267,13 @@ BOOST_AUTO_TEST_CASE(matchSignals_test)
   physSig2B.setTime(4.8);
   physSig3A.setTime(7.2);
   physSig3B.setTime(6.5);
+  physSigA.setRecoFlag(JPetBaseSignal::Good);
+  physSig1A.setRecoFlag(JPetBaseSignal::Good);
+  physSig1B.setRecoFlag(JPetBaseSignal::Good);
+  physSig2A.setRecoFlag(JPetBaseSignal::Good);
+  physSig2B.setRecoFlag(JPetBaseSignal::Corrupted);
+  physSig3A.setRecoFlag(JPetBaseSignal::Good);
+  physSig3B.setRecoFlag(JPetBaseSignal::Good);
   std::vector<JPetPhysSignal> slotSignals;
   slotSignals.push_back(physSigA);
   slotSignals.push_back(physSig1A);
@@ -240,7 +288,7 @@ BOOST_AUTO_TEST_CASE(matchSignals_test)
   std::vector<double> velVec = {2.0, 3.4, 4.5, 5.6};
   velocitiesMap.insert(std::make_pair(66, velVec));
   velocitiesMap.insert(std::make_pair(88, velVec));
-  auto result = HitFinderTools::matchSignals(slotSignals, velocitiesMap, 1.0, -1, stats, false);
+  auto result = HitFinderTools::matchSignals(slotSignals, velocitiesMap, 1.0, stats, false);
   auto epsilon = 0.0001;
 
   BOOST_REQUIRE_EQUAL(result.size(), 3);
@@ -251,6 +299,13 @@ BOOST_AUTO_TEST_CASE(matchSignals_test)
   BOOST_REQUIRE_EQUAL(result.at(1).getSignalB().getPM().getID(), 75);
   BOOST_REQUIRE_EQUAL(result.at(2).getSignalA().getPM().getID(), 31);
   BOOST_REQUIRE_EQUAL(result.at(2).getSignalB().getPM().getID(), 75);
+
+  BOOST_REQUIRE_EQUAL(result.at(0).getSignalA().getRecoFlag(), JPetBaseSignal::Good);
+  BOOST_REQUIRE_EQUAL(result.at(0).getSignalB().getRecoFlag(), JPetBaseSignal::Good);
+  BOOST_REQUIRE_EQUAL(result.at(1).getSignalA().getRecoFlag(), JPetBaseSignal::Good);
+  BOOST_REQUIRE_EQUAL(result.at(1).getSignalB().getRecoFlag(), JPetBaseSignal::Corrupted);
+  BOOST_REQUIRE_EQUAL(result.at(2).getSignalA().getRecoFlag(), JPetBaseSignal::Good);
+  BOOST_REQUIRE_EQUAL(result.at(2).getSignalB().getRecoFlag(), JPetBaseSignal::Good);
 
   BOOST_REQUIRE_EQUAL(result.at(0).getSignalA().getPM().getScin().getID(), 23);
   BOOST_REQUIRE_EQUAL(result.at(0).getSignalB().getPM().getScin().getID(), 23);
@@ -282,6 +337,10 @@ BOOST_AUTO_TEST_CASE(matchSignals_test)
   BOOST_REQUIRE(result.at(0).getPosZ()>0.0);
   BOOST_REQUIRE(result.at(1).getPosZ()>0.0);
   BOOST_REQUIRE(result.at(2).getPosZ()<0.0);
+
+  BOOST_REQUIRE_EQUAL(result.at(0).getRecoFlag(), JPetHit::Good);
+  BOOST_REQUIRE_EQUAL(result.at(1).getRecoFlag(), JPetHit::Corrupted);
+  BOOST_REQUIRE_EQUAL(result.at(2).getRecoFlag(), JPetHit::Good);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

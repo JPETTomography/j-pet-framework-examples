@@ -51,7 +51,7 @@ protected:
   const int kNumOfThresholds = 4;
   double fSigChLeadTrailMaxTime = 23000.0;
   double fSigChEdgeMaxTime = 5000.0;
-  bool fUseCorruptedSigCh = true;
+  bool fUseCorruptedSigCh = false;
   bool fSaveControlHistos = true;
   void initialiseHistograms();
 };

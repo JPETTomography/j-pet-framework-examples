@@ -100,8 +100,8 @@ bool HitFinder::init()
 bool HitFinder::exec()
 {
   if (auto& timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
-    auto& signalsBySlot = HitFinderTools::getSignalsBySlot(
-      timeWindow, getParamBank(), fUseCorruptedSignals
+    auto signalsBySlot = HitFinderTools::getSignalsBySlot(
+      timeWindow, fUseCorruptedSignals
     );
     auto allHits = HitFinderTools::matchAllSignals(
       signalsBySlot, fVelocities, fABTimeDiff, fRefDetScinID, getStatistics(), fSaveControlHistos
@@ -137,10 +137,11 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
  */
 void HitFinder::initialiseHistograms(){
   getStatistics().createHistogram(new TH1F(
-    "good_vs_bad_hits", "Number of good and corrupted Hits created", 2, 0.5, 2.5
+    "good_vs_bad_hits", "Number of good and corrupted Hits created", 3, 0.5, 3.5
   ));
   getStatistics().getHisto1D("good_vs_bad_hits")->GetXaxis()->SetBinLabel(1,"GOOD");
   getStatistics().getHisto1D("good_vs_bad_hits")->GetXaxis()->SetBinLabel(2,"CORRUPTED");
+  getStatistics().getHisto1D("good_vs_bad_hits")->GetXaxis()->SetBinLabel(3,"UNKNOWN");
   getStatistics().getHisto1D("good_vs_bad_hits")->GetYaxis()->SetTitle("Number of Hits");
 
   getStatistics().createHistogram(new TH1F(

@@ -243,10 +243,11 @@ void TimeWindowCreator::initialiseHistograms(){
   }
 
   getStatistics().createHistogram(
-    new TH1F("good_vs_bad_sigch", "Number of good and corrupted SigChs created", 2, 0.5, 2.5)
+    new TH1F("good_vs_bad_sigch", "Number of good and corrupted SigChs created", 3, 0.5, 3.5)
   );
   getStatistics().getHisto1D("good_vs_bad_sigch")->GetXaxis()->SetBinLabel(1,"GOOD");
   getStatistics().getHisto1D("good_vs_bad_sigch")->GetXaxis()->SetBinLabel(2,"CORRUPTED");
+  getStatistics().getHisto1D("good_vs_bad_sigch")->GetXaxis()->SetBinLabel(3,"UNKNOWN");
   getStatistics().getHisto1D("good_vs_bad_sigch")->GetYaxis()->SetTitle("Number of SigChs");
 
   getStatistics().createHistogram(
@@ -271,7 +272,7 @@ void TimeWindowCreator::initialiseHistograms(){
     ->GetYaxis()->SetTitle("Number of LL pairs");
 
   getStatistics().createHistogram(
-    new TH1F("LT_time_diff", "Any LT time diff", 200, 0.0, 300000.0));
+    new TH1F("LT_time_diff", "Any LT time diff", 200, 0.0, 100000.0));
   getStatistics().getHisto1D("LT_time_diff")
     ->GetXaxis()->SetTitle("Time Diff [ps]");
   getStatistics().getHisto1D("LT_time_diff")

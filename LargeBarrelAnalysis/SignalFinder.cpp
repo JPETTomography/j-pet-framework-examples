@@ -92,7 +92,7 @@ bool SignalFinder::exec()
   // Getting the data from event in an apropriate format
   if(auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     // Distribute signal channels by PM IDs and filter out Corrupted SigChs if requested
-    auto& sigChByPM = SignalFinderTools::getSigChByPM(timeWindow, getParamBank(), fUseCorruptedSigCh);
+    auto& sigChByPM = SignalFinderTools::getSigChByPM(timeWindow, fUseCorruptedSigCh);
     // Building signals
     auto allSignals = SignalFinderTools::buildAllSignals(
       sigChByPM, kNumOfThresholds, fSigChEdgeMaxTime, fSigChLeadTrailMaxTime,
@@ -207,9 +207,10 @@ void SignalFinder::initialiseHistograms(){
 
   getStatistics().createHistogram(new TH1F(
     "good_v_bad_raw_sigs", "Number of good and corrupted signals created",
-    2, 0.5, 2.5
+    3, 0.5, 3.5
   ));
   getStatistics().getHisto1D("good_v_bad_raw_sigs")->GetXaxis()->SetBinLabel(1,"GOOD");
   getStatistics().getHisto1D("good_v_bad_raw_sigs")->GetXaxis()->SetBinLabel(2,"CORRUPTED");
+  getStatistics().getHisto1D("good_v_bad_raw_sigs")->GetXaxis()->SetBinLabel(3,"UNKNOWN");
   getStatistics().getHisto1D("good_v_bad_raw_sigs")->GetYaxis()->SetTitle("Number of Raw Signals");
 }

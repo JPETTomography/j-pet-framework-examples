@@ -17,44 +17,48 @@
 using namespace std;
 
 /**
- * Distributing Signal Channels to PMs and checking RecoFlag
+ * Method returns a map of vectors of JPetSigCh ordered by photomultiplier ID
  */
-const vector<vector<JPetSigCh>> SignalFinderTools::getSigChByPM(
-  const JPetTimeWindow* timeWindow, const JPetParamBank& paramBank, bool useCorrupts
+const map<int, vector<JPetSigCh>> SignalFinderTools::getSigChByPM(
+  const JPetTimeWindow* timeWindow, bool useCorrupts
 ){
+  map<int, vector<JPetSigCh>> sigChsPMMap;
   if (!timeWindow) {
-    WARNING("Pointer of Time Window object is not set, returning empty vector.");
-    vector<vector<JPetSigCh>> emptyVec;
-    return emptyVec;
+    WARNING("Pointer of Time Window object is not set, returning empty map");
+    return sigChsPMMap;
   }
-  // Init return vector
-  int pmNumber = paramBank.getPMsSize();
-  vector<JPetSigCh> sigChVec;
-  vector<vector<JPetSigCh>> pmSigChVec(pmNumber, sigChVec);
-  // Distribute Signal Channels according to PM they belong to
+  // Map Signal Channels according to PM they belong to
   const unsigned int nSigChs = timeWindow->getNumberOfEvents();
   for (unsigned int i = 0; i < nSigChs; i++) {
     auto sigCh = dynamic_cast<const JPetSigCh&>(timeWindow->operator[](i));
     // If it is set not to use Corrupted SigChs, such flagged objects will be skipped
     if(!useCorrupts && sigCh.getRecoFlag() == JPetSigCh::Corrupted) { continue; }
-    int pmID = sigCh.getPM().getID();
-    pmSigChVec.at(pmID-1).push_back(sigCh);
+    int pmtID = sigCh.getPM().getID();
+    auto search = sigChsPMMap.find(pmtID);
+    if (search == sigChsPMMap.end()) {
+      vector<JPetSigCh> tmp;
+      tmp.push_back(sigCh);
+      sigChsPMMap.insert(pair<int, vector<JPetSigCh>>(pmtID, tmp));
+    } else {
+      search->second.push_back(sigCh);
+    }
   }
-  return pmSigChVec;
+  return sigChsPMMap;
 }
 
 /**
  * Method invoking Raw Signal building method for each PM separately
  */
 vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
-   const vector<vector<JPetSigCh>>& sigChByPM, unsigned int numOfThresholds,
+   const map<int, vector<JPetSigCh>>& sigChByPM, unsigned int numOfThresholds,
    double sigChEdgeMaxTime, double sigChLeadTrailMaxTime,
    JPetStatistics& stats, bool saveHistos
 ) {
   vector<JPetRawSignal> allSignals;
-  for (auto sigChVec : sigChByPM) {
+  for (auto& sigChPair : sigChByPM) {
     auto signals = buildRawSignals(
-      sigChVec, numOfThresholds, sigChEdgeMaxTime, sigChLeadTrailMaxTime, stats, saveHistos
+      sigChPair.second, numOfThresholds, sigChEdgeMaxTime,
+      sigChLeadTrailMaxTime, stats, saveHistos
     );
     allSignals.insert(allSignals.end(), signals.begin(), signals.end());
   }
@@ -69,7 +73,7 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
  * to second time window (sigChLeadTrailMaxTime parameter).
  */
  vector<JPetRawSignal> SignalFinderTools::buildRawSignals(
-   const vector<JPetSigCh>& sigChFromSamePM, unsigned int numOfThresholds,
+   const vector<JPetSigCh>& sigChByPM, unsigned int numOfThresholds,
    double sigChEdgeMaxTime, double sigChLeadTrailMaxTime,
    JPetStatistics& stats, bool saveHistos
  ) {
@@ -83,7 +87,7 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
   vector<JPetSigCh> tmpVec;
   vector<vector<JPetSigCh>> thrLeadingSigCh(numOfThresholds, tmpVec);
   vector<vector<JPetSigCh>> thrTrailingSigCh(numOfThresholds, tmpVec);
-  for (const JPetSigCh& sigCh : sigChFromSamePM) {
+  for (const JPetSigCh& sigCh : sigChByPM) {
     if(sigCh.getType() == JPetSigCh::Leading) {
       thrLeadingSigCh.at(sigCh.getThresholdNumber()-1).push_back(sigCh);
     } else if(sigCh.getType() == JPetSigCh::Trailing) {
@@ -155,6 +159,8 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
         stats.getHisto1D("good_v_bad_raw_sigs")->Fill(1);
       } else if(rawSig.getRecoFlag()==JPetBaseSignal::Corrupted){
         stats.getHisto1D("good_v_bad_raw_sigs")->Fill(2);
+      } else if(rawSig.getRecoFlag()==JPetBaseSignal::Unknown){
+        stats.getHisto1D("good_v_bad_raw_sigs")->Fill(3);
       }
     }
     // Adding created Raw Signal to vector

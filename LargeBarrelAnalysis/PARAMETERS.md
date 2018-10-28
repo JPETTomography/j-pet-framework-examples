@@ -6,6 +6,12 @@ Description of available parameters in LargeBarrelAnalysis example. Note that co
 - `Save_Cotrol_Histograms_bool`  
 Common for each module, if set to `true`, in the output `ROOT` files folder with statistics will contain control histograms. Set to `false` if histograms not needed.
 
+- `Unpacker_TOToffsetCalib_std::string`  
+Name of a `ROOT` file with `TOT` offset calibrations (stretcher) applied during unpacking of `HLD` file.
+
+- `Unpacker_TDCnonlinearityCalib_std::string`  
+Name of a `ROOT` file with calibrations of nonlinearities occurring on `TDC` boards, applied during unpacking of `HLD` file.
+
 - `TimeWindowCreator_MainStrip_int`  
 Dedicated for files with data from measurement with Reference Detector - it denotes which `ID` has the reference scintillator. If option not set, part with reference detector is ignored
 
@@ -18,11 +24,20 @@ default value `0.0 ps`
 - `TimeCalibLoader_ConfigFile_std::string`  
 name of ASCII file of required structure, containing time calibrations, specific for each run
 
+- `SignalFinder_UseCorruptedSigCh_bool`  
+Indication if Signal Finder module should use signal channels flagged as Corrupted in the previous task. Default value: `false`
+
 - `SignalFinder_EdgeMaxTime_float`  
 time window for matching Signal Channels on Leading Edge. Default value: `5 000 ps`
 
 - `SignalFinder_LeadTrailMaxTime_float`  
 time window for matching Signal Channels on the same thresholds from Leading and Trailing edge. Default value: `25 000 ps`
+
+- `SignalTransformer_UseCorruptedSignals_bool`  
+Indication if Signal Transformer module should use signals flagged as Corrupted in the previous task. Default value: `false`
+
+- `HitFinder_UseCorruptedSignals_bool`  
+Indication if Hit Finder module should use signals flagged as Corrupted in the previous task. Default value: `false`
 
 - `HitFinder_VelocityFile_std::string`  
 name of ASCII file of required format, containing values of effective velocities of light in each scintillator
@@ -32,6 +47,9 @@ time window for matching Signals on the same scintillator and different sides. D
 
 - `HitFinder_RefDetScinID_int`  
 `ID` of Reference Detector Scintillator, needed for creating reference hits
+
+- `EventFinder_UseCorruptedHits_bool`  
+Indication if Event Finder module should use hits flagged as Corrupted in the previous task. Default value: `false`
 
 - `EventFinder_EventTime_float`  
 time window for grouping hits in one event. Default value `5 000 ps`
@@ -50,4 +68,3 @@ denotes Time over Threshold cut minimal value for simple selection of deexcitati
 
 - `Deex_Categorizer_TOT_Cut_Max_float`  
 denotes Time over Threshold cut maximal value for simple selection of deexcitation photons. Default value: `50 000 ps`
-

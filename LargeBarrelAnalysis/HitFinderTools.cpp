@@ -37,42 +37,52 @@ void HitFinderTools::sortByTime(vector<JPetPhysSignal>& sigVec)
 /**
  * Method distributing Signals according to Scintillator they belong to
  */
-const vector<vector<JPetPhysSignal>> HitFinderTools::getSignalsBySlot(
-  const JPetTimeWindow* timeWindow, const JPetParamBank& paramBank, bool useCorrupts
+map<int, vector<JPetPhysSignal>> HitFinderTools::getSignalsBySlot(
+  const JPetTimeWindow* timeWindow, bool useCorrupts
 ){
+  map<int, vector<JPetPhysSignal>> signalSlotMap;
   if (!timeWindow) {
-    WARNING("Pointer of Time Window object is not set, returning empty vector.");
-    vector<vector<JPetPhysSignal>> emptyVec;
-    return emptyVec;
+    WARNING("Pointer of Time Window object is not set, returning empty map");
+    return signalSlotMap;
   }
-  // Init return vector
-  int slotNumber = paramBank.getBarrelSlotsSize();
-  vector<JPetPhysSignal> signalVec;
-  vector<vector<JPetPhysSignal>> slotSignalVec(slotNumber, signalVec);
-  // Map Signals according to Slot they belong to
-  const unsigned int nSigals = timeWindow->getNumberOfEvents();
-  for (unsigned int i = 0; i < nSigals; i++) {
-    auto sigal = dynamic_cast<const JPetPhysSignal&>(timeWindow->operator[](i));
-    // If it is set not to use Corrupted Sigals, such flagged objects will be skipped
-    if(!useCorrupts && sigal.getRecoFlag() == JPetBaseSignal::Corrupted) { continue; }
-    int slotID = sigal.getBarrelSlot().getID();
-    slotSignalVec.at(slotID-1).push_back(sigal);
+  const unsigned int nSignals = timeWindow->getNumberOfEvents();
+  for (unsigned int i = 0; i < nSignals; i++) {
+    auto physSig = dynamic_cast<const JPetPhysSignal&>(timeWindow->operator[](i));
+    if(!useCorrupts && physSig.getRecoFlag() == JPetBaseSignal::Corrupted) { continue; }
+    int scinID = physSig.getPM().getScin().getID();
+    auto search = signalSlotMap.find(scinID);
+    if (search == signalSlotMap.end()) {
+      vector<JPetPhysSignal> tmp;
+      tmp.push_back(physSig);
+      signalSlotMap.insert(pair<int, vector<JPetPhysSignal>>(scinID, tmp));
+    } else {
+      search->second.push_back(physSig);
+    }
   }
-  return slotSignalVec;
+  return signalSlotMap;
 }
 
 /**
  * Loop over all Scins invoking matching procedure
  */
 vector<JPetHit> HitFinderTools::matchAllSignals(
-  const vector<vector<JPetPhysSignal>>& allSignals,
+  map<int, vector<JPetPhysSignal>>& allSignals,
   const map<unsigned int, vector<double>>& velocitiesMap,
   double timeDiffAB, int refDetScinId, JPetStatistics& stats, bool saveHistos
 ) {
   vector<JPetHit> allHits;
-  for (auto slotSigals : allSignals) {
+  for (auto& slotSigals : allSignals) {
+    // Loop for Reference Detector ID
+    if (slotSigals.first == refDetScinId) {
+      for (auto refSignal : slotSigals.second) {
+        auto refHit = createDummyRefDetHit(refSignal);
+        allHits.push_back(refHit);
+      }
+      continue;
+    }
+    // Loop for other slots than reference one
     auto slotHits = matchSignals(
-      slotSigals, velocitiesMap, timeDiffAB, refDetScinId, stats, saveHistos
+      slotSigals.second, velocitiesMap, timeDiffAB, stats, saveHistos
     );
     allHits.insert(allHits.end(), slotHits.begin(), slotHits.end());
   }
@@ -85,19 +95,13 @@ vector<JPetHit> HitFinderTools::matchAllSignals(
 vector<JPetHit> HitFinderTools::matchSignals(
   vector<JPetPhysSignal>& slotSignals,
   const map<unsigned int, vector<double>>& velocitiesMap,
-  double timeDiffAB, int refDetScinId, JPetStatistics& stats, bool saveHistos
+  double timeDiffAB, JPetStatistics& stats, bool saveHistos
 ) {
   vector<JPetHit> slotHits;
   vector<JPetPhysSignal> remainSignals;
   sortByTime(slotSignals);
   while (slotSignals.size() > 0) {
     auto physSig = slotSignals.at(0);
-    if (physSig.getBarrelSlot().getID() == refDetScinId) {
-      auto refHit = createDummyRefDetHit(physSig);
-      slotHits.push_back(refHit);
-      slotSignals.erase(slotSignals.begin() + 0);
-      continue;
-    }
     if(slotSignals.size() == 1){
       remainSignals.push_back(physSig);
       break;
@@ -105,7 +109,7 @@ vector<JPetHit> HitFinderTools::matchSignals(
     for (unsigned int j = 1; j < slotSignals.size(); j++) {
       if (slotSignals.at(j).getTime() - physSig.getTime() < timeDiffAB) {
         if (physSig.getPM().getSide() != slotSignals.at(j).getPM().getSide()) {
-          JPetHit hit = createHit(
+          auto hit = createHit(
             physSig, slotSignals.at(j), velocitiesMap, stats, saveHistos
           );
           slotHits.push_back(hit);
@@ -171,7 +175,8 @@ JPetHit HitFinderTools::createHit(
   hit.setPosX(radius * cos(theta));
   hit.setPosY(radius * sin(theta));
   hit.setPosZ(velocity * hit.getTimeDiff() / 2000.0);
-  if(signalA.getRecoFlag() == JPetBaseSignal::Good && signalB.getRecoFlag() == JPetBaseSignal::Good) {
+  if(signalA.getRecoFlag() == JPetBaseSignal::Good
+    && signalB.getRecoFlag() == JPetBaseSignal::Good) {
     hit.setRecoFlag(JPetHit::Good);
     if(saveHistos) {
       stats.getHisto1D("good_vs_bad_hits")->Fill(1);
@@ -180,9 +185,13 @@ JPetHit HitFinderTools::createHit(
       stats.getHisto2D("hit_pos_per_scin")
         ->Fill(hit.getPosZ(), (float)(hit.getScintillator().getID()));
     }
-  } else {
+  } else if (signalA.getRecoFlag() == JPetBaseSignal::Corrupted
+    || signalB.getRecoFlag() == JPetBaseSignal::Corrupted){
     hit.setRecoFlag(JPetHit::Corrupted);
     if(saveHistos) { stats.getHisto1D("good_vs_bad_hits")->Fill(2); }
+  } else {
+    hit.setRecoFlag(JPetHit::Unknown);
+    if(saveHistos) { stats.getHisto1D("good_vs_bad_hits")->Fill(3); }
   }
   return hit;
 }
@@ -213,7 +222,6 @@ int HitFinderTools::getProperChannel(const JPetPhysSignal& signal)
 {
   auto someSigCh = signal.getRecoSignal().getRawSignal()
     .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrValue)[0];
-  // INFO(someSigCh.getTOMBChannel().GetObject());
   return someSigCh.getTOMBChannel().getChannel();
 }
 

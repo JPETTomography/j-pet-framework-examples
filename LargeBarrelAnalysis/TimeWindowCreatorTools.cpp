@@ -87,6 +87,13 @@ void TimeWindowCreatorTools::flagSigChs(
       }
       continue;
     }
+    if(sigCh1.getType() == JPetSigCh::Leading && i == inputSigChs.size()-1) {
+      sigCh1.setRecoFlag(JPetSigCh::Good);
+      if(saveHistos){
+        stats.getHisto1D("good_vs_bad_sigch")->Fill(1);
+      }
+      break;
+    }
     for(unsigned int j=i+1; j<inputSigChs.size(); j++) {
       auto& sigCh2 = inputSigChs.at(j);
       if(sigCh1.getPM().getID() != sigCh2.getPM().getID()) { continue; }
@@ -107,6 +114,9 @@ void TimeWindowCreatorTools::flagSigChs(
         }
         break;
       }
+    }
+    if(sigCh1.getRecoFlag()== JPetSigCh::Unknown && saveHistos){
+      stats.getHisto1D("good_vs_bad_sigch")->Fill(3);
     }
   }
 }

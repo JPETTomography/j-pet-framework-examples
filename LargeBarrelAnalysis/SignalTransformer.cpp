@@ -64,22 +64,28 @@ bool SignalTransformer::exec()
   if(auto & timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     uint n = timeWindow->getNumberOfEvents();
     for(uint i=0;i<n;++i){
-      const JPetRawSignal & currSignal = dynamic_cast<const JPetRawSignal&>(timeWindow->operator[](i));
-      if(currSignal.getRecoFlag()==JPetRawSignal::Corrupted) {
-        if(fSaveControlHistos) {
+      auto& rawSignal = dynamic_cast<const JPetRawSignal&>(timeWindow->operator[](i));
+      if(fSaveControlHistos) {
+        if(rawSignal.getRecoFlag()==JPetBaseSignal::Good){
+          getStatistics().getHisto1D("good_vs_bad_signals")->Fill(1);
+        } else if(rawSignal.getRecoFlag()==JPetBaseSignal::Corrupted){
           getStatistics().getHisto1D("good_vs_bad_signals")->Fill(2);
+        } else if(rawSignal.getRecoFlag()==JPetBaseSignal::Unknown){
+          getStatistics().getHisto1D("good_vs_bad_signals")->Fill(3);
         }
-        if(!fUseCorruptedSignals) continue;
-      } else if(fSaveControlHistos) {
-        getStatistics().getHisto1D("good_vs_bad_signals")->Fill(1);
+      }
+      if(!fUseCorruptedSignals && rawSignal.getRecoFlag()==JPetBaseSignal::Corrupted) {
+        continue;
       }
       // Make Reco Signal from Raw Signal
-      auto recoSignal = createRecoSignal(currSignal);
+      auto recoSignal = createRecoSignal(rawSignal);
       // Make Phys Signal from Reco Signal and save
       auto physSignal = createPhysSignal(recoSignal);
       fOutputEvents->add<JPetPhysSignal>(physSignal);
     }
-  }else return false;
+  } else {
+    return false;
+  }
   return true;
 }
 
@@ -132,9 +138,10 @@ JPetPhysSignal SignalTransformer::createPhysSignal(const JPetRecoSignal& recoSig
  */
 void SignalTransformer::initialiseHistograms(){
   getStatistics().createHistogram(
-    new TH1F("good_vs_bad_signals", "Number of good and corrupted signals created", 2, 0.5, 2.5)
+    new TH1F("good_vs_bad_signals", "Number of good and corrupted signals created", 3, 0.5, 3.5)
   );
   getStatistics().getHisto1D("good_vs_bad_signals")->GetXaxis()->SetBinLabel(1,"GOOD");
   getStatistics().getHisto1D("good_vs_bad_signals")->GetXaxis()->SetBinLabel(2,"CORRUPTED");
+  getStatistics().getHisto1D("good_vs_bad_signals")->GetXaxis()->SetBinLabel(3,"UNKNOWN");
   getStatistics().getHisto1D("good_vs_bad_signals")->GetYaxis()->SetTitle("Number of Signals");
 }
