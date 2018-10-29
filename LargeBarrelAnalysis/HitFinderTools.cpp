@@ -49,12 +49,12 @@ map<int, vector<JPetPhysSignal>> HitFinderTools::getSignalsBySlot(
   for (unsigned int i = 0; i < nSignals; i++) {
     auto physSig = dynamic_cast<const JPetPhysSignal&>(timeWindow->operator[](i));
     if(!useCorrupts && physSig.getRecoFlag() == JPetBaseSignal::Corrupted) { continue; }
-    int scinID = physSig.getPM().getScin().getID();
-    auto search = signalSlotMap.find(scinID);
+    int slotID = physSig.getBarrelSlot().getID();
+    auto search = signalSlotMap.find(slotID);
     if (search == signalSlotMap.end()) {
       vector<JPetPhysSignal> tmp;
       tmp.push_back(physSig);
-      signalSlotMap.insert(pair<int, vector<JPetPhysSignal>>(scinID, tmp));
+      signalSlotMap.insert(pair<int, vector<JPetPhysSignal>>(slotID, tmp));
     } else {
       search->second.push_back(physSig);
     }

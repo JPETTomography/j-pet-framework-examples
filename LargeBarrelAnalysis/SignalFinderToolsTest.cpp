@@ -73,20 +73,19 @@ BOOST_AUTO_TEST_CASE(getSigChByPM_Test)
   auto results1 = SignalFinderTools::getSigChByPM(&slot, false);
   auto results2 = SignalFinderTools::getSigChByPM(&slot, true);
 
-  BOOST_REQUIRE_EQUAL(results1.size(), 3);
+  BOOST_REQUIRE_EQUAL(results1.size(), 2);
   BOOST_REQUIRE_EQUAL(results2.size(), 3);
-  BOOST_REQUIRE_EQUAL(results1.at(0).size(), 3);
-  BOOST_REQUIRE_EQUAL(results1.at(1).size(), 0);
-  BOOST_REQUIRE_EQUAL(results1.at(2).size(), 2);
-  BOOST_REQUIRE_EQUAL(results2.at(0).size(), 3);
-  BOOST_REQUIRE_EQUAL(results2.at(1).size(), 3);
-  BOOST_REQUIRE_EQUAL(results2.at(2).size(), 2);
+  BOOST_REQUIRE_EQUAL(results1[1].size(), 3);
+  BOOST_REQUIRE_EQUAL(results1[3].size(), 2);
+  BOOST_REQUIRE_EQUAL(results2[1].size(), 3);
+  BOOST_REQUIRE_EQUAL(results2[2].size(), 3);
+  BOOST_REQUIRE_EQUAL(results2[3].size(), 2);
 }
 
 BOOST_AUTO_TEST_CASE(buildRawSignals_empty)
 {
   JPetStatistics stats;
-  std::map<int, std::vector<JPetSigCh>> sigChByPM;
+  std::vector<JPetSigCh> sigChByPM;
   auto results = SignalFinderTools::buildRawSignals(
     sigChByPM, 1, 5.0, 5.0, stats, false
   );
