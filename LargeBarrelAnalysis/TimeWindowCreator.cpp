@@ -216,12 +216,8 @@ bool TimeWindowCreator::filter(JPetTOMBChannel& tombChannel) const
  * Init histograms
  */
 void TimeWindowCreator::initialiseHistograms(){
-
   getStatistics().createHistogram(
-    new TH1F(
-      "sig_ch_per_time_slot", "Signal Channels Per Time Slot",
-      250, -0.5, 999.5
-    )
+    new TH1F("sig_ch_per_time_slot", "Signal Channels Per Time Slot", 250, -0.5, 999.5)
   );
   getStatistics().getHisto1D("sig_ch_per_time_slot")
     ->GetXaxis()->SetTitle("Signal Channels in Time Slot");
@@ -229,13 +225,11 @@ void TimeWindowCreator::initialiseHistograms(){
     ->GetYaxis()->SetTitle("Number of Time Slots");
 
   for(int i=1; i<=kNumOfThresholds; i++){
-    getStatistics().createHistogram(
-      new TH1F(
+    getStatistics().createHistogram(new TH1F(
         Form("pm_occupation_thr%d", i),
         Form("Signal Channels per PM on THR %d", i),
         385, 0.5, 385.5
-      )
-    );
+    ));
     getStatistics().getHisto1D(Form("pm_occupation_thr%d", i))
       ->GetXaxis()->SetTitle("PM ID)");
     getStatistics().getHisto1D(Form("pm_occupation_thr%d", i))
@@ -251,30 +245,44 @@ void TimeWindowCreator::initialiseHistograms(){
   getStatistics().getHisto1D("good_vs_bad_sigch")->GetYaxis()->SetTitle("Number of SigChs");
 
   getStatistics().createHistogram(
-    new TH1F("LL_per_PM", "Number of LL found on PMs", 385, 0.5, 385.5));
-  getStatistics().getHisto1D("LL_per_PM")
-    ->GetXaxis()->SetTitle("PM ID");
-  getStatistics().getHisto1D("LL_per_PM")
-    ->GetYaxis()->SetTitle("Number of LL pairs");
+    new TH1F("LT_time_diff", "LT time diff", 200, 0.0, 100000.0)
+  );
+  getStatistics().getHisto1D("LT_time_diff")->GetXaxis()->SetTitle("Time Diff [ps]");
+  getStatistics().getHisto1D("LT_time_diff")->GetYaxis()->SetTitle("Number of LL pairs");
 
   getStatistics().createHistogram(
-    new TH1F("LL_per_THR", "Number of found LL on Thresolds", 4, 0.5, 4.5));
-  getStatistics().getHisto1D("LL_per_THR")
-    ->GetXaxis()->SetTitle("THR Number");
-  getStatistics().getHisto1D("LL_per_THR")
-    ->GetYaxis()->SetTitle("Number of LL pairs");
+    new TH1F("LL_per_PM", "Number of LL found on PMs", 385, 0.5, 385.5)
+  );
+  getStatistics().getHisto1D("LL_per_PM")->GetXaxis()->SetTitle("PM ID");
+  getStatistics().getHisto1D("LL_per_PM")->GetYaxis()->SetTitle("Number of LL pairs");
 
   getStatistics().createHistogram(
-    new TH1F("LL_time_diff", "Time diff of any LL", 200, 0.0, 300000.0));
-  getStatistics().getHisto1D("LL_time_diff")
-    ->GetXaxis()->SetTitle("Time Diff [ps]");
-  getStatistics().getHisto1D("LL_time_diff")
-    ->GetYaxis()->SetTitle("Number of LL pairs");
+    new TH1F("LL_per_THR", "Number of found LL on Thresolds", 4, 0.5, 4.5)
+  );
+  getStatistics().getHisto1D("LL_per_THR")->GetXaxis()->SetTitle("THR Number");
+  getStatistics().getHisto1D("LL_per_THR")->GetYaxis()->SetTitle("Number of LL pairs");
 
   getStatistics().createHistogram(
-    new TH1F("LT_time_diff", "Any LT time diff", 200, 0.0, 100000.0));
-  getStatistics().getHisto1D("LT_time_diff")
-    ->GetXaxis()->SetTitle("Time Diff [ps]");
-  getStatistics().getHisto1D("LT_time_diff")
-    ->GetYaxis()->SetTitle("Number of LL pairs");
+    new TH1F("LL_time_diff", "Time diff of LL pairs", 200, 0.0, 300000.0)
+  );
+  getStatistics().getHisto1D("LL_time_diff")->GetXaxis()->SetTitle("Time Diff [ps]");
+  getStatistics().getHisto1D("LL_time_diff")->GetYaxis()->SetTitle("Number of LL pairs");
+
+  getStatistics().createHistogram(
+    new TH1F("TT_per_PM", "Number of TT found on PMs", 385, 0.5, 385.5)
+  );
+  getStatistics().getHisto1D("TT_per_PM")->GetXaxis()->SetTitle("PM ID");
+  getStatistics().getHisto1D("TT_per_PM")->GetYaxis()->SetTitle("Number of TT pairs");
+
+  getStatistics().createHistogram(
+    new TH1F("TT_per_THR", "Number of found TT on Thresolds", 4, 0.5, 4.5)
+  );
+  getStatistics().getHisto1D("TT_per_THR")->GetXaxis()->SetTitle("THR Number");
+  getStatistics().getHisto1D("TT_per_THR")->GetYaxis()->SetTitle("Number of TT pairs");
+
+  getStatistics().createHistogram(
+    new TH1F("TT_time_diff", "Time diff of TT pairs", 200, 0.0, 300000.0)
+  );
+  getStatistics().getHisto1D("TT_time_diff")->GetXaxis()->SetTitle("Time Diff [ps]");
+  getStatistics().getHisto1D("TT_time_diff")->GetYaxis()->SetTitle("Number of TT pairs");
 }
