@@ -52,8 +52,16 @@ public:
   );
   static JPetHit createDummyRefDetHit(const JPetPhysSignal& signal);
   static int getProperChannel(const JPetPhysSignal& signal);
+<<<<<<< b76e8c289e91932a2e7bf30b19ab6fcaaa8d2d1e
   static void checkTheta(const double& theta);
   static double calculateTOT(const JPetHit& hit);
+=======
+  static void sortByTime(std::vector<JPetPhysSignal>& side);
+  /// Returns Time-over-threshold for given deposited energy
+  /// the current parametrization is par1 + par2 * eDep 
+  static double getToT(double eDep, double  par1 = -91958, double par2 = 19341);
+
+>>>>>>> Add Energy to Tot function to HitFinderTools
 };
 
 #endif /* !HITFINDERTOOLS_H */

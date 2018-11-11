@@ -330,4 +330,11 @@ BOOST_AUTO_TEST_CASE(matchSignals_test)
   BOOST_REQUIRE_EQUAL(result.at(2).getRecoFlag(), JPetHit::Good);
 }
 
+
+BOOST_AUTO_TEST_CASE(getTot_test)
+{
+  ///This test is stupid, but I don't know for a moment what values to test.
+  BOOST_CHECK_CLOSE(HitFinderTools::getToT(0), -91958, 0.1);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
