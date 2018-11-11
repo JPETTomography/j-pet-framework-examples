@@ -31,6 +31,8 @@
 class HitFinderTools
 {
 public:
+
+
   static std::map<int, std::vector<JPetPhysSignal>> getSignalsSlotMap(
     const JPetTimeWindow* timeWindow);
   static std::vector<JPetHit> matchSignals(
@@ -49,6 +51,10 @@ public:
   static void checkTheta(const double& theta);
   static int getProperChannel(const JPetPhysSignal& signal);
   static void sortByTime(std::vector<JPetPhysSignal>& side);
+  /// Returns Time-over-threshold for given deposited energy
+  /// the current parametrization is par1 + par2 * eDep 
+  static double getToT(double eDep, double  par1 = -91958, double par2 = 19341);
+
 };
 
 #endif /*  !HITFINDERTOOLS_H */

@@ -203,3 +203,8 @@ void HitFinderTools::sortByTime(vector<JPetPhysSignal>& sigVec)
   }
       );
 }
+
+double HitFinderTools::getToT(double eDep, double  par1, double par2)
+{
+  return par1 + eDep * par2;
+}
