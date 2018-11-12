@@ -412,7 +412,7 @@ BOOST_AUTO_TEST_CASE(sortByTime_test)
 BOOST_AUTO_TEST_CASE(getTot_test)
 {
   ///This test is stupid, but I don't know for a moment what values to test.
-  BOOST_CHECK_CLOSE(HitFinderTools::getToT(0), -91958, 0.1);
+  BOOST_CHECK_CLOSE(HitFinderTools::getToT(0), 0, 0.1);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

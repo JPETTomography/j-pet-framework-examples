@@ -53,6 +53,7 @@ public:
   static void sortByTime(std::vector<JPetPhysSignal>& side);
   /// Returns Time-over-threshold for given deposited energy
   /// the current parametrization is par1 + par2 * eDep 
+  /// Returned value in ps, and eDep is given in keV.
   static double getToT(double eDep, double  par1 = -91958, double par2 = 19341);
 
 };
