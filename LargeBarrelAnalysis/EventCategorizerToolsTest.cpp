@@ -335,6 +335,83 @@ BOOST_AUTO_TEST_CASE(checkTOFsignNegative)
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(AnnihilationPointSuite)
+BOOST_AUTO_TEST_CASE(pointAtCenter1)
+{
+  TVector3 firstHit(5.0, 0.0, 0.0);
+  TVector3 secondHit(-5.0, 0.0, 0.0);
+  double tof = 0; 
+  TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit, tof);
+  BOOST_REQUIRE_CLOSE(point.X(), 0, 0.001);
+  BOOST_REQUIRE_CLOSE(point.Y(), 0, 0.001);
+  BOOST_REQUIRE_CLOSE(point.Z(), 0, 0.001);
+}
+
+BOOST_AUTO_TEST_CASE(pointAtCenter2)
+{
+  TVector3 firstHit(5.0, -5.0, 0.0);
+  TVector3 secondHit(-5.0,5.0, 0.0);
+  double tof = 0; 
+  TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit, tof);
+  BOOST_REQUIRE_CLOSE(point.X(), 0, 0.001);
+  BOOST_REQUIRE_CLOSE(point.Y(), 0, 0.001);
+  BOOST_REQUIRE_CLOSE(point.Z(), 0, 0.001);
+}
+
+BOOST_AUTO_TEST_CASE(ExtremeCase1)
+{
+  /// The annihilation point is at (5.0,0,0)
+  TVector3 firstHit(5.0, 0.0, 0.0);
+  TVector3 secondHit(-5.0, 0.0, 0.0);
+  double path = (secondHit -firstHit) .Mag();
+  double lightSpeed =29.97924580/1000.;
+  double tof = path/lightSpeed * 0.5; 
+  TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit, tof);
+  BOOST_REQUIRE_CLOSE(point.X(), 5, 0.001);
+  BOOST_REQUIRE_CLOSE(point.Y(), 0, 0.001);
+  BOOST_REQUIRE_CLOSE(point.Z(), 0, 0.001);
+}
+
+BOOST_AUTO_TEST_CASE(ExtremeCase2)
+{
+  /// The annihilation point is at (-5.0,0,0)
+  TVector3 firstHit(5.0, 0.0, 0.0);
+  TVector3 secondHit(-5.0, 0.0, 0.0);
+  double path = (secondHit -firstHit) .Mag();
+  double lightSpeed =29.97924580/1000.;
+  double tof = -path/lightSpeed * 0.5; 
+  TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit, tof);
+  BOOST_REQUIRE_CLOSE(point.X(), -5, 0.001);
+  BOOST_REQUIRE_CLOSE(point.Y(), 0, 0.001);
+  BOOST_REQUIRE_CLOSE(point.Z(), 0, 0.001);
+}
+
+BOOST_AUTO_TEST_CASE(ExtremeCase3)
+{
+  /// The annihilation point is at (5.0,5.0,0)
+  TVector3 firstHit(5.0, 5.0, 0.0);
+  TVector3 secondHit(-5.0, -5.0, 0.0);
+  double path = (secondHit -firstHit) .Mag();
+  double lightSpeed =29.97924580/1000.;
+  double tof = path/lightSpeed * 0.5; 
+  TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit, tof);
+  BOOST_REQUIRE_CLOSE(point.X(), 5, 0.001);
+  BOOST_REQUIRE_CLOSE(point.Y(), 5, 0.001);
+  BOOST_REQUIRE_CLOSE(point.Z(), 0, 0.001);
+}
+
+BOOST_AUTO_TEST_CASE(ExtremeCase4)
+{
+  /// The annihilation point is at (5.0,-5.0,0)
+  TVector3 firstHit(5.0, -5.0, 0.0);
+  TVector3 secondHit(-5.0, 5.0, 0.0);
+  double path = (secondHit -firstHit) .Mag();
+  double lightSpeed =(29.97924580/1000.);
+  double tof = path/lightSpeed * 0.5; 
+  TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit, tof);
+  BOOST_REQUIRE_CLOSE(point.X(), 5, 0.001);
+  BOOST_REQUIRE_CLOSE(point.Y(), -5, 0.001);
+  BOOST_REQUIRE_CLOSE(point.Z(), 0, 0.001);
+}
 
 BOOST_AUTO_TEST_CASE(pointAtCenter)
 {

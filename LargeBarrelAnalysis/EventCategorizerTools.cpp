@@ -213,29 +213,40 @@ double EventCategorizerTools::calculateScatteringAngle(const JPetHit& hit1, cons
 */
 TVector3 EventCategorizerTools::calculateAnnihilationPoint(const JPetHit& firstHit, const JPetHit& secondHit)
 {
-  TVector3 middleOfLOR = 0.5 * (firstHit.getPos() + secondHit.getPos());
+  double tof = EventCategorizerTools::calculateTOF(firstHit, secondHit);
+  return calculateAnnihilationPoint(firstHit.getPos(), secondHit.getPos(), tof);
+}
 
-  TVector3 versorOnLOR = (secondHit.getPos() - firstHit.getPos()).Unit()  ;
+TVector3 EventCategorizerTools::calculateAnnihilationPoint(const TVector3& firstHit, const TVector3& secondHit, double tof)
+{
+  TVector3 middleOfLOR = 0.5 * (firstHit + secondHit);
 
-  double shift = calculateTOF(firstHit, secondHit)*kLightVelocity_cm_ns / 1000.0;
-  TVector3 anihillationPoint(middleOfLOR.X() + shift * std::abs(versorOnLOR.X()),
-                             middleOfLOR.Y() + shift * std::abs(versorOnLOR.Y()),
-                             middleOfLOR.Z() + shift * std::abs(versorOnLOR.Z()));
-  return anihillationPoint;
+  TVector3 versorOnLOR = (firstHit - secondHit).Unit()  ;
+
+  double shift = tof * kLightVelocity_cm_ns / 1000.0;
+  TVector3 annihilationPoint(middleOfLOR.X() + shift * versorOnLOR.X(),
+                             middleOfLOR.Y() + shift * versorOnLOR.Y(),
+                             middleOfLOR.Z() + shift * versorOnLOR.Z());
+  return annihilationPoint;
 }
 
 /**
 * Calculation Time of flight
 */
-double EventCategorizerTools::calculateTOF(const JPetHit& firstHit, const JPetHit& latterHit)
+double EventCategorizerTools::calculateTOF(const JPetHit& firstHit, const JPetHit& secondHit)
+{
+  return EventCategorizerTools::calculateTOF(firstHit.getTime(), secondHit.getTime());
+}
+
+double EventCategorizerTools::calculateTOF(double time1, double time2)
 {
   double TOF = kUndefinedValue;
   
-  if (firstHit.getTime() > latterHit.getTime()) {
+  if (time1 > time2) {
     ERROR("First hit time should be earlier than later hit");
     return kUndefinedValue;
   }
-  return (firstHit.getTime() - latterHit.getTime())/2.;
+  return (time1 - time2)/2.;
 }
 
 /**

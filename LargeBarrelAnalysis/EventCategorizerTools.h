@@ -27,40 +27,31 @@ static const double kUndefinedValue = 999.0;
  * @brief Tools for Event Categorization
  *
  * Lots of tools in constatnt developement.
- */
+*/
 class EventCategorizerTools
 {
 public:
-  static bool checkFor2Gamma(
-    const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double b2bSlotThetaDiff
-  );
-  static bool checkFor3Gamma(
-    const JPetEvent& event, JPetStatistics& stats, bool saveHistos
-  );
-  static bool checkForPrompt(
-    const JPetEvent& event, JPetStatistics& stats, bool saveHistos,
-    double deexTOTCutMin, double deexTOTCutMax
-  );
-  static bool checkForScatter(
-    const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double scatterTOFTimeDiff
-  );
-  static double calculateTOT(const JPetHit& hit);
-  static double calculateDistance(const JPetHit& hit1, const JPetHit& hit2);
-  static double calculateScatteringTime(const JPetHit& hit1, const JPetHit& hit2);
-  static double calculateScatteringAngle(const JPetHit& hit1, const JPetHit& hit2);
-  static double calculateTOF(const JPetHit& firstHit, const JPetHit& latterHit);
-  static TVector3 calculateAnnihilationPoint(const JPetHit& firstHit, const JPetHit& latterHit);
-  static double calculatePlaneCenterDistance(
-    const JPetHit& firstHit, const JPetHit& secondHit, const JPetHit& thirdHit
-  );
-  static bool stream2Gamma(
-    const JPetEvent& event, JPetStatistics& stats, bool saveHistos,
-    double b2bSlotThetaDiff, double b2bTimeDiff
-  );
-  static bool stream3Gamma(
-    const JPetEvent& event, JPetStatistics& stats, bool saveHistos,
-    double d3SlotThetaMin, double d3TimeDiff, double d3DistanceFromCenter
-  );
+static bool checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats,
+  bool saveHistos, double b2bSlotThetaDiff);
+static bool checkFor3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos);
+static bool checkForPrompt(const JPetEvent& event, JPetStatistics& stats,
+  bool saveHistos, double deexTOTCutMin, double deexTOTCutMax);
+static bool checkForScatter(const JPetEvent& event, JPetStatistics& stats,
+  bool saveHistos, double scatterTOFTimeDiff);
+static double calculateTOT(const JPetHit& hit);
+static double calculateDistance(const JPetHit& hit1, const JPetHit& hit2);
+static double calculateScatteringTime(const JPetHit& hit1, const JPetHit& hit2);
+static double calculateScatteringAngle(const JPetHit& hit1, const JPetHit& hit2);
+static double calculateTOF(const JPetHit& firstHit, const JPetHit& latterHit);
+static double calculateTOF(double time1, double time2);
+static TVector3 calculateAnnihilationPoint(const JPetHit& firstHit, const JPetHit& latterHit);
+static TVector3 calculateAnnihilationPoint(const TVector3& firstHit, const TVector3& secondHit, double tof);
+static double calculatePlaneCenterDistance(const JPetHit& firstHit,
+  const JPetHit& secondHit, const JPetHit& thirdHit);
+static bool stream2Gamma(const JPetEvent& event, JPetStatistics& stats,
+  bool saveHistos, double b2bSlotThetaDiff, double b2bTimeDiff);
+static bool stream3Gamma(const JPetEvent& event, JPetStatistics& stats,
+  bool saveHistos, double d3SlotThetaMin, double d3TimeDiff, double d3DistanceFromCenter);
 };
 
 #endif /* !EVENTCATEGORIZERTOOLS_H */
