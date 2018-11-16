@@ -220,19 +220,15 @@ TVector3 EventCategorizerTools::calculateAnnihilationPoint(const JPetHit& firstH
 TVector3 EventCategorizerTools::calculateAnnihilationPoint(const TVector3& firstHit, const TVector3& secondHit, double tof)
 {
   TVector3 middleOfLOR = 0.5 * (firstHit + secondHit);
+  TVector3 versorOnLOR = (secondHit - firstHit).Unit()  ;
 
-  TVector3 versorOnLOR = (firstHit - secondHit).Unit()  ;
-
-  double shift = tof * kLightVelocity_cm_ns / 1000.0;
+  double shift = 0.5 * tof  * kLightVelocity_cm_ns / 1000.0;
   TVector3 annihilationPoint(middleOfLOR.X() + shift * versorOnLOR.X(),
                              middleOfLOR.Y() + shift * versorOnLOR.Y(),
                              middleOfLOR.Z() + shift * versorOnLOR.Z());
   return annihilationPoint;
 }
 
-/**
-* Calculation Time of flight
-*/
 double EventCategorizerTools::calculateTOF(const JPetHit& firstHit, const JPetHit& secondHit)
 {
   return EventCategorizerTools::calculateTOF(firstHit.getTime(), secondHit.getTime());
@@ -240,13 +236,7 @@ double EventCategorizerTools::calculateTOF(const JPetHit& firstHit, const JPetHi
 
 double EventCategorizerTools::calculateTOF(double time1, double time2)
 {
-  double TOF = kUndefinedValue;
-  
-  if (time1 > time2) {
-    ERROR("First hit time should be earlier than later hit");
-    return kUndefinedValue;
-  }
-  return (time1 - time2)/2.;
+  return (time1 - time2);
 }
 
 /**
@@ -290,16 +280,16 @@ bool EventCategorizerTools::stream2Gamma(
       double deltaLor = (secondHit.getTime() - firstHit.getTime()) * kLightVelocity_cm_ns / 2000.;
       double theta1 = min(firstHit.getBarrelSlot().getTheta(), secondHit.getBarrelSlot().getTheta());
       double theta2 = max(firstHit.getBarrelSlot().getTheta(), secondHit.getBarrelSlot().getTheta());
-      double thetaDiff = min(theta2-theta1, 360.0-theta2+theta1);
+      double thetaDiff = min(theta2 - theta1, 360.0 - theta2 + theta1);
       if (saveHistos) {
-        stats.getHisto1D("2Gamma_TimeDiff")->Fill(timeDiff/1000.0);
+        stats.getHisto1D("2Gamma_TimeDiff")->Fill(timeDiff / 1000.0);
         stats.getHisto1D("2Gamma_DLOR")->Fill(deltaLor);
         stats.getHisto1D("2Gamma_ThetaDiff")->Fill(thetaDiff);
       }
       if (fabs(thetaDiff - 180.0) < b2bSlotThetaDiff && timeDiff < b2bTimeDiff) {
         if (saveHistos) {
           TVector3 annhilationPoint = calculateAnnihilationPoint(firstHit, secondHit);
-          stats.getHisto1D("2Annih_TimeDiff")->Fill(timeDiff/1000.0);
+          stats.getHisto1D("2Annih_TimeDiff")->Fill(timeDiff / 1000.0);
           stats.getHisto1D("2Annih_DLOR")->Fill(deltaLor);
           stats.getHisto1D("2Annih_ThetaDiff")->Fill(thetaDiff);
           stats.getHisto2D("2Annih_XY")->Fill(annhilationPoint.X(), annhilationPoint.Y());
