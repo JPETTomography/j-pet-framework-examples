@@ -121,10 +121,13 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
   const unsigned int nHits = timeWindow.getNumberOfEvents();
   unsigned int count = 0;
   while(count<nHits){
-    // bool isCorrupted = false;
+    auto hit = dynamic_cast<const JPetHit&>(timeWindow.operator[](count));
+    if(!fUseCorruptedHits && hit.getRecoFlag()==JPetHit::Corrupted){
+      count++;
+      continue;
+    }
     JPetEvent event;
     event.setEventType(JPetEventType::kUnknown);
-    auto hit = dynamic_cast<const JPetHit&>(timeWindow.operator[](count));
     event.addHit(hit);
     if(hit.getRecoFlag() == JPetHit::Good) {
       event.setRecoFlag(JPetEvent::Good);

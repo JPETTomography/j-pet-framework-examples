@@ -175,20 +175,21 @@ JPetHit HitFinderTools::createHit(
   hit.setPosX(radius * cos(theta));
   hit.setPosY(radius * sin(theta));
   hit.setPosZ(velocity * hit.getTimeDiff() / 2000.0);
+
   if(signalA.getRecoFlag() == JPetBaseSignal::Good
     && signalB.getRecoFlag() == JPetBaseSignal::Good) {
-    hit.setRecoFlag(JPetHit::Good);
-    if(saveHistos) {
-      stats.getHisto1D("good_vs_bad_hits")->Fill(1);
-      stats.getHisto2D("time_diff_per_scin")
-        ->Fill(hit.getTimeDiff(), (float)(hit.getScintillator().getID()));
-      stats.getHisto2D("hit_pos_per_scin")
-        ->Fill(hit.getPosZ(), (float)(hit.getScintillator().getID()));
-    }
+      hit.setRecoFlag(JPetHit::Good);
+      if(saveHistos) {
+        stats.getHisto1D("good_vs_bad_hits")->Fill(1);
+        stats.getHisto2D("time_diff_per_scin")
+          ->Fill(hit.getTimeDiff(), (float)(hit.getScintillator().getID()));
+        stats.getHisto2D("hit_pos_per_scin")
+          ->Fill(hit.getPosZ(), (float)(hit.getScintillator().getID()));
+      }
   } else if (signalA.getRecoFlag() == JPetBaseSignal::Corrupted
     || signalB.getRecoFlag() == JPetBaseSignal::Corrupted){
-    hit.setRecoFlag(JPetHit::Corrupted);
-    if(saveHistos) { stats.getHisto1D("good_vs_bad_hits")->Fill(2); }
+      hit.setRecoFlag(JPetHit::Corrupted);
+      if(saveHistos) { stats.getHisto1D("good_vs_bad_hits")->Fill(2); }
   } else {
     hit.setRecoFlag(JPetHit::Unknown);
     if(saveHistos) { stats.getHisto1D("good_vs_bad_hits")->Fill(3); }

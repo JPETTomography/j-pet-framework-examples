@@ -112,6 +112,9 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
     );
     if(closestTrailingSigCh != -1) {
       rawSig.addPoint(thrTrailingSigCh.at(0).at(closestTrailingSigCh));
+      if(thrTrailingSigCh.at(0).at(closestTrailingSigCh).getRecoFlag()==JPetSigCh::Corrupted){
+        rawSig.setRecoFlag(JPetBaseSignal::Corrupted);
+      }
       if(saveHistos){
         stats.getHisto1D("lead_trail_thr1_diff")->Fill(
           thrTrailingSigCh.at(0).at(closestTrailingSigCh).getValue()-thrLeadingSigCh.at(0).at(0).getValue()
@@ -132,6 +135,9 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
         );
         if (closestTrailingSigCh != -1) {
           rawSig.addPoint(thrTrailingSigCh.at(kk).at(closestTrailingSigCh));
+          if(thrTrailingSigCh.at(kk).at(closestTrailingSigCh).getRecoFlag()==JPetSigCh::Corrupted){
+            rawSig.setRecoFlag(JPetBaseSignal::Corrupted);
+          }
           if(saveHistos){
             stats.getHisto1D(Form("lead_trail_thr%d_diff", kk+1))->Fill(
               thrTrailingSigCh.at(kk).at(closestTrailingSigCh).getValue()
@@ -141,9 +147,7 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
           thrTrailingSigCh.at(kk).erase(thrTrailingSigCh.at(kk).begin()+closestTrailingSigCh);
         }
         rawSig.addPoint(thrLeadingSigCh.at(kk).at(nextThrSigChIndex));
-        if(thrLeadingSigCh.at(kk).at(nextThrSigChIndex).getRecoFlag()==JPetSigCh::Good){
-          rawSig.setRecoFlag(JPetBaseSignal::Good);
-        } else if(thrLeadingSigCh.at(kk).at(nextThrSigChIndex).getRecoFlag()==JPetSigCh::Corrupted){
+        if(thrLeadingSigCh.at(kk).at(nextThrSigChIndex).getRecoFlag()==JPetSigCh::Corrupted){
           rawSig.setRecoFlag(JPetBaseSignal::Corrupted);
         }
         if(saveHistos){
@@ -167,13 +171,25 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
     rawSigVec.push_back(rawSig);
     thrLeadingSigCh.at(0).erase(thrLeadingSigCh.at(0).begin());
   }
-  // Filling controll histograms
+  // Filling control histograms
   if(saveHistos){
     for(unsigned int jj=0;jj<numOfThresholds;jj++){
-      stats.getHisto1D("remainig_leading_sig_ch_per_thr")
-        ->Fill(jj+1, thrLeadingSigCh.at(jj).size());
-      stats.getHisto1D("remainig_trailing_sig_ch_per_thr")
-         ->Fill(jj+1, thrTrailingSigCh.at(jj).size());
+      for(auto sigCh : thrLeadingSigCh.at(jj)){
+        stats.getHisto1D("unused_sigch_all")->Fill(2*sigCh.getThresholdNumber()-1);
+        if(sigCh.getRecoFlag()==JPetSigCh::Good){
+          stats.getHisto1D("unused_sigch_good")->Fill(2*sigCh.getThresholdNumber()-1);
+        } else if(sigCh.getRecoFlag()==JPetSigCh::Corrupted){
+          stats.getHisto1D("unused_sigch_corr")->Fill(2*sigCh.getThresholdNumber()-1);
+        }
+      }
+      for(auto sigCh : thrTrailingSigCh.at(jj)){
+        stats.getHisto1D("unused_sigch_all")->Fill(2*sigCh.getThresholdNumber());
+        if(sigCh.getRecoFlag()==JPetSigCh::Good){
+          stats.getHisto1D("unused_sigch_good")->Fill(2*sigCh.getThresholdNumber());
+        } else if(sigCh.getRecoFlag()==JPetSigCh::Corrupted){
+          stats.getHisto1D("unused_sigch_corr")->Fill(2*sigCh.getThresholdNumber());
+        }
+      }
     }
   }
   return rawSigVec;

@@ -125,22 +125,45 @@ void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& rawSigVec)
  * Init histograms
  */
 void SignalFinder::initialiseHistograms(){
-  getStatistics().createHistogram(new TH1F(
-    "remainig_leading_sig_ch_per_thr", "Remainig Leading Signal Channels",
-    4, 0.5, 4.5)
-  );
-  getStatistics().getHisto1D("remainig_leading_sig_ch_per_thr")
-    ->GetXaxis()->SetTitle("Threshold Number");
-  getStatistics().getHisto1D("remainig_leading_sig_ch_per_thr")
-    ->GetYaxis()->SetTitle("Number of Signal Channels");
 
   getStatistics().createHistogram(new TH1F(
-    "remainig_trailing_sig_ch_per_thr", "Remainig Trailing Signal Channels",
-    4, 0.5, 4.5));
-  getStatistics().getHisto1D("remainig_trailing_sig_ch_per_thr")
-    ->GetXaxis()->SetTitle("Threshold Number");
-  getStatistics().getHisto1D("remainig_trailing_sig_ch_per_thr")
-    ->GetYaxis()->SetTitle("Number of Signal Channels");
+    "unused_sigch_all", "Unused Signal Channels", 8, 0.5, 8.5
+  ));
+  getStatistics().getHisto1D("unused_sigch_all")->GetXaxis()->SetBinLabel(1,"THR 1 Lead");
+  getStatistics().getHisto1D("unused_sigch_all")->GetXaxis()->SetBinLabel(2,"THR 1 Trail");
+  getStatistics().getHisto1D("unused_sigch_all")->GetXaxis()->SetBinLabel(3,"THR 2 Lead");
+  getStatistics().getHisto1D("unused_sigch_all")->GetXaxis()->SetBinLabel(4,"THR 2 Trail");
+  getStatistics().getHisto1D("unused_sigch_all")->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
+  getStatistics().getHisto1D("unused_sigch_all")->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
+  getStatistics().getHisto1D("unused_sigch_all")->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
+  getStatistics().getHisto1D("unused_sigch_all")->GetXaxis()->SetBinLabel(8,"THR 5 Trail");
+  getStatistics().getHisto1D("unused_sigch_all")->GetYaxis()->SetTitle("Number of SigChs");
+
+  getStatistics().createHistogram(new TH1F(
+    "unused_sigch_good", "Unused Signal Channels with GOOD flag", 8, 0.5, 8.5
+  ));
+  getStatistics().getHisto1D("unused_sigch_good")->GetXaxis()->SetBinLabel(1,"THR 1 Lead");
+  getStatistics().getHisto1D("unused_sigch_good")->GetXaxis()->SetBinLabel(2,"THR 1 Trail");
+  getStatistics().getHisto1D("unused_sigch_good")->GetXaxis()->SetBinLabel(3,"THR 2 Lead");
+  getStatistics().getHisto1D("unused_sigch_good")->GetXaxis()->SetBinLabel(4,"THR 2 Trail");
+  getStatistics().getHisto1D("unused_sigch_good")->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
+  getStatistics().getHisto1D("unused_sigch_good")->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
+  getStatistics().getHisto1D("unused_sigch_good")->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
+  getStatistics().getHisto1D("unused_sigch_good")->GetXaxis()->SetBinLabel(8,"THR 5 Trail");
+  getStatistics().getHisto1D("unused_sigch_good")->GetYaxis()->SetTitle("Number of SigChs");
+
+  getStatistics().createHistogram(new TH1F(
+    "unused_sigch_corr", "Unused Signal Channels with CORRUPTED flag", 8, 0.5, 8.5
+  ));
+  getStatistics().getHisto1D("unused_sigch_corr")->GetXaxis()->SetBinLabel(1,"THR 1 Lead");
+  getStatistics().getHisto1D("unused_sigch_corr")->GetXaxis()->SetBinLabel(2,"THR 1 Trail");
+  getStatistics().getHisto1D("unused_sigch_corr")->GetXaxis()->SetBinLabel(3,"THR 2 Lead");
+  getStatistics().getHisto1D("unused_sigch_corr")->GetXaxis()->SetBinLabel(4,"THR 2 Trail");
+  getStatistics().getHisto1D("unused_sigch_corr")->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
+  getStatistics().getHisto1D("unused_sigch_corr")->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
+  getStatistics().getHisto1D("unused_sigch_corr")->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
+  getStatistics().getHisto1D("unused_sigch_corr")->GetXaxis()->SetBinLabel(8,"THR 5 Trail");
+  getStatistics().getHisto1D("unused_sigch_corr")->GetYaxis()->SetTitle("Number of SigChs");
 
   getStatistics().createHistogram(new TH1F(
     "lead_thr1_thr2_diff", "Time Difference between leading Signal Channels THR1 and THR2 in found signals",

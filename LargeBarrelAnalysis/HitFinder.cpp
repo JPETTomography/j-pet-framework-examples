@@ -19,6 +19,7 @@ using namespace std;
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include <JPetGeomMapping/JPetGeomMapping.h>
 #include <JPetWriter/JPetWriter.h>
+#include "EventCategorizerTools.h"
 #include "UniversalFileLoader.h"
 #include "HitFinderTools.h"
 #include "HitFinder.h"
@@ -129,7 +130,18 @@ bool HitFinder::terminate()
 void HitFinder::saveHits(const std::vector<JPetHit>& hits)
 {
   auto sortedHits = JPetAnalysisTools::getHitsOrderedByTime(hits);
-  for (const auto& hit : sortedHits) fOutputEvents->add<JPetHit>(hit);
+  for (const auto& hit : sortedHits) {
+    if (fSaveControlHistos) {
+      auto tot = EventCategorizerTools::calculateTOT(hit);
+      getStatistics().getHisto1D("TOT_all_hits")->Fill(tot);
+      if(hit.getRecoFlag()==JPetHit::Good){
+        getStatistics().getHisto1D("TOT_good_hits")->Fill(tot);
+      } else if(hit.getRecoFlag()==JPetHit::Corrupted){
+        getStatistics().getHisto1D("TOT_corr_hits")->Fill(tot);
+      }
+    }
+    fOutputEvents->add<JPetHit>(hit);
+  }
 }
 
 /**
@@ -175,4 +187,23 @@ void HitFinder::initialiseHistograms(){
     ->GetXaxis()->SetTitle("Hit z position [cm]");
   getStatistics().getHisto2D("hit_pos_per_scin")
     ->GetYaxis()->SetTitle("ID of Scintillator");
+
+  // TOT calculating for all hits and reco flags
+  getStatistics().createHistogram(new TH1F(
+    "TOT_all_hits", "TOT of all hits", 200, 0.0, 100000.0
+  ));
+  getStatistics().getHisto1D("TOT_all_hits")->GetXaxis()->SetTitle("Time over Threshold [ps]");
+  getStatistics().getHisto1D("TOT_all_hits")->GetYaxis()->SetTitle("Number of Hits");
+
+  getStatistics().createHistogram(new TH1F(
+    "TOT_good_hits", "TOT of hits with GOOD flag", 200, 0.0, 100000.0
+  ));
+  getStatistics().getHisto1D("TOT_good_hits")->GetXaxis()->SetTitle("Time over Threshold [ps]");
+  getStatistics().getHisto1D("TOT_good_hits")->GetYaxis()->SetTitle("Number of Hits");
+
+  getStatistics().createHistogram(new TH1F(
+    "TOT_corr_hits", "TOT of hits with CORRUPTED flag", 200, 0.0, 100000.0
+  ));
+  getStatistics().getHisto1D("TOT_corr_hits")->GetXaxis()->SetTitle("Time over Threshold [ps]");
+  getStatistics().getHisto1D("TOT_corr_hits")->GetYaxis()->SetTitle("Number of Hits");
 }

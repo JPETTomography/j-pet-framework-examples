@@ -176,28 +176,80 @@ BOOST_AUTO_TEST_CASE(buildRawSignals_test_flag_inherit)
   pm1.setBarrelSlot(bs1);
 
   JPetSigCh sigChA1(JPetSigCh::Leading, 1.0);
-  JPetSigCh sigChA2(JPetSigCh::Trailing, 2.0);
+  JPetSigCh sigChA2(JPetSigCh::Leading, 2.0);
+  JPetSigCh sigChA3(JPetSigCh::Leading, 3.0);
+  JPetSigCh sigChA4(JPetSigCh::Trailing, 4.0);
+  JPetSigCh sigChA5(JPetSigCh::Trailing, 5.0);
+  JPetSigCh sigChA6(JPetSigCh::Trailing, 6.0);
   sigChA1.setPM(pm1);
   sigChA2.setPM(pm1);
+  sigChA3.setPM(pm1);
+  sigChA4.setPM(pm1);
+  sigChA5.setPM(pm1);
+  sigChA6.setPM(pm1);
   sigChA1.setThresholdNumber(1);
-  sigChA2.setThresholdNumber(1);
+  sigChA2.setThresholdNumber(2);
+  sigChA3.setThresholdNumber(3);
+  sigChA4.setThresholdNumber(3);
+  sigChA5.setThresholdNumber(2);
+  sigChA6.setThresholdNumber(1);
   sigChA1.setRecoFlag(JPetSigCh::Good);
   sigChA2.setRecoFlag(JPetSigCh::Good);
+  sigChA3.setRecoFlag(JPetSigCh::Good);
+  sigChA4.setRecoFlag(JPetSigCh::Good);
+  sigChA5.setRecoFlag(JPetSigCh::Good);
+  sigChA6.setRecoFlag(JPetSigCh::Good);
 
   JPetSigCh sigChB1(JPetSigCh::Leading, 10.0);
-  JPetSigCh sigChB2(JPetSigCh::Trailing, 12.0);
+  JPetSigCh sigChB2(JPetSigCh::Leading, 11.0);
+  JPetSigCh sigChB3(JPetSigCh::Leading, 12.0);
+  JPetSigCh sigChB4(JPetSigCh::Leading, 13.0);
+  JPetSigCh sigChB5(JPetSigCh::Trailing, 14.0);
+  JPetSigCh sigChB6(JPetSigCh::Trailing, 15.0);
+  JPetSigCh sigChB7(JPetSigCh::Trailing, 16.0);
+  JPetSigCh sigChB8(JPetSigCh::Trailing, 17.0);
   sigChB1.setPM(pm1);
   sigChB2.setPM(pm1);
+  sigChB3.setPM(pm1);
+  sigChB4.setPM(pm1);
+  sigChB5.setPM(pm1);
+  sigChB6.setPM(pm1);
+  sigChB7.setPM(pm1);
+  sigChB8.setPM(pm1);
+
   sigChB1.setThresholdNumber(1);
-  sigChB2.setThresholdNumber(1);
-  sigChB1.setRecoFlag(JPetSigCh::Corrupted);
+  sigChB2.setThresholdNumber(2);
+  sigChB3.setThresholdNumber(3);
+  sigChB4.setThresholdNumber(4);
+  sigChB5.setThresholdNumber(4);
+  sigChB6.setThresholdNumber(3);
+  sigChB7.setThresholdNumber(2);
+  sigChB8.setThresholdNumber(1);
+
+  sigChB1.setRecoFlag(JPetSigCh::Good);
   sigChB2.setRecoFlag(JPetSigCh::Good);
+  sigChB3.setRecoFlag(JPetSigCh::Corrupted);
+  sigChB4.setRecoFlag(JPetSigCh::Good);
+  sigChB5.setRecoFlag(JPetSigCh::Corrupted);
+  sigChB6.setRecoFlag(JPetSigCh::Good);
+  sigChB7.setRecoFlag(JPetSigCh::Good);
+  sigChB8.setRecoFlag(JPetSigCh::Good);
 
   std::vector<JPetSigCh> sigChFromSamePM;
   sigChFromSamePM.push_back(sigChA1);
   sigChFromSamePM.push_back(sigChA2);
+  sigChFromSamePM.push_back(sigChA3);
+  sigChFromSamePM.push_back(sigChA4);
+  sigChFromSamePM.push_back(sigChA5);
+  sigChFromSamePM.push_back(sigChA6);
   sigChFromSamePM.push_back(sigChB1);
   sigChFromSamePM.push_back(sigChB2);
+  sigChFromSamePM.push_back(sigChB3);
+  sigChFromSamePM.push_back(sigChB4);
+  sigChFromSamePM.push_back(sigChB5);
+  sigChFromSamePM.push_back(sigChB6);
+  sigChFromSamePM.push_back(sigChB7);
+  sigChFromSamePM.push_back(sigChB8);
 
   auto numOfThresholds = 4;
   double sigChEdgeMaxTime = 5.0;
@@ -274,6 +326,147 @@ BOOST_AUTO_TEST_CASE(findTrailingSigCh)
   trailings3.push_back(trail5);
   trailings3.push_back(trail6);
   BOOST_REQUIRE_EQUAL(SignalFinderTools::findTrailingSigCh(lead, 10.0, trailings3), 0);
+}
+
+BOOST_AUTO_TEST_CASE(buildRawSignals_realdata_flag_test)
+{
+  JPetBarrelSlot bs1(1, true, "some_slot", 57.7, 123);
+  JPetPM pm1(1, "first");
+  pm1.setBarrelSlot(bs1);
+
+  JPetSigCh sigCh01(JPetSigCh::Leading, -1.73608);
+  sigCh01.setPM(pm1);
+  sigCh01.setThresholdNumber(1);
+  sigCh01.setRecoFlag(JPetSigCh::Good);
+
+  JPetSigCh sigCh02(JPetSigCh::Trailing, -1.73553);
+  sigCh02.setPM(pm1);
+  sigCh02.setThresholdNumber(1);
+  sigCh02.setRecoFlag(JPetSigCh::Good);
+
+  JPetSigCh sigCh03(JPetSigCh::Leading, -1.62030);
+  sigCh03.setPM(pm1);
+  sigCh03.setThresholdNumber(1);
+  sigCh03.setRecoFlag(JPetSigCh::Good);
+
+  JPetSigCh sigCh04(JPetSigCh::Trailing, -1.62026);
+  sigCh04.setPM(pm1);
+  sigCh04.setThresholdNumber(1);
+  sigCh04.setRecoFlag(JPetSigCh::Good);
+
+  JPetSigCh sigCh05(JPetSigCh::Leading, -1.37056);
+  sigCh05.setPM(pm1);
+  sigCh05.setThresholdNumber(1);
+  sigCh05.setRecoFlag(JPetSigCh::Good);
+
+  JPetSigCh sigCh06(JPetSigCh::Trailing, -1.37000);
+  sigCh06.setPM(pm1);
+  sigCh06.setThresholdNumber(1);
+  sigCh06.setRecoFlag(JPetSigCh::Good);
+
+  JPetSigCh sigCh07(JPetSigCh::Leading, -1.73605);
+  sigCh07.setPM(pm1);
+  sigCh07.setThresholdNumber(2);
+  sigCh07.setRecoFlag(JPetSigCh::Good);
+
+  JPetSigCh sigCh08(JPetSigCh::Trailing, -1.73569);
+  sigCh08.setPM(pm1);
+  sigCh08.setThresholdNumber(2);
+  sigCh08.setRecoFlag(JPetSigCh::Corrupted);
+
+  JPetSigCh sigCh09(JPetSigCh::Trailing, -1.62032);
+  sigCh09.setPM(pm1);
+  sigCh09.setThresholdNumber(2);
+  sigCh09.setRecoFlag(JPetSigCh::Corrupted);
+
+  JPetSigCh sigCh10(JPetSigCh::Leading, -1.62029);
+  sigCh10.setPM(pm1);
+  sigCh10.setThresholdNumber(2);
+  sigCh10.setRecoFlag(JPetSigCh::Corrupted);
+
+  JPetSigCh sigCh11(JPetSigCh::Leading, -1.37054);
+  sigCh11.setPM(pm1);
+  sigCh11.setThresholdNumber(2);
+  sigCh11.setRecoFlag(JPetSigCh::Corrupted);
+
+  JPetSigCh sigCh12(JPetSigCh::Trailing, -1.37006);
+  sigCh12.setPM(pm1);
+  sigCh12.setThresholdNumber(2);
+  sigCh12.setRecoFlag(JPetSigCh::Corrupted);
+
+  JPetSigCh sigCh13(JPetSigCh::Leading, -1.73601);
+  sigCh13.setPM(pm1);
+  sigCh13.setThresholdNumber(3);
+  sigCh13.setRecoFlag(JPetSigCh::Good);
+
+  JPetSigCh sigCh14(JPetSigCh::Trailing, -1.73572);
+  sigCh14.setPM(pm1);
+  sigCh14.setThresholdNumber(3);
+  sigCh14.setRecoFlag(JPetSigCh::Good);
+
+  JPetSigCh sigCh15(JPetSigCh::Leading, -1.37053);
+  sigCh15.setPM(pm1);
+  sigCh15.setThresholdNumber(3);
+  sigCh15.setRecoFlag(JPetSigCh::Good);
+
+  JPetSigCh sigCh16(JPetSigCh::Trailing, -1.37013);
+  sigCh16.setPM(pm1);
+  sigCh16.setThresholdNumber(3);
+  sigCh16.setRecoFlag(JPetSigCh::Good);
+
+  JPetSigCh sigCh17(JPetSigCh::Leading, -1.73598);
+  sigCh17.setPM(pm1);
+  sigCh17.setThresholdNumber(4);
+  sigCh17.setRecoFlag(JPetSigCh::Good);
+
+  JPetSigCh sigCh18(JPetSigCh::Trailing, -1.73581);
+  sigCh18.setPM(pm1);
+  sigCh18.setThresholdNumber(4);
+  sigCh18.setRecoFlag(JPetSigCh::Good);
+
+  JPetSigCh sigCh19(JPetSigCh::Leading, -1.37051);
+  sigCh19.setPM(pm1);
+  sigCh19.setThresholdNumber(4);
+  sigCh19.setRecoFlag(JPetSigCh::Good);
+
+  JPetSigCh sigCh20(JPetSigCh::Trailing, -1.37028);
+  sigCh20.setPM(pm1);
+  sigCh20.setThresholdNumber(4);
+  sigCh20.setRecoFlag(JPetSigCh::Good);
+
+  std::vector<JPetSigCh> sigChFromSamePM;
+  sigChFromSamePM.push_back(sigCh01);
+  sigChFromSamePM.push_back(sigCh02);
+  sigChFromSamePM.push_back(sigCh03);
+  sigChFromSamePM.push_back(sigCh04);
+  sigChFromSamePM.push_back(sigCh05);
+  sigChFromSamePM.push_back(sigCh06);
+  sigChFromSamePM.push_back(sigCh07);
+  sigChFromSamePM.push_back(sigCh08);
+  sigChFromSamePM.push_back(sigCh09);
+  sigChFromSamePM.push_back(sigCh10);
+  sigChFromSamePM.push_back(sigCh11);
+  sigChFromSamePM.push_back(sigCh12);
+  sigChFromSamePM.push_back(sigCh13);
+  sigChFromSamePM.push_back(sigCh14);
+  sigChFromSamePM.push_back(sigCh15);
+  sigChFromSamePM.push_back(sigCh16);
+  sigChFromSamePM.push_back(sigCh17);
+  sigChFromSamePM.push_back(sigCh18);
+  sigChFromSamePM.push_back(sigCh19);
+  sigChFromSamePM.push_back(sigCh20);
+
+  auto numOfThresholds = 4;
+  double sigChEdgeMaxTime = 0.0005;
+  double sigChLeadTrailMaxTime = 0.0023;
+  JPetStatistics stats;
+  auto results = SignalFinderTools::buildRawSignals(
+    sigChFromSamePM, numOfThresholds, sigChEdgeMaxTime, sigChLeadTrailMaxTime, stats, false
+  );
+  BOOST_REQUIRE_EQUAL(results.size(), 3);
+  BOOST_REQUIRE_EQUAL(results.at(0).getRecoFlag(), JPetBaseSignal::Corrupted);
+  BOOST_REQUIRE_EQUAL(results.at(1).getRecoFlag(), JPetBaseSignal::Corrupted);
+  BOOST_REQUIRE_EQUAL(results.at(2).getRecoFlag(), JPetBaseSignal::Corrupted);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
