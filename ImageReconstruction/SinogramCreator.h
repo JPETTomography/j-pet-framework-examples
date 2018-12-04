@@ -29,12 +29,9 @@
 #include <string>
 #include <vector>
 
-<<<<<<< HEAD
 #include "JPetFilterNone.h"
 #include "JPetRecoImageTools.h"
 
-=======
->>>>>>> 496badb7b17333b4e657911055d72d41ad8b0125
 /**
  * @brief Module creating sinogram from data
  *
@@ -58,7 +55,8 @@
  * - "SinogramCreator_SinogramZSplitNumber_int": defines number of splits around "z" coordinate
  * - "SinogramCreator_ScintillatorLenght_float": defines scintillator lenght in "z" coordinate
  */
-class SinogramCreator : public JPetUserTask {
+class SinogramCreator : public JPetUserTask
+{
 public:
   SinogramCreator(const char* name);
   virtual ~SinogramCreator();
