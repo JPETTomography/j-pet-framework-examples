@@ -20,7 +20,8 @@
 #include "SinogramCreatorMC.h"
 using namespace std;
 
-int main(int argc, const char* argv[]) {
+int main(int argc, const char* argv[])
+{
   JPetManager& manager = JPetManager::getManager();
 
   manager.registerTask<FilterEvents>("FilterEvents");
@@ -28,10 +29,10 @@ int main(int argc, const char* argv[]) {
   manager.registerTask<SinogramCreator>("SinogramCreator");
   manager.registerTask<SinogramCreatorMC>("SinogramCreatorMC");
 
-  // manager.useTask("FilterEvents", "unk.evt", "reco.unk.evt");
-  // manager.useTask("ImageReco", "reco.unk.evt", "reco");
+  manager.useTask("FilterEvents", "unk.evt", "reco.unk.evt");
+  manager.useTask("ImageReco", "reco.unk.evt", "reco");
   manager.useTask("SinogramCreator", "reco.unk.evt", "sino");
-  // manager.useTask("SinogramCreatorMC", "reco.unk.evt", "sino.mc");
+  // manager.useTask("SinogramCreatorMC", "hadd.test", "sino.mc");
 
   manager.run(argc, argv);
 }

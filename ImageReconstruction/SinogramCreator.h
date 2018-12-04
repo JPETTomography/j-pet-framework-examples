@@ -64,6 +64,7 @@ private:
   void saveResult(const std::vector<std::vector<unsigned char>>& result, const std::string& outputFileName);
   void saveResult(const JPetRecoImageTools::Matrix2DProj& result, const std::string& outputFileName);
   int getMaxValue(const JPetRecoImageTools::Matrix2DProj& result);
+  bool analyzeHits(const JPetHit& firstHit, const JPetHit& secondHit);
 
   JPetRecoImageTools::Matrix2DProj** fSinogram = nullptr;
 
@@ -77,6 +78,7 @@ private:
   const int kReconstructionMaxAngle = 180;
   const float EPSILON = 0.000001f;
   int fZSplitNumber = 1;
+  int fMaxDistanceNumber = 0;
   std::vector<std::pair<float, float>> fZSplitRange;
 
   std::string fOutFileName = "sinogram";

@@ -17,36 +17,43 @@
 #define SINOGRAMCREATORMC_H
 
 #ifdef __CINT__
-//when cint is used instead of compiler, override word is not recognized
-//nevertheless it's needed for checking if the structure of project is correct
+// when cint is used instead of compiler, override word is not recognized
+// nevertheless it's needed for checking if the structure of project is correct
 #define override
 #endif
 
+#include "JPetHit/JPetHit.h"
 #include "JPetUserTask/JPetUserTask.h"
 #include "SinogramCreatorTools.h"
-#include "JPetHit/JPetHit.h"
-#include <vector>
 #include <string>
+#include <vector>
+
+#include "JPetFilterNone.h"
+#include "JPetRecoImageTools.h"
 
 class SinogramCreatorMC : public JPetUserTask
 {
 public:
-  SinogramCreatorMC(const char *name);
+  SinogramCreatorMC(const char* name);
   virtual ~SinogramCreatorMC();
   virtual bool init() override;
   virtual bool exec() override;
   virtual bool terminate() override;
 
 private:
-  SinogramCreatorMC(const SinogramCreatorMC &) = delete;
-  SinogramCreatorMC &operator=(const SinogramCreatorMC &) = delete;
+  SinogramCreatorMC(const SinogramCreatorMC&) = delete;
+  SinogramCreatorMC& operator=(const SinogramCreatorMC&) = delete;
 
   void generateSinogram();
   void setUpOptions();
   bool checkSplitRange(float firstZ, float secondZ, int i);
-  using SinogramResultType = std::vector<std::vector<unsigned int>>;
+  void saveResult(const std::vector<std::vector<unsigned char>>& result, const std::string& outputFileName);
+  void saveResult(const JPetRecoImageTools::Matrix2DProj& result, const std::string& outputFileName);
+  int getMaxValue(const JPetRecoImageTools::Matrix2DProj& result);
 
-  SinogramResultType **fSinogram = nullptr;
+  JPetRecoImageTools::Matrix2DProj** fSinogram = nullptr;
+
+  JPetRecoImageTools::Matrix2DTOF fTOFInformation;
 
   const std::string kOutFileNameKey = "SinogramCreatorMC_OutFileName_std::string";
   const std::string kReconstructionDistanceAccuracy = "SinogramCreatorMC_ReconstructionDistanceAccuracy_float";
@@ -62,12 +69,12 @@ private:
 
   std::string fOutFileName = "sinogramMC";
   std::string fInputData = "sinogram_data.txt";
-  int *fMaxValueInSinogram = nullptr; // to fill later in output file
-  int *fCurrentValueInSinogram = nullptr;
+  int* fMaxValueInSinogram = nullptr; // to fill later in output file
+  int* fCurrentValueInSinogram = nullptr;
 
-  float fMaxReconstructionLayerRadius = 0.f;    //in cm
-  float fReconstructionDistanceAccuracy = 0.1f; //in cm, 1mm accuracy
-  float fScintillatorLenght = 50.0f;            //in cm
+  float fMaxReconstructionLayerRadius = 0.f;    // in cm
+  float fReconstructionDistanceAccuracy = 0.1f; // in cm, 1mm accuracy
+  float fScintillatorLenght = 50.0f;            // in cm
 };
 
 #endif /*  !SINOGRAMCREATORMC_H */
