@@ -72,16 +72,12 @@ private:
 
   void setUpOptions();
   bool checkSplitRange(float firstZ, float secondZ, int i);
-<<<<<<< HEAD
   void saveResult(const std::vector<std::vector<unsigned char>>& result, const std::string& outputFileName);
   void saveResult(const JPetRecoImageTools::Matrix2DProj& result, const std::string& outputFileName);
   int getMaxValue(const JPetRecoImageTools::Matrix2DProj& result);
   bool analyzeHits(const JPetHit& firstHit, const JPetHit& secondHit);
 
   JPetRecoImageTools::Matrix2DProj** fSinogram = nullptr;
-=======
-  using SinogramResultType = std::vector<std::vector<unsigned int>>;
->>>>>>> 496badb7b17333b4e657911055d72d41ad8b0125
 
   SinogramResultType** fSinogram = nullptr;
 
