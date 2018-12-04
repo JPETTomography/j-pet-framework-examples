@@ -74,8 +74,7 @@ private:
   bool analyzeHits(const JPetHit& firstHit, const JPetHit& secondHit);
 
   JPetRecoImageTools::Matrix2DProj** fSinogram = nullptr;
-
-  SinogramResultType** fSinogram = nullptr;
+  JPetRecoImageTools::Matrix2DTOF fTOFInformation;
 
   const std::string kOutFileNameKey = "SinogramCreator_OutFileName_std::string";
   const std::string kReconstructionDistanceAccuracy = "SinogramCreator_ReconstructionDistanceAccuracy_float";

@@ -53,7 +53,7 @@ bool SinogramCreator::init()
 bool SinogramCreator::exec()
 {
   if (fSinogram == nullptr) {
-    fSinogram = new SinogramResultType *[fZSplitNumber];
+    fSinogram = new JPetRecoImageTools::Matrix2DProj *[fZSplitNumber];
     for (int i = 0; i < fZSplitNumber; i++) {
       fSinogram[i] = new JPetRecoImageTools::Matrix2DProj(fMaxDistanceNumber, (std::vector<double>(kReconstructionMaxAngle, 0)));
     }
@@ -105,6 +105,7 @@ bool SinogramCreator::analyzeHits(const JPetHit& firstHit, const JPetHit& second
       fMaxValueInSinogram[i] = fCurrentValueInSinogram[i]; // save max value of sinogram
     }
   }
+  return true;
 }
 
 bool SinogramCreator::checkSplitRange(float firstZ, float secondZ, int i)
