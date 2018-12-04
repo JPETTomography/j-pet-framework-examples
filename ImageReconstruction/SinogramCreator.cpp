@@ -14,11 +14,10 @@
  */
 
 #include "SinogramCreator.h"
-
-#include <TH1I.h>
-#include <TH2F.h>
 #include <TH2I.h>
+#include <TH2F.h>
 #include <TH3F.h>
+#include <TH1I.h>
 using namespace jpet_options_tools;
 
 SinogramCreator::SinogramCreator(const char* name) : JPetUserTask(name) {}
@@ -54,7 +53,7 @@ bool SinogramCreator::init()
 bool SinogramCreator::exec()
 {
   if (fSinogram == nullptr) {
-    fSinogram = new JPetRecoImageTools::Matrix2DProj*[fZSplitNumber];
+    fSinogram = new SinogramResultType *[fZSplitNumber];
     for (int i = 0; i < fZSplitNumber; i++) {
       fSinogram[i] = new JPetRecoImageTools::Matrix2DProj(fMaxDistanceNumber, (std::vector<double>(kReconstructionMaxAngle, 0)));
     }

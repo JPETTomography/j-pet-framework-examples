@@ -29,20 +29,31 @@
 #include <string>
 #include <vector>
 
+<<<<<<< HEAD
 #include "JPetFilterNone.h"
 #include "JPetRecoImageTools.h"
 
+=======
+>>>>>>> 496badb7b17333b4e657911055d72d41ad8b0125
 /**
  * @brief Module creating sinogram from data
  *
- * Input: *.unk.evt
- * Output: *.sino with root diagrams and sinogram*.ppm with calculated sinogram.
+ * Input: *.reco.unk.evt
+ * Output: *.sino with root diagrams and sinogram *.ppm with calculated sinogram.
  *
+ * Module creates 2D x/y sinogram as *.ppm files for further reconstruction, e.g. FBP.
+ *
+ * It is also possible to split Z coordinate into smaller sections, then for each section sinogram is created.
+ * Split is done by dividing Z coordinate into equal sections starting from negative values to positive, assuming that center of Z axis is in 0.
+ * It is saved as matrix(fi, r) with values corresponding to number of hits registered with that angle and distance from center,
+ * with header needed by ppm P2 file:
+ * P2
+ * (number of horizontal elements) (number of vertical elements)
+ * (maximal value in matrix).
  *
  * It defines 5 user options:
  * - "SinogramCreator_OutFileName_std::string": defines output file name where sinogram is saved
- * - "SinogramCreator_ReconstructionLayerRadius_float": defines radius of reconstruction layer
- * - "SinogramCreator_ReconstructionDistanceAccuracy_float": defines maximal round value for distance, in cm, e.g. 0.1 means 1 bin in sinogram
+ * - "SinogramCreator_ReconstructionDistanceAccuracy_float": (in cm) defines maximal round value for distance, in cm, e.g. 0.1 means 1 bin in sinogram
  * corresponds to 0.1 cm in reality
  * - "SinogramCreator_SinogramZSplitNumber_int": defines number of splits around "z" coordinate
  * - "SinogramCreator_ScintillatorLenght_float": defines scintillator lenght in "z" coordinate
@@ -61,14 +72,18 @@ private:
 
   void setUpOptions();
   bool checkSplitRange(float firstZ, float secondZ, int i);
+<<<<<<< HEAD
   void saveResult(const std::vector<std::vector<unsigned char>>& result, const std::string& outputFileName);
   void saveResult(const JPetRecoImageTools::Matrix2DProj& result, const std::string& outputFileName);
   int getMaxValue(const JPetRecoImageTools::Matrix2DProj& result);
   bool analyzeHits(const JPetHit& firstHit, const JPetHit& secondHit);
 
   JPetRecoImageTools::Matrix2DProj** fSinogram = nullptr;
+=======
+  using SinogramResultType = std::vector<std::vector<unsigned int>>;
+>>>>>>> 496badb7b17333b4e657911055d72d41ad8b0125
 
-  JPetRecoImageTools::Matrix2DTOF fTOFInformation;
+  SinogramResultType** fSinogram = nullptr;
 
   const std::string kOutFileNameKey = "SinogramCreator_OutFileName_std::string";
   const std::string kReconstructionDistanceAccuracy = "SinogramCreator_ReconstructionDistanceAccuracy_float";

@@ -13,32 +13,35 @@
  *  @file main.cpp
  */
 
-#include <JPetManager/JPetManager.h>
-#include "../LargeBarrelAnalysis/TimeWindowCreator.h"
+#include "../LargeBarrelAnalysis/HitFinder.h"
 #include "../LargeBarrelAnalysis/SignalFinder.h"
 #include "../LargeBarrelAnalysis/SignalTransformer.h"
-#include "../LargeBarrelAnalysis/HitFinder.h"
+#include "../LargeBarrelAnalysis/TimeWindowCreator.h"
 #include "DeltaTFinder.h"
+#include <JPetManager/JPetManager.h>
 
 using namespace std;
 
-int main(int argc, const char* argv[])
-{
+int main(int argc, const char* argv[]) {
+  try {
+    JPetManager& manager = JPetManager::getManager();
 
-  JPetManager& manager = JPetManager::getManager();
+    manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
+    manager.registerTask<SignalFinder>("SignalFinder");
+    manager.registerTask<SignalTransformer>("SignalTransformer");
+    manager.registerTask<HitFinder>("HitFinder");
+    manager.registerTask<DeltaTFinder>("DeltaTFinder");
 
-  manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
-  manager.registerTask<SignalFinder>("SignalFinder");
-  manager.registerTask<SignalTransformer>("SignalTransformer");
-  manager.registerTask<HitFinder>("HitFinder");
-  manager.registerTask<DeltaTFinder>("DeltaTFinder");
+    manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
+    manager.useTask("SignalFinder", "tslot.raw", "raw.sig");
+    manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
+    manager.useTask("HitFinder", "phys.sig", "hits");
+    manager.useTask("DeltaTFinder", "hits", "deltaT");
 
-  manager.useTask("TimeWindowCreator", "hld", "tslot.calib");
-  manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
-  manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
-  manager.useTask("HitFinder", "phys.sig", "hits");
-  manager.useTask("DeltaTFinder", "hits", "deltaT");
-
-  manager.run(argc, argv);
-
+    manager.run(argc, argv);
+  } catch (const std::exception& except) {
+    std::cerr << "Unrecoverable error occured:" << except.what() << "Exiting the program!" << std::endl;
+    return EXIT_FAILURE;
+  }
+  return EXIT_SUCCESS;
 }

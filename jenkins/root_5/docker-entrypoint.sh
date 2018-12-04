@@ -20,9 +20,22 @@ executeCommand "./LargeBarrelAnalysis.x -t hld -f dabc_17025151847.hld -l setupR
 executeCommand "mkdir outdir"
 executeCommand "./LargeBarrelAnalysis.x -t hld -f dabc_17025151847.hld -l setupRun3.json -i 3 -r 0 100 -o outdir"
 executeCommand "./LargeBarrelAnalysis.x -t root -f dabc_17025151847.hld.root -l setupRun3.json -i 3 -r 0 100"
-sed -i 's/manager.useTask("TimeWindowCreator", "hld", "tslot.raw");//' ../../LargeBarrelAnalysis/main.cpp
-rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
-sed -i 's/manager.useTask("TimeCalibLoader", "tslot.raw", "tslot.calib");//' ../../LargeBarrelAnalysis/main.cpp
+sed -i 's/manager.useTask("TimeWindowCreator", "hld", "tslot.calib");//' ../../LargeBarrelAnalysis/main.cpp
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 executeCommand "make"
-executeCommand "./LargeBarrelAnalysis.x -t root -f dabc_17025151847.tslot.calib.root   -r 0 100"
+executeCommand "./LargeBarrelAnalysis.x -t root -f dabc_17025151847.tslot.calib.root -r 0 100"
+if [ "$RUN_VELOCITY" = "1" ]; then
+    executeCommand "cd ../VelocityCalibration/tests/unitTestData/VelocityCalibrationTest"
+    executeCommand "rm -rf results_root_5"
+    executeCommand "rm -rf results_root5.txt"
+    executeCommand "rm -rf results.txt"
+    executeCommand "mkdir -p results_root_5"
+    executeCommand "rm -rf *.png"
+    executeCommand "rm -rf calibrationRoot*"
+    executeCommand "rm -rf Results"
+    executeCommand "/usr/local/bin/run_velocity_calibration.sh"
+    executeCommand "/usr/local/bin/compare_velocity_results.py calibrationRoot5resultsForThresholda.txt thresholdResults/resultsForThresholda.txt 5"
+    executeCommand "/usr/local/bin/compare_velocity_results.py calibrationRoot5resultsForThresholdb.txt thresholdResults/resultsForThresholdb.txt 5"
+    executeCommand "/usr/local/bin/compare_velocity_results.py calibrationRoot5resultsForThresholdc.txt thresholdResults/resultsForThresholdc.txt 5"
+    executeCommand "/usr/local/bin/compare_velocity_results.py calibrationRoot5resultsForThresholdd.txt thresholdResults/resultsForThresholdd.txt 5"
+fi
