@@ -22,7 +22,6 @@
 #define override
 #endif
 
-#include "JPetHit/JPetHit.h"
 #include "JPetUserTask/JPetUserTask.h"
 #include "SinogramCreatorTools.h"
 #include <string>
