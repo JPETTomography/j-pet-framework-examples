@@ -28,10 +28,6 @@
 
 #include "JPetFilterInterface.h"
 
-#include <boost/function_types/function_type.hpp>
-#include <boost/function_types/parameter_types.hpp>
-#include <boost/function_types/result_type.hpp>
-
 template <class T, typename U> struct PairHash {
   size_t operator()(const std::pair<T, U>& key) const
   {
