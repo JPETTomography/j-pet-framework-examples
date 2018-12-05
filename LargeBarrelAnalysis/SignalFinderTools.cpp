@@ -78,7 +78,6 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
    JPetStatistics& stats, bool saveHistos
  ) {
   vector<JPetRawSignal> rawSigVec;
-
   // Threshold number check - fixed number equal 4
   if (numOfThresholds != 4) {
     ERROR("This function is meant to work with 4 thresholds only!");
@@ -220,7 +219,8 @@ int SignalFinderTools::findTrailingSigCh(
 ) {
   vector<int> trailingFoundIdices;
   for (size_t i = 0; i < trailingSigChVec.size(); i++) {
-    if (fabs(leadingSigCh.getValue() - trailingSigChVec.at(i).getValue()) < sigChLeadTrailMaxTime){
+    double timeDiff = trailingSigChVec.at(i).getValue() - leadingSigCh.getValue();
+    if (timeDiff > 0.0 && timeDiff < sigChLeadTrailMaxTime){
       trailingFoundIdices.push_back(i);
     }
   }

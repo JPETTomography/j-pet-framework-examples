@@ -136,7 +136,7 @@ void SignalFinder::initialiseHistograms(){
   getStatistics().getHisto1D("unused_sigch_all")->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
   getStatistics().getHisto1D("unused_sigch_all")->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
   getStatistics().getHisto1D("unused_sigch_all")->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
-  getStatistics().getHisto1D("unused_sigch_all")->GetXaxis()->SetBinLabel(8,"THR 5 Trail");
+  getStatistics().getHisto1D("unused_sigch_all")->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
   getStatistics().getHisto1D("unused_sigch_all")->GetYaxis()->SetTitle("Number of SigChs");
 
   getStatistics().createHistogram(new TH1F(
@@ -149,7 +149,7 @@ void SignalFinder::initialiseHistograms(){
   getStatistics().getHisto1D("unused_sigch_good")->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
   getStatistics().getHisto1D("unused_sigch_good")->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
   getStatistics().getHisto1D("unused_sigch_good")->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
-  getStatistics().getHisto1D("unused_sigch_good")->GetXaxis()->SetBinLabel(8,"THR 5 Trail");
+  getStatistics().getHisto1D("unused_sigch_good")->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
   getStatistics().getHisto1D("unused_sigch_good")->GetYaxis()->SetTitle("Number of SigChs");
 
   getStatistics().createHistogram(new TH1F(
@@ -162,7 +162,7 @@ void SignalFinder::initialiseHistograms(){
   getStatistics().getHisto1D("unused_sigch_corr")->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
   getStatistics().getHisto1D("unused_sigch_corr")->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
   getStatistics().getHisto1D("unused_sigch_corr")->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
-  getStatistics().getHisto1D("unused_sigch_corr")->GetXaxis()->SetBinLabel(8,"THR 5 Trail");
+  getStatistics().getHisto1D("unused_sigch_corr")->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
   getStatistics().getHisto1D("unused_sigch_corr")->GetYaxis()->SetTitle("Number of SigChs");
 
   getStatistics().createHistogram(new TH1F(

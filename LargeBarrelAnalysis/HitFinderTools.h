@@ -54,6 +54,7 @@ public:
   static JPetHit createDummyRefDetHit(const JPetPhysSignal& signal);
   static int getProperChannel(const JPetPhysSignal& signal);
   static void checkTheta(const double& theta);
+  static double calculateTOT(const JPetHit& hit);
 };
 
 #endif /* !HITFINDERTOOLS_H */

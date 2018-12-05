@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(buildRawSignals_2)
   pm1.setBarrelSlot(bs1);
   JPetSigCh sigCh1(JPetSigCh::Leading, 9.);
   JPetSigCh sigCh2(JPetSigCh::Leading, 5.);
-  JPetSigCh sigCh3(JPetSigCh::Trailing, 6.);
+  JPetSigCh sigCh3(JPetSigCh::Trailing, 16.);
   sigCh1.setPM(pm1);
   sigCh2.setPM(pm1);
   sigCh3.setPM(pm1);
@@ -153,20 +153,20 @@ BOOST_AUTO_TEST_CASE(buildRawSignals_2)
   sigChFromSamePM.push_back(sigCh3);
   auto numOfThresholds = 4;
   double sigChEdgeMaxTime = 5.;
-  double sigChLeadTrailMaxTime = 5.;
+  double sigChLeadTrailMaxTime = 10.;
   JPetStatistics stats;
   auto results =  SignalFinderTools::buildRawSignals(
     sigChFromSamePM, numOfThresholds, sigChEdgeMaxTime , sigChLeadTrailMaxTime, stats, false
   );
+  BOOST_REQUIRE_EQUAL(results.size(), 1);
   auto points_trail = results.at(0).getPoints(JPetSigCh::Trailing);
   auto points_lead = results.at(0).getPoints(JPetSigCh::Leading);
   auto epsilon = 0.0001;
-  BOOST_REQUIRE_EQUAL(results.size(), 1);
-  BOOST_REQUIRE_EQUAL(points_trail.size(), 1);
   BOOST_REQUIRE_EQUAL(points_lead.size(), 2);
+  BOOST_REQUIRE_EQUAL(points_trail.size(), 1);
   BOOST_REQUIRE_CLOSE(points_lead.at(0).getValue(), 9.0, epsilon);
   BOOST_REQUIRE_CLOSE(points_lead.at(1).getValue(), 5.0, epsilon);
-  BOOST_REQUIRE_CLOSE(points_trail.at(0).getValue(), 6.0, epsilon);
+  BOOST_REQUIRE_CLOSE(points_trail.at(0).getValue(), 16.0, epsilon);
 }
 
 BOOST_AUTO_TEST_CASE(buildRawSignals_test_flag_inherit)

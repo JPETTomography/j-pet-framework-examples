@@ -19,7 +19,6 @@ using namespace std;
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include <JPetGeomMapping/JPetGeomMapping.h>
 #include <JPetWriter/JPetWriter.h>
-#include "EventCategorizerTools.h"
 #include "UniversalFileLoader.h"
 #include "HitFinderTools.h"
 #include "HitFinder.h"
@@ -132,7 +131,7 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
   auto sortedHits = JPetAnalysisTools::getHitsOrderedByTime(hits);
   for (const auto& hit : sortedHits) {
     if (fSaveControlHistos) {
-      auto tot = EventCategorizerTools::calculateTOT(hit);
+      auto tot = HitFinderTools::calculateTOT(hit);
       getStatistics().getHisto1D("TOT_all_hits")->Fill(tot);
       if(hit.getRecoFlag()==JPetHit::Good){
         getStatistics().getHisto1D("TOT_good_hits")->Fill(tot);

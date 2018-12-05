@@ -235,3 +235,33 @@ void HitFinderTools::checkTheta(const double& theta)
     WARNING("Probably wrong values of Barrel Slot theta - conversion to radians failed. Check please.");
   }
 }
+
+/**
+* Calculation of the total TOT of the hit - Time over Threshold:
+* the sum of the TOTs on all of the thresholds (1-4) and on the both sides (A,B)
+*/
+double HitFinderTools::calculateTOT(const JPetHit& hit)
+{
+  double tot = 0.0;
+
+  auto sigALead = hit.getSignalA().getRecoSignal().getRawSignal()
+    .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+  auto sigBLead = hit.getSignalB().getRecoSignal().getRawSignal()
+    .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+  auto sigATrail = hit.getSignalA().getRecoSignal().getRawSignal()
+    .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+  auto sigBTrail = hit.getSignalB().getRecoSignal().getRawSignal()
+    .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+
+  if (sigALead.size() > 0 && sigATrail.size() > 0){
+    for (unsigned i = 0; i < sigALead.size() && i < sigATrail.size(); i++){
+      tot += (sigATrail.at(i).getValue() - sigALead.at(i).getValue());
+    }
+  }
+  if (sigBLead.size() > 0 && sigBTrail.size() > 0){
+    for (unsigned i = 0; i < sigBLead.size() && i < sigBTrail.size(); i++){
+      tot += (sigBTrail.at(i).getValue() - sigBLead.at(i).getValue());
+    }
+  }
+  return tot;
+}
