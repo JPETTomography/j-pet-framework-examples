@@ -46,6 +46,10 @@ public:
     double sigChEdgeMaxTime, double sigChLeadTrailMaxTime,
     JPetStatistics& stats, bool saveHistos
   );
+  static std::pair<std::vector<std::vector<JPetSigCh>>,
+    std::vector<std::vector<JPetSigCh>>> reorderThresholds(
+      const std::vector<JPetSigCh>& sigChByPM, unsigned int numOfThresholds
+  );
   static int findSigChOnNextThr(
     double sigChValue, double sigChEdgeMaxTime,
     const std::vector<JPetSigCh>& sigChVec
