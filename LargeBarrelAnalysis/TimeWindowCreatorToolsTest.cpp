@@ -207,8 +207,8 @@ BOOST_AUTO_TEST_CASE(flagSigChs_test)
   BOOST_REQUIRE_EQUAL(thrSigCh.at(1).getRecoFlag(), JPetSigCh::Good);
 
   BOOST_REQUIRE_EQUAL(thrSigCh.at(2).getRecoFlag(), JPetSigCh::Corrupted);
-  BOOST_REQUIRE_EQUAL(thrSigCh.at(3).getRecoFlag(), JPetSigCh::Corrupted);
-  BOOST_REQUIRE_EQUAL(thrSigCh.at(4).getRecoFlag(), JPetSigCh::Corrupted);
+  BOOST_REQUIRE_EQUAL(thrSigCh.at(3).getRecoFlag(), JPetSigCh::Good);
+  BOOST_REQUIRE_EQUAL(thrSigCh.at(4).getRecoFlag(), JPetSigCh::Good);
 
   BOOST_REQUIRE_EQUAL(thrSigCh.at(5).getRecoFlag(), JPetSigCh::Good);
   BOOST_REQUIRE_EQUAL(thrSigCh.at(6).getRecoFlag(), JPetSigCh::Good);
@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE(flagSigChs_test)
   BOOST_REQUIRE_EQUAL(thrSigCh.at(8).getRecoFlag(), JPetSigCh::Good);
 
   BOOST_REQUIRE_EQUAL(thrSigCh.at(9).getRecoFlag(), JPetSigCh::Good);
-  BOOST_REQUIRE_EQUAL(thrSigCh.at(10).getRecoFlag(), JPetSigCh::Corrupted);
+  BOOST_REQUIRE_EQUAL(thrSigCh.at(10).getRecoFlag(), JPetSigCh::Good);
   BOOST_REQUIRE_EQUAL(thrSigCh.at(11).getRecoFlag(), JPetSigCh::Corrupted);
 
   BOOST_REQUIRE_EQUAL(thrSigCh.at(12).getRecoFlag(), JPetSigCh::Good);
@@ -225,14 +225,14 @@ BOOST_AUTO_TEST_CASE(flagSigChs_test)
 
   BOOST_REQUIRE_EQUAL(thrSigCh.at(14).getRecoFlag(), JPetSigCh::Corrupted);
   BOOST_REQUIRE_EQUAL(thrSigCh.at(15).getRecoFlag(), JPetSigCh::Corrupted);
-  BOOST_REQUIRE_EQUAL(thrSigCh.at(16).getRecoFlag(), JPetSigCh::Corrupted);
-  BOOST_REQUIRE_EQUAL(thrSigCh.at(17).getRecoFlag(), JPetSigCh::Corrupted);
+  BOOST_REQUIRE_EQUAL(thrSigCh.at(16).getRecoFlag(), JPetSigCh::Good);
+  BOOST_REQUIRE_EQUAL(thrSigCh.at(17).getRecoFlag(), JPetSigCh::Good);
 
   BOOST_REQUIRE_EQUAL(thrSigCh.at(18).getRecoFlag(), JPetSigCh::Good);
   BOOST_REQUIRE_EQUAL(thrSigCh.at(19).getRecoFlag(), JPetSigCh::Good);
 
   BOOST_REQUIRE_EQUAL(thrSigCh.at(20).getRecoFlag(), JPetSigCh::Good);
-  BOOST_REQUIRE_EQUAL(thrSigCh.at(21).getRecoFlag(), JPetSigCh::Corrupted);
+  BOOST_REQUIRE_EQUAL(thrSigCh.at(21).getRecoFlag(), JPetSigCh::Good);
   BOOST_REQUIRE_EQUAL(thrSigCh.at(22).getRecoFlag(), JPetSigCh::Corrupted);
   BOOST_REQUIRE_EQUAL(thrSigCh.at(23).getRecoFlag(), JPetSigCh::Corrupted);
   BOOST_REQUIRE_EQUAL(thrSigCh.at(24).getRecoFlag(), JPetSigCh::Corrupted);
@@ -240,7 +240,7 @@ BOOST_AUTO_TEST_CASE(flagSigChs_test)
   BOOST_REQUIRE_EQUAL(thrSigCh.at(25).getRecoFlag(), JPetSigCh::Good);
   BOOST_REQUIRE_EQUAL(thrSigCh.at(26).getRecoFlag(), JPetSigCh::Good);
 
-  BOOST_REQUIRE_EQUAL(thrSigCh.at(27).getRecoFlag(), JPetSigCh::Good);
+  // BOOST_REQUIRE_EQUAL(thrSigCh.at(27).getRecoFlag(), JPetSigCh::Good);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

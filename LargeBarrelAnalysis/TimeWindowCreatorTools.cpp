@@ -86,52 +86,38 @@ void TimeWindowCreatorTools::flagSigChs(
     }
     auto& sigCh1 = inputSigChs.at(i);
     auto& sigCh2 = inputSigChs.at(i+1);
-    // Explicit check for repeteatededges
-    if((sigCh1.getType() == JPetSigCh::Leading && sigCh2.getType() == JPetSigCh::Trailing)
-      || (sigCh1.getType() == JPetSigCh::Trailing && sigCh2.getType() == JPetSigCh::Leading)) {
+    // Explicit check for repeteated edges
+    if((sigCh1.getType() == JPetSigCh::Leading && sigCh2.getType() == JPetSigCh::Trailing)){
       sigCh1.setRecoFlag(JPetSigCh::Good);
-      if(saveHistos){ stats.getHisto1D("good_vs_bad_sigch")->Fill(1); }
-      continue;
+      sigCh2.setRecoFlag(JPetSigCh::Good);
+      if(saveHistos){
+        stats.getHisto1D("LT_time_diff")->Fill(sigCh2.getValue()-sigCh1.getValue());
+        stats.getHisto1D("good_vs_bad_sigch")->Fill(1, 2);
+      }
+    } else if (sigCh1.getType() == JPetSigCh::Trailing && sigCh2.getType() == JPetSigCh::Leading) {
+      sigCh1.setRecoFlag(JPetSigCh::Good);
+      if(saveHistos){
+        stats.getHisto1D("good_vs_bad_sigch")->Fill(1);
+      }
     } else if (sigCh1.getType() == JPetSigCh::Leading && sigCh2.getType() == JPetSigCh::Leading) {
       sigCh1.setRecoFlag(JPetSigCh::Corrupted);
-      sigCh2.setRecoFlag(JPetSigCh::Corrupted);
       if(saveHistos){
-        stats.getHisto1D("good_vs_bad_sigch")->Fill(2, 2);
+        stats.getHisto1D("good_vs_bad_sigch")->Fill(2);
         stats.getHisto1D("LL_per_PM")->Fill(sigCh1.getPM().getID());
         stats.getHisto1D("LL_per_THR")->Fill(sigCh1.getThresholdNumber());
         stats.getHisto1D("LL_time_diff")->Fill(sigCh2.getValue()-sigCh1.getValue());
       }
-      // Searching for next Trailing SigCh
-      for(unsigned int j=i+2; j<inputSigChs.size(); j++) {
-        auto& sigCh3 = inputSigChs.at(j);
-        sigCh3.setRecoFlag(JPetSigCh::Corrupted);
-        if(saveHistos){
-          stats.getHisto1D("good_vs_bad_sigch")->Fill(2);
-        }
-        if(sigCh3.getType() == JPetSigCh::Trailing) {
-          if(saveHistos){
-            stats.getHisto1D("LT_time_diff")->Fill(sigCh3.getValue()-sigCh2.getValue());
-          }
-          i = j;
-          break;
-        } else if(sigCh3.getType() == JPetSigCh::Leading){
-          if(saveHistos){
-            stats.getHisto1D("LL_per_PM")->Fill(sigCh2.getPM().getID());
-            stats.getHisto1D("LL_per_THR")->Fill(sigCh2.getThresholdNumber());
-            stats.getHisto1D("LL_time_diff")->Fill(sigCh3.getValue()-sigCh2.getValue());
-          }
-        }
-      }
     } else if (sigCh1.getType() == JPetSigCh::Trailing && sigCh2.getType() == JPetSigCh::Trailing){
-      sigCh1.setRecoFlag(JPetSigCh::Corrupted);
+      if(sigCh1.getRecoFlag() == JPetSigCh::Unknown) {
+        sigCh1.setRecoFlag(JPetSigCh::Corrupted);
+      }
       sigCh2.setRecoFlag(JPetSigCh::Corrupted);
       if(saveHistos){
-        stats.getHisto1D("good_vs_bad_sigch")->Fill(2, 2);
+        stats.getHisto1D("good_vs_bad_sigch")->Fill(2);
         stats.getHisto1D("TT_per_PM")->Fill(sigCh1.getPM().getID());
         stats.getHisto1D("TT_per_THR")->Fill(sigCh1.getThresholdNumber());
         stats.getHisto1D("TT_time_diff")->Fill(sigCh2.getValue()-sigCh1.getValue());
       }
-      i += 1;
     }
     if(sigCh1.getRecoFlag() == JPetSigCh::Unknown && saveHistos){
       stats.getHisto1D("good_vs_bad_sigch")->Fill(3);
