@@ -78,10 +78,21 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
    JPetStatistics& stats, bool saveHistos
  ) {
   vector<JPetRawSignal> rawSigVec;
-  auto orderedSigCh = SignalFinderTools::reorderThresholds(sigChByPM, numOfThresholds);
-  auto thrLeadingSigCh = orderedSigCh.first;
-  auto thrTrailingSigCh = orderedSigCh.second;
-  if(thrLeadingSigCh.size() == 0){ return rawSigVec; }
+  // Threshold number check - fixed number equal 4
+  if (numOfThresholds != 4) {
+    ERROR("This function is meant to work with 4 thresholds only!");
+    return rawSigVec;
+  }
+  vector<JPetSigCh> tmpVec;
+  vector<vector<JPetSigCh>> thrLeadingSigCh(numOfThresholds, tmpVec);
+  vector<vector<JPetSigCh>> thrTrailingSigCh(numOfThresholds, tmpVec);
+  for (const JPetSigCh& sigCh : sigChByPM) {
+    if(sigCh.getType() == JPetSigCh::Leading) {
+      thrLeadingSigCh.at(sigCh.getThresholdNumber()-1).push_back(sigCh);
+    } else if(sigCh.getType() == JPetSigCh::Trailing) {
+      thrTrailingSigCh.at(sigCh.getThresholdNumber()-1).push_back(sigCh);
+    }
+  }
   assert(thrLeadingSigCh.size() > 0);
   while (thrLeadingSigCh.at(0).size() > 0) {
     JPetRawSignal rawSig;
@@ -181,55 +192,6 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
     }
   }
   return rawSigVec;
-}
-
-/**
- * Reordering vectors of SigChs so they are sorted by Threshold Value,
- * not by Threshold Number (in some cases it is the same).
- */
-pair<vector<vector<JPetSigCh>>, vector<vector<JPetSigCh>>> SignalFinderTools::reorderThresholds(
-  const vector<JPetSigCh>& sigChByPM, unsigned int numOfThresholds
-){
-  vector<JPetSigCh> tmp;
-  vector<vector<JPetSigCh>> thrLeadingSigCh(numOfThresholds, tmp);
-  vector<vector<JPetSigCh>> thrTrailingSigCh(numOfThresholds, tmp);
-  // Threshold number check - fixed number equal 4
-  if (numOfThresholds != 4) {
-    ERROR("This function is meant to work with 4 thresholds only!");
-    return make_pair(thrLeadingSigCh, thrTrailingSigCh);
-  }
-  map<float, pair<vector<JPetSigCh>, vector<JPetSigCh>>> thrValueMap;
-  for (const JPetSigCh& sigCh : sigChByPM) {
-    auto search = thrValueMap.find(sigCh.getThreshold());
-    if (search == thrValueMap.end()) {
-      vector<JPetSigCh> tmpLeads;
-      vector<JPetSigCh> tmpTrails;
-      if(sigCh.getType() == JPetSigCh::Leading) {
-        tmpLeads.push_back(sigCh);
-      } else if(sigCh.getType() == JPetSigCh::Trailing){
-        tmpTrails.push_back(sigCh);
-      }
-      thrValueMap.insert(make_pair(sigCh.getThreshold(), make_pair(tmpLeads, tmpTrails)));
-    } else {
-      if(sigCh.getType() == JPetSigCh::Leading) {
-        search->second.first.push_back(sigCh);
-      } else if(sigCh.getType() == JPetSigCh::Trailing){
-        search->second.second.push_back(sigCh);
-      }
-    }
-  }
-  // Check if maps have no more than 4 elements
-  if(thrValueMap.size() > numOfThresholds){
-    ERROR("Found more than 4 different values of channel thresholds, check configuration!");
-    return make_pair(thrLeadingSigCh, thrTrailingSigCh);
-  }
-  unsigned int i = 0;
-  for(auto thrElement : thrValueMap){
-    thrLeadingSigCh[i] = thrElement.second.first;
-    thrTrailingSigCh[i] = thrElement.second.second;
-    i++;
-  }
-  return make_pair(thrLeadingSigCh, thrTrailingSigCh);
 }
 
 /**
