@@ -75,6 +75,11 @@ bool DeltaTFinder::init()
     pos += "_std::string";
     if (isOptionSet(fParams.getOptions(), pos)) {
       auto res = retrievePositionAndFileName(getOptionAsString(fParams.getOptions(), pos));
+      if ( file_path.find_last_of("/") ) 
+	file_path = file_path.substr( file_path.find_last_of("/")+1,  file_path.find(".") - file_path.find_last_of("/")-1 );
+      else
+	file_path = file_path.substr( 0,  file_path.find(".") -1 );
+
       if ( file_path == res.second )
         fPos = res.first;
     }
@@ -161,6 +166,7 @@ bool DeltaTFinder::terminate()
 
 void DeltaTFinder::fillHistosForHit(const JPetHit& hit)
 {
+  
   auto lead_times_A = hit.getSignalA().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading);
   auto lead_times_B = hit.getSignalB().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading);
   for (auto & thr_time_pair : lead_times_A) {
@@ -171,6 +177,7 @@ void DeltaTFinder::fillHistosForHit(const JPetHit& hit)
       // fill the appropriate histogram
       const char* histo_name = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffAB_");
       getStatistics().getHisto1D(histo_name)->Fill( timeDiffAB );
+
       // fill the timeDiffAB vs slot ID histogram
       int layer_number = fBarrelMap->getLayerNumber( hit.getBarrelSlot().getLayer() );
       int slot_number = fBarrelMap->getSlotNumber( hit.getBarrelSlot() );
