@@ -96,16 +96,13 @@ void velocityCalc(std::vector<scintData>& data, const std::string& outPath)
 	results.open( title.c_str() );
 	for(auto scintillator : data)
 	{	
-		std::cout << scintillator.ID;
 		for(auto threshold : scintillator.thrData)
 		{
-			std::cout << "\t" << threshold.thresholdLabel;
 			std::vector<double> positionsForFit;
 			std::vector<double> timesForFit;	
 			std::vector<double> errorsForFit;
 			for( auto position : threshold.positions )
 			{
-				std::cout << "\t" << position.positionValue << "\t" << position.deltaT << "\t" << position.deltaTError <<std::endl;
 				positionsForFit.push_back( position.positionValue );
 				timesForFit.push_back( position.deltaT );
 				errorsForFit.push_back( position.deltaTError);
