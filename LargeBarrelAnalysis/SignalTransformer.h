@@ -46,7 +46,7 @@ protected:
 	JPetRecoSignal createRecoSignal(const JPetRawSignal& rawSignal);
 	JPetPhysSignal createPhysSignal(const JPetRecoSignal& signals);
 	const std::string kUseCorruptedSignalsParamKey = "SignalTransformer_UseCorruptedSignals_bool";
-	const std::string kSaveControlHistosParamKey = "Save_Cotrol_Histograms_bool";
+	const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
 	bool fUseCorruptedSignals = false;
 	bool fSaveControlHistos = true;
 };

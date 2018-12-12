@@ -20,8 +20,8 @@
 #include <JPetEvent/JPetEvent.h>
 #include <JPetHit/JPetHit.h>
 
-#define kLightVelocity_cm_ns 29.9792458
-#define kUndefinedValue 999.0
+static const double kLightVelocity_cm_ns = 29.9792458;
+static const double kUndefinedValue = 999.0;
 
 /**
  * @brief Tools for Event Categorization

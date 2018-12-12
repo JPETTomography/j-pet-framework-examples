@@ -3,7 +3,7 @@
 ## Contents
 Description of available parameters in LargeBarrelAnalysis example. Note that configuration/calibration files can be obtained from [PetWiki](http://koza.if.uj.edu.pl/petwiki/index.php/Default_settings_and_parameters_used_in_the_analyses)
 
-- `Save_Cotrol_Histograms_bool`  
+- `Save_Control_Histograms_bool`  
 Common for each module, if set to `true`, in the output `ROOT` files folder with statistics will contain control histograms. Set to `false` if histograms not needed.
 
 - `Unpacker_TOToffsetCalib_std::string`  

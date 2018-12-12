@@ -37,7 +37,6 @@ class JPetWriter;
  * performed, if ASCII files of standard format were provided. In case of errors,
  * creation of Time Windows continues without this additional information.
  */
-
 class TimeWindowCreator: public JPetUserTask
 {
 public:
@@ -48,12 +47,12 @@ public:
 	virtual bool terminate() override;
 
 protected:
+	bool isAllowedChannel(JPetTOMBChannel& tombChannel) const;
 	void saveSigChs(const std::vector<JPetSigCh>& sigChVec);
-	bool filter(JPetTOMBChannel& tombChannel) const;
 	void initialiseHistograms();
 	const std::string kTimeCalibFileParamKey = "TimeCalibLoader_ConfigFile_std::string";
 	const std::string kThresholdFileParamKey = "ThresholdLoader_ConfigFile_std::string";
-	const std::string kSaveControlHistosParamKey = "Save_Cotrol_Histograms_bool";
+	const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
 	const std::string kMaxTimeParamKey = "TimeWindowCreator_MaxTime_float";
 	const std::string kMinTimeParamKey = "TimeWindowCreator_MinTime_float";
 	const std::string kMainStripKey = "TimeWindowCreator_MainStrip_int";

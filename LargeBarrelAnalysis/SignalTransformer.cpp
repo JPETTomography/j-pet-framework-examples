@@ -18,19 +18,10 @@
 
 using namespace jpet_options_tools;
 
-/**
- * Constructor
- */
 SignalTransformer::SignalTransformer(const char* name): JPetUserTask(name) {}
 
-/**
- * Destructor
- */
 SignalTransformer::~SignalTransformer() {}
 
-/**
- * Init Signal Transformer
- */
 bool SignalTransformer::init()
 {
   INFO("Signal transforming started: Raw to Reco and Phys");
@@ -56,9 +47,6 @@ bool SignalTransformer::init()
   return true;
 }
 
-/**
- * Execution Signal Transformer
- */
 bool SignalTransformer::exec()
 {
   if(auto & timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
@@ -119,9 +107,6 @@ bool SignalTransformer::exec()
   return true;
 }
 
-/**
- * Terminate Signal Transformer
- */
 bool SignalTransformer::terminate()
 {
   INFO("Signal transforming finished");
@@ -163,9 +148,6 @@ JPetPhysSignal SignalTransformer::createPhysSignal(const JPetRecoSignal& recoSig
   return physSignal;
 }
 
-/**
- * Init histograms
- */
 void SignalTransformer::initialiseHistograms(){
   getStatistics().createHistogram(
     new TH1F("good_vs_bad_signals", "Number of good and corrupted signals created", 3, 0.5, 3.5)

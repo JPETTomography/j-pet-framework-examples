@@ -73,7 +73,12 @@ vector<JPetSigCh> TimeWindowCreatorTools::buildSigChs(
 }
 
 /**
- * Method for investigation of repetated edges - setting RecoFlag for each SigCh
+ * Method for investigation of repetated edges - setting RecoFlag for each SigCh.
+ * SigChs are flagged as GOOD if they appear in the sequence LTLTLTLT ->
+ * in other words, each found LT pair is marked as GOOD. If sequence of one type of
+ * the edge is encountered, repeated ones are flagged CORRUPTED. Examples:
+ * edge type -> LTLTLT  LLT  LLTT  LLLLTTTT  LLTTLTLTTTLLLLTT
+ * flag      -> GGGGGG  CGG  CGGC  CCCGGCCC  CGGCGGGGCCCCCGGC
  */
 void TimeWindowCreatorTools::flagSigChs(
   vector<JPetSigCh>& inputSigChs, JPetStatistics& stats, bool saveHistos
@@ -86,7 +91,7 @@ void TimeWindowCreatorTools::flagSigChs(
     }
     auto& sigCh1 = inputSigChs.at(i);
     auto& sigCh2 = inputSigChs.at(i+1);
-    // Explicit check for repeteated edges
+    // Explicit check for repeated edges
     if((sigCh1.getType() == JPetSigCh::Leading && sigCh2.getType() == JPetSigCh::Trailing)){
       sigCh1.setRecoFlag(JPetSigCh::Good);
       sigCh2.setRecoFlag(JPetSigCh::Good);

@@ -238,12 +238,12 @@ TVector3 EventCategorizerTools::calculateAnnihilationPoint(const JPetHit& firstH
 */
 double EventCategorizerTools::calculateTOF(const JPetHit& firstHit, const JPetHit& latterHit)
 {
-  double TOF = kUndefinedValue;
+  // double TOF = kUndefinedValue;
   if (firstHit.getTime() > latterHit.getTime()) {
     ERROR("First hit time should be earlier than later hit");
-    return TOF;
+    return kUndefinedValue;
   }
-  TOF = firstHit.getTime() - latterHit.getTime();
+  auto TOF = firstHit.getTime() - latterHit.getTime();
   if (firstHit.getBarrelSlot().getTheta() < latterHit.getBarrelSlot().getTheta()){
     return TOF;
   } else {

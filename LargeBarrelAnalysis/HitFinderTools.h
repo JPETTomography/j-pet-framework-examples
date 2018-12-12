@@ -18,7 +18,6 @@
 
 #include <JPetStatistics/JPetStatistics.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
-#include <JPetParamBank/JPetParamBank.h>
 #include <JPetHit/JPetHit.h>
 #include <vector>
 

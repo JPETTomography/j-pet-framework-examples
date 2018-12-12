@@ -217,7 +217,7 @@ JPetHit HitFinderTools::createDummyRefDetHit(const JPetPhysSignal& signalB)
 }
 
 /**
- * Helper method for getting TOMB channel for velocity map
+ * Helper method for getting TOMB channel
  */
 int HitFinderTools::getProperChannel(const JPetPhysSignal& signal)
 {

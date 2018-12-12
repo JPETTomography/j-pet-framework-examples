@@ -50,7 +50,7 @@ protected:
   std::map<unsigned int, std::vector<double>> fVelocities;
   const std::string kUseCorruptedSignalsParamKey = "HitFinder_UseCorruptedSignals_bool";
   const std::string kVelocityFileParamKey = "HitFinder_VelocityFile_std::string";
-  const std::string kSaveControlHistosParamKey = "Save_Cotrol_Histograms_bool";
+  const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kRefDetScinIDParamKey = "HitFinder_RefDetScinID_int";
   const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_float";
   bool fUseCorruptedSignals = false;

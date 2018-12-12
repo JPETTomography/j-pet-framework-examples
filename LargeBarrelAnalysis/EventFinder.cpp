@@ -22,19 +22,10 @@ using namespace std;
 
 using namespace jpet_options_tools;
 
-/**
- * Constructor
- */
 EventFinder::EventFinder(const char* name): JPetUserTask(name) {}
 
-/**
- * Destructor
- */
 EventFinder::~EventFinder() {}
 
-/**
- * Initialize Event Finder
- */
 bool EventFinder::init()
 {
   INFO("Event finding started.");
@@ -81,9 +72,6 @@ bool EventFinder::init()
   return true;
 }
 
-/**
- * Execute Event Finder
- */
 bool EventFinder::exec()
 {
   if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
@@ -92,18 +80,12 @@ bool EventFinder::exec()
   return true;
 }
 
-/**
- * Terminate Event Finder
- */
 bool EventFinder::terminate()
 {
   INFO("Event fiding ended.");
   return true;
 }
 
-/**
- * Saving method
- */
 void EventFinder::saveEvents(const vector<JPetEvent>& events)
 {
   for (const auto& event : events){
@@ -126,6 +108,7 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
       count++;
       continue;
     }
+    // Creating new event with the first hit
     JPetEvent event;
     event.setEventType(JPetEventType::kUnknown);
     event.addHit(hit);
@@ -134,6 +117,8 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
     } else if(hit.getRecoFlag() == JPetHit::Corrupted){
       event.setRecoFlag(JPetEvent::Corrupted);
     }
+    // Checking, if following hits fulfill time window condition,
+    // then moving interator 
     unsigned int nextCount = 1;
     while(count+nextCount < nHits){
       auto nextHit = dynamic_cast<const JPetHit&>(timeWindow.operator[](count+nextCount));
@@ -166,9 +151,6 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
   return eventVec;
 }
 
-/**
- * Init histograms
- */
 void EventFinder::initialiseHistograms(){
   getStatistics().createHistogram(
     new TH1F("hits_per_event_all", "Number of Hits in an all Events", 20, 0.5, 20.5)

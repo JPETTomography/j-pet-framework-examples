@@ -28,19 +28,10 @@ using namespace std;
 
 using namespace jpet_options_tools;
 
-/**
- * Constructor
- */
 HitFinder::HitFinder(const char* name) : JPetUserTask(name) {}
 
-/**
- * Destructor
- */
 HitFinder::~HitFinder() {}
 
-/**
- * Init Hit Finder
- */
 bool HitFinder::init()
 {
   INFO("Hit finding Started");
@@ -94,9 +85,6 @@ bool HitFinder::init()
   return true;
 }
 
-/**
- * Execute Hit Finder
- */
 bool HitFinder::exec()
 {
   if (auto& timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
@@ -114,18 +102,12 @@ bool HitFinder::exec()
   return true;
 }
 
-/**
- * Terminate Hit Finder
- */
 bool HitFinder::terminate()
 {
   INFO("Hit finding ended");
   return true;
 }
 
-/**
- * Saving method
- */
 void HitFinder::saveHits(const std::vector<JPetHit>& hits)
 {
   auto sortedHits = JPetAnalysisTools::getHitsOrderedByTime(hits);
@@ -143,9 +125,6 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
   }
 }
 
-/**
- * Init histograms
- */
 void HitFinder::initialiseHistograms(){
   getStatistics().createHistogram(new TH1F(
     "good_vs_bad_hits", "Number of good and corrupted Hits created", 3, 0.5, 3.5

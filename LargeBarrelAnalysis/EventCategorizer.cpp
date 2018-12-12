@@ -22,19 +22,10 @@
 using namespace jpet_options_tools;
 using namespace std;
 
-/**
- * Constructor
- */
 EventCategorizer::EventCategorizer(const char* name): JPetUserTask(name) {}
 
-/**
- * Destructor
- */
 EventCategorizer::~EventCategorizer() {}
 
-/**
- * Init Event Categorizer
- */
 bool EventCategorizer::init()
 {
   INFO("Event categorization started.");
@@ -85,9 +76,6 @@ bool EventCategorizer::init()
   return true;
 }
 
-/**
- * Execute Event Categorizer
- */
 bool EventCategorizer::exec()
 {
   if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
@@ -127,9 +115,6 @@ bool EventCategorizer::exec()
   return true;
 }
 
-/**
- * Terminate Event Categorizer
- */
 bool EventCategorizer::terminate()
 {
   INFO("Event categorization completed.");
@@ -141,9 +126,6 @@ void EventCategorizer::saveEvents(const vector<JPetEvent>& events)
   for (const auto& event : events) { fOutputEvents->add<JPetEvent>(event); }
 }
 
-/**
- * Init histograms
- */
 void EventCategorizer::initialiseHistograms(){
 
   // General histograms

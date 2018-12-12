@@ -26,19 +26,10 @@ using namespace std;
 
 using namespace jpet_options_tools;
 
-/**
- * Constructor
- */
 SignalFinder::SignalFinder(const char* name): JPetUserTask(name) {}
 
-/**
- * Destructor
- */
 SignalFinder::~SignalFinder() {}
 
-/**
- * Init Signal Finder
- */
 bool SignalFinder::init()
 {
   INFO("Signal finding started.");
@@ -84,9 +75,6 @@ bool SignalFinder::init()
   return true;
 }
 
-/**
- * Execute Signal Finder - sorting by PM, removing multiple edges, building signals
- */
 bool SignalFinder::exec()
 {
   // Getting the data from event in an apropriate format
@@ -104,26 +92,17 @@ bool SignalFinder::exec()
   return true;
 }
 
-/**
- * Terminate Signal Finder
- */
 bool SignalFinder::terminate()
 {
   INFO("Signal finding ended.");
   return true;
 }
 
-/**
- * Saving method
- */
 void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& rawSigVec)
 {
   for (auto & rawSig : rawSigVec) { fOutputEvents->add<JPetRawSignal>(rawSig); }
 }
 
-/**
- * Init histograms
- */
 void SignalFinder::initialiseHistograms(){
 
   getStatistics().createHistogram(new TH1F(

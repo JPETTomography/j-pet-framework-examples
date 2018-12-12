@@ -52,7 +52,7 @@ protected:
   void initialiseHistograms();
   const std::string kUseCorruptedHitsParamKey = "EventFinder_UseCorruptedHits_bool";
   const std::string kEventMinMultiplicity = "EventFinder_MinEventMultiplicity_int";
-  const std::string kSaveControlHistosParamKey = "Save_Cotrol_Histograms_bool";
+  const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kEventTimeParamKey = "EventFinder_EventTime_float";
   double fEventTimeWindow = 5000.0;
   bool fUseCorruptedHits = false;

@@ -28,7 +28,6 @@
 *
 * Contains methods building Signals Channels from Unpacker eventsIII
 */
-
 class TimeWindowCreatorTools
 {
 public:

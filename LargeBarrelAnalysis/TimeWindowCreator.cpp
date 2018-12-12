@@ -24,19 +24,10 @@
 using namespace jpet_options_tools;
 using namespace std;
 
-/**
- * Constructor
- */
 TimeWindowCreator::TimeWindowCreator(const char* name): JPetUserTask(name) {}
 
-/**
- * Destructor
- */
 TimeWindowCreator::~TimeWindowCreator() {}
 
-/**
- * Init Time Window Creator
- */
 bool TimeWindowCreator::init()
 {
   INFO("TimeSlot Creation Started");
@@ -129,9 +120,6 @@ bool TimeWindowCreator::init()
   return true;
 }
 
-/**
- * Execute Time Window Creator
- */
 bool TimeWindowCreator::exec()
 {
   if (auto event = dynamic_cast<EventIII* const> (fEvent)) {
@@ -158,7 +146,7 @@ bool TimeWindowCreator::exec()
 
       // Reference Detector
       // Ignore irrelevant channels
-      if (!filter(tombChannel)) continue;
+      if (!isAllowedChannel(tombChannel)) continue;
 
       // Building Signal Channels for this TOMB Channel
       auto allSigChs = TimeWindowCreatorTools::buildSigChs(
@@ -181,18 +169,12 @@ bool TimeWindowCreator::exec()
   return true;
 }
 
-/**
- * Terminate Time Window Creator
- */
 bool TimeWindowCreator::terminate()
 {
   INFO("TimeSlot Creation Ended");
   return true;
 }
 
-/**
- * Saving method
- */
 void TimeWindowCreator::saveSigChs(const vector<JPetSigCh>& sigChVec)
 {
   for (auto & sigCh : sigChVec) { fOutputEvents->add<JPetSigCh>(sigCh); }
@@ -202,7 +184,7 @@ void TimeWindowCreator::saveSigChs(const vector<JPetSigCh>& sigChVec)
  * Reference Detector
  * Returns true if signal from the channel given as argument should be passed
  */
-bool TimeWindowCreator::filter(JPetTOMBChannel& tombChannel) const
+bool TimeWindowCreator::isAllowedChannel(JPetTOMBChannel& tombChannel) const
 {
   // If main strip was not defined, pass all channels
   if (!fMainStripSet) return true;
@@ -212,9 +194,6 @@ bool TimeWindowCreator::filter(JPetTOMBChannel& tombChannel) const
   return false;
 }
 
-/**
- * Init histograms
- */
 void TimeWindowCreator::initialiseHistograms(){
   getStatistics().createHistogram(
     new TH1F("sig_ch_per_time_slot", "Signal Channels Per Time Slot", 250, -0.5, 999.5)
