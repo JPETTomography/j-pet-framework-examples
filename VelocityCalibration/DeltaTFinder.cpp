@@ -75,11 +75,7 @@ bool DeltaTFinder::init()
     pos += "_std::string";
     if (isOptionSet(fParams.getOptions(), pos)) {
       auto res = retrievePositionAndFileName(getOptionAsString(fParams.getOptions(), pos));
-      if ( file_path.find_last_of("/") ) 
-	file_path = file_path.substr( file_path.find_last_of("/")+1,  file_path.find(".") - file_path.find_last_of("/")-1 );
-      else
-	file_path = file_path.substr( 0,  file_path.find(".") -1 );
-
+      file_path = JPetCommonTools::extractFileNameFromFullPath( file_path );      
       if ( file_path == res.second )
         fPos = res.first;
     }
