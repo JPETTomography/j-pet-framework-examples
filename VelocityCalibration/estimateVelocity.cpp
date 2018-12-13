@@ -94,14 +94,14 @@ void velocityCalc(std::vector<scintData>& data, const std::string& outPath)
 	std::string title = outPath+"EffVelocities";
 	title+= ".txt";
 	results.open( title.c_str() );
-	for(auto scintillator : data)
+	for(const auto& scintillator : data)
 	{	
-		for(auto threshold : scintillator.thrData)
+		for(const auto& threshold : scintillator.thrData)
 		{
 			std::vector<double> positionsForFit;
 			std::vector<double> timesForFit;	
 			std::vector<double> errorsForFit;
-			for( auto position : threshold.positions )
+			for(const auto& position : threshold.positions )
 			{
 				positionsForFit.push_back( position.positionValue );
 				timesForFit.push_back( position.deltaT );
