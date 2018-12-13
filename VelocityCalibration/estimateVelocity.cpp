@@ -9,6 +9,7 @@
 #include "TStyle.h"
 #include "TGraphErrors.h"
 #include <map>
+#include <algorithm>
 
 std::vector< std::pair<int,double> > takeData(const std::string file, const char thresholdLabel);
 std::pair<double,double> plotVelocity(std::vector<double> positions, std::vector<double> means, int strip, std::vector<double> errors, char thresholdLabel);
@@ -174,12 +175,7 @@ int findScintillatorIn( std::vector<scintData>& data, int ID)
 
 bool ifThresholdIsIn( scintData& data, char label)
 {
-	for( auto threshold : data.thrData )
-	{
-		if( label == threshold.thresholdLabel)
-			return true;
-	}
-	return false;
+	return std::any_of(data.thrData.begin(), data.thrData.end(), [label]( const thresholdData& thr) {return label == thr.thresholdLabel; });
 }
 
 int findThresholdIn( scintData& data, char label)
