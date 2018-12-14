@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2016 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -20,49 +20,39 @@
  * @brief Set of tools for Signal Finder task
  *
  * Contains methods building Raw Signals from Signal Channels
- * Core algorithm descibed in
- * http://koza.if.uj.edu.pl/petwiki/images/4/4f/SignalFinderDoc.pdf
  */
 
 #include <JPetStatistics/JPetStatistics.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
 #include <JPetRawSignal/JPetRawSignal.h>
+#include <JPetParamBank/JPetParamBank.h>
 #include <JPetSigCh/JPetSigCh.h>
+#include <utility>
 #include <vector>
-#include <map>
 
 class SignalFinderTools
 {
 public:
-  static std::map<int, std::vector<JPetSigCh>> getSigChsPMMapById(const JPetTimeWindow* timeWindow);
+  static const std::map<int, std::vector<JPetSigCh>> getSigChByPM(
+    const JPetTimeWindow* timeWindow, bool useCorrupts
+  );
   static std::vector<JPetRawSignal> buildAllSignals(
-    std::map<int, std::vector<JPetSigCh>> sigChsPMMap,
-    unsigned int numOfThresholds,
-    JPetStatistics& stats,
-    double sigChEdgeMaxTime,
-    double sigChLeadTrailMaxTime,
-    bool saveHistos
+    const std::map<int, std::vector<JPetSigCh>>& sigChByPM, unsigned int numOfThresholds,
+    double sigChEdgeMaxTime, double sigChLeadTrailMaxTime,
+    JPetStatistics& stats, bool saveHistos
   );
-
   static std::vector<JPetRawSignal> buildRawSignals(
-    const std::vector<JPetSigCh>& sigChFromSamePM,
-    unsigned int numOfThresholds,
-    JPetStatistics& stats,
-    double sigChEdgeMaxTime,
-    double sigChLeadTrailMaxTime,
-    bool saveHistos
+    const std::vector<JPetSigCh>& sigChByPM, unsigned int numOfThresholds,
+    double sigChEdgeMaxTime, double sigChLeadTrailMaxTime,
+    JPetStatistics& stats, bool saveHistos
   );
-
   static int findSigChOnNextThr(
-    double sigChValue,
-    const std::vector<JPetSigCh>& sigChVec,
-    double sigChEdgeMaxTime
+    double sigChValue, double sigChEdgeMaxTime,
+    const std::vector<JPetSigCh>& sigChVec
   );
-
   static int findTrailingSigCh(
-    const JPetSigCh& leadingSigCh,
-    const std::vector<JPetSigCh>& trailingSigChVec,
-    double sigChLeadTrailMaxTime);
-
+    const JPetSigCh& leadingSigCh,double sigChLeadTrailMaxTime,
+    const std::vector<JPetSigCh>& trailingSigChVec
+  );
 };
 #endif /* !SIGNALFINDERTOOLS_H */

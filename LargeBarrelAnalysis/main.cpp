@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2016 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -13,13 +13,13 @@
  *  @file main.cpp
  */
 
+#include <JPetManager/JPetManager.h>
+#include "TimeWindowCreator.h"
+#include "SignalTransformer.h"
 #include "EventCategorizer.h"
+#include "SignalFinder.h"
 #include "EventFinder.h"
 #include "HitFinder.h"
-#include "SignalFinder.h"
-#include "SignalTransformer.h"
-#include "TimeWindowCreator.h"
-#include <JPetManager/JPetManager.h>
 
 using namespace std;
 

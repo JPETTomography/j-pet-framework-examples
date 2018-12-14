@@ -25,7 +25,7 @@ using namespace std;
 bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats,
     bool saveHistos, double b2bSlotThetaDiff)
 {
-  if (event.getHits().size() < 2) return false;
+  if (event.getHits().size() < 2) { return false; }
   for (uint i = 0; i < event.getHits().size(); i++) {
     for (uint j = i + 1; j < event.getHits().size(); j++) {
       JPetHit firstHit, secondHit;
@@ -87,8 +87,9 @@ bool EventCategorizerTools::checkFor3Gamma(const JPetEvent& event, JPetStatistic
         double transformedX = relativeAngles.at(1) + relativeAngles.at(0);
         double transformedY = relativeAngles.at(1) - relativeAngles.at(0);
 
-        if (saveHistos)
+        if (saveHistos) {
           stats.getHisto2D("3Gamma_Angles")->Fill(transformedX, transformedY);
+        }
       }
     }
   }
@@ -105,7 +106,7 @@ bool EventCategorizerTools::checkForPrompt(
   for (unsigned i = 0; i < event.getHits().size(); i++) {
     double tot = calculateTOT(event.getHits().at(i));
     if (tot > deexTOTCutMin && tot < deexTOTCutMax) {
-      if (saveHistos) stats.getHisto1D("Deex_TOT_cut")->Fill(tot);
+      if (saveHistos) { stats.getHisto1D("Deex_TOT_cut")->Fill(tot); }
       return true;
     }
   }
@@ -116,11 +117,8 @@ bool EventCategorizerTools::checkForPrompt(
 * Method for determining type of event - scatter
 */
 bool EventCategorizerTools::checkForScatter(
-  const JPetEvent& event,
-  JPetStatistics& stats,
-  bool saveHistos,
-  double scatterTOFTimeDiff)
-{
+  const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double scatterTOFTimeDiff
+) {
   if (event.getHits().size() < 2) { return false; }
   for (uint i = 0; i < event.getHits().size(); i++) {
     for (uint j = i + 1; j < event.getHits().size(); j++) {
@@ -161,22 +159,25 @@ double EventCategorizerTools::calculateTOT(const JPetHit& hit)
 {
   double tot = 0.0;
 
-  std::vector<JPetSigCh> sigALead = hit.getSignalA().getRecoSignal()
-                                    .getRawSignal().getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-  std::vector<JPetSigCh> sigBLead = hit.getSignalB().getRecoSignal()
-                                    .getRawSignal().getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-  std::vector<JPetSigCh> sigATrail = hit.getSignalA().getRecoSignal()
-                                     .getRawSignal().getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-  std::vector<JPetSigCh> sigBTrail = hit.getSignalB().getRecoSignal()
-                                     .getRawSignal().getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+  auto sigALead = hit.getSignalA().getRecoSignal().getRawSignal()
+    .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+  auto sigBLead = hit.getSignalB().getRecoSignal().getRawSignal()
+    .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+  auto sigATrail = hit.getSignalA().getRecoSignal().getRawSignal()
+    .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+  auto sigBTrail = hit.getSignalB().getRecoSignal().getRawSignal()
+    .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
 
-  if (sigALead.size() > 0 && sigATrail.size() > 0)
-    for (unsigned i = 0; i < sigALead.size() && i < sigATrail.size(); i++)
+  if (sigALead.size() > 0 && sigATrail.size() > 0){
+    for (unsigned i = 0; i < sigALead.size() && i < sigATrail.size(); i++){
       tot += (sigATrail.at(i).getValue() - sigALead.at(i).getValue());
-  if (sigBLead.size() > 0 && sigBTrail.size() > 0)
-    for (unsigned i = 0; i < sigBLead.size() && i < sigBTrail.size(); i++)
+    }
+  }
+  if (sigBLead.size() > 0 && sigBTrail.size() > 0){
+    for (unsigned i = 0; i < sigBLead.size() && i < sigBTrail.size(); i++){
       tot += (sigBTrail.at(i).getValue() - sigBLead.at(i).getValue());
-
+    }
+  }
   return tot;
 }
 
@@ -237,15 +238,17 @@ TVector3 EventCategorizerTools::calculateAnnihilationPoint(const JPetHit& firstH
 */
 double EventCategorizerTools::calculateTOF(const JPetHit& firstHit, const JPetHit& latterHit)
 {
-  double TOF = kUndefinedValue;
+  // double TOF = kUndefinedValue;
   if (firstHit.getTime() > latterHit.getTime()) {
     ERROR("First hit time should be earlier than later hit");
-    return TOF;
+    return kUndefinedValue;
   }
-  TOF = firstHit.getTime() - latterHit.getTime();
-  if (firstHit.getBarrelSlot().getTheta() < latterHit.getBarrelSlot().getTheta())
+  auto TOF = firstHit.getTime() - latterHit.getTime();
+  if (firstHit.getBarrelSlot().getTheta() < latterHit.getBarrelSlot().getTheta()){
     return TOF;
-  else return -1.0 * TOF;
+  } else {
+    return -1.0 * TOF;
+  }
 }
 
 /**
@@ -269,9 +272,10 @@ double EventCategorizerTools::calculatePlaneCenterDistance(
 * @todo: the selection criteria b2b distance from center needs to be checked
 * and implemented again
 */
-bool EventCategorizerTools::stream2Gamma(const JPetEvent& event, JPetStatistics& stats,
-    bool saveHistos, double b2bSlotThetaDiff, double b2bTimeDiff)
-{
+bool EventCategorizerTools::stream2Gamma(
+  const JPetEvent& event, JPetStatistics& stats, bool saveHistos,
+  double b2bSlotThetaDiff, double b2bTimeDiff
+){
   if (event.getHits().size() < 2) { return false; }
   for (uint i = 0; i < event.getHits().size(); i++) {
     for (uint j = i + 1; j < event.getHits().size(); j++) {
@@ -313,9 +317,10 @@ bool EventCategorizerTools::stream2Gamma(const JPetEvent& event, JPetStatistics&
 /**
 * Method for determining type of event for streaming - 3 gamma annihilation
 */
-bool EventCategorizerTools::stream3Gamma(const JPetEvent& event, JPetStatistics& stats,
-  bool saveHistos, double d3SlotThetaMin, double d3TimeDiff, double d3PlaneCenterDist)
-{
+bool EventCategorizerTools::stream3Gamma(
+  const JPetEvent& event, JPetStatistics& stats, bool saveHistos,
+  double d3SlotThetaMin, double d3TimeDiff, double d3PlaneCenterDist
+) {
   if (event.getHits().size() < 3) { return false; }
   for (uint i = 0; i < event.getHits().size(); i++) {
     for (uint j = i + 1; j < event.getHits().size(); j++) {

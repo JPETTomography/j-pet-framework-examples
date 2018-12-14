@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2016 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -13,8 +13,8 @@
  *  @file HitFinder.h
  */
 
-#ifndef HitFinder_H
-#define HitFinder_H
+#ifndef HITFINDER_H
+#define HITFINDER_H
 
 #include <JPetRawSignal/JPetRawSignal.h>
 #include <JPetUserTask/JPetUserTask.h>
@@ -39,21 +39,24 @@ class HitFinder: public JPetUserTask {
 
 public:
   HitFinder(const char* name);
-  virtual ~HitFinder(){};
+  virtual ~HitFinder();
   virtual bool init() override;
   virtual bool exec() override;
   virtual bool terminate() override;
 
 protected:
   void saveHits(const std::vector<JPetHit>& hits);
+  void initialiseHistograms();
   std::map<unsigned int, std::vector<double>> fVelocities;
-  const std::string kSaveControlHistosParamKey = "Save_Cotrol_Histograms_bool";
+  const std::string kUseCorruptedSignalsParamKey = "HitFinder_UseCorruptedSignals_bool";
   const std::string kVelocityFileParamKey = "HitFinder_VelocityFile_std::string";
-  const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_float";
+  const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kRefDetScinIDParamKey = "HitFinder_RefDetScinID_int";
+  const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_float";
+  bool fUseCorruptedSignals = false;
   bool fSaveControlHistos = true;
   double fABTimeDiff = 6000.0;
   int fRefDetScinID = -1;
 };
 
-#endif /*  !HitFinder_H */
+#endif /* !HITFINDER_H */
