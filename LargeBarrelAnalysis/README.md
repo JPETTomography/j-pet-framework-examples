@@ -16,13 +16,13 @@ No output to stdout.
 where `*` stands for the name of the input file.
 
 ## Input Data
-For this example, the user must provide her/his own data file(s) collected with the Big Barrel.
+For this example, the user must provide her/his own data file(s) collected with the Big Barrel. Moreover, useful files with configurations and calibrations are downloaded during the `cmake` build to `CalibrationFiles` folder in the source folder. 
 
 ## Description
 The analysis is split into tasks.
 
 ## Additional info
-For description of possible parameters, that can be ised in `useParams.json`, see file [PARAMETERS](PARAMETERS.md). Please note that if the `-o output_directory_path` command line option is provided, the output files will be created in the specified output path rather than in the current working directory.
+For description of possible parameters, that can be ised in `useParams.json`, see file [PARAMETERS](PARAMETERS.md). Please note that if the `-o output_directory_path` command line option is provided, the output files will be created in the specified output path and not in the directory of the input file.
 
 ## Compiling
 Executable:  

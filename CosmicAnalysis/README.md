@@ -16,7 +16,7 @@ No output to stdout.
 where `*` stands for the name of the input file.
 
 ## Input Data
-For this example, the user must provide her/his own data file(s) collected with the Big Barrel.
+For this example, the user must provide her/his own data file(s) collected with the Big Barrel. Moreover, useful files with configurations and calibrations are downloaded during the `cmake` build to `CalibrationFiles` folder in the source folder.
 
 ## Description
 The analysis extends the example of Large Barrel Analysis and substitutes Event Categorizer with version designed for cosmic radiation particles detection.
@@ -28,7 +28,7 @@ For description of possible parameters, that can be used in `userParams.json`, s
 `make`
 
 ## Running
-Run in the similar way as the other examples.
+Run in the similar way as the LargeBarrelAnalysis example.
 
 ## Authors
 Kamil Dulski, Elena Pérez del Río
