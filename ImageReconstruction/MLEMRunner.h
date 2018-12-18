@@ -141,7 +141,7 @@ private:
   std::stringstream fReconstructionStringStream; // connection between parsing events and reconstruction
 
   int fNumberOfPixelsInOneDimension = 160;             // Dimension of 1 axis in 3d reconstructed image(n-pixels)
-  double fPixelSize = 0.004;                           // Size of 1 pixel in mm(s-pixel)
+  double fPixelSize = 0.004;                           // Size of 1 pixel in m(s-pixel)
   unsigned int fStartPixelForPartialMatrix = 0u;       // Starting position of matrix
   unsigned int fNumberOfEmissionsPerPixel = 100000000; // Number of emissions per pixel for system matrix
   double fTOFStep = 0.;
