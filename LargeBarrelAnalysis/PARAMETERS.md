@@ -4,16 +4,16 @@
 Description of available parameters in LargeBarrelAnalysis example. Note that configuration/calibration files can be obtained from [PetWiki](http://koza.if.uj.edu.pl/petwiki/index.php/Default_settings_and_parameters_used_in_the_analyses)
 
 - `Save_Control_Histograms_bool`  
-Common for each module, if set to `true`, in the output `ROOT` files folder with statistics will contain control histograms. Set to `false` if histograms not needed.
+Common for each module, if set to `true`, in the output `ROOT` files folder with statistics will contain control histograms. Set to `false` if histograms are not needed.
 
 - `Unpacker_TOToffsetCalib_std::string`  
-Name of a `ROOT` file with `TOT` offset calibrations (stretcher) applied during unpacking of `HLD` file.
+Path to and name of a `ROOT` file with `TOT` offset calibrations (stretcher) applied during unpacking of `HLD` file.
 
 - `Unpacker_TDCnonlinearityCalib_std::string`  
-Name of a `ROOT` file with calibrations of nonlinearities occurring on `TDC` boards, applied during unpacking of `HLD` file.
+Path to and name of a `ROOT` file with calibrations of nonlinearities occurring on `TDC` boards, applied during unpacking of `HLD` file.
 
 - `TimeWindowCreator_MainStrip_int`  
-Dedicated for files with data from measurement with Reference Detector - it denotes which `ID` has the reference scintillator. If option not set, part with reference detector is ignored
+Dedicated for files with data from measurement with Reference Detector - it denotes which `ID` has the reference scintillator. If option is absent in the user parameters file, part with reference detector is ignored
 
 - `TimeWindowCreator_MinTime_float`  
 Time Slots have certain duration for specific runs, minimum time is usually negative, default value `-1*10^6 ps`
@@ -22,7 +22,7 @@ Time Slots have certain duration for specific runs, minimum time is usually nega
 default value `0.0 ps`
 
 - `TimeCalibLoader_ConfigFile_std::string`  
-name of ASCII file of required structure, containing time calibrations, specific for each run
+Path to and name of ASCII file of required structure, containing time calibrations, specific for each run
 
 - `SignalFinder_UseCorruptedSigCh_bool`  
 Indication if Signal Finder module should use signal channels flagged as Corrupted in the previous task. Default value: `false`
@@ -40,7 +40,7 @@ Indication if Signal Transformer module should use signals flagged as Corrupted 
 Indication if Hit Finder module should use signals flagged as Corrupted in the previous task. Default value: `false`
 
 - `HitFinder_VelocityFile_std::string`  
-name of ASCII file of required format, containing values of effective velocities of light in each scintillator
+Path to and name of ASCII file of required format, containing values of effective velocities of light in each scintillator
 
 - `HitFinder_ABTimeDiff_float`  
 time window for matching Signals on the same scintillator and different sides. Default value: `6 000 ps`
@@ -58,7 +58,7 @@ time window for grouping hits in one event. Default value `5 000 ps`
 events of minimum multiplicity will only be saved in output file. Default value is 1, so all events are saved.
 
 - `Scatter_Categorizer_TOF_TimeDiff_float`  
-categorizer tool for recognizing scatterings. User can constrain allowed discrepancy between calculated time of flight of scatter candidate and difference of two hit times.
+categorizer tool for recognizing scatterings. User can constrain allowed discrepancy between calculated time of flight of scatter candidate and difference of two hit times. Default value `2000 ps`
 
 - `Back2Back_Categorizer_SlotThetaDiff_float`  
 denotes acceptable difference in degrees between opposite slots, to categorize two hits as back-to-back type. Default value is `3.0` degrees, so accepted slot theta difference will be between `177.0` and `183.0` degrees.
