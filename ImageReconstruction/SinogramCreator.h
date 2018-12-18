@@ -69,9 +69,12 @@ private:
   SinogramCreator& operator=(const SinogramCreator&) = delete;
 
   void setUpOptions();
-  bool checkSplitRange(float firstZ, float secondZ, int i);
+  int getSplitRangeNumber(float firstZ, float secondZ);
+  int getSplitRangeNumber(float z);
   void saveResult(const JPetRecoImageTools::Matrix2DProj& result, const std::string& outputFileName, int sliceNumber);
   bool analyzeHits(const JPetHit& firstHit, const JPetHit& secondHit);
+  int getSinogramSlice(float firstZ, float firstTOF, float secondZ, float secondTOF);
+  float getTOFRescaleFactor(float x_diff, float y_diff, float z_diff);
 
   JPetRecoImageTools::Matrix2DProj** fSinogram = nullptr;
   JPetRecoImageTools::Matrix2DTOF fTOFInformation;
@@ -80,6 +83,8 @@ private:
   const std::string kReconstructionDistanceAccuracy = "SinogramCreator_ReconstructionDistanceAccuracy_float";
   const std::string kZSplitNumber = "SinogramCreator_SinogramZSplitNumber_int";
   const std::string kScintillatorLenght = "SinogramCreator_ScintillatorLenght_float";
+  const std::string kEnableNonPerperdicualLOR = "SinogramCreator_EnableNonPerperdicalLOR_bool";
+  const std::string kEnableTOFReconstrution = "SinogramCreator_EnableTOFReconstruction_bool";
 
   const int kReconstructionMaxAngle = 180;
   const float EPSILON = 0.000001f;
@@ -94,6 +99,8 @@ private:
   float fMaxReconstructionLayerRadius = 0.f;    // in cm
   float fReconstructionDistanceAccuracy = 0.1f; // in cm, 1mm accuracy
   float fScintillatorLenght = 50.0f;            // in cm
+  bool fEnableNonPerperdicularLOR = false;
+  bool fEnableTOFReconstruction = false;
 };
 
 #endif /*  !SINOGRAMCREATOR_H */

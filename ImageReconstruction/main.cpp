@@ -32,11 +32,11 @@ int main(int argc, const char* argv[])
     manager.registerTask<SinogramCreatorMC>("SinogramCreatorMC");
     manager.registerTask<MLEMRunner>("MLEMRunner");
 
-    manager.useTask("FilterEvents", "unk.evt", "reco.unk.evt");
-    manager.useTask("MLEMRunner", "reco.unk.evt", "");
-    manager.useTask("ImageReco", "reco.unk.evt", "reco");
-    manager.useTask("SinogramCreator", "reco.unk.evt", "sino");
-    manager.useTask("SinogramCreatorMC", "", "sino.mc");
+    //manager.useTask("FilterEvents", "unk.evt", "reco.unk.evt");
+    //manager.useTask("MLEMRunner", "reco.unk.evt", "");
+    //manager.useTask("ImageReco", "reco.unk.evt", "reco");
+    //manager.useTask("SinogramCreator", "reco.unk.evt", "sino");
+    manager.useTask("SinogramCreatorMC", "reco.unk.evt", "sino.mc");
 
     manager.run(argc, argv);
   } catch (const std::exception& except) {

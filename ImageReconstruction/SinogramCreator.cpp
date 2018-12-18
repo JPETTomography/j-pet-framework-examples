@@ -86,31 +86,78 @@ bool SinogramCreator::analyzeHits(const JPetHit& firstHit, const JPetHit& second
   const float firstZ = firstHit.getPosZ();
   const float secondZ = secondHit.getPosZ(); // copy positions
 
-  for (int i = 0; i < fZSplitNumber; i++) {
-    if (!checkSplitRange(firstZ, secondZ, i)) {
-      continue;
-    }
-    const auto sinogramResult = SinogramCreatorTools::getSinogramRepresentation(
-                                  firstX, firstY, secondX, secondY, fMaxReconstructionLayerRadius, fReconstructionDistanceAccuracy, fMaxDistanceNumber, kReconstructionMaxAngle);
+  float firstTOF = firstHit.getTime();
+  float secondTOF = secondHit.getTime();
 
-    fCurrentValueInSinogram[i] = ++fSinogram[i]->at(sinogramResult.first).at(sinogramResult.second);
+  int i = -1;
+  if (!fEnableNonPerperdicularLOR) {
+    i = getSplitRangeNumber(firstZ, secondZ);
+  } else {
+    i = getSinogramSlice(firstZ, firstTOF, secondZ, secondTOF);
+  }
+  if (i == -1) {
+    return false;
+  }
+
+  const auto sinogramResult = SinogramCreatorTools::getSinogramRepresentation(
+                                firstX, firstY, secondX, secondY, fMaxReconstructionLayerRadius, fReconstructionDistanceAccuracy, fMaxDistanceNumber, kReconstructionMaxAngle);
+
+  fCurrentValueInSinogram[i] = ++fSinogram[i]->at(sinogramResult.first).at(sinogramResult.second);
+  if (fCurrentValueInSinogram[i] > fMaxValueInSinogram[i]) {
+    fMaxValueInSinogram[i] = fCurrentValueInSinogram[i]; // save max value of sinogram
+  }
+
+  if (fEnableTOFReconstruction) {
+    float tofRescale = 1.f;
+    if (fEnableNonPerperdicularLOR) {
+      tofRescale = getTOFRescaleFactor(firstX - secondX, firstY - secondY, firstZ - secondZ);
+    }
     auto tofInfo = fTOFInformation.find(sinogramResult);
-    float tofResult = (secondHit.getTime() - firstHit.getTime()) / 2.f;
+    float tofResult = ((secondTOF - firstTOF) / 2.f) * tofRescale;
     if (tofInfo != fTOFInformation.end()) {
       tofInfo->second.push_back(tofResult);
     } else {
       fTOFInformation.insert(std::make_pair(sinogramResult, std::vector<float> {tofResult}));
     }
-    if (fCurrentValueInSinogram[i] > fMaxValueInSinogram[i]) {
-      fMaxValueInSinogram[i] = fCurrentValueInSinogram[i]; // save max value of sinogram
-    }
   }
+
   return true;
 }
 
-bool SinogramCreator::checkSplitRange(float firstZ, float secondZ, int i)
+int SinogramCreator::getSplitRangeNumber(float firstZ, float secondZ)
 {
-  return firstZ >= fZSplitRange[i].first && firstZ <= fZSplitRange[i].second && secondZ >= fZSplitRange[i].first && secondZ <= fZSplitRange[i].second;
+  for (int i = 0; i < fZSplitRange.size(); i++) {
+    if (firstZ >= fZSplitRange[i].first && firstZ <= fZSplitRange[i].second && secondZ >= fZSplitRange[i].first && secondZ <= fZSplitRange[i].second)
+      return i;
+  }
+  return -1;
+}
+
+int SinogramCreator::getSplitRangeNumber(float z)
+{
+  for (int i = 0; i < fZSplitRange.size(); i++) {
+    if (z >= fZSplitRange[i].first && z <= fZSplitRange[i].second)
+      return i;
+  }
+  return -1;
+}
+
+int SinogramCreator::getSinogramSlice(float firstZ, float firstTOF, float secondZ, float secondTOF)
+{
+  float middle_point_z = (firstZ + secondZ) / 2;
+
+  float tofDiff = (secondTOF - firstTOF) / 2.f;
+  middle_point_z += tofDiff * 0.0299792458;
+
+
+  return getSplitRangeNumber(middle_point_z);
+}
+
+float SinogramCreator::getTOFRescaleFactor(float x_diff, float y_diff, float z_diff)
+{
+  float distance_3d = std::sqrt(x_diff * x_diff + y_diff * y_diff + z_diff * z_diff);
+  float distance_2d = std::sqrt(x_diff * x_diff + y_diff * y_diff);
+  return distance_2d / distance_3d;
 }
 
 void SinogramCreator::saveResult(const JPetRecoImageTools::Matrix2DProj& result, const std::string& outputFileName, int sliceNumber)
@@ -165,6 +212,14 @@ void SinogramCreator::setUpOptions()
 
   if (isOptionSet(opts, kScintillatorLenght)) {
     fScintillatorLenght = getOptionAsFloat(opts, kScintillatorLenght);
+  }
+
+  if (isOptionSet(opts, kEnableNonPerperdicualLOR)) {
+    fEnableNonPerperdicularLOR = getOptionAsBool(opts, kEnableNonPerperdicualLOR);
+  }
+
+  if (isOptionSet(opts, kEnableTOFReconstrution)) {
+    fEnableTOFReconstruction = getOptionAsBool(opts, kEnableTOFReconstrution);
   }
 
   const JPetParamBank& bank = getParamBank();

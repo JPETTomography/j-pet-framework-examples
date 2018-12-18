@@ -45,14 +45,17 @@ private:
 
   void generateSinogram();
   void setUpOptions();
-  bool checkSplitRange(float firstZ, float secondZ, int i);
+  int getSplitRangeNumber(float firstZ, float secondZ);
+  int getSplitRangeNumber(float z);
   void saveResult(const std::vector<std::vector<unsigned char>>& result, const std::string& outputFileName);
   void saveResult(const JPetRecoImageTools::Matrix2DProj& result, const std::string& outputFileName);
   int getMaxValue(const JPetRecoImageTools::Matrix2DProj& result);
+  int getSinogramSlice(float firstZ, float firstTOF, float secondZ, float secondTOF);
+  float getTOFRescaleFactor(float x_diff, float y_diff, float z_diff);
 
   JPetRecoImageTools::Matrix2DProj** fSinogram = nullptr;
 
-  JPetRecoImageTools::Matrix2DTOF fTOFInformation;
+  JPetRecoImageTools::Matrix2DTOF* fTOFInformation = nullptr;
 
   const std::string kOutFileNameKey = "SinogramCreatorMC_OutFileName_std::string";
   const std::string kReconstructionDistanceAccuracy = "SinogramCreatorMC_ReconstructionDistanceAccuracy_float";
@@ -60,6 +63,8 @@ private:
   const std::string kScintillatorLenght = "SinogramCreatorMC_ScintillatorLenght_float";
   const std::string kMaxReconstructionRadius = "SinogramCreatorMC_MaxReconstructionRadius_float";
   const std::string kInputDataKey = "SinogramCreatorMC_InputDataPath_std::string";
+  const std::string kEnableNonPerperdicualLOR = "SinogramCreatorMC_EnableNonPerperdicalLOR_bool";
+  const std::string kEnableTOFReconstrution = "SinogramCreatorMC_EnableTOFReconstruction_bool";
 
   const int kReconstructionMaxAngle = 180;
   const float EPSILON = 0.000001f;
@@ -74,6 +79,8 @@ private:
   float fMaxReconstructionLayerRadius = 0.f;    // in cm
   float fReconstructionDistanceAccuracy = 0.1f; // in cm, 1mm accuracy
   float fScintillatorLenght = 50.0f;            // in cm
+  bool fEnableNonPerperdicularLOR = false;
+  bool fEnableTOFReconstruction = false;
 };
 
 #endif /*  !SINOGRAMCREATORMC_H */
