@@ -14,8 +14,8 @@ set(projectName MCGeantAnalysis)
 
 ## Auxiliary files
 set(AUXILLIARY_FILES
-  userParams.json
   README.md
+  PARAMETERS.md
   run.sh
 )
 
