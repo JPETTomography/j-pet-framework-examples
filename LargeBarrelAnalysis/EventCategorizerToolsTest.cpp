@@ -20,7 +20,6 @@
 #include "JPetSigCh/JPetSigCh.h"
 
 
-
 BOOST_AUTO_TEST_SUITE(CategoryCheckSuite)
 
 BOOST_AUTO_TEST_CASE(checkFor2GammaTest)
@@ -485,8 +484,8 @@ TVector3 kamilAnihilationPoint( const JPetHit& Hit1, const JPetHit& Hit2)
   double middleX = (Hit1.getPosX() + Hit2.getPosX() ) / 2;
   double middleY = (Hit1.getPosY() + Hit2.getPosY() ) / 2;
   double middleZ = (Hit1.getPosZ() + Hit2.getPosZ() ) / 2;
-  double Fraction = 2 * tof * 29.979246 / VecLength;
-  if ( Hit1.getTime() >= Hit2.getTime() ) {
+  double Fraction =  tof * 29.979246 / VecLength;
+  if ( Hit1.getTime() < Hit2.getTime() ) {
     ReconstructedPosition(0) = middleX + Fraction * ( Hit1.getPosX() - middleX );
     ReconstructedPosition(1) = middleY + Fraction * ( Hit1.getPosY() - middleY );
     ReconstructedPosition(2) = middleZ + Fraction * ( Hit1.getPosZ() - middleZ );
@@ -498,55 +497,120 @@ TVector3 kamilAnihilationPoint( const JPetHit& Hit1, const JPetHit& Hit2)
   return ReconstructedPosition;
 }
 
-//BOOST_AUTO_TEST_CASE(pointAt0x_m5y_0zDifferentMethod)
-//{
+BOOST_AUTO_TEST_CASE(pointAt0x_m5y_0zDifferentMethod)
+{
 
-//double lightSpeed = (29.97924580 / 1000.);
-//double time1 = 40 / lightSpeed;
-//JPetHit firstHit;
-//firstHit.setTime(time1);
-//firstHit.setPos(0.0, -45.0, 0.0);
-//JPetBarrelSlot firstSlot(1, true, "first", 270, 1);
-//firstHit.setBarrelSlot( firstSlot );
+  double lightSpeed = (29.97924580 / 1000.);
+  double time1 = 40 / lightSpeed;
+  JPetHit firstHit;
+  firstHit.setTime(time1);
+  firstHit.setPos(0.0, -45.0, 0.0);
+  JPetBarrelSlot firstSlot(1, true, "first", 270, 1);
+  firstHit.setBarrelSlot( firstSlot );
 
-//double time2 = 50 / lightSpeed;
-//JPetHit secondHit;
-//secondHit.setTime(time2);
-//secondHit.setPos(0.0, 45.0, 0.0);
-//JPetBarrelSlot secondSlot(2, true, "second", 90, 2);
-//secondHit.setBarrelSlot(secondSlot);
+  double time2 = 50 / lightSpeed;
+  JPetHit secondHit;
+  secondHit.setTime(time2);
+  secondHit.setPos(0.0, 45.0, 0.0);
+  JPetBarrelSlot secondSlot(2, true, "second", 90, 2);
+  secondHit.setBarrelSlot(secondSlot);
 
-//TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit);
-//TVector3 point2 = kamilAnihilationPoint(firstHit, secondHit);
-//BOOST_REQUIRE_CLOSE(point.X(), point2.X(), 1);
-//BOOST_REQUIRE_CLOSE(point.Y(), point2.Y(), 1);
-//BOOST_REQUIRE_CLOSE(point.Z(), point2.Z(), 1);
-//}
+  TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit);
+  TVector3 point2 = kamilAnihilationPoint(firstHit, secondHit);
+  BOOST_REQUIRE_CLOSE(point.X(), point2.X(), 1);
+  BOOST_REQUIRE_CLOSE(point.Y(), point2.Y(), 1);
+  BOOST_REQUIRE_CLOSE(point.Z(), point2.Z(), 1);
+}
 
-//BOOST_AUTO_TEST_CASE(pointAt0x_m5y_0zDifferentMethod2)
-//{
+BOOST_AUTO_TEST_CASE(pointAt0x_m5y_0zDifferentMethod2)
+{
 
-//double lightSpeed = (29.97924580 / 1000.);
-//double time1 = 40 / lightSpeed;
-//JPetHit firstHit;
-//firstHit.setTime(time1);
-//firstHit.setPos(0.0, -45.0, 0.0);
-//JPetBarrelSlot firstSlot(1, true, "first", 270, 1);
-//firstHit.setBarrelSlot( firstSlot );
+  double lightSpeed = (29.97924580 / 1000.);
+  double time1 = 40 / lightSpeed;
+  JPetHit firstHit;
+  firstHit.setTime(time1);
+  firstHit.setPos(0.0, -45.0, 0.0);
+  JPetBarrelSlot firstSlot(1, true, "first", 270, 1);
+  firstHit.setBarrelSlot( firstSlot );
 
-//double time2 = 50 / lightSpeed;
-//JPetHit secondHit;
-//secondHit.setTime(time2);
-//secondHit.setPos(0.0, 45.0, 0.0);
-//JPetBarrelSlot secondSlot(2, true, "second", 90, 2);
-//secondHit.setBarrelSlot(secondSlot);
+  double time2 = 50 / lightSpeed;
+  JPetHit secondHit;
+  secondHit.setTime(time2);
+  secondHit.setPos(0.0, 45.0, 0.0);
+  JPetBarrelSlot secondSlot(2, true, "second", 90, 2);
+  secondHit.setBarrelSlot(secondSlot);
 
-//TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit);
-//TVector3 point2 = kamilAnihilationPoint(secondHit, firstHit);
-//BOOST_REQUIRE_CLOSE(point.X(), point2.X(), 1);
-//BOOST_REQUIRE_CLOSE(point.Y(), point2.Y(), 1);
-//BOOST_REQUIRE_CLOSE(point.Z(), point2.Z(), 1);
-//}
+  TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit);
+  TVector3 point2 = kamilAnihilationPoint(secondHit, firstHit);
+  BOOST_REQUIRE_CLOSE(point.X(), point2.X(), 1);
+  BOOST_REQUIRE_CLOSE(point.Y(), point2.Y(), 1);
+  BOOST_REQUIRE_CLOSE(point.Z(), point2.Z(), 1);
+}
+
+BOOST_AUTO_TEST_CASE(selfConsistency_Anihilation)
+{
+
+  double lightSpeed = (29.97924580 / 1000.);
+  double time1 = 40 / lightSpeed;
+  JPetHit firstHit;
+  firstHit.setTime(time1);
+  firstHit.setPos(0.0, -45.0, 0.0);
+  JPetBarrelSlot firstSlot(1, true, "first", 270, 1);
+  firstHit.setBarrelSlot( firstSlot );
+
+  double time2 = 50 / lightSpeed;
+  JPetHit secondHit;
+  secondHit.setTime(time2);
+  secondHit.setPos(0.0, 45.0, 0.0);
+  JPetBarrelSlot secondSlot(2, true, "second", 90, 2);
+  secondHit.setBarrelSlot(secondSlot);
+
+  TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit);
+  TVector3 point2 = EventCategorizerTools::calculateAnnihilationPoint(secondHit, firstHit);
+  BOOST_REQUIRE_CLOSE(point.X(), point2.X(), 1);
+  BOOST_REQUIRE_CLOSE(point.Y(), point2.Y(), 1);
+  BOOST_REQUIRE_CLOSE(point.Z(), point2.Z(), 1);
+}
+
+/// Let's assume  circle with R= 100 cm
+/// anihilation points x= 25, y=25
+/// angle = 45
+/// hit1: x = R *cos(angle)  y = R *sin(angle)
+/// hit2: x = R *-cos(angle) y = R * -sin(angle)=
+/// cos(angle) = sin(angle) = 100 *  0.70710678118 ~= 70.710678
+/// sqrt(25*25*2) ~= 35.3553
+/// t1 = (R - sqrt(25*25 *2)) / c
+/// t2 = (R + sqrt(25*25 *2)) / c
+BOOST_AUTO_TEST_CASE(anotherCheck_Anihilation)
+{
+
+  double lightSpeed = (29.97924580 / 1000.);
+
+  double time1 = (100 - 35.3553)  / lightSpeed;
+  JPetHit firstHit;
+  firstHit.setTime(time1);
+  firstHit.setPos(70.710678, 70.710678, 0.0);
+  JPetBarrelSlot firstSlot(1, true, "first", 270, 1);
+  firstHit.setBarrelSlot( firstSlot );
+
+  double time2 = (100 + 35.3553)  / lightSpeed;
+  JPetHit secondHit;
+  secondHit.setTime(time2);
+  secondHit.setPos(-70.710678, -70.710678, 0.0);
+  JPetBarrelSlot secondSlot(2, true, "second", 90, 2);
+  secondHit.setBarrelSlot(secondSlot);
+
+  TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit);
+  TVector3 point2 = EventCategorizerTools::calculateAnnihilationPoint(secondHit, firstHit);
+  std::cout << "check" << std::endl;
+  BOOST_REQUIRE_CLOSE(point.X(), 25, 1);
+  BOOST_REQUIRE_CLOSE(point.Y(), 25, 1);
+  BOOST_REQUIRE_CLOSE(point.Z(), 0, 1);
+
+  BOOST_REQUIRE_CLOSE(point.X(), point2.X(), 1);
+  BOOST_REQUIRE_CLOSE(point.Y(), point2.Y(), 1);
+  BOOST_REQUIRE_CLOSE(point.Z(), point2.Z(), 1);
+}
 
 BOOST_AUTO_TEST_SUITE_END()
 

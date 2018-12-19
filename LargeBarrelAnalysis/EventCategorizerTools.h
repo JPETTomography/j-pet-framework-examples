@@ -42,13 +42,13 @@ public:
   static double calculateDistance(const JPetHit& hit1, const JPetHit& hit2);
   static double calculateScatteringTime(const JPetHit& hit1, const JPetHit& hit2);
   static double calculateScatteringAngle(const JPetHit& hit1, const JPetHit& hit2);
-/// tof is calculated as delta = time(firstHit) -time(secondHit)
-  static double calculateTOF(const JPetHit& firstHit, const JPetHit& latterHit);
-/// tof is calculated as  time1 -time2
+  /// Tof calculated with the ordered hits with respect to scintillator number
+  static double calculateTOFArrangedByScintilatorNr(const JPetHit& hitA, const JPetHit& hitB);
+  /// Tof is calculated as  time1 -time2. The order is random
+  static double calculateTOF(const JPetHit& hitA, const JPetHit& hitB);
   static double calculateTOF(double time1, double time2);
-  static TVector3 calculateAnnihilationPoint(const JPetHit& firstHit, const JPetHit& secondHit);
-/// tof must be calculated as delta = time(firstHit) -time(secondHit)
-  static TVector3 calculateAnnihilationPoint(const TVector3& firstHit, const TVector3& secondHit, double tof);
+  static TVector3 calculateAnnihilationPoint(const JPetHit& hitA, const JPetHit& hitB);
+  static TVector3 calculateAnnihilationPoint(const TVector3& hitA, const TVector3& hitB, double tof);
   static double calculatePlaneCenterDistance(const JPetHit& firstHit,
       const JPetHit& secondHit, const JPetHit& thirdHit);
   static bool stream2Gamma(const JPetEvent& event, JPetStatistics& stats,

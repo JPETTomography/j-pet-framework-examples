@@ -25,7 +25,9 @@ using namespace std;
 bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats,
     bool saveHistos, double b2bSlotThetaDiff)
 {
-  if (event.getHits().size() < 2) { return false; }
+  if (event.getHits().size() < 2) {
+    return false;
+  }
   for (uint i = 0; i < event.getHits().size(); i++) {
     for (uint j = i + 1; j < event.getHits().size(); j++) {
       JPetHit firstHit, secondHit;
@@ -106,7 +108,9 @@ bool EventCategorizerTools::checkForPrompt(
   for (unsigned i = 0; i < event.getHits().size(); i++) {
     double tot = calculateTOT(event.getHits().at(i));
     if (tot > deexTOTCutMin && tot < deexTOTCutMax) {
-      if (saveHistos) { stats.getHisto1D("Deex_TOT_cut")->Fill(tot); }
+      if (saveHistos) {
+        stats.getHisto1D("Deex_TOT_cut")->Fill(tot);
+      }
       return true;
     }
   }
@@ -118,8 +122,11 @@ bool EventCategorizerTools::checkForPrompt(
 */
 bool EventCategorizerTools::checkForScatter(
   const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double scatterTOFTimeDiff
-) {
-  if (event.getHits().size() < 2) { return false; }
+)
+{
+  if (event.getHits().size() < 2) {
+    return false;
+  }
   for (uint i = 0; i < event.getHits().size(); i++) {
     for (uint j = i + 1; j < event.getHits().size(); j++) {
       JPetHit primaryHit, scatterHit;
@@ -160,21 +167,21 @@ double EventCategorizerTools::calculateTOT(const JPetHit& hit)
   double tot = 0.0;
 
   auto sigALead = hit.getSignalA().getRecoSignal().getRawSignal()
-    .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+                  .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
   auto sigBLead = hit.getSignalB().getRecoSignal().getRawSignal()
-    .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+                  .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
   auto sigATrail = hit.getSignalA().getRecoSignal().getRawSignal()
-    .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+                   .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
   auto sigBTrail = hit.getSignalB().getRecoSignal().getRawSignal()
-    .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+                   .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
 
-  if (sigALead.size() > 0 && sigATrail.size() > 0){
-    for (unsigned i = 0; i < sigALead.size() && i < sigATrail.size(); i++){
+  if (sigALead.size() > 0 && sigATrail.size() > 0) {
+    for (unsigned i = 0; i < sigALead.size() && i < sigATrail.size(); i++) {
       tot += (sigATrail.at(i).getValue() - sigALead.at(i).getValue());
     }
   }
-  if (sigBLead.size() > 0 && sigBTrail.size() > 0){
-    for (unsigned i = 0; i < sigBLead.size() && i < sigBTrail.size(); i++){
+  if (sigBLead.size() > 0 && sigBTrail.size() > 0) {
+    for (unsigned i = 0; i < sigBLead.size() && i < sigBTrail.size(); i++) {
       tot += (sigBTrail.at(i).getValue() - sigBLead.at(i).getValue());
     }
   }
@@ -211,16 +218,16 @@ double EventCategorizerTools::calculateScatteringAngle(const JPetHit& hit1, cons
 /**
 * Calculation point in 3D, where annihilation occured
 */
-TVector3 EventCategorizerTools::calculateAnnihilationPoint(const JPetHit& firstHit, const JPetHit& secondHit)
+TVector3 EventCategorizerTools::calculateAnnihilationPoint(const JPetHit& hitA, const JPetHit& hitB)
 {
-  double tof = EventCategorizerTools::calculateTOF(firstHit, secondHit);
-  return calculateAnnihilationPoint(firstHit.getPos(), secondHit.getPos(), tof);
+  double tof = EventCategorizerTools::calculateTOF(hitA, hitB);
+  return calculateAnnihilationPoint(hitA.getPos(), hitB.getPos(), tof);
 }
 
-TVector3 EventCategorizerTools::calculateAnnihilationPoint(const TVector3& firstHit, const TVector3& secondHit, double tof)
+TVector3 EventCategorizerTools::calculateAnnihilationPoint(const TVector3& hitA, const TVector3& hitB, double tof)
 {
-  TVector3 middleOfLOR = 0.5 * (firstHit + secondHit);
-  TVector3 versorOnLOR = (secondHit - firstHit).Unit()  ;
+  TVector3 middleOfLOR = 0.5 * (hitA + hitB);
+  TVector3 versorOnLOR = (hitB - hitA).Unit()  ;
 
   double shift = 0.5 * tof  * kLightVelocity_cm_ns / 1000.0;
   TVector3 annihilationPoint(middleOfLOR.X() + shift * versorOnLOR.X(),
@@ -229,9 +236,18 @@ TVector3 EventCategorizerTools::calculateAnnihilationPoint(const TVector3& first
   return annihilationPoint;
 }
 
-double EventCategorizerTools::calculateTOF(const JPetHit& firstHit, const JPetHit& secondHit)
+double EventCategorizerTools::calculateTOFArrangedByScintilatorNr(const JPetHit& hitA, const JPetHit& hitB)
 {
-  return EventCategorizerTools::calculateTOF(firstHit.getTime(), secondHit.getTime());
+  if (hitA.getBarrelSlot().getTheta() < hitB.getBarrelSlot().getTheta()) {
+    return calculateTOF(hitA, hitB);
+  } else {
+    return calculateTOF(hitB, hitA);
+  }
+}
+
+double EventCategorizerTools::calculateTOF(const JPetHit& hitA, const JPetHit& hitB)
+{
+  return EventCategorizerTools::calculateTOF(hitA.getTime(), hitB.getTime());
 }
 
 double EventCategorizerTools::calculateTOF(double time1, double time2)
@@ -263,8 +279,11 @@ double EventCategorizerTools::calculatePlaneCenterDistance(
 bool EventCategorizerTools::stream2Gamma(
   const JPetEvent& event, JPetStatistics& stats, bool saveHistos,
   double b2bSlotThetaDiff, double b2bTimeDiff
-){
-  if (event.getHits().size() < 2) { return false; }
+)
+{
+  if (event.getHits().size() < 2) {
+    return false;
+  }
   for (uint i = 0; i < event.getHits().size(); i++) {
     for (uint j = i + 1; j < event.getHits().size(); j++) {
       JPetHit firstHit, secondHit;
@@ -308,8 +327,11 @@ bool EventCategorizerTools::stream2Gamma(
 bool EventCategorizerTools::stream3Gamma(
   const JPetEvent& event, JPetStatistics& stats, bool saveHistos,
   double d3SlotThetaMin, double d3TimeDiff, double d3PlaneCenterDist
-) {
-  if (event.getHits().size() < 3) { return false; }
+)
+{
+  if (event.getHits().size() < 3) {
+    return false;
+  }
   for (uint i = 0; i < event.getHits().size(); i++) {
     for (uint j = i + 1; j < event.getHits().size(); j++) {
       for (uint k = j + 1; k < event.getHits().size(); k++) {
