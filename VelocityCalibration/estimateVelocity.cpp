@@ -8,9 +8,13 @@
 #include "TF1.h"
 #include "TStyle.h"
 #include "TGraphErrors.h"
+#include <map>
+#include <algorithm>
 
 std::vector< std::pair<int,double> > takeData(const std::string file, const char thresholdLabel);
 std::pair<double,double> plotVelocity(std::vector<double> positions, std::vector<double> means, int strip, std::vector<double> errors, char thresholdLabel);
+
+
 
 struct positionData{
 	double positionValue;
@@ -29,7 +33,7 @@ struct scintData{
 };
 
 std::vector<scintData> takeData(const std::string file);
-void velocityCalc(std::vector<scintData>& data, const char thrLabel, const std::string& outPath);
+void velocityCalc(std::vector<scintData>& data, const std::string& outPath);
 void parserTest(std::vector<scintData>& data, const char thrLabel);
 
 int main(int argc, char** argv)
@@ -58,11 +62,8 @@ int main(int argc, char** argv)
 	  return 1;
 	}
 	
-	velocityCalc( data , 'a', outPath);
-	velocityCalc( data , 'b', outPath);
-	velocityCalc( data , 'c', outPath);
-	velocityCalc( data , 'd', outPath);
-
+	velocityCalc( data , outPath);
+	
 	return 0;
 }
 
@@ -87,37 +88,50 @@ void parserTest(std::vector<scintData>& data, const char thrLabel)
 }
 
 
-void velocityCalc(std::vector<scintData>& data, const char thrLabel, const std::string& outPath)
+void velocityCalc(std::vector<scintData>& data, const std::string& outPath)
 {
-
+	std::map<char, int> thresholdLabelToInt = {{'a', 1}, {'b',2}, {'c',3}, {'d',4}};
 	std::ofstream results;
-	std::string title = outPath+"resultsForThreshold";
-	title+= thrLabel;
+	std::string title = outPath+"EffVelocities";
 	title+= ".txt";
 	results.open( title.c_str() );
-	for(auto scintillator : data)
+	for(const auto& scintillator : data)
 	{	
-		std::vector<double> positionsForFit;
-		std::vector<double> timesForFit;	
-		std::vector<double> errorsForFit;
-		for(auto threshold : scintillator.thrData)
+		for(const auto& threshold : scintillator.thrData)
 		{
-			
-			if( thrLabel == threshold.thresholdLabel )
-			{			
-				for( auto position : threshold.positions )
-				{
-					std::cout << "\t" << position.positionValue << "\t" << position.deltaT << "\t" << position.deltaTError <<std::endl;
-					positionsForFit.push_back( position.positionValue );
-					timesForFit.push_back( position.deltaT );
-					errorsForFit.push_back( position.deltaTError);
-					std::cout << positionsForFit.size() << std::endl;
-					std::cout << timesForFit.size() << std::endl;
-				}
+			std::vector<double> positionsForFit;
+			std::vector<double> timesForFit;	
+			std::vector<double> errorsForFit;
+			for(const auto& position : threshold.positions )
+			{
+				positionsForFit.push_back( position.positionValue );
+				timesForFit.push_back( position.deltaT );
+				errorsForFit.push_back( position.deltaTError);
 			}
+			std::pair<double,double> velocity = plotVelocity( positionsForFit, timesForFit, scintillator.ID, errorsForFit, threshold.thresholdLabel);
+			int layer = 0, layerReset = 0;
+			if( scintillator.ID < 49 )
+			{
+			  layer = 1;
+			}
+			else if( scintillator.ID > 48 && scintillator.ID < 97 )
+			{
+			  layer = 2; 
+			  layerReset = 48;
+			}
+			else 
+			{
+			  layer = 3;
+			  layerReset = 96;
+			}
+			
+			results << layer << "\t" << scintillator.ID - layerReset << "\tA\t" << thresholdLabelToInt[threshold.thresholdLabel];
+			results << "\t" << velocity.first << "\t" << velocity.second;
+			results << "\t0\t0\t0\t0\t0\t0" << std::endl;
+			results << layer << "\t" << scintillator.ID - layerReset << "\tB\t" << thresholdLabelToInt[threshold.thresholdLabel];
+			results << "\t" << velocity.first << "\t" << velocity.second;
+			results << "\t0\t0\t0\t0\t0\t0" << std::endl;
 		}
-		std::pair<double,double> velocity = plotVelocity( positionsForFit, timesForFit, scintillator.ID, errorsForFit, thrLabel);
-		results << scintillator.ID << "\t" << velocity.first << "\t" << velocity.second << std::endl;
 	}
 
 	results.close();
@@ -159,6 +173,22 @@ int findScintillatorIn( std::vector<scintData>& data, int ID)
 	return -1;
 }
 
+bool ifThresholdIsIn( scintData& data, char label)
+{
+	return std::any_of(data.thrData.begin(), data.thrData.end(), [label]( const thresholdData& thr) {return label == thr.thresholdLabel; });
+}
+
+int findThresholdIn( scintData& data, char label)
+{
+	for( unsigned int i = 0; i < data.thrData.size(); i++ )
+	{
+		if( label == data.thrData[i].thresholdLabel )
+			return i;
+	}
+	return -1;
+}
+
+
 std::vector<scintData> takeData(const std::string file){
 	std::ifstream dataFile;
 	dataFile.open(file.c_str());
@@ -190,11 +220,21 @@ std::vector<scintData> takeData(const std::string file){
 				pos.deltaT = mean;
 				pos.deltaTError = meanError;
 				
+				//IF THR IS IN SCINTILLATOR
+				if( ifThresholdIsIn( allData[scintIndex], thrLabel ) )
+				{
+				  int thrIndex = findThresholdIn( allData[scintIndex], thrLabel );
+				  allData[ scintIndex ].thrData[thrIndex].positions.push_back(pos);
+				}
+				else
+				{
+				//ELSE MAKE A NEW THRESHOLD AND FILL
 				thresholdData thr;
 				thr.thresholdLabel = thrLabel;
 				thr.positions.push_back(pos);
 				
 				allData[ scintIndex ].thrData.push_back(thr);
+				}
 			}
 			else{
 				//ELSE MAKE NEW SCINTILLATOR AND FILL
