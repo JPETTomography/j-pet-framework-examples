@@ -34,5 +34,5 @@ if [ "$RUN_VELOCITY" = "1" ]; then
     executeCommand "rm -rf calibrationRoot*"
     executeCommand "rm -rf Results"
     executeCommand "/usr/local/bin/run_velocity_calibration.sh"
-    executeCommand "/usr/local/bin/compare_velocity_results.py calibrationRoot5EffVelocities.txt thresholdResults/resultsForThresholda.txt 5"
+    executeCommand "/usr/local/bin/compare_velocity_results.py calibrationRoot6EffVelocities.txt thresholdResults/EffVelocities.txt 5"
 fi
