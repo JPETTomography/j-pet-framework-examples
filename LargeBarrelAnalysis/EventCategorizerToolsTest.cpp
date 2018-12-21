@@ -20,6 +20,10 @@
 #include "JPetSigCh/JPetSigCh.h"
 
 
+/// Accuracy for BOOST_REQUIRE_CLOSE comparisons
+const double kEpsilon = 0.01;
+const double kLightVelocity_cm_ps = kLightVelocity_cm_ns / 1000.;
+
 BOOST_AUTO_TEST_SUITE(CategoryCheckSuite)
 
 BOOST_AUTO_TEST_CASE(checkFor2GammaTest)
@@ -254,9 +258,9 @@ BOOST_AUTO_TEST_CASE(checkForPromptTest_checkTOTCalc)
   hit2.setSignals(physSignal2A, physSignal2B);
   hit3.setSignals(physSignal3A, physSignal3B);
 
-  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit1), 0.0, 0.1);
-  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit2), 56.0, 0.1);
-  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit3), 560.0, 0.1);
+  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit1), 0.0, kEpsilon);
+  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit2), 56.0, kEpsilon);
+  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit3), 560.0, kEpsilon);
 
   JPetEvent event1;
   JPetEvent event2;
@@ -316,7 +320,7 @@ BOOST_AUTO_TEST_CASE(checkHitOrder)
   firstHit.setTime(500.0);
   secondHit.setTime(100.0);
 
-  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOF(firstHit, secondHit), 400, 0.100);
+  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOF(firstHit, secondHit), 400, kEpsilon);
 }
 
 BOOST_AUTO_TEST_CASE(checkTOFsignNegative)
@@ -343,9 +347,9 @@ BOOST_AUTO_TEST_CASE(pointAtCenter1)
   TVector3 secondHit(-5.0, 0.0, 0.0);
   double tof = 0;
   TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit, tof);
-  BOOST_REQUIRE_CLOSE(point.X(), 0, 0.001);
-  BOOST_REQUIRE_CLOSE(point.Y(), 0, 0.001);
-  BOOST_REQUIRE_CLOSE(point.Z(), 0, 0.001);
+  BOOST_REQUIRE_CLOSE(point.X(), 0, kEpsilon);
+  BOOST_REQUIRE_CLOSE(point.Y(), 0, kEpsilon);
+  BOOST_REQUIRE_CLOSE(point.Z(), 0, kEpsilon);
 }
 
 BOOST_AUTO_TEST_CASE(pointAtCenter2)
@@ -354,48 +358,51 @@ BOOST_AUTO_TEST_CASE(pointAtCenter2)
   TVector3 secondHit(-5.0, 5.0, 0.0);
   double tof = 0;
   TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit, tof);
-  BOOST_REQUIRE_CLOSE(point.X(), 0, 0.001);
-  BOOST_REQUIRE_CLOSE(point.Y(), 0, 0.001);
-  BOOST_REQUIRE_CLOSE(point.Z(), 0, 0.001);
+  BOOST_REQUIRE_CLOSE(point.X(), 0, kEpsilon);
+  BOOST_REQUIRE_CLOSE(point.Y(), 0, kEpsilon);
+  BOOST_REQUIRE_CLOSE(point.Z(), 0, kEpsilon);
 }
 
 BOOST_AUTO_TEST_CASE(ExtremeCase1)
 {
-  /// The annihilation point is at (5.0,0,0)
+  /// The annihilation point is at (5.0,0,0) near scintillator
+  /// t1 = 0 t2 = path/c
   TVector3 firstHit(5.0, 0.0, 0.0);
   TVector3 secondHit(-5.0, 0.0, 0.0);
   double path = (firstHit - secondHit) .Mag();
-  double tof = -path / kLightVelocity_cm_ns;
+  double tof = -path / kLightVelocity_cm_ps;
   TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit, tof);
-  BOOST_REQUIRE_CLOSE(point.X(), 5, 0.001);
-  BOOST_REQUIRE_CLOSE(point.Y(), 0, 0.001);
-  BOOST_REQUIRE_CLOSE(point.Z(), 0, 0.001);
+  BOOST_REQUIRE_CLOSE(point.X(), 5, kEpsilon);
+  BOOST_REQUIRE_CLOSE(point.Y(), 0, kEpsilon);
+  BOOST_REQUIRE_CLOSE(point.Z(), 0, kEpsilon);
 }
 
 BOOST_AUTO_TEST_CASE(ExtremeCase2)
 {
   /// The annihilation point is at (-5.0,0,0)
+  /// t1 = path/c  t2 = 0
   TVector3 firstHit(5.0, 0.0, 0.0);
   TVector3 secondHit(-5.0, 0.0, 0.0);
   double path = (firstHit - secondHit) .Mag();
-  double tof = path / kLightVelocity_cm_ns;
+  double tof = path / kLightVelocity_cm_ps;
   TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit, tof);
-  BOOST_REQUIRE_CLOSE(point.X(), -5, 0.001);
-  BOOST_REQUIRE_CLOSE(point.Y(), 0, 0.001);
-  BOOST_REQUIRE_CLOSE(point.Z(), 0, 0.001);
+  BOOST_REQUIRE_CLOSE(point.X(), -5, kEpsilon);
+  BOOST_REQUIRE_CLOSE(point.Y(), 0, kEpsilon);
+  BOOST_REQUIRE_CLOSE(point.Z(), 0, kEpsilon);
 }
 
 BOOST_AUTO_TEST_CASE(ExtremeCase3)
 {
   /// The annihilation point is at (5.0,5.0,0)
+  /// t1 = 0  t2 = path/c
   TVector3 firstHit(5.0, 5.0, 0.0);
   TVector3 secondHit(-5.0, -5.0, 0.0);
   double path = (firstHit - secondHit) .Mag();
-  double tof = -path / kLightVelocity_cm_ns;
+  double tof = -path / kLightVelocity_cm_ps;
   TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit, tof);
-  BOOST_REQUIRE_CLOSE(point.X(), 5, 0.001);
-  BOOST_REQUIRE_CLOSE(point.Y(), 5, 0.001);
-  BOOST_REQUIRE_CLOSE(point.Z(), 0, 0.001);
+  BOOST_REQUIRE_CLOSE(point.X(), 5, kEpsilon);
+  BOOST_REQUIRE_CLOSE(point.Y(), 5, kEpsilon);
+  BOOST_REQUIRE_CLOSE(point.Z(), 0, kEpsilon);
 }
 
 BOOST_AUTO_TEST_CASE(ExtremeCase4)
@@ -403,13 +410,13 @@ BOOST_AUTO_TEST_CASE(ExtremeCase4)
   /// The annihilation point is at (5.0,-5.0,0)
   TVector3 firstHit(5.0, -5.0, 0.0);
   TVector3 secondHit(-5.0, 5.0, 0.0);
+  /// t1 = 0  t2 = path/c
   double path = (firstHit - secondHit) .Mag();
-  /// t1 = 0 t2 = path/c
-  double tof = -path / kLightVelocity_cm_ns;
+  double tof = -path / kLightVelocity_cm_ps;
   TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit, tof);
-  BOOST_REQUIRE_CLOSE(point.X(), 5, 0.001);
-  BOOST_REQUIRE_CLOSE(point.Y(), -5, 0.001);
-  BOOST_REQUIRE_CLOSE(point.Z(), 0, 0.001);
+  BOOST_REQUIRE_CLOSE(point.X(), 5, kEpsilon);
+  BOOST_REQUIRE_CLOSE(point.Y(), -5, kEpsilon);
+  BOOST_REQUIRE_CLOSE(point.Z(), 0, kEpsilon);
 }
 
 BOOST_AUTO_TEST_CASE(pointAtCenter)
@@ -425,9 +432,9 @@ BOOST_AUTO_TEST_CASE(pointAtCenter)
   firstHit.setBarrelSlot(firstSlot);
   secondHit.setBarrelSlot(secondSlot);
   TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit);
-  BOOST_REQUIRE_CLOSE(point.X(), 0, 0.001);
-  BOOST_REQUIRE_CLOSE(point.Y(), 0, 0.001);
-  BOOST_REQUIRE_CLOSE(point.Z(), 0, 0.001);
+  BOOST_REQUIRE_CLOSE(point.X(), 0, kEpsilon);
+  BOOST_REQUIRE_CLOSE(point.Y(), 0, kEpsilon);
+  BOOST_REQUIRE_CLOSE(point.Z(), 0, kEpsilon);
 }
 
 BOOST_AUTO_TEST_CASE(pointAt0x_5y_0z)
@@ -493,17 +500,18 @@ TVector3 kamilAnihilationPoint( const JPetHit& Hit1, const JPetHit& Hit2)
   return ReconstructedPosition;
 }
 
-BOOST_AUTO_TEST_CASE(pointAt0x_m5y_0zDifferentMethod)
+BOOST_AUTO_TEST_CASE(selfcosistency_check)
 {
 
-  double time1 = 40 / kLightVelocity_cm_ns;
+  /// Time values are arbitrary just to check if both methods return the same values.
+  double time1 = 40 / kLightVelocity_cm_ps; ///artibrary value
   JPetHit firstHit;
   firstHit.setTime(time1);
   firstHit.setPos(0.0, -45.0, 0.0);
   JPetBarrelSlot firstSlot(1, true, "first", 270, 1);
   firstHit.setBarrelSlot( firstSlot );
 
-  double time2 = 50 / kLightVelocity_cm_ns;
+  double time2 = 50 / kLightVelocity_cm_ps; ///artibrary value
   JPetHit secondHit;
   secondHit.setTime(time2);
   secondHit.setPos(0.0, 45.0, 0.0);
@@ -512,46 +520,22 @@ BOOST_AUTO_TEST_CASE(pointAt0x_m5y_0zDifferentMethod)
 
   TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit);
   TVector3 point2 = kamilAnihilationPoint(firstHit, secondHit);
-  BOOST_REQUIRE_CLOSE(point.X(), point2.X(), 1);
-  BOOST_REQUIRE_CLOSE(point.Y(), point2.Y(), 1);
-  BOOST_REQUIRE_CLOSE(point.Z(), point2.Z(), 1);
+  BOOST_REQUIRE_CLOSE(point.X(), point2.X(), kEpsilon);
+  BOOST_REQUIRE_CLOSE(point.Y(), point2.Y(), kEpsilon);
+  BOOST_REQUIRE_CLOSE(point.Z(), point2.Z(), kEpsilon);
 }
 
-BOOST_AUTO_TEST_CASE(pointAt0x_m5y_0zDifferentMethod2)
+BOOST_AUTO_TEST_CASE(selfConsistency_change_order)
 {
 
-  double time1 = 40 / kLightVelocity_cm_ns;
+  double time1 = 40 / kLightVelocity_cm_ps;
   JPetHit firstHit;
   firstHit.setTime(time1);
   firstHit.setPos(0.0, -45.0, 0.0);
   JPetBarrelSlot firstSlot(1, true, "first", 270, 1);
   firstHit.setBarrelSlot( firstSlot );
 
-  double time2 = 50 / kLightVelocity_cm_ns;
-  JPetHit secondHit;
-  secondHit.setTime(time2);
-  secondHit.setPos(0.0, 45.0, 0.0);
-  JPetBarrelSlot secondSlot(2, true, "second", 90, 2);
-  secondHit.setBarrelSlot(secondSlot);
-
-  TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit);
-  TVector3 point2 = kamilAnihilationPoint(secondHit, firstHit);
-  BOOST_REQUIRE_CLOSE(point.X(), point2.X(), 1);
-  BOOST_REQUIRE_CLOSE(point.Y(), point2.Y(), 1);
-  BOOST_REQUIRE_CLOSE(point.Z(), point2.Z(), 1);
-}
-
-BOOST_AUTO_TEST_CASE(selfConsistency_Anihilation)
-{
-
-  double time1 = 40 / kLightVelocity_cm_ns;
-  JPetHit firstHit;
-  firstHit.setTime(time1);
-  firstHit.setPos(0.0, -45.0, 0.0);
-  JPetBarrelSlot firstSlot(1, true, "first", 270, 1);
-  firstHit.setBarrelSlot( firstSlot );
-
-  double time2 = 50 / kLightVelocity_cm_ns;
+  double time2 = 50 / kLightVelocity_cm_ps;
   JPetHit secondHit;
   secondHit.setTime(time2);
   secondHit.setPos(0.0, 45.0, 0.0);
@@ -560,9 +544,9 @@ BOOST_AUTO_TEST_CASE(selfConsistency_Anihilation)
 
   TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit);
   TVector3 point2 = EventCategorizerTools::calculateAnnihilationPoint(secondHit, firstHit);
-  BOOST_REQUIRE_CLOSE(point.X(), point2.X(), 1);
-  BOOST_REQUIRE_CLOSE(point.Y(), point2.Y(), 1);
-  BOOST_REQUIRE_CLOSE(point.Z(), point2.Z(), 1);
+  BOOST_REQUIRE_CLOSE(point.X(), point2.X(), kEpsilon);
+  BOOST_REQUIRE_CLOSE(point.Y(), point2.Y(), kEpsilon);
+  BOOST_REQUIRE_CLOSE(point.Z(), point2.Z(), kEpsilon);
 }
 
 /// Let's assume  circle with R= 100 cm
@@ -577,15 +561,17 @@ BOOST_AUTO_TEST_CASE(selfConsistency_Anihilation)
 BOOST_AUTO_TEST_CASE(anotherCheck_Anihilation)
 {
 
-
-  double time1 = (100 - 35.3553)  / kLightVelocity_cm_ns;
+  /// 100 is the circle radius, 35.35553 is the shift from 0,0,0, to anihillation point
+  /// The difference give the path length that first photon travels
+  double time1 = (100 - 35.3553)  / kLightVelocity_cm_ps;
   JPetHit firstHit;
   firstHit.setTime(time1);
   firstHit.setPos(70.710678, 70.710678, 0.0);
   JPetBarrelSlot firstSlot(1, true, "first", 270, 1);
   firstHit.setBarrelSlot( firstSlot );
 
-  double time2 = (100 + 35.3553)  / kLightVelocity_cm_ns;
+  /// The sum give the path length that second photon travels
+  double time2 = (100 + 35.3553)  / kLightVelocity_cm_ps;
   JPetHit secondHit;
   secondHit.setTime(time2);
   secondHit.setPos(-70.710678, -70.710678, 0.0);
@@ -595,13 +581,13 @@ BOOST_AUTO_TEST_CASE(anotherCheck_Anihilation)
   TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit);
   TVector3 point2 = EventCategorizerTools::calculateAnnihilationPoint(secondHit, firstHit);
   std::cout << "check" << std::endl;
-  BOOST_REQUIRE_CLOSE(point.X(), 25, 1);
-  BOOST_REQUIRE_CLOSE(point.Y(), 25, 1);
-  BOOST_REQUIRE_CLOSE(point.Z(), 0, 1);
+  BOOST_REQUIRE_CLOSE(point.X(), 25, kEpsilon);
+  BOOST_REQUIRE_CLOSE(point.Y(), 25, kEpsilon);
+  BOOST_REQUIRE_CLOSE(point.Z(), 0, kEpsilon);
 
-  BOOST_REQUIRE_CLOSE(point.X(), point2.X(), 1);
-  BOOST_REQUIRE_CLOSE(point.Y(), point2.Y(), 1);
-  BOOST_REQUIRE_CLOSE(point.Z(), point2.Z(), 1);
+  BOOST_REQUIRE_CLOSE(point.X(), point2.X(), kEpsilon);
+  BOOST_REQUIRE_CLOSE(point.Y(), point2.Y(), kEpsilon);
+  BOOST_REQUIRE_CLOSE(point.Z(), point2.Z(), kEpsilon);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
