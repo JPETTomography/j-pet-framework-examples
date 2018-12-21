@@ -42,11 +42,13 @@ public:
   static double calculateDistance(const JPetHit& hit1, const JPetHit& hit2);
   static double calculateScatteringTime(const JPetHit& hit1, const JPetHit& hit2);
   static double calculateScatteringAngle(const JPetHit& hit1, const JPetHit& hit2);
-  /// Tof calculated with the ordered hits with respect to scintillator number
-  static double calculateTOFArrangedByScintilatorNr(const JPetHit& hitA, const JPetHit& hitB);
-  /// Tof is calculated as  time1 -time2. The order is random
+  /// Tof is calculated as  time1 -time2.
   static double calculateTOF(const JPetHit& hitA, const JPetHit& hitB);
   static double calculateTOF(double time1, double time2);
+  /// Tof calculated with the ordered hits with respect to scintillator number.
+  /// The first one will be hit with smaller theta angle.
+  /// See also: http://koza.if.uj.edu.pl/petwiki/index.php/Coordinate_system_in_Big_Barrel
+  static double calculateTOFByConvention(const JPetHit& hitA, const JPetHit& hitB);
   static TVector3 calculateAnnihilationPoint(const JPetHit& hitA, const JPetHit& hitB);
   static TVector3 calculateAnnihilationPoint(const TVector3& hitA, const TVector3& hitB, double tof);
   static double calculatePlaneCenterDistance(const JPetHit& firstHit,

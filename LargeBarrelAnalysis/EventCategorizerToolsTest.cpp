@@ -477,7 +477,7 @@ BOOST_AUTO_TEST_CASE(pointAt0x_m5y_0z)
   BOOST_REQUIRE_CLOSE(point.Z(), 0.0, 1);
 }
 
-TVector3 kamilAnihilationPoint( const JPetHit& Hit1, const JPetHit& Hit2)
+TVector3 testAnihilationPoint( const JPetHit& Hit1, const JPetHit& Hit2)
 {
   TVector3 ReconstructedPosition;
   double tof = fabs( Hit1.getTime() - Hit2.getTime() ) / 1000;
@@ -519,7 +519,7 @@ BOOST_AUTO_TEST_CASE(selfcosistency_check)
   secondHit.setBarrelSlot(secondSlot);
 
   TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit);
-  TVector3 point2 = kamilAnihilationPoint(firstHit, secondHit);
+  TVector3 point2 = testAnihilationPoint(firstHit, secondHit);
   BOOST_REQUIRE_CLOSE(point.X(), point2.X(), kEpsilon);
   BOOST_REQUIRE_CLOSE(point.Y(), point2.Y(), kEpsilon);
   BOOST_REQUIRE_CLOSE(point.Z(), point2.Z(), kEpsilon);

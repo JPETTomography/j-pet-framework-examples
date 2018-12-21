@@ -236,7 +236,7 @@ TVector3 EventCategorizerTools::calculateAnnihilationPoint(const TVector3& hitA,
   return annihilationPoint;
 }
 
-double EventCategorizerTools::calculateTOFArrangedByScintilatorNr(const JPetHit& hitA, const JPetHit& hitB)
+double EventCategorizerTools::calculateTOFByConvention(const JPetHit& hitA, const JPetHit& hitB)
 {
   if (hitA.getBarrelSlot().getTheta() < hitB.getBarrelSlot().getTheta()) {
     return calculateTOF(hitA, hitB);
