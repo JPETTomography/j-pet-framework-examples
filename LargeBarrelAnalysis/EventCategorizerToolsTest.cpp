@@ -481,7 +481,7 @@ TVector3 testAnihilationPoint( const JPetHit& Hit1, const JPetHit& Hit2)
 {
   TVector3 ReconstructedPosition;
   double tof = fabs( Hit1.getTime() - Hit2.getTime() ) / 1000;
-  double VecLength = sqrt( pow(Hit1.getPosX() - Hit2.getPosX(), 2)	// Pos in cm
+  double VecLength = sqrt( pow(Hit1.getPosX() - Hit2.getPosX(), 2)
                            + pow(Hit1.getPosY() - Hit2.getPosY(), 2)
                            + pow(Hit1.getPosZ() - Hit2.getPosZ(), 2) );
   double middleX = (Hit1.getPosX() + Hit2.getPosX() ) / 2;
