@@ -365,8 +365,7 @@ BOOST_AUTO_TEST_CASE(ExtremeCase1)
   TVector3 firstHit(5.0, 0.0, 0.0);
   TVector3 secondHit(-5.0, 0.0, 0.0);
   double path = (firstHit - secondHit) .Mag();
-  double lightSpeed = 29.97924580 / 1000.;
-  double tof = -path / lightSpeed;
+  double tof = -path / kLightVelocity_cm_ns;
   TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit, tof);
   BOOST_REQUIRE_CLOSE(point.X(), 5, 0.001);
   BOOST_REQUIRE_CLOSE(point.Y(), 0, 0.001);
@@ -379,8 +378,7 @@ BOOST_AUTO_TEST_CASE(ExtremeCase2)
   TVector3 firstHit(5.0, 0.0, 0.0);
   TVector3 secondHit(-5.0, 0.0, 0.0);
   double path = (firstHit - secondHit) .Mag();
-  double lightSpeed = 29.97924580 / 1000.;
-  double tof = path / lightSpeed;
+  double tof = path / kLightVelocity_cm_ns;
   TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit, tof);
   BOOST_REQUIRE_CLOSE(point.X(), -5, 0.001);
   BOOST_REQUIRE_CLOSE(point.Y(), 0, 0.001);
@@ -393,8 +391,7 @@ BOOST_AUTO_TEST_CASE(ExtremeCase3)
   TVector3 firstHit(5.0, 5.0, 0.0);
   TVector3 secondHit(-5.0, -5.0, 0.0);
   double path = (firstHit - secondHit) .Mag();
-  double lightSpeed = 29.97924580 / 1000.;
-  double tof = -path / lightSpeed;
+  double tof = -path / kLightVelocity_cm_ns;
   TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit, tof);
   BOOST_REQUIRE_CLOSE(point.X(), 5, 0.001);
   BOOST_REQUIRE_CLOSE(point.Y(), 5, 0.001);
@@ -407,9 +404,8 @@ BOOST_AUTO_TEST_CASE(ExtremeCase4)
   TVector3 firstHit(5.0, -5.0, 0.0);
   TVector3 secondHit(-5.0, 5.0, 0.0);
   double path = (firstHit - secondHit) .Mag();
-  double lightSpeed = (29.97924580 / 1000.);
   /// t1 = 0 t2 = path/c
-  double tof = -path / lightSpeed;
+  double tof = -path / kLightVelocity_cm_ns;
   TVector3 point = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit, tof);
   BOOST_REQUIRE_CLOSE(point.X(), 5, 0.001);
   BOOST_REQUIRE_CLOSE(point.Y(), -5, 0.001);
@@ -500,15 +496,14 @@ TVector3 kamilAnihilationPoint( const JPetHit& Hit1, const JPetHit& Hit2)
 BOOST_AUTO_TEST_CASE(pointAt0x_m5y_0zDifferentMethod)
 {
 
-  double lightSpeed = (29.97924580 / 1000.);
-  double time1 = 40 / lightSpeed;
+  double time1 = 40 / kLightVelocity_cm_ns;
   JPetHit firstHit;
   firstHit.setTime(time1);
   firstHit.setPos(0.0, -45.0, 0.0);
   JPetBarrelSlot firstSlot(1, true, "first", 270, 1);
   firstHit.setBarrelSlot( firstSlot );
 
-  double time2 = 50 / lightSpeed;
+  double time2 = 50 / kLightVelocity_cm_ns;
   JPetHit secondHit;
   secondHit.setTime(time2);
   secondHit.setPos(0.0, 45.0, 0.0);
@@ -525,15 +520,14 @@ BOOST_AUTO_TEST_CASE(pointAt0x_m5y_0zDifferentMethod)
 BOOST_AUTO_TEST_CASE(pointAt0x_m5y_0zDifferentMethod2)
 {
 
-  double lightSpeed = (29.97924580 / 1000.);
-  double time1 = 40 / lightSpeed;
+  double time1 = 40 / kLightVelocity_cm_ns;
   JPetHit firstHit;
   firstHit.setTime(time1);
   firstHit.setPos(0.0, -45.0, 0.0);
   JPetBarrelSlot firstSlot(1, true, "first", 270, 1);
   firstHit.setBarrelSlot( firstSlot );
 
-  double time2 = 50 / lightSpeed;
+  double time2 = 50 / kLightVelocity_cm_ns;
   JPetHit secondHit;
   secondHit.setTime(time2);
   secondHit.setPos(0.0, 45.0, 0.0);
@@ -550,15 +544,14 @@ BOOST_AUTO_TEST_CASE(pointAt0x_m5y_0zDifferentMethod2)
 BOOST_AUTO_TEST_CASE(selfConsistency_Anihilation)
 {
 
-  double lightSpeed = (29.97924580 / 1000.);
-  double time1 = 40 / lightSpeed;
+  double time1 = 40 / kLightVelocity_cm_ns;
   JPetHit firstHit;
   firstHit.setTime(time1);
   firstHit.setPos(0.0, -45.0, 0.0);
   JPetBarrelSlot firstSlot(1, true, "first", 270, 1);
   firstHit.setBarrelSlot( firstSlot );
 
-  double time2 = 50 / lightSpeed;
+  double time2 = 50 / kLightVelocity_cm_ns;
   JPetHit secondHit;
   secondHit.setTime(time2);
   secondHit.setPos(0.0, 45.0, 0.0);
@@ -584,16 +577,15 @@ BOOST_AUTO_TEST_CASE(selfConsistency_Anihilation)
 BOOST_AUTO_TEST_CASE(anotherCheck_Anihilation)
 {
 
-  double lightSpeed = (29.97924580 / 1000.);
 
-  double time1 = (100 - 35.3553)  / lightSpeed;
+  double time1 = (100 - 35.3553)  / kLightVelocity_cm_ns;
   JPetHit firstHit;
   firstHit.setTime(time1);
   firstHit.setPos(70.710678, 70.710678, 0.0);
   JPetBarrelSlot firstSlot(1, true, "first", 270, 1);
   firstHit.setBarrelSlot( firstSlot );
 
-  double time2 = (100 + 35.3553)  / lightSpeed;
+  double time2 = (100 + 35.3553)  / kLightVelocity_cm_ns;
   JPetHit secondHit;
   secondHit.setTime(time2);
   secondHit.setPos(-70.710678, -70.710678, 0.0);
