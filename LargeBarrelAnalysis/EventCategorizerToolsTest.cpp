@@ -477,27 +477,27 @@ BOOST_AUTO_TEST_CASE(pointAt0x_m5y_0z)
   BOOST_REQUIRE_CLOSE(point.Z(), 0.0, 1);
 }
 
-TVector3 testAnihilationPoint( const JPetHit& Hit1, const JPetHit& Hit2)
+TVector3 testAnihilationPoint( const JPetHit& hit1, const JPetHit& hit2)
 {
-  TVector3 ReconstructedPosition;
-  double tof = fabs( Hit1.getTime() - Hit2.getTime() ) / 1000;
-  double VecLength = sqrt( pow(Hit1.getPosX() - Hit2.getPosX(), 2)
-                           + pow(Hit1.getPosY() - Hit2.getPosY(), 2)
-                           + pow(Hit1.getPosZ() - Hit2.getPosZ(), 2) );
-  double middleX = (Hit1.getPosX() + Hit2.getPosX() ) / 2;
-  double middleY = (Hit1.getPosY() + Hit2.getPosY() ) / 2;
-  double middleZ = (Hit1.getPosZ() + Hit2.getPosZ() ) / 2;
-  double Fraction =  tof * 29.979246 / VecLength;
-  if ( Hit1.getTime() < Hit2.getTime() ) {
-    ReconstructedPosition(0) = middleX + Fraction * ( Hit1.getPosX() - middleX );
-    ReconstructedPosition(1) = middleY + Fraction * ( Hit1.getPosY() - middleY );
-    ReconstructedPosition(2) = middleZ + Fraction * ( Hit1.getPosZ() - middleZ );
+  TVector3 reconstructedPosition;
+  double tof = fabs( hit1.getTime() - hit2.getTime() ) / 1000;
+  double vecLength = sqrt( pow(hit1.getPosX() - hit2.getPosX(), 2)
+                           + pow(hit1.getPosY() - hit2.getPosY(), 2)
+                           + pow(hit1.getPosZ() - hit2.getPosZ(), 2) );
+  double middleX = (hit1.getPosX() + hit2.getPosX() ) / 2;
+  double middleY = (hit1.getPosY() + hit2.getPosY() ) / 2;
+  double middleZ = (hit1.getPosZ() + hit2.getPosZ() ) / 2;
+  double fraction =  tof * 29.979246 / vecLength;
+  if ( hit1.getTime() < hit2.getTime() ) {
+    reconstructedPosition(0) = middleX + fraction * ( hit1.getPosX() - middleX );
+    reconstructedPosition(1) = middleY + fraction * ( hit1.getPosY() - middleY );
+    reconstructedPosition(2) = middleZ + fraction * ( hit1.getPosZ() - middleZ );
   } else {
-    ReconstructedPosition(0) = middleX + Fraction * ( Hit2.getPosX() - middleX );
-    ReconstructedPosition(1) = middleY + Fraction * ( Hit2.getPosY() - middleY );
-    ReconstructedPosition(2) = middleZ + Fraction * ( Hit2.getPosZ() - middleZ );
+    reconstructedPosition(0) = middleX + fraction * ( hit2.getPosX() - middleX );
+    reconstructedPosition(1) = middleY + fraction * ( hit2.getPosY() - middleY );
+    reconstructedPosition(2) = middleZ + fraction * ( hit2.getPosZ() - middleZ );
   }
-  return ReconstructedPosition;
+  return reconstructedPosition;
 }
 
 BOOST_AUTO_TEST_CASE(selfcosistency_check)
