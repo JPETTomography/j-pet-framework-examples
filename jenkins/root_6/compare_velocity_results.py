@@ -11,11 +11,12 @@ def compare_lines(first_line, second_line, multiplier):
         if((int)(first_line[1]) == (int)(second_line[1])):
             if((str)(first_line[2]) == (str)(second_line[2])):
                 if((int)(first_line[3]) == (int)(second_line[3])):
-                    if((value_diff * (float)(multiplier)) <= abs((float)(first_line[5])) and ((value_diff * (float)(multiplier)) <= abs((float)(second_line[5])))):
+                    if(value_diff <= abs((float)(first_line[5]) * (float)(multiplier)) and ((value_diff) <= abs((float)(second_line[5]) * (float)(multiplier)))):
                         return True
                     else:
-                        print("Value diff %f, inputvalue diff: %s, testvalue diff: %s" %
-                              (value_diff * (float)(multiplier), first_line[4], second_line[4]))
+                        print("Value diff: %f, input value : %s, test value : %s, first diff range: %s, second diff range: %s" %
+                              (value_diff, first_line[4], second_line[4], abs(
+                                  (float)(first_line[5]) * (float)(multiplier)), abs((float)(second_line[5]) * (float)(multiplier))))
     return False
 
 
