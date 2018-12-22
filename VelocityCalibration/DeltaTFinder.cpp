@@ -77,6 +77,7 @@ bool DeltaTFinder::init()
       auto res = retrievePositionAndFileName(getOptionAsString(fParams.getOptions(), pos));
       file_path = JPetCommonTools::extractFileNameFromFullPath( file_path );      
       file_path = JPetCommonTools::stripFileNameSuffix( file_path );      
+      file_path = JPetCommonTools::stripFileNameSuffix( file_path );      
       if ( file_path == res.second )
         fPos = res.first;
     }
