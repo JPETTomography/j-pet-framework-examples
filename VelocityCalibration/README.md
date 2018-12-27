@@ -62,7 +62,7 @@ The user can put in the `userParams.json` file the position and corresponding to
 
 `DeltaTFinder_velocityCalibFile_std::string` - file name with results which will be created at the end of analysis, which later has to be provided to estimateVelocity program
 
-Another, separate program (`estimateVelocity.cpp`) has been written to estimate effective velocity of signal inside the scintillator based on file `results.txt`. This program draws the dependence between the position and the mean value of Gaussian function for a given scintillator. Later a polynomial (pol1) function is fitted to this points and p1 parameter of this function is treated as a effective velocity of signal.
+Another, separate program (`estimateVelocity.cpp`) has been written to estimate effective velocity of signal inside the scintillator based on file `results.txt`. This program draws the dependence between the position and the mean value of Gaussian function for a given scintillator. Later a polynomial (pol1) function is fitted to this points and p1 parameter of this function is treated as a effective velocity of signal. This program takes as an argument file path to the file with results produced by framework module.
 
 ## Additional info
 To run `VelocityCalibration` module properly one has to create velocity calibration file with `0` value as the effective velocity of light inside the scintillator which is used by `HitFinder`. This file is read in `HitFinder` and it was not possible to turn off loading of previous effective velocity calibration.
