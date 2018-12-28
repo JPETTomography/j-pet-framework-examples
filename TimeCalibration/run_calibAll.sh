@@ -36,14 +36,12 @@ json="large_barrel.json"
 RunJson=44
 UserParams="userParams.json"
 fi
-#if [[ $RunPeriod -eq 2 ]] || [[ $RunPeriod -eq 3 ]];
 if [[ $RunPeriod -gt 1 ]]; 
 then
 json="detectorSetupRun2345.json"
 RunJson=2
 UserParams="userParams.json"
 fi
-###
 echo "##############################################################"
 echo "--------------------------------------------------------------"
 echo "Using the following settings: -l $json -i $RunJson -c $TOTFile"
@@ -54,11 +52,6 @@ while read linia
   i=`echo $linia | awk -F":" '{print $1}' | awk -F"_" '{print $2}'`
   dir=`echo $linia | awk -F":" '{print $2}'| awk '{print $1}'`
   j=`echo $linia | awk -F":" '{print $1}' | awk -F"_" '{print $1}'`
-# echo "======="
-#  echo $i
-#  echo $ScinStart
-#  echo $ScinStop
-#  echo "========"
   if [[ ($i -ge $ScinStart) ]] && [[ ($i -le $ScinStop) ]] && [[ ($j -eq $Lay) ]];
   then
       s=$i
@@ -79,17 +72,13 @@ while read linia
 	 break   
 	fi    
       list=`echo ls -1 $5$dir/*.xz | awk -F"dabc_" '{print $'"${ii}"'}' | awk '{print $1}'`
-#      echo $list
       FilN=`echo ls -1 $5$dir/*.xz | awk -F"dabc_" '{print $'"${ii}"'}' | awk '{print $1}' |awk -F"." '{print $1}'`
-#      echo $FilN
        OldFileName="$Filepath$dir/dabc_$FilN"
        if [[ ($i -gt 9) ]];
 	then   
         NewFileName="$Filepath$dir/File${ii}_Layer${Lay}_slot${s}"
        else
 	NewFileName="$Filepath$dir/File${ii}_Layer${Lay}_slot0${s}"
-#	NewFileNameForIF="$Filepath$dir/File${ii}_Layer${Lay}_slot0${s}.$Tfile"
-#	echo $NewFileNameForIF
        fi 	   
        Hdir=`pwd`
       if [[ "$Tfile" == "hld" ]];
@@ -105,15 +94,11 @@ while read linia
 	 echo "Start of analysis of File $NewFileName.$Tfile ($Filepath$dir/dabc_$FilN.$Tfile)"
 	 echo "##############################################################"
          echo "./TimeCalibration.x -t hld -f $NewFileName.$Tfile -i $RunJson -c $TOTFile -u $UserParams"
-#	 ./TimeCalibration.x -t hld -f $NewFileName.$Tfile -i $RunJson -c $TOTFile -u $UserParams -r 0 100000
 	 ./TimeCalibration_dev.x -t hld -f $NewFileName.$Tfile -i $RunJson -c $TOTFile -u $UserParams
-#	 rm $NewFileName.hld
 	 rm $NewFileName.hld.root
 	 rm $NewFileName.tslot.raw.root
 	 rm $NewFileName.raw.sig.root
 	 rm $NewFileName.phys.sig.root
-#	 rm $NewFileName.hits.root
-#	 rm $NewFileName.tslot.calib.root
 	 rm $NewFileName.calib.root
       else
 	./TimeCalibration_dev.x -t $Tfile -f $NewFileName.$Tfile -i $RunJson -c $TOTFile -u $UserParams
@@ -123,7 +108,6 @@ while read linia
          rm $NewFileName.raw.sig.root
          rm $NewFileName.phys.sig.root
          rm $NewFileName.hits.root
-#         rm $NewFileName.tslot.calib.root
          rm $NewFileName.calib.root
       fi  
      done
@@ -131,4 +115,3 @@ while read linia
   fi
 done < $FileName
 
-#exit 0
