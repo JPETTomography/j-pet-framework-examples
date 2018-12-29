@@ -28,6 +28,7 @@
 #include <JPetTreeHeader/JPetTreeHeader.h>
 #include <JPetParamManager/JPetParamManager.h>
 #include <JPetGeomMapping/JPetGeomMapping.h>
+#include <JPetCommonTools/JPetCommonTools.h>
 
 class JPetWriter;
 
