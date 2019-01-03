@@ -135,3 +135,9 @@ foreach(test_source ${UNIT_TEST_SOURCES})
 endforeach()
 
 add_custom_target(tests_ImageReconstruction DEPENDS ${test_binaries})
+
+################################################################################
+## Add new target that depends on copied files
+add_custom_target(copy_files_${projectName} DEPENDS ${copy_depends})
+## Add dependencies between building project and copy files
+add_dependencies(${projectBinary} copy_files_${projectName})
