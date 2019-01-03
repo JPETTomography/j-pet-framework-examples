@@ -15,6 +15,7 @@ set(projectName VelocityCalibration)
 ################################################################################
 ## Auxiliary files
 set(AUXILIARY_FILES
+  conf_trb3.xml
   userParams.json
   README.md
   run.sh
