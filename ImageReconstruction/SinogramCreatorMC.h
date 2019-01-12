@@ -22,15 +22,9 @@
 #define override
 #endif
 
-#include "JPetUserTask/JPetUserTask.h"
-#include "SinogramCreatorTools.h"
-#include <string>
-#include <vector>
+#include "SinogramCreator.h"
 
-#include "JPetFilterNone.h"
-#include "JPetRecoImageTools.h"
-
-class SinogramCreatorMC : public JPetUserTask
+class SinogramCreatorMC : public SinogramCreator
 {
 public:
   SinogramCreatorMC(const char* name);
@@ -39,23 +33,13 @@ public:
   virtual bool exec() override;
   virtual bool terminate() override;
 
+
 private:
   SinogramCreatorMC(const SinogramCreatorMC&) = delete;
   SinogramCreatorMC& operator=(const SinogramCreatorMC&) = delete;
 
-  void generateSinogram();
   void setUpOptions();
-  int getSplitRangeNumber(float firstZ, float secondZ);
-  int getSplitRangeNumber(float z);
-  void saveResult(const std::vector<std::vector<unsigned char>>& result, const std::string& outputFileName);
-  void saveResult(const JPetRecoImageTools::Matrix2DProj& result, const std::string& outputFileName);
-  int getMaxValue(const JPetRecoImageTools::Matrix2DProj& result);
-  int getSinogramSlice(float firstZ, float firstTOF, float secondZ, float secondTOF);
-  float getTOFRescaleFactor(float x_diff, float y_diff, float z_diff);
-
-  JPetRecoImageTools::Matrix2DProj** fSinogram = nullptr;
-
-  JPetRecoImageTools::Matrix2DTOF* fTOFInformation = nullptr;
+  void generateSinogram();
 
   const std::string kOutFileNameKey = "SinogramCreatorMC_OutFileName_std::string";
   const std::string kReconstructionDistanceAccuracy = "SinogramCreatorMC_ReconstructionDistanceAccuracy_float";
@@ -66,21 +50,8 @@ private:
   const std::string kEnableNonPerperdicualLOR = "SinogramCreatorMC_EnableNonPerperdicalLOR_bool";
   const std::string kEnableTOFReconstrution = "SinogramCreatorMC_EnableTOFReconstruction_bool";
 
-  const int kReconstructionMaxAngle = 180;
-  const float EPSILON = 0.000001f;
-  int fZSplitNumber = 1;
-  std::vector<std::pair<float, float>> fZSplitRange;
-
-  std::string fOutFileName = "sinogramMC";
   std::string fInputData = "sinogram_data.txt";
-  int* fMaxValueInSinogram = nullptr; // to fill later in output file
-  int* fCurrentValueInSinogram = nullptr;
-
-  float fMaxReconstructionLayerRadius = 0.f;    // in cm
-  float fReconstructionDistanceAccuracy = 0.1f; // in cm, 1mm accuracy
-  float fScintillatorLenght = 50.0f;            // in cm
-  bool fEnableNonPerperdicularLOR = false;
-  bool fEnableTOFReconstruction = false;
+  std::string fOutFileName = "sinogramMC";
 };
 
 #endif /*  !SINOGRAMCREATORMC_H */

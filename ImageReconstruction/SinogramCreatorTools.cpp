@@ -36,8 +36,7 @@ float SinogramCreatorTools::calculateAngle(float firstX, float firstY, float sec
 float SinogramCreatorTools::calculateDistance(float firstX, float firstY, float secondX, float secondY)
 {
   float norm = calculateNorm(firstX, firstY, secondX, secondY);
-  if (std::abs(norm) < 0.00001f)
-  {
+  if (std::abs(norm) < 0.00001f) {
     return 0;
   }
   return ((secondX * firstY) - (secondY * firstX)) / norm;
@@ -48,10 +47,9 @@ float SinogramCreatorTools::calculateNorm(float firstX, float firstY, float seco
   return std::sqrt(std::pow((secondY - firstY), 2) + std::pow((secondX - firstX), 2));
 }
 
-void SinogramCreatorTools::swapIfNeeded(float &firstX, float &firstY, float &secondX, float &secondY)
+void SinogramCreatorTools::swapIfNeeded(float& firstX, float& firstY, float& secondX, float& secondY)
 {
-  if (firstX > secondX)
-  {
+  if (firstX > secondX) {
     std::swap(firstX, secondX);
     std::swap(firstY, secondY);
   }
@@ -65,17 +63,39 @@ std::pair<int, int> SinogramCreatorTools::getSinogramRepresentation(float firstX
   if (angle > 90.f)
     distance = -distance;
   int angleRound = std::round(angle);
-  if (angleRound >= 180)
-  {
+  if (angleRound >= 180) {
     angleRound -= 180;
   }
 
   int distanceRound = SinogramCreatorTools::roundToNearesMultiplicity(distance + fMaxReconstructionLayerRadius, fReconstructionDistanceAccuracy);
-  if (distanceRound >= maxDistanceNumber || angleRound >= kReconstructionMaxAngle)
-  {
-    std::cout << "Distance or angle > then max, distance: " << distanceRound << " angle: " << angleRound << std::endl;
+  if (distanceRound >= maxDistanceNumber || angleRound >= kReconstructionMaxAngle) {
+    std::cout << "Distance or angle > then max, distance: " << distanceRound << " (max : " << maxDistanceNumber << ")" << " angle: " << angleRound << " (max: " << kReconstructionMaxAngle << ")" << std::endl;
   }
   if (distanceRound < 0)
     distanceRound = 0;
   return std::make_pair(distanceRound, angleRound);
+}
+
+float SinogramCreatorTools::calculateLORSlice(float x1, float y1, float z1, float t1,
+    float x2, float y2, float z2, float t2)
+{
+  float shiftX2 = x2 - x1;
+  float shiftY2 = y2 - y1;
+  float shiftZ2 = z2 - z1;
+
+  float theta = std::atan2(std::hypot(shiftX2, shiftZ2), shiftY2);
+  float phi = std::atan2(shiftX2, shiftZ2);
+  float r = std::sqrt(shiftX2 * shiftX2 + shiftY2 * shiftY2 + shiftZ2 * shiftZ2);
+
+  const float speed_of_light = 0.0299792458f;
+
+  float diffR = speed_of_light * (t2 - t1) / 2.f;
+  float r0 = r / 2.f - diffR;
+
+  //float resultY = r0 * std::cos(phi);
+  float resultZ = -r0 * std::sin(phi) * std::cos(theta);
+  //float resultX = r * std::sin(phi) * std::sin(theta);
+
+  return resultZ;
+
 }

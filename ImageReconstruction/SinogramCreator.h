@@ -64,27 +64,20 @@ public:
   virtual bool exec() override;
   virtual bool terminate() override;
 
-private:
-  SinogramCreator(const SinogramCreator&) = delete;
-  SinogramCreator& operator=(const SinogramCreator&) = delete;
-
-  void setUpOptions();
+protected:
   int getSplitRangeNumber(float firstZ, float secondZ);
   int getSplitRangeNumber(float z);
-  void saveResult(const JPetRecoImageTools::Matrix2DProj& result, const std::string& outputFileName, int sliceNumber);
+  void saveResult(const JPetRecoImageTools::Matrix2DProj& result, const std::string& outputFileName);
   bool analyzeHits(const JPetHit& firstHit, const JPetHit& secondHit);
-  int getSinogramSlice(float firstZ, float firstTOF, float secondZ, float secondTOF);
+  bool analyzeHits(const float firstX, const float firstY, const float firstZ, const float firstTOF,
+                   const float secondX, const float secondY, const float secondZ, const float secondTOF);
+  int getSinogramSlice(float firstX, float firstY, float firstZ, float firstTOF,
+                       float secondX, float secondY, float secondZ, float secondTOF);
   float getTOFRescaleFactor(float x_diff, float y_diff, float z_diff);
+  int maxValueInSinogram(const JPetRecoImageTools::Matrix2DProj& sinogram);
 
   JPetRecoImageTools::Matrix2DProj** fSinogram = nullptr;
-  JPetRecoImageTools::Matrix2DTOF fTOFInformation;
-
-  const std::string kOutFileNameKey = "SinogramCreator_OutFileName_std::string";
-  const std::string kReconstructionDistanceAccuracy = "SinogramCreator_ReconstructionDistanceAccuracy_float";
-  const std::string kZSplitNumber = "SinogramCreator_SinogramZSplitNumber_int";
-  const std::string kScintillatorLenght = "SinogramCreator_ScintillatorLenght_float";
-  const std::string kEnableNonPerperdicualLOR = "SinogramCreator_EnableNonPerperdicalLOR_bool";
-  const std::string kEnableTOFReconstrution = "SinogramCreator_EnableTOFReconstruction_bool";
+  JPetRecoImageTools::Matrix2DTOF* fTOFInformation;
 
   const int kReconstructionMaxAngle = 180;
   const float EPSILON = 0.000001f;
@@ -92,7 +85,7 @@ private:
   int fMaxDistanceNumber = 0;
   std::vector<std::pair<float, float>> fZSplitRange;
 
-  std::string fOutFileName = "sinogram";
+
   int* fMaxValueInSinogram = nullptr; // to fill later in output file
   int* fCurrentValueInSinogram = nullptr;
 
@@ -101,6 +94,21 @@ private:
   float fScintillatorLenght = 50.0f;            // in cm
   bool fEnableNonPerperdicularLOR = false;
   bool fEnableTOFReconstruction = false;
+
+private:
+  SinogramCreator(const SinogramCreator&) = delete;
+  SinogramCreator& operator=(const SinogramCreator&) = delete;
+
+  void setUpOptions();
+
+  const std::string kOutFileNameKey = "SinogramCreator_OutFileName_std::string";
+  const std::string kReconstructionDistanceAccuracy = "SinogramCreator_ReconstructionDistanceAccuracy_float";
+  const std::string kZSplitNumber = "SinogramCreator_SinogramZSplitNumber_int";
+  const std::string kScintillatorLenght = "SinogramCreator_ScintillatorLenght_float";
+  const std::string kEnableNonPerperdicualLOR = "SinogramCreator_EnableNonPerperdicalLOR_bool";
+  const std::string kEnableTOFReconstrution = "SinogramCreator_EnableTOFReconstruction_bool";
+  std::string fOutFileName = "sinogram";
+
 };
 
 #endif /*  !SINOGRAMCREATOR_H */
