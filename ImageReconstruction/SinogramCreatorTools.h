@@ -24,6 +24,7 @@
 
 #include <utility>
 #include <cmath>
+#include <tuple>
 
 class SinogramCreatorTools
 {
@@ -46,7 +47,12 @@ private:
   SinogramCreatorTools(const SinogramCreatorTools&) = delete;
   SinogramCreatorTools& operator=(const SinogramCreatorTools&) = delete;
 
+  static std::tuple<float, float, float> cart2sph(float x, float y, float z);
+  static std::tuple<float, float, float> sph2cart(float azimuth, float elevation, float r);
+
   static void swapIfNeeded(float& firstX, float& firstY, float& secondX, float& secondY);
+  static void swapIfNeeded(float& firstX, float& firstY, float& firstZ, float& firstT,
+                           float& secondX, float& secondY, float& secondZ, float& secondT);
   static float calculateNorm(float firstX, float firstY, float secondX, float secondY);
 };
 

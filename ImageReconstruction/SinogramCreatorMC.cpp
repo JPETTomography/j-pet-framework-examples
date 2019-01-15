@@ -100,12 +100,12 @@ bool SinogramCreatorMC::terminate()
     JPetRecoImageTools::Matrix2DProj result =
       JPetRecoImageTools::backProjectWithTOF((*fSinogram[i]), fTOFInformation[i], (*fSinogram[i])[0].size(), JPetRecoImageTools::nonRescale, 0, 255);
 
-    saveResult(result, "reconstruction_with_tof_" + std::to_string(i) + ".ppm");
+    saveResult(result, fOutFileName + "reconstruction_with_tof_" + std::to_string(i) + ".ppm");
     JPetRecoImageTools::Matrix2DProj filteredSinogram = JPetRecoImageTools::FilterSinogram(f, noneFilter, (*fSinogram[i]));
     JPetRecoImageTools::Matrix2DProj resultBP =
       JPetRecoImageTools::backProject(filteredSinogram, (*fSinogram[i])[0].size(), JPetRecoImageTools::nonRescale, 0, 255);
 
-    saveResult(resultBP, "reconstruction_" + std::to_string(i) + ".ppm");
+    saveResult(resultBP, fOutFileName + "reconstruction_" + std::to_string(i) + ".ppm");
   }
 
   for (int i = 0; i < fZSplitNumber; i++) {

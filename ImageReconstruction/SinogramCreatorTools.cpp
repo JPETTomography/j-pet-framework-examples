@@ -55,6 +55,17 @@ void SinogramCreatorTools::swapIfNeeded(float& firstX, float& firstY, float& sec
   }
 }
 
+void SinogramCreatorTools::swapIfNeeded(float& firstX, float& firstY, float& firstZ, float& firstT,
+                                        float& secondX, float& secondY, float& secondZ, float& secondT)
+{
+  if (firstX > secondX) {
+    std::swap(firstX, secondX);
+    std::swap(firstY, secondY);
+    std::swap(firstZ, secondZ);
+    std::swap(firstT, secondT);
+  }
+}
+
 std::pair<int, int> SinogramCreatorTools::getSinogramRepresentation(float firstX, float firstY, float secondX, float secondY, float fMaxReconstructionLayerRadius, float fReconstructionDistanceAccuracy, int maxDistanceNumber, int kReconstructionMaxAngle)
 {
   swapIfNeeded(firstX, firstY, secondX, secondY);
@@ -76,25 +87,51 @@ std::pair<int, int> SinogramCreatorTools::getSinogramRepresentation(float firstX
   return std::make_pair(distanceRound, angleRound);
 }
 
+std::tuple<float, float, float> SinogramCreatorTools::cart2sph(float x, float y, float z)
+{
+  float azimuth = std::atan2(y, x);
+  float elevation = std::atan2(z, std::sqrt( x * x + y * y));
+  float r = std::sqrt( x * x + y * y + z * z);
+  return std::make_tuple(azimuth, elevation, r);
+}
+
+std::tuple<float, float, float> SinogramCreatorTools::sph2cart(float azimuth, float elevation, float r)
+{
+  float x = r * std::cos(elevation) * std::cos(azimuth);
+  float y = r * std::cos(elevation) * std::sin(azimuth);
+  float z = r * std::sin(elevation);
+  return std::make_tuple(x, y, z);
+}
+
 float SinogramCreatorTools::calculateLORSlice(float x1, float y1, float z1, float t1,
     float x2, float y2, float z2, float t2)
 {
+  swapIfNeeded(x1, y1, z1, t1, x2, y2, z2, t2);
   float shiftX2 = x2 - x1;
   float shiftY2 = y2 - y1;
   float shiftZ2 = z2 - z1;
 
-  float theta = std::atan2(std::hypot(shiftX2, shiftZ2), shiftY2);
-  float phi = std::atan2(shiftX2, shiftZ2);
-  float r = std::sqrt(shiftX2 * shiftX2 + shiftY2 * shiftY2 + shiftZ2 * shiftZ2);
+  float azimuth;
+  float elevation;
+  float r;
+
+  std::tie(azimuth, elevation, r) = cart2sph(shiftX2, shiftY2, shiftZ2);
 
   const float speed_of_light = 0.0299792458f;
 
   float diffR = speed_of_light * (t2 - t1) / 2.f;
+
   float r0 = r / 2.f - diffR;
 
-  //float resultY = r0 * std::cos(phi);
-  float resultZ = -r0 * std::sin(phi) * std::cos(theta);
-  //float resultX = r * std::sin(phi) * std::sin(theta);
+  float resultX;
+  float resultY;
+  float resultZ;
+
+  std::tie(resultX, resultY, resultZ) = sph2cart(azimuth, elevation, r0);
+
+  resultX += x1;
+  resultY += y1;
+  resultZ += z1;
 
   return resultZ;
 

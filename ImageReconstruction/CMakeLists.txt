@@ -83,13 +83,13 @@ add_custom_target(clean_data_${projectName}
 
 ################################################################################
 ## Unit tests
+set(TEST_SRC SinogramCreatorTools.cpp)
 set(TESTS_DIR ${CMAKE_CURRENT_BINARY_DIR}/tests)
 file(MAKE_DIRECTORY ${TESTS_DIR})
 foreach(test_source ${UNIT_TEST_SOURCES})
   get_filename_component(test ${test_source} NAME_WE)
-  generate_root_dictionaries(test_dictionaries SOURCES ${test_source})
   list(APPEND test_binaries ${test}.x)
-  add_executable(${test}.x EXCLUDE_FROM_ALL ${test_source} ${SOURCES_WITHOUT_MAIN}
+  add_executable(${test}.x EXCLUDE_FROM_ALL ${test_source} ${TEST_SRC}
     ${test_dictionaries}
     )
   set_target_properties(${test}.x PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TESTS_DIR} )
