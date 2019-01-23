@@ -29,6 +29,11 @@
 #include <JPetSigCh/JPetSigCh.h>
 #include <utility>
 #include <vector>
+#include <map>
+#include <array>
+
+typedef std::array<unsigned short, 4> Permutation;
+typedef std::map<unsigned int, Permutation> ThresholdOrderings;
 
 class SignalFinderTools
 {
@@ -54,5 +59,6 @@ public:
     const JPetSigCh& leadingSigCh,double sigChLeadTrailMaxTime,
     const std::vector<JPetSigCh>& trailingSigChVec
   );
+  static ThresholdOrderings findThresholdOrders(const JPetParamBank& bank);
 };
 #endif /* !SIGNALFINDERTOOLS_H */

@@ -228,3 +228,36 @@ int SignalFinderTools::findTrailingSigCh(
   sort(trailingFoundIdices.begin(), trailingFoundIdices.end());
   return trailingFoundIdices.at(0);
 }
+
+/**
+ * Method finds a 4-element permutation which has to be applied to threshold numbers
+ * to have them sorted by increasing threshold values.
+ *
+ * The ordering may be different for each PMT, therefore the method creates a map
+ * with PMT ID numbers as keys and 4-element permutations as values.
+ */
+ThresholdOrderings SignalFinderTools::findThresholdOrders(const JPetParamBank& bank){
+
+  ThresholdOrderings orderings;
+  std::map<unsigned int, std::array<float, 4> > thr_values;
+  
+  for(auto& tc: bank.getTOMBChannels()){
+    unsigned int id = tc.second->getPM().getID();
+    
+    thr_values[id][tc.second->getLocalChannelNumber()-1] = tc.second->getThreshold();
+  }
+
+  for(auto& pm: thr_values){
+    orderings[pm.first] = {1,2,3,4};
+    auto& indices = orderings[pm.first];
+    auto& values = pm.second;
+    
+    sort(indices.begin(), indices.end(),
+         [&](const int& a, const int& b) {
+           return (values.at(a-1) < values.at(b-1));
+         }
+         );
+  }
+
+  return orderings;
+}
