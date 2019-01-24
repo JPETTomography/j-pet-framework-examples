@@ -59,7 +59,7 @@ protected:
 	const int kNumOfThresholds = 4;
 	std::map<unsigned int, std::vector<double>> fTimeCalibration;
 	std::map<unsigned int, std::vector<double>> fThresholds;
-	bool fSetTHRValuesFromChannels = false;
+	bool fSetTHRValuesFromChannels = true;
 	long long int fCurrEventNumber = 0;
 	std::set<int> fAllowedChannels;
 	bool fSaveControlHistos = true;
