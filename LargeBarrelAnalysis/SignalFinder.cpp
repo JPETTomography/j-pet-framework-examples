@@ -18,7 +18,6 @@ using namespace std;
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
 #include <JPetWriter/JPetWriter.h>
-#include "SignalFinderTools.h"
 #include "SignalFinder.h"
 #include <utility>
 #include <string>
@@ -70,6 +69,15 @@ bool SignalFinder::init()
     fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
   }
 
+  // Check if the user requested ordering of thresholds by value
+  if (isOptionSet(fParams.getOptions(), kOrderThresholdsByValueKey)) {
+    fOrderThresholdsByValue = getOptionAsBool(fParams.getOptions(), kOrderThresholdsByValueKey);
+  }
+  if (fOrderThresholdsByValue){
+    INFO("Threshold reordering was requested. Thresholds will be ordered by their values according to provided detector setup file.");
+    fThreshldOrderings = SignalFinderTools::findThresholdOrders(getParamBank());
+  }
+    
   // Creating control histograms
   if(fSaveControlHistos) { initialiseHistograms(); }
   return true;
@@ -84,7 +92,7 @@ bool SignalFinder::exec()
     // Building signals
     auto allSignals = SignalFinderTools::buildAllSignals(
       sigChByPM, kNumOfThresholds, fSigChEdgeMaxTime, fSigChLeadTrailMaxTime,
-      getStatistics(), fSaveControlHistos
+      getStatistics(), fSaveControlHistos, fThreshldOrderings
     );
     // Saving method invocation
     saveRawSignals(allSignals);
