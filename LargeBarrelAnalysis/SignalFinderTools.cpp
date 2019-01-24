@@ -52,14 +52,22 @@ const map<int, vector<JPetSigCh>> SignalFinderTools::getSigChByPM(
 vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
    const map<int, vector<JPetSigCh>>& sigChByPM, unsigned int numOfThresholds,
    double sigChEdgeMaxTime, double sigChLeadTrailMaxTime,
-   JPetStatistics& stats, bool saveHistos
+   JPetStatistics& stats, bool saveHistos,
+   ThresholdOrderings thresholdOrderings
 ) {
   vector<JPetRawSignal> allSignals;
   for (auto& sigChPair : sigChByPM) {
-    auto signals = buildRawSignals(
-      sigChPair.second, numOfThresholds, sigChEdgeMaxTime,
-      sigChLeadTrailMaxTime, stats, saveHistos
-    );
+    Permutation P;
+    if(thresholdOrderings.empty()){
+      P = kIdentity;
+    }else{
+      P = thresholdOrderings.at(sigChPair.first);
+    }
+    
+    auto signals = buildRawSignals(                                
+                                   sigChPair.second, numOfThresholds, sigChEdgeMaxTime,
+                                   sigChLeadTrailMaxTime, stats, saveHistos, P
+                                   );
     allSignals.insert(allSignals.end(), signals.begin(), signals.end());
   }
   return allSignals;
@@ -75,7 +83,8 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
  vector<JPetRawSignal> SignalFinderTools::buildRawSignals(
    const vector<JPetSigCh>& sigChByPM, unsigned int numOfThresholds,
    double sigChEdgeMaxTime, double sigChLeadTrailMaxTime,
-   JPetStatistics& stats, bool saveHistos
+   JPetStatistics& stats, bool saveHistos,
+   Permutation ordering
  ) {
   vector<JPetRawSignal> rawSigVec;
   // Threshold number check - fixed number equal 4
@@ -83,14 +92,15 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
     ERROR("This function is meant to work with 4 thresholds only!");
     return rawSigVec;
   }
+  
   vector<JPetSigCh> tmpVec;
   vector<vector<JPetSigCh>> thrLeadingSigCh(numOfThresholds, tmpVec);
   vector<vector<JPetSigCh>> thrTrailingSigCh(numOfThresholds, tmpVec);
   for (const JPetSigCh& sigCh : sigChByPM) {
     if(sigCh.getType() == JPetSigCh::Leading) {
-      thrLeadingSigCh.at(sigCh.getThresholdNumber()-1).push_back(sigCh);
+      thrLeadingSigCh.at(ordering[sigCh.getThresholdNumber()-1]).push_back(sigCh);
     } else if(sigCh.getType() == JPetSigCh::Trailing) {
-      thrTrailingSigCh.at(sigCh.getThresholdNumber()-1).push_back(sigCh);
+      thrTrailingSigCh.at(ordering[sigCh.getThresholdNumber()-1]).push_back(sigCh);
     }
   }
   assert(thrLeadingSigCh.size() > 0);
@@ -248,15 +258,19 @@ ThresholdOrderings SignalFinderTools::findThresholdOrders(const JPetParamBank& b
   }
 
   for(auto& pm: thr_values){
-    orderings[pm.first] = {1,2,3,4};
-    auto& indices = orderings[pm.first];
+
+    Permutation indices = kIdentity;
     auto& values = pm.second;
     
     sort(indices.begin(), indices.end(),
          [&](const int& a, const int& b) {
-           return (values.at(a-1) < values.at(b-1));
+           return (values.at(a) < values.at(b));
          }
          );
+
+    for(unsigned short i=0;i<4;++i){
+      orderings[pm.first][indices[i]] = i;
+    }
   }
 
   return orderings;

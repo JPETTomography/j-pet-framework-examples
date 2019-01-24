@@ -34,6 +34,7 @@
 
 typedef std::array<unsigned short, 4> Permutation;
 typedef std::map<unsigned int, Permutation> ThresholdOrderings;
+const Permutation kIdentity = {0,1,2,3};
 
 class SignalFinderTools
 {
@@ -44,12 +45,14 @@ public:
   static std::vector<JPetRawSignal> buildAllSignals(
     const std::map<int, std::vector<JPetSigCh>>& sigChByPM, unsigned int numOfThresholds,
     double sigChEdgeMaxTime, double sigChLeadTrailMaxTime,
-    JPetStatistics& stats, bool saveHistos
+    JPetStatistics& stats, bool saveHistos,
+    ThresholdOrderings thresholdOrderings
   );
   static std::vector<JPetRawSignal> buildRawSignals(
     const std::vector<JPetSigCh>& sigChByPM, unsigned int numOfThresholds,
     double sigChEdgeMaxTime, double sigChLeadTrailMaxTime,
-    JPetStatistics& stats, bool saveHistos
+    JPetStatistics& stats, bool saveHistos,
+    Permutation ordering
   );
   static int findSigChOnNextThr(
     double sigChValue, double sigChEdgeMaxTime,
