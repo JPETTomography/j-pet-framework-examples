@@ -4,8 +4,6 @@ set(projectName JPetRecoImageTools)
 ######################################################################
 ### this section should not need to be modified for a new project
 ######################################################################
-set(projectBinary ${projectName}.x)
-
 project(${projectName} CXX) # using only C++
 
 file(GLOB SOURCES JPet*/*.cpp)
