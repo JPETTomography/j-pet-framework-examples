@@ -9,6 +9,7 @@ set(projectBinary ${projectName}.x)
 project(${projectName} CXX) # using only C++
 
 file(GLOB SOURCES JPet*/*.cpp)
+file(GLOB HEADERS JPet*/*.h)
 file(GLOB UNIT_TEST_SOURCES JPet*/*Test.cpp)
 list(REMOVE_ITEM SOURCES ${UNIT_TEST_SOURCES})
 
@@ -40,4 +41,13 @@ add_custom_command(OUTPUT ${TESTS_DIR}/unitTestData
   COMMAND ln -s ${CMAKE_SOURCE_DIR}/unitTestData ${TESTS_DIR}/unitTestData
 )
 
-add_custom_target(tests_large_barrel DEPENDS ${test_binaries} ${TESTS_DIR}/unitTestData)
+add_custom_target(tests_fbp DEPENDS ${test_binaries} ${TESTS_DIR}/unitTestData)
+
+
+add_library(${projectName} SHARED ${SOURCES} ${HEADERS})
+target_link_libraries(${projectName}
+  PRIVATE
+    ${FFTW_LIBRARIES})
+set_target_properties(${projectName} PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}"
+)
