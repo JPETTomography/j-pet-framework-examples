@@ -1311,7 +1311,11 @@ BOOST_AUTO_TEST_CASE(test_normal_distribution_popability)
   float mean = 0.;
   float stddev = 1.;
 
-  BOOST_REQUIRE_EQUAL(JPetRecoImageTools::normalDistributionProbability(x, mean, stddev), 0.5);
+  BOOST_REQUIRE_CLOSE(JPetRecoImageTools::normalDistributionProbability(x, mean, stddev), 0.3989422804014327, 0.00001);
+  x = stddev;
+  BOOST_REQUIRE_CLOSE(JPetRecoImageTools::normalDistributionProbability(x, mean, stddev), 0.24197072451914337, 0.00001);
+  x = -stddev;
+  BOOST_REQUIRE_CLOSE(JPetRecoImageTools::normalDistributionProbability(x, mean, stddev), 0.24197072451914337, 0.00001);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

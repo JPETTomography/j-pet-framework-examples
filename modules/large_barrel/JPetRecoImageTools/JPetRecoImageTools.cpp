@@ -285,13 +285,14 @@ JPetRecoImageTools::Matrix2DProj JPetRecoImageTools::backProjectWithTOF(Matrix2D
           assert(sinogram[n][angle] == tofVector.size());
           float lor_center_x = center + cos * (n - center);
           float lor_center_y = center + sin * (n - center);
-
+          double diffBetweenLORCenterYandY = lor_center_y - y;
+          double diffBetweenLORCenterXandX = lor_center_x - x;
+          double distanceToCenterOfLOR = std::abs(std::sqrt((diffBetweenLORCenterXandX * diffBetweenLORCenterXandX)
+                                                  + (diffBetweenLORCenterYandY * diffBetweenLORCenterYandY)));
           for (unsigned int i = 0; i < tofVector.size(); i++) {
             float delta = std::abs(tofVector[i] * 0.299792458);
-            double distanceToCenterOfLOR = std::abs(std::sqrt(std::pow(lor_center_x - x, 2) + std::pow(lor_center_y - y, 2)));
-            double distributionProbability = normalDistributionProbability(distanceToCenterOfLOR, delta, 10);
-            distributionProbability = distributionProbability > 0.5 ? 1 - distributionProbability : distributionProbability;
-            reconstructedProjection[y][x] += distributionProbability * 2.;
+            double distributionProbability = normalDistributionProbability(distanceToCenterOfLOR, delta, 10.);
+            reconstructedProjection[y][x] += distributionProbability;
           }
         }
       }
@@ -307,17 +308,18 @@ JPetRecoImageTools::Matrix2DProj JPetRecoImageTools::backProjectWithTOF(Matrix2D
   return reconstructedProjection;
 }
 
-double JPetRecoImageTools::normalDistributionProbability(float x, float mean, float stddev)
-{
-  return 0.5 * erfc(-(x - mean) / (stddev * sqrt(2)));
-}
-
 // double JPetRecoImageTools::normalDistributionProbability(float x, float mean, float stddev)
 // {
-//   double diff = x - mean;
-//   double stddev2 = stddev * stddev;
-//   return 1. / std::sqrt(2. * M_PI * stddev2) * std::exp(-(diff * diff) / (2. * stddev2));
+//   double result = 0.5 * erfc(-(x - mean) / (stddev * sqrt(2)));
+//   return result > 0.5 ? 1. - result : result;
 // }
+
+double JPetRecoImageTools::normalDistributionProbability(float x, float mean, float stddev)
+{
+  double diff = x - mean;
+  double stddev2 = stddev * stddev;
+  return 1. / std::sqrt(2. * M_PI * stddev2) * std::exp(-(diff * diff) / (2. * stddev2));
+}
 
 JPetRecoImageTools::Matrix2DProj JPetRecoImageTools::FilterSinogram(JPetRecoImageTools::FourierTransformFunction& ftf,
     JPetFilterInterface& filterFunction, JPetRecoImageTools::Matrix2DProj& sinogram)
