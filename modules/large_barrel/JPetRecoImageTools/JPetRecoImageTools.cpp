@@ -308,12 +308,6 @@ JPetRecoImageTools::Matrix2DProj JPetRecoImageTools::backProjectWithTOF(Matrix2D
   return reconstructedProjection;
 }
 
-// double JPetRecoImageTools::normalDistributionProbability(float x, float mean, float stddev)
-// {
-//   double result = 0.5 * erfc(-(x - mean) / (stddev * sqrt(2)));
-//   return result > 0.5 ? 1. - result : result;
-// }
-
 double JPetRecoImageTools::normalDistributionProbability(float x, float mean, float stddev)
 {
   double diff = x - mean;
