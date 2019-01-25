@@ -291,7 +291,7 @@ JPetRecoImageTools::Matrix2DProj JPetRecoImageTools::backProjectWithTOF(Matrix2D
             double distanceToCenterOfLOR = std::abs(std::sqrt(std::pow(lor_center_x - x, 2) + std::pow(lor_center_y - y, 2)));
             double distributionProbability = normalDistributionProbability(distanceToCenterOfLOR, delta, 10);
             distributionProbability = distributionProbability > 0.5 ? 1 - distributionProbability : distributionProbability;
-            reconstructedProjection[y][x] += distributionProbability;
+            reconstructedProjection[y][x] += distributionProbability * 2.;
           }
         }
       }
@@ -311,6 +311,13 @@ double JPetRecoImageTools::normalDistributionProbability(float x, float mean, fl
 {
   return 0.5 * erfc(-(x - mean) / (stddev * sqrt(2)));
 }
+
+// double JPetRecoImageTools::normalDistributionProbability(float x, float mean, float stddev)
+// {
+//   double diff = x - mean;
+//   double stddev2 = stddev * stddev;
+//   return 1. / std::sqrt(2. * M_PI * stddev2) * std::exp(-(diff * diff) / (2. * stddev2));
+// }
 
 JPetRecoImageTools::Matrix2DProj JPetRecoImageTools::FilterSinogram(JPetRecoImageTools::FourierTransformFunction& ftf,
     JPetFilterInterface& filterFunction, JPetRecoImageTools::Matrix2DProj& sinogram)

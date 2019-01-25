@@ -24,15 +24,16 @@
 class JPetFilterSheppLogan : public JPetFilterInterface
 {
 public:
-  JPetFilterSheppLogan() {}
+  JPetFilterSheppLogan(float threshold = 1.f) : threshold(threshold) {}
   virtual double operator()(double radius) override
   {
-    return std::sin(M_PI * radius) / M_PI;
+    return radius < threshold ? std::sin(M_PI * radius) / M_PI : 0;
   }
 
 private:
-  JPetFilterSheppLogan(const JPetFilterSheppLogan &) = delete;
-  JPetFilterSheppLogan &operator=(const JPetFilterSheppLogan &) = delete;
+  JPetFilterSheppLogan(const JPetFilterSheppLogan&) = delete;
+  JPetFilterSheppLogan& operator=(const JPetFilterSheppLogan&) = delete;
+  float threshold = 0.f;
 };
 
 #endif /*  !_JPetFilterSheppLogan_H_ */
