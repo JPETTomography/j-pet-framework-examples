@@ -35,14 +35,18 @@ bool SinogramCreatorMC::init()
     new TH1F("pos_dis", "Position distance real data", (fMaxReconstructionLayerRadius) * 10 * 5, 0.f, fMaxReconstructionLayerRadius));
   getStatistics().createHistogram(new TH1F("angle", "Position angle real data", kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
 
+  getStatistics().createHistogram(new TH1I("lor_v_slice", "Number of lors vs slice number", fZSplitNumber, -fZSplitNumber / 2., fZSplitNumber / 2.));
+
 #if ROOT_VERSION_CODE < ROOT_VERSION(6, 0, 0)
   getStatistics().getObject<TH2I>("reconstuction_histogram")->SetBit(TH2::kCanRebin);
   getStatistics().getObject<TH1F>("angle")->SetBit(TH1::kCanRebin);
   getStatistics().getObject<TH1F>("pos_dis")->SetBit(TH1::kCanRebin);
+  getStatistics().getObject<TH1I>("lor_v_slice")->SetBit(TH1::kCanRebin);
 #else
   getStatistics().getObject<TH2I>("reconstuction_histogram")->SetCanExtend(TH1::kAllAxes);
   getStatistics().getObject<TH1F>("angle")->SetCanExtend(TH1::kAllAxes);
   getStatistics().getObject<TH1F>("pos_dis")->SetCanExtend(TH1::kAllAxes);
+  getStatistics().getObject<TH1I>("lor_v_slice")->SetCanExtend(TH1::kAllAxes);
 #endif
 
   generateSinogram();
