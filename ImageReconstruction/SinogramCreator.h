@@ -55,8 +55,7 @@
  * - "SinogramCreator_SinogramZSplitNumber_int": defines number of splits around "z" coordinate
  * - "SinogramCreator_ScintillatorLenght_float": defines scintillator lenght in "z" coordinate
  */
-class SinogramCreator : public JPetUserTask
-{
+class SinogramCreator : public JPetUserTask {
 public:
   SinogramCreator(const char* name);
   virtual ~SinogramCreator();
@@ -69,10 +68,9 @@ protected:
   int getSplitRangeNumber(float z);
   void saveResult(const JPetRecoImageTools::Matrix2DProj& result, const std::string& outputFileName);
   bool analyzeHits(const JPetHit& firstHit, const JPetHit& secondHit);
-  bool analyzeHits(const float firstX, const float firstY, const float firstZ, const float firstTOF,
-                   const float secondX, const float secondY, const float secondZ, const float secondTOF);
-  int getSinogramSlice(float firstX, float firstY, float firstZ, float firstTOF,
-                       float secondX, float secondY, float secondZ, float secondTOF);
+  bool analyzeHits(const float firstX, const float firstY, const float firstZ, const float firstTOF, const float secondX, const float secondY,
+                   const float secondZ, const float secondTOF);
+  int getSinogramSlice(float firstX, float firstY, float firstZ, float firstTOF, float secondX, float secondY, float secondZ, float secondTOF);
   float getTOFRescaleFactor(float x_diff, float y_diff, float z_diff);
   int maxValueInSinogram(const JPetRecoImageTools::Matrix2DProj& sinogram);
 
@@ -84,7 +82,6 @@ protected:
   int fZSplitNumber = 1;
   int fMaxDistanceNumber = 0;
   std::vector<std::pair<float, float>> fZSplitRange;
-
 
   int* fMaxValueInSinogram = nullptr; // to fill later in output file
   int* fCurrentValueInSinogram = nullptr;
@@ -108,7 +105,6 @@ private:
   const std::string kEnableNonPerperdicualLOR = "SinogramCreator_EnableNonPerperdicalLOR_bool";
   const std::string kEnableTOFReconstrution = "SinogramCreator_EnableTOFReconstruction_bool";
   std::string fOutFileName = "sinogram";
-
 };
 
 #endif /*  !SINOGRAMCREATOR_H */
