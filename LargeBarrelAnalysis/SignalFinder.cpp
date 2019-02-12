@@ -91,7 +91,7 @@ bool SignalFinder::exec()
     auto& sigChByPM = SignalFinderTools::getSigChByPM(timeWindow, fUseCorruptedSigCh);
     // Building signals
     auto allSignals = SignalFinderTools::buildAllSignals(
-      sigChByPM, kNumOfThresholds, fSigChEdgeMaxTime, fSigChLeadTrailMaxTime,
+      sigChByPM, fSigChEdgeMaxTime, fSigChLeadTrailMaxTime,
       getStatistics(), fSaveControlHistos, fThreshldOrderings
     );
     // Saving method invocation

@@ -87,22 +87,7 @@ BOOST_AUTO_TEST_CASE(buildRawSignals_empty)
   JPetStatistics stats;
   std::vector<JPetSigCh> sigChByPM;
   auto results = SignalFinderTools::buildRawSignals(
-    sigChByPM, 1, 5.0, 5.0, stats, false
-  );
-  BOOST_REQUIRE(results.empty());
-}
-
-BOOST_AUTO_TEST_CASE(buildRawSignals_wrong_one_signal_NumOfThresholdsNot4)
-{
-  JPetPM pm1(1, "first");
-  JPetSigCh sigCh1(JPetSigCh::Leading, 10);
-  sigCh1.setPM(pm1);
-  std::vector<JPetSigCh> sigChVec;
-  sigChVec.push_back(sigCh1);
-  auto numOfThresholds = 1;
-  JPetStatistics stats;
-  auto results = SignalFinderTools::buildRawSignals(
-    sigChVec, numOfThresholds, 5.0, 5.0, stats, false
+    sigChByPM, 5.0, 5.0, stats, false
   );
   BOOST_REQUIRE(results.empty());
 }
@@ -118,11 +103,10 @@ BOOST_AUTO_TEST_CASE(buildRawSignals_one_signal)
   sigCh1.setThresholdNumber(1);
   std::vector<JPetSigCh> sigChVec;
   sigChVec.push_back(sigCh1);
-  int numOfThresholds = 4;
   double sigChEdgeMaxTime = 5.0;
   double sigChLeadTrailMaxTime = 5.0;
   auto results = SignalFinderTools::buildRawSignals(
-    sigChVec, numOfThresholds, sigChEdgeMaxTime, sigChLeadTrailMaxTime, stats, false
+    sigChVec, sigChEdgeMaxTime, sigChLeadTrailMaxTime, stats, false
   );
   auto points_trail = results.at(0).getPoints(JPetSigCh::Trailing);
   auto points_lead = results.at(0).getPoints(JPetSigCh::Leading);
@@ -151,12 +135,11 @@ BOOST_AUTO_TEST_CASE(buildRawSignals_2)
   sigChFromSamePM.push_back(sigCh1);
   sigChFromSamePM.push_back(sigCh2);
   sigChFromSamePM.push_back(sigCh3);
-  auto numOfThresholds = 4;
   double sigChEdgeMaxTime = 5.;
   double sigChLeadTrailMaxTime = 10.;
   JPetStatistics stats;
   auto results =  SignalFinderTools::buildRawSignals(
-    sigChFromSamePM, numOfThresholds, sigChEdgeMaxTime , sigChLeadTrailMaxTime, stats, false
+    sigChFromSamePM, sigChEdgeMaxTime , sigChLeadTrailMaxTime, stats, false
   );
   BOOST_REQUIRE_EQUAL(results.size(), 1);
   auto points_trail = results.at(0).getPoints(JPetSigCh::Trailing);
@@ -251,12 +234,11 @@ BOOST_AUTO_TEST_CASE(buildRawSignals_test_flag_inherit)
   sigChFromSamePM.push_back(sigChB7);
   sigChFromSamePM.push_back(sigChB8);
 
-  auto numOfThresholds = 4;
   double sigChEdgeMaxTime = 5.0;
   double sigChLeadTrailMaxTime = 12.0;
   JPetStatistics stats;
   auto results = SignalFinderTools::buildRawSignals(
-    sigChFromSamePM, numOfThresholds, sigChEdgeMaxTime, sigChLeadTrailMaxTime, stats, false
+    sigChFromSamePM, sigChEdgeMaxTime, sigChLeadTrailMaxTime, stats, false
   );
   BOOST_REQUIRE_EQUAL(results.size(), 2);
   BOOST_REQUIRE_EQUAL(results.at(0).getRecoFlag(), JPetBaseSignal::Good);
@@ -456,12 +438,11 @@ BOOST_AUTO_TEST_CASE(buildRawSignals_realdata_flag_test)
   sigChFromSamePM.push_back(sigCh19);
   sigChFromSamePM.push_back(sigCh20);
 
-  auto numOfThresholds = 4;
   double sigChEdgeMaxTime = 0.0005;
   double sigChLeadTrailMaxTime = 0.0023;
   JPetStatistics stats;
   auto results = SignalFinderTools::buildRawSignals(
-    sigChFromSamePM, numOfThresholds, sigChEdgeMaxTime, sigChLeadTrailMaxTime, stats, false
+    sigChFromSamePM, sigChEdgeMaxTime, sigChLeadTrailMaxTime, stats, false
   );
   BOOST_REQUIRE_EQUAL(results.size(), 3);
   BOOST_REQUIRE_EQUAL(results.at(0).getRecoFlag(), JPetBaseSignal::Corrupted);

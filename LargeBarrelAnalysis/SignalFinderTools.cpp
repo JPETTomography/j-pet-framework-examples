@@ -16,6 +16,8 @@
 #include "SignalFinderTools.h"
 using namespace std;
 
+const SignalFinderTools::Permutation SignalFinderTools::kIdentity = {0,1,2,3};
+
 /**
  * Method returns a map of vectors of JPetSigCh ordered by photomultiplier ID
  */
@@ -50,7 +52,7 @@ const map<int, vector<JPetSigCh>> SignalFinderTools::getSigChByPM(
  * Method invoking Raw Signal building method for each PM separately
  */
 vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
-   const map<int, vector<JPetSigCh>>& sigChByPM, unsigned int numOfThresholds,
+   const map<int, vector<JPetSigCh>>& sigChByPM,
    double sigChEdgeMaxTime, double sigChLeadTrailMaxTime,
    JPetStatistics& stats, bool saveHistos,
    ThresholdOrderings thresholdOrderings
@@ -65,7 +67,7 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
     }
     
     auto signals = buildRawSignals(                                
-                                   sigChPair.second, numOfThresholds, sigChEdgeMaxTime,
+                                   sigChPair.second, sigChEdgeMaxTime,
                                    sigChLeadTrailMaxTime, stats, saveHistos, P
                                    );
     allSignals.insert(allSignals.end(), signals.begin(), signals.end());
@@ -81,21 +83,16 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
  * to second time window (sigChLeadTrailMaxTime parameter).
  */
  vector<JPetRawSignal> SignalFinderTools::buildRawSignals(
-   const vector<JPetSigCh>& sigChByPM, unsigned int numOfThresholds,
+   const vector<JPetSigCh>& sigChByPM,
    double sigChEdgeMaxTime, double sigChLeadTrailMaxTime,
    JPetStatistics& stats, bool saveHistos,
    Permutation ordering
  ) {
   vector<JPetRawSignal> rawSigVec;
-  // Threshold number check - fixed number equal 4
-  if (numOfThresholds != 4) {
-    ERROR("This function is meant to work with 4 thresholds only!");
-    return rawSigVec;
-  }
   
   vector<JPetSigCh> tmpVec;
-  vector<vector<JPetSigCh>> thrLeadingSigCh(numOfThresholds, tmpVec);
-  vector<vector<JPetSigCh>> thrTrailingSigCh(numOfThresholds, tmpVec);
+  vector<vector<JPetSigCh>> thrLeadingSigCh(kNumberOfThresholds, tmpVec);
+  vector<vector<JPetSigCh>> thrTrailingSigCh(kNumberOfThresholds, tmpVec);
   for (const JPetSigCh& sigCh : sigChByPM) {
     if(sigCh.getType() == JPetSigCh::Leading) {
       thrLeadingSigCh.at(ordering[sigCh.getThresholdNumber()-1]).push_back(sigCh);
@@ -134,7 +131,7 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
     // Procedure follows in loop for THR 2,3,4
     // First search for leading SigCh on iterated THR,
     // then search for trailing SigCh on iterated THR
-    for(unsigned int kk=1;kk<numOfThresholds;kk++){
+    for(unsigned int kk=1;kk<kNumberOfThresholds;kk++){
       int nextThrSigChIndex = findSigChOnNextThr(
         thrLeadingSigCh.at(0).at(0).getValue(), sigChEdgeMaxTime, thrLeadingSigCh.at(kk)
       );
@@ -182,7 +179,7 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
   }
   // Filling control histograms
   if(saveHistos){
-    for(unsigned int jj=0;jj<numOfThresholds;jj++){
+    for(unsigned int jj=0;jj<kNumberOfThresholds;jj++){
       for(auto sigCh : thrLeadingSigCh.at(jj)){
         stats.getHisto1D("unused_sigch_all")->Fill(2*sigCh.getThresholdNumber()-1);
         if(sigCh.getRecoFlag()==JPetSigCh::Good){
@@ -246,13 +243,18 @@ int SignalFinderTools::findTrailingSigCh(
  * The ordering may be different for each PMT, therefore the method creates a map
  * with PMT ID numbers as keys and 4-element permutations as values.
  */
-ThresholdOrderings SignalFinderTools::findThresholdOrders(const JPetParamBank& bank){
+SignalFinderTools::ThresholdOrderings SignalFinderTools::findThresholdOrders(const JPetParamBank& bank){
 
   ThresholdOrderings orderings;
-  std::map<unsigned int, std::array<float, 4> > thr_values;
+  std::map<unsigned int, std::array<float, kNumberOfThresholds> > thr_values;
   
   for(auto& tc: bank.getTOMBChannels()){
     unsigned int id = tc.second->getPM().getID();
+
+    if(tc.second->getLocalChannelNumber() >= kNumberOfThresholds){
+      ERROR("Threshold sorting is meant to work with 4 thresholds only!");
+      return orderings;
+    }
     
     thr_values[id][tc.second->getLocalChannelNumber()-1] = tc.second->getThreshold();
   }
@@ -268,7 +270,7 @@ ThresholdOrderings SignalFinderTools::findThresholdOrders(const JPetParamBank& b
          }
          );
 
-    for(unsigned short i=0;i<4;++i){
+    for(unsigned short i=0;i<kNumberOfThresholds;++i){
       orderings[pm.first][indices[i]] = i;
     }
   }

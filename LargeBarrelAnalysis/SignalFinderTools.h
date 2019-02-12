@@ -32,27 +32,28 @@
 #include <map>
 #include <array>
 
-typedef std::array<unsigned short, 4> Permutation;
-typedef std::map<unsigned int, Permutation> ThresholdOrderings;
-const Permutation kIdentity = {0,1,2,3};
-
 class SignalFinderTools
 {
 public:
+  static const unsigned short kNumberOfThresholds = 4;
+  typedef std::array<unsigned short, SignalFinderTools::kNumberOfThresholds> Permutation;
+  typedef std::map<unsigned int, Permutation> ThresholdOrderings;
+  static const Permutation kIdentity;
+
   static const std::map<int, std::vector<JPetSigCh>> getSigChByPM(
     const JPetTimeWindow* timeWindow, bool useCorrupts
   );
   static std::vector<JPetRawSignal> buildAllSignals(
-    const std::map<int, std::vector<JPetSigCh>>& sigChByPM, unsigned int numOfThresholds,
+    const std::map<int, std::vector<JPetSigCh>>& sigChByPM,
     double sigChEdgeMaxTime, double sigChLeadTrailMaxTime,
     JPetStatistics& stats, bool saveHistos,
     ThresholdOrderings thresholdOrderings
   );
   static std::vector<JPetRawSignal> buildRawSignals(
-    const std::vector<JPetSigCh>& sigChByPM, unsigned int numOfThresholds,
+    const std::vector<JPetSigCh>& sigChByPM,
     double sigChEdgeMaxTime, double sigChLeadTrailMaxTime,
     JPetStatistics& stats, bool saveHistos,
-    Permutation ordering
+    Permutation ordering = SignalFinderTools::kIdentity
   );
   static int findSigChOnNextThr(
     double sigChValue, double sigChEdgeMaxTime,
@@ -63,5 +64,6 @@ public:
     const std::vector<JPetSigCh>& trailingSigChVec
   );
   static ThresholdOrderings findThresholdOrders(const JPetParamBank& bank);
+  
 };
 #endif /* !SIGNALFINDERTOOLS_H */
