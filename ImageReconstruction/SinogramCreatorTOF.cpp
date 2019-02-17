@@ -68,9 +68,9 @@ void SinogramCreatorTOF::generateSinogram() {
 
   const int maxDistanceNumber = std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
   if (fSinogram == nullptr) {
-    fSinogram = new JPetRecoImageTools::Matrix2DProj*[fZSplitNumber];
+    fSinogram = new JPetRecoImageTools::SparseMatrix*[fZSplitNumber];
     for (int i = 0; i < fZSplitNumber; i++) {
-      fSinogram[i] = new JPetRecoImageTools::Matrix2DProj(maxDistanceNumber, (std::vector<double>(kReconstructionMaxAngle, 0)));
+      fSinogram[i] = new JPetRecoImageTools::SparseMatrix(maxDistanceNumber, kReconstructionMaxAngle);
     }
   }
 
@@ -94,13 +94,13 @@ bool SinogramCreatorTOF::terminate() {
   JPetRecoImageTools::FourierTransformFunction f = JPetRecoImageTools::doFFTW;
 
   for (int i = 0; i < fZSplitNumber; i++) {
-    JPetRecoImageTools::Matrix2DProj result = JPetRecoImageTools::backProjectWithTOF((*fSinogram[i]), fTOFInformation[i], (*fSinogram[i])[0].size(),
-                                                                                     JPetRecoImageTools::nonRescale, 0, 255);
+    JPetRecoImageTools::SparseMatrix result =
+        JPetRecoImageTools::backProjectWithTOF((*fSinogram[i]), fTOFInformation[i], (*fSinogram[i]).size2(), JPetRecoImageTools::nonRescale, 0, 255);
 
     saveResult(result, fOutFileName + "reconstruction_with_tof_" + std::to_string(i) + ".ppm");
-    JPetRecoImageTools::Matrix2DProj filteredSinogram = JPetRecoImageTools::FilterSinogram(f, noneFilter, (*fSinogram[i]));
-    JPetRecoImageTools::Matrix2DProj resultBP =
-        JPetRecoImageTools::backProject(filteredSinogram, (*fSinogram[i])[0].size(), JPetRecoImageTools::nonRescale, 0, 255);
+    JPetRecoImageTools::SparseMatrix filteredSinogram = JPetRecoImageTools::FilterSinogram(f, noneFilter, (*fSinogram[i]));
+    JPetRecoImageTools::SparseMatrix resultBP =
+        JPetRecoImageTools::backProject(filteredSinogram, (*fSinogram[i]).size2(), JPetRecoImageTools::nonRescale, 0, 255);
 
     saveResult(resultBP, fOutFileName + "reconstruction_" + std::to_string(i) + ".ppm");
   }
