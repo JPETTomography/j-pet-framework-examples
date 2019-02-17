@@ -24,15 +24,13 @@
 
 #include "SinogramCreator.h"
 
-class SinogramCreatorMC : public SinogramCreator
-{
+class SinogramCreatorMC : public SinogramCreator {
 public:
-  SinogramCreatorMC(const char* name);
+  explicit SinogramCreatorMC(const char* name);
   virtual ~SinogramCreatorMC();
   virtual bool init() override;
   virtual bool exec() override;
   virtual bool terminate() override;
-
 
 private:
   SinogramCreatorMC(const SinogramCreatorMC&) = delete;
