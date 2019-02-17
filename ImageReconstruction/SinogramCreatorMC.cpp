@@ -64,7 +64,7 @@ void SinogramCreatorMC::generateSinogram() {
   float skip = 0.f;
 
   int numberOfCorrectHits = 0;
-  int totalHits = 0;
+  int totalHits = 1; // to make sure that we do not divide by 0
 
   const int maxDistanceNumber = std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
   if (fSinogram == nullptr) {
@@ -89,7 +89,8 @@ void SinogramCreatorMC::generateSinogram() {
   }
 
   std::cout << "Correct hits: " << numberOfCorrectHits << " total hits: " << totalHits
-            << " (correct percentage: " << (((float)numberOfCorrectHits * 100.f) / (float)totalHits) << std::endl;
+            << " (correct percentage: " << (((float)numberOfCorrectHits * 100.f) / (float)totalHits) << ")" << std::endl
+            << std::endl;
 }
 
 bool SinogramCreatorMC::exec() { return true; }
