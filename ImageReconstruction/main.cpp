@@ -15,11 +15,11 @@
 
 #include "FilterEvents.h"
 #include "ImageReco.h"
-#include "JPetGojaParser.h"
 #include "JPetManager/JPetManager.h"
 #include "MLEMRunner.h"
 #include "SinogramCreator.h"
 #include "SinogramCreatorMC.h"
+#include "SinogramCreatorTOF.h"
 using namespace std;
 
 int main(int argc, const char* argv[]) {
@@ -31,15 +31,13 @@ int main(int argc, const char* argv[]) {
     manager.registerTask<SinogramCreator>("SinogramCreator");
     manager.registerTask<SinogramCreatorMC>("SinogramCreatorMC");
     manager.registerTask<MLEMRunner>("MLEMRunner");
-    manager.registerTask<JPetGojaParser>("JPetGojaParser");
+    manager.registerTask<SinogramCreatorTOF>("SinogramCreatorTOF");
 
     // manager.useTask("FilterEvents", "unk.evt", "reco.unk.evt");
     // manager.useTask("MLEMRunner", "reco.unk.evt", "");
     // manager.useTask("ImageReco", "reco.unk.evt", "reco");
     // manager.useTask("SinogramCreator", "reco.unk.evt", "sino");
-    manager.useTask("JPetGojaParser", "", "parsed.evt");
-    // manager.useTask("SinogramCreator", "parsed.evt", "sino");
-    // manager.useTask("SinogramCreatorMC", "", "sino.mc");
+    manager.useTask("SinogramCreatorMC", "", "sino.mc");
 
     manager.run(argc, argv);
   } catch (const std::exception& except) {
