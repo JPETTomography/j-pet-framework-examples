@@ -38,7 +38,8 @@ int main(int argc, const char* argv[]) {
     // manager.useTask("ImageReco", "reco.unk.evt", "reco");
     // manager.useTask("SinogramCreator", "reco.unk.evt", "sino");
     manager.useTask("JPetGojaParser", "", "parsed.evt");
-    manager.useTask("SinogramCreatorMC", "parsed.evt", "sino.mc");
+    // manager.useTask("SinogramCreator", "parsed.evt", "sino");
+    // manager.useTask("SinogramCreatorMC", "", "sino.mc");
 
     manager.run(argc, argv);
   } catch (const std::exception& except) {

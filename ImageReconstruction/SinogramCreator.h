@@ -66,15 +66,15 @@ public:
 protected:
   int getSplitRangeNumber(float firstZ, float secondZ);
   int getSplitRangeNumber(float z);
-  void saveResult(const JPetRecoImageTools::Matrix2DProj& result, const std::string& outputFileName);
+  void saveResult(const JPetRecoImageTools::SparseMatrix& result, const std::string& outputFileName);
   bool analyzeHits(const JPetHit& firstHit, const JPetHit& secondHit);
   bool analyzeHits(const float firstX, const float firstY, const float firstZ, const float firstTOF, const float secondX, const float secondY,
                    const float secondZ, const float secondTOF);
   int getSinogramSlice(float firstX, float firstY, float firstZ, float firstTOF, float secondX, float secondY, float secondZ, float secondTOF);
   float getTOFRescaleFactor(float x_diff, float y_diff, float z_diff);
-  int maxValueInSinogram(const JPetRecoImageTools::Matrix2DProj& sinogram);
+  int maxValueInSinogram(const JPetRecoImageTools::SparseMatrix& sinogram);
 
-  JPetRecoImageTools::Matrix2DProj** fSinogram = nullptr;
+  JPetRecoImageTools::SparseMatrix** fSinogram = nullptr;
   JPetRecoImageTools::Matrix2DTOF* fTOFInformation;
 
   const int kReconstructionMaxAngle = 180;

@@ -26,24 +26,51 @@
 #include <memory>
 #include <utility>
 
+#include <boost/numeric/ublas/io.hpp>
+#include <boost/numeric/ublas/matrix_sparse.hpp>
+
 #include "JPetFilterInterface.h"
 
 template <class T, typename U> struct PairHash {
-  size_t operator()(const std::pair<T, U>& key) const
-  {
-    return std::hash<T>()(key.first) ^ std::hash<U>()(key.second);
-  }
+  size_t operator()(const std::pair<T, U>& key) const { return std::hash<T>()(key.first) ^ std::hash<U>()(key.second); }
 };
 
-class JPetRecoImageTools
-{
+struct Point {
+  Point(int x, int y) {
+    this->x = x;
+    this->y = y;
+  }
+  Point(const std::pair<int, int>& p) {
+    this->x = p.first;
+    this->y = p.second;
+  }
+  int x = 0;
+  int y = 0;
+};
+
+struct SinogramPoints {
+  SinogramPoints(double value, double time) {
+    this->value = value;
+    timeVector.push_back(time);
+  }
+
+  void operator+=(const std::pair<double, double>& other) {
+    value += other.first;
+    timeVector.push_back(other.second);
+  }
+  double value = 0.;
+  std::vector<double> timeVector;
+};
+
+class JPetRecoImageTools {
 public:
-  using Matrix2D = std::vector<std::vector<int>>;
-  using Matrix2DProj = std::vector<std::vector<double>>;
+  using SparseMatrix = boost::numeric::ublas::mapped_matrix<double>;
+  using Matrix3D = std::unordered_map<int, SparseMatrix>;
+
   using Matrix2DTOF = std::unordered_map<std::pair<int, int>, std::vector<float>, PairHash<int, int>>;
   using InterpolationFunc = std::function<double(int i, double y, std::function<double(int, int)>&)>;
-  using RescaleFunc = std::function<void(Matrix2DProj& v, double minCutoff, double rescaleFactor)>;
-  using FourierTransformFunction = std::function<Matrix2DProj(Matrix2DProj& sinogram, JPetFilterInterface& filterFunction)>;
+  using RescaleFunc = std::function<void(SparseMatrix& v, double minCutoff, double rescaleFactor)>;
+  using FourierTransformFunction = std::function<SparseMatrix(SparseMatrix& sinogram, JPetFilterInterface& filterFunction)>;
 
   /// Returns a matrixGetter, that can be used to return matrix elements in the
   /// following way:
@@ -52,7 +79,7 @@ public:
   /// In addition if the indices goes outside of the matrix range 0 is retuned.
   /// It is assumed that the input matrix is quadratic.
   /// The produced functions can be used as an input to interpolation functions.
-  static std::function<double(int, int)> matrixGetterFactory(const Matrix2D& emissionMatrix, bool isTransposed = false);
+  static std::function<double(int, int)> matrixGetterFactory(const SparseMatrix& emissionMatrix, bool isTransposed = false);
 
   /*! \brief function returning func(i,j) where j is the nearest neighbour
    * index with respect to y.
@@ -76,12 +103,9 @@ public:
   /// 2. Removes the common backgroud term. So the values start at zero
   /// 3. Rescales all values by rescaleFactor/maxElement
   /// The final value range is from 0 to rescaleFactor
-  static void rescale(Matrix2DProj& v, double minCutoff, double rescaleFactor);
+  static void rescale(SparseMatrix& v, double minCutoff, double rescaleFactor);
   /// PseudoRescale which does nothing
-  static void nonRescale(Matrix2DProj&, double, double)
-  {
-    return;
-  }
+  static void nonRescale(SparseMatrix&, double, double) { return; }
 
   /*! \brief Function returning sinogram matrix.
    *  \param emissionMatrix matrix,  needs to be NxN
@@ -96,11 +120,12 @@ public:
    *  \param rescaleFunc function that rescales the final result (Optional,
    * default no rescaling)
    */
-  static Matrix2DProj createSinogramWithSingleInterpolation(Matrix2D& emissionMatrix, int nViews, int nScans, double angleBeg = 0,
-      double angleEnd = 180, InterpolationFunc interpolationFunction = linear,
-      RescaleFunc rescaleFunc = nonRescale, int rescaleMinCutoff = 0, int rescaleFactor = 255);
+  static SparseMatrix createSinogramWithSingleInterpolation(SparseMatrix& emissionMatrix, int nViews, int nScans, double angleBeg = 0,
+                                                            double angleEnd = 180, InterpolationFunc interpolationFunction = linear,
+                                                            RescaleFunc rescaleFunc = nonRescale, int rescaleMinCutoff = 0, int rescaleFactor = 255);
 
-  static double calculateProjection(const Matrix2D& emissionMatrix, double phi, int scanNumber, int nScans, InterpolationFunc& interpolationFunction);
+  static double calculateProjection(const SparseMatrix& emissionMatrix, double phi, int scanNumber, int nScans,
+                                    InterpolationFunc& interpolationFunction);
 
   /*! \brief Function returning sinogram matrix with both variables interpolated
    *  \param emissionMatrix matrix, needs to be NxN
@@ -110,8 +135,8 @@ public:
    *  \param rescaleMinCutoff min value to set in rescale (Optional)
    *  \param rescaleFactor max value to set in rescale (Optional)
    */
-  static Matrix2DProj createSinogramWithDoubleInterpolation(Matrix2D& emissionMatrix, int nAngles, RescaleFunc rescaleFunc = nonRescale,
-      int rescaleMinCutoff = 0, int rescaleFactor = 255);
+  static SparseMatrix createSinogramWithDoubleInterpolation(SparseMatrix& emissionMatrix, int nAngles, RescaleFunc rescaleFunc = nonRescale,
+                                                            int rescaleMinCutoff = 0, int rescaleFactor = 255);
 
   static double calculateProjection2(int step, double cos, double sin, int imageSize, double center, double length,
                                      std::function<double(int, int)> matrixGet);
@@ -124,7 +149,7 @@ public:
    *  \param rescaleMinCutoff min value to set in rescale (Optional)
    *  \param rescaleFactor max value to set in rescale (Optional)
    */
-  static Matrix2DProj backProject(Matrix2DProj& sinogram, int angles, RescaleFunc rescaleFunc, int rescaleMinCutoff, int rescaleFactor);
+  static SparseMatrix backProject(SparseMatrix& sinogram, int angles, RescaleFunc rescaleFunc, int rescaleMinCutoff, int rescaleFactor);
 
   /*! \brief Function image from sinogram matrix
    *  \param sinogram matrix containing sinogram to backProject
@@ -135,7 +160,7 @@ public:
    *  \param rescaleMinCutoff min value to set in rescale (Optional)
    *  \param rescaleFactor max value to set in rescale (Optional)
    */
-  static Matrix2DProj backProjectWithTOF(Matrix2DProj& sinogram, Matrix2DTOF& tof, int angles, RescaleFunc rescaleFunc, int rescaleMinCutoff,
+  static SparseMatrix backProjectWithTOF(SparseMatrix& sinogram, Matrix2DTOF& tof, int angles, RescaleFunc rescaleFunc, int rescaleMinCutoff,
                                          int rescaleFactor);
 
   static double normalDistributionProbability(float x, float mean, float stddev);
@@ -146,19 +171,28 @@ public:
    *  \param filter type of filter
    *  \param sinogram data to filter
   */
-  static Matrix2DProj FilterSinogram(FourierTransformFunction& ftf, JPetFilterInterface& filter, Matrix2DProj& sinogram);
+  static SparseMatrix FilterSinogram(FourierTransformFunction& ftf, JPetFilterInterface& filter, SparseMatrix& sinogram);
+
+  /*! \brief Function filtering given sinogram using fouriner implementation and
+ filter
+ *  \param ftf function filtering sinogram with given filter
+ *  \param filter type of filter
+ *  \param matrix data to filter
+ *  \param TOFSliceSize size of TOF slice in matrix
+*/
+  static Matrix3D FilterSinograms(FourierTransformFunction& ftf, JPetFilterInterface& filter, Matrix3D& matrix, float TOFSliceSize);
 
   /*! \brief Fourier transform implementation using FFTW library
    *  \param sinogram data to filter
    *  \param filter type of filter
    */
-  static Matrix2DProj doFFTW(Matrix2DProj& sinogram, JPetFilterInterface& filter);
+  static SparseMatrix doFFTW(SparseMatrix& sinogram, JPetFilterInterface& filter);
 
   /*! \brief Fourier transform implementation
    *  \param sinogram data to filter
    *  \param filter type of filter
    */
-  static Matrix2DProj doFFTSLOW(Matrix2DProj& sinogram, JPetFilterInterface& filter);
+  static SparseMatrix doFFTSLOW(SparseMatrix& sinogram, JPetFilterInterface& filter);
 
 private:
   JPetRecoImageTools();
@@ -170,8 +204,7 @@ private:
 
   static void doFFTSLOWI(std::vector<double>& Re, std::vector<double>& Im, int size, int shift);
 
-  static inline double setToZeroIfSmall(double value, double epsilon)
-  {
+  static inline double setToZeroIfSmall(double value, double epsilon) {
     if (std::abs(value) < epsilon)
       return 0;
     else
