@@ -40,7 +40,7 @@ set(findFFTW_DIR ${CMAKE_CURRENT_BINARY_DIR}/findFFTW-src)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${findFFTW_DIR}")
 
 
-find_package(FFTW REQUIRED DOUBLE_LIB)
+find_package(FFTW REQUIRED COMPONENTS DOUBLE_LIB)
 include_directories(${FFTW_INCLUDE_DIRS})
 
 ######################################################################
