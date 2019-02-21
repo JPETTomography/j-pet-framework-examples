@@ -97,15 +97,18 @@ bool SinogramCreatorMC::exec() { return true; }
 
 bool SinogramCreatorMC::terminate() {
 
-  JPetFilterNone noneFilter;
+  JPetFilterRamLak ramlakFilter;
   JPetRecoImageTools::FourierTransformFunction f = JPetRecoImageTools::doFFTW;
 
   for (int i = 0; i < fZSplitNumber; i++) {
+    if (fMaxValueInSinogram[i] == 0)
+      continue;
+
     JPetRecoImageTools::SparseMatrix result =
         JPetRecoImageTools::backProjectWithTOF((*fSinogram[i]), fTOFInformation[i], (*fSinogram[i]).size2(), JPetRecoImageTools::nonRescale, 0, 255);
 
     saveResult(result, fOutFileName + "reconstruction_with_tof_" + std::to_string(i) + ".ppm");
-    JPetRecoImageTools::SparseMatrix filteredSinogram = JPetRecoImageTools::FilterSinogram(f, noneFilter, (*fSinogram[i]));
+    JPetRecoImageTools::SparseMatrix filteredSinogram = JPetRecoImageTools::FilterSinogram(f, ramlakFilter, (*fSinogram[i]));
     JPetRecoImageTools::SparseMatrix resultBP =
         JPetRecoImageTools::backProject(filteredSinogram, (*fSinogram[i]).size2(), JPetRecoImageTools::nonRescale, 0, 255);
 

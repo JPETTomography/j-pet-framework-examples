@@ -22,6 +22,7 @@
 #define override
 #endif
 
+#include "JPetFilterRamLak.h"
 #include "SinogramCreator.h"
 
 class SinogramCreatorMC : public SinogramCreator {
