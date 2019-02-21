@@ -166,6 +166,8 @@ int SinogramCreator::maxValueInSinogram(const JPetRecoImageTools::SparseMatrix& 
 
 void SinogramCreator::saveResult(const JPetRecoImageTools::SparseMatrix& result, const std::string& outputFileName) {
   int maxValue = maxValueInSinogram(result);
+  if (maxValue == 0)
+    return;
   std::ofstream res(outputFileName);
   res << "P2" << std::endl;
   res << result.size2() << " " << result.size1() << std::endl;

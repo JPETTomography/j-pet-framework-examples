@@ -115,9 +115,6 @@ bool SinogramCreatorMC::terminate() {
     saveResult(resultBP, fOutFileName + "reconstruction_" + std::to_string(i) + ".ppm");
   }
 
-  for (int i = 0; i < fZSplitNumber; i++) {
-    saveResult((*fSinogram[i]), fOutFileName + "_" + std::to_string(i) + ".ppm");
-  }
   delete[] fSinogram;
   delete[] fMaxValueInSinogram;
 
