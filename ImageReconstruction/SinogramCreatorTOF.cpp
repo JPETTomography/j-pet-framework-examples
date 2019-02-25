@@ -67,7 +67,6 @@ float firstX = 0.f;
   int numberOfCorrectHits = 0;
   int totalHits = 1; // to make sure that we do not divide by 0
 
-  const int maxDistanceNumber = std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
   if (fSinogramDataTOF == nullptr) {
     fSinogramDataTOF = new JPetRecoImageTools::Matrix3D[fZSplitNumber];
   }
@@ -98,20 +97,17 @@ bool SinogramCreatorTOF::exec() { return true; }
 
 bool SinogramCreatorTOF::terminate() {
 
-  JPetFilterNone noneFilter;
+  JPetFilterRamLak ramLakFilter(0.7);
   JPetRecoImageTools::FourierTransformFunction f = JPetRecoImageTools::doFFTW;
 
   for (int i = 0; i < fZSplitNumber; i++) {
-    saveResult((fSinogramDataTOF[i]), fOutFileName + "_" + std::to_string(i) + ".ppm");
+    for(auto &sinogram : fSinogramDataTOF[i]) {
+      sinogram.second = JPetRecoImageTools::FilterSinogram(f, ramLakFilter, sinogram.second);
+    }
     JPetRecoImageTools::SparseMatrix result =
-        JPetRecoImageTools::backProjectRealTOF(fSinogramDataTOF, (fSinogramDataTOF[i]).size2(), JPetRecoImageTools::nonRescale, 0, 255, fReconstructionDistanceAccuracy, fTOFSliceSize, 150);
+        JPetRecoImageTools::backProjectRealTOF(fSinogramDataTOF[i], fMaxDistanceNumber, JPetRecoImageTools::nonRescale, 0, 255, fReconstructionDistanceAccuracy, fTOFSliceSize, 150);
 
     saveResult(result, fOutFileName + "reconstruction_with_tof_" + std::to_string(i) + ".ppm");
-    JPetRecoImageTools::SparseMatrix filteredSinogram = JPetRecoImageTools::FilterSinogram(f, noneFilter, (fSinogramDataTOF[i]));
-    JPetRecoImageTools::SparseMatrix resultBP =
-        JPetRecoImageTools::backProject(filteredSinogram, (fSinogramDataTOF[i]).size2(), JPetRecoImageTools::nonRescale, 0, 255);
-
-    saveResult(resultBP, fOutFileName + "reconstruction_" + std::to_string(i) + ".ppm");
   }
   delete[] fSinogram;
   delete[] fMaxValueInSinogram;

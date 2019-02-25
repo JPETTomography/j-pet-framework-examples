@@ -23,6 +23,7 @@
 #endif
 
 #include "SinogramCreator.h"
+#include "JPetFilterRamLak.h"
 
 class SinogramCreatorTOF : public SinogramCreator {
 public:
