@@ -55,7 +55,7 @@ private:
   std::string fOutFileName = "sinogramMC";
   float fTOFSliceSize = 100.f;
 
-  JPetRecoImageTools::Matrix3D fSinogramDataTOF;
+  JPetRecoImageTools::Matrix3D *fSinogramDataTOF = nullptr;
 };
 
 #endif /*  !SINOGRAMCREATORTOF_H */

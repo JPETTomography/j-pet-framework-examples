@@ -68,11 +68,8 @@ float firstX = 0.f;
   int totalHits = 1; // to make sure that we do not divide by 0
 
   const int maxDistanceNumber = std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
-  if (fSinogram == nullptr) {
-    fSinogram = new JPetRecoImageTools::SparseMatrix*[fZSplitNumber];
-    for (int i = 0; i < fZSplitNumber; i++) {
-      fSinogram[i] = new JPetRecoImageTools::SparseMatrix(maxDistanceNumber, kReconstructionMaxAngle, 0);
-    }
+  if (fSinogramDataTOF == nullptr) {
+    fSinogramDataTOF = new JPetRecoImageTools::Matrix3D[fZSplitNumber];
   }
 
   for (const auto& inputPath : fInputData) {
@@ -132,13 +129,13 @@ bool SinogramCreatorTOF::analyzeHits(const float firstX, const float firstY, con
   const auto sinogramResult = SinogramCreatorTools::getSinogramRepresentation(
       firstX, firstY, secondX, secondY, fMaxReconstructionLayerRadius, fReconstructionDistanceAccuracy, fMaxDistanceNumber, kReconstructionMaxAngle);
   const auto TOFSlice = SinogramCreatorTools::getTOFSlice(firstX, firstY, firstTOF, secondX, secondY, secondTOF, fTOFSliceSize);
-  const auto data = fSinogramDataTOF.find(TOFSlice);
-  if (data != fSinogramDataTOF.end()) {
+  const auto data = fSinogramDataTOF[i].find(TOFSlice);
+  if (data != fSinogramDataTOF[i].end()) {
     data->second(sinogramResult.first, sinogramResult.second) += 1.;
   } else {
-    fSinogramDataTOF.insert(std::make_pair(
+    fSinogramDataTOF[i].insert(std::make_pair(
         TOFSlice, JPetRecoImageTools::SparseMatrix(fMaxDistanceNumber, kReconstructionMaxAngle, fMaxDistanceNumber * kReconstructionMaxAngle)));
-    fSinogramDataTOF[TOFSlice](sinogramResult.first, sinogramResult.second) += 1.;
+    fSinogramDataTOF[i][TOFSlice](sinogramResult.first, sinogramResult.second) += 1.;
   }
 
   return true;
