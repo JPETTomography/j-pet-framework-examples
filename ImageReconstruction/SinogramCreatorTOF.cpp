@@ -53,9 +53,7 @@ bool SinogramCreatorTOF::init() {
 }
 
 void SinogramCreatorTOF::generateSinogram() {
-  std::ifstream in(fInputData);
-
-  float firstX = 0.f;
+float firstX = 0.f;
   float firstY = 0.f;
   float secondX = 0.f;
   float secondY = 0.f;
@@ -63,27 +61,40 @@ void SinogramCreatorTOF::generateSinogram() {
   float secondZ = 0.f;
   float firstT = 0.f;
   float secondT = 0.f;
+  float skip = 0.f;
+  int coincidence = 0;
 
-  int numberOfCorrectI = 0;
+  int numberOfCorrectHits = 0;
+  int totalHits = 1; // to make sure that we do not divide by 0
 
   const int maxDistanceNumber = std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
   if (fSinogram == nullptr) {
     fSinogram = new JPetRecoImageTools::SparseMatrix*[fZSplitNumber];
     for (int i = 0; i < fZSplitNumber; i++) {
-      fSinogram[i] = new JPetRecoImageTools::SparseMatrix(maxDistanceNumber, kReconstructionMaxAngle);
+      fSinogram[i] = new JPetRecoImageTools::SparseMatrix(maxDistanceNumber, kReconstructionMaxAngle, 0);
     }
   }
 
-  while (in.peek() != EOF) {
+  for (const auto& inputPath : fInputData) {
+    std::ifstream in(inputPath);
+    while (in.peek() != EOF) {
 
-    in >> firstX >> firstY >> firstZ >> firstT >> secondX >> secondY >> secondZ >> secondT;
+      in >> firstX >> firstY >> firstZ >> firstT >> secondX >> secondY >> secondZ >> secondT >> skip >> skip >> skip >> skip >> coincidence >> skip >>
+          skip >> skip;
 
-    if (analyzeHits(firstX, firstY, firstZ, firstT, secondX, secondY, secondZ, secondT)) {
-      numberOfCorrectI++;
+        if(coincidence != 1) // 1 == true event
+          continue;
+
+      if (analyzeHits(firstX, firstY, firstZ, firstT, secondX, secondY, secondZ, secondT)) {
+      numberOfCorrectHits++;
+      }
+      totalHits++;
     }
   }
 
-  std::cout << "Correct i: " << numberOfCorrectI << std::endl;
+  std::cout << "Correct hits: " << numberOfCorrectHits << " total hits: " << totalHits
+            << " (correct percentage: " << (((float)numberOfCorrectHits * 100.f) / (float)totalHits) << "%)" << std::endl
+            << std::endl;
 }
 
 bool SinogramCreatorTOF::exec() { return true; }
@@ -94,19 +105,16 @@ bool SinogramCreatorTOF::terminate() {
   JPetRecoImageTools::FourierTransformFunction f = JPetRecoImageTools::doFFTW;
 
   for (int i = 0; i < fZSplitNumber; i++) {
+    saveResult((fSinogramDataTOF[i]), fOutFileName + "_" + std::to_string(i) + ".ppm");
     JPetRecoImageTools::SparseMatrix result =
-        JPetRecoImageTools::backProjectWithTOF((*fSinogram[i]), fTOFInformation[i], (*fSinogram[i]).size2(), JPetRecoImageTools::nonRescale, 0, 255);
+        JPetRecoImageTools::backProjectRealTOF(fSinogramDataTOF, (fSinogramDataTOF[i]).size2(), JPetRecoImageTools::nonRescale, 0, 255, fReconstructionDistanceAccuracy, fTOFSliceSize, 150);
 
     saveResult(result, fOutFileName + "reconstruction_with_tof_" + std::to_string(i) + ".ppm");
-    JPetRecoImageTools::SparseMatrix filteredSinogram = JPetRecoImageTools::FilterSinogram(f, noneFilter, (*fSinogram[i]));
+    JPetRecoImageTools::SparseMatrix filteredSinogram = JPetRecoImageTools::FilterSinogram(f, noneFilter, (fSinogramDataTOF[i]));
     JPetRecoImageTools::SparseMatrix resultBP =
-        JPetRecoImageTools::backProject(filteredSinogram, (*fSinogram[i]).size2(), JPetRecoImageTools::nonRescale, 0, 255);
+        JPetRecoImageTools::backProject(filteredSinogram, (fSinogramDataTOF[i]).size2(), JPetRecoImageTools::nonRescale, 0, 255);
 
     saveResult(resultBP, fOutFileName + "reconstruction_" + std::to_string(i) + ".ppm");
-  }
-
-  for (int i = 0; i < fZSplitNumber; i++) {
-    saveResult((*fSinogram[i]), fOutFileName + "_" + std::to_string(i) + ".ppm");
   }
   delete[] fSinogram;
   delete[] fMaxValueInSinogram;
@@ -158,7 +166,7 @@ void SinogramCreatorTOF::setUpOptions() {
   }
 
   if (isOptionSet(opts, kInputDataKey)) {
-    fInputData = getOptionAsString(opts, kInputDataKey);
+    fInputData = getOptionAsVectorOfStrings(opts, kInputDataKey);
   }
 
   if (isOptionSet(opts, kEnableNonPerperdicualLOR)) {

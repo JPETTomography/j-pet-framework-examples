@@ -240,6 +240,71 @@ JPetRecoImageTools::SparseMatrix JPetRecoImageTools::backProject(SparseMatrix& s
   return reconstructedProjection;
 }
 
+JPetRecoImageTools::SparseMatrix JPetRecoImageTools::backProjectRealTOF(Matrix3D& sinogram, int nAngles, RescaleFunc rescaleFunc,
+                                                                        int rescaleMinCutoff, int rescaleFactor, double sinogramAccuracy, double tofBinSigma, double tofSigma) {
+  const auto sinogramBegin = sinogram.cbegin();
+  int imageSize = sinogramBegin->second.size1();
+  double center = (double)(imageSize - 1) / 2.0;
+  double center2 = center * center;
+  double angleStep = M_PI / (double)nAngles;
+
+  SparseMatrix reconstructedProjection(imageSize, imageSize);
+  const double speed_of_light = 2.99792458 * sinogramAccuracy; // accuracy * ps/cm
+
+  const int max_sigma_multi = 3;
+
+  for (int angle = 0; angle < nAngles; angle++) {
+    double cos = std::cos((double)angle * (double)angleStep);
+    double sin = std::sin((double)angle * (double)angleStep);
+
+    for (const auto& tofBin : sinogram) {
+
+      const double lor_tof_center = tofBin.first * tofBinSigma * speed_of_light;
+      for (int x = 0; x < imageSize; x++) {
+        double xMinusCenter = (double)x - center;
+        double xMinusCenter2 = xMinusCenter * xMinusCenter;
+        double ttemp = xMinusCenter * cos + center;
+        
+        for (int y = 0; y < imageSize; y++) {
+          double yMinusCenter = (double)y - center;
+          double yMinusCenter2 = yMinusCenter * yMinusCenter;
+          
+          if (yMinusCenter2 + xMinusCenter2 < center2) {
+            double t = ttemp - yMinusCenter * sin;
+            int n = std::floor(t + 0.5F);
+
+            float lor_center_x = center + cos * (n - center);
+            float lor_center_y = center + sin * (n - center);
+
+            double diffBetweenLORCenterYandY = lor_center_y - y;
+            double diffBetweenLORCenterXandX = lor_center_x - x;
+            double distanceToCenterOfLOR =
+              std::abs(std::sqrt((diffBetweenLORCenterXandX * diffBetweenLORCenterXandX) + (diffBetweenLORCenterYandY * diffBetweenLORCenterYandY)));
+            if(distanceToCenterOfLOR - lor_tof_center >  max_sigma_multi * tofSigma)
+              continue;
+            reconstructedProjection(y, x) += tofBin.second(n, angle) * tofWeight(lor_tof_center, distanceToCenterOfLOR, tofSigma);
+          }
+        }
+      }
+    }
+  }
+
+  for (int x = 0; x < imageSize; x++) {
+    for (int y = 0; y < imageSize; y++) {
+      reconstructedProjection(y, x) *= angleStep;
+    }
+  }
+  rescaleFunc(reconstructedProjection, rescaleMinCutoff, rescaleFactor);
+  return reconstructedProjection;
+}
+
+double JPetRecoImageTools::tofWeight(double lor_tof_center, double lor_position, double sigma) {
+  double x = lor_position - lor_tof_center;
+  x *= x;
+  double y = 2 * (sigma * sigma);
+  return std::exp(-x / y);
+}
+
 JPetRecoImageTools::SparseMatrix JPetRecoImageTools::backProjectWithTOF(SparseMatrix& sinogram, Matrix2DTOF& tof, int nAngles,
                                                                         RescaleFunc rescaleFunc, int rescaleMinCutoff, int rescaleFactor) {
   int imageSize = sinogram.size1();
@@ -280,7 +345,7 @@ JPetRecoImageTools::SparseMatrix JPetRecoImageTools::backProjectWithTOF(SparseMa
               std::abs(std::sqrt((diffBetweenLORCenterXandX * diffBetweenLORCenterXandX) + (diffBetweenLORCenterYandY * diffBetweenLORCenterYandY)));
           for (unsigned int i = 0; i < tofVector.size(); i++) {
             float delta = std::abs(tofVector[i] * 0.299792458);
-            double distributionProbability = normalDistributionProbability(distanceToCenterOfLOR, delta, 10.);
+            double distributionProbability = normalDistributionProbability(distanceToCenterOfLOR, delta, 150.);
             reconstructedProjection(y, x) += distributionProbability;
           }
         }

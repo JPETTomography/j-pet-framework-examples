@@ -46,12 +46,12 @@ private:
   const std::string kZSplitNumber = "SinogramCreatorTOF_SinogramZSplitNumber_int";
   const std::string kScintillatorLenght = "SinogramCreatorTOF_ScintillatorLenght_float";
   const std::string kMaxReconstructionRadius = "SinogramCreatorTOF_MaxReconstructionRadius_float";
-  const std::string kInputDataKey = "SinogramCreatorTOF_InputDataPath_std::string";
+  const std::string kInputDataKey = "SinogramCreatorTOF_InputDataPaths_std::vector<std::string>";
   const std::string kEnableNonPerperdicualLOR = "SinogramCreatorTOF_EnableNonPerperdicalLOR_bool";
   const std::string kEnableTOFReconstrution = "SinogramCreatorTOF_EnableTOFReconstruction_bool";
   const std::string kTOFSliceSize = "SinogramCreatorTOF_TOFSliceSize_float";
 
-  std::string fInputData = "sinogram_data.txt";
+  std::vector<std::string> fInputData{"sinogram_data.txt"};
   std::string fOutFileName = "sinogramMC";
   float fTOFSliceSize = 100.f;
 

@@ -62,6 +62,7 @@ void SinogramCreatorMC::generateSinogram() {
   float firstT = 0.f;
   float secondT = 0.f;
   float skip = 0.f;
+  int coincidence = 0;
 
   int numberOfCorrectHits = 0;
   int totalHits = 1; // to make sure that we do not divide by 0
@@ -78,8 +79,11 @@ void SinogramCreatorMC::generateSinogram() {
     std::ifstream in(inputPath);
     while (in.peek() != EOF) {
 
-      in >> firstX >> firstY >> firstZ >> firstT >> secondX >> secondY >> secondZ >> secondT >> skip >> skip >> skip >> skip >> skip >> skip >>
+      in >> firstX >> firstY >> firstZ >> firstT >> secondX >> secondY >> secondZ >> secondT >> skip >> skip >> skip >> skip >> coincidence >> skip >>
           skip >> skip;
+
+        if(coincidence != 1) // 1 == true event
+          continue;
 
       if (analyzeHits(firstX, firstY, firstZ, firstT, secondX, secondY, secondZ, secondT)) {
         numberOfCorrectHits++;
@@ -89,7 +93,7 @@ void SinogramCreatorMC::generateSinogram() {
   }
 
   std::cout << "Correct hits: " << numberOfCorrectHits << " total hits: " << totalHits
-            << " (correct percentage: " << (((float)numberOfCorrectHits * 100.f) / (float)totalHits) << ")" << std::endl
+            << " (correct percentage: " << (((float)numberOfCorrectHits * 100.f) / (float)totalHits) << "%)" << std::endl
             << std::endl;
 }
 
@@ -97,22 +101,22 @@ bool SinogramCreatorMC::exec() { return true; }
 
 bool SinogramCreatorMC::terminate() {
 
-  JPetFilterRamLak ramlakFilter;
+  JPetFilterRamLak ramlakFilter(0.7);
   JPetRecoImageTools::FourierTransformFunction f = JPetRecoImageTools::doFFTW;
 
   for (int i = 0; i < fZSplitNumber; i++) {
-    if (fMaxValueInSinogram[i] == 0)
-      continue;
+    int sliceNumber = i - (fZSplitNumber / 2);
+    saveResult(*(fSinogram[i]), "sinogram_" + std::to_string(sliceNumber) + "_" + std::to_string(fZSplitRange[i].first) + "_" + std::to_string(fZSplitRange[i].second) + ".ppm");
 
-    JPetRecoImageTools::SparseMatrix result =
-        JPetRecoImageTools::backProjectWithTOF((*fSinogram[i]), fTOFInformation[i], (*fSinogram[i]).size2(), JPetRecoImageTools::nonRescale, 0, 255);
-
-    saveResult(result, fOutFileName + "reconstruction_with_tof_" + std::to_string(i) + ".ppm");
     JPetRecoImageTools::SparseMatrix filteredSinogram = JPetRecoImageTools::FilterSinogram(f, ramlakFilter, (*fSinogram[i]));
     JPetRecoImageTools::SparseMatrix resultBP =
         JPetRecoImageTools::backProject(filteredSinogram, (*fSinogram[i]).size2(), JPetRecoImageTools::nonRescale, 0, 255);
 
-    saveResult(resultBP, fOutFileName + "reconstruction_" + std::to_string(i) + ".ppm");
+    saveResult(resultBP, fOutFileName + "reconstruction_" + std::to_string(sliceNumber) + ".ppm");
+    
+    JPetRecoImageTools::SparseMatrix result =
+        JPetRecoImageTools::backProjectWithTOF((*fSinogram[i]), fTOFInformation[i], (*fSinogram[i]).size2(), JPetRecoImageTools::nonRescale, 0, 255);
+    saveResult(result, fOutFileName + "reconstruction_with_KDE_" + std::to_string(sliceNumber) + ".ppm");
   }
 
   delete[] fSinogram;

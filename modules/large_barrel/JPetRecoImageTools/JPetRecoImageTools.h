@@ -164,6 +164,8 @@ public:
                                          int rescaleFactor);
 
   static double normalDistributionProbability(float x, float mean, float stddev);
+  static double tofWeight(double lor_tof_center, double lor_position, double sigma);
+  static SparseMatrix backProjectRealTOF(Matrix3D& sinogram, int nAngles, RescaleFunc rescaleFunc, int rescaleMinCutoff, int rescaleFactor, double sinogramAccuracy, double tofBinSigma, double tofSigma);
 
   /*! \brief Function filtering given sinogram using fouriner implementation and
    filter
