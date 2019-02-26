@@ -265,10 +265,3 @@ double HitFinderTools::calculateTOT(const JPetHit& hit)
   }
   return tot;
 }
-
-double HitFinderTools::getToT(double eDep, double  par1, double par2)
-{
-  double value = par1 + eDep * par2;
-  if (value < 0 ) return 0;
-  return value;
-}
