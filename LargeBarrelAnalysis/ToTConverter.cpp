@@ -13,11 +13,61 @@
  *  @file ToTConverter.cpp
  */
 
-#include "./ToTConverter.h"
+#include <TFormula.h>
+#include "ToTConverter.h"
+#include "JPetLoggerInclude.h"
 
-double ToTConverter::getToT(double eDep, double  par1, double par2)
+ToTConverter::ToTConverter(const ToTConverterParams& params): fParams(params)
 {
-  double value = par1 + eDep * par2;
-  if (value < 0 ) return 0;
-  return value;
+  TFormula func("myFunc", fParams.fFormula.c_str());
+  func.SetParameters(fParams.fParams.data());
+  if (!func.IsValid()) {
+    ERROR("TFormula describing  convertion function is invalid! getEdep() function will not work correctly");
+    fParams.fValidFunction = false;
+    return;
+  }
+  if (fParams.fBins <= 0) {
+    ERROR("Number of bins must be greater than 0! getEdep() function will not work correctly");
+    fParams.fValidFunction = false;
+    return;
+  }
+  double step = (fParams.fEdepMax - fParams.fEdepMin) / fParams.fBins;
+  if (step <= 0) {
+    ERROR("Check values of EdepMin and EdepMax! getEdep() function will not work correctly");
+    fParams.fValidFunction = false;
+    return;
+  }
+  fValues.reserve(fParams.fBins);
+  double currEdep = fParams.fEdepMin;
+  for (int i = 0; i < fParams.fBins; i++) {
+    fValues.push_back(func.Eval(currEdep));
+    currEdep = currEdep + step;
+  }
+  fParams.fValidFunction = true;
+}
+
+int ToTConverter::edepToIndex(double Edep) const
+{
+  double step = (fParams.fEdepMax - fParams.fEdepMin) / fParams.fBins;
+  assert(step > 0);
+  return Edep / step; /// maybe some floor or round needed?
+}
+
+double ToTConverter::getToT(double eDep) const
+{
+  if ((eDep < fParams.fEdepMin) || (eDep > fParams.fEdepMax)) return 0;
+  int index = edepToIndex(eDep);
+  assert(index >= 0);
+  assert(index < fValues.size());
+  return fValues[index];
+}
+
+ToTConverterParams ToTConverter::getParams() const
+{
+  return fParams;
+}
+
+std::vector<double> ToTConverter::getValues() const
+{
+  return fValues;
 }

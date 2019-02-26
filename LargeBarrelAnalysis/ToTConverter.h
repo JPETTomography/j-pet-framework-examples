@@ -13,20 +13,39 @@
  *  @file ToTConverter.h
  */
 
-#ifndef TOTCONVERTER_H 
-#define TOTCONVERTER_H 
+#ifndef TOTCONVERTER_H
+#define TOTCONVERTER_H
 
 #include <vector>
+#include <string>
 
-class ToTConverter {
-  public:
-  /// Returns Time-over-threshold for given deposited energy
-  /// the current parametrization is par1 + par2 * eDep 
-  /// Returned value in ps, and eDep is given in keV.
-  static double getToT(double eDep, double  par1 = -91958, double par2 = 19341);
-  private:
-    std::vector<double> fValues;
+struct ToTConverterParams {
+  ToTConverterParams(const std::string& formula, const std::vector<double>& params, int bins, double min, double max):
+    fFormula(formula), fParams(params), fBins(bins), fEdepMin(min), fEdepMax(max)
+  {
+  }
+  std::string fFormula;
+  std::vector<double> fParams;
+  int fBins = 100;
+  double fEdepMin = -1;
+  double fEdepMax = -1;
+  bool fValidFunction = false;
+};
 
+class ToTConverter
+{
 
+public:
+  explicit ToTConverter(const ToTConverterParams& params);
+
+  double getToT(double eDep) const;
+
+  int edepToIndex(double Edep) const;
+  ToTConverterParams getParams() const;
+  std::vector<double> getValues() const;
+
+private:
+  ToTConverterParams fParams;
+  std::vector<double> fValues;
 };
 #endif /*  !TOTCONVERTER_H */
