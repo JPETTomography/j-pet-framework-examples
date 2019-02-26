@@ -21,11 +21,6 @@ ToTConverter::ToTConverter(const ToTConverterParams& params): fParams(params)
 {
   TFormula func("myFunc", fParams.fFormula.c_str());
   func.SetParameters(fParams.fParams.data());
-  if (!func.IsValid()) {
-    ERROR("TFormula describing  convertion function is invalid! getEdep() function will not work correctly");
-    fParams.fValidFunction = false;
-    return;
-  }
   if (fParams.fBins <= 0) {
     ERROR("Number of bins must be greater than 0! getEdep() function will not work correctly");
     fParams.fValidFunction = false;
