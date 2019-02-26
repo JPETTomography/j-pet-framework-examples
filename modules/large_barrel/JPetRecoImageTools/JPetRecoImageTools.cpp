@@ -279,9 +279,9 @@ JPetRecoImageTools::SparseMatrix JPetRecoImageTools::backProjectRealTOF(Matrix3D
             double diffBetweenLORCenterYandY = lor_center_y - y;
             double diffBetweenLORCenterXandX = lor_center_x - x;
             double distanceToCenterOfLOR =
-              std::abs(std::sqrt((diffBetweenLORCenterXandX * diffBetweenLORCenterXandX) + (diffBetweenLORCenterYandY * diffBetweenLORCenterYandY)));
-            if(distanceToCenterOfLOR - lor_tof_center >  max_sigma_multi * tofSigma)
-              continue;
+              std::sqrt((diffBetweenLORCenterXandX * diffBetweenLORCenterXandX) + (diffBetweenLORCenterYandY * diffBetweenLORCenterYandY));
+            if(x < lor_center_x)
+              distanceToCenterOfLOR = -distanceToCenterOfLOR;
             reconstructedProjection(y, x) += tofBin.second(n, angle) * tofWeight(lor_tof_center, distanceToCenterOfLOR, tofSigma);
           }
         }
@@ -342,9 +342,9 @@ JPetRecoImageTools::SparseMatrix JPetRecoImageTools::backProjectWithTOF(SparseMa
           double diffBetweenLORCenterYandY = lor_center_y - y;
           double diffBetweenLORCenterXandX = lor_center_x - x;
           double distanceToCenterOfLOR =
-              std::abs(std::sqrt((diffBetweenLORCenterXandX * diffBetweenLORCenterXandX) + (diffBetweenLORCenterYandY * diffBetweenLORCenterYandY)));
+              std::sqrt((diffBetweenLORCenterXandX * diffBetweenLORCenterXandX) + (diffBetweenLORCenterYandY * diffBetweenLORCenterYandY));
           for (unsigned int i = 0; i < tofVector.size(); i++) {
-            float delta = std::abs(tofVector[i] * 0.299792458);
+            float delta = tofVector[i] * 0.299792458;
             double distributionProbability = normalDistributionProbability(distanceToCenterOfLOR, delta, 150.);
             reconstructedProjection(y, x) += distributionProbability;
           }
