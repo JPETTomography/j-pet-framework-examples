@@ -101,11 +101,12 @@ bool SinogramCreatorTOF::terminate() {
   JPetRecoImageTools::FourierTransformFunction f = JPetRecoImageTools::doFFTW;
 
   for (int i = 0; i < fZSplitNumber; i++) {
+    JPetRecoImageTools::Matrix3D filtered;
     for(auto &sinogram : fSinogramDataTOF[i]) {
-      sinogram.second = JPetRecoImageTools::FilterSinogram(f, ramLakFilter, sinogram.second);
+      filtered[sinogram.first] = JPetRecoImageTools::FilterSinogram(f, ramLakFilter, sinogram.second);;
     }
     JPetRecoImageTools::SparseMatrix result =
-        JPetRecoImageTools::backProjectRealTOF(fSinogramDataTOF[i], fMaxDistanceNumber, JPetRecoImageTools::nonRescale, 0, 255, fReconstructionDistanceAccuracy, fTOFSliceSize, 150);
+        JPetRecoImageTools::backProjectRealTOF(filtered, fMaxDistanceNumber, JPetRecoImageTools::nonRescale, 0, 255, fReconstructionDistanceAccuracy, fTOFSliceSize, 150);
 
     saveResult(result, fOutFileName + "reconstruction_with_tof_" + std::to_string(i) + ".ppm");
   }
