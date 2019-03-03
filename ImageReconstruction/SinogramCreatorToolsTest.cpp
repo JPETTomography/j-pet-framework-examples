@@ -17,6 +17,16 @@ BOOST_AUTO_TEST_CASE(roundToNearesMultiplicity_test)
   BOOST_REQUIRE_EQUAL(SinogramCreatorTools::roundToNearesMultiplicity(0.02f, 0.01f), 2u);
 }
 
+BOOST_AUTO_TEST_CASE(test_angle_middle)
+{
+  const float EPSILON = 0.01f;
+  for (int i = 0; i < 360; i++) {
+    float x = std::cos((M_PI * (float)i) / 180.f );
+    float y = std::sin((M_PI * (float)i) / 180.f );
+    BOOST_REQUIRE_CLOSE(SinogramCreatorTools::calculateAngle(x, y, -x, -y), i % 180, EPSILON);
+  }
+}
+
 BOOST_AUTO_TEST_CASE(test_angle)
 {
   const float EPSILON = 0.00001f;
