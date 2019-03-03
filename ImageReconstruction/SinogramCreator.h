@@ -71,6 +71,12 @@ protected:
   bool analyzeHits(const float firstX, const float firstY, const float firstZ, const float firstTOF, const float secondX, const float secondY,
                    const float secondZ, const float secondTOF);
   int getSinogramSlice(float firstX, float firstY, float firstZ, float firstTOF, float secondX, float secondY, float secondZ, float secondTOF);
+  /**
+   * @brief Function returing value of TOF rescale, to match same annihilation point after projection from 3d to 2d
+   * \param x_diff difference on x axis between hit ends
+   * \param y_diff difference on y axis between hit ends
+   * \param z_diff difference on z axis between hit ends
+   */
   float getTOFRescaleFactor(float x_diff, float y_diff, float z_diff);
   int maxValueInSinogram(const JPetRecoImageTools::Matrix2DProj& sinogram);
 
