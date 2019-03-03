@@ -27,7 +27,7 @@ bool SinogramCreatorMC::init()
   SinogramCreatorMC::setUpOptions();
   fOutputEvents = new JPetTimeWindow("JPetEvent");
 
-  getStatistics().createHistogram(new TH2I("reconstuction_histogram", "reconstuction histogram",
+  getStatistics().createHistogram(new TH2I("reconstruction_histogram", "reconstruction_histogram histogram",
                                   std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1, 0.f,
                                   fMaxReconstructionLayerRadius, kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
 
@@ -36,11 +36,11 @@ bool SinogramCreatorMC::init()
   getStatistics().createHistogram(new TH1F("angle", "Position angle real data", kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
 
 #if ROOT_VERSION_CODE < ROOT_VERSION(6, 0, 0)
-  getStatistics().getObject<TH2I>("reconstuction_histogram")->SetBit(TH2::kCanRebin);
+  getStatistics().getObject<TH2I>("reconstruction_histogram")->SetBit(TH2::kCanRebin);
   getStatistics().getObject<TH1F>("angle")->SetBit(TH1::kCanRebin);
   getStatistics().getObject<TH1F>("pos_dis")->SetBit(TH1::kCanRebin);
 #else
-  getStatistics().getObject<TH2I>("reconstuction_histogram")->SetCanExtend(TH1::kAllAxes);
+  getStatistics().getObject<TH2I>("reconstruction_histogram")->SetCanExtend(TH1::kAllAxes);
   getStatistics().getObject<TH1F>("angle")->SetCanExtend(TH1::kAllAxes);
   getStatistics().getObject<TH1F>("pos_dis")->SetCanExtend(TH1::kAllAxes);
 #endif
