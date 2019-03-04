@@ -66,16 +66,16 @@ std::pair<int, int> SinogramCreatorTools::getSinogramRepresentation(float firstX
 }
 
 std::tuple<float, float, float> SinogramCreatorTools::cart2sph(float x, float y, float z) {
-  float azimuth = std::atan2(y, x);
-  float elevation = std::atan2(z, std::sqrt(x * x + y * y));
+  float theta = std::atan2(y, x);
+  float phi = std::atan2(z, std::sqrt(x * x + y * y));
   float r = std::sqrt(x * x + y * y + z * z);
-  return std::make_tuple(azimuth, elevation, r);
+  return std::make_tuple(theta, phi, r);
 }
 
-std::tuple<float, float, float> SinogramCreatorTools::sph2cart(float azimuth, float elevation, float r) {
-  float x = r * std::cos(elevation) * std::cos(azimuth);
-  float y = r * std::cos(elevation) * std::sin(azimuth);
-  float z = r * std::sin(elevation);
+std::tuple<float, float, float> SinogramCreatorTools::sph2cart(float theta, float phi, float r) {
+  float x = r * std::cos(phi) * std::cos(theta);
+  float y = r * std::cos(phi) * std::sin(theta);
+  float z = r * std::sin(phi);
   return std::make_tuple(x, y, z);
 }
 
@@ -84,11 +84,11 @@ float SinogramCreatorTools::calculateLORSlice(float x1, float y1, float z1, floa
   float shiftY2 = y2 - y1;
   float shiftZ2 = z2 - z1;
 
-  float azimuth;
-  float elevation;
+  float theta;
+  float phi;
   float r;
 
-  std::tie(azimuth, elevation, r) = cart2sph(shiftX2, shiftY2, shiftZ2);
+  std::tie(theta, phi, r) = cart2sph(shiftX2, shiftY2, shiftZ2);
 
   const float speed_of_light = 0.0299792458f;
 
@@ -100,10 +100,8 @@ float SinogramCreatorTools::calculateLORSlice(float x1, float y1, float z1, floa
   float resultY;
   float resultZ;
 
-  std::tie(resultX, resultY, resultZ) = sph2cart(azimuth, elevation, r0);
+  std::tie(resultX, resultY, resultZ) = sph2cart(theta, phi, r0);
 
-  // resultX += x1;
-  // resultY += y1;
   resultZ += z1;
 
   return resultZ;

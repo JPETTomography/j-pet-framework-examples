@@ -89,7 +89,7 @@ bool SinogramCreator::analyzeHits(const float firstX, const float firstY, const 
                                   const float secondX, const float secondY, const float secondZ, const float secondTOF)
 {
   int i = -1;
-  if (!fEnableNonPerperdicularLOR) {
+  if (!fEnableObliqueLORRemapping) {
     i = getSplitRangeNumber(firstZ, secondZ);
   } else {
     i = getSinogramSlice(firstX, firstY, firstZ, firstTOF, secondX, secondY, secondZ, secondTOF);
@@ -107,9 +107,9 @@ bool SinogramCreator::analyzeHits(const float firstX, const float firstY, const 
     fMaxValueInSinogram[i] = fCurrentValueInSinogram[i]; // save max value of sinogram
   }
 
-  if (fEnableTOFReconstruction) {
+  if (fEnableKDEReconstruction) {
     float tofRescale = 1.f;
-    if (fEnableNonPerperdicularLOR) {
+    if (fEnableObliqueLORRemapping) {
       tofRescale = getTOFRescaleFactor(firstX - secondX, firstY - secondY, firstZ - secondZ);
     }
     auto tofInfo = fTOFInformation[i].find(sinogramResult);
@@ -223,12 +223,12 @@ void SinogramCreator::setUpOptions()
     fScintillatorLenght = getOptionAsFloat(opts, kScintillatorLenght);
   }
 
-  if (isOptionSet(opts, kEnableNonPerperdicualLOR)) {
-    fEnableNonPerperdicularLOR = getOptionAsBool(opts, kEnableNonPerperdicualLOR);
+  if (isOptionSet(opts, kEnableObliqueLORRemapping)) {
+    fEnableObliqueLORRemapping = getOptionAsBool(opts, kEnableObliqueLORRemapping);
   }
 
   if (isOptionSet(opts, kEnableTOFReconstrution)) {
-    fEnableTOFReconstruction = getOptionAsBool(opts, kEnableTOFReconstrution);
+    fEnableKDEReconstruction = getOptionAsBool(opts, kEnableTOFReconstrution);
   }
 
   const JPetParamBank& bank = getParamBank();

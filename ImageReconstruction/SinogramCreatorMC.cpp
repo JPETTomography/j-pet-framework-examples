@@ -144,12 +144,12 @@ void SinogramCreatorMC::setUpOptions()
     fInputData = getOptionAsString(opts, kInputDataKey);
   }
 
-  if (isOptionSet(opts, kEnableNonPerperdicualLOR)) {
-    fEnableNonPerperdicularLOR = getOptionAsBool(opts, kEnableNonPerperdicualLOR);
+  if (isOptionSet(opts, kEnableObliqueLORRemapping)) {
+    fEnableObliqueLORRemapping = getOptionAsBool(opts, kEnableObliqueLORRemapping);
   }
 
-  if (isOptionSet(opts, kEnableTOFReconstrution)) {
-    fEnableTOFReconstruction = getOptionAsBool(opts, kEnableTOFReconstrution);
+  if (isOptionSet(opts, kEnableTOFReconstruction)) {
+    fEnableKDEReconstruction = getOptionAsBool(opts, kEnableTOFReconstruction);
   }
 
   fTOFInformation = new JPetRecoImageTools::Matrix2DTOF[fZSplitNumber];

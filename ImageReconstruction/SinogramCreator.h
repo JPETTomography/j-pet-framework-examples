@@ -95,8 +95,8 @@ protected:
   float fMaxReconstructionLayerRadius = 0.f;    // in cm
   float fReconstructionDistanceAccuracy = 0.1f; // in cm, 1mm accuracy
   float fScintillatorLenght = 50.0f;            // in cm
-  bool fEnableNonPerperdicularLOR = false;
-  bool fEnableTOFReconstruction = false;
+  bool fEnableObliqueLORRemapping = false;
+  bool fEnableKDEReconstruction = false;
 
 private:
   SinogramCreator(const SinogramCreator&) = delete;
@@ -108,8 +108,8 @@ private:
   const std::string kReconstructionDistanceAccuracy = "SinogramCreator_ReconstructionDistanceAccuracy_float";
   const std::string kZSplitNumber = "SinogramCreator_SinogramZSplitNumber_int";
   const std::string kScintillatorLenght = "SinogramCreator_ScintillatorLenght_float";
-  const std::string kEnableNonPerperdicualLOR = "SinogramCreator_EnableNonPerperdicalLOR_bool";
-  const std::string kEnableTOFReconstrution = "SinogramCreator_EnableTOFReconstruction_bool";
+  const std::string kEnableObliqueLORRemapping = "SinogramCreator_EnableObliqueLORRemapping_bool";
+  const std::string kEnableTOFReconstrution = "SinogramCreator_EnableKDEReconstruction_bool";
   std::string fOutFileName = "sinogram";
 };
 

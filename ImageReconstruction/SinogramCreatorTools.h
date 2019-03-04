@@ -48,7 +48,7 @@ private:
   SinogramCreatorTools& operator=(const SinogramCreatorTools&) = delete;
 
   static std::tuple<float, float, float> cart2sph(float x, float y, float z);
-  static std::tuple<float, float, float> sph2cart(float azimuth, float elevation, float r);
+  static std::tuple<float, float, float> sph2cart(float theta, float phi, float r);
 
   static float calculateNorm(float firstX, float firstY, float secondX, float secondY);
 };

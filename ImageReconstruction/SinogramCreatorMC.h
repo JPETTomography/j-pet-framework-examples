@@ -45,8 +45,8 @@ private:
   const std::string kScintillatorLenght = "SinogramCreatorMC_ScintillatorLenght_float";
   const std::string kMaxReconstructionRadius = "SinogramCreatorMC_MaxReconstructionRadius_float";
   const std::string kInputDataKey = "SinogramCreatorMC_InputDataPath_std::string";
-  const std::string kEnableNonPerperdicualLOR = "SinogramCreatorMC_EnableNonPerperdicalLOR_bool";
-  const std::string kEnableTOFReconstrution = "SinogramCreatorMC_EnableTOFReconstruction_bool";
+  const std::string kEnableObliqueLORRemapping = "SinogramCreatorMC_EnableObliqueLORRemapping_bool";
+  const std::string kEnableTOFReconstruction = "SinogramCreatorMC_EnableKDEReconstruction_bool";
 
   std::string fInputData = "sinogram_data.txt";
   std::string fOutFileName = "sinogramMC";
