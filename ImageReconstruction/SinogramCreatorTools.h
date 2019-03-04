@@ -32,7 +32,7 @@ public:
   using Point = std::pair<float, float>;
 
   static unsigned int roundToNearesMultiplicity(float numberToRound, float muliFactor);
-  static float calculateAngle(float firstX, float firstY, float secondX, float secondY);
+  static std::pair<int, bool> getAngleAndDistanceSign(float firstX, float firstY, float secondX, float secondY);
 
   static float calculateDistance(float firstX, float firstY, float secondX, float secondY);
 
@@ -50,9 +50,6 @@ private:
   static std::tuple<float, float, float> cart2sph(float x, float y, float z);
   static std::tuple<float, float, float> sph2cart(float azimuth, float elevation, float r);
 
-  static void swapIfNeeded(float& firstX, float& firstY, float& secondX, float& secondY);
-  static void swapIfNeeded(float& firstX, float& firstY, float& firstZ, float& firstT,
-                           float& secondX, float& secondY, float& secondZ, float& secondT);
   static float calculateNorm(float firstX, float firstY, float secondX, float secondY);
 };
 

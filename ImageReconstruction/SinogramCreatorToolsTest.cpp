@@ -3,6 +3,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "SinogramCreatorTools.h"
+#include <iostream>
 
 BOOST_AUTO_TEST_SUITE(FirstSuite)
 
@@ -19,28 +20,28 @@ BOOST_AUTO_TEST_CASE(roundToNearesMultiplicity_test)
 
 BOOST_AUTO_TEST_CASE(test_angle_middle)
 {
-  const float EPSILON = 0.01f;
-  for (int i = 0; i < 360; i++) {
-    float x = std::cos((M_PI * (float)i) / 180.f );
-    float y = std::sin((M_PI * (float)i) / 180.f );
-    BOOST_REQUIRE_CLOSE(SinogramCreatorTools::calculateAngle(x, y, -x, -y), i % 180, EPSILON);
+  for (int i = 0; i < 360; i = i + 10) {
+    const float x1 = std::cos(i * (M_PI / 180.f));
+    const float y1 = std::sin(i * (M_PI / 180.f));
+    const float x2 = std::cos((i + 1) * (M_PI / 180.f));
+    const float y2 = std::sin((i + 1) * (M_PI / 180.f));
+    BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(x1, y1, x2, y2).first, (i + 1) % 180); 
   }
 }
 
 BOOST_AUTO_TEST_CASE(test_angle)
 {
-  const float EPSILON = 0.00001f;
-  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(0.f, 0.f, 0.f, 0.f), 0);
-  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(0.f, 0.f, -1.f, 0.f), 0);
-  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(-1.f, 0.f, 1.f, 0.f), 0);
-  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(1.f, 0.f, -1.f, 0.f), 0);
-  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(0.f, 1.f, 0.f, -1.f), 0);
-  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(0.f, -1.f, 0.f, 1.f), 0);
-  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(-1.f, 0.f, 0.f, 1.f), 135);
-  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(1.f, 0.f, 0.f, 1.f), 45);
-  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(0.f, 1.f, 1.f, 0.f), 45);
-  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(-1.f, 0.f, 0.f, -1.f), 45);
-  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(1.f, 0.f, 0.f, -1.f), 135);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(0.f, 0.f, 0.f, 0.f).first, 0);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(0.f, 0.f, -1.f, 0.f).first, 0);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(-1.f, 0.f, 1.f, 0.f).first, 0);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(1.f, 0.f, -1.f, 0.f).first, 0);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(0.f, 1.f, 0.f, -1.f).first, 0);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(0.f, -1.f, 0.f, 1.f).first, 0);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(-1.f, 0.f, 0.f, 1.f).first, 135);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(1.f, 0.f, 0.f, 1.f).first, 45);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(0.f, 1.f, 1.f, 0.f).first, 45);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(-1.f, 0.f, 0.f, -1.f).first, 45);
+  BOOST_REQUIRE_EQUAL(SinogramCreatorTools::calculateAngle(1.f, 0.f, 0.f, -1.f).first, 135);
 }
 
 BOOST_AUTO_TEST_CASE(test_distance)

@@ -21,13 +21,16 @@ unsigned int SinogramCreatorTools::roundToNearesMultiplicity(float numberToRound
   return std::floor((numberToRound / accuracy) + (accuracy / 2));
 }
 
-float SinogramCreatorTools::calculateAngle(float firstX, float firstY, float secondX, float secondY) {
-  float dx = (firstX + secondX) / 2.f;
-  float dy = (firstY + secondY) / 2.f;
+std::pair<int, bool> SinogramCreatorTools::getAngleAndDistanceSign(float firstX, float firstY, float secondX, float secondY) {
+  const float dx = (firstX + secondX) / 2.f;
+  const float dy = (firstY + secondY) / 2.f;
   float angle = std::atan2(dy, dx) * (180.f / M_PI);
+  const bool sign = angle < 0;
   angle = fmod(angle + 360.f, 180.f);
+  int angleResult = std::round(angle);
+  angleResult = angleResult % 180;
 
-  return angle;
+  return std::make_pair(angleResult, sign);
 }
 
 float SinogramCreatorTools::calculateDistance(float firstX, float firstY, float secondX, float secondY) {
@@ -44,39 +47,22 @@ float SinogramCreatorTools::calculateNorm(float firstX, float firstY, float seco
   return std::sqrt(std::pow((secondY - firstY), 2) + std::pow((secondX - firstX), 2));
 }
 
-void SinogramCreatorTools::swapIfNeeded(float& firstX, float& firstY, float& secondX, float& secondY) {
-  if (firstX > secondX) {
-    std::swap(firstX, secondX);
-    std::swap(firstY, secondY);
-  }
-}
-
-void SinogramCreatorTools::swapIfNeeded(float& firstX, float& firstY, float& firstZ, float& firstT, float& secondX, float& secondY, float& secondZ,
-                                        float& secondT) {
-  if (firstX > secondX) {
-    std::swap(firstX, secondX);
-    std::swap(firstY, secondY);
-    std::swap(firstZ, secondZ);
-    std::swap(firstT, secondT);
-  }
-}
-
 std::pair<int, int> SinogramCreatorTools::getSinogramRepresentation(float firstX, float firstY, float secondX, float secondY,
                                                                     float fMaxReconstructionLayerRadius, float fReconstructionDistanceAccuracy,
                                                                     int maxDistanceNumber, int kReconstructionMaxAngle) {
-  const float distance = SinogramCreatorTools::calculateDistance(firstX, firstY, secondX, secondY);
-  int angle = std::round(SinogramCreatorTools::calculateAngle(firstX, firstY, secondX, secondY));
-  if(angle == 180)
-    angle = 0;
+  float distance = SinogramCreatorTools::calculateDistance(firstX, firstY, secondX, secondY);
+  const auto angle = SinogramCreatorTools::getAngleAndDistanceSign(firstX, firstY, secondX, secondY);
+  if(angle.second)
+    distance = -distance;
 
   int distanceRound = SinogramCreatorTools::roundToNearesMultiplicity(distance + fMaxReconstructionLayerRadius, fReconstructionDistanceAccuracy);
-  if (distanceRound >= maxDistanceNumber || angle >= kReconstructionMaxAngle) {
+  if (distanceRound >= maxDistanceNumber || angle.first >= kReconstructionMaxAngle) {
     std::cout << "Distance or angle > then max, distance: " << distanceRound << " (max : " << maxDistanceNumber << ")"
-              << " angle: " << angle << " (max: " << kReconstructionMaxAngle << ")" << std::endl;
+              << " angle: " << angle.first << " (max: " << kReconstructionMaxAngle << ")" << std::endl;
   }
   if (distanceRound < 0)
     distanceRound = 0;
-  return std::make_pair(distanceRound, angle);
+  return std::make_pair(distanceRound, angle.first);
 }
 
 std::tuple<float, float, float> SinogramCreatorTools::cart2sph(float x, float y, float z) {
@@ -94,7 +80,6 @@ std::tuple<float, float, float> SinogramCreatorTools::sph2cart(float azimuth, fl
 }
 
 float SinogramCreatorTools::calculateLORSlice(float x1, float y1, float z1, float t1, float x2, float y2, float z2, float t2) {
-  swapIfNeeded(x1, y1, z1, t1, x2, y2, z2, t2);
   float shiftX2 = x2 - x1;
   float shiftY2 = y2 - y1;
   float shiftZ2 = z2 - z1;
