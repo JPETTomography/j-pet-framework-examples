@@ -34,17 +34,9 @@ std::pair<int, bool> SinogramCreatorTools::getAngleAndDistanceSign(float firstX,
 }
 
 float SinogramCreatorTools::calculateDistance(float firstX, float firstY, float secondX, float secondY) {
-  float norm = calculateNorm(firstX, firstY, secondX, secondY);
-  if (std::abs(norm) < 0.00001f) {
-    return 0.f;
-  }
-  float dy = (firstY + secondY) / 2.f; // calculate middle point between firstY and secondY
-  float sign = dy < 0.f ? -1.f : 1.f;
-  return sign * (((secondX * firstY) - (secondY * firstX)) / norm);
-}
-
-float SinogramCreatorTools::calculateNorm(float firstX, float firstY, float secondX, float secondY) {
-  return std::sqrt(std::pow((secondY - firstY), 2) + std::pow((secondX - firstX), 2));
+  const float dx = (firstX + secondX) / 2.f;
+  const float dy = (firstY + secondY) / 2.f;
+  return std::sqrt(std::pow((dx), 2) + std::pow((dy), 2));
 }
 
 std::pair<int, int> SinogramCreatorTools::getSinogramRepresentation(float firstX, float firstY, float secondX, float secondY,

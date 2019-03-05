@@ -92,15 +92,18 @@ bool SinogramCreatorMC::exec()
 
 bool SinogramCreatorMC::terminate()
 {
+  for (int i = 0; i < fZSplitNumber; i++) {
+    saveResult((*fSinogram[i]), fOutFileName + "_" + std::to_string(i) + ".ppm");
+  }
 
   JPetFilterNone noneFilter;
   JPetRecoImageTools::FourierTransformFunction f = JPetRecoImageTools::doFFTW;
 
   for (int i = 0; i < fZSplitNumber; i++) {
-    JPetRecoImageTools::Matrix2DProj result =
-      JPetRecoImageTools::backProjectWithTOF((*fSinogram[i]), fTOFInformation[i], (*fSinogram[i])[0].size(), JPetRecoImageTools::nonRescale, 0, 255);
+    //JPetRecoImageTools::Matrix2DProj result =
+    //  JPetRecoImageTools::backProjectWithTOF((*fSinogram[i]), fTOFInformation[i], (*fSinogram[i])[0].size(), JPetRecoImageTools::nonRescale, 0, 255);
 
-    saveResult(result, fOutFileName + "reconstruction_with_tof_" + std::to_string(i) + ".ppm");
+    //saveResult(result, fOutFileName + "reconstruction_with_tof_" + std::to_string(i) + ".ppm");
     JPetRecoImageTools::Matrix2DProj filteredSinogram = JPetRecoImageTools::FilterSinogram(f, noneFilter, (*fSinogram[i]));
     JPetRecoImageTools::Matrix2DProj resultBP =
       JPetRecoImageTools::backProject(filteredSinogram, (*fSinogram[i])[0].size(), JPetRecoImageTools::nonRescale, 0, 255);
@@ -108,9 +111,7 @@ bool SinogramCreatorMC::terminate()
     saveResult(resultBP, fOutFileName + "reconstruction_" + std::to_string(i) + ".ppm");
   }
 
-  for (int i = 0; i < fZSplitNumber; i++) {
-    saveResult((*fSinogram[i]), fOutFileName + "_" + std::to_string(i) + ".ppm");
-  }
+
   delete[] fSinogram;
   delete[] fMaxValueInSinogram;
 

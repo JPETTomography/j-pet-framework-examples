@@ -46,7 +46,6 @@ bool SinogramCreator::init()
   getStatistics().getObject<TH1F>("angle")->SetCanExtend(TH1::kAllAxes);
   getStatistics().getObject<TH1F>("pos_dis")->SetCanExtend(TH1::kAllAxes);
 #endif
-
   return true;
 }
 
@@ -146,7 +145,6 @@ int SinogramCreator::getSinogramSlice(float firstX, float firstY, float firstZ, 
                                       float secondX, float secondY, float secondZ, float secondTOF)
 {
   float result = SinogramCreatorTools::calculateLORSlice(firstX, firstY, firstZ, firstTOF, secondX, secondY, secondZ, secondTOF);
-
   return getSplitRangeNumber(result);
 }
 
