@@ -43,10 +43,13 @@ std::pair<int, int> SinogramCreatorTools::getSinogramRepresentation(float firstX
                                                                     float fMaxReconstructionLayerRadius, float fReconstructionDistanceAccuracy,
                                                                     int maxDistanceNumber, int kReconstructionMaxAngle) {
   float distance = SinogramCreatorTools::calculateDistance(firstX, firstY, secondX, secondY);
-  const auto angle = SinogramCreatorTools::getAngleAndDistanceSign(firstX, firstY, secondX, secondY);
-  if(angle.second)
-    distance = -distance;
-
+  std::pair<int, bool> angle(0, false);
+  if(std::abs(distance) > fReconstructionDistanceAccuracy) { //if not close to 0, atan2 is only defined for r > 0
+    angle = SinogramCreatorTools::getAngleAndDistanceSign(firstX, firstY, secondX, secondY);
+    if(angle.second)
+      distance = -distance;
+  }
+  
   int distanceRound = SinogramCreatorTools::roundToNearesMultiplicity(distance + fMaxReconstructionLayerRadius, fReconstructionDistanceAccuracy);
   if (distanceRound >= maxDistanceNumber || angle.first >= kReconstructionMaxAngle) {
     std::cout << "Distance or angle > then max, distance: " << distanceRound << " (max : " << maxDistanceNumber << ")"
