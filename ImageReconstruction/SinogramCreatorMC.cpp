@@ -142,7 +142,7 @@ void SinogramCreatorMC::setUpOptions()
   }
 
   if (isOptionSet(opts, kInputDataKey)) {
-    fInputData = getOptionAsString(opts, kInputDataKey);
+    fInputData = getOptionAsVectorOfStrings(opts, kInputDataKey);
   }
 
   if (isOptionSet(opts, kEnableObliqueLORRemapping)) {

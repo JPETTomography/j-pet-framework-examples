@@ -44,11 +44,11 @@ private:
   const std::string kZSplitNumber = "SinogramCreatorMC_SinogramZSplitNumber_int";
   const std::string kScintillatorLenght = "SinogramCreatorMC_ScintillatorLenght_float";
   const std::string kMaxReconstructionRadius = "SinogramCreatorMC_MaxReconstructionRadius_float";
-  const std::string kInputDataKey = "SinogramCreatorMC_InputDataPath_std::string";
+  const std::string kInputDataKey = "SinogramCreatorMC_InputDataPaths_std::vector<std::string>";
   const std::string kEnableObliqueLORRemapping = "SinogramCreatorMC_EnableObliqueLORRemapping_bool";
   const std::string kEnableTOFReconstruction = "SinogramCreatorMC_EnableKDEReconstruction_bool";
 
-  std::string fInputData = "sinogram_data.txt";
+  std::vector<std::string> fInputData{"sinogram_data.txt"};
   std::string fOutFileName = "sinogramMC";
 };
 
