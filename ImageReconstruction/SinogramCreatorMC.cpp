@@ -51,8 +51,6 @@ bool SinogramCreatorMC::init()
 
 void SinogramCreatorMC::generateSinogram()
 {
-  std::ifstream in(fInputData);
-
   float firstX = 0.f;
   float firstY = 0.f;
   float secondX = 0.f;
@@ -61,28 +59,39 @@ void SinogramCreatorMC::generateSinogram()
   float secondZ = 0.f;
   float firstT = 0.f;
   float secondT = 0.f;
+  float skip = 0.f;
+  int coincidence = 0;
 
-  int numberOfCorrectI = 0;
+  int numberOfCorrectHits = 0;
+  int totalHits = 1; // to make sure that we do not divide by 0
 
   const int maxDistanceNumber = std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
   if (fSinogram == nullptr) {
-    fSinogram = new JPetRecoImageTools::Matrix2DProj*[fZSplitNumber];
+    fSinogram = new JPetRecoImageTools::SparseMatrix*[fZSplitNumber];
     for (int i = 0; i < fZSplitNumber; i++) {
-      fSinogram[i] = new JPetRecoImageTools::Matrix2DProj(maxDistanceNumber, (std::vector<double>(kReconstructionMaxAngle, 0)));
+      fSinogram[i] = new JPetRecoImageTools::SparseMatrix(maxDistanceNumber, kReconstructionMaxAngle, 0);
     }
   }
 
-  while (in.peek() != EOF) {
+  for (const auto& inputPath : fInputData) {
+    std::ifstream in(inputPath);
+    while (in.peek() != EOF) {
 
-    in >> firstX >> firstY >> firstZ >> firstT >> secondX >> secondY >> secondZ >> secondT;
+      in >> firstX >> firstY >> firstZ >> firstT >> secondX >> secondY >> secondZ >> secondT >> skip >> skip >> skip >> skip >> coincidence >> skip >>
+          skip >> skip;
 
-    if (analyzeHits(firstX, firstY, firstZ, firstT,
-                    secondX, secondY, secondZ, secondT)) {
-      numberOfCorrectI++;
+        if(coincidence != 1) // 1 == true event
+          continue;
+
+      if (analyzeHits(firstX, firstY, firstZ, firstT, secondX, secondY, secondZ, secondT)) {
+        numberOfCorrectHits++;
+      }
+      totalHits++;
     }
   }
 
-  std::cout << "Correct i: " << numberOfCorrectI << std::endl;
+  std::cout << "Correct hits: " << numberOfCorrectHits << " total hits: " << totalHits
+            << " (correct percentage: " << (((float)numberOfCorrectHits * 100.f) / (float)totalHits) << "%)" << std::endl;
 }
 
 bool SinogramCreatorMC::exec()
