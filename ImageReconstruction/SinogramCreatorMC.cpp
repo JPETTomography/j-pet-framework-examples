@@ -65,7 +65,6 @@ void SinogramCreatorMC::generateSinogram()
   int numberOfCorrectHits = 0;
   int totalHits = 1; // to make sure that we do not divide by 0
 
-  const int maxDistanceNumber = std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
   if (fSinogram == nullptr) {
     fSinogram = new JPetRecoImageTools::Matrix2DProj *[fZSplitNumber];
     for (int i = 0; i < fZSplitNumber; i++) {
@@ -101,23 +100,27 @@ bool SinogramCreatorMC::exec()
 
 bool SinogramCreatorMC::terminate()
 {
-  for (int i = 0; i < fZSplitNumber; i++) {
-    saveResult((*fSinogram[i]), fOutFileName + "_" + std::to_string(i) + ".ppm");
-  }
-
-  JPetFilterNone noneFilter;
+  JPetFilterRamLak filter(0.7);
   JPetRecoImageTools::FourierTransformFunction f = JPetRecoImageTools::doFFTW;
 
   for (int i = 0; i < fZSplitNumber; i++) {
-    //JPetRecoImageTools::Matrix2DProj result =
-    //  JPetRecoImageTools::backProjectWithTOF((*fSinogram[i]), fTOFInformation[i], (*fSinogram[i])[0].size(), JPetRecoImageTools::nonRescale, 0, 255);
+    int sliceNumber = i - (fZSplitNumber / 2);
+    //save sinogram
+    saveResult((*fSinogram[i]), "sinogram_" + std::to_string(sliceNumber) + "_" + std::to_string(fZSplitRange[i].first) + "_" + std::to_string(fZSplitRange[i].second) + ".ppm");
 
-    //saveResult(result, fOutFileName + "reconstruction_with_tof_" + std::to_string(i) + ".ppm");
-    JPetRecoImageTools::Matrix2DProj filteredSinogram = JPetRecoImageTools::FilterSinogram(f, noneFilter, (*fSinogram[i]));
+    //calculate KDE
+    JPetRecoImageTools::Matrix2DProj result =
+      JPetRecoImageTools::backProjectWithKDE((*fSinogram[i]), fTOFInformation[i], (*fSinogram[i])[0].size(), JPetRecoImageTools::nonRescale, 0, 255);
+    //save KDE
+    saveResult(result, fOutFileName + "reconstruction_with_KDE_" + std::to_string(sliceNumber) + ".ppm");
+
+    //filter sinogram
+    JPetRecoImageTools::Matrix2DProj filteredSinogram = JPetRecoImageTools::FilterSinogram(f, filter, (*fSinogram[i]));
+    //backproject
     JPetRecoImageTools::Matrix2DProj resultBP =
       JPetRecoImageTools::backProject(filteredSinogram, (*fSinogram[i])[0].size(), JPetRecoImageTools::nonRescale, 0, 255);
-
-    saveResult(resultBP, fOutFileName + "reconstruction_" + std::to_string(i) + ".ppm");
+    //save FBP
+    saveResult(resultBP, fOutFileName + "reconstruction_with_FBP" + std::to_string(sliceNumber) + ".ppm");
   }
 
 

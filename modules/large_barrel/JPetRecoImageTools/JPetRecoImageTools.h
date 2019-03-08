@@ -135,7 +135,7 @@ public:
    *  \param rescaleMinCutoff min value to set in rescale (Optional)
    *  \param rescaleFactor max value to set in rescale (Optional)
    */
-  static Matrix2DProj backProjectWithTOF(Matrix2DProj& sinogram, Matrix2DTOF& tof, int angles, RescaleFunc rescaleFunc, int rescaleMinCutoff,
+  static Matrix2DProj backProjectWithKDE(Matrix2DProj& sinogram, Matrix2DTOF& tof, int angles, RescaleFunc rescaleFunc, int rescaleMinCutoff,
                                          int rescaleFactor);
 
   static double normalDistributionProbability(float x, float mean, float stddev);

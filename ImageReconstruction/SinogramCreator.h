@@ -30,6 +30,7 @@
 #include <vector>
 
 #include "JPetFilterNone.h"
+#include "JPetFilterRamLak.h"
 #include "JPetRecoImageTools.h"
 
 /**

@@ -241,7 +241,7 @@ JPetRecoImageTools::Matrix2DProj JPetRecoImageTools::backProject(Matrix2DProj& s
   return reconstructedProjection;
 }
 
-JPetRecoImageTools::Matrix2DProj JPetRecoImageTools::backProjectWithTOF(Matrix2DProj& sinogram, Matrix2DTOF& tof, int nAngles,
+JPetRecoImageTools::Matrix2DProj JPetRecoImageTools::backProjectWithKDE(Matrix2DProj& sinogram, Matrix2DTOF& tof, int nAngles,
                                                                         RescaleFunc rescaleFunc, int rescaleMinCutoff, int rescaleFactor) {
   int imageSize = sinogram.size();
   double center = (double)(imageSize - 1) / 2.0;
@@ -281,8 +281,8 @@ JPetRecoImageTools::Matrix2DProj JPetRecoImageTools::backProjectWithTOF(Matrix2D
               std::abs(std::sqrt((diffBetweenLORCenterXandX * diffBetweenLORCenterXandX) + (diffBetweenLORCenterYandY * diffBetweenLORCenterYandY)));
           for (unsigned int i = 0; i < tofVector.size(); i++) {
             float delta = std::abs(tofVector[i] * 0.299792458);
-            double distributionProbability = normalDistributionProbability(distanceToCenterOfLOR, delta, 10.);
-            reconstructedProjection[y][x] += distributionProbability;
+            double distributionProbability = normalDistributionProbability(distanceToCenterOfLOR, delta, 150.);
+            reconstructedProjection[y][x] += distributionProbability * 1000;
           }
         }
       }
