@@ -67,9 +67,9 @@ void SinogramCreatorMC::generateSinogram()
 
   const int maxDistanceNumber = std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
   if (fSinogram == nullptr) {
-    fSinogram = new JPetRecoImageTools::SparseMatrix*[fZSplitNumber];
+    fSinogram = new JPetRecoImageTools::Matrix2DProj*[fZSplitNumber];
     for (int i = 0; i < fZSplitNumber; i++) {
-      fSinogram[i] = new JPetRecoImageTools::SparseMatrix(maxDistanceNumber, kReconstructionMaxAngle, 0);
+      fSinogram[i] = new JPetRecoImageTools::Matrix2DProj(maxDistanceNumber, kReconstructionMaxAngle, 0);
     }
   }
 
