@@ -34,11 +34,11 @@ BOOST_AUTO_TEST_CASE(getTot_standardFunc)
   ToTConverterParams params("pol1", { -91958, 19341}, 10000, 0., 100.);
   ToTConverter conv(params);
   BOOST_CHECK(conv.getParams().fValidFunction);
-  BOOST_CHECK_CLOSE(conv.getToT(0), getToT1(0), 0.1);
-  BOOST_CHECK_CLOSE(conv.getToT(1), getToT1(1), 0.1);
-  BOOST_CHECK_CLOSE(conv.getToT(10), getToT1(10), 0.1);
-  BOOST_CHECK_CLOSE(conv.getToT(59.5), getToT1(59.5), 0.1);
-  BOOST_CHECK_CLOSE(conv.getToT(99.9), getToT1(99.9), 0.1);
+  BOOST_CHECK_CLOSE(conv(0), getToT1(0), 0.1);
+  BOOST_CHECK_CLOSE(conv(1), getToT1(1), 0.1);
+  BOOST_CHECK_CLOSE(conv(10), getToT1(10), 0.1);
+  BOOST_CHECK_CLOSE(conv(59.5), getToT1(59.5), 0.1);
+  BOOST_CHECK_CLOSE(conv(99.9), getToT1(99.9), 0.1);
 }
 
 BOOST_AUTO_TEST_CASE(getTot_quadratic)
@@ -46,10 +46,10 @@ BOOST_AUTO_TEST_CASE(getTot_quadratic)
   ToTConverterParams params("pol2", {1, 1, 1}, 10000, 0., 100.); /// 1 + x + x^2
   ToTConverter conv(params);
   BOOST_CHECK(conv.getParams().fValidFunction);
-  BOOST_CHECK_CLOSE(conv.getToT(0), 1, 0.1);
-  BOOST_CHECK_CLOSE(conv.getToT(1), 3, 0.1);
-  BOOST_CHECK_CLOSE(conv.getToT(2), 7, 0.1);
-  BOOST_CHECK_CLOSE(conv.getToT(3), 13, 0.1);
+  BOOST_CHECK_CLOSE(conv(0), 1, 0.1);
+  BOOST_CHECK_CLOSE(conv(1), 3, 0.1);
+  BOOST_CHECK_CLOSE(conv(2), 7, 0.1);
+  BOOST_CHECK_CLOSE(conv(3), 13, 0.1);
 }
 
 

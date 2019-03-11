@@ -26,15 +26,15 @@ ToTConverter::ToTConverter(const ToTConverterParams& params): fParams(params)
     fParams.fValidFunction = false;
     return;
   }
-  double step = (fParams.fEdepMax - fParams.fEdepMin) / fParams.fBins;
+  double step = (fParams.fXMax - fParams.fXMin) / fParams.fBins;
   if (step <= 0) {
-    ERROR("Check values of EdepMin:" + std::to_string(fParams.fEdepMin) << " and EdepMax:" << std::to_string(fParams.fEdepMax) << " !!! getEdep() function will not work correctly.");
+    ERROR("Check values of EdepMin:" + std::to_string(fParams.fXMin) << " and EdepMax:" << std::to_string(fParams.fXMax) << " !!! getEdep() function will not work correctly.");
     fParams.fValidFunction = false;
     return;
   }
   fStep = step;
   fValues.reserve(fParams.fBins);
-  double currEdep = fParams.fEdepMin;
+  double currEdep = fParams.fXMin;
   for (int i = 0; i < fParams.fBins; i++) {
     fValues.push_back(func.Eval(currEdep));
     currEdep = currEdep + step;
@@ -42,19 +42,19 @@ ToTConverter::ToTConverter(const ToTConverterParams& params): fParams(params)
   fParams.fValidFunction = true;
 }
 
+double ToTConverter::operator()(double x) const
+{
+  if ((x < fParams.fXMin) || (x > fParams.fXMax)) return 0;
+  int index = edepToIndex(x);
+  assert(index >= 0);
+  assert(index < fValues.size());
+  return fValues[index];
+}
+
 int ToTConverter::edepToIndex(double Edep) const
 {
   assert(fStep > 0);
   return Edep / fStep; /// maybe some floor or round needed?
-}
-
-double ToTConverter::getToT(double eDep) const
-{
-  if ((eDep < fParams.fEdepMin) || (eDep > fParams.fEdepMax)) return 0;
-  int index = edepToIndex(eDep);
-  assert(index >= 0);
-  assert(index < fValues.size());
-  return fValues[index];
 }
 
 ToTConverterParams ToTConverter::getParams() const

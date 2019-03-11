@@ -21,14 +21,14 @@
 
 struct ToTConverterParams {
   ToTConverterParams(const std::string& formula, const std::vector<double>& params, int bins, double min, double max):
-    fFormula(formula), fParams(params), fBins(bins), fEdepMin(min), fEdepMax(max)
+    fFormula(formula), fParams(params), fBins(bins), fXMin(min), fXMax(max)
   {
   }
-  std::string fFormula;
-  std::vector<double> fParams;
-  int fBins = 100;
-  double fEdepMin = -1;
-  double fEdepMax = -1;
+  std::string fFormula;  /// Function formula that must be understood by TFormula from ROOT.
+  std::vector<double> fParams; /// Parameters used by the function described by TFormula.
+  int fBins = 100;  /// Number of times the function is sampled.
+  double fXMin = -1;
+  double fXMax = -1;
   bool fValidFunction = false;
 };
 
@@ -38,14 +38,15 @@ class ToTConverter
 public:
   explicit ToTConverter(const ToTConverterParams& params);
 
-  double getToT(double eDep) const;
+  double operator()(double x) const;
 
   int edepToIndex(double Edep) const;
   ToTConverterParams getParams() const;
   std::vector<double> getValues() const;
 
 private:
-  ToTConverterParams fParams;
-  std::vector<double> fValues;
+  ToTConverterParams fParams;  /// Parameters describing the function.
+  std::vector<double> fValues; /// Lookup table containg the function values.
+  double fStep = -1; /// Step size with which the lookup table is filled.
 };
 #endif /*  !TOTCONVERTER_H */
