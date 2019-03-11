@@ -251,7 +251,7 @@ void SinogramCreator::setUpOptions()
   fMaxDistanceNumber = std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
 
   if(isOptionSet(opts, kReconstructSliceNumbers)) {
-    fReconstructSliceNumbers = getOptionAsVectorOfInts(opts, kReconstructSliceNumbers);
+    fReconstructSliceNumbers = boost::any_cast<std::vector<int>>(getOptionValue(opts, kReconstructSliceNumbers));
   } else {
     for(int i = 0; i < fZSplitNumber; i++) {
       fReconstructSliceNumbers.push_back(i);
