@@ -32,6 +32,7 @@ ToTConverter::ToTConverter(const ToTConverterParams& params): fParams(params)
     fParams.fValidFunction = false;
     return;
   }
+  fStep = step;
   fValues.reserve(fParams.fBins);
   double currEdep = fParams.fEdepMin;
   for (int i = 0; i < fParams.fBins; i++) {
@@ -43,9 +44,8 @@ ToTConverter::ToTConverter(const ToTConverterParams& params): fParams(params)
 
 int ToTConverter::edepToIndex(double Edep) const
 {
-  double step = (fParams.fEdepMax - fParams.fEdepMin) / fParams.fBins;
-  assert(step > 0);
-  return Edep / step; /// maybe some floor or round needed?
+  assert(fStep > 0);
+  return Edep / fStep; /// maybe some floor or round needed?
 }
 
 double ToTConverter::getToT(double eDep) const
