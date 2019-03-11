@@ -105,6 +105,8 @@ bool SinogramCreatorMC::terminate()
 
   for (int i = 0; i < fZSplitNumber; i++) {
     int sliceNumber = i - (fZSplitNumber / 2);
+    if(std::find(fReconstructSliceNumbers.begin(), fReconstructSliceNumbers.end(), sliceNumber) == fReconstructSliceNumbers.end())
+      continue;
     //save sinogram
     saveResult((*fSinogram[i]), "sinogram_" + std::to_string(sliceNumber) + "_" + std::to_string(fZSplitRange[i].first) + "_" + std::to_string(fZSplitRange[i].second) + ".ppm");
 
@@ -179,4 +181,12 @@ void SinogramCreatorMC::setUpOptions()
   }
 
   fMaxDistanceNumber = std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
+
+    if(isOptionSet(opts, kReconstructSliceNumbers)) {
+    fReconstructSliceNumbers = getOptionAsVectorOfInts(opts, kReconstructSliceNumbers);
+  } else {
+    for(int i = 0; i < fZSplitNumber; i++) {
+      fReconstructSliceNumbers.push_back(i);
+    }
+  }
 }
