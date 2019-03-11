@@ -40,7 +40,7 @@ public:
 
   double operator()(double x) const;
 
-  int edepToIndex(double Edep) const;
+  int xValueToIndex(double x) const;
   ToTConverterParams getParams() const;
   std::vector<double> getValues() const;
 

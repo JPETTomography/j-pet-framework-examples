@@ -22,22 +22,22 @@ ToTConverter::ToTConverter(const ToTConverterParams& params): fParams(params)
   TFormula func("myFunc", fParams.fFormula.c_str());
   func.SetParameters(fParams.fParams.data());
   if (fParams.fBins <= 0) {
-    ERROR("Number of bins must be greater than 0! getEdep() function will not work correctly");
+    ERROR("Number of bins must be greater than 0! getX() function will not work correctly");
     fParams.fValidFunction = false;
     return;
   }
   double step = (fParams.fXMax - fParams.fXMin) / fParams.fBins;
   if (step <= 0) {
-    ERROR("Check values of EdepMin:" + std::to_string(fParams.fXMin) << " and EdepMax:" << std::to_string(fParams.fXMax) << " !!! getEdep() function will not work correctly.");
+    ERROR("Check values of XMin:" + std::to_string(fParams.fXMin) << " and XMax:" << std::to_string(fParams.fXMax) << " !!! getX() function will not work correctly.");
     fParams.fValidFunction = false;
     return;
   }
   fStep = step;
   fValues.reserve(fParams.fBins);
-  double currEdep = fParams.fXMin;
+  double currX = fParams.fXMin;
   for (int i = 0; i < fParams.fBins; i++) {
-    fValues.push_back(func.Eval(currEdep));
-    currEdep = currEdep + step;
+    fValues.push_back(func.Eval(currX));
+    currX = currX + step;
   }
   fParams.fValidFunction = true;
 }
@@ -45,16 +45,16 @@ ToTConverter::ToTConverter(const ToTConverterParams& params): fParams(params)
 double ToTConverter::operator()(double x) const
 {
   if ((x < fParams.fXMin) || (x > fParams.fXMax)) return 0;
-  int index = edepToIndex(x);
+  int index = xValueToIndex(x);
   assert(index >= 0);
   assert(index < fValues.size());
   return fValues[index];
 }
 
-int ToTConverter::edepToIndex(double Edep) const
+int ToTConverter::xValueToIndex(double x) const
 {
   assert(fStep > 0);
-  return Edep / fStep; /// maybe some floor or round needed?
+  return x / fStep; /// maybe some floor or round needed?
 }
 
 ToTConverterParams ToTConverter::getParams() const

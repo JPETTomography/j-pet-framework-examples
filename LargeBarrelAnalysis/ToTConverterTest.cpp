@@ -52,5 +52,4 @@ BOOST_AUTO_TEST_CASE(getTot_quadratic)
   BOOST_CHECK_CLOSE(conv(3), 13, 0.1);
 }
 
-
 BOOST_AUTO_TEST_SUITE_END()
