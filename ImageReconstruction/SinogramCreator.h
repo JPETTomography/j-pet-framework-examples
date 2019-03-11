@@ -112,7 +112,7 @@ private:
   const std::string kScintillatorLenght = "SinogramCreator_ScintillatorLenght_float";
   const std::string kEnableObliqueLORRemapping = "SinogramCreator_EnableObliqueLORRemapping_bool";
   const std::string kEnableTOFReconstrution = "SinogramCreator_EnableKDEReconstruction_bool";
-  const std::string kReconstructSliceNumbers = "SinogramCreator_ReconstructSliceNumbers_std::vector<int>"
+  const std::string kReconstructSliceNumbers = "SinogramCreator_ReconstructSliceNumbers_std::vector<int>";
   std::string fOutFileName = "sinogram";
 };
 
