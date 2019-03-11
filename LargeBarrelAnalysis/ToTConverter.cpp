@@ -28,7 +28,7 @@ ToTConverter::ToTConverter(const ToTConverterParams& params): fParams(params)
   }
   double step = (fParams.fEdepMax - fParams.fEdepMin) / fParams.fBins;
   if (step <= 0) {
-    ERROR("Check values of EdepMin and EdepMax! getEdep() function will not work correctly");
+    ERROR("Check values of EdepMin:" + std::to_string(fParams.fEdepMin) << " and EdepMax:" << std::to_string(fParams.fEdepMax) << " !!! getEdep() function will not work correctly.");
     fParams.fValidFunction = false;
     return;
   }
