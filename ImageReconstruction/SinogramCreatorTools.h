@@ -29,12 +29,8 @@
 class SinogramCreatorTools
 {
 public:
-  using Point = std::pair<float, float>;
-
   static unsigned int roundToNearesMultiplicity(float numberToRound, float muliFactor);
-  static std::pair<int, bool> getAngleAndDistanceSign(float firstX, float firstY, float secondX, float secondY);
-
-  static float calculateDistance(float firstX, float firstY, float secondX, float secondY);
+  static std::pair<int, float> getAngleAndDistance(float firstX, float firstY, float secondX, float secondY);
 
   static std::pair<int, int> getSinogramRepresentation(float firstX, float firstY, float secondX, float secondY, float fMaxReconstructionLayerRadius, float fReconstructionDistanceAccuracy, int maxDistanceNumber, int kReconstructionMaxAngle);
 
