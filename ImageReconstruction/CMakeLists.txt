@@ -42,10 +42,6 @@ file(GLOB SOURCES_WITHOUT_MAIN *.cpp)
 list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${UNIT_TEST_SOURCES})
 list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${MAIN_CPP})
 
-
-find_package(FFTW REQUIRED)
-include_directories(${FFTW_INCLUDE_DIRS})
-
 ################################################################################
 ## Add options from j-pet-mlem as compile flags removing PET_ prefix
 ## j-pet-mlem sets some parameters of the CMake build by using definitions,
@@ -92,7 +88,7 @@ include_directories(${Framework_INCLUDE_DIRS})
 add_definitions(${Framework_DEFINITIONS})
 
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})
-target_link_libraries(${projectBinary} JPetFramework ${PNG_LIBRARIES} ${FFTW_LIBRARIES} JPetRecoImageTools)
+target_link_libraries(${projectBinary} JPetFramework ${PNG_LIBRARIES} JPetRecoImageTools)
 
 add_custom_target(clean_data_${projectName}
   COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root
