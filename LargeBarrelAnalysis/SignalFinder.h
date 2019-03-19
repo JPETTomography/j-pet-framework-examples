@@ -37,7 +37,7 @@ class JPetWriter;
 class SignalFinder: public JPetUserTask
 {
 public:
-  SignalFinder(const char* name);
+  explicit SignalFinder(const char* name);
   virtual ~SignalFinder();
   virtual bool init() override;
   virtual bool exec() override;

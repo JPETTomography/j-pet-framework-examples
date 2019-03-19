@@ -40,7 +40,7 @@ class JPetWriter;
 class TimeWindowCreator: public JPetUserTask
 {
 public:
-	TimeWindowCreator(const char* name);
+  explicit TimeWindowCreator(const char* name);
 	virtual ~TimeWindowCreator();
 	virtual bool init() override;
 	virtual bool exec() override;
