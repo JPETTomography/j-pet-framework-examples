@@ -22,17 +22,16 @@ SinogramCreatorMC::SinogramCreatorMC(const char* name) : SinogramCreator(name) {
 
 SinogramCreatorMC::~SinogramCreatorMC() {}
 
-bool SinogramCreatorMC::init()
-{
+bool SinogramCreatorMC::init() {
   SinogramCreatorMC::setUpOptions();
   fOutputEvents = new JPetTimeWindow("JPetEvent");
 
   getStatistics().createHistogram(new TH2I("reconstruction_histogram", "reconstruction_histogram histogram",
-                                  std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1, 0.f,
-                                  fMaxReconstructionLayerRadius, kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
+                                           std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1, 0.f,
+                                           fMaxReconstructionLayerRadius, kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
 
   getStatistics().createHistogram(
-    new TH1F("pos_dis", "Position distance real data", (fMaxReconstructionLayerRadius) * 10 * 5, 0.f, fMaxReconstructionLayerRadius));
+      new TH1F("pos_dis", "Position distance real data", (fMaxReconstructionLayerRadius)*10 * 5, 0.f, fMaxReconstructionLayerRadius));
   getStatistics().createHistogram(new TH1F("angle", "Position angle real data", kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
 
 #if ROOT_VERSION_CODE < ROOT_VERSION(6, 0, 0)
@@ -49,8 +48,7 @@ bool SinogramCreatorMC::init()
   return true;
 }
 
-void SinogramCreatorMC::generateSinogram()
-{
+void SinogramCreatorMC::generateSinogram() {
   float firstX = 0.f;
   float firstY = 0.f;
   float secondX = 0.f;
@@ -66,7 +64,7 @@ void SinogramCreatorMC::generateSinogram()
   int totalHits = 1; // to make sure that we do not divide by 0
 
   if (fSinogram == nullptr) {
-    fSinogram = new JPetRecoImageTools::Matrix2DProj *[fZSplitNumber];
+    fSinogram = new JPetRecoImageTools::Matrix2DProj*[fZSplitNumber];
     for (int i = 0; i < fZSplitNumber; i++) {
       fSinogram[i] = new JPetRecoImageTools::Matrix2DProj(fMaxDistanceNumber, (std::vector<double>(kReconstructionMaxAngle, 0)));
     }
@@ -78,9 +76,10 @@ void SinogramCreatorMC::generateSinogram()
 
       in >> firstX >> firstY >> firstZ >> firstT >> secondX >> secondY >> secondZ >> secondT >> skip >> skip >> skip >> skip >> coincidence >> skip >>
           skip >> skip;
+      // in >> firstX >> firstY >> firstZ >> firstT >> secondX >> secondY >> secondZ >> secondT;
 
-        if(coincidence != 1) // 1 == true event
-          continue;
+      if (coincidence != 1) // 1 == true event
+        continue;
 
       if (analyzeHits(firstX, firstY, firstZ, firstT, secondX, secondY, secondZ, secondT)) {
         numberOfCorrectHits++;
@@ -93,38 +92,34 @@ void SinogramCreatorMC::generateSinogram()
             << " (correct percentage: " << (((float)numberOfCorrectHits * 100.f) / (float)totalHits) << "%)" << std::endl;
 }
 
-bool SinogramCreatorMC::exec()
-{
-  return true;
-}
+bool SinogramCreatorMC::exec() { return true; }
 
-bool SinogramCreatorMC::terminate()
-{
+bool SinogramCreatorMC::terminate() {
   JPetFilterRamLak filter(0.7);
   JPetRecoImageTools::FourierTransformFunction f = JPetRecoImageTools::doFFTW;
 
   for (int i = 0; i < fZSplitNumber; i++) {
     int sliceNumber = i - (fZSplitNumber / 2);
-    if(std::find(fReconstructSliceNumbers.begin(), fReconstructSliceNumbers.end(), sliceNumber) == fReconstructSliceNumbers.end())
+    if (std::find(fReconstructSliceNumbers.begin(), fReconstructSliceNumbers.end(), sliceNumber) == fReconstructSliceNumbers.end())
       continue;
-    //save sinogram
-    saveResult((*fSinogram[i]), "sinogram_" + std::to_string(sliceNumber) + "_" + std::to_string(fZSplitRange[i].first) + "_" + std::to_string(fZSplitRange[i].second) + ".ppm");
+    // save sinogram
+    saveResult((*fSinogram[i]), fOutFileName + "sinogram_" + std::to_string(sliceNumber) + "_" + std::to_string(fZSplitRange[i].first) + "_" +
+                                    std::to_string(fZSplitRange[i].second) + ".ppm");
 
-    //calculate KDE
-    JPetRecoImageTools::Matrix2DProj result =
-      JPetRecoImageTools::backProjectWithKDE((*fSinogram[i]), fTOFInformation[i], (*fSinogram[i])[0].size(), JPetRecoImageTools::nonRescale, 0, 255);
-    //save KDE
+    // calculate KDE
+    JPetRecoImageTools::Matrix2DProj result = JPetRecoImageTools::backProjectWithKDE((*fSinogram[i]), fTOFInformation[i], (*fSinogram[i])[0].size(),
+                                                                                     JPetRecoImageTools::nonRescale, 0, 255);
+    // save KDE
     saveResult(result, fOutFileName + "reconstruction_with_KDE_" + std::to_string(sliceNumber) + ".ppm");
 
-    //filter sinogram
+    // filter sinogram
     JPetRecoImageTools::Matrix2DProj filteredSinogram = JPetRecoImageTools::FilterSinogram(f, filter, (*fSinogram[i]));
-    //backproject
+    // backproject
     JPetRecoImageTools::Matrix2DProj resultBP =
-      JPetRecoImageTools::backProject(filteredSinogram, (*fSinogram[i])[0].size(), JPetRecoImageTools::nonRescale, 0, 255);
-    //save FBP
+        JPetRecoImageTools::backProject(filteredSinogram, (*fSinogram[i])[0].size(), JPetRecoImageTools::nonRescale, 0, 255);
+    // save FBP
     saveResult(resultBP, fOutFileName + "reconstruction_with_FBP" + std::to_string(sliceNumber) + ".ppm");
   }
-
 
   delete[] fSinogram;
   delete[] fMaxValueInSinogram;
@@ -132,8 +127,7 @@ bool SinogramCreatorMC::terminate()
   return true;
 }
 
-void SinogramCreatorMC::setUpOptions()
-{
+void SinogramCreatorMC::setUpOptions() {
   auto opts = getOptions();
   if (isOptionSet(opts, kOutFileNameKey)) {
     fOutFileName = getOptionAsString(opts, kOutFileNameKey);
@@ -182,10 +176,10 @@ void SinogramCreatorMC::setUpOptions()
 
   fMaxDistanceNumber = std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
 
-  if(isOptionSet(opts, kReconstructSliceNumbers)) {
+  if (isOptionSet(opts, kReconstructSliceNumbers)) {
     fReconstructSliceNumbers = boost::any_cast<std::vector<int>>(getOptionValue(opts, kReconstructSliceNumbers));
   } else {
-    for(int i = 0; i < fZSplitNumber; i++) {
+    for (int i = 0; i < fZSplitNumber; i++) {
       fReconstructSliceNumbers.push_back(i);
     }
   }
