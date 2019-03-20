@@ -22,7 +22,8 @@ SinogramCreatorMC::SinogramCreatorMC(const char* name) : SinogramCreator(name) {
 
 SinogramCreatorMC::~SinogramCreatorMC() {}
 
-bool SinogramCreatorMC::init() {
+bool SinogramCreatorMC::init()
+{
   SinogramCreatorMC::setUpOptions();
   fOutputEvents = new JPetTimeWindow("JPetEvent");
 
@@ -48,7 +49,8 @@ bool SinogramCreatorMC::init() {
   return true;
 }
 
-void SinogramCreatorMC::generateSinogram() {
+void SinogramCreatorMC::generateSinogram()
+{
   float firstX = 0.f;
   float firstY = 0.f;
   float secondX = 0.f;
@@ -63,16 +65,18 @@ void SinogramCreatorMC::generateSinogram() {
   int numberOfCorrectHits = 0;
   int totalHits = 1; // to make sure that we do not divide by 0
 
-  if (fSinogram == nullptr) {
+  if (fSinogram == nullptr)
+  {
     fSinogram = new JPetRecoImageTools::Matrix2DProj*[fZSplitNumber];
-    for (int i = 0; i < fZSplitNumber; i++) {
-      fSinogram[i] = new JPetRecoImageTools::Matrix2DProj(fMaxDistanceNumber, (std::vector<double>(kReconstructionMaxAngle, 0)));
-    }
+    for (int i = 0; i < fZSplitNumber; i++)
+    { fSinogram[i] = new JPetRecoImageTools::Matrix2DProj(fMaxDistanceNumber, (std::vector<double>(kReconstructionMaxAngle, 0))); }
   }
 
-  for (const auto& inputPath : fInputData) {
+  for (const auto& inputPath : fInputData)
+  {
     std::ifstream in(inputPath);
-    while (in.peek() != EOF) {
+    while (in.peek() != EOF)
+    {
 
       in >> firstX >> firstY >> firstZ >> firstT >> secondX >> secondY >> secondZ >> secondT >> skip >> skip >> skip >> skip >> coincidence >> skip >>
           skip >> skip;
@@ -81,9 +85,7 @@ void SinogramCreatorMC::generateSinogram() {
       if (coincidence != 1) // 1 == true event
         continue;
 
-      if (analyzeHits(firstX, firstY, firstZ, firstT, secondX, secondY, secondZ, secondT)) {
-        numberOfCorrectHits++;
-      }
+      if (analyzeHits(firstX, firstY, firstZ, firstT, secondX, secondY, secondZ, secondT)) { numberOfCorrectHits++; }
       totalHits++;
     }
   }
@@ -94,14 +96,15 @@ void SinogramCreatorMC::generateSinogram() {
 
 bool SinogramCreatorMC::exec() { return true; }
 
-bool SinogramCreatorMC::terminate() {
+bool SinogramCreatorMC::terminate()
+{
   JPetFilterRamLak filter(0.7);
   JPetRecoImageTools::FourierTransformFunction f = JPetRecoImageTools::doFFTW;
 
-  for (int i = 0; i < fZSplitNumber; i++) {
+  for (int i = 0; i < fZSplitNumber; i++)
+  {
     int sliceNumber = i - (fZSplitNumber / 2);
-    if (std::find(fReconstructSliceNumbers.begin(), fReconstructSliceNumbers.end(), sliceNumber) == fReconstructSliceNumbers.end())
-      continue;
+    if (std::find(fReconstructSliceNumbers.begin(), fReconstructSliceNumbers.end(), sliceNumber) == fReconstructSliceNumbers.end()) continue;
     // save sinogram
     saveResult((*fSinogram[i]), fOutFileName + "sinogram_" + std::to_string(sliceNumber) + "_" + std::to_string(fZSplitRange[i].first) + "_" +
                                     std::to_string(fZSplitRange[i].second) + ".ppm");
@@ -113,12 +116,12 @@ bool SinogramCreatorMC::terminate() {
     saveResult(result, fOutFileName + "reconstruction_with_KDE_" + std::to_string(sliceNumber) + ".ppm");
 
     // filter sinogram
-    JPetRecoImageTools::Matrix2DProj filteredSinogram = JPetRecoImageTools::FilterSinogram(f, filter, (*fSinogram[i]));
+    // JPetRecoImageTools::Matrix2DProj filteredSinogram = JPetRecoImageTools::FilterSinogram(f, filter, (*fSinogram[i]));
     // backproject
-    JPetRecoImageTools::Matrix2DProj resultBP =
-        JPetRecoImageTools::backProject(filteredSinogram, (*fSinogram[i])[0].size(), JPetRecoImageTools::nonRescale, 0, 255);
+    // JPetRecoImageTools::Matrix2DProj resultBP =
+    //    JPetRecoImageTools::backProject(filteredSinogram, (*fSinogram[i])[0].size(), JPetRecoImageTools::nonRescale, 0, 255);
     // save FBP
-    saveResult(resultBP, fOutFileName + "reconstruction_with_FBP" + std::to_string(sliceNumber) + ".ppm");
+    // saveResult(resultBP, fOutFileName + "reconstruction_with_FBP" + std::to_string(sliceNumber) + ".ppm");
   }
 
   delete[] fSinogram;
@@ -127,46 +130,33 @@ bool SinogramCreatorMC::terminate() {
   return true;
 }
 
-void SinogramCreatorMC::setUpOptions() {
+void SinogramCreatorMC::setUpOptions()
+{
   auto opts = getOptions();
-  if (isOptionSet(opts, kOutFileNameKey)) {
-    fOutFileName = getOptionAsString(opts, kOutFileNameKey);
-  }
+  if (isOptionSet(opts, kOutFileNameKey)) { fOutFileName = getOptionAsString(opts, kOutFileNameKey); }
 
-  if (isOptionSet(opts, kReconstructionDistanceAccuracy)) {
-    fReconstructionDistanceAccuracy = getOptionAsFloat(opts, kReconstructionDistanceAccuracy);
-  }
+  if (isOptionSet(opts, kReconstructionDistanceAccuracy))
+  { fReconstructionDistanceAccuracy = getOptionAsFloat(opts, kReconstructionDistanceAccuracy); }
 
-  if (isOptionSet(opts, kZSplitNumber)) {
-    fZSplitNumber = getOptionAsInt(opts, kZSplitNumber);
-  }
+  if (isOptionSet(opts, kZSplitNumber)) { fZSplitNumber = getOptionAsInt(opts, kZSplitNumber); }
 
-  if (isOptionSet(opts, kScintillatorLenght)) {
-    fScintillatorLenght = getOptionAsFloat(opts, kScintillatorLenght);
-  }
+  if (isOptionSet(opts, kScintillatorLenght)) { fScintillatorLenght = getOptionAsFloat(opts, kScintillatorLenght); }
 
-  if (isOptionSet(opts, kMaxReconstructionRadius)) {
-    fMaxReconstructionLayerRadius = getOptionAsFloat(opts, kMaxReconstructionRadius);
-  }
+  if (isOptionSet(opts, kMaxReconstructionRadius)) { fMaxReconstructionLayerRadius = getOptionAsFloat(opts, kMaxReconstructionRadius); }
 
-  if (isOptionSet(opts, kInputDataKey)) {
-    fInputData = getOptionAsVectorOfStrings(opts, kInputDataKey);
-  }
+  if (isOptionSet(opts, kInputDataKey)) { fInputData = getOptionAsVectorOfStrings(opts, kInputDataKey); }
 
-  if (isOptionSet(opts, kEnableObliqueLORRemapping)) {
-    fEnableObliqueLORRemapping = getOptionAsBool(opts, kEnableObliqueLORRemapping);
-  }
+  if (isOptionSet(opts, kEnableObliqueLORRemapping)) { fEnableObliqueLORRemapping = getOptionAsBool(opts, kEnableObliqueLORRemapping); }
 
-  if (isOptionSet(opts, kEnableTOFReconstruction)) {
-    fEnableKDEReconstruction = getOptionAsBool(opts, kEnableTOFReconstruction);
-  }
+  if (isOptionSet(opts, kEnableTOFReconstruction)) { fEnableKDEReconstruction = getOptionAsBool(opts, kEnableTOFReconstruction); }
 
   fTOFInformation = new JPetRecoImageTools::Matrix2DTOF[fZSplitNumber];
   fMaxValueInSinogram = new int[fZSplitNumber];
   fCurrentValueInSinogram = new int[fZSplitNumber];
   const float maxZRange = fScintillatorLenght / 2.f;
   float range = (2.f * maxZRange) / fZSplitNumber;
-  for (int i = 0; i < fZSplitNumber; i++) {
+  for (int i = 0; i < fZSplitNumber; i++)
+  {
     float rangeStart = (i * range) - maxZRange;
     float rangeEnd = ((i + 1) * range) - maxZRange;
     fZSplitRange.push_back(std::make_pair(rangeStart, rangeEnd));
@@ -176,11 +166,10 @@ void SinogramCreatorMC::setUpOptions() {
 
   fMaxDistanceNumber = std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
 
-  if (isOptionSet(opts, kReconstructSliceNumbers)) {
-    fReconstructSliceNumbers = boost::any_cast<std::vector<int>>(getOptionValue(opts, kReconstructSliceNumbers));
-  } else {
-    for (int i = 0; i < fZSplitNumber; i++) {
-      fReconstructSliceNumbers.push_back(i);
-    }
+  if (isOptionSet(opts, kReconstructSliceNumbers))
+  { fReconstructSliceNumbers = boost::any_cast<std::vector<int>>(getOptionValue(opts, kReconstructSliceNumbers)); }
+  else
+  {
+    for (int i = 0; i < fZSplitNumber; i++) { fReconstructSliceNumbers.push_back(i); }
   }
 }
