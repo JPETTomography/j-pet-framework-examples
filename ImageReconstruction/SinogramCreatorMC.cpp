@@ -84,7 +84,7 @@ void SinogramCreatorMC::generateSinogram()
       if (coincidence != 1) // 1 == true event
         continue;
 
-      if (analyzeHits(firstX, firstY, firstZ, firstT, secondX, secondY, secondZ, secondT)) { numberOfCorrectHits++; }
+      if (analyzeHits(TVector3(firstX, firstY, firstZ), firstT, TVector3(secondX, secondY, secondZ), secondT)) { numberOfCorrectHits++; }
       totalHits++;
     }
   }

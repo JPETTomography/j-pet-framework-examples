@@ -67,15 +67,14 @@ public:
 
 protected:
   bool analyzeHits(const JPetHit& firstHit, const JPetHit& secondHit);
-  bool analyzeHits(const float firstX, const float firstY, const float firstZ, const float firstTOF, const float secondX, const float secondY,
-                   const float secondZ, const float secondTOF);
+  bool analyzeHits(const TVector3& firstHit, const float firstTOF, const TVector3& secondHit, const float secondTOF);
   /**
    * @brief Function returing value of TOF rescale, to match same annihilation point after projection from 3d to 2d
    * \param x_diff difference on x axis between hit ends
    * \param y_diff difference on y axis between hit ends
    * \param z_diff difference on z axis between hit ends
    */
-  float getTOFRescaleFactor(float x_diff, float y_diff, float z_diff) const;
+  float getTOFRescaleFactor(const TVector3& posDiff) const;
 
   /**
    * @brief Helper function used in saving result

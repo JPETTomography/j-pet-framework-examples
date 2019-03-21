@@ -79,18 +79,17 @@ bool SinogramCreator::exec()
 
 bool SinogramCreator::analyzeHits(const JPetHit& firstHit, const JPetHit& secondHit)
 {
-  return analyzeHits(firstHit.getPosX(), firstHit.getPosY(), firstHit.getPosZ(), firstHit.getTime(), secondHit.getPosX(), secondHit.getPosY(),
-                     secondHit.getPosZ(), secondHit.getTime());
+  return analyzeHits(firstHit.getPos(), firstHit.getTime(), secondHit.getPos(), secondHit.getTime());
 }
 
-bool SinogramCreator::analyzeHits(const float firstX, const float firstY, const float firstZ, const float firstTOF, const float secondX,
-                                  const float secondY, const float secondZ, const float secondTOF)
+bool SinogramCreator::analyzeHits(const TVector3& firstHit, const float firstTOF, const TVector3& secondHit, const float secondTOF)
 {
   int i = -1;
-  if (!fEnableObliqueLORRemapping) { i = SinogramCreatorTools::getSplitRangeNumber(firstZ, secondZ, fZSplitRange); }
+  if (!fEnableObliqueLORRemapping) { i = SinogramCreatorTools::getSplitRangeNumber(firstHit.Z(), secondHit.Z(), fZSplitRange); }
   else
   {
-    i = SinogramCreatorTools::getSinogramSlice(firstX, firstY, firstZ, firstTOF, secondX, secondY, secondZ, secondTOF, fZSplitRange);
+    i = SinogramCreatorTools::getSinogramSlice(firstHit.X(), firstHit.Y(), firstHit.Z(), firstTOF, secondHit.X(), secondHit.Y(), secondHit.Z(),
+                                               secondTOF, fZSplitRange);
   }
   if (i < 0 || i >= fZSplitNumber)
   {
@@ -98,8 +97,9 @@ bool SinogramCreator::analyzeHits(const float firstX, const float firstY, const 
     return false;
   }
 
-  const auto sinogramResult = SinogramCreatorTools::getSinogramRepresentation(
-      firstX, firstY, secondX, secondY, fMaxReconstructionLayerRadius, fReconstructionDistanceAccuracy, fMaxDistanceNumber, kReconstructionMaxAngle);
+  const auto sinogramResult =
+      SinogramCreatorTools::getSinogramRepresentation(firstHit.X(), firstHit.Y(), secondHit.X(), secondHit.Y(), fMaxReconstructionLayerRadius,
+                                                      fReconstructionDistanceAccuracy, fMaxDistanceNumber, kReconstructionMaxAngle);
 
   fCurrentValueInSinogram[i] = ++fSinogram[i]->at(sinogramResult.first).at(sinogramResult.second);
   if (fCurrentValueInSinogram[i] > fMaxValueInSinogram[i])
@@ -110,7 +110,7 @@ bool SinogramCreator::analyzeHits(const float firstX, const float firstY, const 
   if (fEnableKDEReconstruction)
   {
     float tofRescale = 1.f;
-    if (fEnableObliqueLORRemapping) { tofRescale = getTOFRescaleFactor(firstX - secondX, firstY - secondY, firstZ - secondZ); }
+    if (fEnableObliqueLORRemapping) { tofRescale = getTOFRescaleFactor(firstHit - secondHit); }
     auto tofInfo = fTOFInformation[i].find(sinogramResult);
     float tofResult = ((secondTOF - firstTOF) / 2.f) * tofRescale;
     if (tofInfo != fTOFInformation[i].end()) { tofInfo->second.push_back(tofResult); }
@@ -123,10 +123,10 @@ bool SinogramCreator::analyzeHits(const float firstX, const float firstY, const 
   return true;
 }
 
-float SinogramCreator::getTOFRescaleFactor(float x_diff, float y_diff, float z_diff) const
+float SinogramCreator::getTOFRescaleFactor(const TVector3& posDiff) const
 {
-  float distance_3d = std::sqrt(x_diff * x_diff + y_diff * y_diff + z_diff * z_diff);
-  float distance_2d = std::sqrt(x_diff * x_diff + y_diff * y_diff);
+  float distance_3d = std::sqrt(posDiff.X() * posDiff.X() + posDiff.Y() * posDiff.Y() + posDiff.Z() * posDiff.Z());
+  float distance_2d = std::sqrt(posDiff.X() * posDiff.X() + posDiff.Y() * posDiff.Y());
   if (distance_3d < kEPSILON) return 0.f;
   return distance_2d / distance_3d;
 }
