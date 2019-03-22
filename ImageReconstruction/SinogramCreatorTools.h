@@ -42,6 +42,7 @@ public:
   static int getSplitRangeNumber(float z, const std::vector<std::pair<float, float>>& zSplitRange);
   static int getSinogramSlice(float firstX, float firstY, float firstZ, float firstTOF, float secondX, float secondY, float secondZ, float secondTOF,
                               const std::vector<std::pair<float, float>>& zSplitRange);
+  static int getTOFSlice(float firstTOF, float secondTOF, float sliceSize);
 
 private:
   SinogramCreatorTools() = delete;

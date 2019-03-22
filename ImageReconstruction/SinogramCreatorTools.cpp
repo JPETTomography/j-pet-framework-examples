@@ -132,3 +132,8 @@ int SinogramCreatorTools::getSinogramSlice(float firstX, float firstY, float fir
   float result = calculateLORSlice(firstX, firstY, firstZ, firstTOF, secondX, secondY, secondZ, secondTOF);
   return getSplitRangeNumber(result, zSplitRange);
 }
+
+int SinogramCreatorTools::getTOFSlice(float firstTOF, float secondTOF, float sliceSize)
+{
+  return std::round(((secondTOF - firstTOF) / 2.) * sliceSize);
+}

@@ -31,16 +31,21 @@
 
 #include "JPetFilterInterface.h"
 
-template <class T, typename U> struct PairHash {
+template <class T, typename U>
+struct PairHash
+{
   size_t operator()(const std::pair<T, U>& key) const { return std::hash<T>()(key.first) ^ std::hash<U>()(key.second); }
 };
 
-struct Point {
-  Point(int x, int y) {
+struct Point
+{
+  Point(int x, int y)
+  {
     this->x = x;
     this->y = y;
   }
-  Point(const std::pair<int, int>& p) {
+  Point(const std::pair<int, int>& p)
+  {
     this->x = p.first;
     this->y = p.second;
   }
@@ -48,13 +53,16 @@ struct Point {
   int y = 0;
 };
 
-struct SinogramPoints {
-  SinogramPoints(double value, double time) {
+struct SinogramPoints
+{
+  SinogramPoints(double value, double time)
+  {
     this->value = value;
     timeVector.push_back(time);
   }
 
-  void operator+=(const std::pair<double, double>& other) {
+  void operator+=(const std::pair<double, double>& other)
+  {
     value += other.first;
     timeVector.push_back(other.second);
   }
@@ -62,7 +70,8 @@ struct SinogramPoints {
   std::vector<double> timeVector;
 };
 
-class JPetRecoImageTools {
+class JPetRecoImageTools
+{
 public:
   using SparseMatrix = boost::numeric::ublas::mapped_matrix<double>;
   using Matrix3D = std::unordered_map<int, SparseMatrix>;
@@ -160,12 +169,13 @@ public:
    *  \param rescaleMinCutoff min value to set in rescale (Optional)
    *  \param rescaleFactor max value to set in rescale (Optional)
    */
-  static SparseMatrix backProjectWithTOF(SparseMatrix& sinogram, Matrix2DTOF& tof, int angles, RescaleFunc rescaleFunc, int rescaleMinCutoff,
+  static SparseMatrix backProjectWithKDE(SparseMatrix& sinogram, Matrix2DTOF& tof, int angles, RescaleFunc rescaleFunc, int rescaleMinCutoff,
                                          int rescaleFactor);
 
   static double normalDistributionProbability(float x, float mean, float stddev);
   static double tofWeight(double lor_tof_center, double lor_position, double sigma);
-  static SparseMatrix backProjectRealTOF(Matrix3D& sinogram, int nAngles, RescaleFunc rescaleFunc, int rescaleMinCutoff, int rescaleFactor, double sinogramAccuracy, double tofBinSigma, double tofSigma);
+  static SparseMatrix backProjectRealTOF(Matrix3D& sinogram, int nAngles, RescaleFunc rescaleFunc, int rescaleMinCutoff, int rescaleFactor,
+                                         double sinogramAccuracy, double tofBinSigma, double tofSigma);
 
   /*! \brief Function filtering given sinogram using fouriner implementation and
    filter
@@ -206,7 +216,8 @@ private:
 
   static void doFFTSLOWI(std::vector<double>& Re, std::vector<double>& Im, int size, int shift);
 
-  static inline double setToZeroIfSmall(double value, double epsilon) {
+  static inline double setToZeroIfSmall(double value, double epsilon)
+  {
     if (std::abs(value) < epsilon)
       return 0;
     else

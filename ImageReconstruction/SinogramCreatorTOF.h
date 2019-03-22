@@ -22,10 +22,11 @@
 #define override
 #endif
 
-#include "SinogramCreator.h"
 #include "JPetFilterRamLak.h"
+#include "SinogramCreator.h"
 
-class SinogramCreatorTOF : public SinogramCreator {
+class SinogramCreatorTOF : public SinogramCreator
+{
 public:
   SinogramCreatorTOF(const char* name);
   virtual ~SinogramCreatorTOF();
@@ -48,15 +49,16 @@ private:
   const std::string kScintillatorLenght = "SinogramCreatorTOF_ScintillatorLenght_float";
   const std::string kMaxReconstructionRadius = "SinogramCreatorTOF_MaxReconstructionRadius_float";
   const std::string kInputDataKey = "SinogramCreatorTOF_InputDataPaths_std::vector<std::string>";
-  const std::string kEnableNonPerperdicualLOR = "SinogramCreatorTOF_EnableNonPerperdicalLOR_bool";
-  const std::string kEnableTOFReconstrution = "SinogramCreatorTOF_EnableTOFReconstruction_bool";
+  const std::string kEnableObliqueLORRemapping = "SinogramCreatorTOF_EnableObliqueLORRemapping_bool";
+  const std::string kEnableTOFReconstruction = "SinogramCreatorTOF_EnableKDEReconstruction_bool";
   const std::string kTOFSliceSize = "SinogramCreatorTOF_TOFSliceSize_float";
+  const std::string kReconstructSliceNumbers = "SinogramCreatorTOF_ReconstructSliceNumber_std::vector<int>";
 
   std::vector<std::string> fInputData{"sinogram_data.txt"};
   std::string fOutFileName = "sinogramMC";
   float fTOFSliceSize = 100.f;
 
-  JPetRecoImageTools::Matrix3D *fSinogramDataTOF = nullptr;
+  JPetRecoImageTools::Matrix3D* fSinogramDataTOF = nullptr;
 };
 
 #endif /*  !SINOGRAMCREATORTOF_H */

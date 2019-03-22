@@ -81,15 +81,15 @@ protected:
    * \param result matrix to find max value
    * \return max value of matrix
    */
-  int getMaxValue(const JPetRecoImageTools::Matrix2DProj& result);
+  int getMaxValue(const JPetRecoImageTools::SparseMatrix& result);
   /**
    * @brief Helper function used to save results(sinograms and reconstructed images)
    * \param result resulted matrix to save
    * \param outputFileName name with path where to save result
    */
-  void saveResult(const JPetRecoImageTools::Matrix2DProj& result, const std::string& outputFileName);
+  void saveResult(const JPetRecoImageTools::SparseMatrix& result, const std::string& outputFileName);
 
-  JPetRecoImageTools::Matrix2DProj** fSinogram = nullptr;
+  JPetRecoImageTools::SparseMatrix** fSinogram = nullptr;
   JPetRecoImageTools::Matrix2DTOF* fTOFInformation = nullptr;
 
   const int kReconstructionMaxAngle = 180;

@@ -67,9 +67,9 @@ void SinogramCreatorMC::generateSinogram()
 
   if (fSinogram == nullptr)
   {
-    fSinogram = new JPetRecoImageTools::Matrix2DProj*[fZSplitNumber];
-    for (int i = 0; i < fZSplitNumber; i++)
-    { fSinogram[i] = new JPetRecoImageTools::Matrix2DProj(fMaxDistanceNumber, (std::vector<double>(kReconstructionMaxAngle, 0))); } }
+    fSinogram = new JPetRecoImageTools::SparseMatrix*[fZSplitNumber];
+    for (int i = 0; i < fZSplitNumber; i++) { fSinogram[i] = new JPetRecoImageTools::SparseMatrix(fMaxDistanceNumber, kReconstructionMaxAngle); }
+  }
 
   for (const auto& inputPath : fInputData)
   {
@@ -109,8 +109,8 @@ bool SinogramCreatorMC::terminate()
                                     std::to_string(fZSplitRange[i].second) + ".ppm");
 
     // calculate KDE
-    JPetRecoImageTools::Matrix2DProj result = JPetRecoImageTools::backProjectWithKDE((*fSinogram[i]), fTOFInformation[i], (*fSinogram[i])[0].size(),
-                                                                                     JPetRecoImageTools::nonRescale, 0, 255);
+    JPetRecoImageTools::SparseMatrix result =
+        JPetRecoImageTools::backProjectWithKDE((*fSinogram[i]), fTOFInformation[i], (*fSinogram[i]).size2(), JPetRecoImageTools::nonRescale, 0, 255);
     // save KDE
     saveResult(result, fOutFileName + "reconstruction_with_KDE_" + std::to_string(sliceNumber) + ".ppm");
 
@@ -135,13 +135,13 @@ void SinogramCreatorMC::setUpOptions()
   if (isOptionSet(opts, kOutFileNameKey)) { fOutFileName = getOptionAsString(opts, kOutFileNameKey); }
 
   if (isOptionSet(opts, kReconstructionDistanceAccuracy))
-  { fReconstructionDistanceAccuracy = getOptionAsFloat(opts, kReconstructionDistanceAccuracy); } if (isOptionSet(opts, kZSplitNumber))
-  { fZSplitNumber = getOptionAsInt(opts, kZSplitNumber); } if (isOptionSet(opts, kScintillatorLenght))
-  { fScintillatorLenght = getOptionAsFloat(opts, kScintillatorLenght); } if (isOptionSet(opts, kMaxReconstructionRadius))
-  { fMaxReconstructionLayerRadius = getOptionAsFloat(opts, kMaxReconstructionRadius); } if (isOptionSet(opts, kInputDataKey))
-  { fInputData = getOptionAsVectorOfStrings(opts, kInputDataKey); } if (isOptionSet(opts, kEnableObliqueLORRemapping))
-  { fEnableObliqueLORRemapping = getOptionAsBool(opts, kEnableObliqueLORRemapping); } if (isOptionSet(opts, kEnableTOFReconstruction))
-  { fEnableKDEReconstruction = getOptionAsBool(opts, kEnableTOFReconstruction); }
+  { fReconstructionDistanceAccuracy = getOptionAsFloat(opts, kReconstructionDistanceAccuracy); }
+  if (isOptionSet(opts, kZSplitNumber)) { fZSplitNumber = getOptionAsInt(opts, kZSplitNumber); }
+  if (isOptionSet(opts, kScintillatorLenght)) { fScintillatorLenght = getOptionAsFloat(opts, kScintillatorLenght); }
+  if (isOptionSet(opts, kMaxReconstructionRadius)) { fMaxReconstructionLayerRadius = getOptionAsFloat(opts, kMaxReconstructionRadius); }
+  if (isOptionSet(opts, kInputDataKey)) { fInputData = getOptionAsVectorOfStrings(opts, kInputDataKey); }
+  if (isOptionSet(opts, kEnableObliqueLORRemapping)) { fEnableObliqueLORRemapping = getOptionAsBool(opts, kEnableObliqueLORRemapping); }
+  if (isOptionSet(opts, kEnableTOFReconstruction)) { fEnableKDEReconstruction = getOptionAsBool(opts, kEnableTOFReconstruction); }
 
   fTOFInformation = new JPetRecoImageTools::Matrix2DTOF[fZSplitNumber];
   fMaxValueInSinogram = new int[fZSplitNumber];
@@ -160,7 +160,8 @@ void SinogramCreatorMC::setUpOptions()
   fMaxDistanceNumber = std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
 
   if (isOptionSet(opts, kReconstructSliceNumbers))
-  { fReconstructSliceNumbers = boost::any_cast<std::vector<int>>(getOptionValue(opts, kReconstructSliceNumbers)); } else
+  { fReconstructSliceNumbers = boost::any_cast<std::vector<int>>(getOptionValue(opts, kReconstructSliceNumbers)); }
+  else
   {
     for (int i = 0; i < fZSplitNumber; i++) { fReconstructSliceNumbers.push_back(i); }
   }
