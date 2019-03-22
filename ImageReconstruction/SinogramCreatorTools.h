@@ -25,22 +25,23 @@
 #include <cmath>
 #include <tuple>
 #include <utility>
+#include <vector>
 
-class SinogramCreatorTools {
+class SinogramCreatorTools
+{
 public:
-  using Point = std::pair<float, float>;
-
   static unsigned int roundToNearesMultiplicity(float numberToRound, float muliFactor);
-  static float calculateAngle(float firstX, float firstY, float secondX, float secondY);
-
-  static float calculateDistance(float firstX, float firstY, float secondX, float secondY);
+  static std::pair<int, float> getAngleAndDistance(float firstX, float firstY, float secondX, float secondY);
 
   static std::pair<int, int> getSinogramRepresentation(float firstX, float firstY, float secondX, float secondY, float fMaxReconstructionLayerRadius,
                                                        float fReconstructionDistanceAccuracy, int maxDistanceNumber, int kReconstructionMaxAngle);
 
   static float calculateLORSlice(float x1, float y1, float z1, float t1, float x2, float y2, float z2, float t2);
 
-  static int getTOFSlice(float firstX, float firstY, float firstTOF, float secondX, float secondY, float secondTOF, float sliceSize);
+  static int getSplitRangeNumber(float firstZ, float secondZ, const std::vector<std::pair<float, float>>& zSplitRange);
+  static int getSplitRangeNumber(float z, const std::vector<std::pair<float, float>>& zSplitRange);
+  static int getSinogramSlice(float firstX, float firstY, float firstZ, float firstTOF, float secondX, float secondY, float secondZ, float secondTOF,
+                              const std::vector<std::pair<float, float>>& zSplitRange);
 
 private:
   SinogramCreatorTools() = delete;
@@ -49,13 +50,7 @@ private:
   SinogramCreatorTools& operator=(const SinogramCreatorTools&) = delete;
 
   static std::tuple<float, float, float> cart2sph(float x, float y, float z);
-  static std::tuple<float, float, float> sph2cart(float azimuth, float elevation, float r);
-
-  static void swapIfNeeded(float& firstX, float& firstY, float& secondX, float& secondY);
-  static void swapIfNeeded(float& firstX, float& firstY, float& firstT, float& secondX, float& secondY, float& secondT);
-  static void swapIfNeeded(float& firstX, float& firstY, float& firstZ, float& firstT, float& secondX, float& secondY, float& secondZ,
-                           float& secondT);
-  static float calculateNorm(float firstX, float firstY, float secondX, float secondY);
+  static std::tuple<float, float, float> sph2cart(float theta, float phi, float r);
 };
 
 #endif /*  !SINOGRAMCREATORTOOLS_H */
