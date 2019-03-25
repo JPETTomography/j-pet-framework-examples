@@ -10,7 +10,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *
-* Purpose: Time calibration with data measured with reference detector
+*  @brief Time calibration with data measured with reference detector
 *  @file TimeCalibration.h
 */
 
@@ -19,9 +19,12 @@
 #include <JPetTask/JPetTask.h>
 #include <JPetUserTask/JPetUserTask.h>
 #include <JPetHit/JPetHit.h>
-#include <JPetRawSignal/JPetRawSignal.h>
-#include <JPetGeomMapping/JPetGeomMapping.h>
 #include <JPetParamManager/JPetParamManager.h>
+#include <JPetGeomMapping/JPetGeomMapping.h>
+#include <JPetTimer/JPetTimer.h>
+#include <memory>
+#include <vector>
+#include <string>
 #ifdef __CINT__
 //when cint is used instead of compiler, override word is not recognized
 //nevertheless it's needed for checking if the structure of project is correct
@@ -32,52 +35,70 @@ class TimeCalibration: public JPetUserTask
 public:
   TimeCalibration(const char* name);
   virtual ~TimeCalibration();
-  virtual bool init()override;
-  virtual bool exec()override;
-  virtual bool terminate()override;
+  virtual bool init() override;
+  virtual bool exec() override;
+  virtual bool terminate() override;
+
 protected:
+  static constexpr int kNumberOfThresholds = 4;
+  static void writeHeader(const std::string& filename);
+
+  bool loadOptions();
+  /// Methods loads the calibration constants from the file into the arrays.
+  void loadFileWithParameters(const std::string& filename);
+  void createHistograms();
+  bool isInChosenStrip(const JPetHit& hit) const;
   const char* formatUniqueSlotDescription(const JPetBarrelSlot& slot, int threshold, const char* prefix);
-  void fillHistosForHit(const JPetHit& hit, const std::vector<double>& RefTimesL, const std::vector<double>& RefTimesT);
-  JPetGeomMapping* fBarrelMap = nullptr;
-  std::string OutputFile = "TimeConstantsCalib.txt";
-  std::string OutputFileTmp = "TimeConstants.txt";
-  const std::string fTmpOutFile = "TimeCalibLoader_ConfigFile";
+  void fillHistosForHit(const JPetHit& hit, const std::vector<double>& refTimesL, const std::vector<double>& refTimesT);
+  void fitAndSaveParametersToFile(const std::string& filename, const std::string& filenameTmp);
+  bool CheckIfExit(int Niter);
+
+  /// Required options to be loaded from the json file.
+  const std::string kPMIdRefOptName  = "TimeCalibration_PMIdRef_int";
+  const std::string kTOTCutLowOptName = "TimeCalibration_TOTCutLow_float";
+  const std::string kTOTCutHighOptName  = "TimeCalibration_TOTCutHigh_float";
+  //  const std::string kMainStripOptName = "TimeCalibration_MainStrip_int";
+  const std::string kMainStripOptName = "TimeWindowCreator_MainStrip_int"; 
+  const std::string kLoadConstantsOptName  = "TimeCalibration_LoadConstants_bool";
+  const std::string kCalibFileTmpOptName = "TimeCalibration_OutputFileTmp_std::string";
+  const std::string kCalibFileFinalOptName = "TimeCalibration_OutputFileFinal_std::string";
+  const std::string MaxIterNumOptName = "TimeCalibration_NiterMax_int";
+  int kPMIdRef = 385;
+  std::array<float, 2> TOTcut{{ -300000000., 300000000.}}; //TOT cuts for slot hits (sum of TOTs from both sides)
+  int fLayerToCalib = -1; //Layer of calibrated slot
+  int fStripToCalib = -1; //Slot to be calibrated
+  bool fIsCorrection = true; //Flag for choosing the correction of times at the level of calibration module (use only if the calibration loader is not used)
+  std::string fTimeConstantsCalibFileName = "TimeConstantsCalib.txt";
+  std::string fTimeConstantsCalibFileNameTmp = "TimeConstantsCalibTmp.txt";
+
   const float Cl[3] = {0., 0.1418, 0.5003};  //[ns]
   const float SigCl[3] = {0., 0.0033, 0.0033}; //[ns]
-  float TOTcut[2] = { -300000000., 300000000.}; //TOT cuts for slot hits (sum of TOTs from both sides)
-  const std::string fTOTcutLow  = "TOTcutLow";
-  const std::string fTOTcutHigh  = "TOTcutHigh";
-  const std::string kMainStripKey = "TimeWindowCreator_MainStrip";
-  double frac_err = 0.3; //maximal fractional uncertainty of parameters accepted by calibration
-  int min_ev = 100;     //minimal number of events for a distribution to be fitted
-  int LayerToCalib = 0; //Layer of calibrated slot
-  int StripToCalib = 0; //Slot to be calibrated
-  float CAlTmp[5]    = {0., 0., 0., 0., 0.};
-  float SigCAlTmp[5] = {0., 0., 0., 0., 0.};
-  float CAtTmp[5]    = {0., 0., 0., 0., 0.};
-  float SigCAtTmp[5] = {0., 0., 0., 0., 0.};
-  float CBlTmp[5]    = {0., 0., 0., 0., 0.};
-  float SigCBlTmp[5] = {0., 0., 0., 0., 0.};
-  float CBtTmp[5]    = {0., 0., 0., 0., 0.};
-  float SigCBtTmp[5] = {0., 0., 0., 0., 0.};
-  float sigma_peak_Ref_lBTmp[5] = {0., 0., 0., 0., 0.};
-  float sigma_peak_Ref_tBTmp[5] = {0., 0., 0., 0., 0.};
-  float chi2_ndf_Ref_lBTmp[5] = {0., 0., 0., 0., 0.};
-  float chi2_ndf_Ref_tBTmp[5] = {0., 0., 0., 0., 0.};
-  float sigma_peak_Ref_lATmp[5] = {0., 0., 0., 0., 0.};
-  float sigma_peak_Ref_tATmp[5] = {0., 0., 0., 0., 0.};
-  float chi2_ndf_Ref_lATmp[5] = {0., 0., 0., 0., 0.};
-  float chi2_ndf_Ref_tATmp[5] = {0., 0., 0., 0., 0.};
+
   int Niter = 0;
-  int flag_end = 0;
-  float CAtCor[5] = {0., 0., 0., 0., 0.};
-  float CBtCor[5] = {0., 0., 0., 0., 0.};
-  float CAlCor[5] = {0., 0., 0., 0., 0.};
-  float CBlCor[5] = {0., 0., 0., 0., 0.};
-  int   flag_corr = 1; //Flag for choosing the correction of times at the level of calibration module (use only if the calibration loader is not used)
-  const std::string fConstantsLoadingFlag  = "ConstantsLoadingFlag";
-  int   NiterMax = 1;   //Max number of iterations for calibration of one strip
-  const std::string fMaxIterationNumber = "MaxIterationNumber";
-  bool CheckIfExitIter(float CAl[], float  SigCAl[], float CBl[], float  SigCBl[], float CAt[], float SigCAt[], float CBt[], float SigCBt[], int Niter, int NiterM );
+  int NiterMax = 1;
+
+  /// Structures to save the results of the calibration procedures
+  /// Tmp are temporary results
+  std::array<double, 5> CAlTmp {{0., 0., 0., 0., 0.}};
+  std::array<double, 5> SigCAlTmp {{0., 0., 0., 0., 0.}};
+  std::array<double, 5> CAtTmp {{0., 0., 0., 0., 0.}};
+  std::array<double, 5> SigCAtTmp = {{0., 0., 0., 0., 0.}};
+  std::array<double, 5> CBlTmp = {{0., 0., 0., 0., 0.}};
+  std::array<double, 5> SigCBlTmp = {{0., 0., 0., 0., 0.}};
+  std::array<double, 5> CBtTmp = {{0., 0., 0., 0., 0.}};
+  std::array<double, 5> SigCBtTmp = {{0., 0., 0., 0., 0.}};
+
+  std::array<double, 5> CAtCor = {{0., 0., 0., 0., 0.}};
+  std::array<double, 5> CBtCor = {{0., 0., 0., 0., 0.}};
+  std::array<double, 5> CAlCor = {{0., 0., 0., 0., 0.}};
+  std::array<double, 5> CBlCor = {{0., 0., 0., 0., 0.}};
+  //
+  double sigma_peak_Ref_lTmp[5] = {0., 0., 0., 0., 0.};
+  double sigma_peak_Ref_tTmp[5] = {0., 0., 0., 0., 0.};
+  double sigma_peak_lTmp[5] = {0., 0., 0., 0., 0.};
+  double sigma_peak_tTmp[5] = {0., 0., 0., 0., 0.};
+
+  std::unique_ptr<JPetGeomMapping> fMapper;
+  JPetTimer fTimer;
 };
 #endif /*  !TimeCalibration_H */

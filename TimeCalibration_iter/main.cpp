@@ -13,35 +13,37 @@
  *  @file main.cpp
  */
 
-#include <JPetManager/JPetManager.h>
 #include "TimeCalibration_dev.h"
+#include <JPetManager/JPetManager.h>
 #include "../LargeBarrelAnalysis/TimeWindowCreator.h"
-#include "../LargeBarrelAnalysis/TimeCalibLoader.h"
 #include "../LargeBarrelAnalysis/SignalFinder.h"
 #include "../LargeBarrelAnalysis/SignalTransformer.h"
 #include "../LargeBarrelAnalysis/HitFinder.h"
-#include "../LargeBarrelAnalysis/EventFinder.h"
-#include "../LargeBarrelAnalysis/EventCategorizer.h"
 
 using namespace std;
 
 int main(int argc, const char* argv[])
 {
-  JPetManager& manager = JPetManager::getManager();
+  try {
+    //
+    JPetManager& manager = JPetManager::getManager();
+    manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
+    manager.registerTask<SignalFinder>("SignalFinder");
+    manager.registerTask<SignalTransformer>("SignalTransformer");
+    manager.registerTask<HitFinder>("HitFinder");
+    manager.registerTask<TimeCalibration>("TimeCalibration");
+    //
+    manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
+    manager.useTask("SignalFinder", "tslot.raw", "raw.sig");
+    manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
+    manager.useTask("HitFinder", "phys.sig", "hits");
+    manager.useTask("TimeCalibration", "hits", "calib",1);
+    manager.run(argc, argv);
 
-  manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
-  manager.registerTask<TimeCalibLoader>("TimeCalibLoader");
-  manager.registerTask<SignalFinder>("SignalFinder");
-  manager.registerTask<SignalTransformer>("SignalTransformer"); 
-  manager.registerTask<HitFinder>("HitFinder"); 
-  manager.registerTask<TimeCalibration>("TimeCalibration"); 
-  
-  manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
-  manager.useTask("TimeCalibLoader", "tslot.raw", "tslot.calib");
-  manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
-  manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
-  manager.useTask("HitFinder", "phys.sig", "hits");
-  manager.useTask("TimeCalibration", "hits", "calib");
+  } catch (const std::exception& except) {
+    std::cerr << "Unrecoverable error occured:" << except.what() << "Exiting the program!" << std::endl;
+    return EXIT_FAILURE;
+  }
+  return EXIT_SUCCESS;
 
-  manager.run(argc, argv);
 }
