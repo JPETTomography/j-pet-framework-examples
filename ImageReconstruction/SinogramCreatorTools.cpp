@@ -17,9 +17,9 @@
 #include <iostream>
 #include <math.h>
 
-unsigned int SinogramCreatorTools::roundToNearesMultiplicity(float numberToRound, float accuracy)
+unsigned int SinogramCreatorTools::roundToNearesMultiplicity(double numberToRound, double accuracy)
 {
-  return std::floor((numberToRound / accuracy) + (accuracy / 2));
+  return std::floor((numberToRound / accuracy) + (accuracy / 2.));
 }
 
 std::pair<int, float> SinogramCreatorTools::getAngleAndDistance(float firstX, float firstY, float secondX, float secondY)
@@ -78,7 +78,7 @@ std::tuple<float, float, float> SinogramCreatorTools::sph2cart(float theta, floa
   return std::make_tuple(x, y, z);
 }
 
-float SinogramCreatorTools::calculateLORSlice(float x1, float y1, float z1, float t1, float x2, float y2, float z2, float t2)
+float SinogramCreatorTools::calculateLORSlice(float x1, float y1, float z1, double t1, float x2, float y2, float z2, double t2)
 {
   float shiftX2 = x2 - x1;
   float shiftY2 = y2 - y1;
@@ -92,9 +92,9 @@ float SinogramCreatorTools::calculateLORSlice(float x1, float y1, float z1, floa
 
   const static float speed_of_light = 0.0299792458f;
 
-  float diffR = speed_of_light * (t2 - t1) / 2.f;
+  double diffR = speed_of_light * (t2 - t1) / 2.f;
 
-  float r0 = r / 2.f - diffR;
+  double r0 = r / 2.f - diffR;
 
   float resultX;
   float resultY;
@@ -126,14 +126,15 @@ int SinogramCreatorTools::getSplitRangeNumber(float z, const std::vector<std::pa
   return -1;
 }
 
-int SinogramCreatorTools::getSinogramSlice(float firstX, float firstY, float firstZ, float firstTOF, float secondX, float secondY, float secondZ,
-                                           float secondTOF, const std::vector<std::pair<float, float>>& zSplitRange)
+int SinogramCreatorTools::getSinogramSlice(float firstX, float firstY, float firstZ, double firstTOF, float secondX, float secondY, float secondZ,
+                                           double secondTOF, const std::vector<std::pair<float, float>>& zSplitRange)
 {
   float result = calculateLORSlice(firstX, firstY, firstZ, firstTOF, secondX, secondY, secondZ, secondTOF);
   return getSplitRangeNumber(result, zSplitRange);
 }
 
-int SinogramCreatorTools::getTOFSlice(float firstTOF, float secondTOF, float sliceSize)
+unsigned int SinogramCreatorTools::getTOFSlice(double firstTOF, double secondTOF, double sliceSize)
 {
-  return std::round(((secondTOF - firstTOF) / 2.) * sliceSize);
+  double tofDiff = (secondTOF - firstTOF) / 2.;
+  return tofDiff / sliceSize;
 }

@@ -30,19 +30,19 @@
 class SinogramCreatorTools
 {
 public:
-  static unsigned int roundToNearesMultiplicity(float numberToRound, float muliFactor);
+  static unsigned int roundToNearesMultiplicity(double numberToRound, double muliFactor);
   static std::pair<int, float> getAngleAndDistance(float firstX, float firstY, float secondX, float secondY);
 
   static std::pair<int, int> getSinogramRepresentation(float firstX, float firstY, float secondX, float secondY, float fMaxReconstructionLayerRadius,
                                                        float fReconstructionDistanceAccuracy, int maxDistanceNumber, int kReconstructionMaxAngle);
 
-  static float calculateLORSlice(float x1, float y1, float z1, float t1, float x2, float y2, float z2, float t2);
+  static float calculateLORSlice(float x1, float y1, float z1, double t1, float x2, float y2, float z2, double t2);
 
   static int getSplitRangeNumber(float firstZ, float secondZ, const std::vector<std::pair<float, float>>& zSplitRange);
   static int getSplitRangeNumber(float z, const std::vector<std::pair<float, float>>& zSplitRange);
-  static int getSinogramSlice(float firstX, float firstY, float firstZ, float firstTOF, float secondX, float secondY, float secondZ, float secondTOF,
-                              const std::vector<std::pair<float, float>>& zSplitRange);
-  static int getTOFSlice(float firstTOF, float secondTOF, float sliceSize);
+  static int getSinogramSlice(float firstX, float firstY, float firstZ, double firstTOF, float secondX, float secondY, float secondZ,
+                              double secondTOF, const std::vector<std::pair<float, float>>& zSplitRange);
+  static unsigned int getTOFSlice(double firstTOF, double secondTOF, double sliceSize);
 
 private:
   SinogramCreatorTools() = delete;
