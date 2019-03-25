@@ -38,8 +38,8 @@ private:
   SinogramCreatorTOF(const SinogramCreatorTOF&) = delete;
   SinogramCreatorTOF& operator=(const SinogramCreatorTOF&) = delete;
 
-  bool analyzeHits(const float firstX, const float firstY, const float firstZ, const float firstTOF, const float secondX, const float secondY,
-                   const float secondZ, const float secondTOF);
+  bool analyzeHits(const float firstX, const float firstY, const float firstZ, const double firstTOF, const float secondX, const float secondY,
+                   const float secondZ, const double secondTOF);
   void setUpOptions();
   void generateSinogram();
 

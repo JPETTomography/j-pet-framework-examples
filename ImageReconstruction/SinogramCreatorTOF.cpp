@@ -61,8 +61,8 @@ void SinogramCreatorTOF::generateSinogram()
   float secondY = 0.f;
   float firstZ = 0.f;
   float secondZ = 0.f;
-  float firstT = 0.f;
-  float secondT = 0.f;
+  double firstT = 0.f;
+  double secondT = 0.f;
   float skip = 0.f;
   int coincidence = 0;
 
@@ -107,14 +107,16 @@ bool SinogramCreatorTOF::terminate()
     if (std::find(fReconstructSliceNumbers.begin(), fReconstructSliceNumbers.end(), sliceNumber) == fReconstructSliceNumbers.end()) continue;
 
     JPetRecoImageTools::Matrix3D filtered;
+    int tofID = 0;
     for (auto& sinogram : fSinogramDataTOF[i])
     {
       filtered[sinogram.first] = JPetRecoImageTools::FilterSinogram(f, ramLakFilter, sinogram.second);
       saveResult((filtered[sinogram.first]), fOutFileName + "sinogram_" + std::to_string(sliceNumber) + "_" + std::to_string(fZSplitRange[i].first) +
-                                                 "_" + std::to_string(fZSplitRange[i].second) + ".ppm");
+                                                 "_" + std::to_string(fZSplitRange[i].second) + "_TOFID_" + std::to_string(tofID) + ".ppm");
+      tofID++;
     }
-    JPetRecoImageTools::SparseMatrix result = JPetRecoImageTools::backProjectRealTOF(filtered, fMaxDistanceNumber, JPetRecoImageTools::nonRescale, 0,
-                                                                                     255, fReconstructionDistanceAccuracy, fTOFSliceSize, 150);
+    JPetRecoImageTools::SparseMatrix result = JPetRecoImageTools::backProjectRealTOF(filtered, kReconstructionMaxAngle, JPetRecoImageTools::rescale,
+                                                                                     0, 255, fReconstructionDistanceAccuracy, fTOFSliceSize, 150);
 
     saveResult(result, fOutFileName + "reconstruction_with_TOFFBP_" + std::to_string(sliceNumber) + "_" + std::to_string(fZSplitRange[i].first) +
                            "_" + std::to_string(fZSplitRange[i].second) + ".ppm");
@@ -125,8 +127,8 @@ bool SinogramCreatorTOF::terminate()
   return true;
 }
 
-bool SinogramCreatorTOF::analyzeHits(const float firstX, const float firstY, const float firstZ, const float firstTOF, const float secondX,
-                                     const float secondY, const float secondZ, const float secondTOF)
+bool SinogramCreatorTOF::analyzeHits(const float firstX, const float firstY, const float firstZ, const double firstTOF, const float secondX,
+                                     const float secondY, const float secondZ, const double secondTOF)
 {
   int i = SinogramCreatorTools::getSinogramSlice(firstX, firstY, firstZ, firstTOF, secondX, secondY, secondZ, secondTOF, fZSplitRange);
   if (i < 0 || i >= fZSplitNumber)
@@ -154,14 +156,15 @@ void SinogramCreatorTOF::setUpOptions()
   if (isOptionSet(opts, kOutFileNameKey)) { fOutFileName = getOptionAsString(opts, kOutFileNameKey); }
 
   if (isOptionSet(opts, kReconstructionDistanceAccuracy))
-  { fReconstructionDistanceAccuracy = getOptionAsFloat(opts, kReconstructionDistanceAccuracy); } if (isOptionSet(opts, kZSplitNumber))
-  { fZSplitNumber = getOptionAsInt(opts, kZSplitNumber); } if (isOptionSet(opts, kScintillatorLenght))
-  { fScintillatorLenght = getOptionAsFloat(opts, kScintillatorLenght); } if (isOptionSet(opts, kMaxReconstructionRadius))
-  { fMaxReconstructionLayerRadius = getOptionAsFloat(opts, kMaxReconstructionRadius); } if (isOptionSet(opts, kInputDataKey))
-  { fInputData = getOptionAsVectorOfStrings(opts, kInputDataKey); } if (isOptionSet(opts, kEnableObliqueLORRemapping))
-  { fEnableObliqueLORRemapping = getOptionAsBool(opts, kEnableObliqueLORRemapping); } if (isOptionSet(opts, kEnableTOFReconstruction))
-  { fEnableKDEReconstruction = getOptionAsBool(opts, kEnableTOFReconstruction); } if (isOptionSet(opts, kTOFSliceSize))
-  { fTOFSliceSize = getOptionAsFloat(opts, kTOFSliceSize); } fMaxValueInSinogram = new int[fZSplitNumber];
+  { fReconstructionDistanceAccuracy = getOptionAsFloat(opts, kReconstructionDistanceAccuracy); }
+  if (isOptionSet(opts, kZSplitNumber)) { fZSplitNumber = getOptionAsInt(opts, kZSplitNumber); }
+  if (isOptionSet(opts, kScintillatorLenght)) { fScintillatorLenght = getOptionAsFloat(opts, kScintillatorLenght); }
+  if (isOptionSet(opts, kMaxReconstructionRadius)) { fMaxReconstructionLayerRadius = getOptionAsFloat(opts, kMaxReconstructionRadius); }
+  if (isOptionSet(opts, kInputDataKey)) { fInputData = getOptionAsVectorOfStrings(opts, kInputDataKey); }
+  if (isOptionSet(opts, kEnableObliqueLORRemapping)) { fEnableObliqueLORRemapping = getOptionAsBool(opts, kEnableObliqueLORRemapping); }
+  if (isOptionSet(opts, kEnableTOFReconstruction)) { fEnableKDEReconstruction = getOptionAsBool(opts, kEnableTOFReconstruction); }
+  if (isOptionSet(opts, kTOFSliceSize)) { fTOFSliceSize = getOptionAsFloat(opts, kTOFSliceSize); }
+  fMaxValueInSinogram = new int[fZSplitNumber];
   fCurrentValueInSinogram = new int[fZSplitNumber];
   const float maxZRange = fScintillatorLenght / 2.f;
   float range = (2.f * maxZRange) / fZSplitNumber;
@@ -177,7 +180,8 @@ void SinogramCreatorTOF::setUpOptions()
   fMaxDistanceNumber = std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
 
   if (isOptionSet(opts, kReconstructSliceNumbers))
-  { fReconstructSliceNumbers = boost::any_cast<std::vector<int>>(getOptionValue(opts, kReconstructSliceNumbers)); } else
+  { fReconstructSliceNumbers = boost::any_cast<std::vector<int>>(getOptionValue(opts, kReconstructSliceNumbers)); }
+  else
   {
     for (int i = 0; i < fZSplitNumber; i++) { fReconstructSliceNumbers.push_back(i); }
   }
