@@ -162,8 +162,7 @@ JPetRecoImageTools::SparseMatrix JPetRecoImageTools::createSinogramWithDoubleInt
     double cos = std::cos((double)angle * angleStep);
     double sin = std::sin((double)angle * angleStep);
     for (int scanNumber = 0; scanNumber < imageSize - 1; scanNumber++)
-    { proj(scanNumber, angle) = calculateProjection2(scanNumber, cos, sin, imageSize, center, center2, matrixGet); }
-  }
+    { proj(scanNumber, angle) = calculateProjection2(scanNumber, cos, sin, imageSize, center, center2, matrixGet); } }
   rescaleFunc(proj, rescaleMinCutoff, rescaleFactor);
   return proj;
 }
@@ -258,6 +257,19 @@ JPetRecoImageTools::SparseMatrix JPetRecoImageTools::backProject(SparseMatrix& s
   return reconstructedProjection;
 }
 
+int JPetRecoImageTools::getMaxValue(const SparseMatrix& result)
+{
+  int maxValue = 0;
+  for (unsigned int i = 0; i < result.size1(); i++)
+  {
+    for (unsigned int j = 0; j < result.size2(); j++)
+    {
+      if (static_cast<int>(result(i, j)) > maxValue) maxValue = static_cast<int>(result(i, j));
+    }
+  }
+  return maxValue;
+}
+
 JPetRecoImageTools::SparseMatrix JPetRecoImageTools::backProjectRealTOF(Matrix3D& sinogram, int nAngles, RescaleFunc rescaleFunc,
                                                                         int rescaleMinCutoff, int rescaleFactor, double sinogramAccuracy,
                                                                         double tofBinSigma, double tofSigma)
@@ -271,7 +283,7 @@ JPetRecoImageTools::SparseMatrix JPetRecoImageTools::backProjectRealTOF(Matrix3D
   SparseMatrix reconstructedProjection(imageSize, imageSize);
   const double speed_of_light = 2.99792458 * sinogramAccuracy; // accuracy * ps/cm
 
-  const int max_sigma_multi = 3;
+  // const int max_sigma_multi = 3;
 
   for (int angle = 0; angle < nAngles; angle++)
   {
@@ -280,7 +292,6 @@ JPetRecoImageTools::SparseMatrix JPetRecoImageTools::backProjectRealTOF(Matrix3D
 
     for (const auto& tofBin : sinogram)
     {
-
       const double lor_tof_center = tofBin.first * tofBinSigma * speed_of_light;
       for (int x = 0; x < imageSize; x++)
       {

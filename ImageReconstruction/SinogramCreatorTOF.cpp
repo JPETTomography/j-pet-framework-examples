@@ -115,8 +115,9 @@ bool SinogramCreatorTOF::terminate()
                                                  "_" + std::to_string(fZSplitRange[i].second) + "_TOFID_" + std::to_string(tofID) + ".ppm");
       tofID++;
     }
-    JPetRecoImageTools::SparseMatrix result = JPetRecoImageTools::backProjectRealTOF(filtered, kReconstructionMaxAngle, JPetRecoImageTools::rescale,
-                                                                                     0, 255, fReconstructionDistanceAccuracy, fTOFSliceSize, 150);
+    JPetRecoImageTools::SparseMatrix result = JPetRecoImageTools::backProjectRealTOF(
+        filtered, kReconstructionMaxAngle, JPetRecoImageTools::rescale, 0, 255, fReconstructionDistanceAccuracy, fTOFSliceSize,
+        fTOFSigma * 2.99792458 * fReconstructionDistanceAccuracy); // TODO: change speed to light to const
 
     saveResult(result, fOutFileName + "reconstruction_with_TOFFBP_" + std::to_string(sliceNumber) + "_" + std::to_string(fZSplitRange[i].first) +
                            "_" + std::to_string(fZSplitRange[i].second) + ".ppm");
@@ -164,6 +165,7 @@ void SinogramCreatorTOF::setUpOptions()
   if (isOptionSet(opts, kEnableObliqueLORRemapping)) { fEnableObliqueLORRemapping = getOptionAsBool(opts, kEnableObliqueLORRemapping); }
   if (isOptionSet(opts, kEnableTOFReconstruction)) { fEnableKDEReconstruction = getOptionAsBool(opts, kEnableTOFReconstruction); }
   if (isOptionSet(opts, kTOFSliceSize)) { fTOFSliceSize = getOptionAsFloat(opts, kTOFSliceSize); }
+  if (isOptionSet(opts, kReconstructionTOFSigma)) { fTOFSigma = getOptionAsFloat(opts, kReconstructionTOFSigma); }
   fMaxValueInSinogram = new int[fZSplitNumber];
   fCurrentValueInSinogram = new int[fZSplitNumber];
   const float maxZRange = fScintillatorLenght / 2.f;

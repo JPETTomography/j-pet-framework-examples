@@ -53,10 +53,12 @@ private:
   const std::string kEnableTOFReconstruction = "SinogramCreatorTOF_EnableKDEReconstruction_bool";
   const std::string kTOFSliceSize = "SinogramCreatorTOF_TOFSliceSize_float";
   const std::string kReconstructSliceNumbers = "SinogramCreatorTOF_ReconstructSliceNumber_std::vector<int>";
+  const std::string kReconstructionTOFSigma = "SinogramCreatorTOF_ReconstructionTOFSigma_float";
 
   std::vector<std::string> fInputData{"sinogram_data.txt"};
   std::string fOutFileName = "sinogramMC";
   float fTOFSliceSize = 100.f;
+  float fTOFSigma = 150.f;
 
   JPetRecoImageTools::Matrix3D* fSinogramDataTOF = nullptr;
 };
