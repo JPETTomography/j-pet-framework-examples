@@ -1,5 +1,7 @@
 Aim
 ---
+THIS MODULE IS OBSOLETE THE NEWEST VERSION OF THE TIME CALIBRATION WITH THE REFFERENCE DETECTOR IS ITERATIVE AND CAN BE FOUND IN TimeCalibration_iter FOLDER
+
 This is an example analysis producing J-PET time calibration using data taken with a reference detector.
 
 Input Data
