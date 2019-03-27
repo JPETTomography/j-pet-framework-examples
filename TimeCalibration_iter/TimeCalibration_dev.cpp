@@ -252,7 +252,7 @@ bool TimeCalibration::terminate()
   fitAndSaveParametersToFile(fTimeConstantsCalibFileName, fTimeConstantsCalibFileNameTmp);
   if (CheckIfExit(Niter)) {
        auto newOpts = getOptions();
-       newOpts["stopIteration_bool"] = true;
+       newOpts["StopIteration_bool"] = true;
        fParams = JPetParams(newOpts, fParams.getParamManagerAsShared());
 }
   return true;
