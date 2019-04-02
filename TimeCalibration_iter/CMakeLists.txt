@@ -19,7 +19,7 @@ set(AUXILIARY_FILES
   userParams.json
   PARAMETERS.md
   README.md
-  run_calibAll.sh
+  run_calibAll_iter.sh
 )
 
 set(ROOT_SCRIPTS
