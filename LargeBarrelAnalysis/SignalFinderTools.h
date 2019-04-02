@@ -34,7 +34,7 @@ class SignalFinderTools
 {
 public:
   static const std::map<int, std::vector<JPetSigCh>> getSigChByPM(
-    const JPetTimeWindow* timeWindow, bool useCorrupts
+     const JPetTimeWindow* timeWindow, bool useCorrupts, int kPMIdRef
   );
   static std::vector<JPetRawSignal> buildAllSignals(
     const std::map<int, std::vector<JPetSigCh>>& sigChByPM, unsigned int numOfThresholds,

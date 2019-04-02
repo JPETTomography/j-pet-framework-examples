@@ -48,6 +48,8 @@ protected:
   const std::string kLeadTrailMaxTimeParamKey = "SignalFinder_LeadTrailMaxTime_float";
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kEdgeMaxTimeParamKey = "SignalFinder_EdgeMaxTime_float";
+  const std::string kPMIdRefOptName  = "TimeCalibration_PMIdRef_int";
+  int kPMIdRef = 385;
   const int kNumOfThresholds = 4;
   double fSigChLeadTrailMaxTime = 23000.0;
   double fSigChEdgeMaxTime = 5000.0;
