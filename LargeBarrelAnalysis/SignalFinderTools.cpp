@@ -20,7 +20,7 @@ using namespace std;
  * Method returns a map of vectors of JPetSigCh ordered by photomultiplier ID
  */
 const map<int, vector<JPetSigCh>> SignalFinderTools::getSigChByPM(
-  const JPetTimeWindow* timeWindow, bool useCorrupts
+     const JPetTimeWindow* timeWindow, bool useCorrupts,int kPMIdRef
 ){
   map<int, vector<JPetSigCh>> sigChsPMMap;
   if (!timeWindow) {
@@ -32,8 +32,15 @@ const map<int, vector<JPetSigCh>> SignalFinderTools::getSigChByPM(
   for (unsigned int i = 0; i < nSigChs; i++) {
     auto sigCh = dynamic_cast<const JPetSigCh&>(timeWindow->operator[](i));
     // If it is set not to use Corrupted SigChs, such flagged objects will be skipped
-    if(!useCorrupts && sigCh.getRecoFlag() == JPetSigCh::Corrupted) { continue; }
+    //Here we ignore the corrupted flag of signals from Refference detector
+    //since removing them results in double peak structures in the calibration spectra
     int pmtID = sigCh.getPM().getID();
+    if(pmtID==kPMIdRef) {
+      sigCh.setRecoFlag(JPetSigCh::Good);
+    }
+    //
+    if(!useCorrupts && sigCh.getRecoFlag() == JPetSigCh::Corrupted) { continue; }
+    //int pmtID = sigCh.getPM().getID();
     auto search = sigChsPMMap.find(pmtID);
     if (search == sigChsPMMap.end()) {
       vector<JPetSigCh> tmp;
