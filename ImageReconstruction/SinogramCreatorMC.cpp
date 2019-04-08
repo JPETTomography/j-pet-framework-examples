@@ -69,8 +69,7 @@ void SinogramCreatorMC::generateSinogram()
   {
     fSinogram = new JPetRecoImageTools::Matrix2DProj*[fZSplitNumber];
     for (int i = 0; i < fZSplitNumber; i++)
-    { fSinogram[i] = new JPetRecoImageTools::Matrix2DProj(fMaxDistanceNumber, (std::vector<double>(kReconstructionMaxAngle, 0))); }
-  }
+    { fSinogram[i] = new JPetRecoImageTools::Matrix2DProj(fMaxDistanceNumber, (std::vector<double>(kReconstructionMaxAngle, 0))); } }
 
   for (const auto& inputPath : fInputData)
   {
