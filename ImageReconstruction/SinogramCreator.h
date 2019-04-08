@@ -29,6 +29,10 @@
 #include <string>
 #include <vector>
 
+#include "JPetFilterNone.h"
+#include "JPetFilterRamLak.h"
+#include "JPetRecoImageTools.h"
+
 /**
  * @brief Module creating sinogram from data
  *
@@ -52,41 +56,73 @@
  * - "SinogramCreator_SinogramZSplitNumber_int": defines number of splits around "z" coordinate
  * - "SinogramCreator_ScintillatorLenght_float": defines scintillator lenght in "z" coordinate
  */
-class SinogramCreator : public JPetUserTask {
+class SinogramCreator : public JPetUserTask
+{
 public:
-  SinogramCreator(const char* name);
+  explicit SinogramCreator(const char* name);
   virtual ~SinogramCreator();
   virtual bool init() override;
   virtual bool exec() override;
   virtual bool terminate() override;
+
+protected:
+  bool analyzeHits(const JPetHit& firstHit, const JPetHit& secondHit);
+  bool analyzeHits(const TVector3& firstHit, const float firstTOF, const TVector3& secondHit, const float secondTOF);
+  /**
+   * @brief Function returing value of TOF rescale, to match same annihilation point after projection from 3d to 2d
+   * \param x_diff difference on x axis between hit ends
+   * \param y_diff difference on y axis between hit ends
+   * \param z_diff difference on z axis between hit ends
+   */
+  float getTOFRescaleFactor(const TVector3& posDiff) const;
+
+  /**
+   * @brief Helper function used in saving result
+   * \param result matrix to find max value
+   * \return max value of matrix
+   */
+  int getMaxValue(const JPetRecoImageTools::Matrix2DProj& result);
+  /**
+   * @brief Helper function used to save results(sinograms and reconstructed images)
+   * \param result resulted matrix to save
+   * \param outputFileName name with path where to save result
+   */
+  void saveResult(const JPetRecoImageTools::Matrix2DProj& result, const std::string& outputFileName);
+
+  JPetRecoImageTools::Matrix2DProj** fSinogram = nullptr;
+  JPetRecoImageTools::Matrix2DTOF* fTOFInformation = nullptr;
+
+  const int kReconstructionMaxAngle = 180;
+  int fZSplitNumber = 1;
+  int fMaxDistanceNumber = 0;
+  std::vector<std::pair<float, float>> fZSplitRange;
+
+  int* fMaxValueInSinogram = nullptr; // to fill later in output file
+  int* fCurrentValueInSinogram = nullptr;
+
+  float fMaxReconstructionLayerRadius = 0.f;    // in cm
+  float fReconstructionDistanceAccuracy = 0.1f; // in cm, 1mm accuracy, maximal accuracy: 0.001f
+  float fScintillatorLenght = 50.0f;            // in cm
+  bool fEnableObliqueLORRemapping = false;      // enable remapping LORs to correct sinogram slices based on TOF value
+  bool fEnableKDEReconstruction = false;        // enable saving extra TOF information
+  std::vector<int> fReconstructSliceNumbers;    // reconstruct only slices that was given in userParams
+
+  const float kEPSILON = 0.0001f;
 
 private:
   SinogramCreator(const SinogramCreator&) = delete;
   SinogramCreator& operator=(const SinogramCreator&) = delete;
 
   void setUpOptions();
-  bool checkSplitRange(float firstZ, float secondZ, int i);
-  using SinogramResultType = std::vector<std::vector<unsigned int>>;
-
-  SinogramResultType** fSinogram = nullptr;
 
   const std::string kOutFileNameKey = "SinogramCreator_OutFileName_std::string";
   const std::string kReconstructionDistanceAccuracy = "SinogramCreator_ReconstructionDistanceAccuracy_float";
   const std::string kZSplitNumber = "SinogramCreator_SinogramZSplitNumber_int";
   const std::string kScintillatorLenght = "SinogramCreator_ScintillatorLenght_float";
-
-  const int kReconstructionMaxAngle = 180;
-  const float EPSILON = 0.000001f;
-  int fZSplitNumber = 1;
-  std::vector<std::pair<float, float>> fZSplitRange;
-
+  const std::string kEnableObliqueLORRemapping = "SinogramCreator_EnableObliqueLORRemapping_bool";
+  const std::string kEnableTOFReconstrution = "SinogramCreator_EnableKDEReconstruction_bool";
+  const std::string kReconstructSliceNumbers = "SinogramCreator_ReconstructSliceNumbers_std::vector<int>";
   std::string fOutFileName = "sinogram";
-  int* fMaxValueInSinogram = nullptr; // to fill later in output file
-  int* fCurrentValueInSinogram = nullptr;
-
-  float fMaxReconstructionLayerRadius = 0.f;    // in cm
-  float fReconstructionDistanceAccuracy = 0.1f; // in cm, 1mm accuracy
-  float fScintillatorLenght = 50.0f;            // in cm
 };
 
 #endif /*  !SINOGRAMCREATOR_H */

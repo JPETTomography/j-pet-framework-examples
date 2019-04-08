@@ -31,6 +31,8 @@ set(ROOT_SCRIPTS
 set(projectBinary ${projectName}.x)
 project(${projectName} CXX)
 
+include_directories(../modules/large_barrel/JPetRecoImageTools/)
+
 file(GLOB HEADERS *.h)
 file(GLOB SOURCES *.cpp)
 file(GLOB MAIN_CPP main.cpp)
@@ -86,7 +88,7 @@ include_directories(${Framework_INCLUDE_DIRS})
 add_definitions(${Framework_DEFINITIONS})
 
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})
-target_link_libraries(${projectBinary} JPetFramework ${PNG_LIBRARIES})
+target_link_libraries(${projectBinary} JPetFramework ${PNG_LIBRARIES} JPetRecoImageTools)
 
 add_custom_target(clean_data_${projectName}
   COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root
@@ -121,17 +123,21 @@ endforeach(file_i)
 
 ################################################################################
 ## Unit tests
+set(TEST_SRC SinogramCreatorTools.cpp)
 set(TESTS_DIR ${CMAKE_CURRENT_BINARY_DIR}/tests)
 file(MAKE_DIRECTORY ${TESTS_DIR})
 foreach(test_source ${UNIT_TEST_SOURCES})
   get_filename_component(test ${test_source} NAME_WE)
-  generate_root_dictionaries(test_dictionaries SOURCES ${test_source})
   list(APPEND test_binaries ${test}.x)
-  add_executable(${test}.x EXCLUDE_FROM_ALL ${test_source} ${SOURCES_WITHOUT_MAIN}
+  add_executable(${test}.x EXCLUDE_FROM_ALL ${test_source} ${TEST_SRC}
     ${test_dictionaries}
-  )
-  set_target_properties(${test}.x PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TESTS_DIR})
-  target_link_libraries(${test}.x JPetFramework ${Boost_LIBRARIES})
+    )
+  set_target_properties(${test}.x PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TESTS_DIR} )
+  target_link_libraries(${test}.x
+    JPetFramework
+    ${Boost_LIBRARIES}
+    ${FFTW_LIBRARIES}
+    )
 endforeach()
 
 add_custom_target(tests_ImageReconstruction DEPENDS ${test_binaries})

@@ -21,8 +21,10 @@
 #include "SinogramCreatorMC.h"
 using namespace std;
 
-int main(int argc, const char* argv[]) {
-  try {
+int main(int argc, const char* argv[])
+{
+  try
+  {
     JPetManager& manager = JPetManager::getManager();
 
     manager.registerTask<FilterEvents>("FilterEvents");
@@ -35,10 +37,12 @@ int main(int argc, const char* argv[]) {
     manager.useTask("MLEMRunner", "reco.unk.evt", "");
     manager.useTask("ImageReco", "reco.unk.evt", "reco");
     manager.useTask("SinogramCreator", "reco.unk.evt", "sino");
-    manager.useTask("SinogramCreatorMC", "", "sino.mc");
+    manager.useTask("SinogramCreatorMC", "reco.unk.evt", "sino.mc");
 
     manager.run(argc, argv);
-  } catch (const std::exception& except) {
+  }
+  catch (const std::exception& except)
+  {
     std::cerr << "Unrecoverable error occured:" << except.what() << "Exiting the program!" << std::endl;
     return EXIT_FAILURE;
   }

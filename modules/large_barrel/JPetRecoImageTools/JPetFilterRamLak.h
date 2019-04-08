@@ -19,16 +19,12 @@
 
 /*! \brief Filter F(x) = |x| if x < maxThreshold otherwise 0.;
  * default maxThreshold = 0.9
-*/
-class JPetFilterRamLak : public JPetFilterInterface
-{
+ */
+class JPetFilterRamLak : public JPetFilterInterface {
 public:
   JPetFilterRamLak() {}
-  JPetFilterRamLak(double maxThreshold) { threshold = maxThreshold; }
-  virtual double operator()(double radius) override
-  {
-    return radius < threshold ? radius : 0.;
-  }
+  explicit JPetFilterRamLak(double maxThreshold) { threshold = maxThreshold; }
+  virtual double operator()(double radius) override { return radius < threshold ? radius : 0.; }
 
 private:
   double threshold = 0.9;
