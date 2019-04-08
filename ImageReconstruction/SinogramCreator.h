@@ -101,7 +101,7 @@ protected:
   int* fCurrentValueInSinogram = nullptr;
 
   float fMaxReconstructionLayerRadius = 0.f;    // in cm
-  float fReconstructionDistanceAccuracy = 0.1f; // in cm, 1mm accuracy
+  float fReconstructionDistanceAccuracy = 0.1f; // in cm, 1mm accuracy, maximal accuracy: 0.001f
   float fScintillatorLenght = 50.0f;            // in cm
   bool fEnableObliqueLORRemapping = false;      // enable remapping LORs to correct sinogram slices based on TOF value
   bool fEnableKDEReconstruction = false;        // enable saving extra TOF information
