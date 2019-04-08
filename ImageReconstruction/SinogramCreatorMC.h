@@ -24,7 +24,8 @@
 
 #include "SinogramCreator.h"
 
-class SinogramCreatorMC : public SinogramCreator {
+class SinogramCreatorMC : public SinogramCreator
+{
 public:
   explicit SinogramCreatorMC(const char* name);
   virtual ~SinogramCreatorMC();

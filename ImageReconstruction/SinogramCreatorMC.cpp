@@ -69,7 +69,8 @@ void SinogramCreatorMC::generateSinogram()
   {
     fSinogram = new JPetRecoImageTools::Matrix2DProj*[fZSplitNumber];
     for (int i = 0; i < fZSplitNumber; i++)
-    { fSinogram[i] = new JPetRecoImageTools::Matrix2DProj(fMaxDistanceNumber, (std::vector<double>(kReconstructionMaxAngle, 0))); } }
+    { fSinogram[i] = new JPetRecoImageTools::Matrix2DProj(fMaxDistanceNumber, (std::vector<double>(kReconstructionMaxAngle, 0))); }
+  }
 
   for (const auto& inputPath : fInputData)
   {
@@ -84,7 +85,10 @@ void SinogramCreatorMC::generateSinogram()
       if (coincidence != 1) // 1 == true event
         continue;
 
-      if (analyzeHits(TVector3(firstX, firstY, firstZ), firstT, TVector3(secondX, secondY, secondZ), secondT)) { numberOfCorrectHits++; }
+      if (analyzeHits(TVector3(firstX, firstY, firstZ), firstT, TVector3(secondX, secondY, secondZ), secondT))
+      {
+        numberOfCorrectHits++;
+      }
       totalHits++;
     }
   }
@@ -103,7 +107,8 @@ bool SinogramCreatorMC::terminate()
   for (int i = 0; i < fZSplitNumber; i++)
   {
     int sliceNumber = i - (fZSplitNumber / 2);
-    if (std::find(fReconstructSliceNumbers.begin(), fReconstructSliceNumbers.end(), sliceNumber) == fReconstructSliceNumbers.end()) continue;
+    if (std::find(fReconstructSliceNumbers.begin(), fReconstructSliceNumbers.end(), sliceNumber) == fReconstructSliceNumbers.end())
+      continue;
     // save sinogram
     saveResult((*fSinogram[i]), fOutFileName + "sinogram_" + std::to_string(sliceNumber) + "_" + std::to_string(fZSplitRange[i].first) + "_" +
                                     std::to_string(fZSplitRange[i].second) + ".ppm");
@@ -132,16 +137,39 @@ bool SinogramCreatorMC::terminate()
 void SinogramCreatorMC::setUpOptions()
 {
   auto opts = getOptions();
-  if (isOptionSet(opts, kOutFileNameKey)) { fOutFileName = getOptionAsString(opts, kOutFileNameKey); }
+  if (isOptionSet(opts, kOutFileNameKey))
+  {
+    fOutFileName = getOptionAsString(opts, kOutFileNameKey);
+  }
 
   if (isOptionSet(opts, kReconstructionDistanceAccuracy))
-  { fReconstructionDistanceAccuracy = getOptionAsFloat(opts, kReconstructionDistanceAccuracy); } if (isOptionSet(opts, kZSplitNumber))
-  { fZSplitNumber = getOptionAsInt(opts, kZSplitNumber); } if (isOptionSet(opts, kScintillatorLenght))
-  { fScintillatorLenght = getOptionAsFloat(opts, kScintillatorLenght); } if (isOptionSet(opts, kMaxReconstructionRadius))
-  { fMaxReconstructionLayerRadius = getOptionAsFloat(opts, kMaxReconstructionRadius); } if (isOptionSet(opts, kInputDataKey))
-  { fInputData = getOptionAsVectorOfStrings(opts, kInputDataKey); } if (isOptionSet(opts, kEnableObliqueLORRemapping))
-  { fEnableObliqueLORRemapping = getOptionAsBool(opts, kEnableObliqueLORRemapping); } if (isOptionSet(opts, kEnableTOFReconstruction))
-  { fEnableKDEReconstruction = getOptionAsBool(opts, kEnableTOFReconstruction); }
+  {
+    fReconstructionDistanceAccuracy = getOptionAsFloat(opts, kReconstructionDistanceAccuracy);
+  }
+  if (isOptionSet(opts, kZSplitNumber))
+  {
+    fZSplitNumber = getOptionAsInt(opts, kZSplitNumber);
+  }
+  if (isOptionSet(opts, kScintillatorLenght))
+  {
+    fScintillatorLenght = getOptionAsFloat(opts, kScintillatorLenght);
+  }
+  if (isOptionSet(opts, kMaxReconstructionRadius))
+  {
+    fMaxReconstructionLayerRadius = getOptionAsFloat(opts, kMaxReconstructionRadius);
+  }
+  if (isOptionSet(opts, kInputDataKey))
+  {
+    fInputData = getOptionAsVectorOfStrings(opts, kInputDataKey);
+  }
+  if (isOptionSet(opts, kEnableObliqueLORRemapping))
+  {
+    fEnableObliqueLORRemapping = getOptionAsBool(opts, kEnableObliqueLORRemapping);
+  }
+  if (isOptionSet(opts, kEnableTOFReconstruction))
+  {
+    fEnableKDEReconstruction = getOptionAsBool(opts, kEnableTOFReconstruction);
+  }
 
   fTOFInformation = new JPetRecoImageTools::Matrix2DTOF[fZSplitNumber];
   fMaxValueInSinogram = new int[fZSplitNumber];
@@ -160,7 +188,10 @@ void SinogramCreatorMC::setUpOptions()
   fMaxDistanceNumber = std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
 
   if (isOptionSet(opts, kReconstructSliceNumbers))
-  { fReconstructSliceNumbers = boost::any_cast<std::vector<int>>(getOptionValue(opts, kReconstructSliceNumbers)); } else
+  {
+    fReconstructSliceNumbers = boost::any_cast<std::vector<int>>(getOptionValue(opts, kReconstructSliceNumbers));
+  }
+  else
   {
     for (int i = 0; i < fZSplitNumber; i++) { fReconstructSliceNumbers.push_back(i); }
   }

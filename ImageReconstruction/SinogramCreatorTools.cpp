@@ -27,8 +27,10 @@ std::pair<int, float> SinogramCreatorTools::getAngleAndDistance(float firstX, fl
   static const float dxEPSILON = 0.001f;
   float dx = (secondX - firstX);
   float dy = (secondY - firstY);
-  if (std::abs(dx) < dxEPSILON) return std::make_pair(0, firstX);
-  if (std::abs(dy) < dxEPSILON) return std::make_pair(90, firstY);
+  if (std::abs(dx) < dxEPSILON)
+    return std::make_pair(0, firstX);
+  if (std::abs(dy) < dxEPSILON)
+    return std::make_pair(90, firstY);
   float slope = dy / dx;
   float perpendicularSlope = -(1 / slope);
   float d = firstY - (slope * firstX);
@@ -41,7 +43,8 @@ std::pair<int, float> SinogramCreatorTools::getAngleAndDistance(float firstX, fl
   int angleResult = std::round(angle);
   angleResult = angleResult % 180;
   float distance = std::sqrt(std::pow((x), 2) + std::pow((y), 2));
-  if (!sign) distance = -distance;
+  if (!sign)
+    distance = -distance;
   return std::make_pair(angleResult, distance);
 }
 
@@ -58,7 +61,8 @@ std::pair<int, int> SinogramCreatorTools::getSinogramRepresentation(float firstX
     std::cout << "Distance or angle > then max, distance: " << distanceRound << " (max : " << maxDistanceNumber << ")"
               << " angle: " << angleAndDistance.first << " (max: " << kReconstructionMaxAngle << ")" << std::endl;
   }
-  if (distanceRound < 0) distanceRound = 0;
+  if (distanceRound < 0)
+    distanceRound = 0;
   return std::make_pair(distanceRound, angleAndDistance.first);
 }
 
@@ -121,7 +125,8 @@ int SinogramCreatorTools::getSplitRangeNumber(float z, const std::vector<std::pa
 {
   for (unsigned int i = 0; i < zSplitRange.size(); i++)
   {
-    if (z >= zSplitRange[i].first && z <= zSplitRange[i].second) return i;
+    if (z >= zSplitRange[i].first && z <= zSplitRange[i].second)
+      return i;
   }
   return -1;
 }
