@@ -20,19 +20,16 @@
 #include <cmath>
 
 /*! \brief Filter F(x) = sin(x * pi) / pi
-*/
-class JPetFilterSheppLogan : public JPetFilterInterface
-{
+ */
+class JPetFilterSheppLogan : public JPetFilterInterface {
 public:
-  JPetFilterSheppLogan() {}
-  virtual double operator()(double radius) override
-  {
-    return std::sin(M_PI * radius) / M_PI;
-  }
+  explicit JPetFilterSheppLogan(float threshold = 1.f) : threshold(threshold) {}
+  virtual double operator()(double radius) override { return radius < threshold ? std::sin(M_PI * radius) / M_PI : 0; }
 
 private:
-  JPetFilterSheppLogan(const JPetFilterSheppLogan &) = delete;
-  JPetFilterSheppLogan &operator=(const JPetFilterSheppLogan &) = delete;
+  JPetFilterSheppLogan(const JPetFilterSheppLogan&) = delete;
+  JPetFilterSheppLogan& operator=(const JPetFilterSheppLogan&) = delete;
+  float threshold = 0.f;
 };
 
 #endif /*  !_JPetFilterSheppLogan_H_ */
