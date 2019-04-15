@@ -15,38 +15,24 @@
 
 #ifndef TOTCONVERTER_H
 #define TOTCONVERTER_H
+#include <JPetCachedFunction/JPetCachedFunction.h>
+using ToTParams = jpet_common_tools::JPetCachedFunctionParams;
+using ToTRange = jpet_common_tools::Range;
+using CachedFunction = jpet_common_tools::JPetCachedFunction1D;
 
-#include <vector>
-#include <string>
-
-struct ToTConverterParams {
-  ToTConverterParams(const std::string& formula, const std::vector<double>& params, int bins, double min, double max):
-    fFormula(formula), fParams(params), fBins(bins), fXMin(min), fXMax(max)
-  {
-  }
-  std::string fFormula;  /// Function formula that must be understood by TFormula from ROOT.
-  std::vector<double> fParams; /// Parameters used by the function described by TFormula.
-  int fBins = 100;  /// Number of times the function is sampled.
-  double fXMin = -1;
-  double fXMax = -1;
-  bool fValidFunction = false;
-};
+enum RunType { kUnknown, kRun4 };
 
 class ToTConverter
 {
 
 public:
-  explicit ToTConverter(const ToTConverterParams& params);
-
-  double operator()(double x) const;
-
-  int xValueToIndex(double x) const;
-  ToTConverterParams getParams() const;
-  std::vector<double> getValues() const;
+  ToTConverter(const ToTParams &params, ToTRange);
+  double operator()(double E) const;
 
 private:
-  ToTConverterParams fParams;  /// Parameters describing the function.
-  std::vector<double> fValues; /// Lookup table containg the function values.
-  double fStep = -1; /// Step size with which the lookup table is filled.
+  CachedFunction fFunction;
 };
+
+ToTConverter getConverter(RunType type);
+
 #endif /*  !TOTCONVERTER_H */

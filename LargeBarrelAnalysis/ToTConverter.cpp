@@ -13,56 +13,27 @@
  *  @file ToTConverter.cpp
  */
 
-#include <TFormula.h>
 #include "ToTConverter.h"
 #include "JPetLoggerInclude.h"
+using namespace jpet_common_tools;
 
-ToTConverter::ToTConverter(const ToTConverterParams& params): fParams(params)
-{
-  TFormula func("myFunc", fParams.fFormula.c_str());
-  func.SetParameters(fParams.fParams.data());
-  if (fParams.fBins <= 0) {
-    ERROR("Number of bins must be greater than 0! getX() function will not work correctly");
-    fParams.fValidFunction = false;
-    return;
+ToTConverter getConverter(RunType type) {
+  if (type == kRun4) {
+    JPetCachedFunctionParams params("[0]+ [1] * TMath::Log(x - [2]) + [3]* "
+                                    "TMath::Power(TMath::Log(x - [2]), 2)",
+                                    {-2332.32, 632.038, 606.909, -42.0769});
+    ToTConverter conv(params, Range(10000, 100., 940.));
+    return conv;
+  } else {
+    WARNING("No parameterization given");
+    JPetCachedFunctionParams params("pol0", {-1});
+    ToTConverter conv(params, Range(1, 0., 1));
+    return conv;
   }
-  double step = (fParams.fXMax - fParams.fXMin) / fParams.fBins;
-  if (step <= 0) {
-    ERROR("Check values of XMin:" + std::to_string(fParams.fXMin) << " and XMax:" << std::to_string(fParams.fXMax) << " !!! getX() function will not work correctly.");
-    fParams.fValidFunction = false;
-    return;
-  }
-  fStep = step;
-  fValues.reserve(fParams.fBins);
-  double currX = fParams.fXMin;
-  for (int i = 0; i < fParams.fBins; i++) {
-    fValues.push_back(func.Eval(currX));
-    currX = currX + step;
-  }
-  fParams.fValidFunction = true;
+
 }
 
-double ToTConverter::operator()(double x) const
-{
-  if ((x < fParams.fXMin) || (x > fParams.fXMax)) return 0;
-  int index = xValueToIndex(x);
-  assert(index >= 0);
-  assert(index < fValues.size());
-  return fValues[index];
-}
+ToTConverter::ToTConverter(const ToTParams &params, const ToTRange range)
+    : fFunction(params, range) {}
 
-int ToTConverter::xValueToIndex(double x) const
-{
-  assert(fStep > 0);
-  return x / fStep; /// maybe some floor or round needed?
-}
-
-ToTConverterParams ToTConverter::getParams() const
-{
-  return fParams;
-}
-
-std::vector<double> ToTConverter::getValues() const
-{
-  return fValues;
-}
+double ToTConverter::operator()(double E) const { return fFunction(E); }
