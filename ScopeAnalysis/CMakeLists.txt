@@ -6,7 +6,13 @@
 ##   Analysis of the scope data.
 ################################################################################
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.1...3.14)
+
+if(${CMAKE_VERSION} VERSION_LESS 3.14)
+    cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
+else()
+    cmake_policy(VERSION 3.14)
+endif()
 
 ################################################################################
 ## Project name
@@ -26,33 +32,40 @@ set(projectBinary ${projectName}.x)
 ## Project is using only C++
 project(${projectName} CXX)
 
-file(GLOB HEADERS *.h)
-file(GLOB SOURCES *.cpp)
-file(GLOB MAIN_CPP main.cpp)
+set(HEADERS ${PROJECT_SOURCE_DIR}/../modules/SDA/JPetMakePhysSignal/SDAMakePhysSignals.h
+            ${PROJECT_SOURCE_DIR}/../modules/SDA/JPetMatchHits/SDAMatchHits.h
+            ${PROJECT_SOURCE_DIR}/../modules/SDA/JPetMatchLORs/SDAMatchLORs.h
+            ${PROJECT_SOURCE_DIR}/../modules/SDA/JPetRecoAmplitudeCalc/SDARecoAmplitudeCalc.h
+            ${PROJECT_SOURCE_DIR}/../modules/SDA/JPetRecoChargeCalc/SDARecoChargeCalc.h
+            ${PROJECT_SOURCE_DIR}/../modules/SDA/JPetRecoDrawAllCharges/SDARecoDrawAllCharges.h
+            ${PROJECT_SOURCE_DIR}/../modules/SDA/JPetRecoDrawAllOffsets/SDARecoDrawAllOffsets.h
+            ${PROJECT_SOURCE_DIR}/../modules/SDA/JPetRecoOffsetCalc/SDARecoOffsetsCalc.h
+            ${PROJECT_SOURCE_DIR}/../modules/tools/JPetHitTools/FindConstant.h
+            ${PROJECT_SOURCE_DIR}/../modules/tools/JPetRecoSignalTools/JPetRecoSignalTools.h)
 
-include_directories(${Framework_INCLUDE_DIRS})
-add_definitions(${Framework_DEFINITIONS})
+set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+            ${PROJECT_SOURCE_DIR}/../modules/SDA/JPetMakePhysSignal/SDAMakePhysSignals.cpp
+            ${PROJECT_SOURCE_DIR}/../modules/SDA/JPetMatchHits/SDAMatchHits.cpp
+            ${PROJECT_SOURCE_DIR}/../modules/SDA/JPetMatchLORs/SDAMatchLORs.cpp
+            ${PROJECT_SOURCE_DIR}/../modules/SDA/JPetRecoAmplitudeCalc/SDARecoAmplitudeCalc.cpp
+            ${PROJECT_SOURCE_DIR}/../modules/SDA/JPetRecoChargeCalc/SDARecoChargeCalc.cpp
+            ${PROJECT_SOURCE_DIR}/../modules/SDA/JPetRecoDrawAllCharges/SDARecoDrawAllCharges.cpp
+            ${PROJECT_SOURCE_DIR}/../modules/SDA/JPetRecoDrawAllOffsets/SDARecoDrawAllOffsets.cpp
+            ${PROJECT_SOURCE_DIR}/../modules/SDA/JPetRecoOffsetCalc/SDARecoOffsetsCalc.cpp
+            ${PROJECT_SOURCE_DIR}/../modules/tools/JPetHitTools/FindConstant.cpp
+            ${PROJECT_SOURCE_DIR}/../modules/tools/JPetRecoSignalTools/JPetRecoSignalTools.cpp)
 
-set(ADDITIONAL_SOURCES
-  ../modules/SDA
-  ../modules/tools
-)
-
-foreach(dir ${ADDITIONAL_SOURCES})
-  file(GLOB HEADERS_TMP ${dir}/JPet*/*.h)
-  file(GLOB SOURCES_TMP ${dir}/JPet*/*.cpp)
-  file(GLOB FOLDERS_TMP ${dir})
-  list(REMOVE_ITEM FOLDERS_TMP ${HEADERS_TMP} ${SOURCES_TMP})
-  list(APPEND HEADERS ${HEADERS_TMP})
-  list(APPEND SOURCES ${SOURCES_TMP})
-  list(APPEND FOLDERS ${FOLDERS_TMP})
-endforeach()
-include_directories(${FOLDERS})
 
 ################################################################################
 ## Build definitions and libraries linking
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})
-target_link_libraries(${projectBinary} JPetFramework)
+target_link_libraries(${projectBinary} JPetFramework::JPetFramework)
+target_include_directories(${projectBinary} PRIVATE
+                           $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/../modules/SDA/>
+                           $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/../modules/tools/>)
+
+
+
 
 ## Copy the auxiliary files
 foreach(file_i ${AUXILIARY_FILES})

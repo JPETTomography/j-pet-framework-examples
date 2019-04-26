@@ -6,7 +6,14 @@
 ##   Basic data reconstruction for Large Barrel setup
 ################################################################################
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.1...3.14)
+
+if(${CMAKE_VERSION} VERSION_LESS 3.14)
+    cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
+else()
+    cmake_policy(VERSION 3.14)
+endif()
+
 
 ################################################################################
 ## Project name
@@ -22,30 +29,39 @@ set(AUXILIARY_FILES
   run.sh
 )
 
-set(ROOT_SCRIPTS
-  rootlogon.C
-  rootalias.C
-)
-
 ################################################################################
 ## Binary, header and source files definitions
 set(projectBinary ${projectName}.x)
 project(${projectName} CXX)
 
-file(GLOB HEADERS *.h)
-file(GLOB SOURCES *.cpp)
-file(GLOB MAIN_CPP main.cpp)
-file(GLOB UNIT_TEST_SOURCES *Test.cpp)
-list(REMOVE_ITEM SOURCES ${UNIT_TEST_SOURCES})
-file(GLOB SOURCES_WITHOUT_MAIN *.cpp)
-list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${UNIT_TEST_SOURCES})
-list(REMOVE_ITEM SOURCES_WITHOUT_MAIN ${MAIN_CPP})
+set(HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizer.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizerTools.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/EventFinder.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/HitFinder.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/HitFinderTools.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/SignalFinder.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/SignalFinderTools.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/SignalTransformer.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/TimeWindowCreator.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/TimeWindowCreatorTools.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/UniversalFileLoader.h)
 
-include_directories(${Framework_INCLUDE_DIRS})
-add_definitions(${Framework_DEFINITIONS})
+set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizer.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizerTools.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/EventFinder.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/HitFinder.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/HitFinderTools.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/SignalFinder.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/SignalFinderTools.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/SignalTransformer.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/TimeWindowCreator.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/TimeWindowCreatorTools.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/UniversalFileLoader.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
+
 
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})
-target_link_libraries(${projectBinary} JPetFramework)
+target_link_libraries(${projectBinary} JPetFramework::JPetFramework)
 
 add_custom_target(clean_data_largebarrelextended
   COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root)
@@ -68,15 +84,6 @@ foreach(file_i ${AUXILIARY_FILES})
   )
 endforeach(file_i)
 
-## Copy the ROOT scripts
-foreach(file_i ${ROOT_SCRIPTS})
-  list(APPEND copy_depends ${CMAKE_CURRENT_BINARY_DIR}/${file_i})
-  add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
-    POST_BUILD COMMAND ${CMAKE_COMMAND}
-    ARGS -E ${CP_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
-  )
-endforeach(file_i)
-
 ################################################################################
 ## Add new target that depends on copied files
 add_custom_target(copy_files DEPENDS ${copy_depends})
@@ -85,17 +92,8 @@ add_dependencies(${projectBinary} copy_files)
 
 ################################################################################
 ## Unit tests
-set(TESTS_DIR ${CMAKE_CURRENT_BINARY_DIR}/tests)
-file(MAKE_DIRECTORY ${TESTS_DIR})
-foreach(test_source ${UNIT_TEST_SOURCES})
-  get_filename_component(test ${test_source} NAME_WE)
-  generate_root_dictionaries(test_dictionaries SOURCES ${test_source})
-  list(APPEND test_binaries ${test}.x)
-  add_executable(${test}.x EXCLUDE_FROM_ALL ${test_source} ${SOURCES_WITHOUT_MAIN}
-    ${test_dictionaries}
-  )
-  set_target_properties(${test}.x PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TESTS_DIR})
-  target_link_libraries(${test}.x JPetFramework ${Boost_LIBRARIES})
-endforeach()
-
-add_custom_target(tests_LargeBarrel DEPENDS ${test_binaries})
+option(PACKAGE_TESTS "Build the tests" ON)
+if(PACKAGE_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()

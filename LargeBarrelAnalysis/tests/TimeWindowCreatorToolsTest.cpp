@@ -16,13 +16,12 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE TimeWindowCreatorToolsTest
 
+#include "../TimeWindowCreatorTools.h"
 #include <boost/test/unit_test.hpp>
-#include "TimeWindowCreatorTools.h"
 
 BOOST_AUTO_TEST_SUITE(TimeWindowCreatorToolsTestSuite)
 
-BOOST_AUTO_TEST_CASE(sortByValue_test)
-{
+BOOST_AUTO_TEST_CASE(sortByValue_test) {
   JPetPM pm1(1, "first");
 
   JPetSigCh sigCh1(JPetSigCh::Leading, 1.0);
@@ -62,9 +61,7 @@ BOOST_AUTO_TEST_CASE(sortByValue_test)
   BOOST_REQUIRE_EQUAL(sigChs.at(5).getValue(), 6.0);
 }
 
-
-BOOST_AUTO_TEST_CASE(generateSigCh_test)
-{
+BOOST_AUTO_TEST_CASE(generateSigCh_test) {
   JPetFEB feb(1, true, "just great", "very nice front-end board", 1, 1, 4, 4);
   JPetTRB trb(2, 555, 333);
   std::pair<float, float> hvGains(23.4, 43.2);
@@ -86,8 +83,8 @@ BOOST_AUTO_TEST_CASE(generateSigCh_test)
   timeCalibrationMap[123] = calibVec;
 
   auto sigCh = TimeWindowCreatorTools::generateSigCh(
-    50.0, channel, timeCalibrationMap, thresholdsMap, JPetSigCh::Trailing, true
-  );
+      50.0, channel, timeCalibrationMap, thresholdsMap, JPetSigCh::Trailing,
+      true);
 
   auto epsilon = 0.0001;
   BOOST_REQUIRE_EQUAL(sigCh.getType(), JPetSigCh::Trailing);
@@ -97,11 +94,10 @@ BOOST_AUTO_TEST_CASE(generateSigCh_test)
   BOOST_REQUIRE_EQUAL(sigCh.getDAQch(), 123);
   BOOST_REQUIRE_EQUAL(sigCh.getThresholdNumber(), 1);
   BOOST_REQUIRE_CLOSE(sigCh.getThreshold(), 34.5, epsilon);
-  BOOST_REQUIRE_CLOSE(sigCh.getValue(), 1000.0*(50.0+22.0), epsilon);
+  BOOST_REQUIRE_CLOSE(sigCh.getValue(), 1000.0 * (50.0 + 22.0), epsilon);
 }
 
-BOOST_AUTO_TEST_CASE(flagSigChs_test)
-{
+BOOST_AUTO_TEST_CASE(flagSigChs_test) {
   JPetSigCh sigCh01(JPetSigCh::Leading, 10.0);
   JPetSigCh sigCh02(JPetSigCh::Trailing, 11.0);
 

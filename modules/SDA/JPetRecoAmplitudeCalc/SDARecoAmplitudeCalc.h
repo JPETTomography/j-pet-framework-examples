@@ -21,18 +21,17 @@
 
 #include "JPetUserTask/JPetUserTask.h"
 
-class SDARecoAmplitudeCalc: public JPetUserTask
-{
+class SDARecoAmplitudeCalc : public JPetUserTask {
 public:
-  SDARecoAmplitudeCalc(const char* name);
+  SDARecoAmplitudeCalc(const char *name);
   virtual ~SDARecoAmplitudeCalc();
   virtual bool init() override;
   virtual bool exec() override;
   virtual bool terminate() override;
+
 private:
   int fBadSignals;
   int fCurrentEventNumber;
 };
 
 #endif
-

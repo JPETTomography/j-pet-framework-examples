@@ -6,7 +6,13 @@
 ##   Builds calibration procedure between thresholds
 ################################################################################
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.1...3.14)
+
+if(${CMAKE_VERSION} VERSION_LESS 3.14)
+    cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
+else()
+    cmake_policy(VERSION 3.14)
+endif()
 
 ################################################################################
 ## Project name
@@ -18,43 +24,36 @@ set(AUXILLIARY_FILES
   README.md
 )
 
-set(ROOT_SCRIPTS
-  rootlogon.C
-  rootalias.C
-)
-
 ################################################################################
 ## Binary, header and source files definitions
 set(projectBinary ${projectName}.x)
 project(${projectName} CXX)
-file(GLOB HEADERS *.h)
-file(GLOB SOURCES *.cpp)
 
-######################################################################
-## Use source files of modules from LargeBarrelAnalysis
 set(use_modules_from ../LargeBarrelAnalysis)
-list(APPEND HEADERS ${use_modules_from}/TimeWindowCreator.h)
-list(APPEND SOURCES ${use_modules_from}/TimeWindowCreator.cpp)
-list(APPEND HEADERS ${use_modules_from}/TimeWindowCreatorTools.h)
-list(APPEND SOURCES ${use_modules_from}/TimeWindowCreatorTools.cpp)
-list(APPEND HEADERS ${use_modules_from}/UniversalFileLoader.h)
-list(APPEND SOURCES ${use_modules_from}/UniversalFileLoader.cpp)
-list(APPEND HEADERS ${use_modules_from}/SignalFinder.h)
-list(APPEND SOURCES ${use_modules_from}/SignalFinder.cpp)
-list(APPEND HEADERS ${use_modules_from}/SignalFinderTools.h)
-list(APPEND SOURCES ${use_modules_from}/SignalFinderTools.cpp)
-list(APPEND HEADERS ${use_modules_from}/SignalTransformer.h)
-list(APPEND SOURCES ${use_modules_from}/SignalTransformer.cpp)
-list(APPEND HEADERS ${use_modules_from}/HitFinder.h)
-list(APPEND SOURCES ${use_modules_from}/HitFinder.cpp)
-list(APPEND HEADERS ${use_modules_from}/HitFinderTools.h)
-list(APPEND SOURCES ${use_modules_from}/HitFinderTools.cpp)
 
-include_directories(${Framework_INCLUDE_DIRS})
-add_definitions(${Framework_DEFINITIONS})
+set(HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/InterThresholdCalibration.h
+            ${use_modules_from}/TimeWindowCreator.h
+            ${use_modules_from}/TimeWindowCreatorTools.h
+            ${use_modules_from}/UniversalFileLoader.h
+            ${use_modules_from}/SignalFinder.h
+            ${use_modules_from}/SignalFinderTools.h
+            ${use_modules_from}/SignalTransformer.h
+            ${use_modules_from}/HitFinder.h
+            ${use_modules_from}/HitFinderTools.h)
+
+set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/InterThresholdCalibration.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+            ${use_modules_from}/TimeWindowCreator.cpp
+            ${use_modules_from}/TimeWindowCreatorTools.cpp
+            ${use_modules_from}/UniversalFileLoader.cpp
+            ${use_modules_from}/SignalFinder.cpp
+            ${use_modules_from}/SignalFinderTools.cpp
+            ${use_modules_from}/SignalTransformer.cpp
+            ${use_modules_from}/HitFinder.cpp
+            ${use_modules_from}/HitFinderTools.cpp)
 
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})
-target_link_libraries(${projectBinary} JPetFramework)
+target_link_libraries(${projectBinary} JPetFramework::JPetFramework)
 
 add_custom_target(clean_data_${projectName}
   COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root
@@ -75,15 +74,6 @@ foreach(file_i ${AUXILLIARY_FILES})
   add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
     POST_BUILD COMMAND ${CMAKE_COMMAND}
     ARGS -E ${CP_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
-  )
-endforeach(file_i)
-
-## Copy the ROOT scripts
-foreach(file_i ${ROOT_SCRIPTS})
-  list(APPEND copy_depends ${CMAKE_CURRENT_BINARY_DIR}/${file_i})
-  add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
-    POST_BUILD COMMAND ${CMAKE_COMMAND}
-    ARGS -E ${CP_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
   )
 endforeach(file_i)
 

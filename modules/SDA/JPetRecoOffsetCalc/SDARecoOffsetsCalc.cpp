@@ -13,31 +13,32 @@
  *  @file SDARecoOffsetsCalc.cpp
  */
 
+#include "JPetRecoOffsetCalc/SDARecoOffsetsCalc.h"
+#include "JPetRecoSignalTools/JPetRecoSignalTools.h"
 #include <sstream>
 #include <stdlib.h>
-#include "../../tools/JPetRecoSignalTools/JPetRecoSignalTools.h"
-#include "SDARecoOffsetsCalc.h"
 
-SDARecoOffsetsCalc::SDARecoOffsetsCalc(const char* name)
-  : JPetUserTask(name), fCurrentEventNumber(0) {}
+SDARecoOffsetsCalc::SDARecoOffsetsCalc(const char *name)
+    : JPetUserTask(name), fCurrentEventNumber(0) {}
 SDARecoOffsetsCalc::~SDARecoOffsetsCalc() {}
 
-bool SDARecoOffsetsCalc::init()
-{
+bool SDARecoOffsetsCalc::init() {
   fOutputEvents = new JPetTimeWindow("JPetRecoSignal");
   return true;
 }
 
-bool SDARecoOffsetsCalc::exec()
-{
-  if (auto oldTimeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
+bool SDARecoOffsetsCalc::exec() {
+  if (auto oldTimeWindow = dynamic_cast<const JPetTimeWindow *const>(fEvent)) {
     auto n = oldTimeWindow->getNumberOfEvents();
     for (uint i = 0; i < n; ++i) {
-      auto signal = dynamic_cast<const JPetRecoSignal&>(oldTimeWindow->operator[](i));
+      auto signal =
+          dynamic_cast<const JPetRecoSignal &>(oldTimeWindow->operator[](i));
       fOffset = JPetRecoSignalTools::calculateOffset(signal);
-      if ( fOffset == JPetRecoSignalTools::ERRORS::badOffset ) {
-        WARNING( Form("Problem with calculating fOffset for event: %d", fCurrentEventNumber) );
-        JPetRecoSignalTools::saveBadSignalIntoRootFile(signal, fBadSignals, "badOffsets.root");
+      if (fOffset == JPetRecoSignalTools::ERRORS::badOffset) {
+        WARNING(Form("Problem with calculating fOffset for event: %d",
+                     fCurrentEventNumber));
+        JPetRecoSignalTools::saveBadSignalIntoRootFile(signal, fBadSignals,
+                                                       "badOffsets.root");
         fBadSignals++;
       } else {
         auto signalWithOffset = signal;
@@ -53,11 +54,12 @@ bool SDARecoOffsetsCalc::exec()
   return true;
 }
 
-bool SDARecoOffsetsCalc::terminate()
-{
+bool SDARecoOffsetsCalc::terminate() {
   int fEventNb = fCurrentEventNumber;
   double goodPercent = (fEventNb - fBadSignals) * 100.0 / fEventNb;
-  INFO(Form("Amount of signals in input file: %d", fEventNb ) );
-  INFO(Form("Offset calculation complete \nAmount of bad signals: %d \n %f %% of data is good" , fBadSignals, goodPercent) );
+  INFO(Form("Amount of signals in input file: %d", fEventNb));
+  INFO(Form("Offset calculation complete \nAmount of bad signals: %d \n %f %% "
+            "of data is good",
+            fBadSignals, goodPercent));
   return true;
 }

@@ -6,7 +6,13 @@
 ##   Loading scope data project.
 ################################################################################
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.1...3.14)
+
+if(${CMAKE_VERSION} VERSION_LESS 3.14)
+    cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
+else()
+    cmake_policy(VERSION 3.14)
+endif()
 
 ################################################################################
 ## Project name
@@ -27,14 +33,10 @@ set(projectBinary ${projectName}.x)
 ## Project is using only C++
 project(${projectName} CXX)
 
-file(GLOB HEADERS *.h)
-file(GLOB SOURCES *.cpp)
+set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
 
-include_directories(${Framework_INCLUDE_DIRS})
-add_definitions(${Framework_DEFINITIONS})
-
-add_executable(${projectBinary} ${SOURCES} ${HEADERS})
-target_link_libraries(${projectBinary} JPetFramework)
+add_executable(${projectBinary} ${SOURCES})
+target_link_libraries(${projectBinary} JPetFramework::JPetFramework)
 
 ################################################################################
 ## Copy the auxiliary files

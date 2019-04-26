@@ -13,22 +13,22 @@
  *  @file SDARecoDrawAllCharges.cpp
  */
 
-#include <sstream>
+#include "JPetRecoDrawAllCharges/SDARecoDrawAllCharges.h"
+#include "JPetRecoSignalTools/JPetRecoSignalTools.h"
 #include <THStack.h>
 #include <TLegend.h>
-#include "../../tools/JPetRecoSignalTools/JPetRecoSignalTools.h"
-#include "SDARecoDrawAllCharges.h"
+#include <sstream>
 using namespace std;
-SDARecoDrawAllCharges::SDARecoDrawAllCharges(const char* name): JPetUserTask(name) {}
+SDARecoDrawAllCharges::SDARecoDrawAllCharges(const char *name)
+    : JPetUserTask(name) {}
 SDARecoDrawAllCharges::~SDARecoDrawAllCharges() {}
 
-bool SDARecoDrawAllCharges::init()
-{
+bool SDARecoDrawAllCharges::init() {
   DEBUG("bool SDARecoDrawAllCharges::init");
-  const auto& paramBank = getParamBank();
+  const auto &paramBank = getParamBank();
   fNumberOfPMTs = paramBank.getPMsSize();
-  for (const auto& id_pm_pair : getParamBank().getPMs() ) {
-    fIDs.push_back( id_pm_pair.first);
+  for (const auto &id_pm_pair : getParamBank().getPMs()) {
+    fIDs.push_back(id_pm_pair.first);
     std::vector<double> k;
     fCharges[id_pm_pair.first] = k;
   }
@@ -36,13 +36,13 @@ bool SDARecoDrawAllCharges::init()
   return true;
 }
 
-bool SDARecoDrawAllCharges::exec()
-{
+bool SDARecoDrawAllCharges::exec() {
   DEBUG("bool SDARecoDrawAllCharges::exec");
-  if (auto oldTimeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
+  if (auto oldTimeWindow = dynamic_cast<const JPetTimeWindow *const>(fEvent)) {
     auto n = oldTimeWindow->getNumberOfEvents();
     for (uint i = 0; i < n; ++i) {
-      auto signal = dynamic_cast<const JPetRecoSignal&>(oldTimeWindow->operator[](i));
+      auto signal =
+          dynamic_cast<const JPetRecoSignal &>(oldTimeWindow->operator[](i));
       fCharges[signal.getPM().getID()].push_back(signal.getCharge());
     }
   } else {
@@ -51,18 +51,19 @@ bool SDARecoDrawAllCharges::exec()
   return true;
 }
 
-bool SDARecoDrawAllCharges::terminate()
-{
+bool SDARecoDrawAllCharges::terminate() {
   DEBUG("bool SDARecoDrawAllCharges::terminate");
   auto c1 = new TCanvas();
-  //looking for max and min value for all offsets
+  // looking for max and min value for all offsets
   double maximum = -1.e20;
   double minimum = 1.e20;
-  for (const auto& id_vec_pair : fCharges ) {
-    double local_min = JPetRecoSignalTools::min( id_vec_pair.second );
-    double local_max = JPetRecoSignalTools::max( id_vec_pair.second );
-    if ( local_max > maximum) maximum = local_max;
-    if ( local_min < minimum) minimum = local_min;
+  for (const auto &id_vec_pair : fCharges) {
+    double local_min = JPetRecoSignalTools::min(id_vec_pair.second);
+    double local_max = JPetRecoSignalTools::max(id_vec_pair.second);
+    if (local_max > maximum)
+      maximum = local_max;
+    if (local_min < minimum)
+      minimum = local_min;
   }
 
   maximum = maximum + maximum * 0.1;
@@ -76,17 +77,18 @@ bool SDARecoDrawAllCharges::terminate()
   int bins = maximum - minimum;
   if (bins < 0)
     bins *= -1;
-  for (const auto& id_vec_pair : fCharges ) {
+  for (const auto &id_vec_pair : fCharges) {
     stringstream ss;
     ss << id_vec_pair.first;
     string title = "Charge for PMT" + ss.str();
-    fChargeHistos[id_vec_pair.first] = new TH1F( title.c_str(), title.c_str() , bins, minimum, maximum );
+    fChargeHistos[id_vec_pair.first] =
+        new TH1F(title.c_str(), title.c_str(), bins, minimum, maximum);
     for (size_t i = 0; i < fCharges[id_vec_pair.first].size(); ++i)
       fChargeHistos[id_vec_pair.first]->Fill(fCharges[id_vec_pair.first][i], 1);
   }
   auto stack = new THStack("hs1", ";Charge [pC];Counts");
   int i = 1;
-  for (const auto& id_histo_pair : fChargeHistos) {
+  for (const auto &id_histo_pair : fChargeHistos) {
     id_histo_pair.second->GetXaxis()->SetTitle("Charge [pC]");
     id_histo_pair.second->GetYaxis()->SetTitle("Counts");
     id_histo_pair.second->SetLineWidth(2);
@@ -97,11 +99,10 @@ bool SDARecoDrawAllCharges::terminate()
   auto leg = c1->BuildLegend();
   leg->Draw();
   string title = "Charges.root";
-  c1->SaveAs( title.c_str() );
+  c1->SaveAs(title.c_str());
   title = "Charges.png";
-  c1->SaveAs( title.c_str() );
+  c1->SaveAs(title.c_str());
   delete c1; // I propose to use shared_ptr here (Rundel)
   delete stack;
   return true;
 }
-
