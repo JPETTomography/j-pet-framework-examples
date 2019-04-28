@@ -415,9 +415,49 @@ JPetRecoImageTools::SparseMatrix JPetRecoImageTools::FilterSinogram(JPetRecoImag
   return ftf(sinogram, filterFunction);
 }
 
+JPetRecoImageTools::Matrix2DProj JPetRecoImageTools::doFFTW1D(Matrix2DProj& sinogram, JPetFilterInterface& filter)
+{
+  assert(sinogram.size() > 1);
+  JPetRecoImageTools::Matrix2DProj result(sinogram.size(), std::vector<double>(sinogram[0].size()));
+  int nAngles = sinogram[0].size();
+  int nScanSize = sinogram.size();
+  int inFTLength = ((double)nScanSize / 2.) + 1;
+  int outputSize = nScanSize * inFTLength;
+  int size = nScanSize;
+  double* in;
+  in = (double*)malloc(size * sizeof(double));
+  double* outDouble;
+  outDouble = (double*)malloc(size * sizeof(double));
+  fftw_complex* out;
+  out = (fftw_complex*)fftw_malloc(outputSize * sizeof(fftw_complex));
+  fftw_plan plan, invPlan;
+  plan = fftw_plan_dft_r2c_1d(nScanSize, in, out, FFTW_MEASURE);
+  invPlan = fftw_plan_dft_c2r_1d(nScanSize, out, outDouble, FFTW_MEASURE);
+  for (int x = 0; x < nAngles; x++)
+  {
+    for (int y = 0; y < nScanSize; y++) { in[y] = sinogram[y][x]; }
+    fftw_execute(plan);
+    for (int y = 0; y < inFTLength; y++)
+    {
+      double r = (double)y / (double)inFTLength;
+      double filterValue = std::abs(filter(1. - r));
+      out[y][0] *= filterValue;
+      out[y][1] *= filterValue;
+    }
+    fftw_execute(invPlan);
+    for (int y = 0; y < nScanSize; y++) { result[y][x] = outDouble[y] / size; }
+  }
+
+  fftw_free(out);
+  fftw_destroy_plan(plan);
+  fftw_destroy_plan(invPlan);
+  fftw_cleanup();
+  return result;
+}
+
 // see http://www.fftw.org/doc/One_002dDimensional-DFTs-of-Real-Data.html
 // http://www.fftw.org/fftw3.pdf
-JPetRecoImageTools::SparseMatrix JPetRecoImageTools::doFFTW(SparseMatrix& sinogram, JPetFilterInterface& filter)
+JPetRecoImageTools::SparseMatrix JPetRecoImageTools::doFFTW2D(SparseMatrix& sinogram, JPetFilterInterface& filter)
 {
   assert(sinogram.size1() > 1);
   int nScanSize = sinogram.size1();

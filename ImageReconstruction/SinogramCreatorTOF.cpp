@@ -99,7 +99,7 @@ bool SinogramCreatorTOF::terminate()
 {
 
   JPetFilterRamLak ramLakFilter(0.7);
-  JPetRecoImageTools::FourierTransformFunction f = JPetRecoImageTools::doFFTW;
+  JPetRecoImageTools::FourierTransformFunction f = JPetRecoImageTools::doFFTW1D;
 
   for (int i = 0; i < fZSplitNumber; i++)
   {

@@ -198,7 +198,13 @@ public:
    *  \param sinogram data to filter
    *  \param filter type of filter
    */
-  static SparseMatrix doFFTW(SparseMatrix& sinogram, JPetFilterInterface& filter);
+  static SparseMatrix doFFTW1D(SparseMatrix& sinogram, JPetFilterInterface& filter);
+
+  /*! \brief Fourier transform implementation using FFTW library
+   *  \param sinogram data to filter
+   *  \param filter type of filter
+   */
+  static SparseMatrix doFFTW2D(SparseMatrix& sinogram, JPetFilterInterface& filter);
 
   /*! \brief Fourier transform implementation
    *  \param sinogram data to filter
