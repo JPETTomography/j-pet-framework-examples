@@ -415,12 +415,12 @@ JPetRecoImageTools::SparseMatrix JPetRecoImageTools::FilterSinogram(JPetRecoImag
   return ftf(sinogram, filterFunction);
 }
 
-JPetRecoImageTools::Matrix2DProj JPetRecoImageTools::doFFTW1D(Matrix2DProj& sinogram, JPetFilterInterface& filter)
+JPetRecoImageTools::SparseMatrix JPetRecoImageTools::doFFTW1D(SparseMatrix& sinogram, JPetFilterInterface& filter)
 {
-  assert(sinogram.size() > 1);
-  JPetRecoImageTools::Matrix2DProj result(sinogram.size(), std::vector<double>(sinogram[0].size()));
-  int nAngles = sinogram[0].size();
-  int nScanSize = sinogram.size();
+  assert(sinogram.size1() > 1);
+  int nScanSize = sinogram.size1();
+  int nAngles = sinogram.size2();
+  JPetRecoImageTools::SparseMatrix result(nScanSize, nAngles);
   int inFTLength = ((double)nScanSize / 2.) + 1;
   int outputSize = nScanSize * inFTLength;
   int size = nScanSize;
@@ -435,7 +435,7 @@ JPetRecoImageTools::Matrix2DProj JPetRecoImageTools::doFFTW1D(Matrix2DProj& sino
   invPlan = fftw_plan_dft_c2r_1d(nScanSize, out, outDouble, FFTW_MEASURE);
   for (int x = 0; x < nAngles; x++)
   {
-    for (int y = 0; y < nScanSize; y++) { in[y] = sinogram[y][x]; }
+    for (int y = 0; y < nScanSize; y++) { in[y] = sinogram(y,x); }
     fftw_execute(plan);
     for (int y = 0; y < inFTLength; y++)
     {
@@ -445,7 +445,7 @@ JPetRecoImageTools::Matrix2DProj JPetRecoImageTools::doFFTW1D(Matrix2DProj& sino
       out[y][1] *= filterValue;
     }
     fftw_execute(invPlan);
-    for (int y = 0; y < nScanSize; y++) { result[y][x] = outDouble[y] / size; }
+    for (int y = 0; y < nScanSize; y++) { result(y,x) = outDouble[y] / size; }
   }
 
   fftw_free(out);
