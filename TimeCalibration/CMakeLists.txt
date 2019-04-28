@@ -15,7 +15,11 @@ set(projectName TimeCalibration)
 ################################################################################
 ## Auxiliary files
 set(AUXILIARY_FILES
+  conf_trb3.xml
+  userParams.json
+  PARAMETERS.md
   README.md
+  run_calibAll.sh
 )
 
 set(ROOT_SCRIPTS

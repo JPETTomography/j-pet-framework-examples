@@ -13,7 +13,7 @@ fi
 function check_sums {
 	local CUR_DIR=$PWD
 	cd $BASE_PATH
-	shasum -c $1
+	sha256sum -c $1
 	cd $CUR_DIR
 }
 CHECKSUM_COMMAND="check_sums"

@@ -25,7 +25,9 @@ using namespace std;
 bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats,
     bool saveHistos, double b2bSlotThetaDiff)
 {
-  if (event.getHits().size() < 2) { return false; }
+  if (event.getHits().size() < 2) {
+    return false;
+  }
   for (uint i = 0; i < event.getHits().size(); i++) {
     for (uint j = i + 1; j < event.getHits().size(); j++) {
       JPetHit firstHit, secondHit;
@@ -106,7 +108,9 @@ bool EventCategorizerTools::checkForPrompt(
   for (unsigned i = 0; i < event.getHits().size(); i++) {
     double tot = calculateTOT(event.getHits().at(i));
     if (tot > deexTOTCutMin && tot < deexTOTCutMax) {
-      if (saveHistos) { stats.getHisto1D("Deex_TOT_cut")->Fill(tot); }
+      if (saveHistos) {
+        stats.getHisto1D("Deex_TOT_cut")->Fill(tot);
+      }
       return true;
     }
   }
@@ -118,8 +122,11 @@ bool EventCategorizerTools::checkForPrompt(
 */
 bool EventCategorizerTools::checkForScatter(
   const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double scatterTOFTimeDiff
-) {
-  if (event.getHits().size() < 2) { return false; }
+)
+{
+  if (event.getHits().size() < 2) {
+    return false;
+  }
   for (uint i = 0; i < event.getHits().size(); i++) {
     for (uint j = i + 1; j < event.getHits().size(); j++) {
       JPetHit primaryHit, scatterHit;
@@ -160,21 +167,21 @@ double EventCategorizerTools::calculateTOT(const JPetHit& hit)
   double tot = 0.0;
 
   auto sigALead = hit.getSignalA().getRecoSignal().getRawSignal()
-    .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+                  .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
   auto sigBLead = hit.getSignalB().getRecoSignal().getRawSignal()
-    .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+                  .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
   auto sigATrail = hit.getSignalA().getRecoSignal().getRawSignal()
-    .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+                   .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
   auto sigBTrail = hit.getSignalB().getRecoSignal().getRawSignal()
-    .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+                   .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
 
-  if (sigALead.size() > 0 && sigATrail.size() > 0){
-    for (unsigned i = 0; i < sigALead.size() && i < sigATrail.size(); i++){
+  if (sigALead.size() > 0 && sigATrail.size() > 0) {
+    for (unsigned i = 0; i < sigALead.size() && i < sigATrail.size(); i++) {
       tot += (sigATrail.at(i).getValue() - sigALead.at(i).getValue());
     }
   }
-  if (sigBLead.size() > 0 && sigBTrail.size() > 0){
-    for (unsigned i = 0; i < sigBLead.size() && i < sigBTrail.size(); i++){
+  if (sigBLead.size() > 0 && sigBTrail.size() > 0) {
+    for (unsigned i = 0; i < sigBLead.size() && i < sigBTrail.size(); i++) {
       tot += (sigBTrail.at(i).getValue() - sigBLead.at(i).getValue());
     }
   }
@@ -211,44 +218,41 @@ double EventCategorizerTools::calculateScatteringAngle(const JPetHit& hit1, cons
 /**
 * Calculation point in 3D, where annihilation occured
 */
-TVector3 EventCategorizerTools::calculateAnnihilationPoint(const JPetHit& firstHit, const JPetHit& latterHit)
+TVector3 EventCategorizerTools::calculateAnnihilationPoint(const JPetHit& hitA, const JPetHit& hitB)
 {
-  double LORlength = calculateDistance(firstHit, latterHit);
+  double tof = EventCategorizerTools::calculateTOF(hitA, hitB);
+  return calculateAnnihilationPoint(hitA.getPos(), hitB.getPos(), tof);
+}
 
-  TVector3 middleOfLOR;
-  middleOfLOR.SetX((firstHit.getPosX() + latterHit.getPosX()) / 2.0);
-  middleOfLOR.SetY((firstHit.getPosY() + latterHit.getPosY()) / 2.0);
-  middleOfLOR.SetZ((firstHit.getPosZ() + latterHit.getPosZ()) / 2.0);
+TVector3 EventCategorizerTools::calculateAnnihilationPoint(const TVector3& hitA, const TVector3& hitB, double tof)
+{
+  TVector3 middleOfLOR = 0.5 * (hitA + hitB);
+  TVector3 versorOnLOR = (hitB - hitA).Unit()  ;
 
-  TVector3 versorOnLOR;
-  versorOnLOR.SetX(fabs((latterHit.getPosX() - firstHit.getPosX()) / LORlength));
-  versorOnLOR.SetY(fabs((latterHit.getPosY() - firstHit.getPosY()) / LORlength));
-  versorOnLOR.SetZ(fabs((latterHit.getPosZ() - firstHit.getPosZ()) / LORlength));
-
-  TVector3 annihilationPoint;
-  annihilationPoint.SetX(middleOfLOR.X() - versorOnLOR.X()*calculateTOF(firstHit, latterHit)*kLightVelocity_cm_ns / 1000.0);
-  annihilationPoint.SetY(middleOfLOR.Y() - versorOnLOR.Y()*calculateTOF(firstHit, latterHit)*kLightVelocity_cm_ns / 1000.0);
-  annihilationPoint.SetZ(middleOfLOR.Z() - versorOnLOR.Z()*calculateTOF(firstHit, latterHit)*kLightVelocity_cm_ns / 1000.0);
-
+  double shift = 0.5 * tof  * kLightVelocity_cm_ns / 1000.0;
+  TVector3 annihilationPoint(middleOfLOR.X() + shift * versorOnLOR.X(),
+                             middleOfLOR.Y() + shift * versorOnLOR.Y(),
+                             middleOfLOR.Z() + shift * versorOnLOR.Z());
   return annihilationPoint;
 }
 
-/**
-* Calculation Time of flight
-*/
-double EventCategorizerTools::calculateTOF(const JPetHit& firstHit, const JPetHit& latterHit)
+double EventCategorizerTools::calculateTOFByConvention(const JPetHit& hitA, const JPetHit& hitB)
 {
-  // double TOF = kUndefinedValue;
-  if (firstHit.getTime() > latterHit.getTime()) {
-    ERROR("First hit time should be earlier than later hit");
-    return kUndefinedValue;
-  }
-  auto TOF = firstHit.getTime() - latterHit.getTime();
-  if (firstHit.getBarrelSlot().getTheta() < latterHit.getBarrelSlot().getTheta()){
-    return TOF;
+  if (hitA.getBarrelSlot().getTheta() < hitB.getBarrelSlot().getTheta()) {
+    return calculateTOF(hitA, hitB);
   } else {
-    return -1.0 * TOF;
+    return calculateTOF(hitB, hitA);
   }
+}
+
+double EventCategorizerTools::calculateTOF(const JPetHit& hitA, const JPetHit& hitB)
+{
+  return EventCategorizerTools::calculateTOF(hitA.getTime(), hitB.getTime());
+}
+
+double EventCategorizerTools::calculateTOF(double time1, double time2)
+{
+  return (time1 - time2);
 }
 
 /**
@@ -275,8 +279,11 @@ double EventCategorizerTools::calculatePlaneCenterDistance(
 bool EventCategorizerTools::stream2Gamma(
   const JPetEvent& event, JPetStatistics& stats, bool saveHistos,
   double b2bSlotThetaDiff, double b2bTimeDiff
-){
-  if (event.getHits().size() < 2) { return false; }
+)
+{
+  if (event.getHits().size() < 2) {
+    return false;
+  }
   for (uint i = 0; i < event.getHits().size(); i++) {
     for (uint j = i + 1; j < event.getHits().size(); j++) {
       JPetHit firstHit, secondHit;
@@ -292,16 +299,16 @@ bool EventCategorizerTools::stream2Gamma(
       double deltaLor = (secondHit.getTime() - firstHit.getTime()) * kLightVelocity_cm_ns / 2000.;
       double theta1 = min(firstHit.getBarrelSlot().getTheta(), secondHit.getBarrelSlot().getTheta());
       double theta2 = max(firstHit.getBarrelSlot().getTheta(), secondHit.getBarrelSlot().getTheta());
-      double thetaDiff = min(theta2-theta1, 360.0-theta2+theta1);
+      double thetaDiff = min(theta2 - theta1, 360.0 - theta2 + theta1);
       if (saveHistos) {
-        stats.getHisto1D("2Gamma_TimeDiff")->Fill(timeDiff/1000.0);
+        stats.getHisto1D("2Gamma_TimeDiff")->Fill(timeDiff / 1000.0);
         stats.getHisto1D("2Gamma_DLOR")->Fill(deltaLor);
         stats.getHisto1D("2Gamma_ThetaDiff")->Fill(thetaDiff);
       }
       if (fabs(thetaDiff - 180.0) < b2bSlotThetaDiff && timeDiff < b2bTimeDiff) {
         if (saveHistos) {
           TVector3 annhilationPoint = calculateAnnihilationPoint(firstHit, secondHit);
-          stats.getHisto1D("2Annih_TimeDiff")->Fill(timeDiff/1000.0);
+          stats.getHisto1D("2Annih_TimeDiff")->Fill(timeDiff / 1000.0);
           stats.getHisto1D("2Annih_DLOR")->Fill(deltaLor);
           stats.getHisto1D("2Annih_ThetaDiff")->Fill(thetaDiff);
           stats.getHisto2D("2Annih_XY")->Fill(annhilationPoint.X(), annhilationPoint.Y());
@@ -320,8 +327,11 @@ bool EventCategorizerTools::stream2Gamma(
 bool EventCategorizerTools::stream3Gamma(
   const JPetEvent& event, JPetStatistics& stats, bool saveHistos,
   double d3SlotThetaMin, double d3TimeDiff, double d3PlaneCenterDist
-) {
-  if (event.getHits().size() < 3) { return false; }
+)
+{
+  if (event.getHits().size() < 3) {
+    return false;
+  }
   for (uint i = 0; i < event.getHits().size(); i++) {
     for (uint j = i + 1; j < event.getHits().size(); j++) {
       for (uint k = j + 1; k < event.getHits().size(); k++) {

@@ -168,7 +168,7 @@ void SignalTransformer::initialiseHistograms(){
   getStatistics().getHisto1D("raw_sigs_multi")->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
   getStatistics().getHisto1D("raw_sigs_multi")->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
   getStatistics().getHisto1D("raw_sigs_multi")->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
-  getStatistics().getHisto1D("raw_sigs_multi")->GetXaxis()->SetBinLabel(8,"THR 5 Trail");
+  getStatistics().getHisto1D("raw_sigs_multi")->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
   getStatistics().getHisto1D("raw_sigs_multi")->GetYaxis()->SetTitle("Number of SigChs");
 
   getStatistics().createHistogram(new TH1F(
@@ -182,7 +182,7 @@ void SignalTransformer::initialiseHistograms(){
   getStatistics().getHisto1D("raw_sigs_multi_good")->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
   getStatistics().getHisto1D("raw_sigs_multi_good")->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
   getStatistics().getHisto1D("raw_sigs_multi_good")->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
-  getStatistics().getHisto1D("raw_sigs_multi_good")->GetXaxis()->SetBinLabel(8,"THR 5 Trail");
+  getStatistics().getHisto1D("raw_sigs_multi_good")->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
   getStatistics().getHisto1D("raw_sigs_multi_good")->GetYaxis()->SetTitle("Number of SigChs");
 
   getStatistics().createHistogram(new TH1F(
@@ -196,7 +196,7 @@ void SignalTransformer::initialiseHistograms(){
   getStatistics().getHisto1D("raw_sigs_multi_corr")->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
   getStatistics().getHisto1D("raw_sigs_multi_corr")->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
   getStatistics().getHisto1D("raw_sigs_multi_corr")->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
-  getStatistics().getHisto1D("raw_sigs_multi_corr")->GetXaxis()->SetBinLabel(8,"THR 5 Trail");
+  getStatistics().getHisto1D("raw_sigs_multi_corr")->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
   getStatistics().getHisto1D("raw_sigs_multi_corr")->GetYaxis()->SetTitle("Number of SigChs");
 
   getStatistics().createHistogram(new TH1F(
@@ -210,7 +210,7 @@ void SignalTransformer::initialiseHistograms(){
   getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_good")->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
   getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_good")->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
   getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_good")->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
-  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_good")->GetXaxis()->SetBinLabel(8,"THR 5 Trail");
+  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_good")->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
   getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_good")->GetYaxis()->SetTitle("Number of GOOD SigChs");
 
   getStatistics().createHistogram(new TH1F(
@@ -224,6 +224,6 @@ void SignalTransformer::initialiseHistograms(){
   getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_corr")->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
   getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_corr")->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
   getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_corr")->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
-  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_corr")->GetXaxis()->SetBinLabel(8,"THR 5 Trail");
+  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_corr")->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
   getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_corr")->GetYaxis()->SetTitle("Number of CORRUPTED SigChs");
 }
