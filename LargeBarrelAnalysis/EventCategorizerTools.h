@@ -20,7 +20,7 @@
 #include <JPetEvent/JPetEvent.h>
 #include <JPetHit/JPetHit.h>
 
-static const double kLightVelocity_cm_ns = 29.9792458;
+static const double kLightVelocity_cm_ps = 29979.2458;
 static const double kUndefinedValue = 999.0;
 
 /**
