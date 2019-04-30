@@ -238,6 +238,8 @@ TVector3 EventCategorizerTools::calculateAnnihilationPoint(const TVector3& hitA,
 
 double EventCategorizerTools::calculateTOFByConvention(const JPetHit& hitA, const JPetHit& hitB)
 {
+// cppcheck-suppress unusedFunction
+
   if (hitA.getBarrelSlot().getTheta() < hitB.getBarrelSlot().getTheta()) {
     return calculateTOF(hitA, hitB);
   } else {
