@@ -65,7 +65,7 @@ bool TimeCalibration::init()
   else{
       inFile1.close();
       if(Niter==1){
-         std::fstream inFile2(fTimeConstantsCalibFileName,std::ios::in | std::ios::out | std::ios::app); 
+         std::fstream inFile2(fTimeConstantsCalibFileName,std::ios::out | std::ios::app); 
 	 inFile2 << "#Calibration started on " << JPetCommonTools::currentDateTime()<<std::endl;
 	 inFile2.close();
       }
