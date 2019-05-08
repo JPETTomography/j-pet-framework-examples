@@ -13,7 +13,7 @@
  *  @file main.cpp
  */
 
-#include "TimeCalibration_dev.h"
+#include "TimeCalibration.h"
 #include <JPetManager/JPetManager.h>
 #include "../LargeBarrelAnalysis/TimeWindowCreator.h"
 #include "../LargeBarrelAnalysis/SignalFinder.h"

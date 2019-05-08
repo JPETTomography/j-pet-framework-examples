@@ -13,7 +13,7 @@
  *  @file TimeCalibration.cpp
  */
 
-#include "TimeCalibration_dev.h"
+#include "TimeCalibration.h"
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include <JPetCommonTools/JPetCommonTools.h>
 
@@ -55,20 +55,12 @@ bool TimeCalibration::init()
   INFO("#############");
   INFO("WE ARE GOING TO CALIBRATE SCINTILLATOR " + std::to_string(fStripToCalib) + " FROM LAYER " + std::to_string(fLayerToCalib));
   fTimer.startMeasurement();
-  //
-  //Opens the tmp file and checks the Iteration number
-  //for each calibrated scintillator we open a different file for the diagnostics reason
-  //if You want to avoid this comment the next line
   fTimeConstantsCalibFileNameTmp = std::to_string(fStripToCalib) + "_" + std::to_string(fLayerToCalib)+"_"+fTimeConstantsCalibFileNameTmp;
   loadFileWithParameters(fTimeConstantsCalibFileNameTmp);
-  //
-  //Check if the file with final calibration constants exists
-  //if not creates it and writes a header
   std::ifstream inFile1;
   inFile1.open(fTimeConstantsCalibFileName);
   if (!inFile1) {
     writeHeader(fTimeConstantsCalibFileName);
-    std::cout << fTimeConstantsCalibFileName << std::endl;
   }
   else{
       inFile1.close();
@@ -79,18 +71,12 @@ bool TimeCalibration::init()
       }
   }             
   if (fIsCorrection) {
-    //User flag to be used only if we disable the calibration loading module
-    //or we work with root files after the calibration loading module.
-    //By default fIsCorrection is set to true
-    //since this is much faster than the full analysis done starting from unpacker stage.
-    //If You really want to use corrections at that level first uncomment in main.cpp the CalibLoader module
-    //and change fIsCorrection to false.
     for (int i = 1; i <= kNumberOfThresholds; i++) {
       CAtCor[i] = CAtTmp[i];
       CBtCor[i] = CBtTmp[i];
       CAlCor[i] = CAlTmp[i];
       CBlCor[i] = CBlTmp[i];
-      std::cout <<"Iteration: "<<Niter<<", CONSTANTS: "<<CAtCor[i]<<" "<<CBtCor[i]<<" " <<CAlCor[i]<<" "<<CBlCor[i]<<std::endl;
+      INFO("Iteration: "+std::to_string(Niter)+", CONSTANTS: "+std::to_string(CAtCor[i])+", "+std::to_string(CBtCor[i])+", "+std::to_string(CAlCor[i])+", "+std::to_string(CBlCor[i]));
     }
   }
   createHistograms();
@@ -115,24 +101,16 @@ bool TimeCalibration::loadOptions()
   return ok;
                                                                         });
   if (allOptionsExist) {
-//------Lower TOT cut from config (json) file
     TOTcut[0] = getOptionAsFloat(opts, kTOTCutLowOptName);
-//------ Higher TOT cut from config (json) file
     TOTcut[1] = getOptionAsFloat(opts, kTOTCutHighOptName);
-    //------ Packed strip and layer number from config (json) file
     int code = getOptionAsInt(opts, kMainStripOptName);
     fLayerToCalib = code / 100;
     fStripToCalib = code % 100;
     fIsCorrection = getOptionAsBool(opts, kLoadConstantsOptName);
-//------ Temporary file name
     fTimeConstantsCalibFileNameTmp = getOptionAsString(opts, kCalibFileTmpOptName );
-//------ Final file name(the same as the name of file for CalibLoader
     fTimeConstantsCalibFileName = getOptionAsString(opts, kCalibFileFinalOptName );
-//------ Reference photomultiplier identifier
     kPMIdRef = getOptionAsInt(opts, kPMIdRefOptName);
-//---maximum number of iterations
     NiterMax  = getOptionAsInt(opts,MaxIterNumOptName); 
-    //
     return true;
   } else {
     return false;
@@ -157,10 +135,6 @@ void TimeCalibration::createHistograms()
   for (int thr = 1; thr <= kNumberOfThresholds; thr++) {
     assert(fLayerToCalib >= 0);
     assert(fStripToCalib >= 0);
-//
-//---If the iteration is the first one we take the default setting for histograms
-//---otherwise we change the range of time difference to be +-6 sigma around the main value
-//---of the corrections determined in the previous iteration  
     if(Niter==1)
     {
      tABlmin = -20.;
@@ -184,18 +158,13 @@ void TimeCalibration::createHistograms()
       NbinReffl = 200;
       NbinRefft = 200;
     }
-    std::cout << tABlmin <<"\t" <<tABlmax<<"\t"<<tRefflMin<<"\t"<<tRefflMax<<"\t"<<tABtmin<<"\t"<<tABtmax<<"\t"<<tRefftMin<<"\t"<<tRefftMax<<std::endl;
-     //
-//histos for leading edge
+ 
     const char* histo_name_l = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffAB_leading_", fLayerToCalib, fStripToCalib, thr);
     getStatistics().createHistogram( new TH1F(histo_name_l, histo_name_l,NbinABl,tABlmin,tABlmax) );
-//hist0s for leading edge reference detector time difference
     const char* histo_name_Ref_l = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffRef_leading_", fLayerToCalib, fStripToCalib, thr);
     getStatistics().createHistogram( new TH1F(histo_name_Ref_l, histo_name_Ref_l,NbinReffl,tRefflMin,tRefflMax) );
-//histos for trailing edge
     const char* histo_name_t = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffAB_trailing_", fLayerToCalib, fStripToCalib, thr);
     getStatistics().createHistogram( new TH1F(histo_name_t, histo_name_t,NbinABt,tABtmin,tABtmax) );
-//histos for trailing edge reference detector time difference
     const char* histo_name_Ref_t = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffRef_trailing_", fLayerToCalib, fStripToCalib, thr);
     getStatistics().createHistogram( new TH1F(histo_name_Ref_t, histo_name_Ref_t,NbinRefft,tRefftMin,tRefftMax) );
   }
@@ -275,7 +244,6 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
 
   auto lead_times_B = hit.getSignalB().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading);
   auto trail_times_B = hit.getSignalB().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Trailing);
-//-----------TOT calculation for the slot hit
   float TOT_A = 0.;
   float TOT_B = 0.;
   double timeDiffTmin = 0;
@@ -294,26 +262,18 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
       TOT_B = TOT_B + trail_times_B[thr] - lead_times_B[thr];
     }
   }
-  float tTOT = (TOT_A + TOT_B) / 1000.; //total TOT in ns
-//----------cut the hit if TOT is out of accepted range (cuts given in ns)
+  float tTOT = (TOT_A + TOT_B) / 1000.;
   if (tTOT >= TOTcut[0] && tTOT <= TOTcut[1]) {
-//leading edge
     for (auto& thr_time_pair : lead_times_A) {
 
       int thr = thr_time_pair.first;
-      if ( lead_times_B.count(thr) > 0 ) { // if there was leading time at the same threshold at opposite side
-
-        double timeDiffAB_l = (lead_times_B[thr] / 1000. + CBlCor[thr]) - (lead_times_A[thr] / 1000. + CAlCor[thr]); // we want the plots in ns instead of ps
-	//std::cout << "DAB "<<timeDiffAB_l<<" "<<CBlCor[thr] <<" "<<CAlCor[thr] <<std::endl;
-        // fill the appropriate histogram
+      if ( lead_times_B.count(thr) > 0 ) {
+        double timeDiffAB_l = (lead_times_B[thr] / 1000. + CBlCor[thr]) - (lead_times_A[thr] / 1000. + CAlCor[thr]);
         const char* histo_name_l = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffAB_leading_");
         auto hist = getStatistics().getHisto1D(histo_name_l);
-        //hist->SetBit(TH1::kCanRebin);
-        //assert(hist);
         if (hist) {
           getStatistics().getHisto1D(histo_name_l)->Fill( timeDiffAB_l);
         }
-//take minimum time difference between Ref and Scint
         timeDiffLmin = 10000000000000.;
         for (unsigned int i = 0; i < refTimesL.size(); i++) {
           double timeDiffHit_L = (lead_times_A[thr] / 1000. + CAlCor[thr]) + (lead_times_B[thr] / 1000. + CBlCor[thr]);
@@ -324,8 +284,6 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
         }
         const char* histo_name_Ref_l = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffRef_leading_");
         hist = getStatistics().getHisto1D(histo_name_Ref_l );
-        //hist->SetBit(TH1::kCanRebin);
-        //assert(hist);
         if (timeDiffTmin < 100.) {
           if (hist) {
             getStatistics().getHisto1D(histo_name_Ref_l)->Fill(timeDiffLmin);
@@ -333,21 +291,16 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
         }
       }
     }
-//trailing
     for (auto& thr_time_pair : trail_times_A) {
       int thr = thr_time_pair.first;
-      if ( trail_times_B.count(thr) > 0 ) { // if there was trailing time at the same threshold at opposite side
+      if ( trail_times_B.count(thr) > 0 ) {
 
-        double timeDiffAB_t = (trail_times_B[thr] / 1000. + CBtCor[thr]) - (trail_times_A[thr] / 1000. + CAtCor[thr]); // we want the plots in ns instead of ps
-        //fill the appropriate histogram
+        double timeDiffAB_t = (trail_times_B[thr] / 1000. + CBtCor[thr]) - (trail_times_A[thr] / 1000. + CAtCor[thr]);
         const char* histo_name_t = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffAB_trailing_");
         auto hist = getStatistics().getHisto1D(histo_name_t);
-        //hist->SetBit(TH1::kCanRebin);
-        //assert(hist);
         if (hist) {
           getStatistics().getHisto1D(histo_name_t)->Fill( timeDiffAB_t);
         }
-//taken minimal time difference between Ref and Scint
         timeDiffTmin = 10000000000000.;
         for (unsigned int i = 0; i < refTimesT.size(); i++) {
           double timeDiffHit_T = (trail_times_A[thr] / 1000. + CAtCor[thr]) + (trail_times_B[thr] / 1000. + CBtCor[thr]);
@@ -358,14 +311,12 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
         }
         const char* histo_name_Ref_t = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffRef_trailing_");
         hist = getStatistics().getHisto1D(histo_name_Ref_t);
-        //hist->SetBit(TH1::kCanRebin);
-        //assert(hist);
         if (timeDiffTmin < 100.) {
           getStatistics().getHisto1D(histo_name_Ref_t)->Fill(timeDiffTmin);
         }
       }
     }
-  }//end of the if for TOT cut
+  }
 }
 
 
@@ -412,19 +363,15 @@ void TimeCalibration::loadFileWithParameters(const std::string& filename)
 
   std::ifstream inFile(filename);
   if (inFile) {
-    //if the tmp file exists read the content
-    //read the whole file to load the latest constants fitted previously. Not smart but works..
-    //getline(inFile, line); //Reads the one line started with # for each iteration
     while (getline(inFile, line)) {
       for (int i = 1; i <= kNumberOfThresholds; i++) {
-        //
+       
         inFile >> LayerToCalibTmp >> StripToCalibTmp >> SideTmpA >> thrTmp >> CAlTmp[i] >> SigCAlTmp[i] >> CAtTmp[i] >> SigCAtTmp[i]
                >> sigma_peak_Ref_lTmp[i] >> sigma_peak_Ref_tTmp[i] >> chi2_ndf_Ref_lATmp[i] >> chi2_ndf_Ref_tATmp[i]>>Niter
 	       >>peak_Ref_l[i] >> peak_err_Ref_l[i] >> peak_Ref_t[i] >> peak_err_Ref_t[i];
         inFile >> LayerToCalibTmp >> StripToCalibTmp >> SideTmpB >> thrTmp >> CBlTmp[i] >> SigCBlTmp[i] >> CBtTmp[i] >> SigCBtTmp[i]
                >> sigma_peak_lTmp[i] >> sigma_peak_tTmp[i] >> chi2_ndf_Ref_lBTmp[i] >> chi2_ndf_Ref_tBTmp[i]>>Niter
 	       >> peak_l[i] >> peak_err_l[i] >> peak_t[i] >> peak_err_t[i];
-        //
       }
     }
       for (int i = 1; i <= kNumberOfThresholds; i++) {          
@@ -477,7 +424,6 @@ void TimeCalibration::fitAndSaveParametersToFile(const std::string& filename, co
   double chi2_ndf_Ref_l[5] = {0., 0., 0., 0., 0.};
   double sigma_peak_Ref_t[5] = {0., 0., 0., 0., 0.};
   double chi2_ndf_Ref_t[5] = {0., 0., 0., 0., 0.};
-  //--these variables are changed to be arrays since we need the fit parameters for the next iteration
   double position_peak_l[5] = {0., 0., 0., 0., 0.};
   double position_peak_t[5] = {0., 0., 0., 0., 0.};
   double position_peak_error_l[5] = {0., 0., 0., 0., 0.};
@@ -488,15 +434,12 @@ void TimeCalibration::fitAndSaveParametersToFile(const std::string& filename, co
   double position_peak_error_Ref_t[5] = {0., 0., 0., 0., 0.};
 
   for (int thr = 1; thr <= kNumberOfThresholds; thr++) {
-//scintillators
-//
     const char* histo_name_l = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffAB_leading_", fLayerToCalib, fStripToCalib, thr);
     auto histoToSave_leading = getStatistics().getHisto1D(histo_name_l);
     const char* histo_name_t = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffAB_trailing_", fLayerToCalib, fStripToCalib, thr);
     auto histoToSave_trailing = getStatistics().getHisto1D(histo_name_t);
     assert(histoToSave_leading);
     assert(histoToSave_trailing);
-//reference detector
     const char* histo_name_Ref_l = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffRef_leading_", fLayerToCalib, fStripToCalib, thr);
     auto histoToSave_Ref_leading = getStatistics().getHisto1D(histo_name_Ref_l);
     assert(histoToSave_Ref_leading);
@@ -525,8 +468,6 @@ void TimeCalibration::fitAndSaveParametersToFile(const std::string& filename, co
         results_fit << "#WARNING: Statistics used to determine the trailing edge A-B calibration constant was less than " << min_ev << " events!" << endl;
         WARNING(": Statistics used to determine the trailing edge A-B calibration constant was less than" + std::to_string(min_ev) + " events!");
       }
-
-//fit scintilators
       int highestBin_l = histoToSave_leading->GetBinCenter(histoToSave_leading->GetMaximumBin());
       assert(histoToSave_leading->Integral() > 0);
       histoToSave_leading->Fit("gaus", "", "", highestBin_l - 20, highestBin_l + 20);
@@ -550,7 +491,6 @@ void TimeCalibration::fitAndSaveParametersToFile(const std::string& filename, co
       sigma_peak_t[thr] = fit_t->GetParameter(2);
       chi2_ndf_t[thr] = fit_t->GetChisquare() / fit_t->GetNDF();
 
-//fit reference detector
       int highestBin_Ref_l = histoToSave_Ref_leading->GetBinCenter(histoToSave_Ref_leading->GetMaximumBin());
       assert( histoToSave_Ref_leading->Integral() > 0);
       histoToSave_Ref_leading->Fit("gaus", "", "", highestBin_Ref_l - 5, highestBin_Ref_l + 5); //range for fit
@@ -583,18 +523,10 @@ void TimeCalibration::fitAndSaveParametersToFile(const std::string& filename, co
         chi2_ndf_Ref_t[thr] = -1;
       }
 
-//writing to apropriate format (txt file)
-//We assume that all the corrections will be ADDED to the times of channels
-//side A
-//offset = -C2 (ref. det) + C1/2 (AB calib)
-
       CAl[thr] = -(position_peak_Ref_l[thr]) + position_peak_l[thr] / 2.;
       SigCAl[thr] = sqrt(pow(position_peak_error_Ref_l[thr] / 2., 2) + pow(position_peak_error_l[thr], 2));
       CAt[thr] = -(position_peak_Ref_t[thr]) + position_peak_t[thr] / 2.;
       SigCAt[thr] = sqrt(pow(position_peak_error_Ref_t[thr] / 2., 2) + pow(position_peak_error_t[thr], 2));
-
-//side B
-//offset = -C2 (ref. det) -C1/2 (AB calib)
       CBl[thr] = -(position_peak_Ref_l[thr] - Cl[fLayerToCalib - 1]) - position_peak_l[thr] / 2.;
       SigCBl[thr] = SigCAl[thr];
       CBt[thr] = -(position_peak_Ref_t[thr] - Cl[fLayerToCalib - 1]) - position_peak_t[thr] / 2.;
@@ -604,13 +536,6 @@ void TimeCalibration::fitAndSaveParametersToFile(const std::string& filename, co
             " IS EMPTY, WE CANNOT CALIBRATE IT");
     }
   }
-  //
-  //if (CheckIfExitIter(CAl, SigCAl, CBl, SigCBl, CAt, SigCAt, CBt, SigCBt, Niter, NiterMax)) {
-  //if the difference between old and new constant are smaller than their uncertanities we end iterations and calibration
-  //and correct the final results for different layers (layers synchronization)
-  //C2 = C2 - Cl(warstwa-1) (we correct the correction with respect to ref. detector only for L2 and L3
-  //Moreover, new offsets need to be added to the ones determined in the previous iteration
-  //
  if(CheckIfExit(Niter)){
   for (int thr = 1; thr <= kNumberOfThresholds; thr++) {
     CAl[thr] = CAl[thr] + CAlTmp[thr]  - Cl[fLayerToCalib - 1];
@@ -685,14 +610,14 @@ void TimeCalibration::fitAndSaveParametersToFile(const std::string& filename, co
 		   << position_peak_l[thr]<<"\t"<< position_peak_error_l[thr]<<"\t" <<position_peak_t[thr]<<"\t"<< position_peak_error_t[thr]
 		   <<std::endl;
   }
-   }//end of else of Niter condition
+   }
   results_fit.close();
   results_fitTmp.close();
 }
 
 void TimeCalibration::writeHeader(const std::string& filename)
 {
-  std::ofstream output(filename);//, std::ios::in);
+  std::ofstream output(filename);
   output << "# Time calibration constants" << std::endl;
   output << "# For side A we apply only the correction from refference detector, for side B the correction is equal to the sum of the A-B" << std::endl;
   output << "# correction and offset with respect to the refference detector. For side A we report the sigmas and chi2/ndf for fit to the time difference spectra with refference detector" << std::endl;
