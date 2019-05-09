@@ -245,21 +245,24 @@ int SignalFinderTools::findTrailingSigCh(
  */
 SignalFinderTools::ThresholdOrderings SignalFinderTools::findThresholdOrders(const JPetParamBank& bank){
 
+  using ThresholdValues = std::array<float, kNumberOfThresholds>;
+  using PMid = unsigned int;
+  
   ThresholdOrderings orderings;
-  std::map<unsigned int, std::array<float, kNumberOfThresholds> > thr_values;
+  std::map<PMid, ThresholdValues> thr_values_per_pm;
   
   for(auto& tc: bank.getTOMBChannels()){
-    unsigned int id = tc.second->getPM().getID();
+    PMid pm_id = tc.second->getPM().getID();
 
     if(tc.second->getLocalChannelNumber() >= kNumberOfThresholds){
       ERROR("Threshold sorting is meant to work with 4 thresholds only!");
       return orderings;
     }
     
-    thr_values[id][tc.second->getLocalChannelNumber()-1] = tc.second->getThreshold();
+    thr_values_per_pm[pm_id][tc.second->getLocalChannelNumber()-1] = tc.second->getThreshold();
   }
 
-  for(auto& pm: thr_values){
+  for(auto& pm: thr_values_per_pm){
 
     Permutation indices = kIdentity;
     auto& values = pm.second;
