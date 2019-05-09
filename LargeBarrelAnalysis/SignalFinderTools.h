@@ -65,7 +65,7 @@ public:
     const JPetSigCh& leadingSigCh,double sigChLeadTrailMaxTime,
     const std::vector<JPetSigCh>& trailingSigChVec
   );
-  static ThresholdOrderings findThresholdOrdersx(const JPetParamBank& bank);
+  static ThresholdOrderings findThresholdOrders(const JPetParamBank& bank);
   static void permuteThresholdsByValue(const ThresholdValues& threshold_values, Permutation& new_ordering);
   
 };
