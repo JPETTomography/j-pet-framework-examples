@@ -75,7 +75,7 @@ bool SignalFinder::init()
   }
   if (fOrderThresholdsByValue){
     INFO("Threshold reordering was requested. Thresholds will be ordered by their values according to provided detector setup file.");
-    fThreshldOrderings = SignalFinderTools::findThresholdOrders(getParamBank());
+    fThresholdOrderings = SignalFinderTools::findThresholdOrders(getParamBank());
   }
     
   // Creating control histograms
@@ -92,7 +92,7 @@ bool SignalFinder::exec()
     // Building signals
     auto allSignals = SignalFinderTools::buildAllSignals(
       sigChByPM, fSigChEdgeMaxTime, fSigChLeadTrailMaxTime,
-      getStatistics(), fSaveControlHistos, fThreshldOrderings
+      getStatistics(), fSaveControlHistos, fThresholdOrderings
     );
     // Saving method invocation
     saveRawSignals(allSignals);
