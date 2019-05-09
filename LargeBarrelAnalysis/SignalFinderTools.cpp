@@ -244,9 +244,6 @@ int SignalFinderTools::findTrailingSigCh(
  * with PMT ID numbers as keys and 4-element permutations as values.
  */
 SignalFinderTools::ThresholdOrderings SignalFinderTools::findThresholdOrders(const JPetParamBank& bank){
-
-  using ThresholdValues = std::array<float, kNumberOfThresholds>;
-  using PMid = unsigned int;
   
   ThresholdOrderings orderings;
   std::map<PMid, ThresholdValues> thr_values_per_pm;
@@ -263,20 +260,32 @@ SignalFinderTools::ThresholdOrderings SignalFinderTools::findThresholdOrders(con
   }
 
   for(auto& pm: thr_values_per_pm){
-
-    Permutation indices = kIdentity;
-    auto& values = pm.second;
-    
-    sort(indices.begin(), indices.end(),
-         [&](const int& a, const int& b) {
-           return (values.at(a) < values.at(b));
-         }
-         );
-
-    for(unsigned short i=0;i<kNumberOfThresholds;++i){
-      orderings[pm.first][indices[i]] = i;
-    }
+    permuteThresholdsByValue(pm.second, orderings[pm.first]);
   }
 
   return orderings;
+}
+
+/**
+ * Helper method for findThresholdOrders which constructs a single permutation
+ * based on the threshold values on a single PMT
+ *
+ * @param threshold_values array of floating-point values of voltage thresholds set on
+ * front-end thresholds 1-4
+ * @param new_ordering a permutation of thresholds 1-4 such that new_ordering[k] indicates the place of 
+ * threshold no. k (k in 0,1,2,3) in an array of thresholds sorted by voltage value
+ */
+void SignalFinderTools::permuteThresholdsByValue(const ThresholdValues& threshold_values, Permutation& new_ordering){
+
+  Permutation indices = kIdentity;
+
+  sort(indices.begin(), indices.end(),
+       [&](const int& a, const int& b) {
+         return (threshold_values.at(a) < threshold_values.at(b));
+       }
+       );
+  
+  for(unsigned short i=0;i<kNumberOfThresholds;++i){
+    new_ordering[indices[i]] = i;
+  }
 }

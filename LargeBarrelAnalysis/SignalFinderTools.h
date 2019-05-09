@@ -36,8 +36,10 @@ class SignalFinderTools
 {
 public:
   static const unsigned short kNumberOfThresholds = 4;
-  typedef std::array<unsigned short, SignalFinderTools::kNumberOfThresholds> Permutation;
-  typedef std::map<unsigned int, Permutation> ThresholdOrderings;
+  using ThresholdValues = std::array<float, kNumberOfThresholds>;
+  using PMid = unsigned int;
+  using Permutation = std::array<unsigned int, SignalFinderTools::kNumberOfThresholds>;
+  using ThresholdOrderings = std::map<PMid, Permutation>;
   static const Permutation kIdentity;
 
   static const std::map<int, std::vector<JPetSigCh>> getSigChByPM(
@@ -63,7 +65,8 @@ public:
     const JPetSigCh& leadingSigCh,double sigChLeadTrailMaxTime,
     const std::vector<JPetSigCh>& trailingSigChVec
   );
-  static ThresholdOrderings findThresholdOrders(const JPetParamBank& bank);
+  static ThresholdOrderings findThresholdOrdersx(const JPetParamBank& bank);
+  static void permuteThresholdsByValue(const ThresholdValues& threshold_values, Permutation& new_ordering);
   
 };
 #endif /* !SIGNALFINDERTOOLS_H */
