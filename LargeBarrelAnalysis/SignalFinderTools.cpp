@@ -251,7 +251,7 @@ SignalFinderTools::ThresholdOrderings SignalFinderTools::findThresholdOrders(con
   for(auto& tc: bank.getTOMBChannels()){
     PMid pm_id = tc.second->getPM().getID();
 
-    if(tc.second->getLocalChannelNumber() >= kNumberOfThresholds){
+    if(tc.second->getLocalChannelNumber() > kNumberOfThresholds){
       ERROR("Threshold sorting is meant to work with 4 thresholds only!");
       return orderings;
     }
