@@ -39,10 +39,9 @@ set(findFFTW_DIR ${CMAKE_CURRENT_BINARY_DIR}/findFFTW-src)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${findFFTW_DIR}")
 
 find_package(FFTW REQUIRED COMPONENTS DOUBLE_LIB)
-include_directories(${FFTW_INCLUDE_DIRS})
-
 
 add_library(${projectName} SHARED ${SOURCES} ${HEADERS})
 target_include_directories(${projectName} PUBLIC
-                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/JPetRecoImageTools>)
+                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/JPetRecoImageTools>
+                           $<BUILD_INTERFACE:${FFTW_INCLUDE_DIRS})
 target_link_libraries(${projectName} PRIVATE JPetFramework::JPetFramework ${FFTW_LIBRARIES})
