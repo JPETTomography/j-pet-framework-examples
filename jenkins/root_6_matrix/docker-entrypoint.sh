@@ -6,11 +6,30 @@ function executeCommand {
     echo "Exit code[" $@ "]: $rc"
 }
 
-executeCommand "mkdir -p build"
-executeCommand "cd build"
+
 executeCommand "export CMAKE_LIBRARY_PATH=$CMAKE_LIBRARY_PATH:/framework-dependencies/lib"
 executeCommand "export CMAKE_INCLUDE_PATH=$CMAKE_INCLUDE_PATH:/framework-dependencies/include"
 executeCommand "source /root-system/bin/thisroot.sh"
+executeCommand "rm -rf Unpacker2 || true"
+executeCommand "git clone --single-branch --branch cmake https://github.com/grey277/Unpacker2.git"
+executeCommand "mkdir -p Unpacker2/build"
+executeCommand "cd Unpacker2/build"
+executeCommand "cmake .."
+executeCommand "cmake --build ."
+executeCommand "sudo make install"
+executeCommand "cd ../.."
+
+executeCommand "rm -rf j-pet-framework || true"
+executeCommand "git clone --single-branch --branch cmake https://github.com/grey277/j-pet-framework.git"
+executeCommand "mkdir -p j-pet-framework/build"
+executeCommand "cd j-pet-framework/build"
+executeCommand "cmake .."
+executeCommand "cmake --build ."
+executeCommand "sudo make install"
+executeCommand "cd ../.."
+
+executeCommand "mkdir -p build"
+executeCommand "cd build"
 executeCommand "cmake .."
 executeCommand "make"
 executeCommand "cd LargeBarrelAnalysis"
