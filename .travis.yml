@@ -18,6 +18,26 @@ install:
   - sudo apt-get install -y root-system
   - sudo apt-get install -y libfftw3-3 libfftw3-dev
 script:
+    - wget https://root.cern/download/root_v6.12.06.Linux-ubuntu16-x86_64-gcc5.4.tar.gz
+    - tar xzf root_v6.12.06.Linux-ubuntu16-x86_64-gcc5.4.tar.gz
+    - source root/bin/thisroot.sh
+
+    - "git clone --single-branch --branch cmake https://github.com/grey277/Unpacker2.git"
+    - "mkdir -p Unpacker2/build"
+    - "cd Unpacker2/build"
+    - "cmake .."
+    - "cmake --build ."
+    - "sudo make install"
+    - "cd ../.."
+
+    - "git clone --single-branch --branch cmake https://github.com/grey277/j-pet-framework.git"
+    - "mkdir -p j-pet-framework/build"
+    - "cd j-pet-framework/build"
+    - "cmake .."
+    - "cmake --build ."
+    - "sudo make install"
+    - "cd ../.."
+
     - mkdir build
     - cd build
     - cmake ..
@@ -32,7 +52,3 @@ script:
     - sed -i 's/manager.useTask("TimeWindowCreator", "hld", "tslot.calib");//' ../../LargeBarrelAnalysis/main.cpp
     - make
     - ./LargeBarrelAnalysis.x -t root -f dabc_17025151847.tslot.calib.root   -r 0 100
-notifications:
-  email:
-    - aleksander.gajos@uj.edu.pl
-    - wojciech.krzemien@ncbj.gov.pl
