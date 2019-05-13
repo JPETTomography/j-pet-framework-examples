@@ -19,6 +19,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 set(UNIT_TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/SinogramCreatorToolsTest.cpp)
+set(TEST_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/../SinogramCreatorTools.cpp)
 
 #Configure Boost
 set(Boost_USE_STATIC_LIBS OFF)
@@ -35,22 +36,14 @@ if(NOT TARGET Boost::unit_test_framework)
 endif()
 #End of configuration of Boost
 
-macro(package_add_test TESTNAME)
-    add_executable(${TESTNAME}.x ${ARGN})
-    target_compile_options(${TESTNAME}.x PRIVATE -Wunused-parameter -Wall)
-    target_link_libraries(${TESTNAME}.x JPetFramework::JPetFramework Boost::unit_test_framework)
-    add_test(NAME ${TESTNAME}.x COMMAND ${TESTNAME}.x "--log_level=ERROR --log_format=XML --log_sink=${TESTNAME}.xml --raport_level=no")
-    set_target_properties(${TESTNAME}.x PROPERTIES FOLDER tests)
-    add_dependencies(${TESTNAME}.x link_target_imagereconstruction)
-endmacro()
-
-
 ## Add custom target to create symlink from test dir to unitTestData
 add_custom_target(link_target_imagereconstruction ALL
                   COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/../../unitTestData ${CMAKE_CURRENT_BINARY_DIR}/unitTestData)
 
-
-foreach(test_source IN ITEMS ${UNIT_TEST_SOURCES})
-    get_filename_component(test ${test_source} NAME_WE)
-    package_add_test(${test} ${test_source})
-endforeach()
+get_filename_component(TESTNAME ${UNIT_TEST_SOURCES} NAME_WE)
+add_executable(${TESTNAME}.x ${UNIT_TEST_SOURCES} ${TEST_SOURCE})
+target_compile_options(${TESTNAME}.x PRIVATE -Wunused-parameter -Wall)
+target_link_libraries(${TESTNAME}.x JPetFramework::JPetFramework Boost::unit_test_framework)
+add_test(NAME ${TESTNAME}.x COMMAND ${TESTNAME}.x "--log_level=ERROR --log_format=XML --log_sink=${TESTNAME}.xml --raport_level=no")
+set_target_properties(${TESTNAME}.x PROPERTIES FOLDER tests)
+add_dependencies(${TESTNAME}.x link_target_imagereconstruction)
