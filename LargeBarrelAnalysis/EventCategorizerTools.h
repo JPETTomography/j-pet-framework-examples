@@ -20,7 +20,7 @@
 #include <JPetEvent/JPetEvent.h>
 #include <JPetHit/JPetHit.h>
 
-static const double kLightVelocity_cm_ns = 29.9792458;
+static const double kLightVelocity_cm_ps = 29979.2458;
 static const double kUndefinedValue = 999.0;
 
 /**
@@ -48,6 +48,8 @@ public:
   /// Tof calculated with the ordered hits with respect to scintillator number.
   /// The first one will be hit with smaller theta angle.
   /// See also: http://koza.if.uj.edu.pl/petwiki/index.php/Coordinate_system_in_Big_Barrel
+
+  // cppcheck-suppress unusedFunction
   static double calculateTOFByConvention(const JPetHit& hitA, const JPetHit& hitB);
   static TVector3 calculateAnnihilationPoint(const JPetHit& hitA, const JPetHit& hitB);
   static TVector3 calculateAnnihilationPoint(const TVector3& hitA, const TVector3& hitB, double tof);

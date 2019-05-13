@@ -21,7 +21,6 @@
 
 /// Accuracy for BOOST_REQUIRE_CLOSE comparisons
 const double kEpsilon = 0.01;
-const double kLightVelocity_cm_ps = kLightVelocity_cm_ns / 1000.;
 
 BOOST_AUTO_TEST_SUITE(CategoryCheckSuite)
 

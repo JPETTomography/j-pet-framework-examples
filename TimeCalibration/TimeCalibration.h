@@ -43,9 +43,9 @@ protected:
         const std::string fCalibRunKey = "TimeCalibRunNumber";
         int CalibRun = 1; //Number of calibration run associated with Acquisition Campaign  
 	float TOTcut[2] = {-300000000.,300000000.}; //TOT cuts for slot hits (sum of TOTs from both sides)
-	const std::string fTOTcutLow  = "TOTcutLow";
-	const std::string fTOTcutHigh  = "TOTcutHigh";
-	const std::string kMainStripKey = "TimeWindowCreator_MainStrip";
+	const std::string fTOTcutLow  = "TimeCalibration_TOTCutLow_float";
+	const std::string fTOTcutHigh  = "TimeCalibration_TOTCutHigh_float";
+	const std::string kMainStripKey = "TimeWindowCreator_MainStrip_int";
 	double frac_err=0.3;  //maximal fractional uncertainty of parameters accepted by calibration
 	int min_ev = 100;     //minimal number of events for a distribution to be fitted                         
 	int LayerToCalib = 0; //Layer of calibrated slot
