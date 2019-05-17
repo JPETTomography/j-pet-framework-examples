@@ -100,7 +100,8 @@ bool SinogramCreator::analyzeHits(const TVector3& firstHit, const float firstTOF
   const auto sinogramResult =
       SinogramCreatorTools::getSinogramRepresentation(firstHit.X(), firstHit.Y(), secondHit.X(), secondHit.Y(), fMaxReconstructionLayerRadius,
                                                       fReconstructionDistanceAccuracy, fMaxDistanceNumber, kReconstructionMaxAngle);
-
+  if (sinogramResult.first >= fMaxDistanceNumber || sinogramResult.second >= kReconstructionMaxAngle)
+    return false;
   (*fSinogram[i])(sinogramResult.first, sinogramResult.second) += 1.;
   fCurrentValueInSinogram[i] = (*fSinogram[i])(sinogramResult.first, sinogramResult.second);
   if (fCurrentValueInSinogram[i] > fMaxValueInSinogram[i])

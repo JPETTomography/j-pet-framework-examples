@@ -69,7 +69,10 @@ void SinogramCreatorTOF::generateSinogram()
   int numberOfCorrectHits = 0;
   int totalHits = 1; // to make sure that we do not divide by 0
 
-  if (fSinogramDataTOF == nullptr) { fSinogramDataTOF = new JPetRecoImageTools::Matrix3D[fZSplitNumber]; }
+  if (fSinogramDataTOF == nullptr)
+  {
+    fSinogramDataTOF = new JPetRecoImageTools::Matrix3D[fZSplitNumber];
+  }
 
   for (const auto& inputPath : fInputData)
   {
@@ -83,7 +86,10 @@ void SinogramCreatorTOF::generateSinogram()
       if (coincidence != 1) // 1 == true event
         continue;
 
-      if (analyzeHits(firstX, firstY, firstZ, firstT, secondX, secondY, secondZ, secondT)) { numberOfCorrectHits++; }
+      if (analyzeHits(firstX, firstY, firstZ, firstT, secondX, secondY, secondZ, secondT))
+      {
+        numberOfCorrectHits++;
+      }
       totalHits++;
     }
   }
@@ -98,13 +104,14 @@ bool SinogramCreatorTOF::exec() { return true; }
 bool SinogramCreatorTOF::terminate()
 {
 
-  JPetFilterRamLak ramLakFilter(0.7);
+  JPetFilterRamLak ramLakFilter(fRamLakCutOffValue);
   JPetRecoImageTools::FourierTransformFunction f = JPetRecoImageTools::doFFTW1D;
 
   for (int i = 0; i < fZSplitNumber; i++)
   {
     int sliceNumber = i - (fZSplitNumber / 2);
-    if (std::find(fReconstructSliceNumbers.begin(), fReconstructSliceNumbers.end(), sliceNumber) == fReconstructSliceNumbers.end()) continue;
+    if (std::find(fReconstructSliceNumbers.begin(), fReconstructSliceNumbers.end(), sliceNumber) == fReconstructSliceNumbers.end())
+      continue;
 
     JPetRecoImageTools::Matrix3D filtered;
     int tofID = 0;
@@ -131,7 +138,15 @@ bool SinogramCreatorTOF::terminate()
 bool SinogramCreatorTOF::analyzeHits(const float firstX, const float firstY, const float firstZ, const double firstTOF, const float secondX,
                                      const float secondY, const float secondZ, const double secondTOF)
 {
-  int i = SinogramCreatorTools::getSinogramSlice(firstX, firstY, firstZ, firstTOF, secondX, secondY, secondZ, secondTOF, fZSplitRange);
+  int i = -1;
+  if (!fEnableObliqueLORRemapping)
+  {
+    i = SinogramCreatorTools::getSplitRangeNumber(firstZ, secondZ, fZSplitRange);
+  }
+  else
+  {
+    i = SinogramCreatorTools::getSinogramSlice(firstX, firstY, firstZ, firstTOF, secondX, secondY, secondZ, secondTOF, fZSplitRange);
+  }
   if (i < 0 || i >= fZSplitNumber)
   {
     WARNING("WARNING, reconstructed sinogram slice is out of range: " + std::to_string(i) + " max slice number: " + std::to_string(fZSplitNumber));
@@ -141,7 +156,12 @@ bool SinogramCreatorTOF::analyzeHits(const float firstX, const float firstY, con
       firstX, firstY, secondX, secondY, fMaxReconstructionLayerRadius, fReconstructionDistanceAccuracy, fMaxDistanceNumber, kReconstructionMaxAngle);
   const auto TOFSlice = SinogramCreatorTools::getTOFSlice(firstTOF, secondTOF, fTOFSliceSize);
   const auto data = fSinogramDataTOF[i].find(TOFSlice);
-  if (data != fSinogramDataTOF[i].end()) { data->second(sinogramResult.first, sinogramResult.second) += 1.; }
+  if (sinogramResult.first >= fMaxDistanceNumber || sinogramResult.second >= kReconstructionMaxAngle)
+    return false;
+  if (data != fSinogramDataTOF[i].end())
+  {
+    data->second(sinogramResult.first, sinogramResult.second) += 1.;
+  }
   else
   {
     fSinogramDataTOF[i].insert(std::make_pair(
@@ -154,18 +174,51 @@ bool SinogramCreatorTOF::analyzeHits(const float firstX, const float firstY, con
 void SinogramCreatorTOF::setUpOptions()
 {
   auto opts = getOptions();
-  if (isOptionSet(opts, kOutFileNameKey)) { fOutFileName = getOptionAsString(opts, kOutFileNameKey); }
+  if (isOptionSet(opts, kOutFileNameKey))
+  {
+    fOutFileName = getOptionAsString(opts, kOutFileNameKey);
+  }
 
   if (isOptionSet(opts, kReconstructionDistanceAccuracy))
-  { fReconstructionDistanceAccuracy = getOptionAsFloat(opts, kReconstructionDistanceAccuracy); }
-  if (isOptionSet(opts, kZSplitNumber)) { fZSplitNumber = getOptionAsInt(opts, kZSplitNumber); }
-  if (isOptionSet(opts, kScintillatorLenght)) { fScintillatorLenght = getOptionAsFloat(opts, kScintillatorLenght); }
-  if (isOptionSet(opts, kMaxReconstructionRadius)) { fMaxReconstructionLayerRadius = getOptionAsFloat(opts, kMaxReconstructionRadius); }
-  if (isOptionSet(opts, kInputDataKey)) { fInputData = getOptionAsVectorOfStrings(opts, kInputDataKey); }
-  if (isOptionSet(opts, kEnableObliqueLORRemapping)) { fEnableObliqueLORRemapping = getOptionAsBool(opts, kEnableObliqueLORRemapping); }
-  if (isOptionSet(opts, kEnableTOFReconstruction)) { fEnableKDEReconstruction = getOptionAsBool(opts, kEnableTOFReconstruction); }
-  if (isOptionSet(opts, kTOFSliceSize)) { fTOFSliceSize = getOptionAsFloat(opts, kTOFSliceSize); }
-  if (isOptionSet(opts, kReconstructionTOFSigma)) { fTOFSigma = getOptionAsFloat(opts, kReconstructionTOFSigma); }
+  {
+    fReconstructionDistanceAccuracy = getOptionAsFloat(opts, kReconstructionDistanceAccuracy);
+  }
+  if (isOptionSet(opts, kZSplitNumber))
+  {
+    fZSplitNumber = getOptionAsInt(opts, kZSplitNumber);
+  }
+  if (isOptionSet(opts, kScintillatorLenght))
+  {
+    fScintillatorLenght = getOptionAsFloat(opts, kScintillatorLenght);
+  }
+  if (isOptionSet(opts, kMaxReconstructionRadius))
+  {
+    fMaxReconstructionLayerRadius = getOptionAsFloat(opts, kMaxReconstructionRadius);
+  }
+  if (isOptionSet(opts, kInputDataKey))
+  {
+    fInputData = getOptionAsVectorOfStrings(opts, kInputDataKey);
+  }
+  if (isOptionSet(opts, kEnableObliqueLORRemapping))
+  {
+    fEnableObliqueLORRemapping = getOptionAsBool(opts, kEnableObliqueLORRemapping);
+  }
+  if (isOptionSet(opts, kEnableTOFReconstruction))
+  {
+    fEnableKDEReconstruction = getOptionAsBool(opts, kEnableTOFReconstruction);
+  }
+  if (isOptionSet(opts, kTOFSliceSize))
+  {
+    fTOFSliceSize = getOptionAsFloat(opts, kTOFSliceSize);
+  }
+  if (isOptionSet(opts, kReconstructionTOFSigma))
+  {
+    fTOFSigma = getOptionAsFloat(opts, kReconstructionTOFSigma);
+  }
+  if (isOptionSet(opts, kRamLakCutOffValue))
+  {
+    fRamLakCutOffValue = getOptionAsDouble(opts, kRamLakCutOffValue);
+  }
   fMaxValueInSinogram = new int[fZSplitNumber];
   fCurrentValueInSinogram = new int[fZSplitNumber];
   const float maxZRange = fScintillatorLenght / 2.f;
@@ -182,9 +235,15 @@ void SinogramCreatorTOF::setUpOptions()
   fMaxDistanceNumber = std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
 
   if (isOptionSet(opts, kReconstructSliceNumbers))
-  { fReconstructSliceNumbers = boost::any_cast<std::vector<int>>(getOptionValue(opts, kReconstructSliceNumbers)); }
+  {
+    fReconstructSliceNumbers = boost::any_cast<std::vector<int>>(
+        getOptionValue(opts, kReconstructSliceNumbers)); // TODO: Change to framework helper method when it will be accepted and merged
+  }
   else
   {
-    for (int i = 0; i < fZSplitNumber; i++) { fReconstructSliceNumbers.push_back(i); }
+    for (int i = 0; i < fZSplitNumber; i++)
+    {
+      fReconstructSliceNumbers.push_back(i);
+    }
   }
 }

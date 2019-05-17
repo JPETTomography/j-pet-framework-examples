@@ -97,7 +97,7 @@ bool SinogramCreatorMC::exec() { return true; }
 
 bool SinogramCreatorMC::terminate()
 {
-  JPetFilterRamLak filter(0.7);
+  JPetFilterRamLak filter(1);
   JPetRecoImageTools::FourierTransformFunction f = JPetRecoImageTools::doFFTW1D;
 
   for (int i = 0; i < fZSplitNumber; i++)
@@ -115,12 +115,12 @@ bool SinogramCreatorMC::terminate()
     saveResult(result, fOutFileName + "reconstruction_with_KDE_" + std::to_string(sliceNumber) + ".ppm");
 
     // filter sinogram
-    // JPetRecoImageTools::Matrix2DProj filteredSinogram = JPetRecoImageTools::FilterSinogram(f, filter, (*fSinogram[i]));
+    //JPetRecoImageTools::SparseMatrix filteredSinogram = JPetRecoImageTools::FilterSinogram(f, filter, (*fSinogram[i]));
     // backproject
-    // JPetRecoImageTools::Matrix2DProj resultBP =
-    //    JPetRecoImageTools::backProject(filteredSinogram, (*fSinogram[i])[0].size(), JPetRecoImageTools::nonRescale, 0, 255);
+    // JPetRecoImageTools::SparseMatrix resultBP =
+    //    JPetRecoImageTools::backProject(filteredSinogram, (*fSinogram[i]).size2(), JPetRecoImageTools::nonRescale, 0, 255);
     // save FBP
-    // saveResult(resultBP, fOutFileName + "reconstruction_with_FBP" + std::to_string(sliceNumber) + ".ppm");
+    //saveResult(resultBP, fOutFileName + "reconstruction_with_FBP" + std::to_string(sliceNumber) + ".ppm");
   }
 
   delete[] fSinogram;
