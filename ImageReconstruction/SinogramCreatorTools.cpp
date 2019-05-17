@@ -142,9 +142,21 @@ unsigned int SinogramCreatorTools::getTOFSlice(double firstTOF, double secondTOF
 //TODO: add time remapping also
 std::pair<TVector3,TVector3> SinogramCreatorTools::remapToSingleLayer(const TVector3& firstHit, const TVector3& secondHit, const float r)
 {
-  float dx = (secondHit.X() - firstHit.X());
-  float dy = (secondHit.Y() - firstHit.Y());
-  if (std::abs(dx) < kEPSILON) return std::make_pair(TVector3(firstHit.X(), r, firstHit.Z()), TVector3(firstHit.X(), -r, secondHit.Z()));
+  float dx = secondHit.X() - firstHit.X();
+  float dy = secondHit.Y() - firstHit.Y();
+  //float dz = secondHit.Z() - firstHit.Z();
+
+  if (std::abs(dx) < kEPSILON) {
+    if(std::abs(dy) < kEPSILON) {
+      //std::cout << "{ " << firstHit.X() << ", " << r << ", " << firstHit.Z() << "}, {" << secondHit.X() << ", " << -r << ", " << secondHit.Z() << "}" << std::endl;
+      return std::make_pair(TVector3(firstHit.X(), r, firstHit.Z()), TVector3(secondHit.X(), -r, secondHit.Z())); // make sure it is correct
+    }
+    float te = (r - firstHit.X()) / dy;
+    float z1e = firstHit.Z() + (secondHit.Z() - firstHit.Z()) * te;
+    float z2e = secondHit.Z() + (firstHit.Z() - secondHit.Z()) * te;
+    //std::cout << "{ " << firstHit.X() << ", " << r << ", " << z1e << "}, {" << secondHit.X() << ", " << -r << ", " << z2e << "}" << std::endl;
+    return std::make_pair(TVector3(firstHit.X(), r, z1e), TVector3(firstHit.X(), -r, z2e));
+  }
   float a = dy / dx;
   float b = firstHit.Y() - firstHit.X() * a;
   if(std::abs(b) < kEPSILON) {
@@ -154,8 +166,12 @@ std::pair<TVector3,TVector3> SinogramCreatorTools::remapToSingleLayer(const TVec
 
     float y1d = a * x1d;
     float y2d = a * x2d;
-    //std::cout << "{ " << x1d << ", " << y1d << "}, {" << x2d << ", " << y2d << "}" << std::endl;
-    return std::make_pair(TVector3(x1d, y1d, firstHit.Z()), TVector3(x2d, y2d, secondHit.Z()));
+
+    float td = (x1d - firstHit.X()) / dx;
+    float z1d = firstHit.Z() + (secondHit.Z() - firstHit.Z() * td);
+    float z2d = secondHit.Z() + (firstHit.Z() - secondHit.Z() * td);
+    //std::cout << "{ " << x1d << ", " << y1d << ", " << z1d << "}, {" << x2d << ", " << y2d << ", " << z2d << "}" << std::endl;
+    return std::make_pair(TVector3(x1d, y1d, z1d), TVector3(x2d, y2d, z2d));
   }
   float A = 1 + a;
   float B = 2 * a * b;
@@ -163,6 +179,7 @@ std::pair<TVector3,TVector3> SinogramCreatorTools::remapToSingleLayer(const TVec
 
   float delta = B * B - (4 * A * C);
   if(delta <= 0) {
+    //std::cout << "Same points" << std::endl;
     WARNING("Could not find 2 interaction points with single layer remap, returning same points..");
     return std::make_pair(firstHit, secondHit);
   }
@@ -173,6 +190,9 @@ std::pair<TVector3,TVector3> SinogramCreatorTools::remapToSingleLayer(const TVec
   float y1 = a * x1 + b;
   float y2 = a * x2 + b;
 
-  //std::cout << "{ " << x1 << ", " << y1 << "}, {" << x2 << ", " << y2 << "}" << std::endl;
-  return std::make_pair(TVector3(x1, y1, firstHit.Z()), TVector3(x2, y2, secondHit.Z()));
+  float t = (x1 - firstHit.X()) / dx;
+  float z1 = firstHit.Z() + (secondHit.Z() - firstHit.Z() * t);
+  float z2 = secondHit.Z() + (firstHit.Z() - secondHit.Z() * t);
+  //std::cout << "{ " << x1 << ", " << y1 << ", " << z1 << "}, {" << x2 << ", " << y2 << ", " << z2 << "}" << std::endl;
+  return std::make_pair(TVector3(x1, y1, z1), TVector3(x2, y2, z2));
 }
