@@ -26,6 +26,7 @@
 #include <tuple>
 #include <utility>
 #include <vector>
+#include "TVector3.h"
 
 class SinogramCreatorTools
 {
@@ -44,6 +45,7 @@ public:
                               double secondTOF, const std::vector<std::pair<float, float>>& zSplitRange);
   static unsigned int getTOFSlice(double firstTOF, double secondTOF, double sliceSize);
 
+  static std::pair<TVector3,TVector3> remapToSingleLayer(const TVector3& firstHit, const TVector3& secondHit, const float radius);
 private:
   SinogramCreatorTools() = delete;
   ~SinogramCreatorTools() = delete;
@@ -52,6 +54,7 @@ private:
 
   static std::tuple<float, float, float> cart2sph(float x, float y, float z);
   static std::tuple<float, float, float> sph2cart(float theta, float phi, float r);
-};
 
+  static constexpr float kEPSILON = 0.00001f;
+};
 #endif /*  !SINOGRAMCREATORTOOLS_H */

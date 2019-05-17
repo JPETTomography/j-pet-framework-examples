@@ -14,6 +14,7 @@
  */
 
 #include "SinogramCreatorTools.h"
+#include "JPetLoggerInclude.h"
 #include <iostream>
 #include <math.h>
 
@@ -24,11 +25,10 @@ unsigned int SinogramCreatorTools::roundToNearesMultiplicity(double numberToRoun
 
 std::pair<int, float> SinogramCreatorTools::getAngleAndDistance(float firstX, float firstY, float secondX, float secondY)
 {
-  static const float dxEPSILON = 0.001f;
   float dx = (secondX - firstX);
   float dy = (secondY - firstY);
-  if (std::abs(dx) < dxEPSILON) return std::make_pair(0, firstX);
-  if (std::abs(dy) < dxEPSILON) return std::make_pair(90, firstY);
+  if (std::abs(dx) < kEPSILON) return std::make_pair(0, firstX);
+  if (std::abs(dy) < kEPSILON) return std::make_pair(90, firstY);
   float slope = dy / dx;
   float perpendicularSlope = -(1 / slope);
   float d = firstY - (slope * firstX);
@@ -46,13 +46,13 @@ std::pair<int, float> SinogramCreatorTools::getAngleAndDistance(float firstX, fl
 }
 
 std::pair<int, int> SinogramCreatorTools::getSinogramRepresentation(float firstX, float firstY, float secondX, float secondY,
-                                                                    float fMaxReconstructionLayerRadius, float fReconstructionDistanceAccuracy,
+                                                                    float fMaxReconstructionLayerfSingleLayerRadius, float fReconstructionDistanceAccuracy,
                                                                     int maxDistanceNumber, int kReconstructionMaxAngle)
 {
   std::pair<int, float> angleAndDistance = SinogramCreatorTools::getAngleAndDistance(firstX, firstY, secondX, secondY);
 
   int distanceRound =
-      SinogramCreatorTools::roundToNearesMultiplicity(angleAndDistance.second + fMaxReconstructionLayerRadius, fReconstructionDistanceAccuracy);
+      SinogramCreatorTools::roundToNearesMultiplicity(angleAndDistance.second + fMaxReconstructionLayerfSingleLayerRadius, fReconstructionDistanceAccuracy);
   if (distanceRound >= maxDistanceNumber || angleAndDistance.first >= kReconstructionMaxAngle)
   {
     std::cout << "Distance or angle > then max, distance: " << distanceRound << " (max : " << maxDistanceNumber << ")"
@@ -137,4 +137,42 @@ unsigned int SinogramCreatorTools::getTOFSlice(double firstTOF, double secondTOF
 {
   double tofDiff = (secondTOF - firstTOF) / 2.;
   return tofDiff / sliceSize;
+}
+
+//TODO: add time remapping also
+std::pair<TVector3,TVector3> SinogramCreatorTools::remapToSingleLayer(const TVector3& firstHit, const TVector3& secondHit, const float r)
+{
+  float dx = (secondHit.X() - firstHit.X());
+  float dy = (secondHit.Y() - firstHit.Y());
+  if (std::abs(dx) < kEPSILON) return std::make_pair(TVector3(firstHit.X(), r, firstHit.Z()), TVector3(firstHit.X(), -r, secondHit.Z()));
+  float a = dy / dx;
+  float b = firstHit.Y() - firstHit.X() * a;
+  if(std::abs(b) < kEPSILON) {
+    float D = std::sqrt(1 + a * a);
+    float x1d = r / D;
+    float x2d = -r / D;
+
+    float y1d = a * x1d;
+    float y2d = a * x2d;
+    //std::cout << "{ " << x1d << ", " << y1d << "}, {" << x2d << ", " << y2d << "}" << std::endl;
+    return std::make_pair(TVector3(x1d, y1d, firstHit.Z()), TVector3(x2d, y2d, secondHit.Z()));
+  }
+  float A = 1 + a;
+  float B = 2 * a * b;
+  float C = b * b - r * r;
+
+  float delta = B * B - (4 * A * C);
+  if(delta <= 0) {
+    WARNING("Could not find 2 interaction points with single layer remap, returning same points..");
+    return std::make_pair(firstHit, secondHit);
+  }
+
+  float x1 = (-B + std::sqrt(delta)) / 2 * A;
+  float x2 = (-B - std::sqrt(delta)) / 2 * A;
+
+  float y1 = a * x1 + b;
+  float y2 = a * x2 + b;
+
+  //std::cout << "{ " << x1 << ", " << y1 << "}, {" << x2 << ", " << y2 << "}" << std::endl;
+  return std::make_pair(TVector3(x1, y1, firstHit.Z()), TVector3(x2, y2, secondHit.Z()));
 }

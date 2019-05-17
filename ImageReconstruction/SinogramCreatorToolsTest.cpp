@@ -33,7 +33,6 @@ BOOST_AUTO_TEST_CASE(test_angle_middle)
     const float y2 = r * std::sin((i + 1) * (M_PI / 180.f));
     const auto result =
         SinogramCreatorTools::getSinogramRepresentation(x1, y1, x2, y2, maxDistance, accuracy, std::ceil(maxDistance * 2.f * (1.f / accuracy)), 180);
-    std::cout << "i: " << i << " result: " << result.second << std::endl;
     BOOST_REQUIRE_EQUAL(result.second, i % 180);
     const float distance = i < 180 ? r : -r;
     const float distanceResult = SinogramCreatorTools::roundToNearesMultiplicity(distance + maxDistance, accuracy);
@@ -68,6 +67,80 @@ BOOST_AUTO_TEST_CASE(test_lor_slice)
   z1 = -1.f;
   z2 = 1.f;
   BOOST_REQUIRE_CLOSE(SinogramCreatorTools::calculateLORSlice(x1, y1, z1, t1, x2, y2, z2, t2), 0.f, EPSILON);
+}
+
+BOOST_AUTO_TEST_CASE(remap_to_single_layer)
+{
+  const float EPSILON = 0.1f;
+  float x1 = 0.f;
+  float y1 = 0.f;
+  float z1 = 0.f;
+  float x2 = 1.f;
+  float y2 = 0.f;
+  float z2 = 0.f;
+
+  float radius = 40.f;
+
+  auto result = SinogramCreatorTools::remapToSingleLayer(TVector3(x1, y1, z1), TVector3(x2, y2, z2), radius);
+  BOOST_REQUIRE_CLOSE(result.first.X(), radius, EPSILON);
+  BOOST_REQUIRE_CLOSE(result.first.Y(), 0.f, EPSILON);
+  BOOST_REQUIRE_CLOSE(result.first.Z(), 0.f, EPSILON);
+
+  BOOST_REQUIRE_CLOSE(result.second.X(), -radius, EPSILON);
+  BOOST_REQUIRE_CLOSE(result.second.Y(), 0.f, EPSILON);
+  BOOST_REQUIRE_CLOSE(result.second.Z(), 0.f, EPSILON);
+
+  radius = 45.75f;
+  result = SinogramCreatorTools::remapToSingleLayer(TVector3(x1, y1, z1), TVector3(x2, y2, z2), radius);
+  BOOST_REQUIRE_CLOSE(result.first.X(), radius, EPSILON);
+  BOOST_REQUIRE_CLOSE(result.first.Y(), 0.f, EPSILON);
+  BOOST_REQUIRE_CLOSE(result.first.Z(), 0.f, EPSILON);
+
+  BOOST_REQUIRE_CLOSE(result.second.X(), -radius, EPSILON);
+  BOOST_REQUIRE_CLOSE(result.second.Y(), 0.f, EPSILON);
+  BOOST_REQUIRE_CLOSE(result.second.Z(), 0.f, EPSILON);
+
+  x1 = 0.f; 
+  y1 = 30.f;
+  x2 = 0.f;
+  y2 = -30.f;
+
+  result = SinogramCreatorTools::remapToSingleLayer(TVector3(x1, y1, z1), TVector3(x2, y2, z2), radius);
+  BOOST_REQUIRE_CLOSE(result.first.X(), 0.f, EPSILON);
+  BOOST_REQUIRE_CLOSE(result.first.Y(), radius, EPSILON);
+  BOOST_REQUIRE_CLOSE(result.first.Z(), 0.f, EPSILON);
+
+  BOOST_REQUIRE_CLOSE(result.second.X(), 0.f, EPSILON);
+  BOOST_REQUIRE_CLOSE(result.second.Y(), -radius, EPSILON);
+  BOOST_REQUIRE_CLOSE(result.second.Z(), 0.f, EPSILON);
+
+  x1 = 10.f; 
+  y1 = 30.f;
+  x2 = 10.f;
+  y2 = -30.f;
+
+  result = SinogramCreatorTools::remapToSingleLayer(TVector3(x1, y1, z1), TVector3(x2, y2, z2), radius);
+  BOOST_REQUIRE_CLOSE(result.first.X(), 10.f, EPSILON);
+  BOOST_REQUIRE_CLOSE(result.first.Y(), radius, EPSILON);
+  BOOST_REQUIRE_CLOSE(result.first.Z(), 0.f, EPSILON);
+
+  BOOST_REQUIRE_CLOSE(result.second.X(), 10.f, EPSILON);
+  BOOST_REQUIRE_CLOSE(result.second.Y(), -radius, EPSILON);
+  BOOST_REQUIRE_CLOSE(result.second.Z(), 0.f, EPSILON);
+
+  x1 = 10.f; 
+  y1 = 30.f;
+  x2 = -10.f;
+  y2 = -30.f;
+  result = SinogramCreatorTools::remapToSingleLayer(TVector3(x1, y1, z1), TVector3(x2, y2, z2), radius);
+  BOOST_REQUIRE_CLOSE(result.first.X(), 14.4674, EPSILON);
+  BOOST_REQUIRE_CLOSE(result.first.Y(), 43.4023, EPSILON);
+  BOOST_REQUIRE_CLOSE(result.first.Z(), 0.f, EPSILON);
+
+  BOOST_REQUIRE_CLOSE(result.second.X(), -14.4674, EPSILON);
+  BOOST_REQUIRE_CLOSE(result.second.Y(), -43.4023, EPSILON);
+  BOOST_REQUIRE_CLOSE(result.second.Z(), 0.f, EPSILON);
+
 }
 
 BOOST_AUTO_TEST_SUITE_END()
