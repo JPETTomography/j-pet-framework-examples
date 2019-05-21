@@ -3,7 +3,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include "JPetLoggerInclude.h"
-#include "ToTConverter.h"
+#include "../ToTConverter.h"
 using namespace jpet_common_tools;
 
 /// Returns Time-over-threshold for given deposited energy

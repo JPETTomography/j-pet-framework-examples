@@ -22,7 +22,8 @@ set(UNIT_TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizerToolsTest.cpp
                       ${CMAKE_CURRENT_SOURCE_DIR}/HitFinderToolsTest.cpp
                       ${CMAKE_CURRENT_SOURCE_DIR}/SignalFinderToolsTest.cpp
                       ${CMAKE_CURRENT_SOURCE_DIR}/TimeWindowCreatorToolsTest.cpp
-                      ${CMAKE_CURRENT_SOURCE_DIR}/UniversalFileLoaderTest.cpp)
+                      ${CMAKE_CURRENT_SOURCE_DIR}/UniversalFileLoaderTest.cpp
+                      ${CMAKE_CURRENT_SOURCE_DIR}/ToTConverterTestgit .cpp)
 
 #Configure Boost
 set(Boost_USE_STATIC_LIBS OFF)
