@@ -25,6 +25,13 @@ set(UNIT_TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizerToolsTest.cpp
                       ${CMAKE_CURRENT_SOURCE_DIR}/UniversalFileLoaderTest.cpp
                       ${CMAKE_CURRENT_SOURCE_DIR}/ToTConverterTest.cpp)
 
+set(UNIT_TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizerToolsTest.cpp
+                      ${CMAKE_CURRENT_SOURCE_DIR}/HitFinderToolsTest.cpp
+                      ${CMAKE_CURRENT_SOURCE_DIR}/SignalFinderToolsTest.cpp
+                      ${CMAKE_CURRENT_SOURCE_DIR}/TimeWindowCreatorToolsTest.cpp
+                      ${CMAKE_CURRENT_SOURCE_DIR}/UniversalFileLoaderTest.cpp
+                      ${CMAKE_CURRENT_SOURCE_DIR}/ToTConverterTest.cpp)
+
 #Configure Boost
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
@@ -41,7 +48,8 @@ endif()
 #End of configuration of Boost
 
 macro(package_add_test TESTNAME)
-    add_executable(${TESTNAME}.x ${ARGN})
+    string(REPLACE "Test" "" TEST_SOURCE ${TESTNAME}) #Remove Test from test name to get source to test
+    add_executable(${TESTNAME}.x ../${TEST_SOURCE} ${ARGN}) #Tests sources are in parent dir
     target_compile_options(${TESTNAME}.x PRIVATE -Wunused-parameter -Wall)
     target_link_libraries(${TESTNAME}.x JPetFramework::JPetFramework Boost::unit_test_framework)
     add_test(NAME ${TESTNAME}.x COMMAND ${TESTNAME}.x "--log_level=ERROR --log_format=XML --log_sink=${TESTNAME}.xml --raport_level=no")
@@ -57,5 +65,11 @@ add_custom_target(link_target_largebarrelanalysis ALL
 
 foreach(test_source IN ITEMS ${UNIT_TEST_SOURCES})
     get_filename_component(test ${test_source} NAME_WE)
-    package_add_test(${test} ${test_source})
+    if(${test} MATCHES TimeWindowCreatorToolsTest|HitFinderToolsTest)
+      package_add_test(${test} ${test_source} ../UniversalFileLoader.cpp) #TimeWindowCreatorToolsTests and HitFinderToolsTest require also UniversalFileLoader
+    else()
+      package_add_test(${test} ${test_source})
+    endif(${test} MATCHES TimeWindowCreatorToolsTest|HitFinderToolsTest)
+    
+    
 endforeach()

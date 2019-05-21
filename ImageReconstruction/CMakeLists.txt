@@ -52,6 +52,40 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/FilterEvents.cpp
 ## Add options from j-pet-mlem as compile flags removing PET_ prefix
 ## j-pet-mlem sets some parameters of the CMake build by using definitions,
 ## that are limited to project, it is necessary to copy them here
+# configuration time options
+set(PET_MAX_DETECTORS 512
+    CACHE INTEGER
+    "maximum number of detectors allowed in the scanner (impacts performance)"  )
+set(PET_GRANULARITY_TYPE "WARP"
+    CACHE STRING
+    "warp, thread (or simple just for testing) granularity"  )
+set(PET_USE_STATISTICS OFF
+    CACHE BOOL
+    "collect statistics and print them after program is finished"  )
+set(PET_CACHE_ELLIPSE_PIXELS OFF
+    CACHE BOOL
+    "shared memory pixel buffer in error ellipse"  )
+set(PET_USE_SENSITIVITY ON
+    CACHE BOOL
+    "use sensitivity when calculating reconstruction"  )
+set(PET_USE_KERNEL ON
+    CACHE BOOL
+    "use kernel (when off it uses constant 1 for kernel value)"  )
+set(PET_THROW_ON_ZERO_DENOMINATOR OFF
+    CACHE BOOL
+    "throw on zero denominator (event outside FOV)"  )
+set(PET_MAX_PIXELS_PER_THREAD 12
+    CACHE INTEGER
+    "chosen arbitrarily, no more than 11 pixels per thread in current config"  )
+set(PET_WARP_SIZE 32
+    CACHE INTEGER
+    "normally it should not be changed to anything else than 32"  )
+set(PET_MAX_THREADS_PER_BLOCK 512
+    CACHE INTEGER
+    "not used in current implementation"  )
+set(PET_USE_FAST_TEXT_PARSER ON
+    CACHE BOOL
+    "use fast text parser for loading events (around ~5x faster than C++)"  )
 get_cmake_property(vars VARIABLES)
 foreach(var ${vars})
   if(var MATCHES "^PET_" AND NOT var MATCHES "_DIR$")

@@ -85,27 +85,9 @@ BOOST_AUTO_TEST_CASE(getSigChByPM_Test) {
 BOOST_AUTO_TEST_CASE(buildRawSignals_empty) {
   JPetStatistics stats;
   std::vector<JPetSigCh> sigChByPM;
-<<<<<<< HEAD:LargeBarrelAnalysis/tests/SignalFinderToolsTest.cpp
-  auto results =
-      SignalFinderTools::buildRawSignals(sigChByPM, 1, 5.0, 5.0, stats, false);
-  BOOST_REQUIRE(results.empty());
-}
-
-BOOST_AUTO_TEST_CASE(buildRawSignals_wrong_one_signal_NumOfThresholdsNot4) {
-  JPetPM pm1(1, "first");
-  JPetSigCh sigCh1(JPetSigCh::Leading, 10);
-  sigCh1.setPM(pm1);
-  std::vector<JPetSigCh> sigChVec;
-  sigChVec.push_back(sigCh1);
-  auto numOfThresholds = 1;
-  JPetStatistics stats;
-  auto results = SignalFinderTools::buildRawSignals(sigChVec, numOfThresholds,
-                                                    5.0, 5.0, stats, false);
-=======
   auto results = SignalFinderTools::buildRawSignals(
     sigChByPM, 5.0, 5.0, stats, false
   );
->>>>>>> a0a8a4850bb809944d86d210dead2471038856db:LargeBarrelAnalysis/SignalFinderToolsTest.cpp
   BOOST_REQUIRE(results.empty());
 }
 
@@ -122,13 +104,8 @@ BOOST_AUTO_TEST_CASE(buildRawSignals_one_signal) {
   double sigChEdgeMaxTime = 5.0;
   double sigChLeadTrailMaxTime = 5.0;
   auto results = SignalFinderTools::buildRawSignals(
-<<<<<<< HEAD:LargeBarrelAnalysis/tests/SignalFinderToolsTest.cpp
-      sigChVec, numOfThresholds, sigChEdgeMaxTime, sigChLeadTrailMaxTime, stats,
-      false);
-=======
     sigChVec, sigChEdgeMaxTime, sigChLeadTrailMaxTime, stats, false
   );
->>>>>>> a0a8a4850bb809944d86d210dead2471038856db:LargeBarrelAnalysis/SignalFinderToolsTest.cpp
   auto points_trail = results.at(0).getPoints(JPetSigCh::Trailing);
   auto points_lead = results.at(0).getPoints(JPetSigCh::Leading);
   auto epsilon = 0.0001;
@@ -158,15 +135,9 @@ BOOST_AUTO_TEST_CASE(buildRawSignals_2) {
   double sigChEdgeMaxTime = 5.;
   double sigChLeadTrailMaxTime = 10.;
   JPetStatistics stats;
-<<<<<<< HEAD:LargeBarrelAnalysis/tests/SignalFinderToolsTest.cpp
-  auto results = SignalFinderTools::buildRawSignals(
-      sigChFromSamePM, numOfThresholds, sigChEdgeMaxTime, sigChLeadTrailMaxTime,
-      stats, false);
-=======
   auto results =  SignalFinderTools::buildRawSignals(
     sigChFromSamePM, sigChEdgeMaxTime , sigChLeadTrailMaxTime, stats, false
   );
->>>>>>> a0a8a4850bb809944d86d210dead2471038856db:LargeBarrelAnalysis/SignalFinderToolsTest.cpp
   BOOST_REQUIRE_EQUAL(results.size(), 1);
   auto points_trail = results.at(0).getPoints(JPetSigCh::Trailing);
   auto points_lead = results.at(0).getPoints(JPetSigCh::Leading);
@@ -263,13 +234,8 @@ BOOST_AUTO_TEST_CASE(buildRawSignals_test_flag_inherit) {
   double sigChLeadTrailMaxTime = 12.0;
   JPetStatistics stats;
   auto results = SignalFinderTools::buildRawSignals(
-<<<<<<< HEAD:LargeBarrelAnalysis/tests/SignalFinderToolsTest.cpp
-      sigChFromSamePM, numOfThresholds, sigChEdgeMaxTime, sigChLeadTrailMaxTime,
-      stats, false);
-=======
     sigChFromSamePM, sigChEdgeMaxTime, sigChLeadTrailMaxTime, stats, false
   );
->>>>>>> a0a8a4850bb809944d86d210dead2471038856db:LargeBarrelAnalysis/SignalFinderToolsTest.cpp
   BOOST_REQUIRE_EQUAL(results.size(), 2);
   BOOST_REQUIRE_EQUAL(results.at(0).getRecoFlag(), JPetBaseSignal::Good);
   BOOST_REQUIRE_EQUAL(results.at(1).getRecoFlag(), JPetBaseSignal::Corrupted);
@@ -480,13 +446,8 @@ BOOST_AUTO_TEST_CASE(buildRawSignals_realdata_flag_test) {
   double sigChLeadTrailMaxTime = 0.0023;
   JPetStatistics stats;
   auto results = SignalFinderTools::buildRawSignals(
-<<<<<<< HEAD:LargeBarrelAnalysis/tests/SignalFinderToolsTest.cpp
-      sigChFromSamePM, numOfThresholds, sigChEdgeMaxTime, sigChLeadTrailMaxTime,
-      stats, false);
-=======
     sigChFromSamePM, sigChEdgeMaxTime, sigChLeadTrailMaxTime, stats, false
   );
->>>>>>> a0a8a4850bb809944d86d210dead2471038856db:LargeBarrelAnalysis/SignalFinderToolsTest.cpp
   BOOST_REQUIRE_EQUAL(results.size(), 3);
   BOOST_REQUIRE_EQUAL(results.at(0).getRecoFlag(), JPetBaseSignal::Corrupted);
   BOOST_REQUIRE_EQUAL(results.at(1).getRecoFlag(), JPetBaseSignal::Corrupted);
@@ -508,9 +469,9 @@ BOOST_AUTO_TEST_CASE(reorderThresholdsByValue){
     sorted_values[new_order[i]] = values[i];
   }
   
-  BOOST_TEST(sorted_values[0] <= sorted_values[1]);
-  BOOST_TEST(sorted_values[1] <= sorted_values[2]);
-  BOOST_TEST(sorted_values[2] <= sorted_values[3]);
+  BOOST_REQUIRE_LE(sorted_values[0], sorted_values[1]);
+  BOOST_REQUIRE_LE(sorted_values[1],sorted_values[2]);
+  BOOST_REQUIRE_LE(sorted_values[2], sorted_values[3]);
 }
 
 BOOST_AUTO_TEST_CASE(findThresholdOrders){
@@ -554,9 +515,9 @@ BOOST_AUTO_TEST_CASE(findThresholdOrders){
       sorted_values[pm.second[i]] = orig_values[i];
     }
     
-    BOOST_TEST(sorted_values[0] <= sorted_values[1]);
-    BOOST_TEST(sorted_values[1] <= sorted_values[2]);
-    BOOST_TEST(sorted_values[2] <= sorted_values[3]);  
+    BOOST_REQUIRE_LE(sorted_values[0], sorted_values[1]);
+    BOOST_REQUIRE_LE(sorted_values[1], sorted_values[2]);
+    BOOST_REQUIRE_LE(sorted_values[2], sorted_values[3]);  
   }  
 }
 
