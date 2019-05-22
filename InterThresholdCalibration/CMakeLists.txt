@@ -61,4 +61,4 @@ add_custom_target(clean_data_${projectName}
 
 ################################################################################
 ## Copy the example auxiliary files
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/${AUXILIARY_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/${file_i})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/${AUXILIARY_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)

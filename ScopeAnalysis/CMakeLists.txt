@@ -65,4 +65,4 @@ target_include_directories(${projectBinary} PRIVATE
                            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/../modules/tools/>)
 
 ## Copy the auxiliary files
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/${AUXILIARY_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/${file_i})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/${AUXILIARY_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)

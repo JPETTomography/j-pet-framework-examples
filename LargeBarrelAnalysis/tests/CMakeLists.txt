@@ -35,7 +35,7 @@ endif()
 
 macro(package_add_test TESTNAME)
     string(REPLACE "Test" "" TEST_SOURCE ${TESTNAME}) #Remove Test from test name to get source to test
-    add_executable(${TESTNAME}.x ../${TEST_SOURCE} ${ARGN}) #Tests sources are in parent dir
+    add_executable(${TESTNAME}.x EXCLUDE_FROM_ALL ../${TEST_SOURCE} ${ARGN}) #Tests sources are in parent dir
     target_compile_options(${TESTNAME}.x PRIVATE -Wunused-parameter -Wall)
     target_link_libraries(${TESTNAME}.x JPetFramework::JPetFramework Boost::unit_test_framework)
     add_test(NAME ${TESTNAME}.x COMMAND ${TESTNAME}.x "--log_level=ERROR --log_format=XML --log_sink=${TESTNAME}.xml --raport_level=no")
