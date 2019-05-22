@@ -149,7 +149,7 @@ if(DOWNLOAD_DATA)
       file(DOWNLOAD "http://sphinx.if.uj.edu.pl/framework/${PATH}" ${DOWNLOAD_BASE_PATH}/${SAVE_PATH} EXPECTED_HASH SHA256=${SHA256})
     endif(NOT "${CURRENT_SHA256}" STREQUAL "${SHA256}")
   endforeach(SHA_HASH ${SHA_HASHES})
-  #file(REMOVE ${DOWNLOAD_BASE_PATH}/examples_reformed.sha)
+  file(REMOVE ${DOWNLOAD_BASE_PATH}/examples_reformed.sha)
 endif()
 
 ################################################################################
