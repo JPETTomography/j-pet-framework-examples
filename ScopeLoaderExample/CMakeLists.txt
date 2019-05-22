@@ -40,13 +40,4 @@ target_link_libraries(${projectBinary} JPetFramework::JPetFramework)
 
 ################################################################################
 ## Copy the auxiliary files
-foreach(file_i ${AUXILIARY_FILES})
-  if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${file_i})
-    set(CP_CMD copy_directory)
-  else()
-    set(CP_CMD copy)
-  endif()
-  add_custom_command(TARGET ${projectBinary} POST_BUILD COMMAND ${CMAKE_COMMAND}
-    ARGS -E ${CP_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
-  )
-endforeach(file_i)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/${AUXILIARY_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/${file_i})

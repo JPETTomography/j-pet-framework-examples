@@ -1,22 +1,7 @@
 message(STATUS "")
-message(STATUS "Starting to configure LargeBarrelAnalysisTests..")
+message(STATUS "Starting to configure ImageReconstructionTests..")
 message(STATUS "")
 enable_testing()
-
-set(CMAKE_CXX_STANDARD 11) # maybe not best solutio to set it globally? upgrate minimal cmake version to 3.8 or find another way to set it only for target with interface
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_PLATFORM_INDEPENDENT_CODE ON)
-
-set(default_build_type "Release")
-if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  message(STATUS "Setting build type to '${default_build_type}' as none was specified.")
-  set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE
-      STRING "Choose the type of build." FORCE)
-  # Set the possible values of build type for cmake-gui
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
-    "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
-endif()
 
 set(UNIT_TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/SinogramCreatorToolsTest.cpp)
 set(TEST_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/../SinogramCreatorTools.cpp)

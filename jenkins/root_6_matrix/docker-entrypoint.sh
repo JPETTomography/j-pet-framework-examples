@@ -32,7 +32,12 @@ executeCommand "mkdir -p build"
 executeCommand "cd build"
 executeCommand "cmake .."
 executeCommand "make"
+
+executeCommand "cd ImageReconstruction"
+executeCommand "ctest -j6 -C Debug -T test --output-on-failure"
+
 executeCommand "cd LargeBarrelAnalysis"
+executeCommand "ctest -j6 -C Debug -T test --output-on-failure"
 executeCommand "wget http://sphinx.if.uj.edu.pl/~alek/framework_integration_tests/dabc_17025151847.hld"
 executeCommand "wget http://sphinx.if.uj.edu.pl/~alek/framework_integration_tests/setupRun3.json"
 executeCommand "./LargeBarrelAnalysis.x -t hld -f dabc_17025151847.hld -l setupRun3.json -i 3 -r 0 100"
@@ -43,6 +48,8 @@ sed -i 's/manager.useTask(\"TimeWindowCreator\", \"hld\", \"tslot.calib\");//' .
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 executeCommand "make"
 executeCommand "./LargeBarrelAnalysis.x -t root -f dabc_17025151847.tslot.calib.root -r 0 100"
+
+
 if [ "$RUN_VELOCITY" = "1" ]; then
     executeCommand "cd ../VelocityCalibration/tests/unitTestData/VelocityCalibrationTest"
     executeCommand "rm -rf results_root_6"

@@ -60,8 +60,6 @@ find_package(Threads REQUIRED)
 
 ################################################################################
 ## Find BOOST LIBs
-#set(BOOST_LOG_DYN_LINK -DBOOST_LOG_DYN_LINK)
-#add_definitions(${BOOST_LOG_DYN_LINK})
 
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
@@ -88,9 +86,7 @@ if(NOT TARGET Boost::filesystem)
 endif()
 
 ################################################################################
-## Find CERN ROOT
-# first try to find ROOT 6 compiled with CMake
-# if present, such ROOT should be possible to find without explicit setting of any paths
+## Find CERN ROOT 6.10+
 find_package(ROOT CONFIG REQUIRED)
 if(ROOT_FOUND)
   message(STATUS "ROOT (version ${ROOT_VERSION}) was found using ROOTConfig")
@@ -134,10 +130,30 @@ endif()
 ## The script shouldn't do anything if the data is present and correct.
 option(DOWNLOAD_DATA "Download data" ON)
 if(DOWNLOAD_DATA)
-    set(DOWNLOAD_MORE_DATA ${CMAKE_CURRENT_SOURCE_DIR}/download_reformed_data.sh ${CMAKE_CURRENT_SOURCE_DIR})
-    execute_process(COMMAND ${DOWNLOAD_MORE_DATA})
+  set(DOWNLOAD_BASE_PATH ${PROJECT_SOURCE_DIR})  
+
+  file(DOWNLOAD "http://sphinx.if.uj.edu.pl/framework/examples_reformed.sha" ${DOWNLOAD_BASE_PATH}/examples_reformed.sha)
+  file(READ ${DOWNLOAD_BASE_PATH}/examples_reformed.sha SHA_HASHES)
+  string(REGEX REPLACE "\n" ";" SHA_HASHES "${SHA_HASHES}") #create cmake array from hash + file path
+  foreach(SHA_HASH ${SHA_HASHES})
+    string(REGEX REPLACE "  " ";" SHA_HASH "${SHA_HASH}") #Split hash and file path
+    list(GET SHA_HASH 0 SHA256) #get sha hash
+    list(GET SHA_HASH 1 PATH) #get file path
+    string(REPLACE "ExamplesReformed/" "" SAVE_PATH ${PATH})
+
+    if(EXISTS "${DOWNLOAD_BASE_PATH}/${SAVE_PATH}")
+      file(SHA256 ${DOWNLOAD_BASE_PATH}/${SAVE_PATH} CURRENT_SHA256)
+    endif(EXISTS "${DOWNLOAD_BASE_PATH}/${SAVE_PATH}")
+    if(NOT ${CURRENT_SHA256} STREQUAL ${SHA256})
+      message(STATUS "SHA value of ${DOWNLOAD_BASE_PATH}/${SAVE_PATH} to not match! Downloading file..")
+      file(DOWNLOAD "http://sphinx.if.uj.edu.pl/framework/${PATH}" ${DOWNLOAD_BASE_PATH}/${SAVE_PATH} EXPECTED_HASH SHA256=${SHA256})
+    endif(NOT ${CURRENT_SHA256} STREQUAL ${SHA256})
+  endforeach(SHA_HASH ${SHA_HASHES})
+  file(REMOVE ${DOWNLOAD_BASE_PATH}/examples_reformed.sha)
 endif()
 
+################################################################################
+## Add general modules files
 add_subdirectory(modules)
 
 ################################################################################

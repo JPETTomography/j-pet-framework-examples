@@ -65,32 +65,12 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizer.cpp
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})
 target_link_libraries(${projectBinary} JPetFramework::JPetFramework)
 
-add_custom_target(clean_data_largebarrelextended
+add_custom_target(clean_data_${projectName}
   COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root)
-
-## Create variable for list with depends files path
-set(copy_depends)
 
 ################################################################################
 ## Copy the example auxiliary files
-foreach(file_i ${AUXILIARY_FILES})
-  list(APPEND copy_depends ${CMAKE_CURRENT_BINARY_DIR}/${file_i})
-  if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${file_i})
-    set(CP_CMD copy_directory)
-  else()
-    set(CP_CMD copy)
-  endif()
-  add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
-    POST_BUILD COMMAND ${CMAKE_COMMAND}
-    ARGS -E ${CP_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${file_i} ${CMAKE_CURRENT_BINARY_DIR}/${file_i}
-  )
-endforeach(file_i)
-
-################################################################################
-## Add new target that depends on copied files
-add_custom_target(copy_files DEPENDS ${copy_depends})
-## Add dependencies between building project and copy files
-add_dependencies(${projectBinary} copy_files)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/${AUXILIARY_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/${file_i})
 
 ################################################################################
 ## Unit tests
