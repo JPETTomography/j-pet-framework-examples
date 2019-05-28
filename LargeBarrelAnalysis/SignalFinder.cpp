@@ -63,7 +63,14 @@ bool SignalFinder::init()
   } else {
     WARNING("Signal Finder is not using Corrupted Signal Channels (default option)");
   }
-
+  //------ Reference detector photomultiplier identifier
+  if (isOptionSet(fParams.getOptions(),kPMIdRefOptName)) {
+    fPMIdRef = getOptionAsInt(fParams.getOptions(), kPMIdRefOptName);
+    WARNING("Signal Finder is ignoring Corrupted Signal Channels from the Refference detector as specified by the user (photomultiplier number + std::to_string(fPMIdRef)");
+  }
+  else{
+    WARNING("Signal Finder is ignoring Corrupted Signal Channels from the Refference detector(default photomultiplier number + std::to_string(fPMIdRef)");
+  }
   // Getting bool for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey)) {
     fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
@@ -88,7 +95,7 @@ bool SignalFinder::exec()
   // Getting the data from event in an apropriate format
   if(auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     // Distribute signal channels by PM IDs and filter out Corrupted SigChs if requested
-    auto& sigChByPM = SignalFinderTools::getSigChByPM(timeWindow, fUseCorruptedSigCh);
+    auto& sigChByPM = SignalFinderTools::getSigChByPM(timeWindow, fUseCorruptedSigCh,fPMIdRef);
     // Building signals
     auto allSignals = SignalFinderTools::buildAllSignals(
       sigChByPM, fSigChEdgeMaxTime, fSigChLeadTrailMaxTime,
