@@ -153,9 +153,7 @@ JPetRecoSignal SignalTransformer::createRecoSignal(const JPetRawSignal& rawSigna
 JPetPhysSignal SignalTransformer::createPhysSignal(const JPetRecoSignal& recoSignal)
 {
   JPetPhysSignal physSignal;
-  //
   correctForWalk(recoSignal);
-  //
   std::vector<JPetSigCh> leadingSigChVec = recoSignal.getRawSignal().getPoints(
        JPetSigCh::Leading, JPetRawSignal::ByThrValue
 									       );

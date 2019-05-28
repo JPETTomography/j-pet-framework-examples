@@ -40,7 +40,7 @@ const map<int, vector<JPetSigCh>> SignalFinderTools::getSigChByPM(
     }
     //
     if(!useCorrupts && sigCh.getRecoFlag() == JPetSigCh::Corrupted) { continue; }
-    //int pmtID = sigCh.getPM().getID();
+    //
     auto search = sigChsPMMap.find(pmtID);
     if (search == sigChsPMMap.end()) {
       vector<JPetSigCh> tmp;
