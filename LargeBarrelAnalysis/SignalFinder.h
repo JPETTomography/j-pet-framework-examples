@@ -60,6 +60,7 @@ protected:
   bool fSaveControlHistos = true;
   bool fOrderThresholdsByValue = false;
   void initialiseHistograms();
+  SignalFinderTools::ThresholdOrderings fThresholdOrderings;
 };
 
 #endif /* !SIGNALFINDER_H */
