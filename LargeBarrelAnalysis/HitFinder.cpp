@@ -140,14 +140,6 @@ void HitFinder::initialiseHistograms(){
   getStatistics().getHisto1D("hits_per_time_slot")->GetXaxis()->SetTitle("Hits in Time Slot");
   getStatistics().getHisto1D("hits_per_time_slot")->GetYaxis()->SetTitle("Number of Time Slots");
 
-  getStatistics().createHistogram(new TH1F(
-    "remain_signals_per_scin", "Number of Unused Signals in Scintillator", 192, 0.5, 192.5
-  ));
-  getStatistics().getHisto1D("remain_signals_per_scin")
-    ->GetXaxis()->SetTitle("ID of Scintillator");
-  getStatistics().getHisto1D("remain_signals_per_scin")
-    ->GetYaxis()->SetTitle("Number of Unused Signals in Scintillator");
-
   getStatistics().createHistogram(new TH2F(
     "time_diff_per_scin", "Signals Time Difference per Scintillator ID",
     200, -2 * fABTimeDiff, 2 * fABTimeDiff, 192, 0.5, 192.5
@@ -184,4 +176,28 @@ void HitFinder::initialiseHistograms(){
   ));
   getStatistics().getHisto1D("TOT_corr_hits")->GetXaxis()->SetTitle("Time over Threshold [ps]");
   getStatistics().getHisto1D("TOT_corr_hits")->GetYaxis()->SetTitle("Number of Hits");
+
+  getStatistics().createHistogram(new TH1F(
+    "remain_signals_per_scin", "Number of Unused Signals in Scintillator", 192, 0.5, 192.5
+  ));
+  getStatistics().getHisto1D("remain_signals_per_scin")
+    ->GetXaxis()->SetTitle("ID of Scintillator");
+  getStatistics().getHisto1D("remain_signals_per_scin")
+    ->GetYaxis()->SetTitle("Number of Unused Signals in Scintillator");
+
+  getStatistics().createHistogram(new TH1F(
+    "remain_signals_tot", "TOT of Unused Signals", 200, 0.0, 50000.0
+  ));
+  getStatistics().getHisto1D("remain_signals_tot")
+    ->GetXaxis()->SetTitle("Time over Threshold [ps]");
+  getStatistics().getHisto1D("remain_signals_tot")
+    ->GetYaxis()->SetTitle("Number of Signals");
+
+  getStatistics().createHistogram(new TH1F(
+    "remain_signals_tdiff", "Time Diff of an unused signal and the consecutive one", 200, 0.0, 50000.0
+  ));
+  getStatistics().getHisto1D("remain_signals_tdiff")
+    ->GetXaxis()->SetTitle("Time difference [ps]");
+  getStatistics().getHisto1D("remain_signals_tdiff")
+    ->GetYaxis()->SetTitle("Number of Signals");
 }

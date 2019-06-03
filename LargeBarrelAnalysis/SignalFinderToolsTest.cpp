@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2019 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_SUITE(SignalFinderTestSuite)
 
 BOOST_AUTO_TEST_CASE(getSigChByPM_nullPointer_test)
 {
-  auto results = SignalFinderTools::getSigChByPM(nullptr, false);
+  auto results = SignalFinderTools::getSigChByPM(nullptr, false, -1);
   BOOST_REQUIRE(results.empty());
 }
 
@@ -71,8 +71,8 @@ BOOST_AUTO_TEST_CASE(getSigChByPM_Test)
   slot.add<JPetSigCh>(sigChC1);
   slot.add<JPetSigCh>(sigChC2);
 
-  auto results1 = SignalFinderTools::getSigChByPM(&slot, false);
-  auto results2 = SignalFinderTools::getSigChByPM(&slot, true);
+  auto results1 = SignalFinderTools::getSigChByPM(&slot, false, -1);
+  auto results2 = SignalFinderTools::getSigChByPM(&slot, true, -1);
 
   BOOST_REQUIRE_EQUAL(results1.size(), 2);
   BOOST_REQUIRE_EQUAL(results2.size(), 3);
@@ -81,6 +81,47 @@ BOOST_AUTO_TEST_CASE(getSigChByPM_Test)
   BOOST_REQUIRE_EQUAL(results2[1].size(), 3);
   BOOST_REQUIRE_EQUAL(results2[2].size(), 3);
   BOOST_REQUIRE_EQUAL(results2[3].size(), 2);
+}
+
+BOOST_AUTO_TEST_CASE(getSigChByPM_refDet_test)
+{
+  JPetPM pm(1, "not_reference");
+  JPetPM pmRef(234, "reference");
+  JPetSigCh sigCh1(JPetSigCh::Leading, 10.0);
+  JPetSigCh sigCh2(JPetSigCh::Trailing, 11.0);
+  JPetSigCh sigCh3(JPetSigCh::Leading, 12.0);
+  JPetSigCh sigCh4(JPetSigCh::Trailing, 13.0);
+  JPetSigCh sigCh5(JPetSigCh::Leading, 14.0);
+  JPetSigCh sigCh6(JPetSigCh::Trailing, 15.0);
+  sigCh1.setPM(pm);
+  sigCh2.setPM(pmRef);
+  sigCh3.setPM(pm);
+  sigCh4.setPM(pmRef);
+  sigCh5.setPM(pmRef);
+  sigCh6.setPM(pm);
+  sigCh1.setRecoFlag(JPetSigCh::Corrupted);
+  sigCh2.setRecoFlag(JPetSigCh::Corrupted);
+  sigCh3.setRecoFlag(JPetSigCh::Corrupted);
+  sigCh4.setRecoFlag(JPetSigCh::Corrupted);
+  sigCh5.setRecoFlag(JPetSigCh::Corrupted);
+  sigCh6.setRecoFlag(JPetSigCh::Corrupted);
+
+  JPetTimeWindow slot("JPetSigCh");
+  slot.add<JPetSigCh>(sigCh1);
+  slot.add<JPetSigCh>(sigCh2);
+  slot.add<JPetSigCh>(sigCh3);
+  slot.add<JPetSigCh>(sigCh4);
+  slot.add<JPetSigCh>(sigCh5);
+  slot.add<JPetSigCh>(sigCh6);
+
+  auto results1 = SignalFinderTools::getSigChByPM(&slot, true, 234);
+  auto results2 = SignalFinderTools::getSigChByPM(&slot, false, 234);
+
+  BOOST_REQUIRE_EQUAL(results1.size(), 2);
+  BOOST_REQUIRE_EQUAL(results2.size(), 1);
+  BOOST_REQUIRE_EQUAL(results1[1].size(), 3);
+  BOOST_REQUIRE_EQUAL(results1[234].size(), 3);
+  BOOST_REQUIRE_EQUAL(results2[234].size(), 3);
 }
 
 BOOST_AUTO_TEST_CASE(buildRawSignals_empty)
@@ -465,7 +506,7 @@ BOOST_AUTO_TEST_CASE(reorderThresholdsByValue){
   for(int i=0;i<4;++i){
     sorted_values[new_order[i]] = values[i];
   }
-  
+
   BOOST_TEST(sorted_values[0] <= sorted_values[1]);
   BOOST_TEST(sorted_values[1] <= sorted_values[2]);
   BOOST_TEST(sorted_values[2] <= sorted_values[3]);
@@ -478,30 +519,30 @@ BOOST_AUTO_TEST_CASE(findThresholdOrders){
 
   bank.addPM(pm1);
   bank.addPM(pm2);
-  
-  SignalFinderTools::ThresholdValues values_pm1 = {40., 3., 20., 10.};  
-  SignalFinderTools::ThresholdValues values_pm2 = {100., 400., 200., 300.};  
+
+  SignalFinderTools::ThresholdValues values_pm1 = {40., 3., 20., 10.};
+  SignalFinderTools::ThresholdValues values_pm2 = {100., 400., 200., 300.};
 
   JPetTOMBChannel channels[8];
-  
+
   for(int i=0;i<4;++i){
 
     channels[i] = JPetTOMBChannel(i);
     channels[4+i] = JPetTOMBChannel(4+i);
-    
+
     channels[i].setLocalChannelNumber(i+1);
     channels[4+i].setLocalChannelNumber(i+1);
 
     channels[i].setThreshold(values_pm1[i]);
     channels[4+i].setThreshold(values_pm2[i]);
-    
+
     channels[i].setPM(pm1);
     channels[4+i].setPM(pm2);
 
     bank.addTOMBChannel(channels[i]);
     bank.addTOMBChannel(channels[4+i]);
   }
-  
+
   SignalFinderTools::ThresholdOrderings orderings =  SignalFinderTools::findThresholdOrders(bank);
   BOOST_REQUIRE_EQUAL(orderings.size(), 2);
 
@@ -511,11 +552,11 @@ BOOST_AUTO_TEST_CASE(findThresholdOrders){
     for(int i=0;i<4;++i){
       sorted_values[pm.second[i]] = orig_values[i];
     }
-    
+
     BOOST_TEST(sorted_values[0] <= sorted_values[1]);
     BOOST_TEST(sorted_values[1] <= sorted_values[2]);
-    BOOST_TEST(sorted_values[2] <= sorted_values[3]);  
-  }  
+    BOOST_TEST(sorted_values[2] <= sorted_values[3]);
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

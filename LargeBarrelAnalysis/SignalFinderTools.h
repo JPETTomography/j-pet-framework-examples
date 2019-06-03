@@ -43,7 +43,7 @@ public:
   static const Permutation kIdentity;
 
   static const std::map<int, std::vector<JPetSigCh>> getSigChByPM(
-     const JPetTimeWindow* timeWindow, bool useCorrupts, int kPMIdRef
+     const JPetTimeWindow* timeWindow, bool useCorrupts, int refPMID
   );
   static std::vector<JPetRawSignal> buildAllSignals(
     const std::map<int, std::vector<JPetSigCh>>& sigChByPM,
@@ -67,6 +67,6 @@ public:
   );
   static ThresholdOrderings findThresholdOrders(const JPetParamBank& bank);
   static void permuteThresholdsByValue(const ThresholdValues& threshold_values, Permutation& new_ordering);
-  
+
 };
 #endif /* !SIGNALFINDERTOOLS_H */
