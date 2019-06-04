@@ -186,15 +186,8 @@ void HitFinder::initialiseHistograms(){
     ->GetYaxis()->SetTitle("Number of Unused Signals in Scintillator");
 
   getStatistics().createHistogram(new TH1F(
-    "remain_signals_tot", "TOT of Unused Signals", 200, 0.0, 50000.0
-  ));
-  getStatistics().getHisto1D("remain_signals_tot")
-    ->GetXaxis()->SetTitle("Time over Threshold [ps]");
-  getStatistics().getHisto1D("remain_signals_tot")
-    ->GetYaxis()->SetTitle("Number of Signals");
-
-  getStatistics().createHistogram(new TH1F(
-    "remain_signals_tdiff", "Time Diff of an unused signal and the consecutive one", 200, 0.0, 50000.0
+    "remain_signals_tdiff", "Time Diff of an unused signal and the consecutive one",
+    200, fABTimeDiff, 50000.0+fABTimeDiff
   ));
   getStatistics().getHisto1D("remain_signals_tdiff")
     ->GetXaxis()->SetTitle("Time difference [ps]");

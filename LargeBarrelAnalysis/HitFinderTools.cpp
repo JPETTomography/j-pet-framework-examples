@@ -125,18 +125,9 @@ vector<JPetHit> HitFinderTools::matchSignals(
         }
       } else {
         if(saveHistos && physSig.getPM().getSide() != slotSignals.at(j).getPM().getSide()){
-          float tot = 0.0;
-          auto sigLead = physSig.getRecoSignal().getRawSignal()
-            .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-          auto sigTrail = physSig.getRecoSignal().getRawSignal()
-            .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-          if (sigLead.size() > 0 && sigTrail.size() > 0){
-            for (unsigned i = 0; i < sigLead.size() && i < sigTrail.size(); i++){
-              tot += (sigTrail.at(i).getValue() - sigLead.at(i).getValue());
-            }
-          }
-          stats.getHisto1D("remain_signals_tot")->Fill(tot);
-          stats.getHisto1D("remain_signals_tdiff")->Fill(slotSignals.at(j).getTime() - physSig.getTime());
+          stats.getHisto1D("remain_signals_tdiff")->Fill(
+            slotSignals.at(j).getTime() - physSig.getTime()
+          );
         }
         remainSignals.push_back(physSig);
         slotSignals.erase(slotSignals.begin() + 0);
