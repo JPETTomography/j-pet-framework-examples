@@ -15,6 +15,7 @@ set(projectName InterThresholdCalibration)
 ## Auxiliary files
 set(AUXILLIARY_FILES
   userParams.json
+  PARAMETERS.md
   README.md
 )
 
