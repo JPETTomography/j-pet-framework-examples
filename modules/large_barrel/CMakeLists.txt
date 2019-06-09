@@ -1,20 +1,19 @@
 set(projectName JPetRecoImageTools)
 
-
 ######################################################################
 ### this section should not need to be modified for a new project
 ######################################################################
 project(${projectName} CXX) # using only C++
 
-set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/JPetRecoImageTools/JPetRecoImageTools.cpp)
-set(HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/JPetRecoImageTools/JPetFilterCosine.h
-            ${CMAKE_CURRENT_SOURCE_DIR}/JPetRecoImageTools/JPetFilterHamming.h
-            ${CMAKE_CURRENT_SOURCE_DIR}/JPetRecoImageTools/JPetFilterInterface.h
-            ${CMAKE_CURRENT_SOURCE_DIR}/JPetRecoImageTools/JPetFilterNone.h
-            ${CMAKE_CURRENT_SOURCE_DIR}/JPetRecoImageTools/JPetFilterRamLak.h
-            ${CMAKE_CURRENT_SOURCE_DIR}/JPetRecoImageTools/JPetFilterRidgelet.h
-            ${CMAKE_CURRENT_SOURCE_DIR}/JPetRecoImageTools/JPetFilterSheppLogan.h
-            ${CMAKE_CURRENT_SOURCE_DIR}/JPetRecoImageTools/JPetRecoImageTools.h)
+set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${projectName}/JPetRecoImageTools.cpp)
+set(HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/${projectName}/JPetFilterCosine.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/${projectName}/JPetFilterHamming.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/${projectName}/JPetFilterInterface.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/${projectName}/JPetFilterNone.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/${projectName}/JPetFilterRamLak.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/${projectName}/JPetFilterRidgelet.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/${projectName}/JPetFilterSheppLogan.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/${projectName}/JPetRecoImageTools.h)
 ######################################################################
 ### Configure FFTW(based on: https://github.com/egpbos/findFFTW)
 ######################################################################
@@ -42,6 +41,6 @@ find_package(FFTW REQUIRED COMPONENTS DOUBLE_LIB)
 
 add_library(${projectName} SHARED ${SOURCES} ${HEADERS})
 target_include_directories(${projectName} PUBLIC
-                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/JPetRecoImageTools>
-                           $<BUILD_INTERFACE:${FFTW_INCLUDE_DIRS})
+                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${projectName}>
+                           $<BUILD_INTERFACE:${FFTW_INCLUDE_DIRS}>)
 target_link_libraries(${projectName} PRIVATE JPetFramework::JPetFramework ${FFTW_LIBRARIES})
