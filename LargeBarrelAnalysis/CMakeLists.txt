@@ -63,7 +63,8 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizer.cpp
 
 
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})
-target_link_libraries(${projectBinary} JPetFramework::JPetFramework)
+target_link_libraries(${projectBinary} JPetFramework::JPetFramework
+                                       Boost::program_options)
 
 add_custom_target(clean_data_${projectName}
   COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root)
