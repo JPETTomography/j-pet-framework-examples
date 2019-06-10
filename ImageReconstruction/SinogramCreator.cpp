@@ -180,6 +180,8 @@ bool SinogramCreator::terminate()
   return true;
 }
 
+bool SinogramCreator::atenuation(const float value) { return distribution(generator) <= value; }
+
 void SinogramCreator::setUpOptions()
 {
   auto opts = getOptions();

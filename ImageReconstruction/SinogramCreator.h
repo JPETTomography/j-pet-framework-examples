@@ -26,6 +26,7 @@
 #include "JPetHit/JPetHit.h"
 #include "JPetUserTask/JPetUserTask.h"
 #include "SinogramCreatorTools.h"
+#include <random>
 #include <string>
 #include <vector>
 
@@ -89,6 +90,8 @@ protected:
    */
   void saveResult(const JPetRecoImageTools::SparseMatrix& result, const std::string& outputFileName);
 
+  bool atenuation(const float value);
+
   JPetRecoImageTools::SparseMatrix** fSinogram = nullptr;
   JPetRecoImageTools::Matrix2DTOF* fTOFInformation = nullptr;
 
@@ -123,6 +126,9 @@ private:
   const std::string kEnableTOFReconstrution = "SinogramCreator_EnableKDEReconstruction_bool";
   const std::string kReconstructSliceNumbers = "SinogramCreator_ReconstructSliceNumbers_std::vector<int>";
   std::string fOutFileName = "sinogram";
+
+  std::default_random_engine generator;
+  std::uniform_real_distribution<double> distribution;
 };
 
 #endif /*  !SINOGRAMCREATOR_H */
