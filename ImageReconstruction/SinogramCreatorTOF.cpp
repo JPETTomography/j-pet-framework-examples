@@ -76,19 +76,21 @@ void SinogramCreatorTOF::generateSinogram()
 
   for (const auto& inputPath : fInputData)
   {
+    numberOfCorrectHits = 0;
     std::ifstream in(inputPath);
     while (in.peek() != EOF)
     {
-
       in >> firstX >> firstY >> firstZ >> firstT >> secondX >> secondY >> secondZ >> secondT >> skip >> skip >> skip >> skip >> coincidence >> skip >>
           skip >> skip;
-
+      // in >> firstX >> firstY >> firstZ >> firstT >> secondX >> secondY >> secondZ >> secondT;
       if (coincidence != 1) // 1 == true event
         continue;
 
       if (analyzeHits(firstX, firstY, firstZ, firstT, secondX, secondY, secondZ, secondT))
       {
         numberOfCorrectHits++;
+        // if(numberOfCorrectHits % 10000 == 0)
+        //  break;
       }
       totalHits++;
     }
@@ -103,8 +105,6 @@ bool SinogramCreatorTOF::exec() { return true; }
 
 bool SinogramCreatorTOF::terminate()
 {
-
-  JPetFilterRamLak ramLakFilter(fRamLakCutOffValue);
   JPetRecoImageTools::FourierTransformFunction f = JPetRecoImageTools::doFFTW1D;
 
   for (int i = 0; i < fZSplitNumber; i++)
@@ -112,22 +112,27 @@ bool SinogramCreatorTOF::terminate()
     int sliceNumber = i - (fZSplitNumber / 2);
     if (std::find(fReconstructSliceNumbers.begin(), fReconstructSliceNumbers.end(), sliceNumber) == fReconstructSliceNumbers.end())
       continue;
-
-    JPetRecoImageTools::Matrix3D filtered;
-    int tofID = 0;
-    for (auto& sinogram : fSinogramDataTOF[i])
+    for (float value = 0.95; value <= 1.0; value += 0.01)
     {
-      filtered[sinogram.first] = JPetRecoImageTools::FilterSinogram(f, ramLakFilter, sinogram.second);
-      saveResult((filtered[sinogram.first]), fOutFileName + "sinogram_" + std::to_string(sliceNumber) + "_" + std::to_string(fZSplitRange[i].first) +
-                                                 "_" + std::to_string(fZSplitRange[i].second) + "_TOFID_" + std::to_string(tofID) + ".ppm");
-      tofID++;
-    }
-    JPetRecoImageTools::SparseMatrix result = JPetRecoImageTools::backProjectRealTOF(
-        filtered, kReconstructionMaxAngle, JPetRecoImageTools::rescale, 0, 255, fReconstructionDistanceAccuracy, fTOFSliceSize,
-        fTOFSigma * 2.99792458 * fReconstructionDistanceAccuracy); // TODO: change speed to light to const
+      JPetFilterRamLak ramLakFilter(value);
+      JPetRecoImageTools::Matrix3D filtered;
+      int tofID = 0;
+      for (auto& sinogram : fSinogramDataTOF[i])
+      {
+        filtered[sinogram.first] = JPetRecoImageTools::FilterSinogram(f, ramLakFilter, sinogram.second);
+        // saveResult((filtered[sinogram.first]), fOutFileName + "sinogram_" + std::to_string(sliceNumber) + "_" +
+        // std::to_string(fZSplitRange[i].first) +
+        //                                          "_" + std::to_string(fZSplitRange[i].second) + "_TOFID_" + std::to_string(tofID) + ".ppm");
+        tofID++;
+      }
+      JPetRecoImageTools::SparseMatrix result = JPetRecoImageTools::backProjectRealTOF(
+          filtered, kReconstructionMaxAngle, JPetRecoImageTools::nonRescale, 0, 255, fReconstructionDistanceAccuracy, fTOFSliceSize,
+          fTOFSigma * 2.99792458 * fReconstructionDistanceAccuracy); // TODO: change speed to light to const
 
-    saveResult(result, fOutFileName + "reconstruction_with_TOFFBP_" + std::to_string(sliceNumber) + "_" + std::to_string(fZSplitRange[i].first) +
-                           "_" + std::to_string(fZSplitRange[i].second) + ".ppm");
+      saveResult(result, fOutFileName + "reconstruction_with_TOFFBP_RamLakCutOff_" + std::to_string(value) + "_slicenumber_" +
+                             std::to_string(sliceNumber) + "_" + std::to_string(fZSplitRange[i].first) + "_" +
+                             std::to_string(fZSplitRange[i].second) + ".ppm");
+    }
   }
   delete[] fSinogram;
   delete[] fMaxValueInSinogram;
