@@ -84,7 +84,12 @@ void SinogramCreatorMC::generateSinogram()
       if (coincidence != 1) // 1 == true event
         continue;
 
-      if (analyzeHits(TVector3(firstX, firstY, firstZ), firstT, TVector3(secondX, secondY, secondZ), secondT)) { numberOfCorrectHits++; }
+      if (analyzeHits(TVector3(firstX, firstY, firstZ), firstT, TVector3(secondX, secondY, secondZ), secondT))
+      {
+        numberOfCorrectHits++;
+        // if(numberOfCorrectHits % 10000 == 0)
+        //  break;
+      }
       totalHits++;
     }
   }
@@ -97,7 +102,6 @@ bool SinogramCreatorMC::exec() { return true; }
 
 bool SinogramCreatorMC::terminate()
 {
-  JPetFilterRamLak filter(1);
   JPetRecoImageTools::FourierTransformFunction f = JPetRecoImageTools::doFFTW1D;
 
   for (int i = 0; i < fZSplitNumber; i++)
@@ -105,22 +109,30 @@ bool SinogramCreatorMC::terminate()
     int sliceNumber = i - (fZSplitNumber / 2);
     if (std::find(fReconstructSliceNumbers.begin(), fReconstructSliceNumbers.end(), sliceNumber) == fReconstructSliceNumbers.end()) continue;
     // save sinogram
-    saveResult((*fSinogram[i]), fOutFileName + "sinogram_" + std::to_string(sliceNumber) + "_" + std::to_string(fZSplitRange[i].first) + "_" +
-                                    std::to_string(fZSplitRange[i].second) + ".ppm");
+    // saveResult((*fSinogram[i]), fOutFileName + "sinogram_" + std::to_string(sliceNumber) + "_" + std::to_string(fZSplitRange[i].first) + "_" +
+    //                                std::to_string(fZSplitRange[i].second) + ".ppm");
 
     // calculate KDE
-    JPetRecoImageTools::SparseMatrix result =
-        JPetRecoImageTools::backProjectWithKDE((*fSinogram[i]), fTOFInformation[i], (*fSinogram[i]).size2(), JPetRecoImageTools::nonRescale, 0, 255);
+    // JPetRecoImageTools::SparseMatrix result =
+    //    JPetRecoImageTools::backProjectWithKDE((*fSinogram[i]), fTOFInformation[i], (*fSinogram[i]).size2(), JPetRecoImageTools::nonRescale, 0,
+    //    255);
     // save KDE
-    saveResult(result, fOutFileName + "reconstruction_with_KDE_" + std::to_string(sliceNumber) + ".ppm");
+    // saveResult(result, fOutFileName + "reconstruction_with_KDE_" + std::to_string(sliceNumber) + "_" + std::to_string(fZSplitRange[i].first) +
+    //                       "_" + std::to_string(fZSplitRange[i].second) + ".ppm");
 
-    // filter sinogram
-    //JPetRecoImageTools::SparseMatrix filteredSinogram = JPetRecoImageTools::FilterSinogram(f, filter, (*fSinogram[i]));
-    // backproject
-    // JPetRecoImageTools::SparseMatrix resultBP =
-    //    JPetRecoImageTools::backProject(filteredSinogram, (*fSinogram[i]).size2(), JPetRecoImageTools::nonRescale, 0, 255);
-    // save FBP
-    //saveResult(resultBP, fOutFileName + "reconstruction_with_FBP" + std::to_string(sliceNumber) + ".ppm");
+    for (float value = 0.95; value <= 1.0; value += 0.01)
+    {
+      JPetFilterRamLak filter(value);
+      // filter sinogram
+      JPetRecoImageTools::SparseMatrix filteredSinogram = JPetRecoImageTools::FilterSinogram(f, filter, (*fSinogram[i]));
+      // backproject
+      JPetRecoImageTools::SparseMatrix resultBP =
+          JPetRecoImageTools::backProject(filteredSinogram, (*fSinogram[i]).size2(), JPetRecoImageTools::nonRescale, 0, 255);
+      // save FBP
+      saveResult(resultBP, fOutFileName + "reconstruction_with_FBP_RamLakCutOff_" + std::to_string(value) + "_slicenumber_" +
+                               std::to_string(sliceNumber) + "_" + std::to_string(fZSplitRange[i].first) + "_" +
+                               std::to_string(fZSplitRange[i].second) + ".ppm");
+    }
   }
 
   delete[] fSinogram;
