@@ -274,7 +274,9 @@ JPetRecoImageTools::SparseMatrix JPetRecoImageTools::backProjectRealTOF(Matrix3D
                                                                         int rescaleMinCutoff, int rescaleFactor, double sinogramAccuracy,
                                                                         double tofBinSigma, double tofSigma)
 {
-  const auto sinogramBegin = sinogram.cbegin();
+  if (sinogram.size() == 0)
+    return SparseMatrix(0, 0);
+  const auto sinogramBegin = sinogram.cbegin(0);
   int imageSize = sinogramBegin->second.size1();
   double center = (double)(imageSize - 1) / 2.0;
   double center2 = center * center;
@@ -307,7 +309,7 @@ JPetRecoImageTools::SparseMatrix JPetRecoImageTools::backProjectRealTOF(Matrix3D
           if (yMinusCenter2 + xMinusCenter2 < center2)
           {
             double t = ttemp - yMinusCenter * sin;
-            int n = std::floor(t + 0.5F);
+            int n = std::floor(t + 0.5);
 
             float lor_center_x = center + cos * (n - center);
             float lor_center_y = center + sin * (n - center);
@@ -316,6 +318,8 @@ JPetRecoImageTools::SparseMatrix JPetRecoImageTools::backProjectRealTOF(Matrix3D
             double diffBetweenLORCenterXandX = lor_center_x - x;
             double distanceToCenterOfLOR =
                 std::sqrt((diffBetweenLORCenterXandX * diffBetweenLORCenterXandX) + (diffBetweenLORCenterYandY * diffBetweenLORCenterYandY));
+            if (distanceToCenterOfLOR > 3. * tofSigma)
+              continue;
             if (x < lor_center_x) distanceToCenterOfLOR = -distanceToCenterOfLOR;
             reconstructedProjection(y, x) += tofBin.second(n, angle) * tofWeight(lor_tof_center, distanceToCenterOfLOR, tofSigma);
           }
@@ -387,7 +391,7 @@ JPetRecoImageTools::SparseMatrix JPetRecoImageTools::backProjectWithKDE(SparseMa
           {
             float delta = tofVector[i] * 0.299792458;
             double distributionProbability = normalDistributionProbability(distanceToCenterOfLOR, delta, 150.);
-            reconstructedProjection(y, x) += distributionProbability;
+            reconstructedProjection(y, x) += distributionProbability * 1000;
           }
         }
       }

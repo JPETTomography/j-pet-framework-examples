@@ -30,12 +30,19 @@ std::pair<int, float> SinogramCreatorTools::getAngleAndDistance(float firstX, fl
   if (std::abs(dx) < kEPSILON) return std::make_pair(0, firstX);
   if (std::abs(dy) < kEPSILON) return std::make_pair(90, firstY);
   float slope = dy / dx;
+  if (std::abs(slope) < kEPSILON)
+    slope = -1.f;
   float perpendicularSlope = -(1 / slope);
   float d = firstY - (slope * firstX);
   float x = -d / (perpendicularSlope - slope);
   float y = perpendicularSlope * x;
 
-  float angle = std::atan2(y, x) * (180.f / M_PI);
+  if (std::abs(d) < kEPSILON)
+    d = 1.f;
+  float xAngle = -d / (perpendicularSlope - slope);
+  float yAngle = perpendicularSlope * xAngle;
+
+  float angle = std::atan2(yAngle, xAngle) * (180.f / M_PI);
   const bool sign = y < 0.f;
   angle = fmod(angle + 360.f, 180.f);
   int angleResult = std::round(angle);
@@ -180,7 +187,7 @@ std::pair<TVector3,TVector3> SinogramCreatorTools::remapToSingleLayer(const TVec
   float delta = B * B - (4 * A * C);
   if(delta <= 0) {
     //std::cout << "Same points" << std::endl;
-    WARNING("Could not find 2 interaction points with single layer remap, returning same points..");
+    WARNING("Could not find 2 intersection points with single layer remap, returning same points..");
     return std::make_pair(firstHit, secondHit);
   }
 

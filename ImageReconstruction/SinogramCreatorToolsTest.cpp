@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE(test_angle_middle)
   const float maxDistance = 20.f;
   const float accuracy = 0.1f;
 
-  for (int i = 0; i < 360; i++)
+  /* for (int i = 0; i < 360; i++)
   {
     const float x1 = r * std::cos((i - 1) * (M_PI / 180.f));
     const float y1 = r * std::sin((i - 1) * (M_PI / 180.f));
@@ -36,6 +36,20 @@ BOOST_AUTO_TEST_CASE(test_angle_middle)
     BOOST_REQUIRE_EQUAL(result.second, i % 180);
     const float distance = i < 180 ? r : -r;
     const float distanceResult = SinogramCreatorTools::roundToNearesMultiplicity(distance + maxDistance, accuracy);
+    BOOST_REQUIRE_CLOSE(result.first, distanceResult, EPSILON);
+  }*/
+
+  for (int i = 0; i < 360; i++)
+  {
+    const float x1 = r * std::cos((i) * (M_PI / 180.f));
+    const float y1 = r * std::sin((i) * (M_PI / 180.f));
+    const float x2 = r * std::cos((i + 180) * (M_PI / 180.f));
+    const float y2 = r * std::sin((i + 180) * (M_PI / 180.f));
+    const auto result =
+        SinogramCreatorTools::getSinogramRepresentation(x1, y1, x2, y2, maxDistance, accuracy, std::ceil(maxDistance * 2.f * (1.f / accuracy)), 180);
+    int resultAngle = i < 90 ? 90 + i : i < 180 ? i - 90 : i < 270 ? i - 90 : i - 270;
+    BOOST_REQUIRE_EQUAL(result.second, resultAngle);
+    const float distanceResult = SinogramCreatorTools::roundToNearesMultiplicity(maxDistance, accuracy);
     BOOST_REQUIRE_CLOSE(result.first, distanceResult, EPSILON);
   }
 }
