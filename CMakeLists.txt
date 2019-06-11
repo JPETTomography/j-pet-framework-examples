@@ -121,10 +121,32 @@ set_property(TARGET ROOT::Flags_CXX APPEND PROPERTY
 
 ################################################################################
 ## Find JPetFramework
-find_package(JPetFramework CONFIG REQUIRED)
+find_package(JPetFramework CONFIG QUIET)
 if(JPetFramework_FOUND)
   message(STATUS "JPetFramework (version ${JPetFramework_VERSION}) was found using JPetFrameworkConfig")
-endif()
+else()
+  include(ExternalProject)
+  message(STATUS "JPetFramework was not found..")
+  set(GITHUB_URL "https://github.com/grey277/j-pet-framework.git")
+  set(GIT_TAG "cmake")
+
+  message(STATUS "Adding external project to download and compile JPetFramework from: ${GITHUB_URL} with tag: ${GIT_TAG}")
+
+  configure_file(CMakeListsJPetFramework.txt.in
+                 JPetFramework-download/CMakeLists.txt)
+
+  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" -DPACKAGE_TESTS=OFF . 
+                  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/JPetFramework-download )
+
+  execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/JPetFramework-download )
+
+  set(JPetFramework_DIR ${CMAKE_BINARY_DIR}/j-pet-framework-build/lib/cmakeJPetFramework)
+  find_package(JPetFramework CONFIG REQUIRED)
+  if(JPetFramework_FOUND)
+    message(STATUS "JPetFramework (version ${JPetFramework_VERSION}) was found using JPetFrameworkConfig")
+  endif()
+endif(JPetFramework_FOUND)
 ################################################################################
 ## Download input and configuration files
 ## The script shouldn't do anything if the data is present and correct.
