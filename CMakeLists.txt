@@ -141,7 +141,8 @@ else()
   execute_process(COMMAND ${CMAKE_COMMAND} --build .
                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/JPetFramework-download )
 
-  set(JPetFramework_DIR ${CMAKE_BINARY_DIR}/j-pet-framework-build/lib/cmakeJPetFramework)
+  set(JPetFramework_DIR ${CMAKE_BINARY_DIR}/j-pet-framework-build/lib/cmake/JPetFramework)
+  set(Unpacker2_DIR ${CMAKE_BINARY_DIR}/JPetFramework-download/JPetFramework-prefix/src/JPetFramework-build/src/Unpacker2-build/lib/cmake/Unpacker2)
   find_package(JPetFramework CONFIG REQUIRED)
   if(JPetFramework_FOUND)
     message(STATUS "JPetFramework (version ${JPetFramework_VERSION}) was found using JPetFrameworkConfig")
