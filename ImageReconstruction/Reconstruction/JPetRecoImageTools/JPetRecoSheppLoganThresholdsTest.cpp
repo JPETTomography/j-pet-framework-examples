@@ -24,7 +24,8 @@ int getMaxValue(const JPetRecoImageTools::Matrix2DProj& result)
   {
     for (unsigned int j = 0; j < result[0].size(); j++)
     {
-      if (static_cast<int>(result[i][j]) > maxValue) maxValue = static_cast<int>(result[i][j]);
+      if (static_cast<int>(result[i][j]) > maxValue)
+        maxValue = static_cast<int>(result[i][j]);
     }
   }
   return maxValue;
@@ -42,7 +43,10 @@ void saveResult(const JPetRecoImageTools::Matrix2DProj& result, const std::strin
     for (unsigned int j = 0; j < result[0].size(); j++)
     {
       int resultInt = static_cast<int>(result[i][j]);
-      if (resultInt < 0) { resultInt = 0; }
+      if (resultInt < 0)
+      {
+        resultInt = 0;
+      }
       res << resultInt << " ";
     }
     res << std::endl;

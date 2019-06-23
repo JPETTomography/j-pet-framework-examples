@@ -14,8 +14,11 @@
  */
 
 #include "SinogramCreatorMC.h"
+#include "JPetSinogramType.h"
+#include "JPetWriter/JPetWriter.h"
 #include <TH1F.h>
 #include <TH2I.h>
+
 using namespace jpet_options_tools;
 
 SinogramCreatorMC::SinogramCreatorMC(const char* name) : SinogramCreator(name) {}
@@ -26,24 +29,6 @@ bool SinogramCreatorMC::init()
 {
   SinogramCreatorMC::setUpOptions();
   fOutputEvents = new JPetTimeWindow("JPetEvent");
-
-  getStatistics().createHistogram(new TH2I("reconstruction_histogram", "reconstruction_histogram histogram",
-                                           std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1, 0.f,
-                                           fMaxReconstructionLayerRadius, kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
-
-  getStatistics().createHistogram(
-      new TH1F("pos_dis", "Position distance real data", (fMaxReconstructionLayerRadius)*10 * 5, 0.f, fMaxReconstructionLayerRadius));
-  getStatistics().createHistogram(new TH1F("angle", "Position angle real data", kReconstructionMaxAngle, 0, kReconstructionMaxAngle));
-
-#if ROOT_VERSION_CODE < ROOT_VERSION(6, 0, 0)
-  getStatistics().getObject<TH2I>("reconstruction_histogram")->SetBit(TH2::kCanRebin);
-  getStatistics().getObject<TH1F>("angle")->SetBit(TH1::kCanRebin);
-  getStatistics().getObject<TH1F>("pos_dis")->SetBit(TH1::kCanRebin);
-#else
-  getStatistics().getObject<TH2I>("reconstruction_histogram")->SetCanExtend(TH1::kAllAxes);
-  getStatistics().getObject<TH1F>("angle")->SetCanExtend(TH1::kAllAxes);
-  getStatistics().getObject<TH1F>("pos_dis")->SetCanExtend(TH1::kAllAxes);
-#endif
 
   generateSinogram();
   return true;
@@ -67,8 +52,11 @@ void SinogramCreatorMC::generateSinogram()
 
   if (fSinogram == nullptr)
   {
-    fSinogram = new JPetRecoImageTools::SparseMatrix*[fZSplitNumber];
-    for (int i = 0; i < fZSplitNumber; i++) { fSinogram[i] = new JPetRecoImageTools::SparseMatrix(fMaxDistanceNumber, kReconstructionMaxAngle); }
+    fSinogram = new JPetSinogramType::SparseMatrix*[fZSplitNumber];
+    for (int i = 0; i < fZSplitNumber; i++)
+    {
+      fSinogram[i] = new JPetSinogramType::SparseMatrix(fMaxDistanceNumber, kReconstructionMaxAngle);
+    }
   }
 
   for (const auto& inputPath : fInputData)
@@ -102,7 +90,18 @@ bool SinogramCreatorMC::exec() { return true; }
 
 bool SinogramCreatorMC::terminate()
 {
-  JPetRecoImageTools::FourierTransformFunction f = JPetRecoImageTools::doFFTW1D;
+  // Save sinogram to root file.
+  JPetSinogramType map("Sinogram", fZSplitNumber);
+  for (int k = 0; k < fZSplitNumber; k++)
+  {
+    map.addSlice((*fSinogram[k]), k);
+  }
+  JPetWriter* writer = new JPetWriter(fOutFileName.c_str());
+  map.saveSinogramToFile(writer);
+  writer->closeFile();
+
+  delete[] fSinogram;
+  /* JPetRecoImageTools::FourierTransformFunction f = JPetRecoImageTools::doFFTW1D;
 
   for (int i = 0; i < fZSplitNumber; i++)
   {
@@ -113,7 +112,7 @@ bool SinogramCreatorMC::terminate()
     //                                std::to_string(fZSplitRange[i].second) + ".ppm");
 
     // calculate KDE
-    // JPetRecoImageTools::SparseMatrix result =
+    // JPetSinogramType::SparseMatrix result =
     //    JPetRecoImageTools::backProjectWithKDE((*fSinogram[i]), fTOFInformation[i], (*fSinogram[i]).size2(), JPetRecoImageTools::nonRescale, 0,
     //    255);
     // save KDE
@@ -124,9 +123,9 @@ bool SinogramCreatorMC::terminate()
     {
       JPetFilterRamLak filter(value);
       // filter sinogram
-      JPetRecoImageTools::SparseMatrix filteredSinogram = JPetRecoImageTools::FilterSinogram(f, filter, (*fSinogram[i]));
+      JPetSinogramType::SparseMatrix filteredSinogram = JPetRecoImageTools::FilterSinogram(f, filter, (*fSinogram[i]));
       // backproject
-      JPetRecoImageTools::SparseMatrix resultBP =
+      JPetSinogramType::SparseMatrix resultBP =
           JPetRecoImageTools::backProject(filteredSinogram, (*fSinogram[i]).size2(), JPetRecoImageTools::nonRescale, 0, 255);
       // save FBP
       saveResult(resultBP, fOutFileName + "reconstruction_with_FBP_RamLakCutOff_" + std::to_string(value) + "_slicenumber_" +
@@ -137,7 +136,7 @@ bool SinogramCreatorMC::terminate()
 
   delete[] fSinogram;
   delete[] fMaxValueInSinogram;
-
+  */
   return true;
 }
 
@@ -156,8 +155,6 @@ void SinogramCreatorMC::setUpOptions()
   if (isOptionSet(opts, kEnableTOFReconstruction)) { fEnableKDEReconstruction = getOptionAsBool(opts, kEnableTOFReconstruction); }
 
   fTOFInformation = new JPetRecoImageTools::Matrix2DTOF[fZSplitNumber];
-  fMaxValueInSinogram = new int[fZSplitNumber];
-  fCurrentValueInSinogram = new int[fZSplitNumber];
   const float maxZRange = fScintillatorLenght / 2.f;
   float range = (2.f * maxZRange) / fZSplitNumber;
   for (int i = 0; i < fZSplitNumber; i++)
@@ -165,8 +162,6 @@ void SinogramCreatorMC::setUpOptions()
     float rangeStart = (i * range) - maxZRange;
     float rangeEnd = ((i + 1) * range) - maxZRange;
     fZSplitRange.push_back(std::make_pair(rangeStart, rangeEnd));
-    fCurrentValueInSinogram[i] = 0;
-    fMaxValueInSinogram[i] = 0;
   }
 
   fMaxDistanceNumber = std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;

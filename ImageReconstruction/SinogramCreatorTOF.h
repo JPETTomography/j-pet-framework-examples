@@ -52,7 +52,6 @@ private:
   const std::string kEnableObliqueLORRemapping = "SinogramCreatorTOF_EnableObliqueLORRemapping_bool";
   const std::string kEnableTOFReconstruction = "SinogramCreatorTOF_EnableKDEReconstruction_bool";
   const std::string kTOFSliceSize = "SinogramCreatorTOF_TOFSliceSize_float";
-  const std::string kReconstructSliceNumbers = "SinogramCreatorTOF_ReconstructSliceNumber_std::vector<int>";
   const std::string kReconstructionTOFSigma = "SinogramCreatorTOF_ReconstructionTOFSigma_float";
   const std::string kRamLakCutOffValue = "SinogramCreatorTOF_RamLakCutOffValue_double";
 
@@ -62,7 +61,7 @@ private:
   float fTOFSigma = 150.f;
   double fRamLakCutOffValue = 1.;
 
-  JPetRecoImageTools::Matrix3D* fSinogramDataTOF = nullptr;
+  JPetSinogramType::WholeSinogram fSinogramDataTOF;
 };
 
 #endif /*  !SINOGRAMCREATORTOF_H */

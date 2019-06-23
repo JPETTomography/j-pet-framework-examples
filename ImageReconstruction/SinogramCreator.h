@@ -77,22 +77,9 @@ protected:
    */
   float getTOFRescaleFactor(const TVector3& posDiff) const;
 
-  /**
-   * @brief Helper function used in saving result
-   * \param result matrix to find max value
-   * \return max value of matrix
-   */
-  int getMaxValue(const JPetRecoImageTools::SparseMatrix& result);
-  /**
-   * @brief Helper function used to save results(sinograms and reconstructed images)
-   * \param result resulted matrix to save
-   * \param outputFileName name with path where to save result
-   */
-  void saveResult(const JPetRecoImageTools::SparseMatrix& result, const std::string& outputFileName);
-
   bool atenuation(const float value);
 
-  JPetRecoImageTools::SparseMatrix** fSinogram = nullptr;
+  JPetSinogramType::SparseMatrix** fSinogram = nullptr;
   JPetRecoImageTools::Matrix2DTOF* fTOFInformation = nullptr;
 
   const int kReconstructionMaxAngle = 180;
@@ -100,15 +87,11 @@ protected:
   int fMaxDistanceNumber = 0;
   std::vector<std::pair<float, float>> fZSplitRange;
 
-  int* fMaxValueInSinogram = nullptr; // to fill later in output file
-  int* fCurrentValueInSinogram = nullptr;
-
   float fMaxReconstructionLayerRadius = 0.f;    // in cm
   float fReconstructionDistanceAccuracy = 0.1f; // in cm, 1mm accuracy, maximal accuracy: 0.001f
   float fScintillatorLenght = 50.0f;            // in cm
   bool fEnableObliqueLORRemapping = false;      // enable remapping LORs to correct sinogram slices based on TOF value
   bool fEnableKDEReconstruction = false;        // enable saving extra TOF information
-  std::vector<int> fReconstructSliceNumbers;    // reconstruct only slices that was given in userParams
 
   const float kEPSILON = 0.0001f;
 
@@ -124,8 +107,8 @@ private:
   const std::string kScintillatorLenght = "SinogramCreator_ScintillatorLenght_float";
   const std::string kEnableObliqueLORRemapping = "SinogramCreator_EnableObliqueLORRemapping_bool";
   const std::string kEnableTOFReconstrution = "SinogramCreator_EnableKDEReconstruction_bool";
-  const std::string kReconstructSliceNumbers = "SinogramCreator_ReconstructSliceNumbers_std::vector<int>";
-  std::string fOutFileName = "sinogram";
+
+  std::string fOutFileName = "sinogram.root";
 
   std::default_random_engine generator;
   std::uniform_real_distribution<double> distribution;

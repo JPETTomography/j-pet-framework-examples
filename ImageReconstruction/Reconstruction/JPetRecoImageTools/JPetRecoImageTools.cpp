@@ -57,11 +57,11 @@ std::function<double(int, int)> JPetRecoImageTools::matrixGetterFactory(const JP
   }
 }
 
-JPetSinogramType::SparseMatrix JPetRecoImageTools::createSinogramWithSingleInterpolation(JPetSinogramType::SparseMatrix& emissionMatrix, int nViews, int nScans,
-                                                                                           double angleBeg, double angleEnd,
-                                                                                           InterpolationFunc interpolationFunction,
-                                                                                           RescaleFunc rescaleFunc, int rescaleMinCutoff,
-                                                                                           int rescaleFactor)
+JPetSinogramType::SparseMatrix JPetRecoImageTools::createSinogramWithSingleInterpolation(JPetSinogramType::SparseMatrix& emissionMatrix, int nViews,
+                                                                                         int nScans, double angleBeg, double angleEnd,
+                                                                                         InterpolationFunc interpolationFunction,
+                                                                                         RescaleFunc rescaleFunc, int rescaleMinCutoff,
+                                                                                         int rescaleFactor)
 {
   assert(emissionMatrix.size1() > 0);
   assert(emissionMatrix.size1() == emissionMatrix.size2());
@@ -142,8 +142,8 @@ double JPetRecoImageTools::calculateProjection(const JPetSinogramType::SparseMat
 }
 
 JPetSinogramType::SparseMatrix JPetRecoImageTools::createSinogramWithDoubleInterpolation(JPetSinogramType::SparseMatrix& emissionMatrix, int nAngles,
-                                                                                           RescaleFunc rescaleFunc, int rescaleMinCutoff,
-                                                                                           int rescaleFactor)
+                                                                                         RescaleFunc rescaleFunc, int rescaleMinCutoff,
+                                                                                         int rescaleFactor)
 {
   assert(emissionMatrix.size1() > 0);
   assert(emissionMatrix.size1() == emissionMatrix.size2());
@@ -214,8 +214,8 @@ void JPetRecoImageTools::rescale(JPetSinogramType::SparseMatrix& matrix, double 
   }
 }
 
-JPetSinogramType::SparseMatrix JPetRecoImageTools::backProject(JPetSinogramType::SparseMatrix& sinogram, int nAngles, RescaleFunc rescaleFunc, int rescaleMinCutoff,
-                                                                 int rescaleFactor)
+JPetSinogramType::SparseMatrix JPetRecoImageTools::backProject(JPetSinogramType::SparseMatrix& sinogram, int nAngles, RescaleFunc rescaleFunc,
+                                                               int rescaleMinCutoff, int rescaleFactor)
 {
   int imageSize = sinogram.size1();
   double center = (double)(imageSize - 1) / 2.0;
@@ -271,8 +271,8 @@ int JPetRecoImageTools::getMaxValue(const JPetSinogramType::SparseMatrix& result
 }
 
 JPetSinogramType::SparseMatrix JPetRecoImageTools::backProjectRealTOF(JPetSinogramType::Matrix3D& sinogram, int nAngles, RescaleFunc rescaleFunc,
-                                                                        int rescaleMinCutoff, int rescaleFactor, double sinogramAccuracy,
-                                                                        double tofBinSigma, double tofSigma)
+                                                                      int rescaleMinCutoff, int rescaleFactor, double sinogramAccuracy,
+                                                                      double tofBinSigma, double tofSigma)
 {
   if (sinogram.size() == 0)
     return JPetSinogramType::SparseMatrix(0, 0);
@@ -345,7 +345,7 @@ double JPetRecoImageTools::tofWeight(double lor_tof_center, double lor_position,
 }
 
 JPetSinogramType::SparseMatrix JPetRecoImageTools::backProjectWithKDE(JPetSinogramType::SparseMatrix& sinogram, Matrix2DTOF& tof, int nAngles,
-                                                                        RescaleFunc rescaleFunc, int rescaleMinCutoff, int rescaleFactor)
+                                                                      RescaleFunc rescaleFunc, int rescaleMinCutoff, int rescaleFactor)
 {
   int imageSize = sinogram.size1();
   double center = (double)(imageSize - 1) / 2.0;
@@ -414,7 +414,7 @@ double JPetRecoImageTools::normalDistributionProbability(float x, float mean, fl
 }
 
 JPetSinogramType::SparseMatrix JPetRecoImageTools::FilterSinogram(JPetRecoImageTools::FourierTransformFunction& ftf,
-                                                                    JPetFilterInterface& filterFunction, JPetSinogramType::SparseMatrix& sinogram)
+                                                                  JPetFilterInterface& filterFunction, JPetSinogramType::SparseMatrix& sinogram)
 {
   return ftf(sinogram, filterFunction);
 }

@@ -28,10 +28,10 @@ class JPetSinogramType : public TObject
 {
 public:
   using SparseMatrix = boost::numeric::ublas::mapped_matrix<double>;
-  using Matrix3D = std::unordered_map<int, SparseMatrix>; 
+  using Matrix3D = std::unordered_map<int, SparseMatrix>;
   using WholeSinogram = std::vector<Matrix3D>; // slice number, tof window, sinogram matrix
 
-  JPetSinogramType() : fName("test") { }
+  JPetSinogramType() : fName("test") {}
   explicit JPetSinogramType(std::string name, unsigned int size) : fName(name), fSinogramType(size, Matrix3D()) {}
   ~JPetSinogramType();
 
@@ -63,17 +63,11 @@ public:
     return map;
   }
 
-  void addSlice(SparseMatrix object, int sliceNumber, int tofWindow = 0) 
-  { 
-    fSinogramType[sliceNumber].insert({tofWindow, object}); 
-  }
+  void addSlice(SparseMatrix object, int sliceNumber, int tofWindow = 0) { fSinogramType[sliceNumber].insert({tofWindow, object}); }
 
   void addSinogram(WholeSinogram object) { fSinogramType = object; }
-  
-  WholeSinogram getSinogram()
-  {
-    return fSinogramType;
-  }
+
+  WholeSinogram getSinogram() { return fSinogramType; }
 
   ClassDef(JPetSinogramType, 3);
 

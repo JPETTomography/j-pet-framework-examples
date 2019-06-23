@@ -31,7 +31,9 @@ set(ROOT_SCRIPTS
 set(projectBinary ${projectName}.x)
 project(${projectName} CXX)
 
-include_directories(../modules/large_barrel/JPetRecoImageTools/)
+add_subdirectory(Reconstruction)
+
+include_directories(Reconstruction/JPetRecoImageTools)
 
 file(GLOB HEADERS *.h)
 file(GLOB SOURCES *.cpp)

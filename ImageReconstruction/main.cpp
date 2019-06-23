@@ -17,6 +17,7 @@
 #include "ImageReco.h"
 #include "JPetManager/JPetManager.h"
 #include "MLEMRunner.h"
+#include "ReconstructionTask.h"
 #include "SinogramCreator.h"
 #include "SinogramCreatorMC.h"
 #include "SinogramCreatorTOF.h"
@@ -34,13 +35,15 @@ int main(int argc, const char* argv[])
     manager.registerTask<SinogramCreatorMC>("SinogramCreatorMC");
     manager.registerTask<MLEMRunner>("MLEMRunner");
     manager.registerTask<SinogramCreatorTOF>("SinogramCreatorTOF");
+    manager.registerTask<ReconstructionTask>("ReconstructionTask");
 
-    manager.useTask("FilterEvents", "unk.evt", "reco.unk.evt");
-    manager.useTask("MLEMRunner", "reco.unk.evt", "");
-    manager.useTask("ImageReco", "reco.unk.evt", "reco");
-    manager.useTask("SinogramCreator", "reco.unk.evt", "sino");
+    // manager.useTask("FilterEvents", "unk.evt", "reco.unk.evt");
+    // manager.useTask("MLEMRunner", "reco.unk.evt", "");
+    // manager.useTask("ImageReco", "reco.unk.evt", "reco");
+    // manager.useTask("SinogramCreator", "reco.unk.evt", "sino");
     manager.useTask("SinogramCreatorMC", "reco.unk.evt", "sino.mc");
-    manager.useTask("SinogramCreatorTOF", "reco.unk.evt", "sino.mc");
+    // manager.useTask("SinogramCreatorTOF", "reco.unk.evt", "sino.mc");
+    manager.useTask("ReconstructionTask", "sino.mc", "reco.mc");
 
     manager.run(argc, argv);
   }

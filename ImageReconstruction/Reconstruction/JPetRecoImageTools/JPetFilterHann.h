@@ -17,9 +17,10 @@
 #define _JPetFilterHann_H_
 #include "JPetFilterInterface.h"
 
-/*! \brief 
+/*! \brief
  */
-class JPetFilterHann : public JPetFilterInterface {
+class JPetFilterHann : public JPetFilterInterface
+{
 public:
   JPetFilterHann() {}
   explicit JPetFilterHann(double maxCutoff) { cutoff = maxCutoff; }

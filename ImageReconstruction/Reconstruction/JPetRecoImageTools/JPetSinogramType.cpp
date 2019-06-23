@@ -17,4 +17,4 @@
 
 ClassImp(JPetSinogramType);
 
-JPetSinogramType::~JPetSinogramType() { }
+JPetSinogramType::~JPetSinogramType() {}

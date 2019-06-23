@@ -48,7 +48,6 @@ private:
   const std::string kInputDataKey = "SinogramCreatorMC_InputDataPaths_std::vector<std::string>";
   const std::string kEnableObliqueLORRemapping = "SinogramCreatorMC_EnableObliqueLORRemapping_bool";
   const std::string kEnableTOFReconstruction = "SinogramCreatorMC_EnableKDEReconstruction_bool";
-  const std::string kReconstructSliceNumbers = "SinogramCreatorMC_ReconstructSliceNumber_std::vector<int>";
 
   std::vector<std::string> fInputData{"sinogram_data.txt"};
   std::string fOutFileName = "sinogramMC";
