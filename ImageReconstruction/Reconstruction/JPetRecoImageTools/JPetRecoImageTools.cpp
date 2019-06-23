@@ -214,7 +214,7 @@ void JPetRecoImageTools::rescale(JPetSinogramType::SparseMatrix& matrix, double 
   }
 }
 
-JPetSinogramType::SparseMatrix JPetRecoImageTools::backProject(JPetSinogramType::SparseMatrix& sinogram, int nAngles, RescaleFunc rescaleFunc,
+JPetSinogramType::SparseMatrix JPetRecoImageTools::backProject(const JPetSinogramType::SparseMatrix& sinogram, int nAngles, RescaleFunc rescaleFunc,
                                                                int rescaleMinCutoff, int rescaleFactor)
 {
   int imageSize = sinogram.size1();
@@ -270,9 +270,9 @@ int JPetRecoImageTools::getMaxValue(const JPetSinogramType::SparseMatrix& result
   return maxValue;
 }
 
-JPetSinogramType::SparseMatrix JPetRecoImageTools::backProjectRealTOF(JPetSinogramType::Matrix3D& sinogram, double sinogramAccuracy, double tofWindow,
-                                                                      double lorTOFSigma, RescaleFunc rescaleFunc, int rescaleMinCutoff,
-                                                                      int rescaleFactor)
+JPetSinogramType::SparseMatrix JPetRecoImageTools::backProjectRealTOF(const JPetSinogramType::Matrix3D& sinogram, float sinogramAccuracy,
+                                                                      float tofWindow, float lorTOFSigma, RescaleFunc rescaleFunc,
+                                                                      int rescaleMinCutoff, int rescaleFactor)
 {
   if (sinogram.size() == 0)
     return JPetSinogramType::SparseMatrix(0, 0);
@@ -287,7 +287,7 @@ JPetSinogramType::SparseMatrix JPetRecoImageTools::backProjectRealTOF(JPetSinogr
 
   // const int max_sigma_multi = 3;
 
-  for (int angle = 0; angle < nAngles; angle++)
+  for (int angle = 0; angle < 180; angle++)
   {
     double cos = std::cos((double)angle * (double)angleStep);
     double sin = std::sin((double)angle * (double)angleStep);
@@ -344,7 +344,7 @@ double JPetRecoImageTools::tofWeight(double lor_tof_center, double lor_position,
   return std::exp(-x / y);
 }
 
-JPetSinogramType::SparseMatrix JPetRecoImageTools::backProjectWithKDE(JPetSinogramType::SparseMatrix& sinogram, Matrix2DTOF& tof, int nAngles,
+JPetSinogramType::SparseMatrix JPetRecoImageTools::backProjectWithKDE(const JPetSinogramType::SparseMatrix& sinogram, Matrix2DTOF& tof, int nAngles,
                                                                       RescaleFunc rescaleFunc, int rescaleMinCutoff, int rescaleFactor)
 {
   int imageSize = sinogram.size1();
@@ -414,12 +414,12 @@ double JPetRecoImageTools::normalDistributionProbability(float x, float mean, fl
 }
 
 JPetSinogramType::SparseMatrix JPetRecoImageTools::FilterSinogram(JPetRecoImageTools::FourierTransformFunction& ftf,
-                                                                  JPetFilterInterface& filterFunction, JPetSinogramType::SparseMatrix& sinogram)
+                                                                  JPetFilterInterface& filterFunction, const JPetSinogramType::SparseMatrix& sinogram)
 {
   return ftf(sinogram, filterFunction);
 }
 
-JPetSinogramType::SparseMatrix JPetRecoImageTools::doFFTW1D(JPetSinogramType::SparseMatrix& sinogram, JPetFilterInterface& filter)
+JPetSinogramType::SparseMatrix JPetRecoImageTools::doFFTW1D(const JPetSinogramType::SparseMatrix& sinogram, JPetFilterInterface& filter)
 {
   assert(sinogram.size1() > 1);
   int nScanSize = sinogram.size1();
@@ -461,7 +461,7 @@ JPetSinogramType::SparseMatrix JPetRecoImageTools::doFFTW1D(JPetSinogramType::Sp
 
 // see http://www.fftw.org/doc/One_002dDimensional-DFTs-of-Real-Data.html
 // http://www.fftw.org/fftw3.pdf
-JPetSinogramType::SparseMatrix JPetRecoImageTools::doFFTW2D(JPetSinogramType::SparseMatrix& sinogram, JPetFilterInterface& filter)
+JPetSinogramType::SparseMatrix JPetRecoImageTools::doFFTW2D(const JPetSinogramType::SparseMatrix& sinogram, JPetFilterInterface& filter)
 {
   assert(sinogram.size1() > 1);
   int nScanSize = sinogram.size1();
@@ -519,7 +519,7 @@ JPetSinogramType::SparseMatrix JPetRecoImageTools::doFFTW2D(JPetSinogramType::Sp
   return result;
 }
 
-JPetSinogramType::SparseMatrix JPetRecoImageTools::doFFTSLOW(JPetSinogramType::SparseMatrix& sinogram, JPetFilterInterface& filter)
+JPetSinogramType::SparseMatrix JPetRecoImageTools::doFFTSLOW(const JPetSinogramType::SparseMatrix& sinogram, JPetFilterInterface& filter)
 {
   int nAngles = sinogram.size2();
   int nScanSize = sinogram.size1();

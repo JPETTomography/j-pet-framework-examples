@@ -103,44 +103,45 @@ bool SinogramCreatorTOF::exec() { return true; }
 bool SinogramCreatorTOF::terminate()
 {
   // Save sinogram to root file.
-  JPetSinogramType map("Sinogram", fZSplitNumber);
+  JPetSinogramType map("Sinogram", fZSplitNumber, fMaxDistanceNumber, fMaxReconstructionLayerRadius, fReconstructionDistanceAccuracy,
+                       fScintillatorLenght, fTOFSliceSize, fTOFSigma, fZSplitRange);
   map.addSinogram(fSinogramDataTOF);
   JPetWriter* writer = new JPetWriter(fOutFileName.c_str());
   map.saveSinogramToFile(writer);
   writer->closeFile();
 
   /*
-  JPetRecoImageTools::FourierTransformFunction f = JPetRecoImageTools::doFFTW1D;
+    JPetRecoImageTools::FourierTransformFunction f = JPetRecoImageTools::doFFTW1D;
 
-  for (int i = 0; i < fZSplitNumber; i++)
-  {
-    int sliceNumber = i - (fZSplitNumber / 2);
-    if (std::find(fReconstructSliceNumbers.begin(), fReconstructSliceNumbers.end(), sliceNumber) == fReconstructSliceNumbers.end())
-      continue;
-    for (float value = 0.95; value <= 1.0; value += 0.01)
+    for (int i = 0; i < fZSplitNumber; i++)
     {
-      JPetFilterRamLak ramLakFilter(value);
-      JPetSinogramType::Matrix3D filtered;
-      int tofID = 0;
-      for (auto& sinogram : fSinogramDataTOF[i])
+      int sliceNumber = i - (fZSplitNumber / 2);
+      if (std::find(fReconstructSliceNumbers.begin(), fReconstructSliceNumbers.end(), sliceNumber) == fReconstructSliceNumbers.end())
+        continue;
+      for (float value = 0.95; value <= 1.0; value += 0.01)
       {
-        filtered[sinogram.first] = JPetRecoImageTools::FilterSinogram(f, ramLakFilter, sinogram.second);
-        // saveResult((filtered[sinogram.first]), fOutFileName + "sinogram_" + std::to_string(sliceNumber) + "_" +
-        // std::to_string(fZSplitRange[i].first) +
-        //                                          "_" + std::to_string(fZSplitRange[i].second) + "_TOFID_" + std::to_string(tofID) + ".ppm");
-        tofID++;
-      }
-      JPetSinogramType::SparseMatrix result = JPetRecoImageTools::backProjectRealTOF(
-          filtered, kReconstructionMaxAngle, JPetRecoImageTools::nonRescale, 0, 255, fReconstructionDistanceAccuracy, fTOFSliceSize,
-          fTOFSigma * 2.99792458 * fReconstructionDistanceAccuracy); // TODO: change speed to light to const
+        JPetFilterRamLak ramLakFilter(value);
+        JPetSinogramType::Matrix3D filtered;
+        int tofID = 0;
+        for (auto& sinogram : fSinogramDataTOF[i])
+        {
+          filtered[sinogram.first] = JPetRecoImageTools::FilterSinogram(f, ramLakFilter, sinogram.second);
+          // saveResult((filtered[sinogram.first]), fOutFileName + "sinogram_" + std::to_string(sliceNumber) + "_" +
+          // std::to_string(fZSplitRange[i].first) +
+          //                                          "_" + std::to_string(fZSplitRange[i].second) + "_TOFID_" + std::to_string(tofID) + ".ppm");
+          tofID++;
+        }
+        JPetSinogramType::SparseMatrix result = JPetRecoImageTools::backProjectRealTOF(
+            filtered, kReconstructionMaxAngle, JPetRecoImageTools::nonRescale, 0, 255, fReconstructionDistanceAccuracy, fTOFSliceSize,
+            fTOFSigma * 2.99792458 * fReconstructionDistanceAccuracy); // TODO: change speed to light to const
 
-      saveResult(result, fOutFileName + "reconstruction_with_TOFFBP_RamLakCutOff_" + std::to_string(value) + "_slicenumber_" +
-                             std::to_string(sliceNumber) + "_" + std::to_string(fZSplitRange[i].first) + "_" +
-                             std::to_string(fZSplitRange[i].second) + ".ppm");
+        saveResult(result, fOutFileName + "reconstruction_with_TOFFBP_RamLakCutOff_" + std::to_string(value) + "_slicenumber_" +
+                              std::to_string(sliceNumber) + "_" + std::to_string(fZSplitRange[i].first) + "_" +
+                              std::to_string(fZSplitRange[i].second) + ".ppm");
+      }
     }
-  }
-  delete[] fSinogram;
-  delete[] fMaxValueInSinogram;
+    delete[] fSinogram;
+    delete[] fMaxValueInSinogram;
   */
   return true;
 }
@@ -239,17 +240,4 @@ void SinogramCreatorTOF::setUpOptions()
   }
 
   fMaxDistanceNumber = std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
-
-  if (isOptionSet(opts, kReconstructSliceNumbers))
-  {
-    fReconstructSliceNumbers = boost::any_cast<std::vector<int>>(
-        getOptionValue(opts, kReconstructSliceNumbers)); // TODO: Change to framework helper method when it will be accepted and merged
-  }
-  else
-  {
-    for (int i = 0; i < fZSplitNumber; i++)
-    {
-      fReconstructSliceNumbers.push_back(i);
-    }
-  }
 }

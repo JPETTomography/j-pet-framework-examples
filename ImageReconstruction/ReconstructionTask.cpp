@@ -25,12 +25,11 @@ bool ReconstructionTask::init()
 {
   setUpOptions();
   fOutputEvents = new JPetTimeWindow("JPetEvent");
-  JPetSinogramType* map = JPetSinogramType::readMapFromFile("sinogramMC.root", "Sinogram");
-  if (!map)
+  fSinogram = JPetSinogramType::readMapFromFile("sinogramMC.root", "Sinogram");
+  if (!fSinogram)
   {
     return false;
   }
-  fSinogram = map->getSinogram();
   return true;
 }
 
@@ -76,45 +75,68 @@ void ReconstructionTask::saveResult(const JPetSinogramType::SparseMatrix& result
 bool ReconstructionTask::terminate()
 {
   JPetRecoImageTools::FourierTransformFunction f = JPetRecoImageTools::doFFTW1D;
-
-  for (int i = 0; i < fSinogram.size(); i++)
+  const auto& sinogram = fSinogram->getSinogram();
+  unsigned int zSplitNumber = fSinogram->getZSplitNumber();
+  for (unsigned int i = 0; i < zSplitNumber; i++)
   { // loop throught Z slices
-    {
-      int sliceNumber = i - (fZSplitNumber / 2);
+    int sliceNumber = i - (zSplitNumber / 2);
+    if (!fReconstructSliceNumbers.empty()) // if there we want to reconstruct only selected z slices, skip others
       if (std::find(fReconstructSliceNumbers.begin(), fReconstructSliceNumbers.end(), sliceNumber) == fReconstructSliceNumbers.end())
         continue;
-      for (float value = 0.95; value <= 1.0; value += 0.01)
-      {
-        JPetFilterRamLak ramLakFilter(value);
-        JPetSinogramType::Matrix3D filtered;
-        int tofID = 0;
-        for (auto& sinogram : fSinogramDataTOF[i])
-        {
-          filtered[sinogram.first] = JPetRecoImageTools::FilterSinogram(f, ramLakFilter, sinogram.second);
-          // saveResult((filtered[sinogram.first]), fOutFileName + "sinogram_" + std::to_string(sliceNumber) + "_" +
-          // std::to_string(fZSplitRange[i].first) +
-          //                                          "_" + std::to_string(fZSplitRange[i].second) + "_TOFID_" + std::to_string(tofID) + ".ppm");
-          tofID++;
-        }
-        JPetSinogramType::SparseMatrix result = JPetRecoImageTools::backProjectRealTOF(
-            filtered, kReconstructionMaxAngle, JPetRecoImageTools::nonRescale, 0, 255, fReconstructionDistanceAccuracy, fTOFSliceSize,
-            fTOFSigma * 2.99792458 * fReconstructionDistanceAccuracy); // TODO: change speed to light to const
-
-        saveResult(result, fOutFileName + "reconstruction_with_TOFFBP_RamLakCutOff_" + std::to_string(value) + "_slicenumber_" +
-                               std::to_string(sliceNumber) + "_" + std::to_string(fZSplitRange[i].first) + "_" +
-                               std::to_string(fZSplitRange[i].second) + ".ppm");
-      }
-    }
-    int i = 0;
-    int j = 0;
-
-    for (auto& tofWindow : sliceNumber)
+    for (float value = fCutOffValueBegin; value <= fCutOffValueEnd; value += fCutOffValueStep)
     {
-      // int sliceNumber = i - (fZSplitNumber / 2);
-      saveResult(tofWindow.second, "test_slice_" + std::to_string(j) + "_tofwindow_" + std::to_string(i) + ".ppm");
-      i++;
+      JPetFilterInterface* filter;
+      static std::map<std::string, int> filterNameToFilter{{"None", ReconstructionTask::kFilterType::kFilterNone},
+                                                           {"RamLak", ReconstructionTask::kFilterType::kFilterRamLak},
+                                                           {"Cosine", ReconstructionTask::kFilterType::kFilterCosine},
+                                                           {"Hamming", ReconstructionTask::kFilterType::kFilterHamming},
+                                                           {"Hann", ReconstructionTask::kFilterType::kFilterHann},
+                                                           {"Ridgelet", ReconstructionTask::kFilterType::kFilterRidgelet},
+                                                           {"SheppLogan", ReconstructionTask::kFilterType::kFilterSheppLogan}};
+
+      switch (filterNameToFilter[fFilterName])
+      {
+      case ReconstructionTask::kFilterType::kFilterNone:
+        filter = new JPetFilterNone(value);
+        break;
+      case ReconstructionTask::kFilterType::kFilterRamLak:
+        filter = new JPetFilterRamLak(value);
+        break;
+      case ReconstructionTask::kFilterType::kFilterCosine:
+        filter = new JPetFilterCosine(value);
+        break;
+      case ReconstructionTask::kFilterType::kFilterHamming:
+        filter = new JPetFilterHamming(value);
+        break;
+      case ReconstructionTask::kFilterType::kFilterHann:
+        filter = new JPetFilterHann(value);
+        break;
+      case ReconstructionTask::kFilterType::kFilterRidgelet:
+        filter = new JPetFilterRidgelet(value);
+        break;
+      case ReconstructionTask::kFilterType::kFilterSheppLogan:
+        filter = new JPetFilterSheppLogan(value);
+        break;
+      default:
+        ERROR("Could not find filter: " + fFilterName + ", using JPetFilterNone.");
+        filter = new JPetFilterNone(value);
+        break;
+      }
+
+      JPetSinogramType::Matrix3D filtered;
+      int tofID = 0;
+      for (auto& tofWindow : sinogram[i])
+      {
+        filtered[tofWindow.first] = JPetRecoImageTools::FilterSinogram(f, *filter, tofWindow.second);
+        tofID++;
+      }
+      JPetSinogramType::SparseMatrix result =
+          JPetRecoImageTools::backProjectRealTOF(filtered, fSinogram->getReconstructionDistanceAccuracy(), fSinogram->getTOFWindowSize(),
+                                                 fSinogram->getLORTOFSigmaSize(), JPetRecoImageTools::nonRescale, 0, 255);
+
+      saveResult(result, fOutFileName + "reconstruction_with_TOFFBP_RamLakCutOff_" + std::to_string(value) + "_slicenumber_" +
+                             std::to_string(sliceNumber) + ".ppm");
     }
-    j++;
   }
 
   return true;
@@ -123,15 +145,13 @@ bool ReconstructionTask::terminate()
 void ReconstructionTask::setUpOptions()
 {
   auto opts = getOptions();
+  if (isOptionSet(opts, kOutFileNameKey))
+  {
+    fOutFileName = getOptionAsString(opts, kOutFileNameKey);
+  }
+
   if (isOptionSet(opts, kReconstructSliceNumbers))
   {
-    fReconstructSliceNumbers = getOptionAsVectorOfInts(opts, kReconstructSliceNumbers));
-  }
-  else
-  {
-    for (int i = 0; i < fZSplitNumber; i++)
-    {
-      fReconstructSliceNumbers.push_back(i);
-    }
+    fReconstructSliceNumbers = getOptionAsVectorOfInts(opts, kReconstructSliceNumbers);
   }
 }

@@ -25,12 +25,18 @@
 #include <string>
 #include <vector>
 
+#include "JPetFilterCosine.h"
+#include "JPetFilterHamming.h"
+#include "JPetFilterHann.h"
+#include "JPetFilterInterface.h"
 #include "JPetFilterNone.h"
 #include "JPetFilterRamLak.h"
+#include "JPetFilterRidgelet.h"
+#include "JPetFilterSheppLogan.h"
 #include "JPetRecoImageTools.h"
 #include "JPetUserTask/JPetUserTask.h"
 
-#include "Reconstruction/JPetRecoImageTools/JPetSinogramType.h"
+#include "JPetSinogramType.h"
 
 class ReconstructionTask : public JPetUserTask
 {
@@ -40,6 +46,18 @@ public:
   virtual bool init() override;
   virtual bool exec() override;
   virtual bool terminate() override;
+
+  enum kFilterType
+  {
+    kFilterNotFound,
+    kFilterNone,
+    kFilterRamLak,
+    kFilterCosine,
+    kFilterHamming,
+    kFilterHann,
+    kFilterRidgelet,
+    kFilterSheppLogan
+  };
 
 private:
   ReconstructionTask(const ReconstructionTask&) = delete;
@@ -67,9 +85,24 @@ private:
 
   const std::string kReconstructSliceNumbers = "ReconstructionTask_ReconstructSliceNumbers_std::vector<int>";
 
+  const std::string kFilterCutOffValueBegin = "ReconstructionTask_FilterCutOffBetwenValuesBegin_float";
+  const std::string kFilterCutOffValueEnd = "ReconstructionTask_FilterCutOffBetwenValuesEnd_float";
+  const std::string kFilterCutOffValueStep = "ReconstructionTask_FilterCutOffBetwenValuesStep_float";
+
+  const std::string kFilterName = "ReconstructionTask_FilterName_std::string";
+
+  const std::string kOutFileNameKey = "SinogramCreator_OutFileName_std::string";
+
   std::vector<int> fReconstructSliceNumbers; // reconstruct only slices that was given in userParams
 
-  JPetSinogramType::WholeSinogram fSinogram;
+  float fCutOffValueBegin = 1.f;
+  float fCutOffValueEnd = 1.f;
+  float fCutOffValueStep = 0.01f;
+
+  std::string fFilterName = "RamLak";
+  std::string fOutFileName = "sinogram.root";
+
+  JPetSinogramType* fSinogram = nullptr;
 };
 
 #endif /*  !ReconstructionTask_H */

@@ -116,7 +116,8 @@ float SinogramCreator::getTOFRescaleFactor(const TVector3& posDiff) const
 bool SinogramCreator::terminate()
 {
   // Save sinogram to root file.
-  JPetSinogramType map("Sinogram", fZSplitNumber);
+  JPetSinogramType map("Sinogram", fZSplitNumber, fMaxDistanceNumber, fMaxReconstructionLayerRadius, fReconstructionDistanceAccuracy,
+                       fScintillatorLenght, 10000, 10000, fZSplitRange);
   for (int k = 0; k < fZSplitNumber; k++)
   {
     map.addSlice((*fSinogram[k]), k);

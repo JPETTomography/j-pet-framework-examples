@@ -91,7 +91,8 @@ bool SinogramCreatorMC::exec() { return true; }
 bool SinogramCreatorMC::terminate()
 {
   // Save sinogram to root file.
-  JPetSinogramType map("Sinogram", fZSplitNumber);
+  JPetSinogramType map("Sinogram", fZSplitNumber, fMaxDistanceNumber, fMaxReconstructionLayerRadius, fReconstructionDistanceAccuracy,
+                       fScintillatorLenght, 10000, 10000, fZSplitRange);
   for (int k = 0; k < fZSplitNumber; k++)
   {
     map.addSlice((*fSinogram[k]), k);
@@ -165,11 +166,4 @@ void SinogramCreatorMC::setUpOptions()
   }
 
   fMaxDistanceNumber = std::ceil(fMaxReconstructionLayerRadius * 2 * (1.f / fReconstructionDistanceAccuracy)) + 1;
-
-  if (isOptionSet(opts, kReconstructSliceNumbers))
-  { fReconstructSliceNumbers = boost::any_cast<std::vector<int>>(getOptionValue(opts, kReconstructSliceNumbers)); }
-  else
-  {
-    for (int i = 0; i < fZSplitNumber; i++) { fReconstructSliceNumbers.push_back(i); }
-  }
 }

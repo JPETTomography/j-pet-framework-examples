@@ -76,7 +76,7 @@ public:
   using InterpolationFunc = std::function<double(int i, double y, std::function<double(int, int)>&)>;
   using RescaleFunc = std::function<void(JPetSinogramType::SparseMatrix& v, double minCutoff, double rescaleFactor)>;
   using FourierTransformFunction =
-      std::function<JPetSinogramType::SparseMatrix(JPetSinogramType::SparseMatrix& sinogram, JPetFilterInterface& filterFunction)>;
+      std::function<JPetSinogramType::SparseMatrix(const JPetSinogramType::SparseMatrix& sinogram, JPetFilterInterface& filterFunction)>;
 
   /// Returns a matrixGetter, that can be used to return matrix elements in the
   /// following way:
@@ -158,7 +158,7 @@ public:
    *  \param rescaleMinCutoff min value to set in rescale (Optional)
    *  \param rescaleFactor max value to set in rescale (Optional)
    */
-  static JPetSinogramType::SparseMatrix backProject(JPetSinogramType::SparseMatrix& sinogram, int angles, RescaleFunc rescaleFunc,
+  static JPetSinogramType::SparseMatrix backProject(const JPetSinogramType::SparseMatrix& sinogram, int angles, RescaleFunc rescaleFunc,
                                                     int rescaleMinCutoff, int rescaleFactor);
 
   /*! \brief Function image from sinogram matrix
@@ -170,13 +170,13 @@ public:
    *  \param rescaleMinCutoff min value to set in rescale (Optional)
    *  \param rescaleFactor max value to set in rescale (Optional)
    */
-  static JPetSinogramType::SparseMatrix backProjectWithKDE(JPetSinogramType::SparseMatrix& sinogram, Matrix2DTOF& tof, int angles,
+  static JPetSinogramType::SparseMatrix backProjectWithKDE(const JPetSinogramType::SparseMatrix& sinogram, Matrix2DTOF& tof, int angles,
                                                            RescaleFunc rescaleFunc, int rescaleMinCutoff, int rescaleFactor);
 
   static double normalDistributionProbability(float x, float mean, float stddev);
   static double tofWeight(double lor_tof_center, double lor_position, double sigma);
-  static JPetSinogramType::SparseMatrix backProjectRealTOF(JPetSinogramType::Matrix3D& sinogram, double sinogramAccuracy, double tofWindow,
-                                                           double lorTOFSigma, RescaleFunc rescaleFunc, int rescaleMinCutoff, int rescaleFactor);
+  static JPetSinogramType::SparseMatrix backProjectRealTOF(const JPetSinogramType::Matrix3D& sinogram, float sinogramAccuracy, float tofWindow,
+                                                           float lorTOFSigma, RescaleFunc rescaleFunc, int rescaleMinCutoff, int rescaleFactor);
 
   /*! \brief Function filtering given sinogram using fouriner implementation and
    filter
@@ -185,7 +185,7 @@ public:
    *  \param sinogram data to filter
   */
   static JPetSinogramType::SparseMatrix FilterSinogram(FourierTransformFunction& ftf, JPetFilterInterface& filter,
-                                                       JPetSinogramType::SparseMatrix& sinogram);
+                                                       const JPetSinogramType::SparseMatrix& sinogram);
 
   /*! \brief Function filtering given sinogram using fouriner implementation and
  filter
@@ -194,26 +194,26 @@ public:
  *  \param matrix data to filter
  *  \param TOFSliceSize size of TOF slice in matrix
 */
-  static JPetSinogramType::Matrix3D FilterSinograms(FourierTransformFunction& ftf, JPetFilterInterface& filter, JPetSinogramType::Matrix3D& matrix,
-                                                    float TOFSliceSize);
+  static JPetSinogramType::Matrix3D FilterSinograms(FourierTransformFunction& ftf, JPetFilterInterface& filter,
+                                                    const JPetSinogramType::Matrix3D& matrix, float TOFSliceSize);
 
   /*! \brief Fourier transform implementation using FFTW library
    *  \param sinogram data to filter
    *  \param filter type of filter
    */
-  static JPetSinogramType::SparseMatrix doFFTW1D(JPetSinogramType::SparseMatrix& sinogram, JPetFilterInterface& filter);
+  static JPetSinogramType::SparseMatrix doFFTW1D(const JPetSinogramType::SparseMatrix& sinogram, JPetFilterInterface& filter);
 
   /*! \brief Fourier transform implementation using FFTW library
    *  \param sinogram data to filter
    *  \param filter type of filter
    */
-  static JPetSinogramType::SparseMatrix doFFTW2D(JPetSinogramType::SparseMatrix& sinogram, JPetFilterInterface& filter);
+  static JPetSinogramType::SparseMatrix doFFTW2D(const JPetSinogramType::SparseMatrix& sinogram, JPetFilterInterface& filter);
 
   /*! \brief Fourier transform implementation
    *  \param sinogram data to filter
    *  \param filter type of filter
    */
-  static JPetSinogramType::SparseMatrix doFFTSLOW(JPetSinogramType::SparseMatrix& sinogram, JPetFilterInterface& filter);
+  static JPetSinogramType::SparseMatrix doFFTSLOW(const JPetSinogramType::SparseMatrix& sinogram, JPetFilterInterface& filter);
 
   static int getMaxValue(const JPetSinogramType::SparseMatrix& result);
 
