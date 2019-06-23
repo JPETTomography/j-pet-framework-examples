@@ -18,11 +18,13 @@
 
 #include "JPetLoggerInclude.h"
 #include "JPetWriter/JPetWriter.h"
-#include <unordered_map>
 
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
+#include <pair>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 class JPetSinogramType : public TObject
 {
@@ -32,10 +34,17 @@ public:
   using WholeSinogram = std::vector<Matrix3D>; // slice number, tof window, sinogram matrix
 
   JPetSinogramType() : fName("test") {}
-  explicit JPetSinogramType(std::string name, unsigned int size) : fName(name), fSinogramType(size, Matrix3D()) {}
+  explicit JPetSinogramType(std::string name, unsigned int zSplitNumber, unsigned int maxDistanceNumber, float maxReconstructionLayerRadius,
+                            float reconstructionDistanceAccuracy, float scintillatorLenght std::vector<std::pair<float, float>> zSplitRange)
+      : fName(name), fSinogramType(zSplitNumber, Matrix3D()), fZSplitNumber(zSplitNumber), fMaxDistanceNumber(maxDistanceNumber),
+        fMaxReconstructionLayerRadius(maxReconstructionLayerRadius), fReconstructionDistanceAccuracy(reconstructionDistanceAccuracy),
+        fScintillatorLenght(scintillatorLenght), fZSplitRange(zSplitRange)
+  {
+  }
+
   ~JPetSinogramType();
 
-  void saveSinogramToFile(JPetWriter* writer)
+  void saveSinogramToFile(JPetWriter* writer) const
   {
     assert(writer);
     if (!writer->isOpen())
@@ -51,7 +60,7 @@ public:
    *
    *
    */
-  static JPetSinogramType* readMapFromFile(std::string filename, std::string name)
+  static JPetSinogramType* readMapFromFile(const std::string& filename, const std::string& name)
   {
     TFile file(filename.c_str(), "READ");
     if (!file.IsOpen())
@@ -63,17 +72,41 @@ public:
     return map;
   }
 
-  void addSlice(SparseMatrix object, int sliceNumber, int tofWindow = 0) { fSinogramType[sliceNumber].insert({tofWindow, object}); }
+  void addSlice(const SparseMatrix object, const int sliceNumber,
+                const int tofWindow = 0) // copy object to make sure we do not assign temporary object
+  {
+    fSinogramType[sliceNumber].insert({tofWindow, object});
+  }
 
-  void addSinogram(WholeSinogram object) { fSinogramType = object; }
+  void addSinogram(const WholeSinogram object) // copy object to make sure we do not assign temporary object
+  {
+    fSinogramType = object;
+  }
 
-  WholeSinogram getSinogram() { return fSinogramType; }
+  WholeSinogram& getSinogram() // this function can change state of sinogram
+  {
+    return fSinogramType;
+  }
 
-  ClassDef(JPetSinogramType, 3);
+  unsigned int getZSplitNumber const { return fZSplitNumber; }
+  unsigned int getMaxDistanceNumber const { return fMaxDistanceNumber; }
+  float getMaxReconstructionLayerRadius const { return fMaxReconstructionLayerRadius; }
+  float getReconstructionDistanceAccuracy const { return fReconstructionDistanceAccuracy; }
+  float getScintillatorLenght const { return fScintillatorLenght; }
+  std::vector<std::pair<float, float>> getZSplitRange const { return fZSplitRange; }
+
+  ClassDef(JPetSinogramType, 4);
 
 private:
   std::string fName;           // name to save in root file.
   WholeSinogram fSinogramType; // for passing any type of variables between tasks and save them to root file.
+
+  unsigned int fZSplitNumber;
+  unsigned int fMaxDistanceNumber;
+  float fMaxReconstructionLayerRadius;
+  float fReconstructionDistanceAccuracy;
+  float fScintillatorLenght;
+  std::vector<std::pair<float, float>> fZSplitRange;
 };
 
 #endif /* !_JPET_SinogramType_H_ */
