@@ -270,9 +270,9 @@ int JPetRecoImageTools::getMaxValue(const JPetSinogramType::SparseMatrix& result
   return maxValue;
 }
 
-JPetSinogramType::SparseMatrix JPetRecoImageTools::backProjectRealTOF(JPetSinogramType::Matrix3D& sinogram, int nAngles, RescaleFunc rescaleFunc,
-                                                                      int rescaleMinCutoff, int rescaleFactor, double sinogramAccuracy,
-                                                                      double tofBinSigma, double tofSigma)
+JPetSinogramType::SparseMatrix JPetRecoImageTools::backProjectRealTOF(JPetSinogramType::Matrix3D& sinogram, double sinogramAccuracy, double tofWindow,
+                                                                      double lorTOFSigma, RescaleFunc rescaleFunc, int rescaleMinCutoff,
+                                                                      int rescaleFactor)
 {
   if (sinogram.size() == 0)
     return JPetSinogramType::SparseMatrix(0, 0);
@@ -280,7 +280,7 @@ JPetSinogramType::SparseMatrix JPetRecoImageTools::backProjectRealTOF(JPetSinogr
   int imageSize = sinogramBegin->second.size1();
   double center = (double)(imageSize - 1) / 2.0;
   double center2 = center * center;
-  double angleStep = M_PI / (double)nAngles;
+  double angleStep = M_PI / (double)sinogramBegin->second.size2();
 
   JPetSinogramType::SparseMatrix reconstructedProjection(imageSize, imageSize);
   const double speed_of_light = 2.99792458 * sinogramAccuracy; // accuracy * ps/cm
@@ -294,7 +294,7 @@ JPetSinogramType::SparseMatrix JPetRecoImageTools::backProjectRealTOF(JPetSinogr
 
     for (const auto& tofBin : sinogram)
     {
-      const double lor_tof_center = tofBin.first * tofBinSigma * speed_of_light;
+      const double lor_tof_center = tofBin.first * tofWindow * speed_of_light;
       for (int x = 0; x < imageSize; x++)
       {
         double xMinusCenter = (double)x - center;
@@ -318,10 +318,10 @@ JPetSinogramType::SparseMatrix JPetRecoImageTools::backProjectRealTOF(JPetSinogr
             double diffBetweenLORCenterXandX = lor_center_x - x;
             double distanceToCenterOfLOR =
                 std::sqrt((diffBetweenLORCenterXandX * diffBetweenLORCenterXandX) + (diffBetweenLORCenterYandY * diffBetweenLORCenterYandY));
-            if (distanceToCenterOfLOR > 3. * tofSigma)
+            if (distanceToCenterOfLOR > 3. * lorTOFSigma)
               continue;
             if (x < lor_center_x) distanceToCenterOfLOR = -distanceToCenterOfLOR;
-            reconstructedProjection(y, x) += tofBin.second(n, angle) * tofWeight(lor_tof_center, distanceToCenterOfLOR, tofSigma);
+            reconstructedProjection(y, x) += tofBin.second(n, angle) * tofWeight(lor_tof_center, distanceToCenterOfLOR, lorTOFSigma);
           }
         }
       }

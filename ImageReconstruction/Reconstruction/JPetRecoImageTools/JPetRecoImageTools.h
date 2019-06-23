@@ -175,9 +175,8 @@ public:
 
   static double normalDistributionProbability(float x, float mean, float stddev);
   static double tofWeight(double lor_tof_center, double lor_position, double sigma);
-  static JPetSinogramType::SparseMatrix backProjectRealTOF(JPetSinogramType::Matrix3D& sinogram, int nAngles, RescaleFunc rescaleFunc,
-                                                           int rescaleMinCutoff, int rescaleFactor, double sinogramAccuracy, double tofBinSigma,
-                                                           double tofSigma);
+  static JPetSinogramType::SparseMatrix backProjectRealTOF(JPetSinogramType::Matrix3D& sinogram, double sinogramAccuracy, double tofWindow,
+                                                           double lorTOFSigma, RescaleFunc rescaleFunc, int rescaleMinCutoff, int rescaleFactor);
 
   /*! \brief Function filtering given sinogram using fouriner implementation and
    filter
