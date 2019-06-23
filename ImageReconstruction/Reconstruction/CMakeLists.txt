@@ -68,7 +68,19 @@ add_custom_command(OUTPUT ${TESTS_DIR}/unitTestData
 add_custom_target(tests_fbp DEPENDS ${test_binaries} ${TESTS_DIR}/unitTestData)
 
 
-add_library(${projectName} SHARED ${SOURCES} ${HEADERS})
+set(DICTIONARY_NAME G__ImageReconstruction)
+set(HEADERS_WITH_DICTIONARY_REQUIRED
+  JPetRecoImageTools/JPetSinogramType.h
+  )
+
+set(LINKDEF_NAME ImageReconstruction_LinkDef.h)
+
+include_directories(ROOT_BUG) # Fix bug in NewMacros Root file
+ROOT_GENERATE_DICTIONARY(${DICTIONARY_NAME} ${HEADERS_WITH_DICTIONARY_REQUIRED}
+  LINKDEF ${LINKDEF_NAME}
+  OPTIONS ${DICTIONARY_INCLUDES})
+
+add_library(${projectName} SHARED ${SOURCES} ${DICTIONARY_NAME}.cxx ${HEADERS})
 target_link_libraries(${projectName}
   PRIVATE
     ${FFTW_LIBRARIES})

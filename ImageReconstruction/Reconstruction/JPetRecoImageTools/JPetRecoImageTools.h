@@ -26,8 +26,7 @@
 #include <memory>
 #include <utility>
 
-#include <boost/numeric/ublas/io.hpp>
-#include <boost/numeric/ublas/matrix_sparse.hpp>
+#include "JPetSinogramType.h"
 
 #include "JPetFilterInterface.h"
 
@@ -73,13 +72,10 @@ struct SinogramPoints
 class JPetRecoImageTools
 {
 public:
-  using SparseMatrix = boost::numeric::ublas::mapped_matrix<double>;
-  using Matrix3D = std::unordered_map<int, SparseMatrix>;
-
   using Matrix2DTOF = std::unordered_map<std::pair<int, int>, std::vector<float>, PairHash<int, int>>;
   using InterpolationFunc = std::function<double(int i, double y, std::function<double(int, int)>&)>;
-  using RescaleFunc = std::function<void(SparseMatrix& v, double minCutoff, double rescaleFactor)>;
-  using FourierTransformFunction = std::function<SparseMatrix(SparseMatrix& sinogram, JPetFilterInterface& filterFunction)>;
+  using RescaleFunc = std::function<void(JPetSinogramType::SparseMatrix& v, double minCutoff, double rescaleFactor)>;
+  using FourierTransformFunction = std::function<JPetSinogramType::SparseMatrix(JPetSinogramType::SparseMatrix& sinogram, JPetFilterInterface& filterFunction)>;
 
   /// Returns a matrixGetter, that can be used to return matrix elements in the
   /// following way:
@@ -88,7 +84,7 @@ public:
   /// In addition if the indices goes outside of the matrix range 0 is retuned.
   /// It is assumed that the input matrix is quadratic.
   /// The produced functions can be used as an input to interpolation functions.
-  static std::function<double(int, int)> matrixGetterFactory(const SparseMatrix& emissionMatrix, bool isTransposed = false);
+  static std::function<double(int, int)> matrixGetterFactory(const JPetSinogramType::SparseMatrix& emissionMatrix, bool isTransposed = false);
 
   /*! \brief function returning func(i,j) where j is the nearest neighbour
    * index with respect to y.
@@ -112,9 +108,9 @@ public:
   /// 2. Removes the common backgroud term. So the values start at zero
   /// 3. Rescales all values by rescaleFactor/maxElement
   /// The final value range is from 0 to rescaleFactor
-  static void rescale(SparseMatrix& v, double minCutoff, double rescaleFactor);
+  static void rescale(JPetSinogramType::SparseMatrix& v, double minCutoff, double rescaleFactor);
   /// PseudoRescale which does nothing
-  static void nonRescale(SparseMatrix&, double, double) { return; }
+  static void nonRescale(JPetSinogramType::SparseMatrix&, double, double) { return; }
 
   /*! \brief Function returning sinogram matrix.
    *  \param emissionMatrix matrix,  needs to be NxN
@@ -129,11 +125,11 @@ public:
    *  \param rescaleFunc function that rescales the final result (Optional,
    * default no rescaling)
    */
-  static SparseMatrix createSinogramWithSingleInterpolation(SparseMatrix& emissionMatrix, int nViews, int nScans, double angleBeg = 0,
+  static JPetSinogramType::SparseMatrix createSinogramWithSingleInterpolation(JPetSinogramType::SparseMatrix& emissionMatrix, int nViews, int nScans, double angleBeg = 0,
                                                             double angleEnd = 180, InterpolationFunc interpolationFunction = linear,
                                                             RescaleFunc rescaleFunc = nonRescale, int rescaleMinCutoff = 0, int rescaleFactor = 255);
 
-  static double calculateProjection(const SparseMatrix& emissionMatrix, double phi, int scanNumber, int nScans,
+  static double calculateProjection(const JPetSinogramType::SparseMatrix& emissionMatrix, double phi, int scanNumber, int nScans,
                                     InterpolationFunc& interpolationFunction);
 
   /*! \brief Function returning sinogram matrix with both variables interpolated
@@ -144,7 +140,7 @@ public:
    *  \param rescaleMinCutoff min value to set in rescale (Optional)
    *  \param rescaleFactor max value to set in rescale (Optional)
    */
-  static SparseMatrix createSinogramWithDoubleInterpolation(SparseMatrix& emissionMatrix, int nAngles, RescaleFunc rescaleFunc = nonRescale,
+  static JPetSinogramType::SparseMatrix createSinogramWithDoubleInterpolation(JPetSinogramType::SparseMatrix& emissionMatrix, int nAngles, RescaleFunc rescaleFunc = nonRescale,
                                                             int rescaleMinCutoff = 0, int rescaleFactor = 255);
 
   static double calculateProjection2(int step, double cos, double sin, int imageSize, double center, double length,
@@ -158,7 +154,7 @@ public:
    *  \param rescaleMinCutoff min value to set in rescale (Optional)
    *  \param rescaleFactor max value to set in rescale (Optional)
    */
-  static SparseMatrix backProject(SparseMatrix& sinogram, int angles, RescaleFunc rescaleFunc, int rescaleMinCutoff, int rescaleFactor);
+  static JPetSinogramType::SparseMatrix backProject(JPetSinogramType::SparseMatrix& sinogram, int angles, RescaleFunc rescaleFunc, int rescaleMinCutoff, int rescaleFactor);
 
   /*! \brief Function image from sinogram matrix
    *  \param sinogram matrix containing sinogram to backProject
@@ -169,12 +165,12 @@ public:
    *  \param rescaleMinCutoff min value to set in rescale (Optional)
    *  \param rescaleFactor max value to set in rescale (Optional)
    */
-  static SparseMatrix backProjectWithKDE(SparseMatrix& sinogram, Matrix2DTOF& tof, int angles, RescaleFunc rescaleFunc, int rescaleMinCutoff,
+  static JPetSinogramType::SparseMatrix backProjectWithKDE(JPetSinogramType::SparseMatrix& sinogram, Matrix2DTOF& tof, int angles, RescaleFunc rescaleFunc, int rescaleMinCutoff,
                                          int rescaleFactor);
 
   static double normalDistributionProbability(float x, float mean, float stddev);
   static double tofWeight(double lor_tof_center, double lor_position, double sigma);
-  static SparseMatrix backProjectRealTOF(Matrix3D& sinogram, int nAngles, RescaleFunc rescaleFunc, int rescaleMinCutoff, int rescaleFactor,
+  static JPetSinogramType::SparseMatrix backProjectRealTOF(JPetSinogramType::Matrix3D& sinogram, int nAngles, RescaleFunc rescaleFunc, int rescaleMinCutoff, int rescaleFactor,
                                          double sinogramAccuracy, double tofBinSigma, double tofSigma);
 
   /*! \brief Function filtering given sinogram using fouriner implementation and
@@ -183,7 +179,7 @@ public:
    *  \param filter type of filter
    *  \param sinogram data to filter
   */
-  static SparseMatrix FilterSinogram(FourierTransformFunction& ftf, JPetFilterInterface& filter, SparseMatrix& sinogram);
+  static JPetSinogramType::SparseMatrix FilterSinogram(FourierTransformFunction& ftf, JPetFilterInterface& filter, JPetSinogramType::SparseMatrix& sinogram);
 
   /*! \brief Function filtering given sinogram using fouriner implementation and
  filter
@@ -192,27 +188,27 @@ public:
  *  \param matrix data to filter
  *  \param TOFSliceSize size of TOF slice in matrix
 */
-  static Matrix3D FilterSinograms(FourierTransformFunction& ftf, JPetFilterInterface& filter, Matrix3D& matrix, float TOFSliceSize);
+  static JPetSinogramType::Matrix3D FilterSinograms(FourierTransformFunction& ftf, JPetFilterInterface& filter, JPetSinogramType::Matrix3D& matrix, float TOFSliceSize);
 
   /*! \brief Fourier transform implementation using FFTW library
    *  \param sinogram data to filter
    *  \param filter type of filter
    */
-  static SparseMatrix doFFTW1D(SparseMatrix& sinogram, JPetFilterInterface& filter);
+  static JPetSinogramType::SparseMatrix doFFTW1D(JPetSinogramType::SparseMatrix& sinogram, JPetFilterInterface& filter);
 
   /*! \brief Fourier transform implementation using FFTW library
    *  \param sinogram data to filter
    *  \param filter type of filter
    */
-  static SparseMatrix doFFTW2D(SparseMatrix& sinogram, JPetFilterInterface& filter);
+  static JPetSinogramType::SparseMatrix doFFTW2D(JPetSinogramType::SparseMatrix& sinogram, JPetFilterInterface& filter);
 
   /*! \brief Fourier transform implementation
    *  \param sinogram data to filter
    *  \param filter type of filter
    */
-  static SparseMatrix doFFTSLOW(SparseMatrix& sinogram, JPetFilterInterface& filter);
+  static JPetSinogramType::SparseMatrix doFFTSLOW(JPetSinogramType::SparseMatrix& sinogram, JPetFilterInterface& filter);
 
-  static int getMaxValue(const SparseMatrix& result);
+  static int getMaxValue(const JPetSinogramType::SparseMatrix& result);
 
 private:
   JPetRecoImageTools();
