@@ -85,13 +85,13 @@ private:
 
   const std::string kReconstructSliceNumbers = "ReconstructionTask_ReconstructSliceNumbers_std::vector<int>";
 
-  const std::string kFilterCutOffValueBegin = "ReconstructionTask_FilterCutOffBetwenValuesBegin_float";
-  const std::string kFilterCutOffValueEnd = "ReconstructionTask_FilterCutOffBetwenValuesEnd_float";
-  const std::string kFilterCutOffValueStep = "ReconstructionTask_FilterCutOffBetwenValuesStep_float";
+  const std::string kFilterCutOffValueBegin = "ReconstructionTask_FilterCutOffValueBegin_float";
+  const std::string kFilterCutOffValueEnd = "ReconstructionTask_FilterCutOffValueEnd_float";
+  const std::string kFilterCutOffValueStep = "ReconstructionTask_FilterCutOffValueStep_float";
 
   const std::string kFilterName = "ReconstructionTask_FilterName_std::string";
 
-  const std::string kOutFileNameKey = "SinogramCreator_OutFileName_std::string";
+  const std::string kOutFileNameKey = "ReconstructionTask_OutFileName_std::string";
 
   std::vector<int> fReconstructSliceNumbers; // reconstruct only slices that was given in userParams
 

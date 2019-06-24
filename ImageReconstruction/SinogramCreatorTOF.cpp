@@ -66,14 +66,10 @@ void SinogramCreatorTOF::generateSinogram()
   float skip = 0.f;
   int coincidence = 0;
 
-  int numberOfCorrectHits = 0;
-  int totalHits = 1; // to make sure that we do not divide by 0
-
   fSinogramDataTOF = JPetSinogramType::WholeSinogram(fZSplitNumber, JPetSinogramType::Matrix3D());
 
   for (const auto& inputPath : fInputData)
   {
-    numberOfCorrectHits = 0;
     std::ifstream in(inputPath);
     while (in.peek() != EOF)
     {
@@ -85,16 +81,18 @@ void SinogramCreatorTOF::generateSinogram()
 
       if (analyzeHits(firstX, firstY, firstZ, firstT, secondX, secondY, secondZ, secondT))
       {
-        numberOfCorrectHits++;
+        fNumberOfCorrectHits++;
         // if(numberOfCorrectHits % 10000 == 0)
         //  break;
       }
-      totalHits++;
+      fTotalHits++;
     }
   }
 
-  std::cout << "Correct hits: " << numberOfCorrectHits << " total hits: " << totalHits
-            << " (correct percentage: " << (((float)numberOfCorrectHits * 100.f) / (float)totalHits) << "%)" << std::endl
+  if (fTotalHits == 0)
+    fTotalHits = 1; // to do not divide by 0
+  std::cout << "Correct hits: " << fNumberOfCorrectHits << " total hits: " << fTotalHits
+            << " (correct percentage: " << (((float)fNumberOfCorrectHits * 100.f) / (float)fTotalHits) << "%)" << std::endl
             << std::endl;
 }
 
@@ -104,45 +102,13 @@ bool SinogramCreatorTOF::terminate()
 {
   // Save sinogram to root file.
   JPetSinogramType map("Sinogram", fZSplitNumber, fMaxDistanceNumber, fMaxReconstructionLayerRadius, fReconstructionDistanceAccuracy,
-                       fScintillatorLenght, fTOFSliceSize, fTOFSigma, fZSplitRange);
+                       fScintillatorLenght, fTOFSliceSize, fTOFSigma * 2.99792458 * fReconstructionDistanceAccuracy, fZSplitRange);
   map.addSinogram(fSinogramDataTOF);
+  map.setNumberOfAllEvents(fTotalHits);
+  map.setNumberOfEventsUsedToCreateSinogram(fNumberOfCorrectHits);
   JPetWriter* writer = new JPetWriter(fOutFileName.c_str());
   map.saveSinogramToFile(writer);
   writer->closeFile();
-
-  /*
-    JPetRecoImageTools::FourierTransformFunction f = JPetRecoImageTools::doFFTW1D;
-
-    for (int i = 0; i < fZSplitNumber; i++)
-    {
-      int sliceNumber = i - (fZSplitNumber / 2);
-      if (std::find(fReconstructSliceNumbers.begin(), fReconstructSliceNumbers.end(), sliceNumber) == fReconstructSliceNumbers.end())
-        continue;
-      for (float value = 0.95; value <= 1.0; value += 0.01)
-      {
-        JPetFilterRamLak ramLakFilter(value);
-        JPetSinogramType::Matrix3D filtered;
-        int tofID = 0;
-        for (auto& sinogram : fSinogramDataTOF[i])
-        {
-          filtered[sinogram.first] = JPetRecoImageTools::FilterSinogram(f, ramLakFilter, sinogram.second);
-          // saveResult((filtered[sinogram.first]), fOutFileName + "sinogram_" + std::to_string(sliceNumber) + "_" +
-          // std::to_string(fZSplitRange[i].first) +
-          //                                          "_" + std::to_string(fZSplitRange[i].second) + "_TOFID_" + std::to_string(tofID) + ".ppm");
-          tofID++;
-        }
-        JPetSinogramType::SparseMatrix result = JPetRecoImageTools::backProjectRealTOF(
-            filtered, kReconstructionMaxAngle, JPetRecoImageTools::nonRescale, 0, 255, fReconstructionDistanceAccuracy, fTOFSliceSize,
-            fTOFSigma * 2.99792458 * fReconstructionDistanceAccuracy); // TODO: change speed to light to const
-
-        saveResult(result, fOutFileName + "reconstruction_with_TOFFBP_RamLakCutOff_" + std::to_string(value) + "_slicenumber_" +
-                              std::to_string(sliceNumber) + "_" + std::to_string(fZSplitRange[i].first) + "_" +
-                              std::to_string(fZSplitRange[i].second) + ".ppm");
-      }
-    }
-    delete[] fSinogram;
-    delete[] fMaxValueInSinogram;
-  */
   return true;
 }
 
@@ -225,10 +191,6 @@ void SinogramCreatorTOF::setUpOptions()
   if (isOptionSet(opts, kReconstructionTOFSigma))
   {
     fTOFSigma = getOptionAsFloat(opts, kReconstructionTOFSigma);
-  }
-  if (isOptionSet(opts, kRamLakCutOffValue))
-  {
-    fRamLakCutOffValue = getOptionAsDouble(opts, kRamLakCutOffValue);
   }
   const float maxZRange = fScintillatorLenght / 2.f;
   float range = (2.f * maxZRange) / fZSplitNumber;

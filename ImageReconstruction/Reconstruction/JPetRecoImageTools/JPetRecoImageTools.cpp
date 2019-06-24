@@ -276,7 +276,7 @@ JPetSinogramType::SparseMatrix JPetRecoImageTools::backProjectRealTOF(const JPet
 {
   if (sinogram.size() == 0)
     return JPetSinogramType::SparseMatrix(0, 0);
-  const auto sinogramBegin = sinogram.cbegin(0);
+  const auto sinogramBegin = sinogram.cbegin();
   int imageSize = sinogramBegin->second.size1();
   double center = (double)(imageSize - 1) / 2.0;
   double center2 = center * center;

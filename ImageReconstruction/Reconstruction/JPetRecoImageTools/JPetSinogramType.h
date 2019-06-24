@@ -89,8 +89,17 @@ public:
     return fSinogramType;
   }
 
+  void setNumberOfAllEvents(unsigned int numberOfAllEvents) { fNumberOfAllEvents = numberOfAllEvents; }
+
+  void setNumberOfEventsUsedToCreateSinogram(unsigned int numberOfEventsUsedToCreateSinogram)
+  {
+    fNumberOfEventsUsedToCreateSinogram = numberOfEventsUsedToCreateSinogram;
+  }
+
   unsigned int getZSplitNumber() const { return fZSplitNumber; }
   unsigned int getMaxDistanceNumber() const { return fMaxDistanceNumber; }
+  unsigned int getNumberOfAllEvents() const { return fNumberOfAllEvents; }
+  unsigned int getNumberOfEventsUsedToCreateSinogram() const { return fNumberOfEventsUsedToCreateSinogram; }
   float getMaxReconstructionLayerRadius() const { return fMaxReconstructionLayerRadius; }
   float getReconstructionDistanceAccuracy() const { return fReconstructionDistanceAccuracy; }
   float getScintillatorLenght() const { return fScintillatorLenght; }
@@ -106,6 +115,8 @@ private:
 
   unsigned int fZSplitNumber;
   unsigned int fMaxDistanceNumber;
+  unsigned int fNumberOfAllEvents;
+  unsigned int fNumberOfEventsUsedToCreateSinogram;
   float fMaxReconstructionLayerRadius;
   float fReconstructionDistanceAccuracy;
   float fScintillatorLenght;

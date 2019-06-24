@@ -51,6 +51,9 @@ private:
 
   std::vector<std::string> fInputData{"sinogram_data.txt"};
   std::string fOutFileName = "sinogramMC";
+
+  unsigned int fNumberOfCorrectHits = 0;
+  unsigned int fTotalHits = 0;
 };
 
 #endif /*  !SINOGRAMCREATORMC_H */

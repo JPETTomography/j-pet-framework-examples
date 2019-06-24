@@ -47,9 +47,6 @@ void SinogramCreatorMC::generateSinogram()
   float skip = 0.f;
   int coincidence = 0;
 
-  int numberOfCorrectHits = 0;
-  int totalHits = 1; // to make sure that we do not divide by 0
-
   if (fSinogram == nullptr)
   {
     fSinogram = new JPetSinogramType::SparseMatrix*[fZSplitNumber];
@@ -74,16 +71,17 @@ void SinogramCreatorMC::generateSinogram()
 
       if (analyzeHits(TVector3(firstX, firstY, firstZ), firstT, TVector3(secondX, secondY, secondZ), secondT))
       {
-        numberOfCorrectHits++;
+        fNumberOfCorrectHits++;
         // if(numberOfCorrectHits % 10000 == 0)
         //  break;
       }
-      totalHits++;
+      fTotalHits++;
     }
   }
-
-  std::cout << "Correct hits: " << numberOfCorrectHits << " total hits: " << totalHits
-            << " (correct percentage: " << (((float)numberOfCorrectHits * 100.f) / (float)totalHits) << "%)" << std::endl;
+  if (fTotalHits == 0)
+    fTotalHits = 1; // to do not divide by 0
+  std::cout << "Correct hits: " << fNumberOfCorrectHits << " total hits: " << fTotalHits
+            << " (correct percentage: " << (((float)fNumberOfCorrectHits * 100.f) / (float)fTotalHits) << "%)" << std::endl;
 }
 
 bool SinogramCreatorMC::exec() { return true; }
@@ -97,47 +95,13 @@ bool SinogramCreatorMC::terminate()
   {
     map.addSlice((*fSinogram[k]), k);
   }
+  map.setNumberOfAllEvents(fTotalHits);
+  map.setNumberOfEventsUsedToCreateSinogram(fNumberOfCorrectHits);
   JPetWriter* writer = new JPetWriter(fOutFileName.c_str());
   map.saveSinogramToFile(writer);
   writer->closeFile();
 
   delete[] fSinogram;
-  /* JPetRecoImageTools::FourierTransformFunction f = JPetRecoImageTools::doFFTW1D;
-
-  for (int i = 0; i < fZSplitNumber; i++)
-  {
-    int sliceNumber = i - (fZSplitNumber / 2);
-    if (std::find(fReconstructSliceNumbers.begin(), fReconstructSliceNumbers.end(), sliceNumber) == fReconstructSliceNumbers.end()) continue;
-    // save sinogram
-    // saveResult((*fSinogram[i]), fOutFileName + "sinogram_" + std::to_string(sliceNumber) + "_" + std::to_string(fZSplitRange[i].first) + "_" +
-    //                                std::to_string(fZSplitRange[i].second) + ".ppm");
-
-    // calculate KDE
-    // JPetSinogramType::SparseMatrix result =
-    //    JPetRecoImageTools::backProjectWithKDE((*fSinogram[i]), fTOFInformation[i], (*fSinogram[i]).size2(), JPetRecoImageTools::nonRescale, 0,
-    //    255);
-    // save KDE
-    // saveResult(result, fOutFileName + "reconstruction_with_KDE_" + std::to_string(sliceNumber) + "_" + std::to_string(fZSplitRange[i].first) +
-    //                       "_" + std::to_string(fZSplitRange[i].second) + ".ppm");
-
-    for (float value = 0.95; value <= 1.0; value += 0.01)
-    {
-      JPetFilterRamLak filter(value);
-      // filter sinogram
-      JPetSinogramType::SparseMatrix filteredSinogram = JPetRecoImageTools::FilterSinogram(f, filter, (*fSinogram[i]));
-      // backproject
-      JPetSinogramType::SparseMatrix resultBP =
-          JPetRecoImageTools::backProject(filteredSinogram, (*fSinogram[i]).size2(), JPetRecoImageTools::nonRescale, 0, 255);
-      // save FBP
-      saveResult(resultBP, fOutFileName + "reconstruction_with_FBP_RamLakCutOff_" + std::to_string(value) + "_slicenumber_" +
-                               std::to_string(sliceNumber) + "_" + std::to_string(fZSplitRange[i].first) + "_" +
-                               std::to_string(fZSplitRange[i].second) + ".ppm");
-    }
-  }
-
-  delete[] fSinogram;
-  delete[] fMaxValueInSinogram;
-  */
   return true;
 }
 

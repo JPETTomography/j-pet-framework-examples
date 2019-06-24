@@ -53,15 +53,16 @@ private:
   const std::string kEnableTOFReconstruction = "SinogramCreatorTOF_EnableKDEReconstruction_bool";
   const std::string kTOFSliceSize = "SinogramCreatorTOF_TOFSliceSize_float";
   const std::string kReconstructionTOFSigma = "SinogramCreatorTOF_ReconstructionTOFSigma_float";
-  const std::string kRamLakCutOffValue = "SinogramCreatorTOF_RamLakCutOffValue_double";
 
   std::vector<std::string> fInputData{"sinogram_data.txt"};
   std::string fOutFileName = "sinogramMC";
   float fTOFSliceSize = 100.f;
   float fTOFSigma = 150.f;
-  double fRamLakCutOffValue = 1.;
 
   JPetSinogramType::WholeSinogram fSinogramDataTOF;
+
+  unsigned int fNumberOfCorrectHits = 0;
+  unsigned int fTotalHits = 0;
 };
 
 #endif /*  !SINOGRAMCREATORTOF_H */

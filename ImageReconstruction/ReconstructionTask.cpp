@@ -134,7 +134,7 @@ bool ReconstructionTask::terminate()
           JPetRecoImageTools::backProjectRealTOF(filtered, fSinogram->getReconstructionDistanceAccuracy(), fSinogram->getTOFWindowSize(),
                                                  fSinogram->getLORTOFSigmaSize(), JPetRecoImageTools::nonRescale, 0, 255);
 
-      saveResult(result, fOutFileName + "reconstruction_with_TOFFBP_RamLakCutOff_" + std::to_string(value) + "_slicenumber_" +
+      saveResult(result, fOutFileName + "reconstruction_with_TOFFBP_" + fFilterName + "_CutOff_" + std::to_string(value) + "_slicenumber_" +
                              std::to_string(sliceNumber) + ".ppm");
     }
   }
@@ -149,9 +149,24 @@ void ReconstructionTask::setUpOptions()
   {
     fOutFileName = getOptionAsString(opts, kOutFileNameKey);
   }
-
   if (isOptionSet(opts, kReconstructSliceNumbers))
   {
     fReconstructSliceNumbers = getOptionAsVectorOfInts(opts, kReconstructSliceNumbers);
+  }
+  if (isOptionSet(opts, kFilterCutOffValueBegin))
+  {
+    fCutOffValueBegin = getOptionAsFloat(opts, kFilterCutOffValueBegin);
+  }
+  if (isOptionSet(opts, kFilterCutOffValueEnd))
+  {
+    fCutOffValueEnd = getOptionAsFloat(opts, kFilterCutOffValueEnd);
+  }
+  if (isOptionSet(opts, kFilterCutOffValueStep))
+  {
+    fCutOffValueStep = getOptionAsFloat(opts, kFilterCutOffValueStep);
+  }
+  if (isOptionSet(opts, kFilterName))
+  {
+    fFilterName = getOptionAsString(opts, kFilterName);
   }
 }
