@@ -102,7 +102,7 @@ bool SinogramCreatorTOF::terminate()
 {
   // Save sinogram to root file.
   JPetSinogramType map("Sinogram", fZSplitNumber, fMaxDistanceNumber, fMaxReconstructionLayerRadius, fReconstructionDistanceAccuracy,
-                       fScintillatorLenght, fTOFSliceSize, fTOFSigma * 2.99792458 * fReconstructionDistanceAccuracy, fZSplitRange);
+                       fScintillatorLenght, fTOFSliceSize, fTOFSigma, fZSplitRange);
   map.addSinogram(fSinogramDataTOF);
   map.setNumberOfAllEvents(fTotalHits);
   map.setNumberOfEventsUsedToCreateSinogram(fNumberOfCorrectHits);

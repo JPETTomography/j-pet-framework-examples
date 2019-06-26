@@ -77,6 +77,7 @@ public:
   using RescaleFunc = std::function<void(JPetSinogramType::SparseMatrix& v, double minCutoff, double rescaleFactor)>;
   using FourierTransformFunction =
       std::function<JPetSinogramType::SparseMatrix(const JPetSinogramType::SparseMatrix& sinogram, JPetFilterInterface& filterFunction)>;
+  using FilteredBackProjectionWeightingFunction = std::function<double(double, double, double)>;
 
   /// Returns a matrixGetter, that can be used to return matrix elements in the
   /// following way:
@@ -152,17 +153,6 @@ public:
 
   /*! \brief Function image from sinogram matrix
    *  \param sinogram matrix containing sinogram to backProject
-   *  \param nAngles angle step is calculated as PI / nAngles
-   *  \param rescaleFunc function that rescales the final result (Optional,
-   * default no rescaling)
-   *  \param rescaleMinCutoff min value to set in rescale (Optional)
-   *  \param rescaleFactor max value to set in rescale (Optional)
-   */
-  static JPetSinogramType::SparseMatrix backProject(const JPetSinogramType::SparseMatrix& sinogram, int angles, RescaleFunc rescaleFunc,
-                                                    int rescaleMinCutoff, int rescaleFactor);
-
-  /*! \brief Function image from sinogram matrix
-   *  \param sinogram matrix containing sinogram to backProject
    *  \param tof vector with information about TOF for every hit
    *  \param nAngles angle step is calculated as PI / nAngles
    *  \param rescaleFunc function that rescales the final result (Optional,
@@ -174,9 +164,21 @@ public:
                                                            RescaleFunc rescaleFunc, int rescaleMinCutoff, int rescaleFactor);
 
   static double normalDistributionProbability(float x, float mean, float stddev);
-  static double tofWeight(double lor_tof_center, double lor_position, double sigma);
-  static JPetSinogramType::SparseMatrix backProjectRealTOF(const JPetSinogramType::Matrix3D& sinogram, float sinogramAccuracy, float tofWindow,
-                                                           float lorTOFSigma, RescaleFunc rescaleFunc, int rescaleMinCutoff, int rescaleFactor);
+
+  /*! \brief Function image from sinogram matrix
+   *  \param sinogram matrix containing sinogram to backProject
+   *  \param sinogramAccuracy
+   *  \param tofWindow
+   *  \param lorTOFSigma
+   *  \param fbpwf
+   *  \param rescaleFunc function that rescales the final result (Optional,
+   * default no rescaling)
+   *  \param rescaleMinCutoff min value to set in rescale (Optional)
+   *  \param rescaleFactor max value to set in rescale (Optional)
+   */
+  static JPetSinogramType::SparseMatrix backProject(const JPetSinogramType::Matrix3D& sinogram, float sinogramAccuracy, float tofWindow,
+                                                    float lorTOFSigma, FilteredBackProjectionWeightingFunction fbpwf, RescaleFunc rescaleFunc,
+                                                    int rescaleMinCutoff, int rescaleFactor);
 
   /*! \brief Function filtering given sinogram using fouriner implementation and
    filter
@@ -215,7 +217,21 @@ public:
    */
   static JPetSinogramType::SparseMatrix doFFTSLOW(const JPetSinogramType::SparseMatrix& sinogram, JPetFilterInterface& filter);
 
+  /*! \brief Returns max value in given matrix
+   *  \param result matrix to calculate max value
+   */
   static int getMaxValue(const JPetSinogramType::SparseMatrix& result);
+
+  /*! \brief Weighting in FBP, always returns 1;
+   */
+  static double FBPWeight(double, double, double);
+
+  /*! \brief Weighting in TOF-FBP, returns value based on normal distribution in the center of tof annihilation point
+   *  \param lor_tof_center center position of the LOR based on TOF value
+   *  \param lor_postion distance from the center(current calculated x)
+   *  \param sigma TOFsigma
+   */
+  static double FBPTOFWeight(double lor_tof_center, double lor_position, double sigma);
 
 private:
   JPetRecoImageTools();

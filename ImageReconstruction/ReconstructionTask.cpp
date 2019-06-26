@@ -77,6 +77,24 @@ bool ReconstructionTask::terminate()
   JPetRecoImageTools::FourierTransformFunction f = JPetRecoImageTools::doFFTW1D;
   const auto& sinogram = fSinogram->getSinogram();
   unsigned int zSplitNumber = fSinogram->getZSplitNumber();
+  static std::map<std::string, int> reconstructionNameToWeight{{"FBP", ReconstructionTask::kWeightingType::kFBP},
+                                                               {"TOFFBP", ReconstructionTask::kWeightingType::kTOFFBP}};
+  JPetRecoImageTools::FilteredBackProjectionWeightingFunction weightFunction;
+
+  switch (reconstructionNameToWeight[fReconstructionName])
+  {
+  case ReconstructionTask::kWeightingType::kFBP:
+    weightFunction = JPetRecoImageTools::FBPWeight;
+    break;
+  case ReconstructionTask::kWeightingType::kTOFFBP:
+    weightFunction = JPetRecoImageTools::FBPTOFWeight;
+    break;
+  default:
+    ERROR("Could not find reconstruction name: " + fReconstructionName + ", using FBP.");
+    weightFunction = JPetRecoImageTools::FBPWeight;
+    break;
+  }
+
   for (unsigned int i = 0; i < zSplitNumber; i++)
   { // loop throught Z slices
     int sliceNumber = i - (zSplitNumber / 2);
@@ -125,20 +143,21 @@ bool ReconstructionTask::terminate()
 
       JPetSinogramType::Matrix3D filtered;
       int tofID = 0;
-      for (auto& tofWindow : sinogram[i])
+      for (auto& tofWindow : sinogram[i]) // filter sinogram in each TOF-windows(for FBP in single timewindow)
       {
         filtered[tofWindow.first] = JPetRecoImageTools::FilterSinogram(f, *filter, tofWindow.second);
         tofID++;
       }
-      JPetSinogramType::SparseMatrix result =
-          JPetRecoImageTools::backProjectRealTOF(filtered, fSinogram->getReconstructionDistanceAccuracy(), fSinogram->getTOFWindowSize(),
-                                                 fSinogram->getLORTOFSigmaSize(), JPetRecoImageTools::nonRescale, 0, 255);
 
-      saveResult(result, fOutFileName + "reconstruction_with_TOFFBP_" + fFilterName + "_CutOff_" + std::to_string(value) + "_slicenumber_" +
-                             std::to_string(sliceNumber) + ".ppm");
+      JPetSinogramType::SparseMatrix result =
+          JPetRecoImageTools::backProject(filtered, fSinogram->getReconstructionDistanceAccuracy(), fSinogram->getTOFWindowSize(),
+                                          fSinogram->getLORTOFSigmaSize(), weightFunction, JPetRecoImageTools::nonRescale, 0, 255);
+
+      saveResult(result, fOutFileName + "reconstruction_with_" + fReconstructionName + "_" + fFilterName + "_CutOff_" + std::to_string(value) +
+                             "_slicenumber_" + std::to_string(sliceNumber) + ".ppm");
+      delete filter;
     }
   }
-
   return true;
 }
 

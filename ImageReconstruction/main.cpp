@@ -42,7 +42,7 @@ int main(int argc, const char* argv[])
     // manager.useTask("ImageReco", "reco.unk.evt", "reco");
     // manager.useTask("SinogramCreator", "reco.unk.evt", "sino");
     // manager.useTask("SinogramCreatorMC", "reco.unk.evt", "sino.mc");
-    manager.useTask("SinogramCreatorTOF", "reco.unk.evt", "sino.mc");
+    // manager.useTask("SinogramCreatorTOF", "reco.unk.evt", "sino.mc");
     manager.useTask("ReconstructionTask", "sino.mc", "reco.mc");
 
     manager.run(argc, argv);

@@ -214,49 +214,6 @@ void JPetRecoImageTools::rescale(JPetSinogramType::SparseMatrix& matrix, double 
   }
 }
 
-JPetSinogramType::SparseMatrix JPetRecoImageTools::backProject(const JPetSinogramType::SparseMatrix& sinogram, int nAngles, RescaleFunc rescaleFunc,
-                                                               int rescaleMinCutoff, int rescaleFactor)
-{
-  int imageSize = sinogram.size1();
-  double center = (double)(imageSize - 1) / 2.0;
-  double center2 = center * center;
-  double angleStep = M_PI / (double)nAngles;
-
-  JPetSinogramType::SparseMatrix reconstructedProjection(imageSize, imageSize);
-
-  for (int angle = 0; angle < nAngles; angle++)
-  {
-    double cos = std::cos((double)angle * (double)angleStep);
-    double sin = std::sin((double)angle * (double)angleStep);
-
-    for (int x = 0; x < imageSize; x++)
-    {
-      double xMinusCenter = (double)x - center;
-      double xMinusCenter2 = xMinusCenter * xMinusCenter;
-      double ttemp = xMinusCenter * cos + center;
-
-      for (int y = 0; y < imageSize; y++)
-      {
-        double yMinusCenter = (double)y - center;
-        double yMinusCenter2 = yMinusCenter * yMinusCenter;
-        if (yMinusCenter2 + xMinusCenter2 < center2)
-        {
-          double t = ttemp - yMinusCenter * sin;
-          int n = std::floor(t + 0.5F);
-          reconstructedProjection(y, x) += sinogram(n, angle);
-        }
-      }
-    }
-  }
-
-  for (int x = 0; x < imageSize; x++)
-  {
-    for (int y = 0; y < imageSize; y++) { reconstructedProjection(y, x) *= angleStep; }
-  }
-  rescaleFunc(reconstructedProjection, rescaleMinCutoff, rescaleFactor);
-  return reconstructedProjection;
-}
-
 int JPetRecoImageTools::getMaxValue(const JPetSinogramType::SparseMatrix& result)
 {
   int maxValue = 0;
@@ -270,9 +227,9 @@ int JPetRecoImageTools::getMaxValue(const JPetSinogramType::SparseMatrix& result
   return maxValue;
 }
 
-JPetSinogramType::SparseMatrix JPetRecoImageTools::backProjectRealTOF(const JPetSinogramType::Matrix3D& sinogram, float sinogramAccuracy,
-                                                                      float tofWindow, float lorTOFSigma, RescaleFunc rescaleFunc,
-                                                                      int rescaleMinCutoff, int rescaleFactor)
+JPetSinogramType::SparseMatrix JPetRecoImageTools::backProject(const JPetSinogramType::Matrix3D& sinogram, float sinogramAccuracy, float tofWindow,
+                                                               float lorTOFSigma, FilteredBackProjectionWeightingFunction fbpwf,
+                                                               RescaleFunc rescaleFunc, int rescaleMinCutoff, int rescaleFactor)
 {
   if (sinogram.size() == 0)
     return JPetSinogramType::SparseMatrix(0, 0);
@@ -283,9 +240,9 @@ JPetSinogramType::SparseMatrix JPetRecoImageTools::backProjectRealTOF(const JPet
   double angleStep = M_PI / (double)sinogramBegin->second.size2();
 
   JPetSinogramType::SparseMatrix reconstructedProjection(imageSize, imageSize);
-  const double speed_of_light = 2.99792458 * sinogramAccuracy; // accuracy * ps/cm
+  const double speed_of_light = 2.99792458 * sinogramAccuracy; // in reconstruction space, accuracy * ps/cm
 
-  // const int max_sigma_multi = 3;
+  const int max_sigma_multi = 3;
 
   for (int angle = 0; angle < 180; angle++)
   {
@@ -318,10 +275,10 @@ JPetSinogramType::SparseMatrix JPetRecoImageTools::backProjectRealTOF(const JPet
             double diffBetweenLORCenterXandX = lor_center_x - x;
             double distanceToCenterOfLOR =
                 std::sqrt((diffBetweenLORCenterXandX * diffBetweenLORCenterXandX) + (diffBetweenLORCenterYandY * diffBetweenLORCenterYandY));
-            if (distanceToCenterOfLOR > 3. * lorTOFSigma)
+            if (distanceToCenterOfLOR > max_sigma_multi * lorTOFSigma * speed_of_light)
               continue;
             if (x < lor_center_x) distanceToCenterOfLOR = -distanceToCenterOfLOR;
-            reconstructedProjection(y, x) += tofBin.second(n, angle) * tofWeight(lor_tof_center, distanceToCenterOfLOR, lorTOFSigma);
+            reconstructedProjection(y, x) += tofBin.second(n, angle) * fbpwf(lor_tof_center, distanceToCenterOfLOR, lorTOFSigma);
           }
         }
       }
@@ -336,13 +293,15 @@ JPetSinogramType::SparseMatrix JPetRecoImageTools::backProjectRealTOF(const JPet
   return reconstructedProjection;
 }
 
-double JPetRecoImageTools::tofWeight(double lor_tof_center, double lor_position, double sigma)
+double JPetRecoImageTools::FBPTOFWeight(double lor_tof_center, double lor_position, double sigma)
 {
   double x = lor_position - lor_tof_center;
   x *= x;
   double y = 2 * (sigma * sigma);
   return std::exp(-x / y);
 }
+
+double JPetRecoImageTools::FBPWeight(double, double, double) { return 1.; }
 
 JPetSinogramType::SparseMatrix JPetRecoImageTools::backProjectWithKDE(const JPetSinogramType::SparseMatrix& sinogram, Matrix2DTOF& tof, int nAngles,
                                                                       RescaleFunc rescaleFunc, int rescaleMinCutoff, int rescaleFactor)

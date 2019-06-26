@@ -59,6 +59,13 @@ public:
     kFilterSheppLogan
   };
 
+  enum kWeightingType
+  {
+    kWeightNotFound,
+    kFBP,
+    kTOFFBP
+  };
+
 private:
   ReconstructionTask(const ReconstructionTask&) = delete;
   ReconstructionTask& operator=(const ReconstructionTask&) = delete;
@@ -90,6 +97,7 @@ private:
   const std::string kFilterCutOffValueStep = "ReconstructionTask_FilterCutOffValueStep_float";
 
   const std::string kFilterName = "ReconstructionTask_FilterName_std::string";
+  const std::string kReconstructionName = "ReconstructionTask_ReconstructionType_std::string";
 
   const std::string kOutFileNameKey = "ReconstructionTask_OutFileName_std::string";
 
@@ -100,6 +108,7 @@ private:
   float fCutOffValueStep = 0.01f;
 
   std::string fFilterName = "RamLak";
+  std::string fReconstructionName = "FBP";
   std::string fOutFileName = "sinogram.root";
 
   JPetSinogramType* fSinogram = nullptr;
