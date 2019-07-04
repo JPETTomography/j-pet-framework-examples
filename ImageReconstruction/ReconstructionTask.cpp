@@ -188,4 +188,8 @@ void ReconstructionTask::setUpOptions()
   {
     fFilterName = getOptionAsString(opts, kFilterName);
   }
+  if (isOptionSet(opts, kReconstructionName))
+  {
+    fReconstructionName = getOptionAsString(opts, kReconstructionName);
+  }
 }
