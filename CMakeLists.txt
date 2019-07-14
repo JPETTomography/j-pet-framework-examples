@@ -121,32 +121,11 @@ set_property(TARGET ROOT::Flags_CXX APPEND PROPERTY
 
 ################################################################################
 ## Find JPetFramework
-find_package(JPetFramework CONFIG QUIET)
+find_package(JPetFramework CONFIG REQUIRED)
 if(JPetFramework_FOUND)
   message(STATUS "JPetFramework (version ${JPetFramework_VERSION}) was found using JPetFrameworkConfig")
 else()
-  include(ExternalProject)
-  message(STATUS "JPetFramework was not found..")
-  set(GITHUB_URL "https://github.com/grey277/j-pet-framework.git")
-  set(GIT_TAG "cmake")
-
-  message(STATUS "Adding external project to download and compile JPetFramework from: ${GITHUB_URL} with tag: ${GIT_TAG}")
-
-  configure_file(CMakeListsJPetFramework.txt.in
-                 JPetFramework-download/CMakeLists.txt)
-
-  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" -DPACKAGE_TESTS=OFF . 
-                  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/JPetFramework-download )
-
-  execute_process(COMMAND ${CMAKE_COMMAND} --build .
-                  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/JPetFramework-download )
-
-  set(JPetFramework_DIR ${CMAKE_BINARY_DIR}/j-pet-framework-build/lib/cmake/JPetFramework)
-  set(Unpacker2_DIR ${CMAKE_BINARY_DIR}/JPetFramework-download/JPetFramework-prefix/src/JPetFramework-build/src/Unpacker2-build/lib/cmake/Unpacker2)
-  find_package(JPetFramework CONFIG REQUIRED)
-  if(JPetFramework_FOUND)
-    message(STATUS "JPetFramework (version ${JPetFramework_VERSION}) was found using JPetFrameworkConfig")
-  endif()
+  message(STATUS "Could not find JPetFramework, please source path/to/framework/bin/thisframework.sh to set correct paths..")
 endif(JPetFramework_FOUND)
 ################################################################################
 ## Download input and configuration files
