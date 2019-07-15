@@ -102,46 +102,47 @@ BOOST_AUTO_TEST_CASE(generateSigCh_test)
 
 BOOST_AUTO_TEST_CASE(flagSigChs_test)
 {
-  JPetSigCh sigCh01(JPetSigCh::Leading, 10.0);
-  JPetSigCh sigCh02(JPetSigCh::Trailing, 11.0);
+  JPetSigCh sigCh00(JPetSigCh::Leading, 10.0);
+  JPetSigCh sigCh01(JPetSigCh::Trailing, 11.0);
 
-  JPetSigCh sigCh03(JPetSigCh::Leading, 12.0);
-  JPetSigCh sigCh04(JPetSigCh::Leading, 13.0);
-  JPetSigCh sigCh05(JPetSigCh::Trailing, 14.0);
+  JPetSigCh sigCh02(JPetSigCh::Leading, 12.0);
+  JPetSigCh sigCh03(JPetSigCh::Leading, 13.0);
+  JPetSigCh sigCh04(JPetSigCh::Trailing, 14.0);
 
-  JPetSigCh sigCh06(JPetSigCh::Leading, 15.0);
-  JPetSigCh sigCh07(JPetSigCh::Trailing, 16.0);
+  JPetSigCh sigCh05(JPetSigCh::Leading, 15.0);
+  JPetSigCh sigCh06(JPetSigCh::Trailing, 16.0);
 
-  JPetSigCh sigCh08(JPetSigCh::Leading, 17.0);
-  JPetSigCh sigCh09(JPetSigCh::Trailing, 18.0);
+  JPetSigCh sigCh07(JPetSigCh::Leading, 17.0);
+  JPetSigCh sigCh08(JPetSigCh::Trailing, 18.0);
 
-  JPetSigCh sigCh10(JPetSigCh::Leading, 19.0);
-  JPetSigCh sigCh11(JPetSigCh::Trailing, 20.0);
-  JPetSigCh sigCh12(JPetSigCh::Trailing, 21.0);
+  JPetSigCh sigCh09(JPetSigCh::Leading, 19.0);
+  JPetSigCh sigCh10(JPetSigCh::Trailing, 20.0);
+  JPetSigCh sigCh11(JPetSigCh::Trailing, 21.0);
 
-  JPetSigCh sigCh13(JPetSigCh::Leading, 22.0);
-  JPetSigCh sigCh14(JPetSigCh::Trailing, 23.0);
+  JPetSigCh sigCh12(JPetSigCh::Leading, 22.0);
+  JPetSigCh sigCh13(JPetSigCh::Trailing, 23.0);
 
-  JPetSigCh sigCh15(JPetSigCh::Leading, 24.0);
-  JPetSigCh sigCh16(JPetSigCh::Leading, 25.0);
-  JPetSigCh sigCh17(JPetSigCh::Leading, 26.0);
-  JPetSigCh sigCh18(JPetSigCh::Trailing, 27.0);
+  JPetSigCh sigCh14(JPetSigCh::Leading, 24.0);
+  JPetSigCh sigCh15(JPetSigCh::Leading, 25.0);
+  JPetSigCh sigCh16(JPetSigCh::Leading, 26.0);
+  JPetSigCh sigCh17(JPetSigCh::Trailing, 27.0);
 
-  JPetSigCh sigCh19(JPetSigCh::Leading, 28.0);
-  JPetSigCh sigCh20(JPetSigCh::Trailing, 29.0);
+  JPetSigCh sigCh18(JPetSigCh::Leading, 28.0);
+  JPetSigCh sigCh19(JPetSigCh::Trailing, 29.0);
 
-  JPetSigCh sigCh21(JPetSigCh::Leading, 30.0);
-  JPetSigCh sigCh22(JPetSigCh::Trailing, 31.0);
-  JPetSigCh sigCh23(JPetSigCh::Trailing, 32.0);
+  JPetSigCh sigCh20(JPetSigCh::Leading, 30.0);
+  JPetSigCh sigCh21(JPetSigCh::Trailing, 31.0);
+  JPetSigCh sigCh22(JPetSigCh::Trailing, 32.0);
+  JPetSigCh sigCh23(JPetSigCh::Trailing, 33.0);
   JPetSigCh sigCh24(JPetSigCh::Trailing, 33.0);
-  JPetSigCh sigCh25(JPetSigCh::Trailing, 33.0);
 
-  JPetSigCh sigCh26(JPetSigCh::Leading, 34.0);
-  JPetSigCh sigCh27(JPetSigCh::Trailing, 35.0);
+  JPetSigCh sigCh25(JPetSigCh::Leading, 34.0);
+  JPetSigCh sigCh26(JPetSigCh::Trailing, 35.0);
 
-  JPetSigCh sigCh28(JPetSigCh::Leading, 34.0);
+  JPetSigCh sigCh27(JPetSigCh::Leading, 36.0);
 
   JPetPM pm1(1, "first");
+  sigCh00.setPM(pm1);
   sigCh01.setPM(pm1);
   sigCh02.setPM(pm1);
   sigCh03.setPM(pm1);
@@ -169,9 +170,9 @@ BOOST_AUTO_TEST_CASE(flagSigChs_test)
   sigCh25.setPM(pm1);
   sigCh26.setPM(pm1);
   sigCh27.setPM(pm1);
-  sigCh28.setPM(pm1);
 
   std::vector<JPetSigCh> thrSigCh;
+  thrSigCh.push_back(sigCh00);
   thrSigCh.push_back(sigCh01);
   thrSigCh.push_back(sigCh02);
   thrSigCh.push_back(sigCh03);
@@ -199,7 +200,6 @@ BOOST_AUTO_TEST_CASE(flagSigChs_test)
   thrSigCh.push_back(sigCh25);
   thrSigCh.push_back(sigCh26);
   thrSigCh.push_back(sigCh27);
-  thrSigCh.push_back(sigCh28);
 
   JPetStatistics stats;
   TimeWindowCreatorTools::flagSigChs(thrSigCh, stats, false);
@@ -240,7 +240,7 @@ BOOST_AUTO_TEST_CASE(flagSigChs_test)
   BOOST_REQUIRE_EQUAL(thrSigCh.at(25).getRecoFlag(), JPetSigCh::Good);
   BOOST_REQUIRE_EQUAL(thrSigCh.at(26).getRecoFlag(), JPetSigCh::Good);
 
-  // BOOST_REQUIRE_EQUAL(thrSigCh.at(27).getRecoFlag(), JPetSigCh::Good);
+  BOOST_REQUIRE_EQUAL(thrSigCh.at(27).getRecoFlag(), JPetSigCh::Good);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
