@@ -10,14 +10,6 @@ function executeCommand {
 executeCommand "export CMAKE_LIBRARY_PATH=$CMAKE_LIBRARY_PATH:/framework-dependencies/lib"
 executeCommand "export CMAKE_INCLUDE_PATH=$CMAKE_INCLUDE_PATH:/framework-dependencies/include"
 executeCommand "source /root-system/bin/thisroot.sh"
-executeCommand "rm -rf Unpacker2 || true"
-executeCommand "git clone --single-branch --branch cmake https://github.com/grey277/Unpacker2.git"
-executeCommand "mkdir -p Unpacker2/build"
-executeCommand "cd Unpacker2/build"
-executeCommand "cmake .."
-executeCommand "cmake --build ."
-executeCommand "sudo make install"
-executeCommand "cd ../.."
 
 executeCommand "rm -rf j-pet-framework || true"
 executeCommand "git clone --single-branch --branch cmake https://github.com/grey277/j-pet-framework.git"
@@ -46,7 +38,7 @@ executeCommand "./LargeBarrelAnalysis.x -t hld -f dabc_17025151847.hld -l setupR
 executeCommand "./LargeBarrelAnalysis.x -t root -f dabc_17025151847.hld.root -l setupRun3.json -i 3 -r 0 100"
 sed -i 's/manager.useTask(\"TimeWindowCreator\", \"hld\", \"tslot.calib\");//' ../../LargeBarrelAnalysis/main.cpp
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
-executeCommand "make"
+executeCommand "make LargeBarrelAnalysis.x"
 executeCommand "./LargeBarrelAnalysis.x -t root -f dabc_17025151847.tslot.calib.root -r 0 100"
 
 

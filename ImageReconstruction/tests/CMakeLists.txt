@@ -32,3 +32,6 @@ target_link_libraries(${TESTNAME}.x JPetFramework::JPetFramework Boost::unit_tes
 add_test(NAME ${TESTNAME}.x COMMAND ${TESTNAME}.x "--log_level=ERROR --log_format=XML --log_sink=${TESTNAME}.xml --raport_level=no")
 set_target_properties(${TESTNAME}.x PROPERTIES FOLDER tests)
 add_dependencies(${TESTNAME}.x link_target_imagereconstruction)
+
+
+add_custom_target(tests_imagereconstruction DEPENDS ${TESTNAME}.x)

@@ -15,12 +15,10 @@
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE SignalFinderToolsTest
-
+#include "../SignalFinderTools.h"
 #include <boost/test/unit_test.hpp>
 #include <JPetParamBank/JPetParamBank.h>
-#include "../SignalFinderTools.h"
 #include "JPetLoggerInclude.h"
-#include <boost/test/unit_test.hpp>
 
 BOOST_AUTO_TEST_SUITE(SignalFinderTestSuite)
 
@@ -512,9 +510,9 @@ BOOST_AUTO_TEST_CASE(reorderThresholdsByValue){
     sorted_values[new_order[i]] = values[i];
   }
 
-  BOOST_TEST(sorted_values[0] <= sorted_values[1]);
-  BOOST_TEST(sorted_values[1] <= sorted_values[2]);
-  BOOST_TEST(sorted_values[2] <= sorted_values[3]);
+  BOOST_REQUIRE_LE(sorted_values[0], sorted_values[1]);
+  BOOST_REQUIRE_LE(sorted_values[1], sorted_values[2]);
+  BOOST_REQUIRE_LE(sorted_values[2], sorted_values[3]);
 }
 
 BOOST_AUTO_TEST_CASE(findThresholdOrders){
@@ -558,9 +556,9 @@ BOOST_AUTO_TEST_CASE(findThresholdOrders){
       sorted_values[pm.second[i]] = orig_values[i];
     }
 
-    BOOST_TEST(sorted_values[0] <= sorted_values[1]);
-    BOOST_TEST(sorted_values[1] <= sorted_values[2]);
-    BOOST_TEST(sorted_values[2] <= sorted_values[3]);
+    BOOST_REQUIRE_LE(sorted_values[0], sorted_values[1]);
+    BOOST_REQUIRE_LE(sorted_values[1], sorted_values[2]);
+    BOOST_REQUIRE_LE(sorted_values[2], sorted_values[3]);
   }
 }
 

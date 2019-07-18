@@ -49,6 +49,7 @@ add_custom_target(link_target_largebarrelanalysis ALL
                   COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/../../unitTestData ${CMAKE_CURRENT_BINARY_DIR}/unitTestData)
 
 
+
 foreach(test_source IN ITEMS ${UNIT_TEST_SOURCES})
     get_filename_component(test ${test_source} NAME_WE)
     if(${test} MATCHES TimeWindowCreatorToolsTest|HitFinderToolsTest)
@@ -56,6 +57,7 @@ foreach(test_source IN ITEMS ${UNIT_TEST_SOURCES})
     else()
       package_add_test(${test} ${test_source})
     endif(${test} MATCHES TimeWindowCreatorToolsTest|HitFinderToolsTest)
-    
-    
+    list(APPEND tests_names ${test}.x)
 endforeach()
+
+add_custom_target(tests_largebarrel DEPENDS ${tests_names})
