@@ -24,6 +24,8 @@ executeCommand "mkdir -p build"
 executeCommand "cd build"
 executeCommand "cmake .."
 executeCommand "make"
+executeCommand "make tests_largebarrel"
+executeCommand "make tests_imagereconstruction"
 
 executeCommand "cd ImageReconstruction"
 executeCommand "ctest -j6 -C Debug -T test --output-on-failure"
