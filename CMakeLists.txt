@@ -92,7 +92,19 @@ if(ROOT_FOUND)
   message(STATUS "ROOT (version ${ROOT_VERSION}) was found using ROOTConfig")
 endif()
 
-include("${ROOT_DIR}/modules/RootNewMacros.cmake")
+if(EXISTS "${ROOT_DIR}/modules/RootNewMacros.cmake")
+  include("${ROOT_DIR}/modules/RootNewMacros.cmake")
+  message(STATUS "Found RootNewMacros.cmake in: ${ROOT_DIR}/modules!")
+elseif(EXISTS "${ROOT_DIR}/cmake/modules/RootNewMacros.cmake")
+  include("${ROOT_DIR}/cmake/modules/RootNewMacros.cmake")
+  message(STATUS "Found RootNewMacros.cmake in: ${ROOT_DIR}/cmake/modules!")
+elseif(EXISTS "${ROOT_DIR}/../cmake/modules/RootNewMacros.cmake")
+  include("${ROOT_DIR}/../cmake/modules/RootNewMacros.cmake")
+  message(STATUS "Found RootNewMacros.cmake in: ${ROOT_DIR}/../cmake/modules!")
+else()
+  message("ERROR! Could not find RootNewMacros.cmake file! Aborting..")
+  return(1)
+endif()
 # fix missing include directories property in versions < ROOT 6.12
 set_target_properties(ROOT::Core PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "${ROOT_INCLUDE_DIRS}")
@@ -121,11 +133,12 @@ set_property(TARGET ROOT::Flags_CXX APPEND PROPERTY
 
 ################################################################################
 ## Find JPetFramework
-find_package(JPetFramework CONFIG REQUIRED)
+find_package(JPetFramework CONFIG QUIET)
 if(JPetFramework_FOUND)
   message(STATUS "JPetFramework (version ${JPetFramework_VERSION}) was found using JPetFrameworkConfig")
 else()
   message(STATUS "Could not find JPetFramework, please source path/to/framework/bin/thisframework.sh to set correct paths..")
+  find_package(JPetFramework CONFIG REQUIRED) #to print error message
 endif(JPetFramework_FOUND)
 ################################################################################
 ## Download input and configuration files
