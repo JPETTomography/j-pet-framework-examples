@@ -33,6 +33,7 @@
 #include "JPetFilterRamLak.h"
 #include "JPetFilterRidgelet.h"
 #include "JPetFilterSheppLogan.h"
+#include "JPetFilterStir.h"
 #include "JPetRecoImageTools.h"
 #include "JPetUserTask/JPetUserTask.h"
 
@@ -56,7 +57,8 @@ public:
     kFilterHamming,
     kFilterHann,
     kFilterRidgelet,
-    kFilterSheppLogan
+    kFilterSheppLogan,
+    kFilterStir
   };
 
   enum kWeightingType
@@ -90,6 +92,8 @@ private:
 
   void setUpOptions();
 
+  const std::string kInFileNameKey = "SinogramCreator_OutFileName_std::string"; // input file for Reconstruction is output from SinogramCreator
+
   const std::string kReconstructSliceNumbers = "ReconstructionTask_ReconstructSliceNumbers_std::vector<int>";
 
   const std::string kFilterCutOffValueBegin = "ReconstructionTask_FilterCutOffValueBegin_float";
@@ -110,6 +114,7 @@ private:
   std::string fFilterName = "RamLak";
   std::string fReconstructionName = "FBP";
   std::string fOutFileName = "sinogram.root";
+  std::string fInFileName = "sinogram.root";
 
   JPetSinogramType* fSinogram = nullptr;
 };

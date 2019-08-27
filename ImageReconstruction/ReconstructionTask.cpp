@@ -25,7 +25,7 @@ bool ReconstructionTask::init()
 {
   setUpOptions();
   fOutputEvents = new JPetTimeWindow("JPetEvent");
-  fSinogram = JPetSinogramType::readMapFromFile("sinogramMC.root", "Sinogram");
+  fSinogram = JPetSinogramType::readMapFromFile(fInFileName, "Sinogram");
   if (!fSinogram)
   {
     return false;
@@ -110,7 +110,8 @@ bool ReconstructionTask::terminate()
                                                            {"Hamming", ReconstructionTask::kFilterType::kFilterHamming},
                                                            {"Hann", ReconstructionTask::kFilterType::kFilterHann},
                                                            {"Ridgelet", ReconstructionTask::kFilterType::kFilterRidgelet},
-                                                           {"SheppLogan", ReconstructionTask::kFilterType::kFilterSheppLogan}};
+                                                           {"SheppLogan", ReconstructionTask::kFilterType::kFilterSheppLogan},
+                                                           {"Stir", ReconstructionTask::kFilterType::kFilterStir}};
 
       switch (filterNameToFilter[fFilterName])
       {
@@ -135,6 +136,9 @@ bool ReconstructionTask::terminate()
       case ReconstructionTask::kFilterType::kFilterSheppLogan:
         filter = new JPetFilterSheppLogan(value);
         break;
+      case ReconstructionTask::kFilterType::kFilterStir:
+        filter = new JPetFilterStir(value);
+        break;
       default:
         ERROR("Could not find filter: " + fFilterName + ", using JPetFilterNone.");
         filter = new JPetFilterNone(value);
@@ -145,7 +149,10 @@ bool ReconstructionTask::terminate()
       int tofID = 0;
       for (auto& tofWindow : sinogram[i]) // filter sinogram in each TOF-windows(for FBP in single timewindow)
       {
-        filtered[tofWindow.first] = JPetRecoImageTools::FilterSinogram(f, *filter, tofWindow.second);
+        // filtered[tofWindow.first] = JPetRecoImageTools::FilterSinogram(f, *filter, tofWindow.second);
+        filtered[tofWindow.first] = JPetRecoImageTools::FilterSinogramInRealSpace(*filter, tofWindow.second);
+        saveResult(filtered[tofWindow.first], fOutFileName + "reconstruction_with_" + fReconstructionName + "_" + fFilterName + "_CutOff_" +
+                                                  std::to_string(value) + "_slicenumber_" + std::to_string(sliceNumber) + "_filteredSinogram.ppm");
         tofID++;
       }
 
@@ -164,6 +171,10 @@ bool ReconstructionTask::terminate()
 void ReconstructionTask::setUpOptions()
 {
   auto opts = getOptions();
+  if (isOptionSet(opts, kInFileNameKey))
+  {
+    fInFileName = getOptionAsString(opts, kInFileNameKey);
+  }
   if (isOptionSet(opts, kOutFileNameKey))
   {
     fOutFileName = getOptionAsString(opts, kOutFileNameKey);
