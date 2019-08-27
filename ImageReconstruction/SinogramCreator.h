@@ -102,6 +102,7 @@ private:
   void setUpOptions();
 
   const std::string kOutFileNameKey = "SinogramCreator_OutFileName_std::string";
+
   const std::string kReconstructionDistanceAccuracy = "SinogramCreator_ReconstructionDistanceAccuracy_float";
   const std::string kZSplitNumber = "SinogramCreator_SinogramZSplitNumber_int";
   const std::string kScintillatorLenght = "SinogramCreator_ScintillatorLenght_float";

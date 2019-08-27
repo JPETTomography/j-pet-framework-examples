@@ -43,7 +43,8 @@ private:
   void setUpOptions();
   void generateSinogram();
 
-  const std::string kOutFileNameKey = "SinogramCreatorTOF_OutFileName_std::string";
+  const std::string kOutFileNameKey = "SinogramCreator_OutFileName_std::string";
+
   const std::string kReconstructionDistanceAccuracy = "SinogramCreatorTOF_ReconstructionDistanceAccuracy_float";
   const std::string kZSplitNumber = "SinogramCreatorTOF_SinogramZSplitNumber_int";
   const std::string kScintillatorLenght = "SinogramCreatorTOF_ScintillatorLenght_float";
