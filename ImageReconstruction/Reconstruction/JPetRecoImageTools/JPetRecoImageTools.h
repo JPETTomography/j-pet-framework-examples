@@ -193,6 +193,14 @@ public:
  filter
  *  \param ftf function filtering sinogram with given filter
  *  \param filter type of filter
+ *  \param sinogram data to filter
+*/
+  static JPetSinogramType::SparseMatrix FilterSinogramInRealSpace(JPetFilterInterface& filter, const JPetSinogramType::SparseMatrix& sinogram);
+
+  /*! \brief Function filtering given sinogram using fouriner implementation and
+ filter
+ *  \param ftf function filtering sinogram with given filter
+ *  \param filter type of filter
  *  \param matrix data to filter
  *  \param TOFSliceSize size of TOF slice in matrix
 */

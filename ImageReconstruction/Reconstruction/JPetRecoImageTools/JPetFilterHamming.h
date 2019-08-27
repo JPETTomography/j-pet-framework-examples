@@ -28,7 +28,7 @@ public:
   explicit JPetFilterHamming(double maxCutOff, double alphaValue) : fAlpha(alphaValue), fCutOff(maxCutOff) {}
   virtual double operator()(double radius) override
   {
-    return radius < fCutOff ? radius * (fAlpha + (1. - fAlpha * std::cos(2. * M_PI * radius))) : 0.f;
+    return radius < fCutOff ? radius * (fAlpha + (1. - fAlpha * std::cos(M_PI * radius / fCutOff))) : 0.f;
   }
 
 private:

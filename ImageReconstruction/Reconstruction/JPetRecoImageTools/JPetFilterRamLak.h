@@ -24,7 +24,7 @@ class JPetFilterRamLak : public JPetFilterInterface {
 public:
   JPetFilterRamLak() {}
   explicit JPetFilterRamLak(double maxCutOff) : fCutOff(maxCutOff) {}
-  virtual double operator()(double radius) override { return radius < fCutOff ? radius : 0.; }
+  virtual double operator()(double radius) override { return radius < fCutOff ? radius / fCutOff : 0.; }
 
 private:
   double fCutOff = 1.0f;
