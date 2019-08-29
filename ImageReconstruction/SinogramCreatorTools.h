@@ -46,6 +46,8 @@ public:
   static unsigned int getTOFSlice(double firstTOF, double secondTOF, double sliceSize);
 
   static std::pair<TVector3,TVector3> remapToSingleLayer(const TVector3& firstHit, const TVector3& secondHit, const float radius);
+
+  static double getPolyFit(std::vector<double> indepvar);
 private:
   SinogramCreatorTools() = delete;
   ~SinogramCreatorTools() = delete;

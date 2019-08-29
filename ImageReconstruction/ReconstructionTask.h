@@ -33,7 +33,6 @@
 #include "JPetFilterRamLak.h"
 #include "JPetFilterRidgelet.h"
 #include "JPetFilterSheppLogan.h"
-#include "JPetFilterStir.h"
 #include "JPetRecoImageTools.h"
 #include "JPetUserTask/JPetUserTask.h"
 
@@ -103,6 +102,8 @@ private:
   const std::string kFilterName = "ReconstructionTask_FilterName_std::string";
   const std::string kReconstructionName = "ReconstructionTask_ReconstructionType_std::string";
 
+  const std::string kLORTOFSigma = "SinogramCreator_LORTOFSigma_float";
+
   const std::string kOutFileNameKey = "ReconstructionTask_OutFileName_std::string";
 
   std::vector<int> fReconstructSliceNumbers; // reconstruct only slices that was given in userParams
@@ -110,6 +111,8 @@ private:
   float fCutOffValueBegin = 1.f;
   float fCutOffValueEnd = 1.f;
   float fCutOffValueStep = 0.01f;
+
+  float fLORTOFSigma = 150.f;
 
   std::string fFilterName = "RamLak";
   std::string fReconstructionName = "FBP";

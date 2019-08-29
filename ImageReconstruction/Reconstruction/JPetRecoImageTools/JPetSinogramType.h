@@ -35,11 +35,11 @@ public:
 
   JPetSinogramType() : fName("test") {}
   explicit JPetSinogramType(std::string name, unsigned int zSplitNumber, unsigned int maxDistanceNumber, float maxReconstructionLayerRadius,
-                            float reconstructionDistanceAccuracy, float scintillatorLenght, float TOFWindowSize, float LORTOFSigmaSize,
+                            float reconstructionDistanceAccuracy, float scintillatorLenght, float TOFWindowSize,
                             std::vector<std::pair<float, float>> zSplitRange)
       : fName(name), fSinogramType(zSplitNumber, Matrix3D()), fZSplitNumber(zSplitNumber), fMaxDistanceNumber(maxDistanceNumber),
         fMaxReconstructionLayerRadius(maxReconstructionLayerRadius), fReconstructionDistanceAccuracy(reconstructionDistanceAccuracy),
-        fScintillatorLenght(scintillatorLenght), fTOFWindowSize(TOFWindowSize), fLORTOFSigmaSize(LORTOFSigmaSize), fZSplitRange(zSplitRange)
+        fScintillatorLenght(scintillatorLenght), fTOFWindowSize(TOFWindowSize), fZSplitRange(zSplitRange)
   {
   }
 
@@ -104,7 +104,6 @@ public:
   float getReconstructionDistanceAccuracy() const { return fReconstructionDistanceAccuracy; }
   float getScintillatorLenght() const { return fScintillatorLenght; }
   float getTOFWindowSize() const { return fTOFWindowSize; }
-  float getLORTOFSigmaSize() const { return fLORTOFSigmaSize; }
   std::vector<std::pair<float, float>> getZSplitRange() const { return fZSplitRange; }
 
   ClassDef(JPetSinogramType, 4);
@@ -121,7 +120,6 @@ private:
   float fReconstructionDistanceAccuracy;
   float fScintillatorLenght;
   float fTOFWindowSize;
-  float fLORTOFSigmaSize;
   std::vector<std::pair<float, float>> fZSplitRange;
 };
 

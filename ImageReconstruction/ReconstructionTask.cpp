@@ -136,9 +136,6 @@ bool ReconstructionTask::terminate()
       case ReconstructionTask::kFilterType::kFilterSheppLogan:
         filter = new JPetFilterSheppLogan(value);
         break;
-      case ReconstructionTask::kFilterType::kFilterStir:
-        filter = new JPetFilterStir(value);
-        break;
       default:
         ERROR("Could not find filter: " + fFilterName + ", using JPetFilterNone.");
         filter = new JPetFilterNone(value);
@@ -149,8 +146,7 @@ bool ReconstructionTask::terminate()
       int tofID = 0;
       for (auto& tofWindow : sinogram[i]) // filter sinogram in each TOF-windows(for FBP in single timewindow)
       {
-        // filtered[tofWindow.first] = JPetRecoImageTools::FilterSinogram(f, *filter, tofWindow.second);
-        filtered[tofWindow.first] = JPetRecoImageTools::FilterSinogramInRealSpace(*filter, tofWindow.second);
+        filtered[tofWindow.first] = JPetRecoImageTools::FilterSinogram(f, *filter, tofWindow.second);
         saveResult(filtered[tofWindow.first], fOutFileName + "reconstruction_with_" + fReconstructionName + "_" + fFilterName + "_CutOff_" +
                                                   std::to_string(value) + "_slicenumber_" + std::to_string(sliceNumber) + "_filteredSinogram.ppm");
         tofID++;
@@ -158,7 +154,7 @@ bool ReconstructionTask::terminate()
 
       JPetSinogramType::SparseMatrix result =
           JPetRecoImageTools::backProject(filtered, fSinogram->getReconstructionDistanceAccuracy(), fSinogram->getTOFWindowSize(),
-                                          fSinogram->getLORTOFSigmaSize(), weightFunction, JPetRecoImageTools::nonRescale, 0, 255);
+                                          fLORTOFSigma, weightFunction, JPetRecoImageTools::nonRescale, 0, 255);
 
       saveResult(result, fOutFileName + "reconstruction_with_" + fReconstructionName + "_" + fFilterName + "_CutOff_" + std::to_string(value) +
                              "_slicenumber_" + std::to_string(sliceNumber) + ".ppm");

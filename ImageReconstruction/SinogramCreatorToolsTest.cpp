@@ -25,20 +25,6 @@ BOOST_AUTO_TEST_CASE(test_angle_middle)
   const float maxDistance = 20.f;
   const float accuracy = 0.1f;
 
-  /* for (int i = 0; i < 360; i++)
-  {
-    const float x1 = r * std::cos((i - 1) * (M_PI / 180.f));
-    const float y1 = r * std::sin((i - 1) * (M_PI / 180.f));
-    const float x2 = r * std::cos((i + 1) * (M_PI / 180.f));
-    const float y2 = r * std::sin((i + 1) * (M_PI / 180.f));
-    const auto result =
-        SinogramCreatorTools::getSinogramRepresentation(x1, y1, x2, y2, maxDistance, accuracy, std::ceil(maxDistance * 2.f * (1.f / accuracy)), 180);
-    BOOST_REQUIRE_EQUAL(result.second, i % 180);
-    const float distance = i < 180 ? r : -r;
-    const float distanceResult = SinogramCreatorTools::roundToNearesMultiplicity(distance + maxDistance, accuracy);
-    BOOST_REQUIRE_CLOSE(result.first, distanceResult, EPSILON);
-  }*/
-
   for (int i = 0; i < 360; i++)
   {
     const float x1 = r * std::cos((i) * (M_PI / 180.f));
@@ -190,6 +176,14 @@ BOOST_AUTO_TEST_CASE(remap_to_single_layer)
   BOOST_REQUIRE_CLOSE(result.second.Y(), -radius, EPSILON);
   BOOST_REQUIRE_CLOSE(result.second.Z(), z2, EPSILON);
 
+}
+
+BOOST_AUTO_TEST_CASE(polyfit_test)
+{
+  BOOST_REQUIRE_CLOSE(SinogramCreatorTools::getPolyFit({std::sqrt((9.39 * 9.39) + (-10.75 * -10.75)), -std::abs(3.39)}), 4.367437643607859e-01, kEPSILON);
+  BOOST_REQUIRE_CLOSE(SinogramCreatorTools::getPolyFit({std::sqrt((9.57 * 9.57) + (-0.87 * -0.87)), -std::abs(2.49)}), 7.197118953414579e-01, kEPSILON);		
+  BOOST_REQUIRE_CLOSE(SinogramCreatorTools::getPolyFit({std::sqrt((-11.83 * -11.83) + (2.66 * 2.66)), -std::abs(-2.72)}), 5.820874582833866e-01, kEPSILON);		
+  BOOST_REQUIRE_CLOSE(SinogramCreatorTools::getPolyFit({std::sqrt((1.84 * 1.84) + (-8.89 * -8.89)), -std::abs(-4.77)}), 7.430144030486940e-01, kEPSILON);		
 }
 
 BOOST_AUTO_TEST_SUITE_END()

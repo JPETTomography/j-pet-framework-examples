@@ -69,6 +69,7 @@ public:
 protected:
   bool analyzeHits(const JPetHit& firstHit, const JPetHit& secondHit);
   bool analyzeHits(const TVector3& firstHit, const float firstTOF, const TVector3& secondHit, const float secondTOF);
+  bool analyzeHits(const float firstX, const float firstY, const float firstZ, const double firstTOF, const float secondX, const float secondY, const float secondZ, const double secondTOF);
   /**
    * @brief Function returing value of TOF rescale, to match same annihilation point after projection from 3d to 2d
    * \param x_diff difference on x axis between hit ends
@@ -77,10 +78,8 @@ protected:
    */
   float getTOFRescaleFactor(const TVector3& posDiff) const;
 
+  void readAndAnalyzeGojaFile();
   bool atenuation(const float value);
-
-  JPetSinogramType::SparseMatrix** fSinogram = nullptr;
-  JPetRecoImageTools::Matrix2DTOF* fTOFInformation = nullptr;
 
   const int kReconstructionMaxAngle = 180;
   int fZSplitNumber = 1;
@@ -108,8 +107,22 @@ private:
   const std::string kScintillatorLenght = "SinogramCreator_ScintillatorLenght_float";
   const std::string kEnableObliqueLORRemapping = "SinogramCreator_EnableObliqueLORRemapping_bool";
   const std::string kEnableTOFReconstrution = "SinogramCreator_EnableKDEReconstruction_bool";
+  const std::string kEnableNEMAAttenuation = "SinogramCreator_EnableNEMAAttenuation_bool";
+
+  const std::string kGojaInputFilePath = "SinogramCreator_GojaInputFilesPaths_std::vector<std::string>";
 
   std::string fOutFileName = "sinogram.root";
+  std::vector<std::string> fGojaInputFilePath;
+
+  JPetSinogramType::WholeSinogram fSinogramData;
+  float fTOFBinSliceSize = 100.f;
+  
+
+  bool fEnableNEMAAttenuation = false;
+
+  unsigned int fTotalAnalyzedHits = 0;
+  unsigned int fNumberOfCorrectHits = 0;
+  unsigned int fTotalAttenuatedHits = 0;
 
   std::default_random_engine generator;
   std::uniform_real_distribution<double> distribution;

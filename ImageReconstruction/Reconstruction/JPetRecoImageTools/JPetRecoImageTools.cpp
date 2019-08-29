@@ -378,25 +378,6 @@ JPetSinogramType::SparseMatrix JPetRecoImageTools::FilterSinogram(JPetRecoImageT
   return ftf(sinogram, filterFunction);
 }
 
-JPetSinogramType::SparseMatrix JPetRecoImageTools::FilterSinogramInRealSpace(JPetFilterInterface& filterFunction,
-                                                                             const JPetSinogramType::SparseMatrix& sinogram)
-{
-  assert(sinogram.size1() > 1);
-  int nScanSize = sinogram.size1();
-  int nAngles = sinogram.size2();
-  JPetSinogramType::SparseMatrix result(nScanSize, nAngles);
-  for (int x = 0; x < nAngles; x++)
-  {
-    result(0, x) = sinogram(0, x) * filterFunction(0);
-    for (int y = 1; y <= nScanSize / 2; y++)
-    {
-      result(y, x) = sinogram(y, x) * filterFunction(y);
-      result(nScanSize - y, x) = sinogram(nScanSize - y, x) * filterFunction(y);
-    }
-  }
-  return result;
-}
-
 JPetSinogramType::SparseMatrix JPetRecoImageTools::doFFTW1D(const JPetSinogramType::SparseMatrix& sinogram, JPetFilterInterface& filter)
 {
   assert(sinogram.size1() > 1);
