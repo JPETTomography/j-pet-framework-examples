@@ -13,9 +13,9 @@
  *  @file main.cpp
  */
 
-#include "JPetManager/JPetManager.h"
 #include "FilterEvents.h"
 #include "ImageReco.h"
+#include "JPetManager/JPetManager.h"
 #include "MLEMRunner.h"
 #include "ReconstructionTask.h"
 #include "SinogramCreator.h"

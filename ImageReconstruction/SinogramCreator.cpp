@@ -27,12 +27,13 @@ SinogramCreator::~SinogramCreator() {}
 bool SinogramCreator::init()
 {
   setUpOptions();
-  
+
   fOutputEvents = new JPetTimeWindow("JPetEvent");
   fSinogramData = JPetSinogramType::WholeSinogram(fZSplitNumber, JPetSinogramType::Matrix3D());
 
-  if(!fGojaInputFilePath.empty()) {
-      readAndAnalyzeGojaFile();
+  if (!fGojaInputFilePath.empty())
+  {
+    readAndAnalyzeGojaFile();
   }
 
   return true;
@@ -67,8 +68,11 @@ void SinogramCreator::readAndAnalyzeGojaFile()
       if (coincidence != 1) // 1 == true event
         continue;
 
-      if (fEnableNEMAAttenuation) {
-        if (firstZ - secondZ < 30. && atenuation(SinogramCreatorTools::getPolyFit(std::vector<double> {(std::sqrt(sourceX * sourceX + sourceY * sourceY), - std::abs(sourceZ))}))) {
+      if (fEnableNEMAAttenuation)
+      {
+        if (firstZ - secondZ < 30. &&
+            atenuation(SinogramCreatorTools::getPolyFit(std::vector<double>{(std::sqrt(sourceX * sourceX + sourceY * sourceY), -std::abs(sourceZ))})))
+        {
           fTotalAttenuatedHits++;
           continue;
         }
@@ -85,7 +89,8 @@ void SinogramCreator::readAndAnalyzeGojaFile()
 
 bool SinogramCreator::exec()
 {
-  if(!fGojaInputFilePath.empty()) {
+  if (!fGojaInputFilePath.empty())
+  {
     return true;
   }
 
@@ -96,10 +101,13 @@ bool SinogramCreator::exec()
     {
       const auto event = dynamic_cast<const JPetEvent&>(timeWindow->operator[](static_cast<int>(i)));
       const auto hits = event.getHits();
-      if (hits.size() != 2) { continue; }
+      if (hits.size() != 2)
+      {
+        continue;
+      }
       const auto& firstHit = hits[0];
       const auto& secondHit = hits[1];
-      if(analyzeHits(firstHit, secondHit))
+      if (analyzeHits(firstHit, secondHit))
         fNumberOfCorrectHits++;
       fTotalAnalyzedHits++;
     }
@@ -118,7 +126,7 @@ bool SinogramCreator::analyzeHits(const JPetHit& firstHit, const JPetHit& second
 }
 
 bool SinogramCreator::analyzeHits(const float firstX, const float firstY, const float firstZ, const double firstTOF, const float secondX,
-                                     const float secondY, const float secondZ, const double secondTOF)
+                                  const float secondY, const float secondZ, const double secondTOF)
 {
   int i = -1;
   if (!fEnableObliqueLORRemapping)
@@ -131,7 +139,8 @@ bool SinogramCreator::analyzeHits(const float firstX, const float firstY, const 
   }
   if (i < 0 || i >= fZSplitNumber)
   {
-    WARNING("WARNING, reconstructed sinogram slice on 'z' is out of range: " + std::to_string(i) + " max slice number: " + std::to_string(fZSplitNumber));
+    WARNING("WARNING, reconstructed sinogram slice on 'z' is out of range: " + std::to_string(i) +
+            " max slice number: " + std::to_string(fZSplitNumber));
     return false;
   }
   const auto sinogramResult = SinogramCreatorTools::getSinogramRepresentation(
@@ -171,7 +180,7 @@ float SinogramCreator::getTOFRescaleFactor(const TVector3& posDiff) const
 bool SinogramCreator::terminate()
 {
   // Save sinogram to root file.
-    JPetSinogramType map("Sinogram", fZSplitNumber, fMaxDistanceNumber, fMaxReconstructionLayerRadius, fReconstructionDistanceAccuracy,
+  JPetSinogramType map("Sinogram", fZSplitNumber, fMaxDistanceNumber, fMaxReconstructionLayerRadius, fReconstructionDistanceAccuracy,
                        fScintillatorLenght, fTOFBinSliceSize, fZSplitRange);
   map.addSinogram(fSinogramData);
   map.setNumberOfAllEvents(fTotalAnalyzedHits);
@@ -183,8 +192,9 @@ bool SinogramCreator::terminate()
   float totalCorrectProcentage = 0.f;
   if (fTotalAnalyzedHits != 0)
     totalCorrectProcentage = (((float)fNumberOfCorrectHits * 100.f) / (float)fTotalAnalyzedHits);
-  std::cout << "Correct hits: " << fNumberOfCorrectHits << " total hits: " << fTotalAnalyzedHits
-            << " (correct percentage: " << totalCorrectProcentage << "%)" << " attenuated: " << fTotalAttenuatedHits << std::endl
+  std::cout << "Correct hits: " << fNumberOfCorrectHits << " total hits: " << fTotalAnalyzedHits << " (correct percentage: " << totalCorrectProcentage
+            << "%)"
+            << " attenuated: " << fTotalAttenuatedHits << std::endl
             << std::endl;
 
   return true;
@@ -195,15 +205,27 @@ bool SinogramCreator::atenuation(const float value) { return distribution(genera
 void SinogramCreator::setUpOptions()
 {
   auto opts = getOptions();
-  if (isOptionSet(opts, kOutFileNameKey)) { fOutFileName = getOptionAsString(opts, kOutFileNameKey);}
-  if (isOptionSet(opts, kReconstructionDistanceAccuracy)) { fReconstructionDistanceAccuracy = getOptionAsFloat(opts, kReconstructionDistanceAccuracy); }
+  if (isOptionSet(opts, kOutFileNameKey))
+  {
+    fOutFileName = getOptionAsString(opts, kOutFileNameKey);
+  }
+  if (isOptionSet(opts, kReconstructionDistanceAccuracy))
+  {
+    fReconstructionDistanceAccuracy = getOptionAsFloat(opts, kReconstructionDistanceAccuracy);
+  }
   if (isOptionSet(opts, kZSplitNumber)) { fZSplitNumber = getOptionAsInt(opts, kZSplitNumber); }
   if (isOptionSet(opts, kScintillatorLenght)) { fScintillatorLenght = getOptionAsFloat(opts, kScintillatorLenght); }
   if (isOptionSet(opts, kEnableObliqueLORRemapping)) { fEnableObliqueLORRemapping = getOptionAsBool(opts, kEnableObliqueLORRemapping); }
   if (isOptionSet(opts, kEnableTOFReconstrution)) { fEnableKDEReconstruction = getOptionAsBool(opts, kEnableTOFReconstrution); }
-  if (isOptionSet(opts, kGojaInputFilePath)) { fGojaInputFilePath = getOptionAsVectorOfStrings(opts, kGojaInputFilePath); }
-  if (isOptionSet(opts, kEnableNEMAAttenuation)) { fEnableNEMAAttenuation = getOptionAsBool(opts, kEnableNEMAAttenuation); }
-  
+  if (isOptionSet(opts, kGojaInputFilePath))
+  {
+    fGojaInputFilePath = getOptionAsVectorOfStrings(opts, kGojaInputFilePath);
+  }
+  if (isOptionSet(opts, kEnableNEMAAttenuation))
+  {
+    fEnableNEMAAttenuation = getOptionAsBool(opts, kEnableNEMAAttenuation);
+  }
+
   const JPetParamBank& bank = getParamBank();
   const JPetGeomMapping mapping(bank);
   fMaxReconstructionLayerRadius = mapping.getRadiusOfLayer(mapping.getLayersCount() - 1);

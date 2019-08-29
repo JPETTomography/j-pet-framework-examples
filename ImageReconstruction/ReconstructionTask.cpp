@@ -153,8 +153,8 @@ bool ReconstructionTask::terminate()
       }
 
       JPetSinogramType::SparseMatrix result =
-          JPetRecoImageTools::backProject(filtered, fSinogram->getReconstructionDistanceAccuracy(), fSinogram->getTOFWindowSize(),
-                                          fLORTOFSigma, weightFunction, JPetRecoImageTools::nonRescale, 0, 255);
+          JPetRecoImageTools::backProject(filtered, fSinogram->getReconstructionDistanceAccuracy(), fSinogram->getTOFWindowSize(), fLORTOFSigma,
+                                          weightFunction, JPetRecoImageTools::nonRescale, 0, 255);
 
       saveResult(result, fOutFileName + "reconstruction_with_" + fReconstructionName + "_" + fFilterName + "_CutOff_" + std::to_string(value) +
                              "_slicenumber_" + std::to_string(sliceNumber) + ".ppm");

@@ -69,7 +69,8 @@ public:
 protected:
   bool analyzeHits(const JPetHit& firstHit, const JPetHit& secondHit);
   bool analyzeHits(const TVector3& firstHit, const float firstTOF, const TVector3& secondHit, const float secondTOF);
-  bool analyzeHits(const float firstX, const float firstY, const float firstZ, const double firstTOF, const float secondX, const float secondY, const float secondZ, const double secondTOF);
+  bool analyzeHits(const float firstX, const float firstY, const float firstZ, const double firstTOF, const float secondX, const float secondY,
+                   const float secondZ, const double secondTOF);
   /**
    * @brief Function returing value of TOF rescale, to match same annihilation point after projection from 3d to 2d
    * \param x_diff difference on x axis between hit ends
@@ -116,7 +117,6 @@ private:
 
   JPetSinogramType::WholeSinogram fSinogramData;
   float fTOFBinSliceSize = 100.f;
-  
 
   bool fEnableNEMAAttenuation = false;
 
