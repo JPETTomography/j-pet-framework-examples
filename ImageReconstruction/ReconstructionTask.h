@@ -102,7 +102,7 @@ private:
   const std::string kFilterName = "ReconstructionTask_FilterName_std::string";
   const std::string kReconstructionName = "ReconstructionTask_ReconstructionType_std::string";
 
-  const std::string kLORTOFSigma = "SinogramCreator_LORTOFSigma_float";
+  const std::string kLORTOFSigma = "ReconstructionTask_LORTOFSigma_float";
 
   const std::string kOutFileNameKey = "ReconstructionTask_OutFileName_std::string";
 

@@ -68,6 +68,8 @@ void SinogramCreator::readAndAnalyzeGojaFile()
       if (coincidence != 1) // 1 == true event
         continue;
 
+      fTotalAnalyzedHits++;
+
       if (fEnableNEMAAttenuation)
       {
         if (firstZ - secondZ < 30. &&
@@ -82,7 +84,6 @@ void SinogramCreator::readAndAnalyzeGojaFile()
       {
         fNumberOfCorrectHits++;
       }
-      fTotalAnalyzedHits++;
     }
   }
 }
@@ -213,10 +214,22 @@ void SinogramCreator::setUpOptions()
   {
     fReconstructionDistanceAccuracy = getOptionAsFloat(opts, kReconstructionDistanceAccuracy);
   }
-  if (isOptionSet(opts, kZSplitNumber)) { fZSplitNumber = getOptionAsInt(opts, kZSplitNumber); }
-  if (isOptionSet(opts, kScintillatorLenght)) { fScintillatorLenght = getOptionAsFloat(opts, kScintillatorLenght); }
-  if (isOptionSet(opts, kEnableObliqueLORRemapping)) { fEnableObliqueLORRemapping = getOptionAsBool(opts, kEnableObliqueLORRemapping); }
-  if (isOptionSet(opts, kEnableTOFReconstrution)) { fEnableKDEReconstruction = getOptionAsBool(opts, kEnableTOFReconstrution); }
+  if (isOptionSet(opts, kZSplitNumber))
+  {
+    fZSplitNumber = getOptionAsInt(opts, kZSplitNumber);
+  }
+  if (isOptionSet(opts, kScintillatorLenght))
+  {
+    fScintillatorLenght = getOptionAsFloat(opts, kScintillatorLenght);
+  }
+  if (isOptionSet(opts, kEnableObliqueLORRemapping))
+  {
+    fEnableObliqueLORRemapping = getOptionAsBool(opts, kEnableObliqueLORRemapping);
+  }
+  if (isOptionSet(opts, kEnableTOFReconstrution))
+  {
+    fEnableKDEReconstruction = getOptionAsBool(opts, kEnableTOFReconstrution);
+  }
   if (isOptionSet(opts, kGojaInputFilePath))
   {
     fGojaInputFilePath = getOptionAsVectorOfStrings(opts, kGojaInputFilePath);
@@ -224,6 +237,10 @@ void SinogramCreator::setUpOptions()
   if (isOptionSet(opts, kEnableNEMAAttenuation))
   {
     fEnableNEMAAttenuation = getOptionAsBool(opts, kEnableNEMAAttenuation);
+  }
+  if (isOptionSet(opts, kTOFBinSliceSize))
+  {
+    fTOFBinSliceSize = getOptionAsFloat(opts, kTOFBinSliceSize);
   }
 
   const JPetParamBank& bank = getParamBank();

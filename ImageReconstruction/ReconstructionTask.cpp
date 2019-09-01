@@ -147,8 +147,8 @@ bool ReconstructionTask::terminate()
       for (auto& tofWindow : sinogram[i]) // filter sinogram in each TOF-windows(for FBP in single timewindow)
       {
         filtered[tofWindow.first] = JPetRecoImageTools::FilterSinogram(f, *filter, tofWindow.second);
-        saveResult(filtered[tofWindow.first], fOutFileName + "reconstruction_with_" + fReconstructionName + "_" + fFilterName + "_CutOff_" +
-                                                  std::to_string(value) + "_slicenumber_" + std::to_string(sliceNumber) + "_filteredSinogram.ppm");
+        // saveResult(filtered[tofWindow.first], fOutFileName + "reconstruction_with_" + fReconstructionName + "_" + fFilterName + "_CutOff_" +
+        //                                          std::to_string(value) + "_slicenumber_" + std::to_string(sliceNumber) + "_filteredSinogram.ppm");
         tofID++;
       }
 

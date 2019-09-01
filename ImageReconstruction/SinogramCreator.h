@@ -109,6 +109,7 @@ private:
   const std::string kEnableObliqueLORRemapping = "SinogramCreator_EnableObliqueLORRemapping_bool";
   const std::string kEnableTOFReconstrution = "SinogramCreator_EnableKDEReconstruction_bool";
   const std::string kEnableNEMAAttenuation = "SinogramCreator_EnableNEMAAttenuation_bool";
+  const std::string kTOFBinSliceSize = "SinogramCreator_TOFBinSliceSize_float";
 
   const std::string kGojaInputFilePath = "SinogramCreator_GojaInputFilesPaths_std::vector<std::string>";
 
