@@ -19,9 +19,9 @@
 #include "JPetLoggerInclude.h"
 #include "JPetWriter/JPetWriter.h"
 
+#include <boost/serialization/array_wrapper.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
-#include <boost/serialization/array_wrapper.hpp>
 #include <string>
 #include <unordered_map>
 #include <utility>
