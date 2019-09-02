@@ -24,16 +24,33 @@
 class JPetFilterHamming : public JPetFilterInterface {
 public:
   JPetFilterHamming() {}
-  explicit JPetFilterHamming(double maxCutOff) : fCutOff(maxCutOff) {}
-  explicit JPetFilterHamming(double maxCutOff, double alphaValue) : fAlpha(alphaValue), fCutOff(maxCutOff) {}
-  virtual double operator()(double radius) override
+  explicit JPetFilterHamming(double maxCutOff, int size) : fCutOff(maxCutOff) { initFilter(); }
+  explicit JPetFilterHamming(double maxCutOff, double alphaValue, int size) : fAlpha(alphaValue), fCutOff(maxCutOff) { initFilter(); }
+
+  virtual double operator()(int n) override { return filterValues[n]; }
+
+  void initFilter()
   {
-    return radius < fCutOff ? radius * (fAlpha + (1. - fAlpha * std::cos(M_PI * radius / fCutOff))) : 0.f;
+    float f = 0.0;
+    for (int i = 1; i <= fSize - 1; i++)
+    {
+      f = (float)((float)0.5 * (i - 1) / fSize);
+      if (f <= fCutOff)
+        filterValues[i] = f * (fAlpha + (1. - fAlpha) * std::cos(M_PI * f / fCutOff));
+      else
+        filterValues[i] = 0.0;
+    }
+    if (0.5 <= fCutOff)
+      filterValues[2] = (0.5) * (fAlpha + (1. - fAlpha) * std::cos(M_PI * f / fCutOff));
+    else
+      filterValues[2] = 0.;
   }
 
 private:
-  double fAlpha = 0.54;
-  double fCutOff = 1.0f;
+  double fAlpha = 0.1;
+  double fCutOff = 0.3;
+  int fSize = 0;
+  std::vector<double> filterValues;
   JPetFilterHamming(const JPetFilterHamming&) = delete;
   JPetFilterHamming& operator=(const JPetFilterHamming&) = delete;
 };

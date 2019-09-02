@@ -101,7 +101,7 @@ bool ReconstructionTask::terminate()
     if (!fReconstructSliceNumbers.empty()) // if there we want to reconstruct only selected z slices, skip others
       if (std::find(fReconstructSliceNumbers.begin(), fReconstructSliceNumbers.end(), sliceNumber) == fReconstructSliceNumbers.end())
         continue;
-    for (float value = fCutOffValueBegin; value <= fCutOffValueEnd; value += fCutOffValueStep)
+    for (float cutOffValue = fCutOffValueBegin; value <= fCutOffValueEnd; value += fCutOffValueStep)
     {
       JPetFilterInterface* filter;
       static std::map<std::string, int> filterNameToFilter{{"None", ReconstructionTask::kFilterType::kFilterNone},
@@ -111,34 +111,37 @@ bool ReconstructionTask::terminate()
                                                            {"Hann", ReconstructionTask::kFilterType::kFilterHann},
                                                            {"Ridgelet", ReconstructionTask::kFilterType::kFilterRidgelet},
                                                            {"SheppLogan", ReconstructionTask::kFilterType::kFilterSheppLogan},
-                                                           {"Stir", ReconstructionTask::kFilterType::kFilterStir}};
+                                                           {"StirOldRamLak", ReconstructionTask::kFilterType::kFilterStirOldRamLak}};
 
       switch (filterNameToFilter[fFilterName])
       {
       case ReconstructionTask::kFilterType::kFilterNone:
-        filter = new JPetFilterNone(value);
+        filter = new JPetFilterNone(cutOffValue, sinogram.getMaxDistanceNumber());
         break;
       case ReconstructionTask::kFilterType::kFilterRamLak:
-        filter = new JPetFilterRamLak(value);
+        filter = new JPetFilterRamLak(cutOffValue, sinogram.getMaxDistanceNumber());
         break;
       case ReconstructionTask::kFilterType::kFilterCosine:
-        filter = new JPetFilterCosine(value);
+        filter = new JPetFilterCosine(cutOffValue, sinogram.getMaxDistanceNumber());
         break;
       case ReconstructionTask::kFilterType::kFilterHamming:
-        filter = new JPetFilterHamming(value);
+        filter = new JPetFilterHamming(cutOffValue, fFilterAlphaValue, sinogram.getMaxDistanceNumber());
         break;
       case ReconstructionTask::kFilterType::kFilterHann:
-        filter = new JPetFilterHann(value);
+        filter = new JPetFilterHann(cutOffValue, fFilterAlphaValue, sinogram.getMaxDistanceNumber());
         break;
       case ReconstructionTask::kFilterType::kFilterRidgelet:
-        filter = new JPetFilterRidgelet(value);
+        filter = new JPetFilterRidgelet(cutOffValue, sinogram.getMaxDistanceNumber());
         break;
       case ReconstructionTask::kFilterType::kFilterSheppLogan:
-        filter = new JPetFilterSheppLogan(value);
+        filter = new JPetFilterSheppLogan(cutOffValue, sinogram.getMaxDistanceNumber());
+        break;
+      case ReconstructionTask::kFilterType::kFilterStirOldRamLak:
+        filter = new JPetStirOldRamLak(cutOffValue, fFilterAlphaValue, sinogram.getMaxDistanceNumber());
         break;
       default:
         ERROR("Could not find filter: " + fFilterName + ", using JPetFilterNone.");
-        filter = new JPetFilterNone(value);
+        filter = new JPetFilterNone(cutOffValue, sinogram.getMaxDistanceNumber());
         break;
       }
 
@@ -148,7 +151,8 @@ bool ReconstructionTask::terminate()
       {
         filtered[tofWindow.first] = JPetRecoImageTools::FilterSinogram(f, *filter, tofWindow.second);
         // saveResult(filtered[tofWindow.first], fOutFileName + "reconstruction_with_" + fReconstructionName + "_" + fFilterName + "_CutOff_" +
-        //                                          std::to_string(value) + "_slicenumber_" + std::to_string(sliceNumber) + "_filteredSinogram.ppm");
+        //                                          std::to_string(cutOffValue) + "_slicenumber_" + std::to_string(sliceNumber) +
+        //                                          "_filteredSinogram.ppm");
         tofID++;
       }
 
@@ -190,6 +194,10 @@ void ReconstructionTask::setUpOptions()
   if (isOptionSet(opts, kFilterCutOffValueStep))
   {
     fCutOffValueStep = getOptionAsFloat(opts, kFilterCutOffValueStep);
+  }
+  if (isOptionSet(opts, kFilterAlpha))
+  {
+    fFilterAlphaValue = getOptionAsFloat(opts, kFilterAlpha);
   }
   if (isOptionSet(opts, kFilterName))
   {

@@ -33,6 +33,7 @@
 #include "JPetFilterRamLak.h"
 #include "JPetFilterRidgelet.h"
 #include "JPetFilterSheppLogan.h"
+#include "JPetFilterStirOldRamLak.h"
 #include "JPetRecoImageTools.h"
 #include "JPetUserTask/JPetUserTask.h"
 
@@ -57,7 +58,7 @@ public:
     kFilterHann,
     kFilterRidgelet,
     kFilterSheppLogan,
-    kFilterStir
+    kFilterStirOldRamLak
   };
 
   enum kWeightingType
@@ -100,6 +101,7 @@ private:
   const std::string kFilterCutOffValueStep = "ReconstructionTask_FilterCutOffValueStep_float";
 
   const std::string kFilterName = "ReconstructionTask_FilterName_std::string";
+  const std::string kFilterAlpha = "ReconstructionTask_FilterAlphaValue_float";
   const std::string kReconstructionName = "ReconstructionTask_ReconstructionType_std::string";
 
   const std::string kLORTOFSigma = "ReconstructionTask_LORTOFSigma_float";
@@ -111,6 +113,8 @@ private:
   float fCutOffValueBegin = 1.f;
   float fCutOffValueEnd = 1.f;
   float fCutOffValueStep = 0.01f;
+
+  float fFilterAlphaValue = 0.1f;
 
   float fLORTOFSigma = 150.f;
 
