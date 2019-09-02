@@ -24,8 +24,11 @@
 class JPetFilterHamming : public JPetFilterInterface {
 public:
   JPetFilterHamming() {}
-  explicit JPetFilterHamming(double maxCutOff, int size) : fCutOff(maxCutOff) { initFilter(); }
-  explicit JPetFilterHamming(double maxCutOff, double alphaValue, int size) : fAlpha(alphaValue), fCutOff(maxCutOff) { initFilter(); }
+  explicit JPetFilterHamming(double maxCutOff, int size) : fCutOff(maxCutOff), fSize(size), filterValues(size) { initFilter(); }
+  explicit JPetFilterHamming(double maxCutOff, double alphaValue, int size) : fAlpha(alphaValue), fCutOff(maxCutOff), fSize(size), filterValues(size)
+  {
+    initFilter();
+  }
 
   virtual double operator()(int n) override { return filterValues[n]; }
 

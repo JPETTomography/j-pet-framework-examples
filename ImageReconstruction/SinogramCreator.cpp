@@ -243,9 +243,16 @@ void SinogramCreator::setUpOptions()
     fTOFBinSliceSize = getOptionAsFloat(opts, kTOFBinSliceSize);
   }
 
-  const JPetParamBank& bank = getParamBank();
-  const JPetGeomMapping mapping(bank);
-  fMaxReconstructionLayerRadius = mapping.getRadiusOfLayer(mapping.getLayersCount() - 1);
+  if (isOptionSet(opts, kMaxReconstructionLayerRadius))
+  {
+    fMaxReconstructionLayerRadius = getOptionAsFloat(opts, kMaxReconstructionLayerRadius);
+  }
+  else
+  {
+    const JPetParamBank& bank = getParamBank();
+    const JPetGeomMapping mapping(bank);
+    fMaxReconstructionLayerRadius = mapping.getRadiusOfLayer(mapping.getLayersCount() - 1);
+  }
 
   const float maxZRange = fScintillatorLenght / 2.f;
   float range = (2.f * maxZRange) / fZSplitNumber;

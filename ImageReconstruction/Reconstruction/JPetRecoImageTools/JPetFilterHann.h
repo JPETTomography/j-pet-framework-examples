@@ -23,8 +23,8 @@ class JPetFilterHann : public JPetFilterInterface
 {
 public:
   JPetFilterHann() {}
-  explicit JPetFilterHann(double maxCutOff, int size) : fCutOff(maxCutOff) { initFilter(); }
-  explicit JPetFilterHann(double maxCutOff, double alphaValue, int size) : fAlpha(alphaValue), fCutOff(maxCutOff), filterValues(size)
+  explicit JPetFilterHann(double maxCutOff, int size) : fCutOff(maxCutOff), fSize(size), filterValues(size) { initFilter(); }
+  explicit JPetFilterHann(double maxCutOff, double alphaValue, int size) : fAlpha(alphaValue), fCutOff(maxCutOff), fSize(size), filterValues(size)
   {
     initFilter();
   }

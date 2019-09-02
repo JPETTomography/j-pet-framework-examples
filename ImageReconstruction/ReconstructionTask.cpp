@@ -101,7 +101,7 @@ bool ReconstructionTask::terminate()
     if (!fReconstructSliceNumbers.empty()) // if there we want to reconstruct only selected z slices, skip others
       if (std::find(fReconstructSliceNumbers.begin(), fReconstructSliceNumbers.end(), sliceNumber) == fReconstructSliceNumbers.end())
         continue;
-    for (float cutOffValue = fCutOffValueBegin; value <= fCutOffValueEnd; value += fCutOffValueStep)
+    for (float cutOffValue = fCutOffValueBegin; cutOffValue <= fCutOffValueEnd; cutOffValue += fCutOffValueStep)
     {
       JPetFilterInterface* filter;
       static std::map<std::string, int> filterNameToFilter{{"None", ReconstructionTask::kFilterType::kFilterNone},
@@ -116,32 +116,32 @@ bool ReconstructionTask::terminate()
       switch (filterNameToFilter[fFilterName])
       {
       case ReconstructionTask::kFilterType::kFilterNone:
-        filter = new JPetFilterNone(cutOffValue, sinogram.getMaxDistanceNumber());
+        filter = new JPetFilterNone(cutOffValue, fSinogram.getMaxDistanceNumber());
         break;
       case ReconstructionTask::kFilterType::kFilterRamLak:
-        filter = new JPetFilterRamLak(cutOffValue, sinogram.getMaxDistanceNumber());
+        filter = new JPetFilterRamLak(cutOffValue, fSinogram.getMaxDistanceNumber());
         break;
       case ReconstructionTask::kFilterType::kFilterCosine:
-        filter = new JPetFilterCosine(cutOffValue, sinogram.getMaxDistanceNumber());
+        filter = new JPetFilterCosine(cutOffValue, fSinogram.getMaxDistanceNumber());
         break;
       case ReconstructionTask::kFilterType::kFilterHamming:
-        filter = new JPetFilterHamming(cutOffValue, fFilterAlphaValue, sinogram.getMaxDistanceNumber());
+        filter = new JPetFilterHamming(cutOffValue, fFilterAlphaValue, fSinogram.getMaxDistanceNumber());
         break;
       case ReconstructionTask::kFilterType::kFilterHann:
-        filter = new JPetFilterHann(cutOffValue, fFilterAlphaValue, sinogram.getMaxDistanceNumber());
+        filter = new JPetFilterHann(cutOffValue, fFilterAlphaValue, fSinogram.getMaxDistanceNumber());
         break;
       case ReconstructionTask::kFilterType::kFilterRidgelet:
-        filter = new JPetFilterRidgelet(cutOffValue, sinogram.getMaxDistanceNumber());
+        filter = new JPetFilterRidgelet(cutOffValue, fSinogram.getMaxDistanceNumber());
         break;
       case ReconstructionTask::kFilterType::kFilterSheppLogan:
-        filter = new JPetFilterSheppLogan(cutOffValue, sinogram.getMaxDistanceNumber());
+        filter = new JPetFilterSheppLogan(cutOffValue, fSinogram.getMaxDistanceNumber());
         break;
       case ReconstructionTask::kFilterType::kFilterStirOldRamLak:
-        filter = new JPetStirOldRamLak(cutOffValue, fFilterAlphaValue, sinogram.getMaxDistanceNumber());
+        filter = new JPetStirOldRamLak(cutOffValue, fFilterAlphaValue, fSinogram.getMaxDistanceNumber());
         break;
       default:
         ERROR("Could not find filter: " + fFilterName + ", using JPetFilterNone.");
-        filter = new JPetFilterNone(cutOffValue, sinogram.getMaxDistanceNumber());
+        filter = new JPetFilterNone(cutOffValue, fSinogram.getMaxDistanceNumber());
         break;
       }
 

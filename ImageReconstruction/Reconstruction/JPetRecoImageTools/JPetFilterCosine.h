@@ -24,7 +24,7 @@ class JPetFilterCosine : public JPetFilterInterface
 {
 public:
   JPetFilterCosine() {}
-  explicit JPetFilterCosine(double maxCutOff, int size) : fCutOff(maxCutOff) { initFilter(); }
+  explicit JPetFilterCosine(double maxCutOff, int size) : fCutOff(maxCutOff), fSize(size), filterValues(size) { initFilter(); }
   virtual double operator()(int n) override { return filterValues[n]; }
 
   void initFilter()
