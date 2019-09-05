@@ -124,6 +124,11 @@ vector<JPetHit> HitFinderTools::matchSignals(
           } else { continue; }
         }
       } else {
+        if(saveHistos && physSig.getPM().getSide() != slotSignals.at(j).getPM().getSide()){
+          stats.getHisto1D("remain_signals_tdiff")->Fill(
+            slotSignals.at(j).getTime() - physSig.getTime()
+          );
+        }
         remainSignals.push_back(physSig);
         slotSignals.erase(slotSignals.begin() + 0);
         break;

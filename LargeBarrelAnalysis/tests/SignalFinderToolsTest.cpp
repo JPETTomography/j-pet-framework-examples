@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2019 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -15,21 +15,20 @@
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE SignalFinderToolsTest
-
+#include "../SignalFinderTools.h"
 #include <boost/test/unit_test.hpp>
-#include "SignalFinderTools.h"
+#include <JPetParamBank/JPetParamBank.h>
 #include "JPetLoggerInclude.h"
 
 BOOST_AUTO_TEST_SUITE(SignalFinderTestSuite)
 
 BOOST_AUTO_TEST_CASE(getSigChByPM_nullPointer_test)
 {
-  auto results = SignalFinderTools::getSigChByPM(nullptr, false);
+  auto results = SignalFinderTools::getSigChByPM(nullptr, false, -1);
   BOOST_REQUIRE(results.empty());
 }
 
-BOOST_AUTO_TEST_CASE(getSigChByPM_Test)
-{
+BOOST_AUTO_TEST_CASE(getSigChByPM_Test) {
   JPetPM pm1(1, "first");
   JPetSigCh sigChA1(JPetSigCh::Leading, 10.0);
   JPetSigCh sigChA2(JPetSigCh::Leading, 11.0);
@@ -70,8 +69,8 @@ BOOST_AUTO_TEST_CASE(getSigChByPM_Test)
   slot.add<JPetSigCh>(sigChC1);
   slot.add<JPetSigCh>(sigChC2);
 
-  auto results1 = SignalFinderTools::getSigChByPM(&slot, false);
-  auto results2 = SignalFinderTools::getSigChByPM(&slot, true);
+  auto results1 = SignalFinderTools::getSigChByPM(&slot, false, -1);
+  auto results2 = SignalFinderTools::getSigChByPM(&slot, true, -1);
 
   BOOST_REQUIRE_EQUAL(results1.size(), 2);
   BOOST_REQUIRE_EQUAL(results2.size(), 3);
@@ -82,33 +81,58 @@ BOOST_AUTO_TEST_CASE(getSigChByPM_Test)
   BOOST_REQUIRE_EQUAL(results2[3].size(), 2);
 }
 
+BOOST_AUTO_TEST_CASE(getSigChByPM_refDet_test)
+{
+  JPetPM pm(1, "not_reference");
+  JPetPM pmRef(234, "reference");
+  JPetSigCh sigCh1(JPetSigCh::Leading, 10.0);
+  JPetSigCh sigCh2(JPetSigCh::Trailing, 11.0);
+  JPetSigCh sigCh3(JPetSigCh::Leading, 12.0);
+  JPetSigCh sigCh4(JPetSigCh::Trailing, 13.0);
+  JPetSigCh sigCh5(JPetSigCh::Leading, 14.0);
+  JPetSigCh sigCh6(JPetSigCh::Trailing, 15.0);
+  sigCh1.setPM(pm);
+  sigCh2.setPM(pmRef);
+  sigCh3.setPM(pm);
+  sigCh4.setPM(pmRef);
+  sigCh5.setPM(pmRef);
+  sigCh6.setPM(pm);
+  sigCh1.setRecoFlag(JPetSigCh::Corrupted);
+  sigCh2.setRecoFlag(JPetSigCh::Corrupted);
+  sigCh3.setRecoFlag(JPetSigCh::Corrupted);
+  sigCh4.setRecoFlag(JPetSigCh::Corrupted);
+  sigCh5.setRecoFlag(JPetSigCh::Corrupted);
+  sigCh6.setRecoFlag(JPetSigCh::Corrupted);
+
+  JPetTimeWindow slot("JPetSigCh");
+  slot.add<JPetSigCh>(sigCh1);
+  slot.add<JPetSigCh>(sigCh2);
+  slot.add<JPetSigCh>(sigCh3);
+  slot.add<JPetSigCh>(sigCh4);
+  slot.add<JPetSigCh>(sigCh5);
+  slot.add<JPetSigCh>(sigCh6);
+
+  auto results1 = SignalFinderTools::getSigChByPM(&slot, true, 234);
+  auto results2 = SignalFinderTools::getSigChByPM(&slot, false, 234);
+
+  BOOST_REQUIRE_EQUAL(results1.size(), 2);
+  BOOST_REQUIRE_EQUAL(results2.size(), 1);
+  BOOST_REQUIRE_EQUAL(results1[1].size(), 3);
+  BOOST_REQUIRE_EQUAL(results1[234].size(), 3);
+  BOOST_REQUIRE_EQUAL(results2[234].size(), 3);
+}
+
 BOOST_AUTO_TEST_CASE(buildRawSignals_empty)
 {
   JPetStatistics stats;
   std::vector<JPetSigCh> sigChByPM;
   auto results = SignalFinderTools::buildRawSignals(
-    sigChByPM, 1, 5.0, 5.0, stats, false
+    sigChByPM, 5.0, 5.0, stats, false
   );
   BOOST_REQUIRE(results.empty());
 }
 
-BOOST_AUTO_TEST_CASE(buildRawSignals_wrong_one_signal_NumOfThresholdsNot4)
-{
-  JPetPM pm1(1, "first");
-  JPetSigCh sigCh1(JPetSigCh::Leading, 10);
-  sigCh1.setPM(pm1);
-  std::vector<JPetSigCh> sigChVec;
-  sigChVec.push_back(sigCh1);
-  auto numOfThresholds = 1;
-  JPetStatistics stats;
-  auto results = SignalFinderTools::buildRawSignals(
-    sigChVec, numOfThresholds, 5.0, 5.0, stats, false
-  );
-  BOOST_REQUIRE(results.empty());
-}
-
-BOOST_AUTO_TEST_CASE(buildRawSignals_one_signal)
-{
+BOOST_AUTO_TEST_CASE(buildRawSignals_one_signal) {
   JPetStatistics stats;
   JPetBarrelSlot bs1(1, true, "some_slot", 57.7, 123);
   JPetPM pm1(1, "first");
@@ -118,11 +142,10 @@ BOOST_AUTO_TEST_CASE(buildRawSignals_one_signal)
   sigCh1.setThresholdNumber(1);
   std::vector<JPetSigCh> sigChVec;
   sigChVec.push_back(sigCh1);
-  int numOfThresholds = 4;
   double sigChEdgeMaxTime = 5.0;
   double sigChLeadTrailMaxTime = 5.0;
   auto results = SignalFinderTools::buildRawSignals(
-    sigChVec, numOfThresholds, sigChEdgeMaxTime, sigChLeadTrailMaxTime, stats, false
+    sigChVec, sigChEdgeMaxTime, sigChLeadTrailMaxTime, stats, false
   );
   auto points_trail = results.at(0).getPoints(JPetSigCh::Trailing);
   auto points_lead = results.at(0).getPoints(JPetSigCh::Leading);
@@ -133,8 +156,7 @@ BOOST_AUTO_TEST_CASE(buildRawSignals_one_signal)
   BOOST_REQUIRE_CLOSE(points_lead.at(0).getValue(), 10.0, epsilon);
 }
 
-BOOST_AUTO_TEST_CASE(buildRawSignals_2)
-{
+BOOST_AUTO_TEST_CASE(buildRawSignals_2) {
   JPetBarrelSlot bs1(1, true, "some_slot", 57.7, 123);
   JPetPM pm1(1, "first");
   pm1.setBarrelSlot(bs1);
@@ -151,12 +173,11 @@ BOOST_AUTO_TEST_CASE(buildRawSignals_2)
   sigChFromSamePM.push_back(sigCh1);
   sigChFromSamePM.push_back(sigCh2);
   sigChFromSamePM.push_back(sigCh3);
-  auto numOfThresholds = 4;
   double sigChEdgeMaxTime = 5.;
   double sigChLeadTrailMaxTime = 10.;
   JPetStatistics stats;
   auto results =  SignalFinderTools::buildRawSignals(
-    sigChFromSamePM, numOfThresholds, sigChEdgeMaxTime , sigChLeadTrailMaxTime, stats, false
+    sigChFromSamePM, sigChEdgeMaxTime , sigChLeadTrailMaxTime, stats, false
   );
   BOOST_REQUIRE_EQUAL(results.size(), 1);
   auto points_trail = results.at(0).getPoints(JPetSigCh::Trailing);
@@ -169,8 +190,7 @@ BOOST_AUTO_TEST_CASE(buildRawSignals_2)
   BOOST_REQUIRE_CLOSE(points_trail.at(0).getValue(), 16.0, epsilon);
 }
 
-BOOST_AUTO_TEST_CASE(buildRawSignals_test_flag_inherit)
-{
+BOOST_AUTO_TEST_CASE(buildRawSignals_test_flag_inherit) {
   JPetBarrelSlot bs1(1, true, "some_slot", 57.7, 123);
   JPetPM pm1(1, "first");
   pm1.setBarrelSlot(bs1);
@@ -251,48 +271,53 @@ BOOST_AUTO_TEST_CASE(buildRawSignals_test_flag_inherit)
   sigChFromSamePM.push_back(sigChB7);
   sigChFromSamePM.push_back(sigChB8);
 
-  auto numOfThresholds = 4;
   double sigChEdgeMaxTime = 5.0;
   double sigChLeadTrailMaxTime = 12.0;
   JPetStatistics stats;
   auto results = SignalFinderTools::buildRawSignals(
-    sigChFromSamePM, numOfThresholds, sigChEdgeMaxTime, sigChLeadTrailMaxTime, stats, false
+    sigChFromSamePM, sigChEdgeMaxTime, sigChLeadTrailMaxTime, stats, false
   );
   BOOST_REQUIRE_EQUAL(results.size(), 2);
   BOOST_REQUIRE_EQUAL(results.at(0).getRecoFlag(), JPetBaseSignal::Good);
   BOOST_REQUIRE_EQUAL(results.at(1).getRecoFlag(), JPetBaseSignal::Corrupted);
 }
 
-BOOST_AUTO_TEST_CASE(findSigChOnNextThr_empty)
-{
+BOOST_AUTO_TEST_CASE(findSigChOnNextThr_empty) {
   std::vector<JPetSigCh> empty;
-  BOOST_REQUIRE_EQUAL(SignalFinderTools::findSigChOnNextThr(1.0, 10.0, empty), -1);
+  BOOST_REQUIRE_EQUAL(SignalFinderTools::findSigChOnNextThr(1.0, 10.0, empty),
+                      -1);
 }
 
-BOOST_AUTO_TEST_CASE(findSigChOnNextThr)
-{
-  std::vector<JPetSigCh> sigCh1 = {JPetSigCh(JPetSigCh::Leading, 2), JPetSigCh(JPetSigCh::Leading, 5)};
-  BOOST_REQUIRE_EQUAL(SignalFinderTools::findSigChOnNextThr(1.0, 10.0, sigCh1), 0);
+BOOST_AUTO_TEST_CASE(findSigChOnNextThr) {
+  std::vector<JPetSigCh> sigCh1 = {JPetSigCh(JPetSigCh::Leading, 2),
+                                   JPetSigCh(JPetSigCh::Leading, 5)};
+  BOOST_REQUIRE_EQUAL(SignalFinderTools::findSigChOnNextThr(1.0, 10.0, sigCh1),
+                      0);
 
-  std::vector<JPetSigCh> sigCh2 = {JPetSigCh(JPetSigCh::Leading, 7), JPetSigCh(JPetSigCh::Leading, 3)};
-  BOOST_REQUIRE_EQUAL(SignalFinderTools::findSigChOnNextThr(1.0, 10.0, sigCh2), 0);
+  std::vector<JPetSigCh> sigCh2 = {JPetSigCh(JPetSigCh::Leading, 7),
+                                   JPetSigCh(JPetSigCh::Leading, 3)};
+  BOOST_REQUIRE_EQUAL(SignalFinderTools::findSigChOnNextThr(1.0, 10.0, sigCh2),
+                      0);
 
-  std::vector<JPetSigCh> sigCh3 = {JPetSigCh(JPetSigCh::Leading, 15), JPetSigCh(JPetSigCh::Leading, 3)};
-  BOOST_REQUIRE_EQUAL(SignalFinderTools::findSigChOnNextThr(1.0, 10.0, sigCh3), 1);
+  std::vector<JPetSigCh> sigCh3 = {JPetSigCh(JPetSigCh::Leading, 15),
+                                   JPetSigCh(JPetSigCh::Leading, 3)};
+  BOOST_REQUIRE_EQUAL(SignalFinderTools::findSigChOnNextThr(1.0, 10.0, sigCh3),
+                      1);
 
-  std::vector<JPetSigCh> sigCh4 = {JPetSigCh(JPetSigCh::Leading, 15), JPetSigCh(JPetSigCh::Leading, 20)};
-  BOOST_REQUIRE_EQUAL(SignalFinderTools::findSigChOnNextThr(1.0, 10.0, sigCh4), -1);
+  std::vector<JPetSigCh> sigCh4 = {JPetSigCh(JPetSigCh::Leading, 15),
+                                   JPetSigCh(JPetSigCh::Leading, 20)};
+  BOOST_REQUIRE_EQUAL(SignalFinderTools::findSigChOnNextThr(1.0, 10.0, sigCh4),
+                      -1);
 }
 
-BOOST_AUTO_TEST_CASE(findTrailingSigCh_empty)
-{
+BOOST_AUTO_TEST_CASE(findTrailingSigCh_empty) {
   JPetSigCh lead(JPetSigCh::Leading, 1);
   std::vector<JPetSigCh> trailings;
-  BOOST_REQUIRE_EQUAL(SignalFinderTools::findTrailingSigCh(lead, 10.0, trailings), -1);
+  BOOST_REQUIRE_EQUAL(
+      SignalFinderTools::findTrailingSigCh(lead, 10.0, trailings), -1);
 }
 
-BOOST_AUTO_TEST_CASE(findTrailingSigCh)
-{
+BOOST_AUTO_TEST_CASE(findTrailingSigCh) {
   JPetBarrelSlot bs1(1, true, "some_slot", 57.7, 123);
   JPetPM pm1(1, "first");
   pm1.setBarrelSlot(bs1);
@@ -307,7 +332,8 @@ BOOST_AUTO_TEST_CASE(findTrailingSigCh)
   std::vector<JPetSigCh> trailings;
   trailings.push_back(trail1);
   trailings.push_back(trail2);
-  BOOST_REQUIRE_EQUAL(SignalFinderTools::findTrailingSigCh(lead, 10.0, trailings), 0);
+  BOOST_REQUIRE_EQUAL(
+      SignalFinderTools::findTrailingSigCh(lead, 10.0, trailings), 0);
 
   JPetSigCh trail3(JPetSigCh::Trailing, 12.0);
   JPetSigCh trail4(JPetSigCh::Trailing, 2.0);
@@ -316,7 +342,8 @@ BOOST_AUTO_TEST_CASE(findTrailingSigCh)
   std::vector<JPetSigCh> trailings2;
   trailings2.push_back(trail3);
   trailings2.push_back(trail4);
-  BOOST_REQUIRE_EQUAL(SignalFinderTools::findTrailingSigCh(lead, 10.0, trailings2), 1);
+  BOOST_REQUIRE_EQUAL(
+      SignalFinderTools::findTrailingSigCh(lead, 10.0, trailings2), 1);
 
   JPetSigCh trail5(JPetSigCh::Trailing, 2.0);
   JPetSigCh trail6(JPetSigCh::Trailing, 4.0);
@@ -325,11 +352,11 @@ BOOST_AUTO_TEST_CASE(findTrailingSigCh)
   std::vector<JPetSigCh> trailings3;
   trailings3.push_back(trail5);
   trailings3.push_back(trail6);
-  BOOST_REQUIRE_EQUAL(SignalFinderTools::findTrailingSigCh(lead, 10.0, trailings3), 0);
+  BOOST_REQUIRE_EQUAL(
+      SignalFinderTools::findTrailingSigCh(lead, 10.0, trailings3), 0);
 }
 
-BOOST_AUTO_TEST_CASE(buildRawSignals_realdata_flag_test)
-{
+BOOST_AUTO_TEST_CASE(buildRawSignals_realdata_flag_test) {
   JPetBarrelSlot bs1(1, true, "some_slot", 57.7, 123);
   JPetPM pm1(1, "first");
   pm1.setBarrelSlot(bs1);
@@ -456,17 +483,83 @@ BOOST_AUTO_TEST_CASE(buildRawSignals_realdata_flag_test)
   sigChFromSamePM.push_back(sigCh19);
   sigChFromSamePM.push_back(sigCh20);
 
-  auto numOfThresholds = 4;
   double sigChEdgeMaxTime = 0.0005;
   double sigChLeadTrailMaxTime = 0.0023;
   JPetStatistics stats;
   auto results = SignalFinderTools::buildRawSignals(
-    sigChFromSamePM, numOfThresholds, sigChEdgeMaxTime, sigChLeadTrailMaxTime, stats, false
+    sigChFromSamePM, sigChEdgeMaxTime, sigChLeadTrailMaxTime, stats, false
   );
   BOOST_REQUIRE_EQUAL(results.size(), 3);
   BOOST_REQUIRE_EQUAL(results.at(0).getRecoFlag(), JPetBaseSignal::Corrupted);
   BOOST_REQUIRE_EQUAL(results.at(1).getRecoFlag(), JPetBaseSignal::Corrupted);
   BOOST_REQUIRE_EQUAL(results.at(2).getRecoFlag(), JPetBaseSignal::Corrupted);
+}
+
+BOOST_AUTO_TEST_CASE(reorderThresholdsByValue){
+
+  SignalFinderTools::Permutation new_order = SignalFinderTools::kIdentity;
+  SignalFinderTools::ThresholdValues values = {100., 70., 20., 90.};
+  SignalFinderTools::permuteThresholdsByValue(values, new_order);
+  BOOST_REQUIRE_EQUAL(new_order[0], 3);
+  BOOST_REQUIRE_EQUAL(new_order[1], 1);
+  BOOST_REQUIRE_EQUAL(new_order[2], 0);
+  BOOST_REQUIRE_EQUAL(new_order[3], 2);
+
+  SignalFinderTools::ThresholdValues sorted_values;
+  for(int i=0;i<4;++i){
+    sorted_values[new_order[i]] = values[i];
+  }
+
+  BOOST_REQUIRE_LE(sorted_values[0], sorted_values[1]);
+  BOOST_REQUIRE_LE(sorted_values[1], sorted_values[2]);
+  BOOST_REQUIRE_LE(sorted_values[2], sorted_values[3]);
+}
+
+BOOST_AUTO_TEST_CASE(findThresholdOrders){
+  JPetParamBank bank;
+  JPetPM pm1(JPetPM::SideA, 221, 32, 64, std::make_pair(16.f, 32.f), "test_pm1");
+  JPetPM pm2(JPetPM::SideB, 222, 32, 64, std::make_pair(16.f, 32.f), "test_pm2");
+
+  bank.addPM(pm1);
+  bank.addPM(pm2);
+
+  SignalFinderTools::ThresholdValues values_pm1 = {40., 3., 20., 10.};
+  SignalFinderTools::ThresholdValues values_pm2 = {100., 400., 200., 300.};
+
+  JPetTOMBChannel channels[8];
+
+  for(int i=0;i<4;++i){
+
+    channels[i] = JPetTOMBChannel(i);
+    channels[4+i] = JPetTOMBChannel(4+i);
+
+    channels[i].setLocalChannelNumber(i+1);
+    channels[4+i].setLocalChannelNumber(i+1);
+
+    channels[i].setThreshold(values_pm1[i]);
+    channels[4+i].setThreshold(values_pm2[i]);
+
+    channels[i].setPM(pm1);
+    channels[4+i].setPM(pm2);
+
+    bank.addTOMBChannel(channels[i]);
+    bank.addTOMBChannel(channels[4+i]);
+  }
+
+  SignalFinderTools::ThresholdOrderings orderings =  SignalFinderTools::findThresholdOrders(bank);
+  BOOST_REQUIRE_EQUAL(orderings.size(), 2);
+
+  for(auto& pm: orderings){
+    SignalFinderTools::ThresholdValues sorted_values;
+    SignalFinderTools::ThresholdValues& orig_values = (pm.first==221 ? values_pm1 : values_pm2);
+    for(int i=0;i<4;++i){
+      sorted_values[pm.second[i]] = orig_values[i];
+    }
+
+    BOOST_REQUIRE_LE(sorted_values[0], sorted_values[1]);
+    BOOST_REQUIRE_LE(sorted_values[1], sorted_values[2]);
+    BOOST_REQUIRE_LE(sorted_values[2], sorted_values[3]);
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

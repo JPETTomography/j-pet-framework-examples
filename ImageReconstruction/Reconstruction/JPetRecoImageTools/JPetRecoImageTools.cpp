@@ -13,7 +13,7 @@
  *  @file JPetRecoImageTools.cpp
  */
 
-#include "./JPetRecoImageTools.h"
+#include "JPetRecoImageTools.h"
 #include "JPetLoggerInclude.h"
 
 JPetRecoImageTools::JPetRecoImageTools() {}

@@ -22,12 +22,12 @@
 #include <vector>
 
 #include <cassert>
-#include <fftw3.h>
 #include <memory>
 #include <utility>
 
 #include "JPetSinogramType.h"
 
+#include "fftw3.h"
 #include "JPetFilterInterface.h"
 
 template <class T, typename U>
