@@ -13,21 +13,14 @@
  *  @file SDAMatchHits.cpp
  */
 
-#include "SDAMatchHits.h"
+#include "JPetMatchHits/SDAMatchHits.h"
 using namespace std;
-SDAMatchHits::SDAMatchHits(const char* name)
-  : JPetUserTask(name),
-    fMatched(0),
-    fCurrentEventNumber(0)
-{
-}
+SDAMatchHits::SDAMatchHits(const char *name)
+    : JPetUserTask(name), fMatched(0), fCurrentEventNumber(0) {}
 
-SDAMatchHits::~SDAMatchHits()
-{
-}
+SDAMatchHits::~SDAMatchHits() {}
 
-bool SDAMatchHits::init()
-{
+bool SDAMatchHits::init() {
   fMatched = 0;
   fCurrentEventNumber = 0;
   fOutputEvents = new JPetTimeWindow("JPetHit");
@@ -35,13 +28,13 @@ bool SDAMatchHits::init()
   return true;
 }
 
-bool SDAMatchHits::exec()
-{
+bool SDAMatchHits::exec() {
   fSignalsArray.clear();
-  if (auto oldTimeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
+  if (auto oldTimeWindow = dynamic_cast<const JPetTimeWindow *const>(fEvent)) {
     auto n = oldTimeWindow->getNumberOfEvents();
     for (uint i = 0; i < n; ++i) {
-      auto signal = dynamic_cast<const JPetPhysSignal&>(oldTimeWindow->operator[](i));
+      auto signal =
+          dynamic_cast<const JPetPhysSignal &>(oldTimeWindow->operator[](i));
       fSignalsArray.push_back(signal);
     }
     fCurrentEventNumber++;
@@ -53,29 +46,29 @@ bool SDAMatchHits::exec()
   return true;
 }
 
-bool SDAMatchHits::terminate()
-{
+bool SDAMatchHits::terminate() {
   int fEventNb = fCurrentEventNumber;
-  INFO(Form("Matching complete \nAmount of fMatched hits: %d out of initial %d signals" , fMatched, fEventNb) );
+  INFO(Form("Matching complete \nAmount of fMatched hits: %d out of initial %d "
+            "signals",
+            fMatched, fEventNb));
   return true;
 }
 
-vector<JPetHit> SDAMatchHits::createHits(vector<JPetPhysSignal>& signals)
-{
+vector<JPetHit> SDAMatchHits::createHits(vector<JPetPhysSignal> &signals) {
   vector<JPetHit> hits;
 
   // group the signals by barrel slot ID
   map<int, vector<JPetPhysSignal>> signalsBySlot;
-  for (auto const& signal : signals) {
+  for (auto const &signal : signals) {
     int barrelSlotID = signal.getRecoSignal().getBarrelSlot().getID();
     signalsBySlot[barrelSlotID].push_back(signal);
   }
 
-  // discard entries for PMTs with smalller number of signals than two for each barrel slot
-  // since they cannot be merged into JPetHit and later for JPetLOR
+  // discard entries for PMTs with smalller number of signals than two for each
+  // barrel slot since they cannot be merged into JPetHit and later for JPetLOR
   for (auto it = signalsBySlot.begin(); it != signalsBySlot.end(); ++it) {
-    if ( it->second.size() < 2 ) {
-      signalsBySlot.erase( it );
+    if (it->second.size() < 2) {
+      signalsBySlot.erase(it);
     }
   }
 
@@ -83,22 +76,25 @@ vector<JPetHit> SDAMatchHits::createHits(vector<JPetPhysSignal>& signals)
   // of signals to match a hit
   for (auto it = signalsBySlot.begin(); it != signalsBySlot.end(); ++it) {
     vector<JPetHit> hitsFromSingleSlot = matchHitsWithinSlot(it->second);
-    // append the hits found for one specific barrel slot to all hits from this time window
-    hits.insert(hits.end(), hitsFromSingleSlot.begin(), hitsFromSingleSlot.end());
+    // append the hits found for one specific barrel slot to all hits from this
+    // time window
+    hits.insert(hits.end(), hitsFromSingleSlot.begin(),
+                hitsFromSingleSlot.end());
   }
   return hits;
 }
 
-std::vector<JPetHit> SDAMatchHits::matchHitsWithinSlot(std::vector<JPetPhysSignal> signals)
-{
+std::vector<JPetHit>
+SDAMatchHits::matchHitsWithinSlot(std::vector<JPetPhysSignal> signals) {
   vector<JPetHit> hits;
 
   for (size_t i = 0; i < signals.size() - 1; ++i) {
     for (size_t j = i + 1; j < signals.size(); ++j) {
-      JPetPhysSignal& sig1 = signals.at(i);
-      JPetPhysSignal& sig2 = signals.at(j);
-      if ( sig1.getPM().getSide() == sig2.getPM().getSide() ) {
-        // @ todo: add more strict rules for deciding whether two signals constitute a hit
+      JPetPhysSignal &sig1 = signals.at(i);
+      JPetPhysSignal &sig2 = signals.at(j);
+      if (sig1.getPM().getSide() == sig2.getPM().getSide()) {
+        // @ todo: add more strict rules for deciding whether two signals
+        // constitute a hit
         continue;
       } else {
         // ha wave a hit
@@ -119,8 +115,7 @@ std::vector<JPetHit> SDAMatchHits::matchHitsWithinSlot(std::vector<JPetPhysSigna
   return hits;
 }
 
-void SDAMatchHits::saveHits(std::vector<JPetHit> hits)
-{
+void SDAMatchHits::saveHits(std::vector<JPetHit> hits) {
   fMatched += hits.size();
   for (auto hit : hits) {
     fOutputEvents->add<JPetHit>(hit);

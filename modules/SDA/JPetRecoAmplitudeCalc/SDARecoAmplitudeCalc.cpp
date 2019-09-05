@@ -13,19 +13,15 @@
  *  @file SDARecoAmplitudeCalc.cpp
  */
 
-#include "../../tools/JPetRecoSignalTools/JPetRecoSignalTools.h"
-#include "SDARecoAmplitudeCalc.h"
+#include "JPetRecoAmplitudeCalc/SDARecoAmplitudeCalc.h"
+#include "JPetRecoSignalTools/JPetRecoSignalTools.h"
 
-SDARecoAmplitudeCalc::SDARecoAmplitudeCalc(const char* name)
-  : JPetUserTask(name),
-    fBadSignals(0),
-    fCurrentEventNumber(0)
-{}
+SDARecoAmplitudeCalc::SDARecoAmplitudeCalc(const char *name)
+    : JPetUserTask(name), fBadSignals(0), fCurrentEventNumber(0) {}
 
 SDARecoAmplitudeCalc::~SDARecoAmplitudeCalc() {}
 
-bool SDARecoAmplitudeCalc::init()
-{
+bool SDARecoAmplitudeCalc::init() {
   INFO(Form("Starting amplitude calculation"));
   fOutputEvents = new JPetTimeWindow("JPetRecoSignal");
   fBadSignals = 0;
@@ -33,16 +29,19 @@ bool SDARecoAmplitudeCalc::init()
   return true;
 }
 
-bool SDARecoAmplitudeCalc::exec()
-{
-  if (auto oldTimeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
+bool SDARecoAmplitudeCalc::exec() {
+  if (auto oldTimeWindow = dynamic_cast<const JPetTimeWindow *const>(fEvent)) {
     auto n = oldTimeWindow->getNumberOfEvents();
     for (uint i = 0; i < n; ++i) {
-      auto signal = dynamic_cast<const JPetRecoSignal&>(oldTimeWindow->operator[](i));
+      auto signal =
+          dynamic_cast<const JPetRecoSignal &>(oldTimeWindow->operator[](i));
       double amplitude = JPetRecoSignalTools::calculateAmplitude(signal);
       if (amplitude == JPetRecoSignalTools::ERRORS::badAmplitude) {
-        WARNING( Form("Something went wrong when calculating charge for event: %d", fCurrentEventNumber) );
-        JPetRecoSignalTools::saveBadSignalIntoRootFile(signal, fBadSignals, "badAmplitudes.root");
+        WARNING(
+            Form("Something went wrong when calculating charge for event: %d",
+                 fCurrentEventNumber));
+        JPetRecoSignalTools::saveBadSignalIntoRootFile(signal, fBadSignals,
+                                                       "badAmplitudes.root");
         fBadSignals++;
       } else {
         auto signalWithAmplitude = signal;
@@ -57,13 +56,14 @@ bool SDARecoAmplitudeCalc::exec()
   return true;
 }
 
-bool SDARecoAmplitudeCalc::terminate()
-{
+bool SDARecoAmplitudeCalc::terminate() {
   int fEventNb = fCurrentEventNumber;
   double goodPercent = 0;
   if (fEventNb != 0) {
     goodPercent = (fEventNb - fBadSignals) * 100.0 / fEventNb;
   }
-  INFO(Form("Amplitude calculation complete \nAmount of bad signals: %d \n %f %% of data is good" , fBadSignals, goodPercent) );
+  INFO(Form("Amplitude calculation complete \nAmount of bad signals: %d \n %f "
+            "%% of data is good",
+            fBadSignals, goodPercent));
   return true;
 }

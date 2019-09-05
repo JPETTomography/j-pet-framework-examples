@@ -23,7 +23,7 @@ Current available programs in this repository:
   * Time Calibration - procedures for calculating calibration constants from measurements with the reference detector.
   * Velocity Calibration - procedures for calculating effective light velocity in the scintillators.
   * Cosmic, Physics, Imaging - procedures with approach for data streaming.
-  * Image Reconstruction - procedures for producing sinograms.
+  * Image Reconstruction - procedures for producing sinograms and reconstructing image.
   * Scope loader and analysis - handling scope data.
   * MCGeantAnalysis - conversion of results of Monte Carlo simulations prepared with the J-PET simulations package to a format consistent with the J-PET Framework data
   * New Analysis Template - project, that can be modified for custom user analysis.

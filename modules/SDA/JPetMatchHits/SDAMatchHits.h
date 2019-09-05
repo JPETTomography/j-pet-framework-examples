@@ -19,22 +19,22 @@
 #ifndef _JPETANALYSISMODULE_SDAMATCHHITS_H_
 #define _JPETANALYSISMODULE_SDAMATCHHITS_H_
 
-#include <map>
-#include <TCanvas.h>
-#include "JPetUserTask/JPetUserTask.h"
 #include "JPetHit/JPetHit.h"
 #include "JPetPhysSignal/JPetPhysSignal.h"
+#include "JPetUserTask/JPetUserTask.h"
+#include <TCanvas.h>
+#include <map>
 
-class SDAMatchHits: public JPetUserTask
-{
+class SDAMatchHits : public JPetUserTask {
 public:
-  SDAMatchHits(const char* name);
+  SDAMatchHits(const char *name);
   virtual ~SDAMatchHits();
   virtual bool init() override;
-  virtual bool exec()override;
+  virtual bool exec() override;
   virtual bool terminate() override;
+
 private:
-  std::vector<JPetHit> createHits(std::vector<JPetPhysSignal>& signals);
+  std::vector<JPetHit> createHits(std::vector<JPetPhysSignal> &signals);
   void saveHits(std::vector<JPetHit> hits);
   std::vector<JPetHit> matchHitsWithinSlot(std::vector<JPetPhysSignal>);
   int fMatched;

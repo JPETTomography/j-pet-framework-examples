@@ -18,23 +18,22 @@
 #ifndef _JPETANALYSISMODULE_SDAMATCHLORS_H_
 #define _JPETANALYSISMODULE_SDAMATCHLORS_H_
 
-#include <TCanvas.h>
-#include "JPetUserTask/JPetUserTask.h"
-#include "JPetLOR/JPetLOR.h"
 #include "JPetHit/JPetHit.h"
+#include "JPetLOR/JPetLOR.h"
+#include "JPetUserTask/JPetUserTask.h"
+#include <TCanvas.h>
 
-class SDAMatchLORs: public JPetUserTask
-{
+class SDAMatchLORs : public JPetUserTask {
 
 public:
-
-  SDAMatchLORs(const char* name);
+  SDAMatchLORs(const char *name);
   virtual ~SDAMatchLORs();
   virtual bool init() override;
-  virtual bool exec()override;
+  virtual bool exec() override;
   virtual bool terminate() override;
+
 private:
-  std::vector<JPetLOR> createLORs(std::vector<JPetHit>& hits);
+  std::vector<JPetLOR> createLORs(std::vector<JPetHit> &hits);
   void saveLORs(std::vector<JPetLOR> lors);
   std::vector<JPetHit> fHitsArray;
   int fTSlot;

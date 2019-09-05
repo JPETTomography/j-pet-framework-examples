@@ -16,18 +16,17 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE HitFinderToolsTest
 
-#include <JPetPhysSignal/JPetPhysSignal.h>
-#include <JPetRecoSignal/JPetRecoSignal.h>
-#include <JPetRawSignal/JPetRawSignal.h>
-#include <boost/test/unit_test.hpp>
-#include <JPetSigCh/JPetSigCh.h>
+#include "../HitFinderTools.h"
 #include "JPetLoggerInclude.h"
-#include "HitFinderTools.h"
+#include "JPetPhysSignal/JPetPhysSignal.h"
+#include "JPetRawSignal/JPetRawSignal.h"
+#include "JPetRecoSignal/JPetRecoSignal.h"
+#include "JPetSigCh/JPetSigCh.h"
+#include <boost/test/unit_test.hpp>
 
 BOOST_AUTO_TEST_SUITE(HitFinderTestSuite)
 
-BOOST_AUTO_TEST_CASE(sortByTime_test)
-{
+BOOST_AUTO_TEST_CASE(sortByTime_test) {
   JPetPhysSignal sig1;
   JPetPhysSignal sig2;
   JPetPhysSignal sig3;
@@ -58,14 +57,12 @@ BOOST_AUTO_TEST_CASE(sortByTime_test)
   BOOST_REQUIRE_CLOSE(sigVec.at(4).getTime(), 16.0, epsilon);
 }
 
-BOOST_AUTO_TEST_CASE(getSignalsBySlot_test_empty)
-{
-  auto results =  HitFinderTools::getSignalsBySlot(nullptr, false);
+BOOST_AUTO_TEST_CASE(getSignalsBySlot_test_empty) {
+  auto results = HitFinderTools::getSignalsBySlot(nullptr, false);
   BOOST_REQUIRE(results.empty());
 }
 
-BOOST_AUTO_TEST_CASE(getSignalsBySlot_test)
-{
+BOOST_AUTO_TEST_CASE(getSignalsBySlot_test) {
   JPetBarrelSlot slot1(1, true, "one", 15.0, 1);
   JPetBarrelSlot slot2(2, true, "two", 25.0, 1);
   JPetBarrelSlot slot3(3, true, "three", 35.0, 1);
@@ -111,8 +108,7 @@ BOOST_AUTO_TEST_CASE(getSignalsBySlot_test)
   BOOST_REQUIRE_EQUAL(results2[3].size(), 3);
 }
 
-BOOST_AUTO_TEST_CASE(matchAllSignals_test_refDetID)
-{
+BOOST_AUTO_TEST_CASE(matchAllSignals_test_refDetID) {
   JPetBarrelSlot slot(1, true, "one", 15.0, 1);
   JPetBarrelSlot refSlot(193, true, "refDet", 15.0, 1);
   JPetPM pm(11, "first");
@@ -140,20 +136,17 @@ BOOST_AUTO_TEST_CASE(matchAllSignals_test_refDetID)
   JPetStatistics stats;
   std::map<unsigned int, std::vector<double>> velocitiesMap;
 
-  auto result1 = HitFinderTools::matchAllSignals(
-    allSignals, velocitiesMap, 5.0, 193, stats, false
-  );
+  auto result1 = HitFinderTools::matchAllSignals(allSignals, velocitiesMap, 5.0,
+                                                 193, stats, false);
 
-  auto result2 = HitFinderTools::matchAllSignals(
-    allSignals, velocitiesMap, 5.0, 1, stats, false
-  );
+  auto result2 = HitFinderTools::matchAllSignals(allSignals, velocitiesMap, 5.0,
+                                                 1, stats, false);
 
   BOOST_REQUIRE_EQUAL(result1.size(), 2);
   BOOST_REQUIRE_EQUAL(result2.size(), 1);
 }
 
-BOOST_AUTO_TEST_CASE(matchSignals_test_sameSide)
-{
+BOOST_AUTO_TEST_CASE(matchSignals_test_sameSide) {
   JPetBarrelSlot slot1(1, true, "one", 15.0, 1);
   JPetScin scin1(1);
   JPetPM pm1(11, "first");
@@ -176,12 +169,12 @@ BOOST_AUTO_TEST_CASE(matchSignals_test_sameSide)
   slotSignals.push_back(physSig3);
   JPetStatistics stats;
   std::map<unsigned int, std::vector<double>> velocitiesMap;
-  auto result = HitFinderTools::matchSignals(slotSignals, velocitiesMap, 5.0, stats, false);
+  auto result = HitFinderTools::matchSignals(slotSignals, velocitiesMap, 5.0,
+                                             stats, false);
   BOOST_REQUIRE(result.empty());
 }
 
-BOOST_AUTO_TEST_CASE(matchSignals_test)
-{
+BOOST_AUTO_TEST_CASE(matchSignals_test) {
   JPetLayer layer1(1, true, "layer1", 10.0);
   JPetBarrelSlot slot1(23, true, "barel1", 30.0, 23);
   slot1.setLayer(layer1);
@@ -275,7 +268,8 @@ BOOST_AUTO_TEST_CASE(matchSignals_test)
   std::vector<double> velVec = {2.0, 3.4, 4.5, 5.6};
   velocitiesMap.insert(std::make_pair(66, velVec));
   velocitiesMap.insert(std::make_pair(88, velVec));
-  auto result = HitFinderTools::matchSignals(slotSignals, velocitiesMap, 1.0, stats, false);
+  auto result = HitFinderTools::matchSignals(slotSignals, velocitiesMap, 1.0,
+                                             stats, false);
   auto epsilon = 0.0001;
 
   BOOST_REQUIRE_EQUAL(result.size(), 3);
@@ -287,12 +281,18 @@ BOOST_AUTO_TEST_CASE(matchSignals_test)
   BOOST_REQUIRE_EQUAL(result.at(2).getSignalA().getPM().getID(), 31);
   BOOST_REQUIRE_EQUAL(result.at(2).getSignalB().getPM().getID(), 75);
 
-  BOOST_REQUIRE_EQUAL(result.at(0).getSignalA().getRecoFlag(), JPetBaseSignal::Good);
-  BOOST_REQUIRE_EQUAL(result.at(0).getSignalB().getRecoFlag(), JPetBaseSignal::Good);
-  BOOST_REQUIRE_EQUAL(result.at(1).getSignalA().getRecoFlag(), JPetBaseSignal::Good);
-  BOOST_REQUIRE_EQUAL(result.at(1).getSignalB().getRecoFlag(), JPetBaseSignal::Corrupted);
-  BOOST_REQUIRE_EQUAL(result.at(2).getSignalA().getRecoFlag(), JPetBaseSignal::Good);
-  BOOST_REQUIRE_EQUAL(result.at(2).getSignalB().getRecoFlag(), JPetBaseSignal::Good);
+  BOOST_REQUIRE_EQUAL(result.at(0).getSignalA().getRecoFlag(),
+                      JPetBaseSignal::Good);
+  BOOST_REQUIRE_EQUAL(result.at(0).getSignalB().getRecoFlag(),
+                      JPetBaseSignal::Good);
+  BOOST_REQUIRE_EQUAL(result.at(1).getSignalA().getRecoFlag(),
+                      JPetBaseSignal::Good);
+  BOOST_REQUIRE_EQUAL(result.at(1).getSignalB().getRecoFlag(),
+                      JPetBaseSignal::Corrupted);
+  BOOST_REQUIRE_EQUAL(result.at(2).getSignalA().getRecoFlag(),
+                      JPetBaseSignal::Good);
+  BOOST_REQUIRE_EQUAL(result.at(2).getSignalB().getRecoFlag(),
+                      JPetBaseSignal::Good);
 
   BOOST_REQUIRE_EQUAL(result.at(0).getSignalA().getPM().getScin().getID(), 23);
   BOOST_REQUIRE_EQUAL(result.at(0).getSignalB().getPM().getScin().getID(), 23);
@@ -301,13 +301,13 @@ BOOST_AUTO_TEST_CASE(matchSignals_test)
   BOOST_REQUIRE_EQUAL(result.at(2).getSignalA().getPM().getScin().getID(), 23);
   BOOST_REQUIRE_EQUAL(result.at(2).getSignalB().getPM().getScin().getID(), 23);
 
-  BOOST_REQUIRE_CLOSE(result.at(0).getTime(), (1.0+1.5)/2, epsilon);
-  BOOST_REQUIRE_CLOSE(result.at(1).getTime(), (4.0+4.8)/2, epsilon);
-  BOOST_REQUIRE_CLOSE(result.at(2).getTime(), (6.5+7.2)/2, epsilon);
+  BOOST_REQUIRE_CLOSE(result.at(0).getTime(), (1.0 + 1.5) / 2, epsilon);
+  BOOST_REQUIRE_CLOSE(result.at(1).getTime(), (4.0 + 4.8) / 2, epsilon);
+  BOOST_REQUIRE_CLOSE(result.at(2).getTime(), (6.5 + 7.2) / 2, epsilon);
 
-  BOOST_REQUIRE_CLOSE(result.at(0).getTimeDiff(), 1.5-1.0, epsilon);
-  BOOST_REQUIRE_CLOSE(result.at(1).getTimeDiff(), 4.8-4.0, epsilon);
-  BOOST_REQUIRE_CLOSE(result.at(2).getTimeDiff(), 6.5-7.2, epsilon);
+  BOOST_REQUIRE_CLOSE(result.at(0).getTimeDiff(), 1.5 - 1.0, epsilon);
+  BOOST_REQUIRE_CLOSE(result.at(1).getTimeDiff(), 4.8 - 4.0, epsilon);
+  BOOST_REQUIRE_CLOSE(result.at(2).getTimeDiff(), 6.5 - 7.2, epsilon);
 
   BOOST_REQUIRE_CLOSE(result.at(0).getPosX(), 8.660254038, epsilon);
   BOOST_REQUIRE_CLOSE(result.at(1).getPosX(), 8.660254038, epsilon);
@@ -317,13 +317,16 @@ BOOST_AUTO_TEST_CASE(matchSignals_test)
   BOOST_REQUIRE_CLOSE(result.at(1).getPosY(), 5.0, epsilon);
   BOOST_REQUIRE_CLOSE(result.at(2).getPosY(), 5.0, epsilon);
 
-  BOOST_REQUIRE_CLOSE(result.at(0).getPosZ(), 2.0 * result.at(0).getTimeDiff() / 2000.0, epsilon);
-  BOOST_REQUIRE_CLOSE(result.at(1).getPosZ(), 2.0 * result.at(1).getTimeDiff() / 2000.0, epsilon);
-  BOOST_REQUIRE_CLOSE(result.at(2).getPosZ(), 2.0 * result.at(2).getTimeDiff() / 2000.0, epsilon);
+  BOOST_REQUIRE_CLOSE(result.at(0).getPosZ(),
+                      2.0 * result.at(0).getTimeDiff() / 2000.0, epsilon);
+  BOOST_REQUIRE_CLOSE(result.at(1).getPosZ(),
+                      2.0 * result.at(1).getTimeDiff() / 2000.0, epsilon);
+  BOOST_REQUIRE_CLOSE(result.at(2).getPosZ(),
+                      2.0 * result.at(2).getTimeDiff() / 2000.0, epsilon);
 
-  BOOST_REQUIRE(result.at(0).getPosZ()>0.0);
-  BOOST_REQUIRE(result.at(1).getPosZ()>0.0);
-  BOOST_REQUIRE(result.at(2).getPosZ()<0.0);
+  BOOST_REQUIRE(result.at(0).getPosZ() > 0.0);
+  BOOST_REQUIRE(result.at(1).getPosZ() > 0.0);
+  BOOST_REQUIRE(result.at(2).getPosZ() < 0.0);
 
   BOOST_REQUIRE_EQUAL(result.at(0).getRecoFlag(), JPetHit::Good);
   BOOST_REQUIRE_EQUAL(result.at(1).getRecoFlag(), JPetHit::Corrupted);

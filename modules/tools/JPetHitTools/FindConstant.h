@@ -17,42 +17,45 @@
 #define FINDCONSTANT_H
 
 #include "JPetLoggerInclude.h"
-#include <vector>
-#include <TString.h>
 #include <TF1.h>
 #include <TH1F.h>
+#include <TString.h>
+#include <vector>
 
-class FindConstant
-{
- public:
-  FindConstant(const std::vector<double>& inputEvents, const TString file, const double sourcePos, const int scinID);
+class FindConstant {
+public:
+  FindConstant(const std::vector<double> &inputEvents, const TString file,
+               const double sourcePos, const int scinID);
   double execute();
   double returnEnergyResolution();
 
- private:
-  void drawChi2AndFitPol2(const std::vector<double>& res, const std::vector<double>& chi2);
+private:
+  void drawChi2AndFitPol2(const std::vector<double> &res,
+                          const std::vector<double> &chi2);
   void aproximateParameters();
   void saveFitResultToTxt(std::string name);
-  void produceSIMEvents(std::vector<double>& SIMEvents, const double eRes);
+  void produceSIMEvents(std::vector<double> &SIMEvents, const double eRes);
   void fillSIMHisto(const double normalisation = 1.0, const double alpha = 1.0);
   void fillEXPHisto(const double normalisation = 1.0, const double alpha = 1.0);
-  double compareHistogramsByChi2(const double normalisation, const double alpha);
+  double compareHistogramsByChi2(const double normalisation,
+                                 const double alpha);
   void saveFittedHisto();
   void saveSIMHisto();
   void saveEXPHisto();
   void performFit();
-  bool isDir(std::string& path);
+  bool isDir(std::string &path);
   double estimateWidthRatio();
   double estimateHeightRatio();
 
   TString fileName;
-  TF1* quadraticFit;
-  double initialHeightRatio, initialWidthRatio, heighestCountsInSIM, heighestCountsInEXP;
+  TF1 *quadraticFit;
+  double initialHeightRatio, initialWidthRatio, heighestCountsInSIM,
+      heighestCountsInEXP;
   std::vector<double> SIMEvents, EXPEvents;
   unsigned int numberOfBins;
   int scintillatorID, binNumber;
-  TH1F* EXPHisto;
-  TH1F* SIMHisto;
+  TH1F *EXPHisto;
+  TH1F *SIMHisto;
   std::string expHistoTitle;
   double normalisation, alpha, energyResolution, sourcePosition;
   int maxBin, minBin;
@@ -62,4 +65,3 @@ class FindConstant
   double upperCut, lowerCut;
 };
 #endif
-

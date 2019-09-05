@@ -1,7 +1,0 @@
-examples_rootv5:
-  build: .
-  volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
-    - /var/www/jenkins_home/workspace/$JOB_BASE_NAME:/j-pet-framework-examples/
-    - /var/www/jenkins_files/examples/unitTestData/:/j-pet-framework-examples/unitTestData/
-  user: "1000:1000"
