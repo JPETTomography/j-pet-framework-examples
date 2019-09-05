@@ -16,14 +16,15 @@
 #include "SignalFinderTools.h"
 using namespace std;
 
-const SignalFinderTools::Permutation SignalFinderTools::kIdentity = {0,1,2,3};
+const SignalFinderTools::Permutation SignalFinderTools::kIdentity = {0, 1, 2,
+                                                                     3};
 
 /**
  * Method returns a map of vectors of JPetSigCh ordered by photomultiplier ID
  */
-const map<int, vector<JPetSigCh>> SignalFinderTools::getSigChByPM(
-     const JPetTimeWindow* timeWindow, bool useCorrupts, int refPMID
-){
+const map<int, vector<JPetSigCh>>
+SignalFinderTools::getSigChByPM(const JPetTimeWindow *timeWindow,
+                                bool useCorrupts, int refPMID) {
   map<int, vector<JPetSigCh>> sigChsPMMap;
   if (!timeWindow) {
     WARNING("Pointer of Time Window object is not set, returning empty map");
@@ -33,15 +34,18 @@ const map<int, vector<JPetSigCh>> SignalFinderTools::getSigChByPM(
   const unsigned int nSigChs = timeWindow->getNumberOfEvents();
   for (unsigned int i = 0; i < nSigChs; i++) {
     auto sigCh = dynamic_cast<const JPetSigCh&>(timeWindow->operator[](i));
-    // If it is set not to use Corrupted SigChs, such flagged objects will be skipped
-    // Here we ignore the corrupted flag of signals from Refference detector
-    // since removing them results in double peak structures in the calibration spectra
+    // If it is set not to use Corrupted SigChs, such flagged objects will be
+    // skipped Here we ignore the corrupted flag of signals from Refference
+    // detector since removing them results in double peak structures in the
+    // calibration spectra
     int pmtID = sigCh.getPM().getID();
-    if(pmtID == refPMID) {
+    if (pmtID == refPMID) {
       sigCh.setRecoFlag(JPetSigCh::Good);
     }
 
-    if(!useCorrupts && sigCh.getRecoFlag() == JPetSigCh::Corrupted) { continue; }
+    if (!useCorrupts && sigCh.getRecoFlag() == JPetSigCh::Corrupted) {
+      continue;
+    }
 
     auto search = sigChsPMMap.find(pmtID);
     if (search == sigChsPMMap.end()) {
@@ -59,24 +63,21 @@ const map<int, vector<JPetSigCh>> SignalFinderTools::getSigChByPM(
  * Method invoking Raw Signal building method for each PM separately
  */
 vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
-   const map<int, vector<JPetSigCh>>& sigChByPM,
-   double sigChEdgeMaxTime, double sigChLeadTrailMaxTime,
-   JPetStatistics& stats, bool saveHistos,
-   ThresholdOrderings thresholdOrderings
-) {
+    const map<int, vector<JPetSigCh>> &sigChByPM, double sigChEdgeMaxTime,
+    double sigChLeadTrailMaxTime, JPetStatistics &stats, bool saveHistos,
+    ThresholdOrderings thresholdOrderings) {
   vector<JPetRawSignal> allSignals;
-  
-  for (auto& sigChPair : sigChByPM) {
+
+  for (auto &sigChPair : sigChByPM) {
     Permutation P;
-    if(thresholdOrderings.empty()){
+    if (thresholdOrderings.empty()) {
       P = kIdentity;
-    }else{
+    } else {
       P = thresholdOrderings.at(sigChPair.first);
     }
 
-    auto signals = buildRawSignals(
-      sigChPair.second, sigChEdgeMaxTime, sigChLeadTrailMaxTime, stats, saveHistos, P
-    );
+    auto signals = buildRawSignals(sigChPair.second, sigChEdgeMaxTime,
+                                   sigChLeadTrailMaxTime, stats, saveHistos, P);
     allSignals.insert(allSignals.end(), signals.begin(), signals.end());
   }
   return allSignals;
@@ -89,22 +90,22 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
  * time window (sigChEdgeMaxTime parameter) and all Trailing SigChs that conform
  * to second time window (sigChLeadTrailMaxTime parameter).
  */
- vector<JPetRawSignal> SignalFinderTools::buildRawSignals(
-   const vector<JPetSigCh>& sigChByPM,
-   double sigChEdgeMaxTime, double sigChLeadTrailMaxTime,
-   JPetStatistics& stats, bool saveHistos,
-   Permutation ordering
- ) {
+vector<JPetRawSignal> SignalFinderTools::buildRawSignals(
+    const vector<JPetSigCh> &sigChByPM, double sigChEdgeMaxTime,
+    double sigChLeadTrailMaxTime, JPetStatistics &stats, bool saveHistos,
+    Permutation ordering) {
   vector<JPetRawSignal> rawSigVec;
 
   vector<JPetSigCh> tmpVec;
   vector<vector<JPetSigCh>> thrLeadingSigCh(kNumberOfThresholds, tmpVec);
   vector<vector<JPetSigCh>> thrTrailingSigCh(kNumberOfThresholds, tmpVec);
-  for (const JPetSigCh& sigCh : sigChByPM) {
+  for (const JPetSigCh &sigCh : sigChByPM) {
     if(sigCh.getType() == JPetSigCh::Leading) {
-      thrLeadingSigCh.at(ordering[sigCh.getThresholdNumber()-1]).push_back(sigCh);
+      thrLeadingSigCh.at(ordering[sigCh.getThresholdNumber() - 1])
+          .push_back(sigCh);
     } else if(sigCh.getType() == JPetSigCh::Trailing) {
-      thrTrailingSigCh.at(ordering[sigCh.getThresholdNumber()-1]).push_back(sigCh);
+      thrTrailingSigCh.at(ordering[sigCh.getThresholdNumber() - 1])
+          .push_back(sigCh);
     }
   }
   assert(thrLeadingSigCh.size() > 0);
@@ -138,7 +139,7 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
     // Procedure follows in loop for THR 2,3,4
     // First search for leading SigCh on iterated THR,
     // then search for trailing SigCh on iterated THR
-    for(unsigned int kk=1;kk<kNumberOfThresholds;kk++){
+    for (unsigned int kk = 1; kk < kNumberOfThresholds; kk++) {
       int nextThrSigChIndex = findSigChOnNextThr(
         thrLeadingSigCh.at(0).at(0).getValue(), sigChEdgeMaxTime, thrLeadingSigCh.at(kk)
       );
@@ -185,8 +186,8 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
     thrLeadingSigCh.at(0).erase(thrLeadingSigCh.at(0).begin());
   }
   // Filling control histograms
-  if(saveHistos){
-    for(unsigned int jj=0;jj<kNumberOfThresholds;jj++){
+  if (saveHistos) {
+    for (unsigned int jj = 0; jj < kNumberOfThresholds; jj++) {
       for(auto sigCh : thrLeadingSigCh.at(jj)){
         stats.getHisto1D("unused_sigch_all")->Fill(2*sigCh.getThresholdNumber()-1);
         if(sigCh.getRecoFlag()==JPetSigCh::Good){
@@ -244,29 +245,31 @@ int SignalFinderTools::findTrailingSigCh(
 }
 
 /**
- * Method finds a 4-element permutation which has to be applied to threshold numbers
- * to have them sorted by increasing threshold values.
+ * Method finds a 4-element permutation which has to be applied to threshold
+ * numbers to have them sorted by increasing threshold values.
  *
- * The ordering may be different for each PMT, therefore the method creates a map
- * with PMT ID numbers as keys and 4-element permutations as values.
+ * The ordering may be different for each PMT, therefore the method creates a
+ * map with PMT ID numbers as keys and 4-element permutations as values.
  */
-SignalFinderTools::ThresholdOrderings SignalFinderTools::findThresholdOrders(const JPetParamBank& bank){
+SignalFinderTools::ThresholdOrderings
+SignalFinderTools::findThresholdOrders(const JPetParamBank &bank) {
 
   ThresholdOrderings orderings;
   std::map<PMid, ThresholdValues> thr_values_per_pm;
 
-  for(auto& tc: bank.getTOMBChannels()){
+  for (auto &tc : bank.getTOMBChannels()) {
     PMid pm_id = tc.second->getPM().getID();
 
-    if(tc.second->getLocalChannelNumber() > kNumberOfThresholds){
+    if (tc.second->getLocalChannelNumber() > kNumberOfThresholds) {
       ERROR("Threshold sorting is meant to work with 4 thresholds only!");
       return orderings;
     }
 
-    thr_values_per_pm[pm_id][tc.second->getLocalChannelNumber()-1] = tc.second->getThreshold();
+    thr_values_per_pm[pm_id][tc.second->getLocalChannelNumber() - 1] =
+        tc.second->getThreshold();
   }
 
-  for(auto& pm: thr_values_per_pm){
+  for (auto &pm : thr_values_per_pm) {
     permuteThresholdsByValue(pm.second, orderings[pm.first]);
   }
 
@@ -277,22 +280,22 @@ SignalFinderTools::ThresholdOrderings SignalFinderTools::findThresholdOrders(con
  * Helper method for findThresholdOrders which constructs a single permutation
  * based on the threshold values on a single PMT
  *
- * @param threshold_values array of floating-point values of voltage thresholds set on
- * front-end thresholds 1-4
- * @param new_ordering a permutation of thresholds 1-4 such that new_ordering[k] indicates the place of
- * threshold no. k (k in 0,1,2,3) in an array of thresholds sorted by voltage value
+ * @param threshold_values array of floating-point values of voltage thresholds
+ * set on front-end thresholds 1-4
+ * @param new_ordering a permutation of thresholds 1-4 such that new_ordering[k]
+ * indicates the place of threshold no. k (k in 0,1,2,3) in an array of
+ * thresholds sorted by voltage value
  */
-void SignalFinderTools::permuteThresholdsByValue(const ThresholdValues& threshold_values, Permutation& new_ordering){
+void SignalFinderTools::permuteThresholdsByValue(
+    const ThresholdValues &threshold_values, Permutation &new_ordering) {
 
   Permutation indices = kIdentity;
 
-  sort(indices.begin(), indices.end(),
-       [&](const int& a, const int& b) {
-         return (threshold_values.at(a) < threshold_values.at(b));
-       }
-       );
+  sort(indices.begin(), indices.end(), [&](const int &a, const int &b) {
+    return (threshold_values.at(a) < threshold_values.at(b));
+  });
 
-  for(unsigned short i=0;i<kNumberOfThresholds;++i){
+  for (unsigned short i = 0; i < kNumberOfThresholds; ++i) {
     new_ordering[indices[i]] = i;
   }
 }

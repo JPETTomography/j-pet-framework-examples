@@ -23,36 +23,11 @@ class JPetFilterHann : public JPetFilterInterface
 {
 public:
   JPetFilterHann() {}
-  explicit JPetFilterHann(double maxCutOff, int size) : fCutOff(maxCutOff), fSize(size), filterValues(size) { initFilter(); }
-  explicit JPetFilterHann(double maxCutOff, double alphaValue, int size) : fAlpha(alphaValue), fCutOff(maxCutOff), fSize(size), filterValues(size)
-  {
-    initFilter();
-  }
-
-  virtual double operator()(int n) override { return filterValues[n]; }
-
-  void initFilter()
-  {
-    float f = 0.0;
-    for (int i = 1; i <= fSize - 1; i++)
-    {
-      f = (float)((float)0.5 * (i - 1) / fSize);
-      if (f <= fCutOff)
-        filterValues[i] = f * (fAlpha + (1. - fAlpha) - std::cos(M_PI * f / fCutOff));
-      else
-        filterValues[i] = 0.0;
-    }
-    if (0.5 <= fCutOff)
-      filterValues[2] = 0.5 * (fAlpha + (1. - fAlpha) - std::cos(M_PI * f / fCutOff));
-    else
-      filterValues[2] = 0.;
-  }
+  explicit JPetFilterHann(double maxCutOff) : fCutOff(maxCutOff) {}
+  virtual double operator()(double radius) override { return radius < fCutOff ? 0.5 * (1. - std::cos((2. * M_PI * radius))) : 0.; }
 
 private:
-  double fAlpha = 0.1;
-  double fCutOff = 0.3;
-  int fSize = 0;
-  std::vector<double> filterValues;
+  double fCutOff = 0.9;
 };
 
 #endif /*  !_JPetFilterHann_H_ */

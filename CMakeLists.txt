@@ -168,10 +168,6 @@ if(DOWNLOAD_DATA)
 endif()
 
 ################################################################################
-## Add general modules files
-add_subdirectory(modules)
-
-################################################################################
 ## Directories with examples
 add_subdirectory(InterThresholdCalibration)
 add_subdirectory(LargeBarrelAnalysis)

@@ -16,10 +16,8 @@
 #ifndef _JPET_SinogramType_H_
 #define _JPET_SinogramType_H_
 
-#include "JPetLoggerInclude.h"
 #include "JPetWriter/JPetWriter.h"
 
-#include <boost/serialization/array_wrapper.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <string>

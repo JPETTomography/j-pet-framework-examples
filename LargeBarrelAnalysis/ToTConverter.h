@@ -22,8 +22,7 @@ using CachedFunction = jpet_common_tools::JPetCachedFunction1D;
 
 enum RunType { kUnknown, kRun4 };
 
-class ToTConverter
-{
+class ToTConverter {
 
 public:
   ToTConverter(const ToTParams &params, ToTRange);

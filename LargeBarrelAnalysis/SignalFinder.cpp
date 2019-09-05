@@ -66,22 +66,29 @@ bool SignalFinder::init()
   // Reference detector photomultiplier identifier
   if (isOptionSet(fParams.getOptions(), kRefPMIDParamKey)) {
     fRefPMID = getOptionAsInt(fParams.getOptions(), kRefPMIDParamKey);
-    WARNING("Signal Finder is ignoring Corrupted Signal Channels from the Refference detector as specified by the user (photomultiplier number + std::to_string(fRefPMID)");
-  }
-  else{
-    WARNING("Signal Finder is ignoring Corrupted Signal Channels from the Refference detector(default photomultiplier number + std::to_string(fRefPMID)");
+    WARNING("Signal Finder is ignoring Corrupted Signal Channels from the "
+            "Refference detector as specified by the user (photomultiplier "
+            "number + std::to_string(fRefPMID)");
+  } else {
+    WARNING("Signal Finder is ignoring Corrupted Signal Channels from the "
+            "Refference detector(default photomultiplier number + "
+            "std::to_string(fRefPMID)");
   }
   // Getting bool for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey)) {
-    fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
+    fSaveControlHistos =
+        getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
   }
   // Check if the user requested ordering of thresholds by value
   if (isOptionSet(fParams.getOptions(), kOrderThresholdsByValueKey)) {
-    fOrderThresholdsByValue = getOptionAsBool(fParams.getOptions(), kOrderThresholdsByValueKey);
+    fOrderThresholdsByValue =
+        getOptionAsBool(fParams.getOptions(), kOrderThresholdsByValueKey);
   }
-  if (fOrderThresholdsByValue){
-    INFO("Threshold reordering was requested. Thresholds will be ordered by their values according to provided detector setup file.");
-    fThresholdOrderings = SignalFinderTools::findThresholdOrders(getParamBank());
+  if (fOrderThresholdsByValue) {
+    INFO("Threshold reordering was requested. Thresholds will be ordered by "
+         "their values according to provided detector setup file.");
+    fThresholdOrderings =
+        SignalFinderTools::findThresholdOrders(getParamBank());
   }
 
   // Creating control histograms
@@ -89,17 +96,16 @@ bool SignalFinder::init()
   return true;
 }
 
-bool SignalFinder::exec()
-{
+bool SignalFinder::exec() {
   // Getting the data from event in an apropriate format
-  if(auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
+  if (auto timeWindow = dynamic_cast<const JPetTimeWindow *const>(fEvent)) {
     // Distribute signal channels by PM IDs and filter out Corrupted SigChs if requested
-    auto& sigChByPM = SignalFinderTools::getSigChByPM(timeWindow, fUseCorruptedSigCh, fRefPMID);
+    auto &sigChByPM = SignalFinderTools::getSigChByPM(
+        timeWindow, fUseCorruptedSigCh, fRefPMID);
     // Building signals
     auto allSignals = SignalFinderTools::buildAllSignals(
-      sigChByPM, fSigChEdgeMaxTime, fSigChLeadTrailMaxTime,
-      getStatistics(), fSaveControlHistos, fThresholdOrderings
-    );
+        sigChByPM, fSigChEdgeMaxTime, fSigChLeadTrailMaxTime, getStatistics(),
+        fSaveControlHistos, fThresholdOrderings);
     // Saving method invocation
     saveRawSignals(allSignals);
   } else { return false; }

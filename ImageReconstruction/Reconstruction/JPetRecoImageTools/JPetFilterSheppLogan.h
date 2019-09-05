@@ -23,7 +23,7 @@
  */
 class JPetFilterSheppLogan : public JPetFilterInterface {
 public:
-  explicit JPetFilterSheppLogan(float maxCutOff = 1.f, int size) : fCutOff(maxCutOff), fSize(size), filterValues(size) { initFilter(); }
+  explicit JPetFilterSheppLogan(float maxCutOff, int size) : fCutOff(maxCutOff), fSize(size), filterValues(size) { initFilter(); }
   virtual double operator()(int n) override { return filterValues[n]; }
 
   void initFilter()

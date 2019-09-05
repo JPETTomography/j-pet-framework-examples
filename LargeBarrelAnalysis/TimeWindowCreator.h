@@ -40,11 +40,11 @@ class JPetWriter;
 class TimeWindowCreator: public JPetUserTask
 {
 public:
-  explicit TimeWindowCreator(const char* name);
-	virtual ~TimeWindowCreator();
-	virtual bool init() override;
-	virtual bool exec() override;
-	virtual bool terminate() override;
+  explicit TimeWindowCreator(const char *name);
+  virtual ~TimeWindowCreator();
+  virtual bool init() override;
+  virtual bool exec() override;
+  virtual bool terminate() override;
 
 protected:
 	bool isAllowedChannel(JPetTOMBChannel& tombChannel) const;
@@ -59,8 +59,8 @@ protected:
 	const int kNumOfThresholds = 4;
 	std::map<unsigned int, std::vector<double>> fTimeCalibration;
 	std::map<unsigned int, std::vector<double>> fThresholds;
-	bool fSetTHRValuesFromChannels = true;
-	long long int fCurrEventNumber = 0;
+        bool fSetTHRValuesFromChannels = true;
+        long long int fCurrEventNumber = 0;
 	std::set<int> fAllowedChannels;
 	bool fSaveControlHistos = true;
 	std::pair<int,int> fMainStrip;

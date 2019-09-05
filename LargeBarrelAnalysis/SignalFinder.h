@@ -16,9 +16,9 @@
 #ifndef SIGNALFINDER_H
 #define SIGNALFINDER_H
 
+#include "SignalFinderTools.h"
 #include <JPetRawSignal/JPetRawSignal.h>
 #include <JPetUserTask/JPetUserTask.h>
-#include "SignalFinderTools.h"
 #include <vector>
 
 class JPetWriter;
@@ -37,7 +37,7 @@ class JPetWriter;
 class SignalFinder: public JPetUserTask
 {
 public:
-  explicit SignalFinder(const char* name);
+  explicit SignalFinder(const char *name);
   virtual ~SignalFinder();
   virtual bool init() override;
   virtual bool exec() override;
@@ -51,7 +51,8 @@ protected:
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kEdgeMaxTimeParamKey = "SignalFinder_EdgeMaxTime_float";
   const std::string kRefPMIDParamKey = "TimeCalibration_RefPMID_int";
-  const std::string kOrderThresholdsByValueKey = "SignalFinder_OrderThresholdsByValue_bool";
+  const std::string kOrderThresholdsByValueKey =
+      "SignalFinder_OrderThresholdsByValue_bool";
   const int kNumOfThresholds = 4;
   double fSigChLeadTrailMaxTime = 23000.0;
   double fSigChEdgeMaxTime = 5000.0;
