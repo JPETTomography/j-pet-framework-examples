@@ -23,11 +23,11 @@ class JPetFilterHann : public JPetFilterInterface
 {
 public:
   JPetFilterHann() {}
-  explicit JPetFilterHann(double maxCutOff) : fCutOff(maxCutOff) {}
+  explicit JPetFilterHann(double maxCutOff, double) : fCutOff(maxCutOff) {}
   virtual double operator()(double radius) override { return radius < fCutOff ? 0.5 * (1. - std::cos((2. * M_PI * radius))) : 0.; }
 
 private:
-  double fCutOff = 0.9;
+  double fCutOff = 1.0;
 };
 
 #endif /*  !_JPetFilterHann_H_ */

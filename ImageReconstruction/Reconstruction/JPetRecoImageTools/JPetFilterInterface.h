@@ -21,7 +21,7 @@
 class JPetFilterInterface
 {
 public:
-  JPetFilterInterface() {}
+  JPetFilterInterface() {};
   virtual ~JPetFilterInterface(){};
   virtual double operator()(double) = 0;
 };

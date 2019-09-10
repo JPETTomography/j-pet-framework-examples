@@ -52,23 +52,6 @@ struct Point
   int y = 0;
 };
 
-struct SinogramPoints
-{
-  SinogramPoints(double value, double time)
-  {
-    this->value = value;
-    timeVector.push_back(time);
-  }
-
-  void operator+=(const std::pair<double, double>& other)
-  {
-    value += other.first;
-    timeVector.push_back(other.second);
-  }
-  double value = 0.;
-  std::vector<double> timeVector;
-};
-
 class JPetRecoImageTools
 {
 public:

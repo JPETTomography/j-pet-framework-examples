@@ -55,6 +55,7 @@ void SinogramCreator::readAndAnalyzeGojaFile()
   float sourceZ = 0.f;
 
   float skip = 0.f;
+  float skipInt = 0.f;
   int coincidence = 0;
 
   for (const auto& inputPath : fGojaInputFilePath)
@@ -62,11 +63,11 @@ void SinogramCreator::readAndAnalyzeGojaFile()
     std::ifstream in(inputPath);
     while (in.peek() != EOF)
     {
-      in >> firstX >> firstY >> firstZ >> firstT >> secondX >> secondY >> secondZ >> secondT >> skip >> skip >> skip >> skip >> coincidence >> skip >>
+      in >> firstX >> firstY >> firstZ >> firstT >> secondX >> secondY >> secondZ >> secondT >> skipInt >> skipInt >> skip >> skip >> coincidence >> skip >>
           skip >> skip;
-      // in >> firstX >> firstY >> firstZ >> firstT >> secondX >> secondY >> secondZ >> secondT;
-      if (coincidence != 1) // 1 == true event
-        continue;
+       in >> firstX >> firstY >> firstZ >> firstT >> secondX >> secondY >> secondZ >> secondT;
+      //if (coincidence != 1) // 1 == true event
+      //  continue;
 
       fTotalAnalyzedHits++;
 

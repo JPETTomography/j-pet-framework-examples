@@ -23,32 +23,13 @@
  */
 class JPetFilterSheppLogan : public JPetFilterInterface {
 public:
-  explicit JPetFilterSheppLogan(float maxCutOff, int size) : fCutOff(maxCutOff), fSize(size), filterValues(size) { initFilter(); }
-  virtual double operator()(int n) override { return filterValues[n]; }
-
-  void initFilter()
-  {
-    float f = 0.0;
-    for (int i = 1; i <= fSize - 1; i++)
-    {
-      f = (float)((float)0.5 * (i - 1) / fSize);
-      if (f <= fCutOff)
-        filterValues[i] = f * std::sin(M_PI * f / fCutOff) / M_PI;
-      else
-        filterValues[i] = 0.0;
-    }
-    if (0.5 <= fCutOff)
-      filterValues[2] = (0.5) * std::sin(M_PI * f / fCutOff) / M_PI;
-    else
-      filterValues[2] = 0.;
-  }
+  explicit JPetFilterSheppLogan(float maxCutOff, double) : fCutOff(maxCutOff) {}
+  virtual double operator()(double radius) override { return radius < fCutOff ? std::sin(M_PI * radius / fCutOff) / M_PI : 0; }
 
 private:
   JPetFilterSheppLogan(const JPetFilterSheppLogan&) = delete;
   JPetFilterSheppLogan& operator=(const JPetFilterSheppLogan&) = delete;
-  double fCutOff = 0.3;
-  int fSize = 0;
-  std::vector<double> filterValues;
+  float fCutOff = 1.f;
 };
 
 #endif /*  !_JPetFilterSheppLogan_H_ */

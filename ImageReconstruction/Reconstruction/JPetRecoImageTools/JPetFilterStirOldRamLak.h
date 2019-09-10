@@ -1,4 +1,5 @@
-/*  Copyright Copyright 2016 The J-PET Framework Authors. All rights reserved.
+/**
+ *  @copyright Copyright 2016 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -15,7 +16,6 @@
 #ifndef _JPetFilterSTIROldRamLak_H_
 #define _JPetFilterSTIROldRamLak_H_
 #include "./JPetFilterInterface.h"
-#include <algorithm>
 #include <cmath>
 #include <iostream>
 
@@ -23,35 +23,12 @@ class JPetFilterStirOldRamLak : public JPetFilterInterface
 {
 public:
   JPetFilterStirOldRamLak() {}
-  explicit JPetFilterStirOldRamLak(double maxCutOff, int size) : fCutOff(maxCutOff), fSize(size), filterValues(size) { initFilter(); }
-  explicit JPetFilterStirOldRamLak(double maxCutOff, double alphaValue, int size) : fAlpha(alphaValue), fCutOff(maxCutOff), filterValues(size)
-  {
-    initFilter();
-  }
-  virtual double operator()(int n) override { return filterValues[n]; }
-
-  void initFilter()
-  {
-    float f = 0.0;
-    for (int i = 1; i <= fSize - 1; i++)
-    {
-      f = (float)((float)0.5 * (i - 1) / fSize);
-      if (f <= fCutOff)
-        filterValues[i] = f * (fAlpha + (1. - fAlpha) * std::cos(M_PI * f / fCutOff));
-      else
-        filterValues[i] = 0.0;
-    }
-    if (0.5 <= fCutOff)
-      filterValues[2] = (0.5) * (fAlpha + (1. - fAlpha) * std::cos(M_PI * f / fCutOff));
-    else
-      filterValues[2] = 0.;
-  }
+  explicit JPetFilterStirOldRamLak(double maxCutOff, double alphaValue = 0.54) : fCutOff(maxCutOff), fAlpha(alphaValue) {}
+  virtual double operator()(double n) override { return n <= fCutOff ? n * (fAlpha + (1. - fAlpha) * std::cos(M_PI * n / fCutOff)) : 0.0; }
 
 private:
-  double fAlpha = 0.1;
-  double fCutOff = 0.3;
-  int fSize = 0;
-  std::vector<double> filterValues;
+  double fAlpha = 0.54;
+  double fCutOff = 1.f;
   JPetFilterStirOldRamLak(const JPetFilterStirOldRamLak&) = delete;
   JPetFilterStirOldRamLak& operator=(const JPetFilterStirOldRamLak&) = delete;
 };

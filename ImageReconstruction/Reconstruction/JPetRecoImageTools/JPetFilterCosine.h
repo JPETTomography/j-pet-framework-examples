@@ -1,3 +1,4 @@
+  
 /**
  *  @copyright Copyright 2016 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,33 +25,14 @@ class JPetFilterCosine : public JPetFilterInterface
 {
 public:
   JPetFilterCosine() {}
-  explicit JPetFilterCosine(double maxCutOff, int size) : fCutOff(maxCutOff), fSize(size), filterValues(size) { initFilter(); }
-  virtual double operator()(int n) override { return filterValues[n]; }
-
-  void initFilter()
-  {
-    float f = 0.0;
-    for (int i = 1; i <= fSize - 1; i++)
-    {
-      f = (float)((float)0.5 * (i - 1) / fSize);
-      if (f <= fCutOff)
-        filterValues[i] = f * std::cos(M_PI * f / fCutOff);
-      else
-        filterValues[i] = 0.0;
-    }
-    if (0.5 <= fCutOff)
-      filterValues[2] = (0.5) * std::cos(M_PI * f / fCutOff);
-    else
-      filterValues[2] = 0.;
-  }
+  explicit JPetFilterCosine(double maxCutOff, double) : fCutOff(maxCutOff) {}
+  virtual double operator()(double radius) override { return radius < fCutOff ? radius * std::cos(M_PI * radius / fCutOff) : 0.; }
 
 private:
   JPetFilterCosine(const JPetFilterCosine &) = delete;
   JPetFilterCosine &operator=(const JPetFilterCosine &) = delete;
 
-  double fCutOff = 0.3;
-  int fSize = 0;
-  std::vector<double> filterValues;
+  double fCutOff = 1.0f;
 };
 
 #endif /*  !_JPetFilterCosine_H_ */

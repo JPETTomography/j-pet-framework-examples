@@ -116,32 +116,32 @@ bool ReconstructionTask::terminate()
       switch (filterNameToFilter[fFilterName])
       {
       case ReconstructionTask::kFilterType::kFilterNone:
-        filter = new JPetFilterNone(cutOffValue, fSinogram->getMaxDistanceNumber());
+        filter = new JPetFilterNone(cutOffValue, fFilterAlphaValue);
         break;
       case ReconstructionTask::kFilterType::kFilterRamLak:
-        filter = new JPetFilterRamLak(cutOffValue, fSinogram->getMaxDistanceNumber());
+        filter = new JPetFilterRamLak(cutOffValue, fFilterAlphaValue);
         break;
       case ReconstructionTask::kFilterType::kFilterCosine:
-        filter = new JPetFilterCosine(cutOffValue, fSinogram->getMaxDistanceNumber());
+        filter = new JPetFilterCosine(cutOffValue, fFilterAlphaValue);
         break;
       case ReconstructionTask::kFilterType::kFilterHamming:
-        filter = new JPetFilterHamming(cutOffValue, fFilterAlphaValue, fSinogram->getMaxDistanceNumber());
+        filter = new JPetFilterHamming(cutOffValue, fFilterAlphaValue);
         break;
       case ReconstructionTask::kFilterType::kFilterHann:
-        filter = new JPetFilterHann(cutOffValue, fFilterAlphaValue, fSinogram->getMaxDistanceNumber());
+        filter = new JPetFilterHann(cutOffValue, fFilterAlphaValue);
         break;
       case ReconstructionTask::kFilterType::kFilterRidgelet:
-        filter = new JPetFilterRidgelet(cutOffValue, fSinogram->getMaxDistanceNumber());
+        filter = new JPetFilterRidgelet(cutOffValue, fFilterAlphaValue);
         break;
       case ReconstructionTask::kFilterType::kFilterSheppLogan:
-        filter = new JPetFilterSheppLogan(cutOffValue, fSinogram->getMaxDistanceNumber());
+        filter = new JPetFilterSheppLogan(cutOffValue, fFilterAlphaValue);
         break;
       case ReconstructionTask::kFilterType::kFilterStirOldRamLak:
-        filter = new JPetFilterStirOldRamLak(cutOffValue, fFilterAlphaValue, fSinogram->getMaxDistanceNumber());
+        filter = new JPetFilterStirOldRamLak(cutOffValue, fFilterAlphaValue);
         break;
       default:
         ERROR("Could not find filter: " + fFilterName + ", using JPetFilterNone.");
-        filter = new JPetFilterNone(cutOffValue, fSinogram->getMaxDistanceNumber());
+        filter = new JPetFilterNone(cutOffValue, fFilterAlphaValue);
         break;
       }
 
