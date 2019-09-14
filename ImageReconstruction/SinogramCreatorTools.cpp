@@ -45,6 +45,7 @@ std::pair<int, float> SinogramCreatorTools::getAngleAndDistance(float firstX, fl
 
   float angle = std::atan2(yAngle, xAngle);
   if (yAngle < 0) angle = -angle;
+  angle *= (180.f / M_PI);
   const bool sign = x < 0.f;
   int angleResult = std::round(angle);
   angleResult = angleResult % 180;
