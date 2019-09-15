@@ -34,23 +34,20 @@ std::pair<int, float> SinogramCreatorTools::getAngleAndDistance(float firstX, fl
     slope = -1.f;
   float perpendicularSlope = -(1.f / slope);
   float d = firstY - (slope * firstX);
-  float x = -d / (perpendicularSlope - slope);
-  float y = perpendicularSlope * x;
 
   if (std::abs(d) < kEPSILON)
     d = 1.f;
 
-  float xAngle = -d / (perpendicularSlope - slope);
-  float yAngle = perpendicularSlope * xAngle;
+  float xAngle = -d / (slope - perpendicularSlope);
+  float yAngle = slope * (-d / (slope - perpendicularSlope)) + d;
 
   float angle = std::atan2(yAngle, xAngle);
-  if (yAngle < 0) angle = -angle;
+  if (yAngle < 0) angle += M_PI;
   angle *= (180.f / M_PI);
-  const bool sign = x < 0.f;
   int angleResult = std::round(angle);
   angleResult = angleResult % 180;
-  float distance = std::sqrt(std::pow((x), 2) + std::pow((y), 2));
-  if (!sign) distance = -distance;
+  float distance = std::sqrt(std::pow((xAngle), 2) + std::pow((yAngle), 2));
+  if (yAngle < 0) distance = -distance;
   return std::make_pair(angleResult, distance);
 }
 
