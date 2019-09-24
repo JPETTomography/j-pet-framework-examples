@@ -76,8 +76,14 @@ set(DICTIONARY_NAME ${DICTIONARY_LIB}Dict)
 
 set(LINKDEF_NAME LinkDef.h)
 
-# extract includes of the JPetframework library needed for dictionary generation
+# extract includes of the JPetframework library and dependencies
+# needed for dictionary generation
 get_property(DICTIONARY_INCLUDE_DIRS TARGET JPetFramework::JPetFramework PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+foreach(dir ${DICTIONARY_INCLUDE_DIRS})
+  list(APPEND DICTIONARY_INCLUDES -I${dir})
+endforeach()
+
+get_property(DICTIONARY_INCLUDE_DIRS TARGET Boost::log PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
 foreach(dir ${DICTIONARY_INCLUDE_DIRS})
   list(APPEND DICTIONARY_INCLUDES -I${dir})
 endforeach()
