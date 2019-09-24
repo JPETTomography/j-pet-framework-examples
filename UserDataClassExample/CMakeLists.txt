@@ -20,6 +20,13 @@ endif()
 ## Project name
 set(projectName UserDataClassExample)
 
+################################################################################
+# Adjust the list below to contain your custom class headers                   #
+################################################################################
+set(USER_DEFINED_CLASS_HEADERS
+  ${CMAKE_CURRENT_SOURCE_DIR}/JPetLORevent.h
+  )
+
 ## Auxiliary files
 set(AUXILIARY_FILES
   README.md
@@ -64,26 +71,32 @@ set(SOURCES ${use_modules_from}/EventCategorizer.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/JPetLORevent.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
 
-set(DICTIONARY_NAME G__UserDataClasses)
-set(HEADERS_WITH_DICTIONARY_REQUIRED
-  ${CMAKE_CURRENT_SOURCE_DIR}/JPetLORevent.h
-  )
+set(DICTIONARY_LIB UserClasses)
+set(DICTIONARY_NAME ${DICTIONARY_LIB}Dict)
 
 set(LINKDEF_NAME LinkDef.h)
 
+# extract includes of the JPetframework library needed for dictionary generation
 get_property(DICTIONARY_INCLUDE_DIRS TARGET JPetFramework::JPetFramework PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
 foreach(dir ${DICTIONARY_INCLUDE_DIRS})
   list(APPEND DICTIONARY_INCLUDES -I${dir})
 endforeach()
 
 include_directories(ROOT_BUG) # Fix bug in NewMacros Root file
-ROOT_GENERATE_DICTIONARY(${DICTIONARY_NAME} ${HEADERS_WITH_DICTIONARY_REQUIRED}
+ROOT_GENERATE_DICTIONARY(${DICTIONARY_NAME} ${USER_DEFINED_CLASS_HEADERS}
   LINKDEF ${LINKDEF_NAME}
   OPTIONS ${DICTIONARY_INCLUDES})
-          
-add_executable(${projectBinary} ${SOURCES} ${HEADERS} ${DICTIONARY_NAME})
-target_link_libraries(${projectBinary} JPetFramework::JPetFramework
-                                       Boost::program_options)
+
+# ROOT 6 requires that dictionaries' symbols be stored in a shared lib
+# rather than directly in the executable
+add_library(${DICTIONARY_LIB} SHARED ${DICTIONARY_NAME}.cxx)
+target_link_libraries(${DICTIONARY_LIB} JPetFramework::JPetFramework ROOT::Core ROOT::Hist ROOT::RIO ROOT::Flags_CXX)
+
+add_executable(${projectBinary} ${SOURCES} ${HEADERS})
+target_link_libraries(${projectBinary}
+  ${DICTIONARY_LIB}
+  JPetFramework::JPetFramework
+  Boost::program_options)
 
 add_custom_target(clean_data_${projectName}
   COMMAND rm -f *.tslot.*.root *.phys.*.root *.sig.root)
