@@ -21,10 +21,10 @@ endif()
 set(projectName UserDataClassExample)
 
 ################################################################################
-# Adjust the list below to contain your custom class headers                   #
+# Adjust the list below to contain your custom class names                     #
 ################################################################################
-set(USER_DEFINED_CLASS_HEADERS
-  ${CMAKE_CURRENT_SOURCE_DIR}/JPetLORevent.h
+set(USER_DEFINED_CLASSES
+  JPetLORevent
   )
 
 ## Auxiliary files
@@ -82,14 +82,20 @@ foreach(dir ${DICTIONARY_INCLUDE_DIRS})
   list(APPEND DICTIONARY_INCLUDES -I${dir})
 endforeach()
 
+foreach(file ${USER_DEFINED_CLASSES})
+  list(APPEND USER_DEFINED_CLASS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${file}.cpp)
+  list(APPEND USER_DEFINED_CLASS_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/${file}.h)
+endforeach()
+
 include_directories(ROOT_BUG) # Fix bug in NewMacros Root file
 ROOT_GENERATE_DICTIONARY(${DICTIONARY_NAME} ${USER_DEFINED_CLASS_HEADERS}
+  MODULE ${DICTIONARY_LIB}
   LINKDEF ${LINKDEF_NAME}
   OPTIONS ${DICTIONARY_INCLUDES})
 
 # ROOT 6 requires that dictionaries' symbols be stored in a shared lib
 # rather than directly in the executable
-add_library(${DICTIONARY_LIB} SHARED ${DICTIONARY_NAME}.cxx)
+add_library(${DICTIONARY_LIB} SHARED ${DICTIONARY_NAME}.cxx ${USER_DEFINED_CLASS_HEADERS} ${USER_DEFINED_CLASS_SOURCES})
 target_link_libraries(${DICTIONARY_LIB} JPetFramework::JPetFramework ROOT::Core ROOT::Hist ROOT::RIO ROOT::Flags_CXX)
 
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})
