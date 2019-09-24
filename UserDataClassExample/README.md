@@ -5,7 +5,7 @@ This example demonstrates how to add a custom data class to the set of standard 
 
 This example can be followed to create other analysis-specific data classes containing additional information used in the analyses.
 
-To demonstrate a real-life use case, this example used the analysis chain from LargeBarrelAnalysis and adds a LORFinder module which identifies 2-gamma events, reconstructs their annihilation points and stores them as JPetLORevent objects in the output file *.lor.evt.root.
+To demonstrate a real-life use case, this example uses the analysis chain from LargeBarrelAnalysis and adds a LORFinder module which identifies 2-gamma events, reconstructs their annihilation points and stores them as JPetLORevent objects in the output file *.lor.evt.root.
 
 ## Usage
 Run the program the same way to the LargeBarrelAnalysis example.
@@ -16,14 +16,18 @@ A ROOT file with the extension *.lor.evt.root will be created. Inspect the file 
 
 ## Details of adding custom classes
 
- 1. Place the .h and .cpp files defining your class in the directory of your program
+ 1. Place the .h and .cpp files defining your class in the directory of your program.
 
- 2. Edit CMakeLists.txt including the name of your custom class in the `USER_DATA_CLASSES` list 
+ 2. Edit CMakeLists.txt including the .h and .cpp files of your custom class in the `HEADERS` and `SOURCES` lists respectively.
 
- 3. Include and use your class in your analysis modules just as any of the standard data classes (e.g. as JPetEevnt). CMake will automatically detect your class and build a ROOT dictionary for it. 
+ 3. Edit CMakeLists.txt including the name of your custom class also in the `USER_DEFINED_CLASSES` list.
+
+ 4. Include and use your class in your analysis modules just as any of the standard data classes (e.g. as JPetEvent). CMake will automatically build a ROOT dictionary for it. 
 
 ## Notes
 Please be aware that your class will only be available to the program in whose directory it is defined and not globally in all framework-based programs.
+
+However, during compilation of this program a shared library `libUserClasses.so` will be created in the same directory. This library contains the definitions and dictionaries of the user-defined classes, therefore any other program supposed to use these classes can link to that library.
 
 ## Author
 [Aleksander Gajos](https://github.com/alekgajos)  
