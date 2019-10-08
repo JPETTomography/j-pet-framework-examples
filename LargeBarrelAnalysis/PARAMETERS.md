@@ -13,7 +13,7 @@ Path to and name of a `ROOT` file with `TOT` offset calibrations (stretcher) app
 Path to and name of a `ROOT` file with calibrations of nonlinearities occurring on `TDC` boards, applied during unpacking of `HLD` file.
 
 - `TimeWindowCreator_MainStrip_int`  
-Dedicated for files with data from measurement with Reference Detector - it denotes which `ID` has the reference scintillator. If option is absent in the user parameters file, part with reference detector is ignored
+Dedicated for files with data from measurement with Reference Detector - it denotes which `ID` has the scintillator we calibrate. If option is absent in the user parameters file, part with reference detector is ignored
 
 - `TimeWindowCreator_MinTime_float`  
 Time Slots have certain duration for specific runs, minimum time is usually negative, default value `-1*10^6 ps`
@@ -35,6 +35,18 @@ time window for matching Signal Channels on the same thresholds from Leading and
 
 - `SignalTransformer_UseCorruptedSignals_bool`  
 Indication if Signal Transformer module should use signals flagged as Corrupted in the previous task. Default value: `false`
+
+- `SignalTransformer_WalkCorrConstThr1_float`
+Constant used to calculate the walk correction for threshold 1 (on both edges), Default value is 0.0
+
+- `SignalTransformer_WalkCorrConstThr2_float`
+Constant used to calculate the walk correction for threshold 2 (on both edges), Default	value is 0.0
+
+- `SignalTransformer_WalkCorrConstThr3_float`
+Constant used to calculate the walk correction for threshold 3 (on both edges), Default	value is 0.0
+
+- `SignalTransformer_WalkCorrConstThr4_float`
+Constant used to calculate the walk correction for threshold 4 (on both edges),	Default value is 0.0
 
 - `HitFinder_UseCorruptedSignals_bool`  
 Indication if Hit Finder module should use signals flagged as Corrupted in the previous task. Default value: `false`

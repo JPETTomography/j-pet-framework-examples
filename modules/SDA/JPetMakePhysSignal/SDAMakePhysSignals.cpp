@@ -13,33 +13,29 @@
  *  @file SDAMakePhysSignals.cpp
  */
 
-#include "../../tools/JPetRecoSignalTools/JPetRecoSignalTools.h"
-#include "SDAMakePhysSignals.h"
+#include "JPetMakePhysSignal/SDAMakePhysSignals.h"
+#include "JPetRecoSignalTools/JPetRecoSignalTools.h"
 
-SDAMakePhysSignals::SDAMakePhysSignals(const char* name)
-  : JPetUserTask(name)
-{}
+SDAMakePhysSignals::SDAMakePhysSignals(const char *name) : JPetUserTask(name) {}
 
 SDAMakePhysSignals::~SDAMakePhysSignals() {}
 
-bool SDAMakePhysSignals::init()
-{
+bool SDAMakePhysSignals::init() {
   fOutputEvents = new JPetTimeWindow("JPetPhysSignal");
   return true;
 }
 
-
-bool SDAMakePhysSignals::exec()
-{
-  if (auto oldTimeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
+bool SDAMakePhysSignals::exec() {
+  if (auto oldTimeWindow = dynamic_cast<const JPetTimeWindow *const>(fEvent)) {
     auto n = oldTimeWindow->getNumberOfEvents();
     for (uint i = 0; i < n; ++i) {
-      auto signal = dynamic_cast<const JPetRecoSignal&>(oldTimeWindow->operator[](i));
+      auto signal =
+          dynamic_cast<const JPetRecoSignal &>(oldTimeWindow->operator[](i));
       JPetPhysSignal physSignal;
       physSignal.setRecoSignal(signal);
       // NOTE: This module currently sets number of photoelectrons
       // equal to charge of JPetRecoSignal
-      physSignal.setPhe(physSignal.getRecoSignal().getCharge() );
+      physSignal.setPhe(physSignal.getRecoSignal().getCharge());
       fOutputEvents->add<JPetPhysSignal>(physSignal);
     }
   } else {
@@ -48,7 +44,4 @@ bool SDAMakePhysSignals::exec()
   return true;
 }
 
-bool SDAMakePhysSignals::terminate()
-{
-  return true;
-}
+bool SDAMakePhysSignals::terminate() { return true; }

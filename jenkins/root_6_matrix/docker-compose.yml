@@ -1,0 +1,6 @@
+examples_rootv6:
+  build: .
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - ${WORKSPACE_JENKINS}:/j-pet-framework-examples/
+  user: "9999:999"

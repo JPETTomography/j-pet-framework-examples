@@ -19,21 +19,20 @@
 #ifndef _JPETANALYSISMODULE_SDACHARGE_H_
 #define _JPETANALYSISMODULE_SDACHARGE_H_
 
-#include <TCanvas.h>
 #include "JPetUserTask/JPetUserTask.h"
+#include <TCanvas.h>
 
-class SDARecoChargeCalc: public JPetUserTask
-{
+class SDARecoChargeCalc : public JPetUserTask {
 public:
-  SDARecoChargeCalc(const char* name);
+  SDARecoChargeCalc(const char *name);
   virtual ~SDARecoChargeCalc();
   virtual bool init() override;
   virtual bool exec() override;
   virtual bool terminate() override;
+
 private:
   int fBadSignals;
   int fCurrentEventNumber;
 };
 
 #endif
-

@@ -19,48 +19,61 @@
 #define JPETRECOSIGNALTOOLS_H
 
 #include "JPetRecoSignal/JPetRecoSignal.h"
-#include <vector>
 #include <string>
+#include <vector>
 
-#include <TH1F.h>
 #include <TGraph.h>
+#include <TH1F.h>
 
-namespace JPetRecoSignalTools
-{
-  enum ERRORS { badOffset, 
-                badIndexAtMinimumSignal, 
-                badIndexAtValue, 
-                badCharge, 
-                badStartingIndex, 
-                badIndexAtMinimumValue, 
-                badTimeAtThr, 
-                badAmplitude};
+namespace JPetRecoSignalTools {
+enum ERRORS {
+  badOffset,
+  badIndexAtMinimumSignal,
+  badIndexAtValue,
+  badCharge,
+  badStartingIndex,
+  badIndexAtMinimumValue,
+  badTimeAtThr,
+  badAmplitude
+};
 
-   double calculateOffset(const JPetRecoSignal& signal);
-   double calculateAmplitude(const JPetRecoSignal& signal);
-   double calculateArea(const JPetRecoSignal& signal);
-   double calculateTimeAtThreshold(const JPetRecoSignal& signal, const double threshold);
-   TGraph* plotJPetRecoSignal(const JPetRecoSignal& signal);
-   void saveTH1FsToRootFile(std::vector<TH1F*> histoCollection, std::string fileName, std::string pdfName);
-   double calculateAreaFromStartingIndex(const JPetRecoSignal& signal);
-   void savePNGOfBadSignal(const JPetRecoSignal& signal, int numberOfBadSignals);
-   void saveBadSignalIntoRootFile(const JPetRecoSignal& signal, const int numberOfBadSignals, const std::string fileName);
-   void savePNGwithMarkedOffsetsAndStartingPoints(const JPetRecoSignal& signal, int number);
-   double min(const std::vector<double>& vector);
-   double max(const std::vector<double>& vector);
+double calculateOffset(const JPetRecoSignal &signal);
+double calculateAmplitude(const JPetRecoSignal &signal);
+double calculateArea(const JPetRecoSignal &signal);
+double calculateTimeAtThreshold(const JPetRecoSignal &signal,
+                                const double threshold);
+TGraph *plotJPetRecoSignal(const JPetRecoSignal &signal);
+void saveTH1FsToRootFile(std::vector<TH1F *> histoCollection,
+                         std::string fileName, std::string pdfName);
+double calculateAreaFromStartingIndex(const JPetRecoSignal &signal);
+void savePNGOfBadSignal(const JPetRecoSignal &signal, int numberOfBadSignals);
+void saveBadSignalIntoRootFile(const JPetRecoSignal &signal,
+                               const int numberOfBadSignals,
+                               const std::string fileName);
+void savePNGwithMarkedOffsetsAndStartingPoints(const JPetRecoSignal &signal,
+                                               int number);
+double min(const std::vector<double> &vector);
+double max(const std::vector<double> &vector);
 
-   double calculateArithmeticMean(const std::vector<double>& vector);
-   int findStartingIndex(const JPetRecoSignal& signal);
-   int findIndexOfMaxHisto(std::vector<TH1F*> histoCollection);
-   double pktPrzecieciaOX(double x1, double y1, double x2, double y2);
-   double absolute(const double number);
-   int findIndexAtValue(double value, std::vector<double>& vector);
-   double calculateArithmeticMean(const std::vector<double>& vector, const int upToIndex);
-   double calculateStandardDeviation(const std::vector<double>& vector, const int upToIndex);
-   std::vector<double> copyVectorWithNumbersUpToIndex(std::vector<double>& vector, int index);
-   bool isPointFromRecoSignalInNoise(const double noiseMean, const double noiseDeviation, const double point);
-   double calculateConstantThreshold(const JPetRecoSignal& signal, const double threshold);
-   double calculateConstantFraction(const JPetRecoSignal& signal, const double threshold);
-}
+double calculateArithmeticMean(const std::vector<double> &vector);
+int findStartingIndex(const JPetRecoSignal &signal);
+int findIndexOfMaxHisto(std::vector<TH1F *> histoCollection);
+double pktPrzecieciaOX(double x1, double y1, double x2, double y2);
+double absolute(const double number);
+int findIndexAtValue(double value, std::vector<double> &vector);
+double calculateArithmeticMean(const std::vector<double> &vector,
+                               const int upToIndex);
+double calculateStandardDeviation(const std::vector<double> &vector,
+                                  const int upToIndex);
+std::vector<double> copyVectorWithNumbersUpToIndex(std::vector<double> &vector,
+                                                   int index);
+bool isPointFromRecoSignalInNoise(const double noiseMean,
+                                  const double noiseDeviation,
+                                  const double point);
+double calculateConstantThreshold(const JPetRecoSignal &signal,
+                                  const double threshold);
+double calculateConstantFraction(const JPetRecoSignal &signal,
+                                 const double threshold);
+} // namespace JPetRecoSignalTools
 
 #endif // JPETRECOSIGNALTOOLS_H

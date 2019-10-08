@@ -50,3 +50,5 @@ CalibrationFiles/*
 LargeBarrelAnalysisExtended/*.txt
 !LargeBarrelAnalysisExtended/CMakeLists.txt
 ScopeLoaderExample/cfg/
+LargeBarrelAnalysis/dummyCalibration.txt
+modules/large_barrel/findFFTW-download/*
