@@ -29,7 +29,7 @@ get_filename_component(TESTNAME ${UNIT_TEST_SOURCES} NAME_WE)
 add_executable(${TESTNAME}.x EXCLUDE_FROM_ALL ${UNIT_TEST_SOURCES} ${TEST_SOURCE})
 target_compile_options(${TESTNAME}.x PRIVATE -Wunused-parameter -Wall)
 target_link_libraries(${TESTNAME}.x JPetFramework::JPetFramework Boost::unit_test_framework)
-add_test(NAME ${TESTNAME}.x COMMAND ${TESTNAME}.x "--log_level=ERROR --log_format=XML --log_sink=${TESTNAME}.xml --raport_level=no")
+add_test(NAME ${TESTNAME}.x COMMAND ${TESTNAME}.x --log_level=error --log_format=XML --log_sink=${TESTNAME}.xml)
 set_target_properties(${TESTNAME}.x PROPERTIES FOLDER tests)
 add_dependencies(${TESTNAME}.x link_target_imagereconstruction)
 
