@@ -24,8 +24,16 @@ class JPetFilterRidgelet : public JPetFilterInterface
 {
 public:
   JPetFilterRidgelet() {}
-  explicit JPetFilterRidgelet(double maxCutOff, double) : fCutOff(maxCutOff) {}
-  virtual double operator()(double radius) override { return radius < fCutOff ? std::sqrt(radius / fCutOff) : 0.f; }
+  explicit JPetFilterRidgelet(double maxCutOff) : fCutOff(maxCutOff) {}
+  virtual double operator()(double pos) override {
+    return 0.;
+    /*if(n == 0) {
+      return 0.02;
+    }
+    double ramlak = (double)(n) / (double) (m);
+    if (ramlak >= fCutOff) return 0.;
+    return ramlak * std::sqrt((double)(n) / ((double)(m) + fCutOff));*/
+  }
 
 private:
   JPetFilterRidgelet(const JPetFilterRidgelet &) = delete;

@@ -25,8 +25,10 @@ class JPetFilterCosine : public JPetFilterInterface
 {
 public:
   JPetFilterCosine() {}
-  explicit JPetFilterCosine(double maxCutOff, double) : fCutOff(maxCutOff) {}
-  virtual double operator()(double radius) override { return radius < fCutOff ? radius * std::cos(M_PI * radius / fCutOff) : 0.; }
+  explicit JPetFilterCosine(double maxCutOff) : fCutOff(maxCutOff) {}
+  virtual double operator()(double pos) override {
+    return std::cos(M_PI * ((double)(n) / (double) (m)));
+  }
 
 private:
   JPetFilterCosine(const JPetFilterCosine &) = delete;

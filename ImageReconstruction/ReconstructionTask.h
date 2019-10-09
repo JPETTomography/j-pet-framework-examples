@@ -33,7 +33,7 @@
 #include "JPetFilterRamLak.h"
 #include "JPetFilterRidgelet.h"
 #include "JPetFilterSheppLogan.h"
-#include "JPetFilterStirOldRamLak.h"
+//#include "JPetFilterStirOldRamLak.h"
 #include "JPetRecoImageTools.h"
 #include "JPetUserTask/JPetUserTask.h"
 

@@ -38,6 +38,9 @@ std::pair<int, float> SinogramCreatorTools::getAngleAndDistance(float firstX, fl
   if (std::abs(d) < kEPSILON)
     d = 1.f;
 
+  if(std::abs(slope - perpendicularSlope) < kEPSILON)
+    return std::make_pair(90, firstY);
+
   float xAngle = -d / (slope - perpendicularSlope);
   float yAngle = slope * (-d / (slope - perpendicularSlope)) + d;
 

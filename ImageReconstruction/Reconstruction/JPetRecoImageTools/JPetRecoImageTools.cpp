@@ -227,6 +227,7 @@ int JPetRecoImageTools::getMaxValue(const JPetSinogramType::SparseMatrix& result
   return maxValue;
 }
 
+
 JPetSinogramType::SparseMatrix JPetRecoImageTools::backProject(const JPetSinogramType::Matrix3D& sinogram, float sinogramAccuracy, float tofWindow,
                                                                float lorTOFSigma, FilteredBackProjectionWeightingFunction fbpwf,
                                                                RescaleFunc rescaleFunc, int rescaleMinCutoff, int rescaleFactor)
@@ -244,10 +245,10 @@ JPetSinogramType::SparseMatrix JPetRecoImageTools::backProject(const JPetSinogra
 
   const int max_sigma_multi = 3;
 
-  for (int angle = 0; angle < 180; angle++)
+  for (int angle = 0; angle < sinogramBegin->second.size2(); angle++)
   {
-    double cos = std::cos((double)angle * (double)angleStep);
-    double sin = std::sin((double)angle * (double)angleStep);
+    double cos = std::cos((double)angle * angleStep);
+    double sin = std::sin((double)angle * angleStep);
 
     for (const auto& tofBin : sinogram)
     {
@@ -266,7 +267,7 @@ JPetSinogramType::SparseMatrix JPetRecoImageTools::backProject(const JPetSinogra
           if (yMinusCenter2 + xMinusCenter2 < center2)
           {
             double t = ttemp - yMinusCenter * sin;
-            int n = std::floor(t + 0.5);
+            int n = std::round(t);
 
             float lor_center_x = center + cos * (n - center);
             float lor_center_y = center + sin * (n - center);
@@ -287,7 +288,7 @@ JPetSinogramType::SparseMatrix JPetRecoImageTools::backProject(const JPetSinogra
 
   for (int x = 0; x < imageSize; x++)
   {
-    for (int y = 0; y < imageSize; y++) { reconstructedProjection(y, x) *= angleStep; }
+    for (int y = 0; y < imageSize; y++) { reconstructedProjection(y, x) *= M_PI / 360.; }
   }
   rescaleFunc(reconstructedProjection, rescaleMinCutoff, rescaleFactor);
   return reconstructedProjection;
@@ -372,6 +373,18 @@ double JPetRecoImageTools::normalDistributionProbability(float x, float mean, fl
   return 1. / std::sqrt(2. * M_PI * stddev2) * std::exp(-(diff * diff) / (2. * stddev2));
 }
 
+int JPetRecoImageTools::nextPowerOf2(int n)   
+{ 
+    n--; 
+    n |= n >> 1; 
+    n |= n >> 2; 
+    n |= n >> 4; 
+    n |= n >> 8; 
+    n |= n >> 16; 
+    n++; 
+    return n; 
+}  
+
 JPetSinogramType::SparseMatrix JPetRecoImageTools::FilterSinogram(JPetRecoImageTools::FourierTransformFunction& ftf,
                                                                   JPetFilterInterface& filterFunction, const JPetSinogramType::SparseMatrix& sinogram)
 {
@@ -381,34 +394,44 @@ JPetSinogramType::SparseMatrix JPetRecoImageTools::FilterSinogram(JPetRecoImageT
 JPetSinogramType::SparseMatrix JPetRecoImageTools::doFFTW1D(const JPetSinogramType::SparseMatrix& sinogram, JPetFilterInterface& filter)
 {
   assert(sinogram.size1() > 1);
-  int nScanSize = sinogram.size1();
+  int N = sinogram.size1();
+  int M = nextPowerOf2((2 * N));
+  int padlen = M - N;
   int nAngles = sinogram.size2();
-  JPetSinogramType::SparseMatrix result(nScanSize, nAngles);
-  int inFTLength = ((double)nScanSize / 2.) + 1;
-  int outputSize = nScanSize * inFTLength;
-  int size = nScanSize;
-  double* in;
-  in = (double*)malloc(size * sizeof(double));
-  double* outDouble;
-  outDouble = (double*)malloc(size * sizeof(double));
-  fftw_complex* out;
-  out = (fftw_complex*)fftw_malloc(outputSize * sizeof(fftw_complex));
-  fftw_plan plan, invPlan;
-  plan = fftw_plan_dft_r2c_1d(nScanSize, in, out, FFTW_MEASURE);
-  invPlan = fftw_plan_dft_c2r_1d(nScanSize, out, outDouble, FFTW_MEASURE);
+  JPetSinogramType::SparseMatrix result(N, nAngles);
+  int inFTLength = ((double)M / 2.) + 1;
+  double* in = (double*)malloc(M * sizeof(double));
+  double* outDouble = (double*)malloc(M * sizeof(double));
+  fftw_complex* out = (fftw_complex*)fftw_malloc(inFTLength * sizeof(fftw_complex));
+  fftw_plan plan = fftw_plan_dft_r2c_1d(M, in, out, FFTW_MEASURE);
+  fftw_plan invPlan = fftw_plan_dft_c2r_1d(M, out, outDouble, FFTW_MEASURE);
+
+  double* inFilter = (double*)malloc(M * sizeof(double));
+  inFilter[0] = 0.25;
+  for(int i = 1; i < inFTLength; i++) {
+    if(i % 2 == 0) inFilter[i] = inFilter[M - i] = 0;
+    else inFilter[i] = inFilter[M - i] = -1./((M_PI*(double)(i)) * (M_PI*(double)(i)));
+  }
+
+  fftw_complex* outFilter = (fftw_complex*)fftw_malloc(M * sizeof(fftw_complex));
+  fftw_plan planFilter = fftw_plan_dft_r2c_1d(M, inFilter, outFilter, FFTW_MEASURE);
+  fftw_execute(planFilter);
   for (int x = 0; x < nAngles; x++)
   {
-    for (int y = 0; y < nScanSize; y++) { in[y] = sinogram(y,x); }
+    for (int y = 0; y < N; y++) { in[y] = sinogram(y ,x); }
+    for (int y = N; y < M; y++) { in[y] = 0; }
     fftw_execute(plan);
     for (int y = 0; y < inFTLength; y++)
     {
-      double r = (double)y / (double)inFTLength;
-      double filterValue = std::abs(filter(1. - r));
-      out[y][0] *= filterValue;
-      out[y][1] *= filterValue;
+      if(y == 0) {
+        out[y][0] *= 2 * outFilter[y][0];
+        out[y][1] *= 2 * outFilter[y][0];
+      }
+      out[y][0] *= 2 * outFilter[y][0] * filter((double)(y + 1) / M);
+      out[y][1] *= 2 * outFilter[y][0] * filter((double)(y + 1) / M);
     }
     fftw_execute(invPlan);
-    for (int y = 0; y < nScanSize; y++) { result(y,x) = outDouble[y] / size; }
+    for (int y = 0; y < N ; y++) { result(y, x) = outDouble[y] / N; }
   }
 
   fftw_free(out);
@@ -454,14 +477,10 @@ JPetSinogramType::SparseMatrix JPetRecoImageTools::doFFTW2D(const JPetSinogramTy
     {
       // go by columns
       uint gid = y * inFTLength + x;
-      // shifting coordinates
-      double yN = ((double)y - ((double)nScanSize / 2.));
 
-      // current radius normalized to [0 .. 1]
-      double r = std::sqrt((xN * xN + yN * yN)) / maxR;
-      double filterValue = std::abs(filter(1 - r));
-      out[gid][0] *= filterValue;
-      out[gid][1] *= filterValue;
+      double filterValue = filter(y);
+      out[gid][0] *= filter(y);
+      out[gid][1] *= filter(y);
     }
   }
   fftw_execute(invPlan);
@@ -504,7 +523,7 @@ JPetSinogramType::SparseMatrix JPetRecoImageTools::doFFTSLOW(const JPetSinogramT
     {
       double highest = padlen / 2; // highest value is on middle of 1D column
       double r = y / highest;      // distance from highest value
-      double filterValue = std::abs(filter(r));
+      double filterValue = filter(y);
 
       Re[y] *= filterValue;
       Im[y] *= filterValue;
@@ -512,8 +531,8 @@ JPetSinogramType::SparseMatrix JPetRecoImageTools::doFFTSLOW(const JPetSinogramT
       Im[padlen - y] *= filterValue;
     }
 
-    Re[padlen / 2] *= std::abs(filter(1));
-    Im[padlen / 2] *= std::abs(filter(1));
+    Re[padlen / 2] *= filter(1);
+    Im[padlen / 2] *= filter(1);
 
     doFFTSLOWI(Re, Im, padlen, 0);
     for (int y = 0; y < nScanSize; y++) { result(y, x) = Re[y]; }

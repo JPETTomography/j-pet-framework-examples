@@ -24,8 +24,8 @@ class JPetFilterNone : public JPetFilterInterface
 {
 public:
   JPetFilterNone() {}
-  explicit JPetFilterNone(double maxCutOff, double) : fCutOff(maxCutOff) {}
-  virtual double operator()(double radius) override { return radius < fCutOff ? 1. : 0.; }
+  explicit JPetFilterNone(double maxCutOff) : fCutOff(maxCutOff) {}
+  virtual double operator()(double pos) override { return 1.; }
 
 private:
   JPetFilterNone(const JPetFilterNone &) = delete;

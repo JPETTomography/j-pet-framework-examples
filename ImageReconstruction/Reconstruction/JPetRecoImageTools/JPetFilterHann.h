@@ -16,6 +16,7 @@
 #ifndef _JPetFilterHann_H_
 #define _JPetFilterHann_H_
 #include "JPetFilterInterface.h"
+#include <cmath>
 
 /*! \brief
  */
@@ -23,8 +24,17 @@ class JPetFilterHann : public JPetFilterInterface
 {
 public:
   JPetFilterHann() {}
-  explicit JPetFilterHann(double maxCutOff, double) : fCutOff(maxCutOff) {}
-  virtual double operator()(double radius) override { return radius < fCutOff ? 0.5 * (1. - std::cos((2. * M_PI * radius))) : 0.; }
+  explicit JPetFilterHann(double maxCutOff) : fCutOff(maxCutOff) {}
+  virtual double operator()(double pos) override {
+    return 0.;
+    /*
+    if(n == 0) {
+      return 0.02;
+    }
+    double ramlak = (double)(n) / (double) (m);
+    if (ramlak >= fCutOff) return 0.;
+    return ramlak * std::sin((2 * M_PI * ((double)(n) / (double) (m))) / (2. * fCutOff)) * std::sin((2 * M_PI * ((double)(n) / (double) (m))) / (2. * fCutOff));*/
+  }
 
 private:
   double fCutOff = 1.0;

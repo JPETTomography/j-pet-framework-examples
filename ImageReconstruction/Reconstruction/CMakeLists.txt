@@ -69,3 +69,12 @@ target_include_directories(${projectName} PUBLIC
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${projectName}>
                            $<BUILD_INTERFACE:${FFTW_INCLUDE_DIRS}>)
 target_link_libraries(${projectName} PRIVATE JPetFramework::JPetFramework ${FFTW_LIBRARIES})
+
+################################################################################
+## Unit tests
+option(PACKAGE_TESTS "Build the tests" ON)
+if(PACKAGE_TESTS)
+    enable_testing()
+    add_subdirectory(JPetRecoImageTools/tests)
+endif()
+

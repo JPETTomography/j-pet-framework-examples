@@ -216,6 +216,8 @@ public:
    */
   static double FBPTOFWeight(double lor_tof_center, double lor_position, double sigma);
 
+  static int nextPowerOf2(int n);
+
 private:
   JPetRecoImageTools();
   ~JPetRecoImageTools();

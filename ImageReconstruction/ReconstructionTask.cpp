@@ -116,32 +116,32 @@ bool ReconstructionTask::terminate()
       switch (filterNameToFilter[fFilterName])
       {
       case ReconstructionTask::kFilterType::kFilterNone:
-        filter = new JPetFilterNone(cutOffValue, fFilterAlphaValue);
+        filter = new JPetFilterNone(cutOffValue);
         break;
       case ReconstructionTask::kFilterType::kFilterRamLak:
-        filter = new JPetFilterRamLak(cutOffValue, fFilterAlphaValue);
+        filter = new JPetFilterRamLak(cutOffValue);
         break;
       case ReconstructionTask::kFilterType::kFilterCosine:
-        filter = new JPetFilterCosine(cutOffValue, fFilterAlphaValue);
+        filter = new JPetFilterCosine(cutOffValue);
         break;
       case ReconstructionTask::kFilterType::kFilterHamming:
-        filter = new JPetFilterHamming(cutOffValue, fFilterAlphaValue);
+        filter = new JPetFilterHamming(cutOffValue);
         break;
       case ReconstructionTask::kFilterType::kFilterHann:
-        filter = new JPetFilterHann(cutOffValue, fFilterAlphaValue);
+        filter = new JPetFilterHann(cutOffValue);
         break;
       case ReconstructionTask::kFilterType::kFilterRidgelet:
-        filter = new JPetFilterRidgelet(cutOffValue, fFilterAlphaValue);
+        filter = new JPetFilterRidgelet(cutOffValue);
         break;
       case ReconstructionTask::kFilterType::kFilterSheppLogan:
-        filter = new JPetFilterSheppLogan(cutOffValue, fFilterAlphaValue);
+        filter = new JPetFilterSheppLogan(cutOffValue);
         break;
-      case ReconstructionTask::kFilterType::kFilterStirOldRamLak:
-        filter = new JPetFilterStirOldRamLak(cutOffValue, fFilterAlphaValue);
-        break;
+      //case ReconstructionTask::kFilterType::kFilterStirOldRamLak:
+      //  filter = new JPetFilterStirOldRamLak(cutOffValue);
+      //  break;
       default:
         ERROR("Could not find filter: " + fFilterName + ", using JPetFilterNone.");
-        filter = new JPetFilterNone(cutOffValue, fFilterAlphaValue);
+        filter = new JPetFilterNone(cutOffValue);
         break;
       }
 
@@ -150,15 +150,12 @@ bool ReconstructionTask::terminate()
       for (auto& tofWindow : sinogram[i]) // filter sinogram in each TOF-windows(for FBP in single timewindow)
       {
         filtered[tofWindow.first] = JPetRecoImageTools::FilterSinogram(f, *filter, tofWindow.second);
-        // saveResult(filtered[tofWindow.first], fOutFileName + "reconstruction_with_" + fReconstructionName + "_" + fFilterName + "_CutOff_" +
-        //                                          std::to_string(cutOffValue) + "_slicenumber_" + std::to_string(sliceNumber) +
-        //                                          "_filteredSinogram.ppm");
         tofID++;
       }
 
       JPetSinogramType::SparseMatrix result =
           JPetRecoImageTools::backProject(filtered, fSinogram->getReconstructionDistanceAccuracy(), fSinogram->getTOFWindowSize(), fLORTOFSigma,
-                                          weightFunction, JPetRecoImageTools::nonRescale, 0, 255);
+                                          weightFunction, JPetRecoImageTools::rescale, 0, 10000);
 
       saveResult(result, fOutFileName + "reconstruction_with_" + fReconstructionName + "_" + fFilterName + "_CutOff_" + std::to_string(cutOffValue) +
                              "_slicenumber_" + std::to_string(sliceNumber) + ".ppm");

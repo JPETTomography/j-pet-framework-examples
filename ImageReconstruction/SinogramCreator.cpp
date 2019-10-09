@@ -65,7 +65,7 @@ void SinogramCreator::readAndAnalyzeGojaFile()
     {
       in >> firstX >> firstY >> firstZ >> firstT >> secondX >> secondY >> secondZ >> secondT >> skipInt >> skipInt >> skip >> skip >> coincidence >> skip >>
           skip >> skip;
-       in >> firstX >> firstY >> firstZ >> firstT >> secondX >> secondY >> secondZ >> secondT;
+      //in >> firstX >> firstY >> firstZ >> firstT >> secondX >> secondY >> secondZ >> secondT;
       //if (coincidence != 1) // 1 == true event
       //  continue;
 
