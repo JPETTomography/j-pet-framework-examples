@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2019 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -18,6 +18,7 @@ using namespace std;
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
 #include <JPetWriter/JPetWriter.h>
+#include "SignalFinderTools.h"
 #include "SignalFinder.h"
 #include <utility>
 #include <string>
@@ -76,15 +77,6 @@ bool SignalFinder::init()
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey)) {
     fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
   }
-  
-  // Check if the user requested ordering of thresholds by value
-  if (isOptionSet(fParams.getOptions(), kOrderThresholdsByValueKey)) {
-    fOrderThresholdsByValue = getOptionAsBool(fParams.getOptions(), kOrderThresholdsByValueKey);
-  }
-  if (fOrderThresholdsByValue){
-    INFO("Threshold reordering was requested. Thresholds will be ordered by their values according to provided detector setup file.");
-    fThresholdOrderings = SignalFinderTools::findThresholdOrders(getParamBank());
-  }
 
   // Creating control histograms
   if(fSaveControlHistos) { initialiseHistograms(); }
@@ -100,7 +92,7 @@ bool SignalFinder::exec()
     // Building signals
     auto allSignals = SignalFinderTools::buildAllSignals(
       sigChByPM, fSigChEdgeMaxTime, fSigChLeadTrailMaxTime,
-      getStatistics(), fSaveControlHistos, fThresholdOrderings
+      kNumOfThresholds, getStatistics(), fSaveControlHistos
     );
     // Saving method invocation
     saveRawSignals(allSignals);
@@ -116,7 +108,26 @@ bool SignalFinder::terminate()
 
 void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& rawSigVec)
 {
-  for (auto & rawSig : rawSigVec) { fOutputEvents->add<JPetRawSignal>(rawSig); }
+  for (auto & rawSig : rawSigVec) {
+    fOutputEvents->add<JPetRawSignal>(rawSig);
+    if(fSaveControlHistos){
+      auto leads = rawSig.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrValue);
+      auto trails = rawSig.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrValue);
+
+      getStatistics().getHisto1D("raw_sig_multi_leads")->Fill(leads.size());
+      getStatistics().getHisto1D("raw_sig_multi_trails")->Fill(trails.size());
+      getStatistics().getHisto1D("raw_sig_multi")->Fill(leads.size()+trails.size());
+
+      for(auto& sigCh : leads){
+        getStatistics().getHisto1D("raw_sig_mtx_occ")->Fill(sigCh.getChannel().getPM().getMatrixPosition());
+        getStatistics().getHisto1D("raw_sig_thr_occ")->Fill(sigCh.getChannel().getThresholdNumber());
+      }
+      for(auto& sigCh : trails){
+        getStatistics().getHisto1D("raw_sig_mtx_occ")->Fill(sigCh.getChannel().getPM().getMatrixPosition());
+        getStatistics().getHisto1D("raw_sig_thr_occ")->Fill(sigCh.getChannel().getThresholdNumber());
+      }
+    }
+  }
 }
 
 void SignalFinder::initialiseHistograms(){
@@ -170,24 +181,6 @@ void SignalFinder::initialiseHistograms(){
     ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
 
   getStatistics().createHistogram(new TH1F(
-    "lead_thr1_thr3_diff", "Time Difference between leading Signal Channels THR1 and THR3 in found signals",
-    200, -fSigChEdgeMaxTime, fSigChEdgeMaxTime)
-  );
-  getStatistics().getHisto1D("lead_thr1_thr3_diff")
-    ->GetXaxis()->SetTitle("time diff [ps]");
-  getStatistics().getHisto1D("lead_thr1_thr3_diff")
-    ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
-
-  getStatistics().createHistogram(new TH1F(
-    "lead_thr1_thr4_diff", "Time Difference between leading Signal Channels THR1 and THR4 in found signals",
-    200, -fSigChEdgeMaxTime, fSigChEdgeMaxTime)
-  );
-  getStatistics().getHisto1D("lead_thr1_thr4_diff")
-    ->GetXaxis()->SetTitle("time diff [ps]");
-  getStatistics().getHisto1D("lead_thr1_thr4_diff")
-    ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
-
-  getStatistics().createHistogram(new TH1F(
     "lead_trail_thr1_diff", "Time Difference between leading and trailing Signal Channels THR1 in found signals",
     200, 0.0, fSigChLeadTrailMaxTime)
   );
@@ -206,24 +199,6 @@ void SignalFinder::initialiseHistograms(){
     ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
 
   getStatistics().createHistogram(new TH1F(
-    "lead_trail_thr3_diff", "Time Difference between leading and trailing Signal Channels THR3 in found signals",
-    200, 0.0, fSigChLeadTrailMaxTime)
-  );
-  getStatistics().getHisto1D("lead_trail_thr3_diff")
-    ->GetXaxis()->SetTitle("time diff [ps]");
-  getStatistics().getHisto1D("lead_trail_thr3_diff")
-    ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
-
-  getStatistics().createHistogram(new TH1F(
-    "lead_trail_thr4_diff", "Time Difference between leading and trailing Signal Channels THR4 in found signals",
-    200, 0.0, fSigChLeadTrailMaxTime)
-  );
-  getStatistics().getHisto1D("lead_trail_thr4_diff")
-    ->GetXaxis()->SetTitle("time diff [ps]");
-  getStatistics().getHisto1D("lead_trail_thr4_diff")
-    ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
-
-  getStatistics().createHistogram(new TH1F(
     "good_v_bad_raw_sigs", "Number of good and corrupted signals created",
     3, 0.5, 3.5
   ));
@@ -231,4 +206,34 @@ void SignalFinder::initialiseHistograms(){
   getStatistics().getHisto1D("good_v_bad_raw_sigs")->GetXaxis()->SetBinLabel(2,"CORRUPTED");
   getStatistics().getHisto1D("good_v_bad_raw_sigs")->GetXaxis()->SetBinLabel(3,"UNKNOWN");
   getStatistics().getHisto1D("good_v_bad_raw_sigs")->GetYaxis()->SetTitle("Number of Raw Signals");
+
+  getStatistics().createHistogram(new TH1F(
+    "raw_sig_thr_occ", "Thresholds occupation in createds Raw Signals", 2, 0.5, 2.5)
+  );
+  getStatistics().getHisto1D("raw_sig_thr_occ")->GetXaxis()->SetTitle("Threshold number");
+  getStatistics().getHisto1D("raw_sig_thr_occ")->GetYaxis()->SetTitle("Number of Signal Channels");
+
+  getStatistics().createHistogram(new TH1F(
+    "raw_sig_mtx_occ", "Matrix SiPMs occupation in createds Raw Signals", 4, 0.5, 4.5)
+  );
+  getStatistics().getHisto1D("raw_sig_mtx_occ")->GetXaxis()->SetTitle("SiPM matrix position number");
+  getStatistics().getHisto1D("raw_sig_mtx_occ")->GetYaxis()->SetTitle("Number of Signal Channels");
+
+  getStatistics().createHistogram(new TH1F(
+    "raw_sig_multi", "Raw Signal Multiplicity", 20, 0.5, 20.5)
+  );
+  getStatistics().getHisto1D("raw_sig_multi")->GetXaxis()->SetTitle("Total number of SigChs in RawSig");
+  getStatistics().getHisto1D("raw_sig_multi")->GetYaxis()->SetTitle("Number of Signal Channels");
+
+  getStatistics().createHistogram(new TH1F(
+    "raw_sig_multi_leads", "Raw Signal Multiplicity - Leadings", 20, 0.5, 20.5)
+  );
+  getStatistics().getHisto1D("raw_sig_multi_leads")->GetXaxis()->SetTitle("Total number of leading SigChs in RawSig");
+  getStatistics().getHisto1D("raw_sig_multi_leads")->GetYaxis()->SetTitle("Number of Signal Channels");
+
+  getStatistics().createHistogram(new TH1F(
+    "raw_sig_multi_trails", "Raw Signal Multiplicity - Trailings", 20, 0.5, 20.5)
+  );
+  getStatistics().getHisto1D("raw_sig_multi_trails")->GetXaxis()->SetTitle("Total number of trailing SigChs in RawSig");
+  getStatistics().getHisto1D("raw_sig_multi_trails")->GetYaxis()->SetTitle("Number of Signal Channels");
 }

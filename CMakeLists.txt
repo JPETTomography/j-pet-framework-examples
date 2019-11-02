@@ -64,7 +64,7 @@ find_package(Threads REQUIRED)
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost 1.50 REQUIRED 
+find_package(Boost 1.50 REQUIRED
              COMPONENTS filesystem
                         program_options
                         regex
@@ -145,7 +145,7 @@ endif(JPetFramework_FOUND)
 ## The script shouldn't do anything if the data is present and correct.
 option(DOWNLOAD_DATA "Download data" ON)
 if(DOWNLOAD_DATA)
-  set(DOWNLOAD_BASE_PATH ${PROJECT_SOURCE_DIR})  
+  set(DOWNLOAD_BASE_PATH ${PROJECT_SOURCE_DIR})
 
   file(DOWNLOAD "http://sphinx.if.uj.edu.pl/framework/examples_reformed.sha" ${DOWNLOAD_BASE_PATH}/examples_reformed.sha)
   file(READ ${DOWNLOAD_BASE_PATH}/examples_reformed.sha SHA_HASHES)
@@ -173,17 +173,19 @@ add_subdirectory(modules)
 
 ################################################################################
 ## Directories with examples
-add_subdirectory(InterThresholdCalibration)
-add_subdirectory(LargeBarrelAnalysis)
-add_subdirectory(VelocityCalibration)
-add_subdirectory(NewAnalysisTemplate)
-add_subdirectory(ImageReconstruction)
-add_subdirectory(ScopeLoaderExample)
-add_subdirectory(TimeCalibration)
-add_subdirectory(MCGeantAnalysis)
-add_subdirectory(PhysicAnalysis)
-add_subdirectory(CosmicAnalysis)
-add_subdirectory(ScopeAnalysis)
-add_subdirectory(Imaging)
-add_subdirectory(TimeCalibration_iter)
-add_subdirectory(UserDataClassExample)
+#add_subdirectory(InterThresholdCalibration)
+#add_subdirectory(LargeBarrelAnalysis)
+#add_subdirectory(VelocityCalibration)
+#add_subdirectory(NewAnalysisTemplate)
+#add_subdirectory(ImageReconstruction)
+#add_subdirectory(ScopeLoaderExample)
+#add_subdirectory(TimeCalibration)
+#add_subdirectory(MCGeantAnalysis)
+#add_subdirectory(PhysicAnalysis)
+#add_subdirectory(CosmicAnalysis)
+#add_subdirectory(ScopeAnalysis)
+#add_subdirectory(Imaging)
+#add_subdirectory(TimeCalibration_iter)
+#add_subdirectory(UserDataClassExample)
+
+add_subdirectory(ModularDetectorAnalysis)
