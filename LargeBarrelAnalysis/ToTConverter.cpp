@@ -30,6 +30,7 @@ ToTConverter getConverter(RunType type) {
     ToTConverter conv(params, Range(1, 0., 1));
     return conv;
   }
+
 }
 
 ToTConverter::ToTConverter(const ToTParams &params, const ToTRange range)

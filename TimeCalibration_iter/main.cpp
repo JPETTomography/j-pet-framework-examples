@@ -13,19 +13,20 @@
  *  @file main.cpp
  */
 
-#include "../LargeBarrelAnalysis/HitFinder.h"
-#include "../LargeBarrelAnalysis/SignalFinder.h"
-#include "../LargeBarrelAnalysis/SignalTransformer.h"
-#include "../LargeBarrelAnalysis/TimeWindowCreator.h"
 #include "TimeCalibration.h"
 #include <JPetManager/JPetManager.h>
+#include "../LargeBarrelAnalysis/TimeWindowCreator.h"
+#include "../LargeBarrelAnalysis/SignalFinder.h"
+#include "../LargeBarrelAnalysis/SignalTransformer.h"
+#include "../LargeBarrelAnalysis/HitFinder.h"
 
 using namespace std;
 
-int main(int argc, const char *argv[]) {
+int main(int argc, const char* argv[])
+{
   try {
     //
-    JPetManager &manager = JPetManager::getManager();
+    JPetManager& manager = JPetManager::getManager();
     manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
     manager.registerTask<SignalFinder>("SignalFinder");
     manager.registerTask<SignalTransformer>("SignalTransformer");
@@ -36,13 +37,13 @@ int main(int argc, const char *argv[]) {
     manager.useTask("SignalFinder", "tslot.raw", "raw.sig");
     manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
     manager.useTask("HitFinder", "phys.sig", "hits");
-    manager.useTask("TimeCalibration", "hits", "calib", -1);
+    manager.useTask("TimeCalibration", "hits", "calib",-1);
     manager.run(argc, argv);
 
-  } catch (const std::exception &except) {
-    std::cerr << "Unrecoverable error occured:" << except.what()
-              << "Exiting the program!" << std::endl;
+  } catch (const std::exception& except) {
+    std::cerr << "Unrecoverable error occured:" << except.what() << "Exiting the program!" << std::endl;
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;
+
 }

@@ -37,22 +37,18 @@ bool SignalTransformer::init()
   } else {
     WARNING("Signal Transformer is not using Corrupted Signals (default option)");
   }
-  // Walk correction constants (for each threshold separately)
+  //Walk correction constants (for each threshold separately)
   if (isOptionSet(fParams.getOptions(), kWalkCorrConst1ParamKey)) {
-    fWalkCorrConst[0] =
-        getOptionAsFloat(fParams.getOptions(), kWalkCorrConst1ParamKey);
+    fWalkCorrConst[0] = getOptionAsFloat(fParams.getOptions(), kWalkCorrConst1ParamKey);
   }
   if (isOptionSet(fParams.getOptions(), kWalkCorrConst2ParamKey)) {
-    fWalkCorrConst[1] =
-        getOptionAsFloat(fParams.getOptions(), kWalkCorrConst2ParamKey);
+    fWalkCorrConst[1] = getOptionAsFloat(fParams.getOptions(), kWalkCorrConst2ParamKey);
   }
   if (isOptionSet(fParams.getOptions(), kWalkCorrConst3ParamKey)) {
-    fWalkCorrConst[2] =
-        getOptionAsFloat(fParams.getOptions(), kWalkCorrConst3ParamKey);
+    fWalkCorrConst[2] = getOptionAsFloat(fParams.getOptions(), kWalkCorrConst3ParamKey);
   }
   if (isOptionSet(fParams.getOptions(), kWalkCorrConst4ParamKey)) {
-    fWalkCorrConst[3] =
-        getOptionAsFloat(fParams.getOptions(), kWalkCorrConst4ParamKey);
+    fWalkCorrConst[3] = getOptionAsFloat(fParams.getOptions(), kWalkCorrConst4ParamKey);
   }
   // Getting bool for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey)) {
@@ -87,16 +83,14 @@ bool SignalTransformer::exec()
           for(unsigned int i=0;i<leads.size();i++){
             getStatistics().getHisto1D("raw_sigs_multi_good")->Fill(2*i+1);
           }
-          for (unsigned int i = 0; i < trails.size(); i++) {
-            getStatistics()
-                .getHisto1D("raw_sigs_multi_good")
-                ->Fill(2 * (i + 1));
+          for(unsigned int i=0;i<trails.size();i++){
+            getStatistics().getHisto1D("raw_sigs_multi_good")->Fill(2*(i+1));
           }
-        } else if (rawSignal.getRecoFlag() == JPetBaseSignal::Corrupted) {
-          //
-          int PMid = leads.at(0).getPM().getID();
-
-          getStatistics().getHisto1D("PmIdCorrupted")->Fill(PMid);
+        } else if(rawSignal.getRecoFlag()==JPetBaseSignal::Corrupted){
+	  //
+	  int PMid = leads.at(0).getPM().getID();
+	  
+	  getStatistics().getHisto1D("PmIdCorrupted")->Fill(PMid);
           getStatistics().getHisto1D("good_vs_bad_signals")->Fill(2);
           for(unsigned int i=0;i<leads.size();i++){
             getStatistics().getHisto1D("raw_sigs_multi_corr")->Fill(2*i+1);
@@ -141,7 +135,7 @@ bool SignalTransformer::terminate()
  */
 JPetRecoSignal SignalTransformer::createRecoSignal(const JPetRawSignal& rawSignal)
 {
-  JPetRecoSignal recoSignal;
+  JPetRecoSignal recoSignal;  
   recoSignal.setRawSignal(rawSignal);
   recoSignal.setAmplitude(-1.0);
   recoSignal.setOffset(-1.0);
@@ -153,15 +147,16 @@ JPetRecoSignal SignalTransformer::createRecoSignal(const JPetRawSignal& rawSigna
 
 /**
  * Method rewrites Reco Signal to Phys Signal.
- * Time of Signal set to time of the Leading Signal Channel at the lowest
- * threshold. Other fields are set to -1, quality fields set to 0.
+ * Time of Signal set to time of the Leading Signal Channel at the lowest threshold.
+ * Other fields are set to -1, quality fields set to 0.
  */
-JPetPhysSignal
-SignalTransformer::createPhysSignal(const JPetRecoSignal &recoSignal) {
+JPetPhysSignal SignalTransformer::createPhysSignal(const JPetRecoSignal& recoSignal)
+{
   JPetPhysSignal physSignal;
   correctForWalk(recoSignal);
   std::vector<JPetSigCh> leadingSigChVec = recoSignal.getRawSignal().getPoints(
-      JPetSigCh::Leading, JPetRawSignal::ByThrValue);
+       JPetSigCh::Leading, JPetRawSignal::ByThrValue
+									       );
   physSignal.setRecoSignal(recoSignal);
   physSignal.setPhe(-1.0);
   physSignal.setQualityOfPhe(0.0);
@@ -170,33 +165,31 @@ SignalTransformer::createPhysSignal(const JPetRecoSignal &recoSignal) {
   physSignal.setTime(leadingSigChVec.at(0).getValue());
   return physSignal;
 }
-// Walk correction applyed to the SigCh times on both edges
+//Walk correction applyed to the SigCh times on both edges
 //
-void SignalTransformer::correctForWalk(const JPetRecoSignal &recoSignal) {
+void SignalTransformer::correctForWalk(const JPetRecoSignal& recoSignal)
+{
   std::vector<JPetSigCh> leadingSigChVec = recoSignal.getRawSignal().getPoints(
-      JPetSigCh::Leading, JPetRawSignal::ByThrValue);
+       JPetSigCh::Leading, JPetRawSignal::ByThrValue);
   std::vector<JPetSigCh> trailingSigChVec = recoSignal.getRawSignal().getPoints(
-      JPetSigCh::Trailing, JPetRawSignal::ByThrValue);
+       JPetSigCh::Trailing, JPetRawSignal::ByThrValue);
   double TOT = 0.;
-  for (unsigned i = 0;
-       i < leadingSigChVec.size() && i < trailingSigChVec.size(); i++) {
+  for (unsigned i = 0; i < leadingSigChVec.size() && i < trailingSigChVec.size(); i++) {
     TOT += trailingSigChVec.at(i).getValue() - leadingSigChVec.at(i).getValue();
   }
-  for (unsigned i = 0; i < leadingSigChVec.size(); i++) {
-    if (TOT > 0. && fWalkCorrConst[i] > 0.) {
-      double WalkCorr = fWalkCorrConst[i] / sqrt(TOT);
-      leadingSigChVec.at(i).setValue(leadingSigChVec.at(i).getValue() -
-                                     WalkCorr);
-      getStatistics().getHisto1D("WalkCorrLead")->Fill(WalkCorr);
-    }
-    for (unsigned i = 0; i < trailingSigChVec.size(); i++) {
-      if (TOT > 0. && fWalkCorrConst[i] > 0.) {
-        double WalkCorr = fWalkCorrConst[i] / sqrt(TOT);
-        trailingSigChVec.at(i).setValue(trailingSigChVec.at(i).getValue() -
-                                        WalkCorr);
-        getStatistics().getHisto1D("WalkCorrTrail")->Fill(WalkCorr);
-      }
-    }
+   for (unsigned i = 0; i < leadingSigChVec.size();i++){
+     if(TOT>0. && fWalkCorrConst[i] >0.){
+       double WalkCorr = fWalkCorrConst[i]/sqrt(TOT);
+       leadingSigChVec.at(i).setValue(leadingSigChVec.at(i).getValue() - WalkCorr);
+       getStatistics().getHisto1D("WalkCorrLead")->Fill(WalkCorr);
+     }
+   for (unsigned i = 0; i < trailingSigChVec.size();i++){
+     if(TOT>0. && fWalkCorrConst[i] >0.){
+       double WalkCorr = fWalkCorrConst[i]/sqrt(TOT);
+       trailingSigChVec.at(i).setValue(trailingSigChVec.at(i).getValue() - WalkCorr);
+       getStatistics().getHisto1D("WalkCorrTrail")->Fill(WalkCorr);
+     }
+   }
   }
 }
 void SignalTransformer::initialiseHistograms(){
@@ -270,58 +263,27 @@ void SignalTransformer::initialiseHistograms(){
   ));
   getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_corr")->GetXaxis()->SetBinLabel(1,"THR 1 Lead");
   getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_corr")->GetXaxis()->SetBinLabel(2,"THR 1 Trail");
-  getStatistics()
-      .getHisto1D("raw_sigs_multi_corr_sigch_corr")
-      ->GetXaxis()
-      ->SetBinLabel(3, "THR 2 Lead");
-  getStatistics()
-      .getHisto1D("raw_sigs_multi_corr_sigch_corr")
-      ->GetXaxis()
-      ->SetBinLabel(4, "THR 2 Trail");
-  getStatistics()
-      .getHisto1D("raw_sigs_multi_corr_sigch_corr")
-      ->GetXaxis()
-      ->SetBinLabel(5, "THR 3 Lead");
-  getStatistics()
-      .getHisto1D("raw_sigs_multi_corr_sigch_corr")
-      ->GetXaxis()
-      ->SetBinLabel(6, "THR 3 Trail");
-  getStatistics()
-      .getHisto1D("raw_sigs_multi_corr_sigch_corr")
-      ->GetXaxis()
-      ->SetBinLabel(7, "THR 4 Lead");
-  getStatistics()
-      .getHisto1D("raw_sigs_multi_corr_sigch_corr")
-      ->GetXaxis()
-      ->SetBinLabel(8, "THR 4 Trail");
-  getStatistics()
-      .getHisto1D("raw_sigs_multi_corr_sigch_corr")
-      ->GetYaxis()
-      ->SetTitle("Number of CORRUPTED SigChs");
+  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_corr")->GetXaxis()->SetBinLabel(3,"THR 2 Lead");
+  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_corr")->GetXaxis()->SetBinLabel(4,"THR 2 Trail");
+  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_corr")->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
+  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_corr")->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
+  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_corr")->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
+  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_corr")->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
+  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_corr")->GetYaxis()->SetTitle("Number of CORRUPTED SigChs");
 
-  getStatistics().createHistogram(
-      new TH1F("WalkCorrLead", "Walk Correction applied on the leading edge",
-               1000, 0., 50.));
-  getStatistics()
-      .getHisto1D("WalkCorrLead")
-      ->GetXaxis()
-      ->SetTitle("Walk Correction [ps]");
+  getStatistics().createHistogram(new TH1F(
+					   "WalkCorrLead", "Walk Correction applied on the leading edge",
+					   1000, 0.,50.
+  ));
+  getStatistics().getHisto1D("WalkCorrLead")->GetXaxis()->SetTitle("Walk Correction [ps]");
   getStatistics().getHisto1D("WalkCorrLead")->GetYaxis()->SetTitle("Counts");
-  getStatistics()
-      .getHisto1D("WalkCorrLead")
-      ->GetYaxis()
-      ->SetTitle("Walk Correction applied on the leading edge");
+  getStatistics().getHisto1D("WalkCorrLead")->GetYaxis()->SetTitle("Walk Correction applied on the leading edge");
 
-  getStatistics().createHistogram(
-      new TH1F("WalkCorrTrail", "Walk Correction applied on the trailing edge",
-               1000, 0., 50.));
-  getStatistics()
-      .getHisto1D("WalkCorrTrail")
-      ->GetXaxis()
-      ->SetTitle("Walk Correction [ps]");
+  getStatistics().createHistogram(new TH1F(
+                                           "WalkCorrTrail", "Walk Correction applied on the trailing edge",
+                                           1000, 0.,50.
+					   ));
+  getStatistics().getHisto1D("WalkCorrTrail")->GetXaxis()->SetTitle("Walk Correction [ps]");
   getStatistics().getHisto1D("WalkCorrTrail")->GetYaxis()->SetTitle("Counts");
-  getStatistics()
-      .getHisto1D("WalkCorrTrail")
-      ->GetYaxis()
-      ->SetTitle("Walk Correction applied on the trailing edge");
+  getStatistics().getHisto1D("WalkCorrTrail")->GetYaxis()->SetTitle("Walk Correction applied on the trailing edge");
 }
