@@ -20,10 +20,6 @@ Create standard analysis histograms
 default value : false
 Create additional set of histograms connected with analysis efficiencies
 
-- "GeantParser_Zresolution_double"
-default value : 0.976
-Value of the Gaussian smearing function along the z~strip
-
 - "GeantParser_EnergyThreshold_double"
 default value [keV] : 10.0
 Energy threshold applied by the electronics - different for different runs, so be careful while
@@ -32,3 +28,5 @@ applying. This value influence on number of reconstructed hits and events.
 - "GeantParser_ProcessSingleEventInWindow_bool"
 default value : false
 For testing purposes user can ask for processing single event per time window
+
+Note that presently there are no parameters allowing to control the smearing of generated hit properties such as interaction time and Z position resolution. In order to tune them, please modify the corresponding functions in the `JPetSmearingFunctions` class directly in the `j-pet-framework` code. User parameters allowing to control the smearing will be added in the future versions.
