@@ -196,10 +196,10 @@ JPetEvent EventCategorizerImaging::imageReconstruction(vector<JPetHit> hits)
       imagingEvent.addHit(hits[i]);
     }
   }
-  if (EventCategorizerTools::stream2Gamma(imagingEvent, getStatistics(), fSaveControlHistos, fBackToBackAngleWindow, fMaxTimeDiff)) {
+  if (EventCategorizerTools::checkFor2Gamma(imagingEvent, getStatistics(), fSaveControlHistos, fBackToBackAngleWindow, fMaxTimeDiff)) {
     imagingEvent.addEventType(JPetEventType::k2Gamma);
   }
-  if (EventCategorizerTools::stream3Gamma(imagingEvent, getStatistics(), fSaveControlHistos, fDecayInto3MinAngle, fMaxTimeDiff, fMaxDistOfDecayPlaneFromCenter)) {
+  if (EventCategorizerTools::checkFor3Gamma(imagingEvent, getStatistics(), fSaveControlHistos)) {
     imagingEvent.addEventType(JPetEventType::k3Gamma);
   }
   return imagingEvent;

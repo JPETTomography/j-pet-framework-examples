@@ -64,10 +64,16 @@ bool EventCategorizer::init()
       kDeexTOTCutMaxParamKey.c_str(), fDeexTOTCutMax
     ));
   }
+  if (isOptionSet(fParams.getOptions(), kMaxTimeDiffParamKey)) {
+    fMaxTimeDiff = getOptionAsFloat(fParams.getOptions(), kMaxTimeDiffParamKey);
+  } else {
+    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMaxTimeDiffParamKey.c_str(), fMaxTimeDiff));
+  }
   // Getting bool for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey)) {
     fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
   }
+
 
   // Input events type
   fOutputEvents = new JPetTimeWindow("JPetEvent");
@@ -85,7 +91,7 @@ bool EventCategorizer::exec()
 
       // Check types of current event
       bool is2Gamma = EventCategorizerTools::checkFor2Gamma(
-        event, getStatistics(), fSaveControlHistos, fB2BSlotThetaDiff
+        event, getStatistics(), fSaveControlHistos, fB2BSlotThetaDiff, fMaxTimeDiff
       );
       bool is3Gamma = EventCategorizerTools::checkFor3Gamma(
         event, getStatistics(), fSaveControlHistos
