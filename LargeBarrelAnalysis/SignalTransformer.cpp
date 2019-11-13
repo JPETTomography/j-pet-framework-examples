@@ -201,6 +201,12 @@ void SignalTransformer::initialiseHistograms(){
   getStatistics().getHisto1D("good_vs_bad_signals")->GetXaxis()->SetBinLabel(3,"UNKNOWN");
   getStatistics().getHisto1D("good_vs_bad_signals")->GetYaxis()->SetTitle("Number of Signals");
 
+  getStatistics().createHistogram(
+    new TH1F("PmIdCorrupted", "PMs yielding corrupted signals", 400, -0.5, 399.5)
+  );
+  getStatistics().getHisto1D("PmIdCorrupted")->GetXaxis()->SetTitle("PM id");
+  getStatistics().getHisto1D("PmIdCorrupted")->GetYaxis()->SetTitle("Number of Signals");
+  
   getStatistics().createHistogram(new TH1F(
     "raw_sigs_multi", "Multiplicity of created Raw Signals",
     8, 0.5, 8.5
