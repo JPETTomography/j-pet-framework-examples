@@ -27,7 +27,7 @@ public:
   JPetFilterCosine() {}
   explicit JPetFilterCosine(double maxCutOff) : fCutOff(maxCutOff) {}
   virtual double operator()(double pos) override {
-    return std::cos(M_PI * ((double)(n) / (double) (m)));
+    return 1;//return std::cos(M_PI * ((double)(n) / (double) (m)));
   }
 
 private:

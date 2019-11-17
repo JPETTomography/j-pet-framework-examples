@@ -16,14 +16,14 @@
 #ifndef _JPET_SinogramType_H_
 #define _JPET_SinogramType_H_
 
-#include "JPetWriter/JPetWriter.h"
-
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
+
+#include "JPetWriter/JPetWriter.h"
 
 class JPetSinogramType : public TObject
 {

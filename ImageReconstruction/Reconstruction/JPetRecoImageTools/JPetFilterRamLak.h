@@ -26,7 +26,7 @@ public:
   explicit JPetFilterRamLak(double maxCutOff) : fCutOff(maxCutOff) {}
   virtual double operator()(double pos) override 
   {
-    return 0.;
+    return 1.;
     /*if(n == 0) {
       return 0.02;
     }

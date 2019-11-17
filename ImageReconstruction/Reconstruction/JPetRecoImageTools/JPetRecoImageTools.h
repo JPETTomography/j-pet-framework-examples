@@ -24,6 +24,7 @@
 #include <cassert>
 #include <memory>
 #include <utility>
+#include <numeric>
 
 #include "JPetSinogramType.h"
 
@@ -97,57 +98,6 @@ public:
   /// PseudoRescale which does nothing
   static void nonRescale(JPetSinogramType::SparseMatrix&, double, double) { return; }
 
-  /*! \brief Function returning sinogram matrix.
-   *  \param emissionMatrix matrix,  needs to be NxN
-   *  \param nViews number of views on object, degree step is calculated as
-   * (angleEnd - angleBeg) / nViews
-   *  \param nScans number of scans on object, step is calculated as
-   * emissionMatrix[0].size() / nScans
-   *  \param interpolationFunction function to interpolate values (Optional,
-   * default linear)
-   *  \param angleBeg start angle for projection in deg (Optional, default 0)
-   *  \param angleEnd end angle for projection in deg(Optional, default 180)
-   *  \param rescaleFunc function that rescales the final result (Optional,
-   * default no rescaling)
-   */
-  static JPetSinogramType::SparseMatrix createSinogramWithSingleInterpolation(JPetSinogramType::SparseMatrix& emissionMatrix, int nViews, int nScans,
-                                                                              double angleBeg = 0, double angleEnd = 180,
-                                                                              InterpolationFunc interpolationFunction = linear,
-                                                                              RescaleFunc rescaleFunc = nonRescale, int rescaleMinCutoff = 0,
-                                                                              int rescaleFactor = 255);
-
-  static double calculateProjection(const JPetSinogramType::SparseMatrix& emissionMatrix, double phi, int scanNumber, int nScans,
-                                    InterpolationFunc& interpolationFunction);
-
-  /*! \brief Function returning sinogram matrix with both variables interpolated
-   *  \param emissionMatrix matrix, needs to be NxN
-   *  \param nAngles angle step is calculated as PI / nAngles
-   *  \param rescaleFunc function that rescales the final result (Optional,
-   * default no rescaling)
-   *  \param rescaleMinCutoff min value to set in rescale (Optional)
-   *  \param rescaleFactor max value to set in rescale (Optional)
-   */
-  static JPetSinogramType::SparseMatrix createSinogramWithDoubleInterpolation(JPetSinogramType::SparseMatrix& emissionMatrix, int nAngles,
-                                                                              RescaleFunc rescaleFunc = nonRescale, int rescaleMinCutoff = 0,
-                                                                              int rescaleFactor = 255);
-
-  static double calculateProjection2(int step, double cos, double sin, int imageSize, double center, double length,
-                                     std::function<double(int, int)> matrixGet);
-
-  /*! \brief Function image from sinogram matrix
-   *  \param sinogram matrix containing sinogram to backProject
-   *  \param tof vector with information about TOF for every hit
-   *  \param nAngles angle step is calculated as PI / nAngles
-   *  \param rescaleFunc function that rescales the final result (Optional,
-   * default no rescaling)
-   *  \param rescaleMinCutoff min value to set in rescale (Optional)
-   *  \param rescaleFactor max value to set in rescale (Optional)
-   */
-  static JPetSinogramType::SparseMatrix backProjectWithKDE(const JPetSinogramType::SparseMatrix& sinogram, Matrix2DTOF& tof, int angles,
-                                                           RescaleFunc rescaleFunc, int rescaleMinCutoff, int rescaleFactor);
-
-  static double normalDistributionProbability(float x, float mean, float stddev);
-
   /*! \brief Function image from sinogram matrix
    *  \param sinogram matrix containing sinogram to backProject
    *  \param sinogramAccuracy
@@ -160,6 +110,10 @@ public:
    *  \param rescaleFactor max value to set in rescale (Optional)
    */
   static JPetSinogramType::SparseMatrix backProject(const JPetSinogramType::Matrix3D& sinogram, float sinogramAccuracy, float tofWindow,
+                                                    float lorTOFSigma, FilteredBackProjectionWeightingFunction fbpwf, RescaleFunc rescaleFunc,
+                                                    int rescaleMinCutoff, int rescaleFactor);
+
+  static JPetSinogramType::SparseMatrix backProjectMatlab(const JPetSinogramType::Matrix3D& sinogram, float sinogramAccuracy, float tofWindow,
                                                     float lorTOFSigma, FilteredBackProjectionWeightingFunction fbpwf, RescaleFunc rescaleFunc,
                                                     int rescaleMinCutoff, int rescaleFactor);
 
@@ -182,23 +136,24 @@ public:
   static JPetSinogramType::Matrix3D FilterSinograms(FourierTransformFunction& ftf, JPetFilterInterface& filter,
                                                     const JPetSinogramType::Matrix3D& matrix, float TOFSliceSize);
 
-  /*! \brief Fourier transform implementation using FFTW library
-   *  \param sinogram data to filter
-   *  \param filter type of filter
+  /*! \brief Function returning sinogram matrix.
+   *  \param emissionMatrix matrix,  needs to be NxN
+   *  \param nViews number of views on object, degree step is calculated as
+   * (angleEnd - angleBeg) / nViews
+   *  \param nScans number of scans on object, step is calculated as
+   * emissionMatrix[0].size() / nScans
+   *  \param interpolationFunction function to interpolate values (Optional,
+   * default linear)
+   *  \param angleBeg start angle for projection in deg (Optional, default 0)
+   *  \param angleEnd end angle for projection in deg(Optional, default 180)
+   *  \param rescaleFunc function that rescales the final result (Optional,
+   * default no rescaling)
    */
-  static JPetSinogramType::SparseMatrix doFFTW1D(const JPetSinogramType::SparseMatrix& sinogram, JPetFilterInterface& filter);
 
-  /*! \brief Fourier transform implementation using FFTW library
-   *  \param sinogram data to filter
-   *  \param filter type of filter
-   */
-  static JPetSinogramType::SparseMatrix doFFTW2D(const JPetSinogramType::SparseMatrix& sinogram, JPetFilterInterface& filter);
+  static JPetSinogramType::SparseMatrix backProjectWithKDE(const JPetSinogramType::SparseMatrix& sinogram, Matrix2DTOF& tof, int angles,
+                                                           RescaleFunc rescaleFunc, int rescaleMinCutoff, int rescaleFactor);
 
-  /*! \brief Fourier transform implementation
-   *  \param sinogram data to filter
-   *  \param filter type of filter
-   */
-  static JPetSinogramType::SparseMatrix doFFTSLOW(const JPetSinogramType::SparseMatrix& sinogram, JPetFilterInterface& filter);
+  static double normalDistributionProbability(float x, float mean, float stddev);
 
   /*! \brief Returns max value in given matrix
    *  \param result matrix to calculate max value
@@ -218,15 +173,13 @@ public:
 
   static int nextPowerOf2(int n);
 
+  static JPetSinogramType::SparseMatrix doFFTW1D(const JPetSinogramType::SparseMatrix& sinogram, JPetFilterInterface& filter);
+
 private:
   JPetRecoImageTools();
   ~JPetRecoImageTools();
   JPetRecoImageTools(const JPetRecoImageTools&) = delete;
   JPetRecoImageTools& operator=(const JPetRecoImageTools&) = delete;
-
-  static void doFFTSLOWT(std::vector<double>& Re, std::vector<double>& Im, int size, int shift);
-
-  static void doFFTSLOWI(std::vector<double>& Re, std::vector<double>& Im, int size, int shift);
 
   static inline double setToZeroIfSmall(double value, double epsilon)
   {
