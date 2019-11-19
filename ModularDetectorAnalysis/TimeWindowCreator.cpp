@@ -14,6 +14,7 @@
  */
 
 #include <JPetOptionsTools/JPetOptionsTools.h>
+#include "TimeWindowCreatorTools.h"
 #include <JPetWriter/JPetWriter.h>
 #include "TimeWindowCreator.h"
 #include <EventIII.h>
@@ -79,9 +80,6 @@ bool TimeWindowCreator::exec()
 
       // Check if channel exists in database from loaded local file
       if (getParamBank().getChannels().count(channelNumber) == 0) {
-        if (fSaveControlHistos){
-          getStatistics().getHisto1D("channel_missing")->Fill(channelNumber);
-        }
         WARNING(
           Form("DAQ Channel %d appears in data but does not exist in the detector setup.", channelNumber)
         );
@@ -91,89 +89,24 @@ bool TimeWindowCreator::exec()
       // Get channel for corresponding number
       auto& channel = getParamBank().getChannel(channelNumber);
 
-      vector<JPetSigCh> allSigChs;
+      // Building Signal Channels for this TOMB Channel
+      auto allSigChs = TimeWindowCreatorTools::buildSigChs(
+        tdcChannel, channel, fMaxTime, fMinTime,
+        getStatistics(), fSaveControlHistos
+      );
 
-      // Loop over all entries on leading edge in current TDCChannel and create SigCh
-      for (int j = 0; j < tdcChannel->GetLeadHitsNum(); j++) {
-        auto leadTime = tdcChannel->GetLeadTime(j);
-        if (leadTime > fMaxTime || leadTime < fMinTime ) { continue; }
-        auto leadSigCh = generateSigCh(
-          leadTime, channel, JPetSigCh::Leading
-        );
-        allSigChs.push_back(leadSigCh);
-        if (fSaveControlHistos){
-          fillChannelHistos(channel, JPetSigCh::Leading);
-        }
-      }
+      // Sort Signal Channels in time
+      TimeWindowCreatorTools::sortByTime(allSigChs);
 
-      // Loop over all entries on trailing edge in current TDCChannel and create SigCh
-      for (int j = 0; j < tdcChannel->GetTrailHitsNum(); j++) {
-        auto trailTime = tdcChannel->GetTrailTime(j);
-        if (trailTime > fMaxTime || trailTime < fMinTime ) { continue; }
-        auto trailSigCh = generateSigCh(
-          trailTime, channel, JPetSigCh::Trailing
-        );
-        allSigChs.push_back(trailSigCh);
-        if (fSaveControlHistos){
-          fillChannelHistos(channel, JPetSigCh::Trailing);
-        }
-      }
+      // Flag with Good or Corrupted
+      TimeWindowCreatorTools::flagSigChs(allSigChs, getStatistics(), fSaveControlHistos);
+
       // Save result
       saveSigChs(allSigChs);
     }
     fCurrEventNumber++;
   } else { return false; }
   return true;
-}
-
-/**
-* Sets up Signal Channel fields
-*/
-void TimeWindowCreator::fillChannelHistos(
-  const JPetChannel& channel, JPetSigCh::EdgeType edge
-) {
-  getStatistics().getHisto1D("channel_occ")->Fill(channel.getID());
-  getStatistics().getHisto1D("channel_thrnum")->Fill(channel.getThresholdNumber());
-  getStatistics().getHisto1D("matrix_occ")->Fill(channel.getPM().getMatrixPosition());
-  getStatistics().getHisto1D("pm_occ")->Fill(channel.getPM().getID());
-  getStatistics().getHisto1D("scin_occ")->Fill(channel.getPM().getScin().getID());
-  getStatistics().getHisto1D("slot_occ")->Fill(channel.getPM().getScin().getID());
-
-  if(edge == JPetSigCh::Leading){
-    getStatistics().getHisto1D("channel_occ_leads")->Fill(channel.getID());
-    getStatistics().getHisto1D("channel_thrnum_leads")->Fill(channel.getThresholdNumber());
-    getStatistics().getHisto1D("matrix_occ_leads")->Fill(channel.getPM().getMatrixPosition());
-    getStatistics().getHisto1D("pm_occ_leads")->Fill(channel.getPM().getID());
-    getStatistics().getHisto1D("scin_occ_leads")->Fill(channel.getPM().getScin().getID());
-    getStatistics().getHisto1D("slot_occ_leads")->Fill(channel.getPM().getScin().getID());
-  } else if(edge == JPetSigCh::Trailing){
-    getStatistics().getHisto1D("channel_occ_trails")->Fill(channel.getID());
-    getStatistics().getHisto1D("channel_thrnum_trails")->Fill(channel.getThresholdNumber());
-    getStatistics().getHisto1D("matrix_occ_trails")->Fill(channel.getPM().getMatrixPosition());
-    getStatistics().getHisto1D("pm_occ_trails")->Fill(channel.getPM().getID());
-    getStatistics().getHisto1D("scin_occ_trails")->Fill(channel.getPM().getScin().getID());
-    getStatistics().getHisto1D("slot_occ_trails")->Fill(channel.getPM().getScin().getID());
-  }
-
-  if(channel.getPM().getSide() == JPetPM::SideA){
-    getStatistics().getHisto1D("pm_occ_sides")->Fill(1);
-  }else if(channel.getPM().getSide() == JPetPM::SideB){
-    getStatistics().getHisto1D("pm_occ_sides")->Fill(2);
-  }
-}
-
-/**
-* Sets up Signal Channel fields
-*/
-JPetSigCh TimeWindowCreator::generateSigCh(
-  double time, const JPetChannel& channel, JPetSigCh::EdgeType edge
-) {
-  JPetSigCh sigCh;
-  sigCh.setTime(1000.*time);
-  sigCh.setType(edge);
-  sigCh.setChannel(channel);
-  sigCh.setRecoFlag(JPetSigCh::Good);
-  return sigCh;
 }
 
 bool TimeWindowCreator::terminate()
@@ -184,7 +117,127 @@ bool TimeWindowCreator::terminate()
 
 void TimeWindowCreator::saveSigChs(const vector<JPetSigCh>& sigChVec)
 {
-  for (auto & sigCh : sigChVec) { fOutputEvents->add<JPetSigCh>(sigCh); }
+  if(sigChVec.size()>0){
+    double lastLLThr1TimeAll = 0.0;
+    double lastLLThr1TimeGood = 0.0;
+    double lastLLThr2TimeAll = 0.0;
+    double lastLLThr2TimeGood = 0.0;
+    double lastTTThr1TimeAll = 0.0;
+    double lastTTThr1TimeGood = 0.0;
+    double lastTTThr2TimeAll = 0.0;
+    double lastTTThr2TimeGood = 0.0;
+
+    for (auto & sigCh : sigChVec) {
+      if(sigCh.getRecoFlag()==JPetSigCh::Good){
+        fOutputEvents->add<JPetSigCh>(sigCh);
+
+        if(fSaveControlHistos){
+          getStatistics().getHisto1D("channel_occ")->Fill(sigCh.getChannel().getID());
+          getStatistics().getHisto1D("channel_thrnum")->Fill(sigCh.getChannel().getThresholdNumber());
+          getStatistics().getHisto1D("matrix_occ")->Fill(sigCh.getChannel().getPM().getMatrixPosition());
+          getStatistics().getHisto1D("pm_occ")->Fill(sigCh.getChannel().getPM().getID());
+          getStatistics().getHisto1D("scin_occ")->Fill(sigCh.getChannel().getPM().getScin().getID());
+
+          if(sigCh.getChannel().getPM().getSide()==JPetPM::SideA){
+            getStatistics().getHisto1D("pm_occ_sides")->Fill(2);
+            if(sigCh.getChannel().getPM().getScin().getID() >= 201
+            && sigCh.getChannel().getPM().getScin().getID() < 214){
+              getStatistics().getHisto1D(Form("mtx_%d_A", sigCh.getChannel().getPM().getScin().getID()))
+              ->Fill(sigCh.getChannel().getPM().getMatrixPosition());
+
+              if(sigCh.getChannel().getThresholdNumber() == 1 && sigCh.getType() == JPetSigCh::Leading){
+                getStatistics().getHisto1D(Form("mtx_%d_A_t1L", sigCh.getChannel().getPM().getScin().getID()))
+                ->Fill(sigCh.getChannel().getPM().getMatrixPosition());
+              }
+            }
+          } else if(sigCh.getChannel().getPM().getSide()==JPetPM::SideB){
+            getStatistics().getHisto1D("pm_occ_sides")->Fill(3);
+            if(sigCh.getChannel().getPM().getScin().getID() >= 201
+            && sigCh.getChannel().getPM().getScin().getID() < 214){
+              getStatistics().getHisto1D(Form("mtx_%d_B", sigCh.getChannel().getPM().getScin().getID()))
+              ->Fill(sigCh.getChannel().getPM().getMatrixPosition());
+              if(sigCh.getChannel().getThresholdNumber() == 1 && sigCh.getType() == JPetSigCh::Leading){
+                getStatistics().getHisto1D(Form("mtx_%d_B_t1L", sigCh.getChannel().getPM().getScin().getID()))
+                ->Fill(sigCh.getChannel().getPM().getMatrixPosition());
+              }
+            }
+          }
+
+          if(sigCh.getType()==JPetSigCh::Leading && sigCh.getChannel().getThresholdNumber()==1){
+            getStatistics().getHisto2D("times_t1L_per_pm")
+            ->Fill(sigCh.getTime(), sigCh.getChannel().getPM().getID());
+            if(lastLLThr1TimeGood != 0.0){
+              getStatistics().getHisto1D("tdiff_LL_THR1_after")->Fill(sigCh.getTime()-lastLLThr1TimeGood);
+            }
+            lastLLThr1TimeGood = sigCh.getTime();
+          }
+          if(sigCh.getType()==JPetSigCh::Leading && sigCh.getChannel().getThresholdNumber()==2){
+            getStatistics().getHisto2D("times_t2L_per_pm")
+            ->Fill(sigCh.getTime(), sigCh.getChannel().getPM().getID());
+            if(lastLLThr2TimeGood != 0.0){
+              getStatistics().getHisto1D("tdiff_LL_THR2_after")->Fill(sigCh.getTime()-lastLLThr2TimeGood);
+            }
+            lastLLThr2TimeGood = sigCh.getTime();
+          }
+          if(sigCh.getType()==JPetSigCh::Trailing && sigCh.getChannel().getThresholdNumber()==1){
+            getStatistics().getHisto2D("times_t1T_per_pm")
+            ->Fill(sigCh.getTime(), sigCh.getChannel().getPM().getID());
+            if(lastTTThr1TimeGood != 0.0){
+              getStatistics().getHisto1D("tdiff_TT_THR1_after")->Fill(sigCh.getTime()-lastTTThr1TimeGood);
+            }
+            lastTTThr1TimeGood = sigCh.getTime();
+          }
+          if(sigCh.getType()==JPetSigCh::Trailing && sigCh.getChannel().getThresholdNumber()==2){
+            getStatistics().getHisto2D("times_t2T_per_pm")
+            ->Fill(sigCh.getTime(), sigCh.getChannel().getPM().getID());
+            if(lastTTThr2TimeGood != 0.0){
+              getStatistics().getHisto1D("tdiff_TT_THR2_after")->Fill(sigCh.getTime()-lastTTThr2TimeGood);
+            }
+            lastTTThr2TimeGood = sigCh.getTime();
+          }
+
+        }
+
+      } else if(sigCh.getRecoFlag()==JPetSigCh::Corrupted){
+
+        if(fSaveControlHistos){
+
+          if(sigCh.getType()==JPetSigCh::Leading && sigCh.getChannel().getThresholdNumber()==1){
+            if(lastLLThr1TimeAll != 0.0){
+              getStatistics().getHisto1D("tdiff_LL_THR1_before")->Fill(sigCh.getTime()-lastLLThr1TimeAll);
+            }
+            lastLLThr1TimeAll = sigCh.getTime();
+          }
+          if(sigCh.getType()==JPetSigCh::Leading && sigCh.getChannel().getThresholdNumber()==2){
+            getStatistics().getHisto2D("times_t2L_per_pm")
+            ->Fill(sigCh.getTime(), sigCh.getChannel().getPM().getID());
+            if(lastLLThr2TimeAll != 0.0){
+              getStatistics().getHisto1D("tdiff_LL_THR2_before")->Fill(sigCh.getTime()-lastLLThr2TimeAll);
+            }
+            lastLLThr2TimeAll = sigCh.getTime();
+          }
+          if(sigCh.getType()==JPetSigCh::Trailing && sigCh.getChannel().getThresholdNumber()==1){
+            getStatistics().getHisto2D("times_t1T_per_pm")
+            ->Fill(sigCh.getTime(), sigCh.getChannel().getPM().getID());
+            if(lastTTThr1TimeAll != 0.0){
+              getStatistics().getHisto1D("tdiff_TT_THR1_before")->Fill(sigCh.getTime()-lastTTThr1TimeAll);
+            }
+            lastTTThr1TimeAll = sigCh.getTime();
+          }
+          if(sigCh.getType()==JPetSigCh::Trailing && sigCh.getChannel().getThresholdNumber()==2){
+            getStatistics().getHisto2D("times_t2T_per_pm")
+            ->Fill(sigCh.getTime(), sigCh.getChannel().getPM().getID());
+            if(lastTTThr2TimeAll != 0.0){
+              getStatistics().getHisto1D("tdiff_TT_THR2_before")->Fill(sigCh.getTime()-lastTTThr2TimeAll);
+            }
+            lastTTThr2TimeAll = sigCh.getTime();
+          }
+
+        }
+
+      }
+    }
+  }
 }
 
 void TimeWindowCreator::initialiseHistograms(){
@@ -204,43 +257,11 @@ void TimeWindowCreator::initialiseHistograms(){
   getStatistics().getHisto1D("channel_occ")->GetXaxis()->SetTitle("Channel ID");
   getStatistics().getHisto1D("channel_occ")->GetYaxis()->SetTitle("Number of SigCh");
 
-  // 2204 2309
-  // high occ: 2198, 2199, 2204, 2205, 2296, 2303, 2304, 2305, 2308, 2309
-  getStatistics().createHistogram(
-    new TH1F("channel_missing", "Channels missing in configuration", 211, 2099.5, 2310.5)
-  );
-  getStatistics().getHisto1D("channel_missing")->GetXaxis()->SetTitle("Channel ID");
-  getStatistics().getHisto1D("channel_missing")->GetYaxis()->SetTitle("Counts");
-
   getStatistics().createHistogram(
     new TH1F("channel_thrnum", "Channels threshold numbers", 4, 0.5, 4.5)
   );
   getStatistics().getHisto1D("channel_thrnum")->GetXaxis()->SetTitle("Channel Threshold Number");
   getStatistics().getHisto1D("channel_thrnum")->GetYaxis()->SetTitle("Number of SigCh");
-
-  getStatistics().createHistogram(
-    new TH1F("channel_thrnum_leads", "Channels threshold numbers LEADS", 4, 0.5, 4.5)
-  );
-  getStatistics().getHisto1D("channel_thrnum_leads")->GetXaxis()->SetTitle("Channel Threshold Number");
-  getStatistics().getHisto1D("channel_thrnum_leads")->GetYaxis()->SetTitle("Number of SigCh");
-
-  getStatistics().createHistogram(
-    new TH1F("channel_thrnum_trails", "Channels threshold numbers TRAILS", 4, 0.5, 4.5)
-  );
-  getStatistics().getHisto1D("channel_thrnum_trails")->GetXaxis()->SetTitle("Channel Threshold Number");
-  getStatistics().getHisto1D("channel_thrnum_trails")->GetYaxis()->SetTitle("Number of SigCh");
-
-  getStatistics().createHistogram(
-    new TH1F("channel_occ_leads", "Channels occupation - Leading channels", 211, 2099.5, 2310.5)
-  );
-  getStatistics().getHisto1D("channel_occ_leads")->GetXaxis()->SetTitle("Channel ID");
-  getStatistics().getHisto1D("channel_occ_leads")->GetYaxis()->SetTitle("Number of Lading SigCh");
-
-  getStatistics().createHistogram(
-    new TH1F("channel_occ_trails", "Channels occupation - Trailing channels", 211, 2099.5, 2310.5)
-  );
-  getStatistics().getHisto1D("channel_occ_trails")->GetXaxis()->SetTitle("Channel ID");
-  getStatistics().getHisto1D("channel_occ_trails")->GetYaxis()->SetTitle("Number of Trailing SigCh");
 
   // SiPMs
   getStatistics().createHistogram(
@@ -250,22 +271,10 @@ void TimeWindowCreator::initialiseHistograms(){
   getStatistics().getHisto1D("pm_occ")->GetYaxis()->SetTitle("Number of SigCh");
 
   getStatistics().createHistogram(
-    new TH1F("pm_occ_leads", "PMs occupation LEADS", 111, 399.5, 510.5)
+    new TH1F("pm_occ_sides", "PMs occupation of sides", 3, 0.5, 3.5)
   );
-  getStatistics().getHisto1D("pm_occ_leads")->GetXaxis()->SetTitle("PM ID");
-  getStatistics().getHisto1D("pm_occ_leads")->GetYaxis()->SetTitle("Number of Leading SigCh");
-
-  getStatistics().createHistogram(
-    new TH1F("pm_occ_trails", "PMs occupation TRAILS", 111, 399.5, 510.5)
-  );
-  getStatistics().getHisto1D("pm_occ_trails")->GetXaxis()->SetTitle("PM ID");
-  getStatistics().getHisto1D("pm_occ_trails")->GetYaxis()->SetTitle("Number of Trailing SigCh");
-
-  getStatistics().createHistogram(
-    new TH1F("pm_occ_sides", "PMs occupation of sides", 2, 0.5, 2.5)
-  );
-  getStatistics().getHisto1D("pm_occ_sides")->GetXaxis()->SetBinLabel(1, "SIDE A");
-  getStatistics().getHisto1D("pm_occ_sides")->GetXaxis()->SetBinLabel(2, "SIDE B");
+  getStatistics().getHisto1D("pm_occ_sides")->GetXaxis()->SetBinLabel(2, "SIDE A");
+  getStatistics().getHisto1D("pm_occ_sides")->GetXaxis()->SetBinLabel(3, "SIDE B");
   getStatistics().getHisto1D("pm_occ_sides")->GetYaxis()->SetTitle("Number of SigCh");
 
   // Matrix position
@@ -275,18 +284,6 @@ void TimeWindowCreator::initialiseHistograms(){
   getStatistics().getHisto1D("matrix_occ")->GetXaxis()->SetTitle("Matrix position");
   getStatistics().getHisto1D("matrix_occ")->GetYaxis()->SetTitle("Number of SigCh");
 
-  getStatistics().createHistogram(
-    new TH1F("matrix_occ_leads", "Position in matrix in PMs occupation LEADS", 5, -0.5, 4.5)
-  );
-  getStatistics().getHisto1D("matrix_occ_leads")->GetXaxis()->SetTitle("Matrix position");
-  getStatistics().getHisto1D("matrix_occ_leads")->GetYaxis()->SetTitle("Number of SigCh");
-
-  getStatistics().createHistogram(
-    new TH1F("matrix_occ_trails", "Position in matrix in PMs occupation TRAILS", 5, -0.5, 4.5)
-  );
-  getStatistics().getHisto1D("matrix_occ_trails")->GetXaxis()->SetTitle("Matrix position");
-  getStatistics().getHisto1D("matrix_occ_trails")->GetYaxis()->SetTitle("Number of SigCh");
-
   // Scins
   getStatistics().createHistogram(
     new TH1F("scin_occ", "Scins occupation", 16, 199.5, 215.5)
@@ -294,34 +291,188 @@ void TimeWindowCreator::initialiseHistograms(){
   getStatistics().getHisto1D("scin_occ")->GetXaxis()->SetTitle("SCIN ID");
   getStatistics().getHisto1D("scin_occ")->GetYaxis()->SetTitle("Number of SigCh");
 
-  getStatistics().createHistogram(
-    new TH1F("scin_occ_leads", "Scins occupation LEADS",16, 199.5, 215.5)
-  );
-  getStatistics().getHisto1D("scin_occ_leads")->GetXaxis()->SetTitle("SCIN ID");
-  getStatistics().getHisto1D("scin_occ_leads")->GetYaxis()->SetTitle("Number of Leading SigCh");
+  // Histograms per matrix
+  for(int scinID=201;scinID<214;scinID++){
+
+    getStatistics().createHistogram(
+      new TH1F(
+        Form("mtx_%d_A", scinID),
+        Form("SiPM occupation in matrix slot %d side A", scinID),
+        5, -0.5, 4.5
+      )
+    );
+    getStatistics().getHisto1D(Form("mtx_%d_A", scinID))->GetXaxis()->SetTitle("SiPM matrix position");
+    getStatistics().getHisto1D(Form("mtx_%d_A", scinID))->GetYaxis()->SetTitle("Number of SigCh");
+
+    getStatistics().createHistogram(
+      new TH1F(
+        Form("mtx_%d_B", scinID),
+        Form("SiPM occupation in matrix slot %d side B", scinID),
+        5, -0.5, 4.5
+      )
+    );
+    getStatistics().getHisto1D(Form("mtx_%d_B", scinID))->GetXaxis()->SetTitle("SiPM matrix position");
+    getStatistics().getHisto1D(Form("mtx_%d_B", scinID))->GetYaxis()->SetTitle("Number of SigCh");
+
+    getStatistics().createHistogram(
+      new TH1F(
+        Form("mtx_%d_A_t1L", scinID),
+        Form("SiPM occupation in matrix slot %d side A THR1 Lead", scinID),
+        5, -0.5, 4.5
+      )
+    );
+    getStatistics().getHisto1D(Form("mtx_%d_A_t1L", scinID))->GetXaxis()->SetTitle("SiPM matrix position");
+    getStatistics().getHisto1D(Form("mtx_%d_A_t1L", scinID))->GetYaxis()->SetTitle("Number of SigCh");
+
+    getStatistics().createHistogram(
+      new TH1F(
+        Form("mtx_%d_B_t1L", scinID),
+        Form("SiPM occupation in matrix slot %d side B THR1 Lead", scinID),
+        5, -0.5, 4.5
+      )
+    );
+    getStatistics().getHisto1D(Form("mtx_%d_B_t1L", scinID))->GetXaxis()->SetTitle("SiPM matrix position");
+    getStatistics().getHisto1D(Form("mtx_%d_B_t1L", scinID))->GetYaxis()->SetTitle("Number of SigCh");
+  }
 
   getStatistics().createHistogram(
-    new TH1F("scin_occ_trails", "Scins occupation TRAILS", 16, 199.5, 215.5)
+    new TH2F(
+      "times_t1L_per_pm",
+      "THR1 Lead SigCh times on SiPMs",
+      200, fMinTime*1000.0, fMaxTime*1000.0, 111, 399.5, 510.5
+    )
   );
-  getStatistics().getHisto1D("scin_occ_trails")->GetXaxis()->SetTitle("SCIN ID");
-  getStatistics().getHisto1D("scin_occ_trails")->GetYaxis()->SetTitle("Number of Trailing SigCh");
-
-  // Slots
-  getStatistics().createHistogram(
-    new TH1F("slot_occ", "Slots occupation", 16, 199.5, 215.5)
-  );
-  getStatistics().getHisto1D("slot_occ")->GetXaxis()->SetTitle("SLOT ID");
-  getStatistics().getHisto1D("slot_occ")->GetYaxis()->SetTitle("Number of SigCh");
+  getStatistics().getHisto2D("times_t1L_per_pm")->GetXaxis()->SetTitle("time [ps]");
+  getStatistics().getHisto2D("times_t1L_per_pm")->GetYaxis()->SetTitle("SiPM ID");
 
   getStatistics().createHistogram(
-    new TH1F("slot_occ_leads", "Slots occupation LEADS", 16, 199.5, 215.5)
+    new TH2F(
+      "times_t2L_per_pm",
+      "THR2 Lead SigCh times on SiPMs",
+      200, fMinTime*1000.0, fMaxTime*1000.0, 111, 399.5, 510.5
+    )
   );
-  getStatistics().getHisto1D("slot_occ_leads")->GetXaxis()->SetTitle("SLOT ID");
-  getStatistics().getHisto1D("slot_occ_leads")->GetYaxis()->SetTitle("Number of Leading SigCh");
+  getStatistics().getHisto2D("times_t2L_per_pm")->GetXaxis()->SetTitle("time [ps]");
+  getStatistics().getHisto2D("times_t2L_per_pm")->GetYaxis()->SetTitle("SiPM ID");
 
   getStatistics().createHistogram(
-    new TH1F("slot_occ_trails", "Slots occupation TRAILS", 16, 199.5, 215.5)
+    new TH2F(
+      "times_t1T_per_pm",
+      "THR1 Trail SigCh times on SiPMs",
+      200, fMinTime*1000.0, fMaxTime*1000.0, 111, 399.5, 510.5
+    )
   );
-  getStatistics().getHisto1D("slot_occ_trails")->GetXaxis()->SetTitle("SLOT ID");
-  getStatistics().getHisto1D("slot_occ_trails")->GetYaxis()->SetTitle("Number of Trailing SigCh");
+  getStatistics().getHisto2D("times_t1T_per_pm")->GetXaxis()->SetTitle("time [ps]");
+  getStatistics().getHisto2D("times_t1T_per_pm")->GetYaxis()->SetTitle("SiPM ID");
+
+  getStatistics().createHistogram(
+    new TH2F(
+      "times_t2T_per_pm",
+      "THR2 Trail SigCh times on SiPMs",
+      200, fMinTime*1000.0, fMaxTime*1000.0, 111, 399.5, 510.5
+    )
+  );
+  getStatistics().getHisto2D("times_t2T_per_pm")->GetXaxis()->SetTitle("time [ps]");
+  getStatistics().getHisto2D("times_t2T_per_pm")->GetYaxis()->SetTitle("SiPM ID");
+
+  // Flagging histograms
+  getStatistics().createHistogram(new TH1F(
+    "good_vs_bad_sigch", "Number of good and corrupted SigChs created", 3, 0.5, 3.5
+  ));
+  getStatistics().getHisto1D("good_vs_bad_sigch")->GetXaxis()->SetBinLabel(1, "GOOD");
+  getStatistics().getHisto1D("good_vs_bad_sigch")->GetXaxis()->SetBinLabel(2, "CORRUPTED");
+  getStatistics().getHisto1D("good_vs_bad_sigch")->GetXaxis()->SetBinLabel(3, "UNKNOWN");
+  getStatistics().getHisto1D("good_vs_bad_sigch")->GetYaxis()->SetTitle("Number of SigChs");
+
+  getStatistics().createHistogram(new TH1F(
+    "LT_time_diff", "LT time diff", 200, 0.0, 100000.0
+  ));
+  getStatistics().getHisto1D("LT_time_diff")->GetXaxis()->SetTitle("Time Diff [ps]");
+  getStatistics().getHisto1D("LT_time_diff")->GetYaxis()->SetTitle("Number of LL pairs");
+
+  getStatistics().createHistogram(new TH1F(
+    "LL_per_PM", "Number of LL found on PMs", 111, 399.5, 510.5
+  ));
+  getStatistics().getHisto1D("LL_per_PM")->GetXaxis()->SetTitle("PM ID");
+  getStatistics().getHisto1D("LL_per_PM")->GetYaxis()->SetTitle("Number of LL pairs");
+
+  getStatistics().createHistogram(new TH1F(
+    "LL_per_THR", "Number of found LL on Thresolds", 4, 0.5, 4.5
+  ));
+  getStatistics().getHisto1D("LL_per_THR")->GetXaxis()->SetTitle("THR Number");
+  getStatistics().getHisto1D("LL_per_THR")->GetYaxis()->SetTitle("Number of LL pairs");
+
+  getStatistics().createHistogram(new TH1F(
+    "LL_time_diff", "Time diff of LL pairs", 200, 0.0, 300000.0
+  ));
+  getStatistics().getHisto1D("LL_time_diff")->GetXaxis()->SetTitle("Time Diff [ps]");
+  getStatistics().getHisto1D("LL_time_diff")->GetYaxis()->SetTitle("Number of LL pairs");
+
+  getStatistics().createHistogram(new TH1F(
+    "TT_per_PM", "Number of TT found on PMs", 111, 399.5, 510.5
+  ));
+  getStatistics().getHisto1D("TT_per_PM")->GetXaxis()->SetTitle("PM ID");
+  getStatistics().getHisto1D("TT_per_PM")->GetYaxis()->SetTitle("Number of TT pairs");
+
+  getStatistics().createHistogram(new TH1F(
+    "TT_per_THR", "Number of found TT on Thresolds", 4, 0.5, 4.5
+  ));
+  getStatistics().getHisto1D("TT_per_THR")->GetXaxis()->SetTitle("THR Number");
+  getStatistics().getHisto1D("TT_per_THR")->GetYaxis()->SetTitle("Number of TT pairs");
+
+  getStatistics().createHistogram(new TH1F(
+    "TT_time_diff", "Time diff of TT pairs", 200, 0.0, 300000.0
+  ));
+  getStatistics().getHisto1D("TT_time_diff")->GetXaxis()->SetTitle("Time Diff [ps]");
+  getStatistics().getHisto1D("TT_time_diff")->GetYaxis()->SetTitle("Number of TT pairs");
+
+  // Time differences between SigChs before and after flagging
+  getStatistics().createHistogram(new TH1F(
+    "tdiff_LL_THR1_before", "Time diff of consecutive leadings THR1 before filtering", 200, 0.0, 300000.0
+  ));
+  getStatistics().getHisto1D("tdiff_LL_THR1_before")->GetXaxis()->SetTitle("Time Diff [ps]");
+  getStatistics().getHisto1D("tdiff_LL_THR1_before")->GetYaxis()->SetTitle("Number of TT pairs");
+
+  getStatistics().createHistogram(new TH1F(
+    "tdiff_LL_THR1_after", "Time diff of consecutive leadings THR1 after filtering", 200, 0.0, 300000.0
+  ));
+  getStatistics().getHisto1D("tdiff_LL_THR1_after")->GetXaxis()->SetTitle("Time Diff [ps]");
+  getStatistics().getHisto1D("tdiff_LL_THR1_after")->GetYaxis()->SetTitle("Number of TT pairs");
+
+  getStatistics().createHistogram(new TH1F(
+    "tdiff_LL_THR2_before", "Time diff of consecutive leadings THR2 before filtering", 200, 0.0, 300000.0
+  ));
+  getStatistics().getHisto1D("tdiff_LL_THR2_before")->GetXaxis()->SetTitle("Time Diff [ps]");
+  getStatistics().getHisto1D("tdiff_LL_THR2_before")->GetYaxis()->SetTitle("Number of TT pairs");
+
+  getStatistics().createHistogram(new TH1F(
+    "tdiff_LL_THR2_after", "Time diff of consecutive leadings THR2 after filtering", 200, 0.0, 300000.0
+  ));
+  getStatistics().getHisto1D("tdiff_LL_THR2_after")->GetXaxis()->SetTitle("Time Diff [ps]");
+  getStatistics().getHisto1D("tdiff_LL_THR2_after")->GetYaxis()->SetTitle("Number of TT pairs");
+
+  getStatistics().createHistogram(new TH1F(
+    "tdiff_TT_THR1_before", "Time diff of consecutive trailings THR1 before filtering", 200, 0.0, 100000.0
+  ));
+  getStatistics().getHisto1D("tdiff_TT_THR1_before")->GetXaxis()->SetTitle("Time Diff [ps]");
+  getStatistics().getHisto1D("tdiff_TT_THR1_before")->GetYaxis()->SetTitle("Number of TT pairs");
+
+  getStatistics().createHistogram(new TH1F(
+    "tdiff_TT_THR1_after", "Time diff of consecutive trailings THR1 after filtering", 200, 0.0, 100000.0
+  ));
+  getStatistics().getHisto1D("tdiff_TT_THR1_after")->GetXaxis()->SetTitle("Time Diff [ps]");
+  getStatistics().getHisto1D("tdiff_TT_THR1_after")->GetYaxis()->SetTitle("Number of TT pairs");
+
+  getStatistics().createHistogram(new TH1F(
+    "tdiff_TT_THR2_before", "Time diff of consecutive trailings THR2 before filtering", 200, 0.0, 100000.0
+  ));
+  getStatistics().getHisto1D("tdiff_TT_THR2_before")->GetXaxis()->SetTitle("Time Diff [ps]");
+  getStatistics().getHisto1D("tdiff_TT_THR2_before")->GetYaxis()->SetTitle("Number of TT pairs");
+
+  getStatistics().createHistogram(new TH1F(
+    "tdiff_TT_THR2_after", "Time diff of consecutive trailings THR2 after filtering", 200, 0.0, 100000.0
+  ));
+  getStatistics().getHisto1D("tdiff_TT_THR2_after")->GetXaxis()->SetTitle("Time Diff [ps]");
+  getStatistics().getHisto1D("tdiff_TT_THR2_after")->GetYaxis()->SetTitle("Number of TT pairs");
+
 }
