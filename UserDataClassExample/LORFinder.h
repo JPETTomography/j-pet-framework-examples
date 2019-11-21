@@ -39,5 +39,6 @@ public:
 
 protected:
   double fB2BSlotThetaDiff = 15.0;
+  double fMaxTimeDiff = 1000.;
 };
 #endif /*  !LORFINDER_H */

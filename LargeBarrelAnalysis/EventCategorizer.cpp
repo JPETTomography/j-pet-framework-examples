@@ -64,10 +64,16 @@ bool EventCategorizer::init()
       kDeexTOTCutMaxParamKey.c_str(), fDeexTOTCutMax
     ));
   }
+  if (isOptionSet(fParams.getOptions(), kMaxTimeDiffParamKey)) {
+    fMaxTimeDiff = getOptionAsFloat(fParams.getOptions(), kMaxTimeDiffParamKey);
+  } else {
+    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMaxTimeDiffParamKey.c_str(), fMaxTimeDiff));
+  }
   // Getting bool for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey)) {
     fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
   }
+
 
   // Input events type
   fOutputEvents = new JPetTimeWindow("JPetEvent");
@@ -85,7 +91,7 @@ bool EventCategorizer::exec()
 
       // Check types of current event
       bool is2Gamma = EventCategorizerTools::checkFor2Gamma(
-        event, getStatistics(), fSaveControlHistos, fB2BSlotThetaDiff
+        event, getStatistics(), fSaveControlHistos, fB2BSlotThetaDiff, fMaxTimeDiff
       );
       bool is3Gamma = EventCategorizerTools::checkFor3Gamma(
         event, getStatistics(), fSaveControlHistos
@@ -139,6 +145,16 @@ void EventCategorizer::initialiseHistograms(){
     new TH1F("2Gamma_Zpos", "B2B hits Z position", 200, -50.0, 50.0));
   getStatistics().getHisto1D("2Gamma_Zpos")->GetXaxis()->SetTitle("Z axis position [cm]");
   getStatistics().getHisto1D("2Gamma_Zpos")->GetYaxis()->SetTitle("Number of Hits");
+
+  getStatistics().createHistogram(
+    new TH1F("2Gamma_DLOR", "Delta LOR distance", 100, 0.0, 50.0));
+  getStatistics().getHisto1D("2Gamma_DLOR")->SetXTitle("Delta LOR [cm]");
+  getStatistics().getHisto1D("2Gamma_DLOR")->SetYTitle("Counts");
+
+  getStatistics().createHistogram(
+    new TH1F("2Gamma_ThetaDiff", "2 Gamma Hits angles", 180, -0.5, 179.5));
+  getStatistics().getHisto1D("2Gamma_ThetaDiff")->SetXTitle("Hits theta diff [deg]");
+  getStatistics().getHisto1D("2Gamma_ThetaDiff")->SetYTitle("Counts");
 
   getStatistics().createHistogram(
     new TH1F("2Gamma_TimeDiff", "B2B hits time difference", 100, -10000.0, 10000.0));
