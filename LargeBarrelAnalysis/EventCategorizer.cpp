@@ -147,6 +147,16 @@ void EventCategorizer::initialiseHistograms(){
   getStatistics().getHisto1D("2Gamma_Zpos")->GetYaxis()->SetTitle("Number of Hits");
 
   getStatistics().createHistogram(
+    new TH1F("2Gamma_DLOR", "Delta LOR distance", 100, 0.0, 50.0));
+  getStatistics().getHisto1D("2Gamma_DLOR")->SetXTitle("Delta LOR [cm]");
+  getStatistics().getHisto1D("2Gamma_DLOR")->SetYTitle("Counts");
+
+  getStatistics().createHistogram(
+    new TH1F("2Gamma_ThetaDiff", "2 Gamma Hits angles", 180, -0.5, 179.5));
+  getStatistics().getHisto1D("2Gamma_ThetaDiff")->SetXTitle("Hits theta diff [deg]");
+  getStatistics().getHisto1D("2Gamma_ThetaDiff")->SetYTitle("Counts");
+
+  getStatistics().createHistogram(
     new TH1F("2Gamma_TimeDiff", "B2B hits time difference", 100, -10000.0, 10000.0));
   getStatistics().getHisto1D("2Gamma_TimeDiff")->GetXaxis()->SetTitle("Time Difference [ps]");
   getStatistics().getHisto1D("2Gamma_TimeDiff")->GetYaxis()->SetTitle("Number of Hit Pairs");
