@@ -23,6 +23,9 @@ class JPetFilterInterface
 public:
   JPetFilterInterface() {};
   virtual ~JPetFilterInterface(){};
+  /*! @brief Returns rescale factor, that should be variable at pos scaled
+      @par pos Position of variable rescaled to [0, 1] 
+   */
   virtual double operator()(double pos) = 0;
 };
 

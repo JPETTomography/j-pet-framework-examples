@@ -26,13 +26,7 @@ public:
   JPetFilterRidgelet() {}
   explicit JPetFilterRidgelet(double maxCutOff) : fCutOff(maxCutOff) {}
   virtual double operator()(double pos) override {
-    return 0.;
-    /*if(n == 0) {
-      return 0.02;
-    }
-    double ramlak = (double)(n) / (double) (m);
-    if (ramlak >= fCutOff) return 0.;
-    return ramlak * std::sqrt((double)(n) / ((double)(m) + fCutOff));*/
+    return pos < fCutOff : std::sqrt(pos / fCutOff) : 0.;
   }
 
 private:

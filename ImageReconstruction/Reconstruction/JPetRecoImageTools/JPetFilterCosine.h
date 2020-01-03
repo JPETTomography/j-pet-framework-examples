@@ -19,7 +19,7 @@
 #include "./JPetFilterInterface.h"
 #include <cmath>
 
-/*! \brief Filter F(x) = x * cos(x * pi)
+/*! \brief Filter F(x) = cos(x * pi)
 */
 class JPetFilterCosine : public JPetFilterInterface
 {
@@ -27,7 +27,7 @@ public:
   JPetFilterCosine() {}
   explicit JPetFilterCosine(double maxCutOff) : fCutOff(maxCutOff) {}
   virtual double operator()(double pos) override {
-    return 1;//return std::cos(M_PI * ((double)(n) / (double) (m)));
+    return pos < fCutOff ? std::cos(M_PI * pos / fCutOff) : 0.;
   }
 
 private:

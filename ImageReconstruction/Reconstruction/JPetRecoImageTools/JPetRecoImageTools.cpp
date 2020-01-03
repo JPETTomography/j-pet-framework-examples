@@ -222,7 +222,6 @@ JPetSinogramType::SparseMatrix JPetRecoImageTools::backProjectMatlab(const JPetS
           const int a = std::floor(t);
           if(ctrIdx + a + 1 < N)
             reconstructedProjection(i, j) += (t - (double)a) * tofBin.second(ctrIdx + a + 1, angle) + ((double)(a + 1) - t) * tofBin.second(ctrIdx + a, angle);
-          
         }
       }
     }
