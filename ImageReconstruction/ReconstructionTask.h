@@ -30,10 +30,8 @@
 #include "JPetFilterHann.h"
 #include "JPetFilterInterface.h"
 #include "JPetFilterNone.h"
-#include "JPetFilterRamLak.h"
 #include "JPetFilterRidgelet.h"
 #include "JPetFilterSheppLogan.h"
-//#include "JPetFilterStirOldRamLak.h"
 #include "JPetRecoImageTools.h"
 #include "JPetUserTask/JPetUserTask.h"
 
@@ -52,13 +50,11 @@ public:
   {
     kFilterNotFound,
     kFilterNone,
-    kFilterRamLak,
     kFilterCosine,
     kFilterHamming,
     kFilterHann,
     kFilterRidgelet,
-    kFilterSheppLogan,
-    kFilterStirOldRamLak
+    kFilterSheppLogan
   };
 
   enum kWeightingType

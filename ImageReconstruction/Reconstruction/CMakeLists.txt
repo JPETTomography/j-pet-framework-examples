@@ -11,7 +11,6 @@ set(HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/${projectName}/JPetFilterCosine.h
             ${CMAKE_CURRENT_SOURCE_DIR}/${projectName}/JPetFilterHamming.h
             ${CMAKE_CURRENT_SOURCE_DIR}/${projectName}/JPetFilterInterface.h
             ${CMAKE_CURRENT_SOURCE_DIR}/${projectName}/JPetFilterNone.h
-            ${CMAKE_CURRENT_SOURCE_DIR}/${projectName}/JPetFilterRamLak.h
             ${CMAKE_CURRENT_SOURCE_DIR}/${projectName}/JPetFilterRidgelet.h
             ${CMAKE_CURRENT_SOURCE_DIR}/${projectName}/JPetFilterSheppLogan.h
             ${CMAKE_CURRENT_SOURCE_DIR}/${projectName}/JPetRecoImageTools.h

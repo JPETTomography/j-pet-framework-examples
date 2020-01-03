@@ -105,21 +105,16 @@ bool ReconstructionTask::terminate()
     {
       JPetFilterInterface* filter;
       static std::map<std::string, int> filterNameToFilter{{"None", ReconstructionTask::kFilterType::kFilterNone},
-                                                           {"RamLak", ReconstructionTask::kFilterType::kFilterRamLak},
                                                            {"Cosine", ReconstructionTask::kFilterType::kFilterCosine},
                                                            {"Hamming", ReconstructionTask::kFilterType::kFilterHamming},
                                                            {"Hann", ReconstructionTask::kFilterType::kFilterHann},
                                                            {"Ridgelet", ReconstructionTask::kFilterType::kFilterRidgelet},
-                                                           {"SheppLogan", ReconstructionTask::kFilterType::kFilterSheppLogan},
-                                                           {"StirOldRamLak", ReconstructionTask::kFilterType::kFilterStirOldRamLak}};
+                                                           {"SheppLogan", ReconstructionTask::kFilterType::kFilterSheppLogan}};
 
       switch (filterNameToFilter[fFilterName])
       {
       case ReconstructionTask::kFilterType::kFilterNone:
         filter = new JPetFilterNone(cutOffValue);
-        break;
-      case ReconstructionTask::kFilterType::kFilterRamLak:
-        filter = new JPetFilterRamLak(cutOffValue);
         break;
       case ReconstructionTask::kFilterType::kFilterCosine:
         filter = new JPetFilterCosine(cutOffValue);
@@ -136,9 +131,6 @@ bool ReconstructionTask::terminate()
       case ReconstructionTask::kFilterType::kFilterSheppLogan:
         filter = new JPetFilterSheppLogan(cutOffValue);
         break;
-      //case ReconstructionTask::kFilterType::kFilterStirOldRamLak:
-      //  filter = new JPetFilterStirOldRamLak(cutOffValue);
-      //  break;
       default:
         ERROR("Could not find filter: " + fFilterName + ", using JPetFilterNone.");
         filter = new JPetFilterNone(cutOffValue);
