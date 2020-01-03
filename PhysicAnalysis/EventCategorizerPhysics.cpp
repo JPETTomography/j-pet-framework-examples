@@ -255,7 +255,7 @@ JPetEvent EventCategorizerPhysics::physicsAnalysis(vector<JPetHit> hits)
       );
     }
   }
-  if (EventCategorizerTools::stream2Gamma(
+  if (EventCategorizerTools::checkFor2Gamma(
     annihilationHits, getStatistics(), fSaveControlHistos,
     fBackToBackAngleWindow, fMaxTimeDiff)
   ) {
@@ -265,9 +265,8 @@ JPetEvent EventCategorizerPhysics::physicsAnalysis(vector<JPetHit> hits)
       physicEvent.addEventType(JPetEventType::k2Gamma);
     }
   }
-  if (EventCategorizerTools::stream3Gamma(
-    annihilationHits, getStatistics(), fSaveControlHistos,
-    fDecayInto3MinAngle, fMaxTimeDiff, fMaxDistOfDecayPlaneFromCenter)
+  if (EventCategorizerTools::checkFor3Gamma(
+    annihilationHits, getStatistics(), fSaveControlHistos)
   ) {
     if (physicEvent.isOnlyTypeOf(JPetEventType::kUnknown)){
       physicEvent.setEventType(JPetEventType::k3Gamma);
