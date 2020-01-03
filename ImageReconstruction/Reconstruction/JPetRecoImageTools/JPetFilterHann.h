@@ -26,7 +26,7 @@ public:
   JPetFilterHann() {}
   explicit JPetFilterHann(double maxCutOff) : fCutOff(maxCutOff) {}
   virtual double operator()(double pos) override {
-    return pos < fCutoff ? 0.5 + 0.5 * std::cos((2. * M_PI * pos) / fCutOff) : 0.;
+    return pos < fCutOff ? 0.5 + 0.5 * std::cos((2. * M_PI * pos) / fCutOff) : 0.;
   }
 
 private:

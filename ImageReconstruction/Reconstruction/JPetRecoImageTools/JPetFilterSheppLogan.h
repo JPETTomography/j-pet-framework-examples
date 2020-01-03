@@ -25,7 +25,7 @@ class JPetFilterSheppLogan : public JPetFilterInterface {
 public:
   explicit JPetFilterSheppLogan(float maxCutOff) : fCutOff(maxCutOff) {}
   virtual double operator()(double pos) override { 
-    return pos < fCutOff ? std::sin(2. * M_PI * pos * M_PI / fCutOff))) : 0.;
+    return pos < fCutOff ? std::sin(2. * M_PI * pos * M_PI / fCutOff) : 0.;
   }
 
 private:

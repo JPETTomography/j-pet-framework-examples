@@ -17,7 +17,9 @@
 #define _JPET_SinogramType_H_
 
 #ifndef __CINT__
-#include <boost/serialization/array_wrapper.hpp>
+#if BOOST_VERSION >= 106400
+#  include <boost/serialization/array_wrapper.hpp>
+#endif
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <string>

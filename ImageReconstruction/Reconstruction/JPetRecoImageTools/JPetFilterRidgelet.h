@@ -26,7 +26,7 @@ public:
   JPetFilterRidgelet() {}
   explicit JPetFilterRidgelet(double maxCutOff) : fCutOff(maxCutOff) {}
   virtual double operator()(double pos) override {
-    return pos < fCutOff : std::sqrt(pos / fCutOff) : 0.;
+    return pos < fCutOff ? std::sqrt(pos / fCutOff) : 0.;
   }
 
 private:
