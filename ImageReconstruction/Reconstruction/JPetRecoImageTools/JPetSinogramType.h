@@ -20,7 +20,6 @@
 #if BOOST_VERSION >= 106400
 #  include <boost/serialization/array_wrapper.hpp>
 #endif
-#include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <string>
 #include <unordered_map>
