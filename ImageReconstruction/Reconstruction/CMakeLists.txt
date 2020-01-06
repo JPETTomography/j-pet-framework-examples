@@ -48,13 +48,15 @@ set(HEADERS_WITH_DICTIONARY_REQUIRED
 set(LINKDEF_NAME ImageReconstruction_LinkDef.h)
 
 get_target_property(DICTIONARY_INCLUDES JPetFramework::JPetFramework INTERFACE_INCLUDE_DIRECTORIES)
-list(APPEND DICTIONARY_INCLUDES /home/grey/jpet/j-pet-framework/build/install/include/)
-foreach(dict ${DICTIONARY_INCLUDES})
-  include_directories(${dict})  # Ugly include directories from JPetFramework for dictionaries
-endforeach(dict ${DICTIONARY_INCLUDES})
+get_target_property(DICTIONARY_INCLUDES_Boost Boost::filesystem INTERFACE_INCLUDE_DIRECTORIES)
+list(APPEND DICTIONARY_INCLUDES ${DICTIONARY_INCLUDES_Boost})
+foreach(dir ${DICTIONARY_INCLUDES})
+  list(APPEND DICTIONARY_INCLUDES_ROOT -I${dir})
+endforeach()
 
 include_directories(ROOT_BUG) # Fix bug in NewMacros Root file
 ROOT_GENERATE_DICTIONARY(${DICTIONARY_NAME} ${HEADERS_WITH_DICTIONARY_REQUIRED}
+  OPTIONS ${DICTIONARY_INCLUDES_ROOT}
   LINKDEF ${LINKDEF_NAME})
 
 add_library(${projectName} SHARED ${SOURCES} ${DICTIONARY_NAME}.cxx ${HEADERS})
