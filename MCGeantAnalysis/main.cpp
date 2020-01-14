@@ -26,7 +26,7 @@ int main(int argc, const char* argv[])
     manager.registerTask<EventFinder>("EventFinder");
     manager.registerTask<EventCategorizer>("EventCategorizer");
     
-    manager.useTask("EventFinder", "mc.hits", "unk.evt");
+    manager.useTask("EventFinder", "hits", "unk.evt");
     manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
     
     manager.run(argc, argv);
