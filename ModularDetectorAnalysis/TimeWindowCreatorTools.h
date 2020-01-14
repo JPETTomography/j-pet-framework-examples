@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2019 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -32,10 +32,9 @@ class TimeWindowCreatorTools {
 public:
   static void sortByTime(std::vector<JPetSigCh> &input);
 
-  static std::vector<JPetSigCh>
-  buildSigChs(
+  static std::vector<JPetSigCh> buildSigChs(
     TDCChannel *tdcChannel, const JPetChannel &channel,
-    double maxTime, double minTime, JPetStatistics &stats, bool saveHistos
+    double maxTime, double minTime
   );
   static void flagSigChs(
     std::vector<JPetSigCh> &inputSigChs, JPetStatistics &stats, bool saveHistos

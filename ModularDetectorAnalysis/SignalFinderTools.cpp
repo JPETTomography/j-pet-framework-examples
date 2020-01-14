@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2019 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -103,11 +103,6 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(
     );
     if(closestTrailingSigCh != -1) {
       rawSig.addPoint(thrTrailingSigCh.at(0).at(closestTrailingSigCh));
-      if(saveHistos){
-        stats.getHisto1D("lead_trail_thr1_diff")->Fill(
-          thrTrailingSigCh.at(0).at(closestTrailingSigCh).getTime()-thrLeadingSigCh.at(0).at(0).getTime()
-        );
-      }
       thrTrailingSigCh.at(0).erase(thrTrailingSigCh.at(0).begin()+closestTrailingSigCh);
     }
 
@@ -129,11 +124,6 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(
         thrTrailingSigCh.at(1).erase(thrTrailingSigCh.at(1).begin()+closestTrailingSigCh);
       }
       rawSig.addPoint(thrLeadingSigCh.at(1).at(nextThrSigChIndex));
-      // if(saveHistos){
-      //   stats.getHisto1D("lead_thr1_thr2_diff")->Fill(
-      //     thrLeadingSigCh.at(1).at(nextThrSigChIndex).getTime()-thrLeadingSigCh.at(0).at(0).getTime()
-      //   );
-      // }
       thrLeadingSigCh.at(1).erase(thrLeadingSigCh.at(1).begin()+nextThrSigChIndex);
     }
 
@@ -144,7 +134,7 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(
 
   // Filling control histograms
   if(saveHistos){
-    for(unsigned int jj=0; jj<numberOfThrs; jj++){
+    for(int jj=0; jj<numberOfThrs; jj++){
       for(auto sigCh : thrLeadingSigCh.at(jj)){
         stats.getHisto1D("unused_sigch_thr")->Fill(2*sigCh.getChannel().getThresholdNumber()-1);
         stats.getHisto1D("unused_sigch_pm")->Fill(sigCh.getChannel().getPM().getID());

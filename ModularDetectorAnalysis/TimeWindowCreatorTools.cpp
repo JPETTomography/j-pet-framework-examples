@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2019 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -34,8 +34,7 @@ using namespace std;
  */
 vector<JPetSigCh> TimeWindowCreatorTools::buildSigChs(
   TDCChannel* tdcChannel, const JPetChannel& channel,
-  double maxTime, double minTime,
-  JPetStatistics& stats, bool saveHistos
+  double maxTime, double minTime
 ){
   vector<JPetSigCh> allSigChs;
 
@@ -86,7 +85,7 @@ void TimeWindowCreatorTools::flagSigChs(
       sigCh1.setRecoFlag(JPetSigCh::Good);
       sigCh2.setRecoFlag(JPetSigCh::Good);
       if(saveHistos){
-        stats.getHisto1D("LT_time_diff")->Fill(sigCh2.getTime()-sigCh1.getTime());
+        stats.getHisto1D("filter_LT_tdiff")->Fill(sigCh2.getTime()-sigCh1.getTime());
         stats.getHisto1D("good_vs_bad_sigch")->Fill(1, 2);
       }
     } else if (sigCh1.getType() == JPetSigCh::Trailing && sigCh2.getType() == JPetSigCh::Leading) {
@@ -100,9 +99,9 @@ void TimeWindowCreatorTools::flagSigChs(
       sigCh1.setRecoFlag(JPetSigCh::Corrupted);
       if(saveHistos){
         stats.getHisto1D("good_vs_bad_sigch")->Fill(2);
-        stats.getHisto1D("LL_per_PM")->Fill(sigCh1.getChannel().getPM().getID());
-        stats.getHisto1D("LL_per_THR")->Fill(sigCh1.getChannel().getThresholdNumber());
-        stats.getHisto1D("LL_time_diff")->Fill(sigCh2.getTime()-sigCh1.getTime());
+        stats.getHisto1D("filter_LL_PM")->Fill(sigCh1.getChannel().getPM().getID());
+        stats.getHisto1D("filter_LL_THR")->Fill(sigCh1.getChannel().getThresholdNumber());
+        stats.getHisto1D("filter_LL_tdiff")->Fill(sigCh2.getTime()-sigCh1.getTime());
       }
     } else if (sigCh1.getType() == JPetSigCh::Trailing && sigCh2.getType() == JPetSigCh::Trailing){
       if(sigCh1.getRecoFlag() == JPetSigCh::Unknown) {
@@ -111,9 +110,9 @@ void TimeWindowCreatorTools::flagSigChs(
       sigCh2.setRecoFlag(JPetSigCh::Corrupted);
       if(saveHistos){
         stats.getHisto1D("good_vs_bad_sigch")->Fill(2);
-        stats.getHisto1D("TT_per_PM")->Fill(sigCh1.getChannel().getPM().getID());
-        stats.getHisto1D("TT_per_THR")->Fill(sigCh1.getChannel().getThresholdNumber());
-        stats.getHisto1D("TT_time_diff")->Fill(sigCh2.getTime()-sigCh1.getTime());
+        stats.getHisto1D("filter_TT_PM")->Fill(sigCh1.getChannel().getPM().getID());
+        stats.getHisto1D("filter_TT_THR")->Fill(sigCh1.getChannel().getThresholdNumber());
+        stats.getHisto1D("filter_TT_tdiff")->Fill(sigCh2.getTime()-sigCh1.getTime());
       }
     }
     if(sigCh1.getRecoFlag() == JPetSigCh::Unknown && saveHistos){

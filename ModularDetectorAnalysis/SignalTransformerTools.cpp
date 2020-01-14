@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -19,11 +19,12 @@ using namespace std;
 
 /**
  * Map Raw Signals from all SiPMs according to matrix and side they belong to.
- * In side vector "A" is first element, "B" second
+ * Returns map< scin ID, side < signals >>.
+ * Side A is the first element int he vector, Side B is the second one.
  */
 const map<int, vector<vector<JPetRawSignal>>>
 SignalTransformerTools::getRawSigMtxMap(
-   const JPetTimeWindow* timeWindow, JPetStatistics& stats, bool saveHistos
+  const JPetTimeWindow* timeWindow, JPetStatistics& stats, bool saveHistos
 ){
   map<int, vector<vector<JPetRawSignal>>> rawSigMtxMap;
 
@@ -46,7 +47,7 @@ SignalTransformerTools::getRawSigMtxMap(
     auto search = rawSigMtxMap.find(scinID);
 
     if (search == rawSigMtxMap.end()) {
-      // There is no map element with searched scin ID in this map, adding
+      // There is no element with searched scin ID in this map, adding new one
       vector<JPetRawSignal> tmpVec;
       vector<vector<JPetRawSignal>> tmpVecVec;
       tmpVecVec.push_back(tmpVec);
@@ -68,8 +69,12 @@ SignalTransformerTools::getRawSigMtxMap(
   return rawSigMtxMap;
 }
 
+/**
+ * Method iterates over all matrices in the detector with signals,
+ * calling merging procedure for each
+ */
 vector<JPetMatrixSignal> SignalTransformerTools::mergeSignalsAllSiPMs(
-   const map<int, vector<vector<JPetRawSignal>>>& rawSigMtxMap,
+   map<int, vector<vector<JPetRawSignal>>>& rawSigMtxMap,
    double mergingTime, JPetStatistics& stats, bool saveHistos
 ) {
   vector<JPetMatrixSignal> allMtxSignals;
@@ -85,261 +90,92 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeSignalsAllSiPMs(
   return allMtxSignals;
 }
 
+/**
+ * Method iterates over all Raw Sigals on some SiPMs on the same matrix,
+ * matching them into groups on max. 4 as a MatrixSignal
+ */
 vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(
-  const vector<JPetRawSignal>& rawSigVec, double mergingTime,
+  vector<JPetRawSignal>& rawSigVec, double mergingTime,
   JPetStatistics& stats, bool saveHistos
 ) {
-  vector<JPetMatrixSignal> mtxSigSiPMs;
+  vector<JPetMatrixSignal> mtxSigVec;
+  sortByTime(rawSigVec);
 
-  int pmID = -1;
-  int scinID = -1;
-  JPetPM::Side side = JPetPM::SideA;
-  if(rawSigVec.size()>0){
-    pmID = rawSigVec.at(0).getPM().getID();
-    scinID = rawSigVec.at(0).getPM().getScin().getID();
-    side = rawSigVec.at(0).getPM().getSide();
-  } else {
-    return mtxSigSiPMs;
+  while (rawSigVec.size() > 0) {
+    // Create Matrix Signal and add first Raw Signal by default
+    JPetMatrixSignal mtxSig;
+    mtxSig.setPM(rawSigVec.at(0).getPM());
+    if(!mtxSig.addRawSignal(rawSigVec.at(0))){
+      ERROR("Problem with adding the first signal to new object.");
+      break;
+    }
+
+    unsigned int nextIndex = 1;
+    while(true){
+      if(rawSigVec.size() <= nextIndex){
+        // nothing left to check
+        break;
+      }
+
+      // signal mathing condidion
+      if(getRawSigBaseTime(rawSigVec.at(nextIndex))
+        -getRawSigBaseTime(rawSigVec.at(0))<mergingTime){
+
+        // mathing signal found
+        if(mtxSig.addRawSignal(rawSigVec.at(nextIndex))){
+          // added succesfully
+          if(saveHistos){
+            stats.getHisto1D("mtxsig_timediff")
+            ->Fill(getRawSigBaseTime(rawSigVec.at(nextIndex))-getRawSigBaseTime(rawSigVec.at(0)));
+
+            auto scinID = rawSigVec.at(0).getPM().getScin().getID();
+            auto pos1 = 0;
+            auto pos2 = 0;
+
+            if(rawSigVec.at(0).getPM().getMatrixPosition()
+            < rawSigVec.at(nextIndex).getPM().getMatrixPosition()) {
+              pos1 = rawSigVec.at(0).getPM().getMatrixPosition();
+              pos2 = rawSigVec.at(nextIndex).getPM().getMatrixPosition();
+            }else{
+              pos1 = rawSigVec.at(nextIndex).getPM().getMatrixPosition();
+              pos2 = rawSigVec.at(0).getPM().getMatrixPosition();
+            }
+
+            stats.getHisto1D(Form("tdiff_Scin_%d_Pos_%d_%d", scinID, pos1, pos2))
+            ->Fill(getRawSigBaseTime(rawSigVec.at(nextIndex))-getRawSigBaseTime(rawSigVec.at(0)));
+          }
+          rawSigVec.erase(rawSigVec.begin()+nextIndex);
+        } else {
+          // this mtx pos is already occupied, check the next one
+          nextIndex++;
+        }
+      } else {
+        // next signal is too far from reference one, this MtxSig is finished
+        break;
+      }
+    }
+    rawSigVec.erase(rawSigVec.begin());
+    mtxSigVec.push_back(mtxSig);
   }
+  return mtxSigVec;
+}
 
-  // Creating vector for each SiPM by matrix position
-  vector<JPetRawSignal> tmp;
-  vector<vector<JPetRawSignal>> rawSigsPerMtx;
-  rawSigsPerMtx.push_back(tmp);
-  rawSigsPerMtx.push_back(tmp);
-  rawSigsPerMtx.push_back(tmp);
-  rawSigsPerMtx.push_back(tmp);
+/**
+ * Returning time of leading Signal Channel on the first threshold from Raw Signal
+ */
+float SignalTransformerTools::getRawSigBaseTime(JPetRawSignal& rawSig)
+{
+  return rawSig.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrValue).at(0).getTime();
+}
 
-  for (auto rawSig : rawSigVec) {
-    auto mtxPos = rawSig.getPM().getMatrixPosition();
-    rawSigsPerMtx.at(mtxPos-1).push_back(rawSig);
-  }
-
-  // Very redundant, but lets start with that
-  // Explicit checking for next SiPMs position 1 with positions 2,3,4
-  while(rawSigsPerMtx.at(0).size() > 0){
-    JPetMatrixSignal mtxSignal(side, scinID);
-    // Add first as default
-    mtxSignal.addRawSignal(rawSigsPerMtx.at(0).at(0));
-    auto time1 = rawSigsPerMtx.at(0).at(0)
-      .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrValue).at(0).getTime();
-
-    int pos2It = 0;
-    int pos3It = 0;
-    int pos4It = 0;
-    bool pos2done = false;
-    bool pos3done = false;
-    bool pos4done = false;
-    auto time2 = 0;
-    auto time3 = 0;
-    auto time4 = 0;
-
-    while(!(pos2done && pos3done && pos4done)){
-      // Checking if other vectors are non-zero
-      if(rawSigsPerMtx.at(1).size() > pos2It){
-        time2 = rawSigsPerMtx.at(1).at(pos2It).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrValue).at(0).getTime();
-      } else {
-        pos2done = true;
-        break;
-      }
-      if(rawSigsPerMtx.at(2).size() > pos3It){
-        time3 = rawSigsPerMtx.at(2).at(pos3It).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrValue).at(0).getTime();
-      } else {
-        pos3done = true;
-        break;
-      }
-      if(rawSigsPerMtx.at(3).size() > pos4It){
-        time4 = rawSigsPerMtx.at(3).at(pos4It).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrValue).at(0).getTime();
-      } else {
-        pos4done = true;
-        break;
-      }
-
-      // check with SiPM position 2
-      if(!pos2done && fabs(time2-time1)<mergingTime){
-        if(saveHistos) {
-          stats.getHisto1D("mtxsig_timediff")->Fill(fabs(time2-time1));
-        }
-        mtxSignal.addRawSignal(rawSigsPerMtx.at(1).at(pos2It));
-        rawSigsPerMtx.at(1).erase(rawSigsPerMtx.at(1).begin()+pos2It);
-        pos2done = true;
-      } else if(!pos2done) {
-        if((time2-time1) > mergingTime){
-          // too far ahead in time, we are done
-          pos2done = true;
-        } else if((time1-time2) > mergingTime) {
-          // too far back in time, mabye need to check next iteration
-          pos2It++;
-        }
-      }
-
-      // check with SiPM position 3
-      if(!pos3done && fabs(time3-time1)<mergingTime){
-        if(saveHistos) {
-          stats.getHisto1D("mtxsig_timediff")->Fill(fabs(time3-time1));
-        }
-        mtxSignal.addRawSignal(rawSigsPerMtx.at(2).at(pos3It));
-        rawSigsPerMtx.at(2).erase(rawSigsPerMtx.at(2).begin()+pos3It);
-      } else if(!pos3done) {
-        if((time3-time1) > mergingTime){
-          // too far ahead in time, we are done
-          pos3done = true;
-        } else if((time1-time3) > mergingTime) {
-          // too far back in time, mabye need to check next iteration
-          pos3It++;
-        }
-      }
-
-      // check with SiPM position 4
-      if(!pos4done && fabs(time4-time1)<mergingTime){
-        if(saveHistos) {
-          stats.getHisto1D("mtxsig_timediff")->Fill(fabs(time4-time1));
-        }
-        mtxSignal.addRawSignal(rawSigsPerMtx.at(3).at(pos4It));
-        rawSigsPerMtx.at(3).erase(rawSigsPerMtx.at(3).begin()+pos4It);
-      } else if(!pos4done) {
-        if((time4-time1) > mergingTime){
-          // too far ahead in time, we are done
-          pos4done = true;
-        } else if((time1-time4) > mergingTime) {
-          // too far back in time, mabye need to check next iteration
-          pos4It++;
-        }
-      }
+/**
+ * Sorting method for Raw Signals, based on time of leading THR1 Signal Channel
+ */
+void SignalTransformerTools::sortByTime(vector<JPetRawSignal>& input)
+{
+  std::sort(
+    input.begin(), input.end(), [] (JPetRawSignal rawSig1, JPetRawSignal rawSig2) {
+      return getRawSigBaseTime(rawSig1) < getRawSigBaseTime(rawSig2);
     }
-
-    // After matching, check if MtxSig multiplicity grater than 1
-    if(mtxSignal.getRawSignals().size() > 1) {
-      mtxSigSiPMs.push_back(mtxSignal);
-    }
-    rawSigsPerMtx.at(0).erase(rawSigsPerMtx.at(0).begin());
-  } // end of check 1 vs 2,3,4
-
-  // Explicit checking for next SiPMs position 2 with positions 3,4
-  while(rawSigsPerMtx.at(1).size() > 0){
-    JPetMatrixSignal mtxSignal(side, scinID);
-    // Add first as default
-    mtxSignal.addRawSignal(rawSigsPerMtx.at(1).at(0));
-    auto time2 = rawSigsPerMtx.at(1).at(0)
-      .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrValue).at(0).getTime();
-
-    int pos3It = 0;
-    int pos4It = 0;
-    bool pos3done = false;
-    bool pos4done = false;
-    auto time3 = 0;
-    auto time4 = 0;
-
-    while(!(pos3done && pos4done)){
-      // Checking if other vectors are non-zero
-      if(rawSigsPerMtx.at(2).size() > pos3It){
-        time3 = rawSigsPerMtx.at(2).at(pos3It).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrValue).at(0).getTime();
-      } else {
-        pos3done = true;
-        break;
-      }
-      if(rawSigsPerMtx.at(3).size() > pos4It){
-        time4 = rawSigsPerMtx.at(3).at(pos4It).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrValue).at(0).getTime();
-      } else {
-        pos4done = true;
-        break;
-      }
-
-      // check with SiPM position 3
-      if(!pos3done && fabs(time3-time2)<mergingTime){
-        if(saveHistos) {
-          stats.getHisto1D("mtxsig_timediff")->Fill(fabs(time3-time2));
-        }
-        mtxSignal.addRawSignal(rawSigsPerMtx.at(2).at(pos3It));
-        rawSigsPerMtx.at(2).erase(rawSigsPerMtx.at(2).begin()+pos3It);
-      } else if(!pos3done) {
-        if((time3-time2) > mergingTime){
-          // too far ahead in time, we are done
-          pos3done = true;
-        } else if((time2-time3) > mergingTime) {
-          // too far back in time, mabye need to check next iteration
-          pos3It++;
-        }
-      }
-
-      // check with SiPM position 4
-      if(!pos4done && fabs(time4-time2)<mergingTime){
-        if(saveHistos) {
-          stats.getHisto1D("mtxsig_timediff")->Fill(fabs(time4-time2));
-        }
-        mtxSignal.addRawSignal(rawSigsPerMtx.at(3).at(pos4It));
-        rawSigsPerMtx.at(3).erase(rawSigsPerMtx.at(3).begin()+pos4It);
-      } else if(!pos4done) {
-        if((time4-time2) > mergingTime){
-          // too far ahead in time, we are done
-          pos4done = true;
-        } else if((time2-time4) > mergingTime) {
-          // too far back in time, mabye need to check next iteration
-          pos4It++;
-        }
-      }
-    }
-
-    // After matching, check if MtxSig multiplicity grater than 1
-    if(mtxSignal.getRawSignals().size() > 1) {
-      mtxSigSiPMs.push_back(mtxSignal);
-    }
-    rawSigsPerMtx.at(1).erase(rawSigsPerMtx.at(1).begin());
-  } // end of check 2 vs 3,4
-
-  // Explicit checking for next SiPMs position 3 with position 4
-  while(rawSigsPerMtx.at(2).size() > 0){
-    JPetMatrixSignal mtxSignal(side, scinID);
-    // Add first as default
-    mtxSignal.addRawSignal(rawSigsPerMtx.at(2).at(0));
-    auto time3 = rawSigsPerMtx.at(2).at(0)
-      .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrValue).at(0).getTime();
-
-    int pos4It = 0;
-    bool pos4done = false;
-    auto time4 = 0;
-
-    while(!pos4done){
-      // Checking if other vector is non-zero
-      if(rawSigsPerMtx.at(3).size() > pos4It){
-        time4 = rawSigsPerMtx.at(3).at(pos4It).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrValue).at(0).getTime();
-      } else {
-        pos4done = true;
-        break;
-      }
-
-      // check with SiPM position 4
-      if(!pos4done && fabs(time4-time3)<mergingTime){
-        if(saveHistos) {
-          stats.getHisto1D("mtxsig_timediff")->Fill(fabs(time4-time3));
-        }
-        mtxSignal.addRawSignal(rawSigsPerMtx.at(3).at(pos4It));
-        rawSigsPerMtx.at(3).erase(rawSigsPerMtx.at(3).begin()+pos4It);
-      } else if(!pos4done) {
-        if((time4-time3) > mergingTime){
-          // too far ahead in time, we are done
-          pos4done = true;
-        } else if((time3-time4) > mergingTime) {
-          // too far back in time, mabye need to check next iteration
-          pos4It++;
-        }
-      }
-    }
-
-    // After matching, check if MtxSig multiplicity grater than 1
-    if(mtxSignal.getRawSignals().size() > 1) {
-      mtxSigSiPMs.push_back(mtxSignal);
-    } else if (saveHistos){
-      stats.getHisto1D("unused_rawsig_per_pm")->Fill(pmID);
-      if(side==JPetPM::SideA){
-        stats.getHisto1D("unused_rawsig_per_scin_sideA")->Fill(scinID);
-      } else if(side==JPetPM::SideB){
-        stats.getHisto1D("unused_rawsig_per_scin_sideB")->Fill(scinID);
-      }
-    }
-
-    rawSigsPerMtx.at(2).erase(rawSigsPerMtx.at(2).begin());
-  } // end of check 3 vs 4
-
-  return mtxSigSiPMs;
+  );
 }

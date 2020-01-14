@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2019 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -17,6 +17,7 @@
 #include "TimeWindowCreator.h"
 #include "SignalTransformer.h"
 #include "SignalFinder.h"
+// #include "HitFinder.h"
 using namespace std;
 
 int main(int argc, const char* argv[]) {
@@ -24,22 +25,23 @@ int main(int argc, const char* argv[]) {
     JPetManager& manager = JPetManager::getManager();
 
     manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
-    // manager.registerTask<SignalFinder>("SignalFinder");
-    // manager.registerTask<SignalTransformer>("SignalTransformer");
+    manager.registerTask<SignalFinder>("SignalFinder");
+    manager.registerTask<SignalTransformer>("SignalTransformer");
     // manager.registerTask<HitFinder>("HitFinder");
     // manager.registerTask<EventFinder>("EventFinder");
     // manager.registerTask<EventCategorizer>("EventCategorizer");
-    //
-    manager.useTask("TimeWindowCreator", "hld", "tslot.calib");
-    // manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
-    // manager.useTask("SignalTransformer", "raw.sig", "mtx.sig");
-    // manager.useTask("HitFinder", "phys.sig", "hits");
+
+    manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
+    manager.useTask("SignalFinder", "tslot.raw", "raw.sig");
+    manager.useTask("SignalTransformer", "raw.sig", "mtx.sig");
+    // manager.useTask("HitFinder", "mtx.sig", "hits");
     // manager.useTask("EventFinder", "hits", "unk.evt");
     // manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
 
     manager.run(argc, argv);
   } catch (const std::exception& except) {
-    std::cerr << "Unrecoverable error occured:" << except.what() << "Exiting the program!" << std::endl;
+    std::cerr << "Unrecoverable error occured:" << except.what()
+    << "Exiting the program!" << std::endl;
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;

@@ -1,6 +1,6 @@
 ################################################################################
 ## Data analysis project based on J-PET Framework
-## Created by J-PET Framework developers 2016-2018
+## Created by J-PET Framework developers 2016-2020
 ##
 ## Description:
 ##   Data reconstruction in Modular J-PET Detector
@@ -50,3 +50,11 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/${AUXILIARY_FILES} DESTINATION ${CMAKE_CUR
 add_custom_target(copy_files_${projectName} DEPENDS ${copy_depends})
 ## Add dependencies between building project and copy files
 add_dependencies(${projectBinary} copy_files_${projectName})
+
+################################################################################
+## Unit tests
+option(PACKAGE_TESTS "Build the tests" ON)
+if(PACKAGE_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()

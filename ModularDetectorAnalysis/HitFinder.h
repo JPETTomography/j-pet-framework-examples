@@ -10,15 +10,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file SignalFinder.h
+ *  @file HitFinder.h
  */
 
-#ifndef SIGNALFINDER_H
-#define SIGNALFINDER_H
+#ifndef HITFINDER_H
+#define HITFINDER_H
 
-#include <JPetRawSignal/JPetRawSignal.h>
+#include <JPetMatrixSignal/JPetMatrixSignal.h>
 #include <JPetUserTask/JPetUserTask.h>
+#include <JPetHit/JPetHit.h>
 #include <vector>
+#include <map>
 
 class JPetWriter;
 
@@ -27,31 +29,28 @@ class JPetWriter;
 #endif
 
 /**
- * @brief User Task: method organizing Signal Channels to Raw Signals
+ * @brief User Task creating JPetHit from matched Singlas
  *
- * Task organizes Signal Channels from every JPetTimeWindow to Raw Signals
- * Parameters for time window values used in tools can be specified in user options,
- * default are provided.
+ * Task pairs Matrix Signals and creates Hits, based on time comparison
+ * of Signals, time window for hit matching can be specified in user options,
+ * default one is provided. Matching method is contained in tools class.
  */
-class SignalFinder: public JPetUserTask
-{
+class HitFinder: public JPetUserTask {
+
 public:
-  SignalFinder(const char* name);
-  virtual ~SignalFinder();
+  HitFinder(const char* name);
+  virtual ~HitFinder();
   virtual bool init() override;
   virtual bool exec() override;
   virtual bool terminate() override;
 
 protected:
-  void saveRawSignals(const std::vector<JPetRawSignal>& sigChVec);
-  const std::string kLeadTrailMaxTimeParamKey = "SignalFinder_LeadTrailMaxTime_float";
-  const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
-  const std::string kEdgeMaxTimeParamKey = "SignalFinder_EdgeMaxTime_float";
-  const int kNumOfThresholds = 2;
-  double fSigChLeadTrailMaxTime = 23000.0;
-  double fSigChEdgeMaxTime = 5000.0;
-  bool fSaveControlHistos = true;
+  void saveHits(const std::vector<JPetHit>& hits);
   void initialiseHistograms();
+  const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
+  const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_float";
+  bool fSaveControlHistos = true;
+  double fABTimeDiff = 10000.0;
 };
 
-#endif /* !SIGNALFINDER_H */
+#endif /* !HITFINDER_H */

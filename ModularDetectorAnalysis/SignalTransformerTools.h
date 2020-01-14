@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2019 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -38,13 +38,18 @@
    );
 
    static std::vector<JPetMatrixSignal> mergeSignalsAllSiPMs(
-     const std::map<int, std::vector<std::vector<JPetRawSignal>>>& rawSigMtxMap,
+     std::map<int, std::vector<std::vector<JPetRawSignal>>>& rawSigMtxMap,
      double mergingTime, JPetStatistics& stats, bool saveHistos
    );
 
    static std::vector<JPetMatrixSignal> mergeRawSignalsOnSide(
-     const std::vector<JPetRawSignal>& rawSigVec, double mergingTime,
+     std::vector<JPetRawSignal>& rawSigVec, double mergingTime,
      JPetStatistics& stats, bool saveHistos
    );
+   static float getRawSigBaseTime(JPetRawSignal& rawSig);
+
+ private:
+   static void sortByTime(std::vector<JPetRawSignal>& input);
+
  };
  #endif /* !SIGNALTRANSFORMERTOOLS_H */
