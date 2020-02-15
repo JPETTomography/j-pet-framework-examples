@@ -27,8 +27,8 @@ std::pair<int, float> SinogramCreatorTools::getAngleAndDistance(float firstX, fl
 {
   float dx = (secondX - firstX);
   float dy = (secondY - firstY);
-  if (std::abs(dx) < kEPSILON) return std::make_pair(0, firstX);
-  if (std::abs(dy) < kEPSILON) return std::make_pair(90, firstY);
+  if (std::abs(dx) < kEPSILON) return std::make_pair(0, firstX < 0 ? -std::sqrt(firstY * firstY) : std::sqrt(firstY * firstY));
+  if (std::abs(dy) < kEPSILON) return std::make_pair(90, firstY < 0 ? - std::sqrt(firstX * firstX) : std::sqrt(firstX * firstX));
   float slope = dy / dx;
   if (std::abs(slope) < kEPSILON)
     slope = -1.f;
@@ -39,7 +39,7 @@ std::pair<int, float> SinogramCreatorTools::getAngleAndDistance(float firstX, fl
     d = 1.f;
 
   if(std::abs(slope - perpendicularSlope) < kEPSILON)
-    return std::make_pair(90, firstY);
+    return std::make_pair(90, std::sqrt(std::pow((firstX), 2)));
 
   float xAngle = -d / (slope - perpendicularSlope);
   float yAngle = slope * (-d / (slope - perpendicularSlope)) + d;
@@ -50,18 +50,19 @@ std::pair<int, float> SinogramCreatorTools::getAngleAndDistance(float firstX, fl
   int angleResult = std::round(angle);
   angleResult = angleResult % 180;
   float distance = std::sqrt(std::pow((xAngle), 2) + std::pow((yAngle), 2));
-  if (yAngle < 0) distance = -distance;
+  if (xAngle < 0) distance = -distance;
+  
   return std::make_pair(angleResult, distance);
 }
 
 std::pair<int, int> SinogramCreatorTools::getSinogramRepresentation(float firstX, float firstY, float secondX, float secondY,
-                                                                    float fMaxReconstructionLayerfSingleLayerRadius, float fReconstructionDistanceAccuracy,
+                                                                    float fMaxReconstructionLayer, float fReconstructionDistanceAccuracy,
                                                                     int maxDistanceNumber, int kReconstructionMaxAngle)
 {
   std::pair<int, float> angleAndDistance = SinogramCreatorTools::getAngleAndDistance(firstX, firstY, secondX, secondY);
 
   int distanceRound =
-      SinogramCreatorTools::roundToNearesMultiplicity(angleAndDistance.second + fMaxReconstructionLayerfSingleLayerRadius, fReconstructionDistanceAccuracy);
+      SinogramCreatorTools::roundToNearesMultiplicity(angleAndDistance.second + fMaxReconstructionLayer, fReconstructionDistanceAccuracy);
   if (distanceRound >= maxDistanceNumber || angleAndDistance.first >= kReconstructionMaxAngle)
   {
     std::cout << "Distance or angle > then max, distance: " << distanceRound << " (max : " << maxDistanceNumber << ")"
