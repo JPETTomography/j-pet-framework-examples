@@ -20,6 +20,7 @@ using namespace std;
 #include <JPetWriter/JPetWriter.h>
 #include "SignalFinderTools.h"
 #include "SignalFinder.h"
+#include <TRandom.h>
 #include <utility>
 #include <string>
 #include <vector>
@@ -95,50 +96,59 @@ void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& rawSigVec)
   for (auto & rawSig : rawSigVec) {
     auto leads = rawSig.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrValue);
     auto trails = rawSig.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrValue);
+
     auto pmID = leads.at(0).getChannel().getPM().getID();
 
     if(leads.size()==trails.size()){
+
       fOutputEvents->add<JPetRawSignal>(rawSig);
+
       if(fSaveControlHistos){
 
-        getStatistics().getHisto1D("raw_sig_multi")
+        getStatistics().getHisto1D("rawsig_per_pm")
+        ->Fill(rawSig.getPM().getID());
+        getStatistics().getHisto1D("rawsig_per_scin")
+        ->Fill(rawSig.getPM().getScin().getID());
+        getStatistics().getHisto1D("rawsig_multi")
         ->Fill(leads.size()+trails.size());
 
         getStatistics().getHisto1D("lead_trail_thr1_diff")
         ->Fill(trails.at(0).getTime()-leads.at(0).getTime());
-        getStatistics().getHisto1D(Form("lead_trail_thr1_diff_%d", pmID))
-        ->Fill(trails.at(0).getTime()-leads.at(0).getTime());
+        // getStatistics().getHisto1D(Form("lead_trail_thr1_diff_%d", pmID))
+        // ->Fill(trails.at(0).getTime()-leads.at(0).getTime());
 
-        for(auto& sigCh : leads){
-          getStatistics().getHisto1D("raw_sig_mtx_occ")
-          ->Fill(sigCh.getChannel().getPM().getMatrixPosition());
-          getStatistics().getHisto1D("raw_sig_thr_occ")
-          ->Fill(sigCh.getChannel().getThresholdNumber());
-        }
+        if(gRandom->Uniform()<fScalingFactor){
+          for(auto& sigCh : leads){
+            getStatistics().getHisto1D("rawsig_mtx_occ")
+            ->Fill(sigCh.getChannel().getPM().getMatrixPosition());
+            getStatistics().getHisto1D("rawsig_thr_occ")
+            ->Fill(sigCh.getChannel().getThresholdNumber());
+          }
 
-        for(auto& sigCh : trails){
-          getStatistics().getHisto1D("raw_sig_mtx_occ")
-          ->Fill(sigCh.getChannel().getPM().getMatrixPosition());
-          getStatistics().getHisto1D("raw_sig_thr_occ")
-          ->Fill(sigCh.getChannel().getThresholdNumber());
+          for(auto& sigCh : trails){
+            getStatistics().getHisto1D("rawsig_mtx_occ")
+            ->Fill(sigCh.getChannel().getPM().getMatrixPosition());
+            getStatistics().getHisto1D("rawsig_thr_occ")
+            ->Fill(sigCh.getChannel().getThresholdNumber());
+          }
         }
 
         if(leads.size() == 2){
           getStatistics().getHisto1D("lead_thr1_thr2_diff")
           ->Fill(leads.at(1).getTime()-leads.at(0).getTime());
-          getStatistics().getHisto1D(Form("lead_thr1_thr2_diff_%d", pmID))
-          ->Fill(leads.at(1).getTime()-leads.at(0).getTime());
+          // getStatistics().getHisto1D(Form("lead_thr1_thr2_diff_%d", pmID))
+          // ->Fill(leads.at(1).getTime()-leads.at(0).getTime());
         }
 
         if(trails.size() == 2){
           getStatistics().getHisto1D("trail_thr1_thr2_diff")
           ->Fill(trails.at(1).getTime()-trails.at(0).getTime());
-          getStatistics().getHisto1D(Form("trail_thr1_thr2_diff_%d", pmID))
-          ->Fill(trails.at(1).getTime()-trails.at(0).getTime());
-          getStatistics().getHisto1D("lead_trail_thr2_diff")
-          ->Fill(trails.at(1).getTime()-leads.at(1).getTime());
-          getStatistics().getHisto1D(Form("lead_trail_thr2_diff_%d", pmID))
-          ->Fill(trails.at(1).getTime()-leads.at(1).getTime());
+          // getStatistics().getHisto1D(Form("trail_thr1_thr2_diff_%d", pmID))
+          // ->Fill(trails.at(1).getTime()-trails.at(0).getTime());
+          // getStatistics().getHisto1D("lead_trail_thr2_diff")
+          // ->Fill(trails.at(1).getTime()-leads.at(1).getTime());
+          // getStatistics().getHisto1D(Form("lead_trail_thr2_diff_%d", pmID))
+          // ->Fill(trails.at(1).getTime()-leads.at(1).getTime());
         }
       }
     }
@@ -146,6 +156,11 @@ void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& rawSigVec)
 }
 
 void SignalFinder::initialiseHistograms(){
+
+  auto minPMID = getParamBank().getPMs().begin()->first;
+  auto maxPMID = getParamBank().getPMs().end()->first;
+  auto minScinD = getParamBank().getScins().begin()->first;
+  auto maxScinID = getParamBank().getScins().end()->first;
 
   // Unused objects stats
   getStatistics().createHistogram(new TH1F(
@@ -158,38 +173,53 @@ void SignalFinder::initialiseHistograms(){
   getStatistics().getHisto1D("unused_sigch_thr")->GetYaxis()->SetTitle("Number of SigChs");
 
   getStatistics().createHistogram(new TH1F(
-    "unused_sigch_pm", "Unused Signal Channels per SiPM", 111, 399.5, 510.5
+    "unused_sigch_pm", "Unused Signal Channels per SiPM",
+    maxPMID-minPMID+1, minPMID-0.5, maxPMID+0.5
   ));
   getStatistics().getHisto1D("unused_sigch_pm")->GetXaxis()->SetTitle("SiPM ID");
   getStatistics().getHisto1D("unused_sigch_pm")->GetYaxis()->SetTitle("Number of Signal Channels");
 
   // Occupancies and multiplicities
   getStatistics().createHistogram(new TH1F(
-    "raw_sig_thr_occ",
-    "Thresholds occupation in createds Raw Signals", 2, 0.5, 2.5)
-  );
-  getStatistics().getHisto1D("raw_sig_thr_occ")->GetXaxis()->SetTitle("Threshold number");
-  getStatistics().getHisto1D("raw_sig_thr_occ")->GetYaxis()->SetTitle("Number of Signal Channels");
+    "rawsig_per_pm", "Raw Signals per SiPM",
+    maxPMID-minPMID+1, minPMID-0.5, maxPMID+0.5
+  ));
+  getStatistics().getHisto1D("rawsig_per_pm")->GetXaxis()->SetTitle("SiPM ID");
+  getStatistics().getHisto1D("rawsig_per_pm")->GetYaxis()->SetTitle("Number of Raw Signals");
 
   getStatistics().createHistogram(new TH1F(
-    "raw_sig_mtx_occ",
-    "Matrix SiPMs occupation in createds Raw Signals", 4, 0.5, 4.5)
-  );
-  getStatistics().getHisto1D("raw_sig_mtx_occ")->GetXaxis()->SetTitle("SiPM matrix position number");
-  getStatistics().getHisto1D("raw_sig_mtx_occ")->GetYaxis()->SetTitle("Number of Signal Channels");
+    "rawsig_per_scin", "Raw Signals per scintillator",
+    maxScinID-minScinD+1, minScinD-0.5, maxScinID+0.5
+  ));
+  getStatistics().getHisto1D("rawsig_per_scin")->GetXaxis()->SetTitle("Scin ID");
+  getStatistics().getHisto1D("rawsig_per_scin")->GetYaxis()->SetTitle("Number of Raw Signals");
 
   getStatistics().createHistogram(new TH1F(
-    "raw_sig_multi", "Raw Signal Multiplicity", 20, 0.5, 20.5)
-  );
-  getStatistics().getHisto1D("raw_sig_multi")->GetXaxis()->SetTitle("Total number of SigChs in RawSig");
-  getStatistics().getHisto1D("raw_sig_multi")->GetYaxis()->SetTitle("Number of Signal Channels");
+    "rawsig_thr_occ", "Thresholds occupation in createds Raw Signals",
+    2, 0.5, 2.5
+  ));
+  getStatistics().getHisto1D("rawsig_thr_occ")->GetXaxis()->SetTitle("Threshold number");
+  getStatistics().getHisto1D("rawsig_thr_occ")->GetYaxis()->SetTitle("Number of Signal Channels");
+
+  getStatistics().createHistogram(new TH1F(
+    "rawsig_mtx_occ", "Matrix SiPMs occupation in createds Raw Signals",
+    4, 0.5, 4.5
+  ));
+  getStatistics().getHisto1D("rawsig_mtx_occ")->GetXaxis()->SetTitle("SiPM matrix position number");
+  getStatistics().getHisto1D("rawsig_mtx_occ")->GetYaxis()->SetTitle("Number of Signal Channels");
+
+  getStatistics().createHistogram(new TH1F(
+    "rawsig_multi", "Raw Signal Multiplicity", 10, 0.5, 10.5
+  ));
+  getStatistics().getHisto1D("rawsig_multi")->GetXaxis()->SetTitle("Total number of SigChs in RawSig");
+  getStatistics().getHisto1D("rawsig_multi")->GetYaxis()->SetTitle("Number of Signal Channels");
 
   // Time differences
   getStatistics().createHistogram(new TH1F(
     "lead_thr1_thr2_diff",
     "Time Difference between leading Signal Channels THR1 and THR2 in found signals",
-    200, -fSigChEdgeMaxTime, fSigChEdgeMaxTime)
-  );
+    200, -fSigChEdgeMaxTime, fSigChEdgeMaxTime
+  ));
   getStatistics().getHisto1D("lead_thr1_thr2_diff")
     ->GetXaxis()->SetTitle("time diff [ps]");
   getStatistics().getHisto1D("lead_thr1_thr2_diff")
@@ -198,8 +228,8 @@ void SignalFinder::initialiseHistograms(){
   getStatistics().createHistogram(new TH1F(
     "trail_thr1_thr2_diff",
     "Time Difference between trailing Signal Channels THR1 and THR2 in found signals",
-    200, -fSigChEdgeMaxTime, fSigChEdgeMaxTime)
-  );
+    200, -fSigChEdgeMaxTime, fSigChEdgeMaxTime
+  ));
   getStatistics().getHisto1D("trail_thr1_thr2_diff")
   ->GetXaxis()->SetTitle("time diff [ps]");
   getStatistics().getHisto1D("trail_thr1_thr2_diff")
@@ -208,8 +238,8 @@ void SignalFinder::initialiseHistograms(){
   getStatistics().createHistogram(new TH1F(
     "lead_trail_thr1_diff",
     "Time Difference between leading and trailing Signal Channels THR1 in found signals",
-    200, 0.0, fSigChLeadTrailMaxTime)
-  );
+    200, 0.0, fSigChLeadTrailMaxTime
+  ));
   getStatistics().getHisto1D("lead_trail_thr1_diff")
     ->GetXaxis()->SetTitle("time diff [ps]");
   getStatistics().getHisto1D("lead_trail_thr1_diff")
@@ -218,53 +248,56 @@ void SignalFinder::initialiseHistograms(){
   getStatistics().createHistogram(new TH1F(
     "lead_trail_thr2_diff",
     "Time Difference between leading and trailing Signal Channels THR2 in found signals",
-    200, 0.0, fSigChLeadTrailMaxTime)
-  );
+    200, 0.0, fSigChLeadTrailMaxTime
+  ));
   getStatistics().getHisto1D("lead_trail_thr2_diff")
     ->GetXaxis()->SetTitle("time diff [ps]");
   getStatistics().getHisto1D("lead_trail_thr2_diff")
     ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
 
-  for(int pmID=401; pmID<505; pmID++){
-
-    getStatistics().createHistogram(new TH1F(
-      Form("lead_thr1_thr2_diff_%d", pmID),
-      Form("Time Difference between leading Signal Channels THR1 and THR2 in found signals SiPM %d", pmID),
-      200, -fSigChEdgeMaxTime, fSigChEdgeMaxTime)
-    );
-    getStatistics().getHisto1D(Form("lead_thr1_thr2_diff_%d", pmID))
-      ->GetXaxis()->SetTitle("time diff [ps]");
-    getStatistics().getHisto1D(Form("lead_thr1_thr2_diff_%d", pmID))
-      ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
-
-    getStatistics().createHistogram(new TH1F(
-      Form("trail_thr1_thr2_diff_%d", pmID),
-      Form("Time Difference between trailing Signal Channels THR1 and THR2 in found signals SiPM %d", pmID),
-      200, -fSigChEdgeMaxTime, fSigChEdgeMaxTime)
-    );
-    getStatistics().getHisto1D(Form("trail_thr1_thr2_diff_%d", pmID))
-      ->GetXaxis()->SetTitle("time diff [ps]");
-    getStatistics().getHisto1D(Form("trail_thr1_thr2_diff_%d", pmID))
-      ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
-
-    getStatistics().createHistogram(new TH1F(
-      Form("lead_trail_thr1_diff_%d", pmID),
-      Form("Time Difference between leading and trailing Signal Channels THR1 in found signals SiPm %d", pmID),
-      200, 0.0, fSigChLeadTrailMaxTime)
-    );
-    getStatistics().getHisto1D(Form("lead_trail_thr1_diff_%d", pmID))
-      ->GetXaxis()->SetTitle("time diff [ps]");
-    getStatistics().getHisto1D(Form("lead_trail_thr1_diff_%d", pmID))
-      ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
-
-    getStatistics().createHistogram(new TH1F(
-      Form("lead_trail_thr2_diff_%d", pmID),
-      Form("Time Difference between leading and trailing Signal Channels THR2 in found signals SiPm %d", pmID),
-      200, 0.0, fSigChLeadTrailMaxTime)
-    );
-    getStatistics().getHisto1D(Form("lead_trail_thr2_diff_%d", pmID))
-      ->GetXaxis()->SetTitle("time diff [ps]");
-    getStatistics().getHisto1D(Form("lead_trail_thr2_diff_%d", pmID))
-      ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
-  }
+  // Time differenced by SiPM
+  // for(int pmID=minPMID; pmID<=maxPMID; pmID++){
+  //
+  //   getStatistics().createHistogram(new TH1F(
+  //     Form("lead_thr1_thr2_diff_%d", pmID),
+  //     Form("Time Difference between leading Signal Channels THR1 and THR2 in found signals SiPM %d", pmID),
+  //     200, -fSigChEdgeMaxTime, fSigChEdgeMaxTime
+  //   ));
+  //   getStatistics().getHisto1D(Form("lead_thr1_thr2_diff_%d", pmID))
+  //     ->GetXaxis()->SetTitle("time diff [ps]");
+  //   getStatistics().getHisto1D(Form("lead_thr1_thr2_diff_%d", pmID))
+  //     ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
+  //
+  //   getStatistics().createHistogram(new TH1F(
+  //     Form("trail_thr1_thr2_diff_%d", pmID),
+  //     Form("Time Difference between trailing Signal Channels THR1 and THR2 in found signals SiPM %d", pmID),
+  //     200, -fSigChEdgeMaxTime, fSigChEdgeMaxTime
+  //   ));
+  //   getStatistics().getHisto1D(Form("trail_thr1_thr2_diff_%d", pmID))
+  //     ->GetXaxis()->SetTitle("time diff [ps]");
+  //   getStatistics().getHisto1D(Form("trail_thr1_thr2_diff_%d", pmID))
+  //     ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
+  //
+  //   std::cout << Form("lead_trail_thr1_diff_%d", pmID) << std::endl;
+  //
+  //   getStatistics().createHistogram(new TH1F(
+  //     Form("lead_trail_thr1_diff_%d", pmID),
+  //     Form("Time Difference between leading and trailing Signal Channels THR1 in found signals SiPm %d", pmID),
+  //     200, 0.0, fSigChLeadTrailMaxTime
+  //   ));
+  //   getStatistics().getHisto1D(Form("lead_trail_thr1_diff_%d", pmID))
+  //     ->GetXaxis()->SetTitle("time diff [ps]");
+  //   getStatistics().getHisto1D(Form("lead_trail_thr1_diff_%d", pmID))
+  //     ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
+  //
+  //   getStatistics().createHistogram(new TH1F(
+  //     Form("lead_trail_thr2_diff_%d", pmID),
+  //     Form("Time Difference between leading and trailing Signal Channels THR2 in found signals SiPm %d", pmID),
+  //     200, 0.0, fSigChLeadTrailMaxTime
+  //   ));
+  //   getStatistics().getHisto1D(Form("lead_trail_thr2_diff_%d", pmID))
+  //     ->GetXaxis()->SetTitle("time diff [ps]");
+  //   getStatistics().getHisto1D(Form("lead_trail_thr2_diff_%d", pmID))
+  //     ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
+  // }
 }

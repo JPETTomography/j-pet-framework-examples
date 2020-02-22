@@ -51,6 +51,7 @@ protected:
   double fSigChLeadTrailMaxTime = 23000.0;
   double fSigChEdgeMaxTime = 5000.0;
   bool fSaveControlHistos = true;
+  double fScalingFactor = 0.001;
   void initialiseHistograms();
 };
 

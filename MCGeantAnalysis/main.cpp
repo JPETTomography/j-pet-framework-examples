@@ -22,13 +22,13 @@ int main(int argc, const char* argv[])
 {
   try {
     JPetManager& manager = JPetManager::getManager();
-    
+
     manager.registerTask<EventFinder>("EventFinder");
     manager.registerTask<EventCategorizer>("EventCategorizer");
-    
+
     manager.useTask("EventFinder", "mc.hits", "unk.evt");
     manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
-    
+
     manager.run(argc, argv);
   } catch (const std::exception& except) {
     std::cerr << "Unrecoverable error occured:" << except.what() << "Exiting the program!" << std::endl;

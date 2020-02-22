@@ -17,24 +17,24 @@
 #include "TimeWindowCreator.h"
 #include "SignalTransformer.h"
 #include "SignalFinder.h"
-// #include "HitFinder.h"
+#include "HitFinder.h"
 using namespace std;
 
 int main(int argc, const char* argv[]) {
   try {
     JPetManager& manager = JPetManager::getManager();
 
-    manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
-    manager.registerTask<SignalFinder>("SignalFinder");
-    manager.registerTask<SignalTransformer>("SignalTransformer");
-    // manager.registerTask<HitFinder>("HitFinder");
+    // manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
+    // manager.registerTask<SignalFinder>("SignalFinder");
+    // manager.registerTask<SignalTransformer>("SignalTransformer");
+    manager.registerTask<HitFinder>("HitFinder");
     // manager.registerTask<EventFinder>("EventFinder");
     // manager.registerTask<EventCategorizer>("EventCategorizer");
 
-    manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
-    manager.useTask("SignalFinder", "tslot.raw", "raw.sig");
-    manager.useTask("SignalTransformer", "raw.sig", "mtx.sig");
-    // manager.useTask("HitFinder", "mtx.sig", "hits");
+    // manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
+    // manager.useTask("SignalFinder", "tslot.raw", "raw.sig");
+    // manager.useTask("SignalTransformer", "raw.sig", "mtx.sig");
+    manager.useTask("HitFinder", "mtx.sig", "hits");
     // manager.useTask("EventFinder", "hits", "unk.evt");
     // manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
 

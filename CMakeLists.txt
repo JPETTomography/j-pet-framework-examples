@@ -169,12 +169,14 @@ endif()
 
 ################################################################################
 ## Add general modules files
-add_subdirectory(modules)
+#add_subdirectory(modules)
 
 ################################################################################
 ## Directories with examples
-#add_subdirectory(InterThresholdCalibration)
+add_subdirectory(ModularDetectorAnalysis)
 #add_subdirectory(LargeBarrelAnalysis)
+
+#add_subdirectory(InterThresholdCalibration)
 #add_subdirectory(VelocityCalibration)
 #add_subdirectory(NewAnalysisTemplate)
 #add_subdirectory(ImageReconstruction)
@@ -187,5 +189,3 @@ add_subdirectory(modules)
 #add_subdirectory(Imaging)
 #add_subdirectory(TimeCalibration_iter)
 #add_subdirectory(UserDataClassExample)
-
-add_subdirectory(ModularDetectorAnalysis)

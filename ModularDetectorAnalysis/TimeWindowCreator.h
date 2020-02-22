@@ -60,9 +60,12 @@ protected:
 	bool fSaveControlHistos = true;
 	double fMinTime = -1.e6;
 	double fMaxTime = 0.;
+	// Number for scaling some histograms, so they are not reaching their memory capacity
+	double fScalingFactor = 0.001;
 	static JPetSigCh generateSigCh(
 		double time, const JPetChannel& channel, JPetSigCh::EdgeType edge
 	);
+
 };
 
 #endif /* !TIMEWINDOWCREATOR_H */

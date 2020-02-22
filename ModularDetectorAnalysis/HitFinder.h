@@ -13,8 +13,8 @@
  *  @file HitFinder.h
  */
 
-#ifndef HITFINDER_H
-#define HITFINDER_H
+#ifndef HITFINDER1_H
+#define HITFINDER1_H
 
 #include <JPetMatrixSignal/JPetMatrixSignal.h>
 #include <JPetUserTask/JPetUserTask.h>
@@ -53,4 +53,4 @@ protected:
   double fABTimeDiff = 10000.0;
 };
 
-#endif /* !HITFINDER_H */
+#endif /* !HITFINDER1_H */
