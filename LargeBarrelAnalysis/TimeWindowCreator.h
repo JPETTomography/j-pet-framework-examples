@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -16,9 +16,9 @@
 #ifndef TIMEWINDOWCREATOR_H
 #define TIMEWINDOWCREATOR_H
 
-#include <JPetTOMBChannel/JPetTOMBChannel.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
 #include <JPetUserTask/JPetUserTask.h>
+#include <JPetChannel/JPetChannel.h>
 #include <map>
 #include <set>
 
@@ -47,7 +47,6 @@ public:
 	virtual bool terminate() override;
 
 protected:
-	bool isAllowedChannel(JPetTOMBChannel& tombChannel) const;
 	void saveSigChs(const std::vector<JPetSigCh>& sigChVec);
 	void initialiseHistograms();
 	const std::string kTimeCalibFileParamKey = "TimeCalibLoader_ConfigFile_std::string";
@@ -58,13 +57,7 @@ protected:
 	const std::string kMainStripKey = "TimeWindowCreator_MainStrip_int";
 	const int kNumOfThresholds = 4;
 	std::map<unsigned int, std::vector<double>> fTimeCalibration;
-	std::map<unsigned int, std::vector<double>> fThresholds;
-	bool fSetTHRValuesFromChannels = true;
-	long long int fCurrEventNumber = 0;
-	std::set<int> fAllowedChannels;
 	bool fSaveControlHistos = true;
-	std::pair<int,int> fMainStrip;
-	bool fMainStripSet = false;
 	double fMinTime = -1.e6;
 	double fMaxTime = 0.;
 };

@@ -77,7 +77,7 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
   auto sortedHits = JPetAnalysisTools::getHitsOrderedByTime(hits);
   for (const auto& hit : sortedHits) {
     if (fSaveControlHistos) {
-      getStatistics().getHisto1D("tot_all_hits")->Fill(HitFinderTools::calculateTOT(hit));
+      // getStatistics().getHisto1D("tot_all_hits")->Fill(HitFinderTools::calculateTOT(hit));
     }
     fOutputEvents->add<JPetHit>(hit);
   }

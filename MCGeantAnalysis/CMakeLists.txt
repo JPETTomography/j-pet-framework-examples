@@ -32,21 +32,25 @@ set(projectBinary ${projectName}.x)
 project(${projectName} CXX)
 
 
-set(use_modules_from ../LargeBarrelAnalysis)
-set(HEADERS ${use_modules_from}/HitFinder.h
-            ${use_modules_from}/HitFinderTools.h
-            ${use_modules_from}/EventFinder.h
-            ${use_modules_from}/EventCategorizer.h
-            ${use_modules_from}/EventCategorizerTools.h
-            ${use_modules_from}/UniversalFileLoader.h)
+set(use_modules_from ../EventClassification)
+set(HEADERS
+  #${use_modules_from}/HitFinder.h
+  #${use_modules_from}/HitFinderTools.h
+  ${use_modules_from}/EventFinder.h
+  ${use_modules_from}/EventCategorizer.h
+  ${use_modules_from}/EventCategorizerTools.h
+  #${use_modules_from}/UniversalFileLoader.h
+)
 
-set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
-            ${use_modules_from}/HitFinder.cpp
-            ${use_modules_from}/HitFinderTools.cpp
-            ${use_modules_from}/EventFinder.cpp
-            ${use_modules_from}/EventCategorizer.cpp
-            ${use_modules_from}/EventCategorizerTools.cpp
-            ${use_modules_from}/UniversalFileLoader.cpp)
+set(SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+  #${use_modules_from}/HitFinder.cpp
+  #${use_modules_from}/HitFinderTools.cpp
+  ${use_modules_from}/EventFinder.cpp
+  ${use_modules_from}/EventCategorizer.cpp
+  ${use_modules_from}/EventCategorizerTools.cpp
+  #${use_modules_from}/UniversalFileLoader.cpp
+)
 
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})
 target_link_libraries(${projectBinary} JPetFramework::JPetFramework)

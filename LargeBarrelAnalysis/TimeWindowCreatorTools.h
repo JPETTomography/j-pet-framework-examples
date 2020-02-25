@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -16,10 +16,10 @@
 #ifndef TIMEWINDOWCREATORTOOLS_H
 #define TIMEWINDOWCREATORTOOLS_H
 
-#include "JPetParamBank/JPetParamBank.h"
-#include "JPetSigCh/JPetSigCh.h"
 #include "JPetStatistics/JPetStatistics.h"
-#include "JPetTOMBChannel/JPetTOMBChannel.h"
+#include "JPetParamBank/JPetParamBank.h"
+#include "JPetChannel/JPetChannel.h"
+#include "JPetSigCh/JPetSigCh.h"
 #include "TDCChannel.h"
 #include <vector>
 
@@ -30,20 +30,20 @@
  */
 class TimeWindowCreatorTools {
 public:
-  static void sortByValue(std::vector<JPetSigCh> &input);
-  static std::vector<JPetSigCh>
-  buildSigChs(TDCChannel *tdcChannel, const JPetTOMBChannel &channel,
-              std::map<unsigned int, std::vector<double>> &timeCalibrationMap,
-              std::map<unsigned int, std::vector<double>> &thresholdsMap,
-              double maxTime, double minTime, bool setTHRValuesFromChannels,
-              JPetStatistics &stats, bool saveHistos);
-  static void flagSigChs(std::vector<JPetSigCh> &inputSigChs,
-                         JPetStatistics &stats, bool saveHistos);
-  static JPetSigCh
-  generateSigCh(double tdcChannelTime, const JPetTOMBChannel &channel,
-                std::map<unsigned int, std::vector<double>> &timeCalibrationMap,
-                std::map<unsigned int, std::vector<double>> &thresholdsMap,
-                JPetSigCh::EdgeType edge, bool setTHRValuesFromChannels);
+  static void sortByTime(std::vector<JPetSigCh> &input);
+  static std::vector<JPetSigCh> buildSigChs(
+    TDCChannel *tdcChannel, const JPetChannel &channel,
+    std::map<unsigned int, std::vector<double>> &timeCalibrationMap,
+    double maxTime, double minTime
+  );
+  static void flagSigChs(
+    std::vector<JPetSigCh> &inputSigChs, JPetStatistics &stats, bool saveHistos
+  );
+  static JPetSigCh generateSigCh(
+    double tdcChannelTime, const JPetChannel &channel,
+    std::map<unsigned int, std::vector<double>> &timeCalibrationMap,
+    JPetSigCh::EdgeType edge
+  );
 };
 
 #endif /* !TIMEWINDOWCREATORTOOLS_H */

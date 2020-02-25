@@ -174,6 +174,9 @@ endif()
 ################################################################################
 ## Directories with examples
 add_subdirectory(ModularDetectorAnalysis)
+add_subdirectory(EventClassification)
+add_subdirectory(MCGeantAnalysis)
+
 #add_subdirectory(LargeBarrelAnalysis)
 
 #add_subdirectory(InterThresholdCalibration)
@@ -182,7 +185,6 @@ add_subdirectory(ModularDetectorAnalysis)
 #add_subdirectory(ImageReconstruction)
 #add_subdirectory(ScopeLoaderExample)
 #add_subdirectory(TimeCalibration)
-#add_subdirectory(MCGeantAnalysis)
 #add_subdirectory(PhysicAnalysis)
 #add_subdirectory(CosmicAnalysis)
 #add_subdirectory(ScopeAnalysis)

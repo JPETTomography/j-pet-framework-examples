@@ -173,12 +173,12 @@ JPetHit HitFinderTools::createHit(
 * Calculation of the total TOT of the hit - Time over Threshold:
 * the sum of the TOTs on both thresholds and on the both sides (A,B)
 */
-double HitFinderTools::calculateTOT(const JPetHit& hit)
+double HitFinderTools::calculateTOT(JPetHit& hit)
 {
   double tot = 0.0;
 
-  auto rawSignalsA = hit.getSignalA().getRawSignals();
-  auto rawSignalsB = hit.getSignalA().getRawSignals();
+  auto rawSignalsA = dynamic_cast<const JPetMatrixSignal&>(hit.getSignalA()).getRawSignals();
+  auto rawSignalsB = dynamic_cast<const JPetMatrixSignal&>(hit.getSignalB()).getRawSignals();
 
   for(auto rawSig: rawSignalsA){
     auto sigALead = rawSig.second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);

@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -13,6 +13,8 @@
  *  @file EventCategorizerTools.cpp
  */
 
+#include <JPetMatrixSignal/JPetMatrixSignal.h>
+#include <JPetPhysSignal/JPetPhysSignal.h>
 #include "EventCategorizerTools.h"
 #include <TMath.h>
 #include <vector>
@@ -39,7 +41,9 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
         secondHit = event.getHits().at(i);
       }
       // Checking for back to back
-      double thetaDiff = fabs(firstHit.getBarrelSlot().getTheta() - secondHit.getBarrelSlot().getTheta());
+      double thetaDiff = fabs(
+        firstHit.getScin().getSlot().getTheta() - secondHit.getScin().getSlot().getTheta()
+      );
       double minTheta = 180.0 - b2bSlotThetaDiff;
       double maxTheta = 180.0 + b2bSlotThetaDiff;
       if (thetaDiff > minTheta && thetaDiff < maxTheta) {
@@ -76,9 +80,9 @@ bool EventCategorizerTools::checkFor3Gamma(const JPetEvent& event, JPetStatistic
         JPetHit thirdHit = event.getHits().at(k);
 
         vector<double> thetaAngles;
-        thetaAngles.push_back(firstHit.getBarrelSlot().getTheta());
-        thetaAngles.push_back(secondHit.getBarrelSlot().getTheta());
-        thetaAngles.push_back(thirdHit.getBarrelSlot().getTheta());
+        thetaAngles.push_back(firstHit.getScin().getSlot().getTheta());
+        thetaAngles.push_back(secondHit.getScin().getSlot().getTheta());
+        thetaAngles.push_back(thirdHit.getScin().getSlot().getTheta());
         sort(thetaAngles.begin(), thetaAngles.end());
 
         vector<double> relativeAngles;
@@ -166,25 +170,54 @@ double EventCategorizerTools::calculateTOT(const JPetHit& hit)
 {
   double tot = 0.0;
 
-  auto sigALead = hit.getSignalA().getRecoSignal().getRawSignal()
-                  .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-  auto sigBLead = hit.getSignalB().getRecoSignal().getRawSignal()
-                  .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-  auto sigATrail = hit.getSignalA().getRecoSignal().getRawSignal()
-                   .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-  auto sigBTrail = hit.getSignalB().getRecoSignal().getRawSignal()
-                   .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+  if(hit.getScin().getSlot().getType() == JPetSlot::Barrel) {
+    auto physSigA = dynamic_cast<const JPetPhysSignal&>(hit.getSignalA());
+    auto physSigB = dynamic_cast<const JPetPhysSignal&>(hit.getSignalB());
 
-  if (sigALead.size() > 0 && sigATrail.size() > 0) {
-    for (unsigned i = 0; i < sigALead.size() && i < sigATrail.size(); i++) {
-      tot += (sigATrail.at(i).getValue() - sigALead.at(i).getValue());
+    auto sigALead = physSigA.getRecoSignal().getRawSignal()
+    .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+    auto sigBLead = physSigB.getRecoSignal().getRawSignal()
+    .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+    auto sigATrail = physSigA.getRecoSignal().getRawSignal()
+    .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+    auto sigBTrail = physSigB.getRecoSignal().getRawSignal()
+    .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+
+    if (sigALead.size() > 0 && sigATrail.size() > 0) {
+      for (unsigned i = 0; i < sigALead.size() && i < sigATrail.size(); i++) {
+        tot += (sigATrail.at(i).getTime() - sigALead.at(i).getTime());
+      }
+    }
+    if (sigBLead.size() > 0 && sigBTrail.size() > 0) {
+      for (unsigned i = 0; i < sigBLead.size() && i < sigBTrail.size(); i++) {
+        tot += (sigBTrail.at(i).getTime() - sigBLead.at(i).getTime());
+      }
+    }
+  } else if(hit.getScin().getSlot().getType() == JPetSlot::Module){
+    auto rawSignalsA = dynamic_cast<const JPetMatrixSignal&>(hit.getSignalA()).getRawSignals();
+    auto rawSignalsB = dynamic_cast<const JPetMatrixSignal&>(hit.getSignalB()).getRawSignals();
+
+    for(auto rawSig: rawSignalsA){
+      auto sigALead = rawSig.second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+      auto sigATrail = rawSig.second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+      if (sigALead.size() > 0 && sigATrail.size() > 0){
+        for (unsigned i = 0; i < sigALead.size() && i < sigATrail.size(); i++){
+          tot += (sigATrail.at(i).getTime() - sigALead.at(i).getTime());
+        }
+      }
+    }
+
+    for(auto rawSig: rawSignalsB){
+      auto sigBLead = rawSig.second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+      auto sigBTrail = rawSig.second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+      if (sigBLead.size() > 0 && sigBTrail.size() > 0){
+        for (unsigned i = 0; i < sigBLead.size() && i < sigBTrail.size(); i++){
+          tot += (sigBTrail.at(i).getTime() - sigBLead.at(i).getTime());
+        }
+      }
     }
   }
-  if (sigBLead.size() > 0 && sigBTrail.size() > 0) {
-    for (unsigned i = 0; i < sigBLead.size() && i < sigBTrail.size(); i++) {
-      tot += (sigBTrail.at(i).getValue() - sigBLead.at(i).getValue());
-    }
-  }
+
   return tot;
 }
 
@@ -238,7 +271,7 @@ TVector3 EventCategorizerTools::calculateAnnihilationPoint(const TVector3& hitA,
 
 double EventCategorizerTools::calculateTOFByConvention(const JPetHit& hitA, const JPetHit& hitB)
 {
-  if (hitA.getBarrelSlot().getTheta() < hitB.getBarrelSlot().getTheta()) {
+  if (hitA.getScin().getSlot().getTheta() < hitB.getScin().getSlot().getTheta()) {
     return calculateTOF(hitA, hitB);
   } else {
     return calculateTOF(hitB, hitA);
@@ -297,8 +330,8 @@ bool EventCategorizerTools::stream2Gamma(
       // Checking for back to back
       double timeDiff = fabs(firstHit.getTime() - secondHit.getTime());
       double deltaLor = (secondHit.getTime() - firstHit.getTime()) * kLightVelocity_cm_ps / 2.;
-      double theta1 = min(firstHit.getBarrelSlot().getTheta(), secondHit.getBarrelSlot().getTheta());
-      double theta2 = max(firstHit.getBarrelSlot().getTheta(), secondHit.getBarrelSlot().getTheta());
+      double theta1 = min(firstHit.getScin().getSlot().getTheta(), secondHit.getScin().getSlot().getTheta());
+      double theta2 = max(firstHit.getScin().getSlot().getTheta(), secondHit.getScin().getSlot().getTheta());
       double thetaDiff = min(theta2 - theta1, 360.0 - theta2 + theta1);
       if (saveHistos) {
         stats.getHisto1D("2Gamma_TimeDiff")->Fill(timeDiff / 1000.0);
@@ -340,9 +373,9 @@ bool EventCategorizerTools::stream3Gamma(
         JPetHit thirdHit = event.getHits().at(k);
 
         vector<double> thetaAngles;
-        thetaAngles.push_back(firstHit.getBarrelSlot().getTheta());
-        thetaAngles.push_back(secondHit.getBarrelSlot().getTheta());
-        thetaAngles.push_back(thirdHit.getBarrelSlot().getTheta());
+        thetaAngles.push_back(firstHit.getScin().getSlot().getTheta());
+        thetaAngles.push_back(secondHit.getScin().getSlot().getTheta());
+        thetaAngles.push_back(thirdHit.getScin().getSlot().getTheta());
         sort(thetaAngles.begin(), thetaAngles.end());
 
         vector<double> relativeAngles;

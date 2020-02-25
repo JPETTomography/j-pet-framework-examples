@@ -48,7 +48,7 @@ public:
     const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2,
     JPetStatistics& stats, bool saveHistos
   );
-  static double calculateTOT(const JPetHit& hit);
+  static double calculateTOT(JPetHit& hit);
 };
 
 #endif /* !HITFINDERTOOLS_H */

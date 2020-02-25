@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -118,7 +118,7 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
       event.setRecoFlag(JPetEvent::Corrupted);
     }
     // Checking, if following hits fulfill time window condition,
-    // then moving interator 
+    // then moving interator
     unsigned int nextCount = 1;
     while(count+nextCount < nHits){
       auto nextHit = dynamic_cast<const JPetHit&>(timeWindow.operator[](count+nextCount));
