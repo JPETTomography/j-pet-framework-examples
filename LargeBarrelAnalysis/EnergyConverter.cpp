@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2019 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -10,32 +10,34 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- *  @file ToTConverter.cpp
+ *  @file EnergyConverter.cpp
  */
 
-#include "ToTConverter.h"
+#include "EnergyConverter.h"
+#include "CommonConstants.h"
 #include "JPetLoggerInclude.h"
+
 using namespace jpet_common_tools;
 
-ToTConverter getToTConverter(RunType type)
+EnergyConverter getEnergyConverter(RunType type)
 {
   if (type == kRun4)
   {
     JPetCachedFunctionParams params("[0]+ [1] * TMath::Log(x - [2]) + [3]* "
                                     "TMath::Power(TMath::Log(x - [2]), 2)",
                                     {-2332.32, 632.038, 606.909, -42.0769});
-    ToTConverter conv(params, Range(10000, 100., 940.));
+    EnergyConverter conv(params, Range(10000, 100., 940.));
     return conv;
   }
   else
   {
     WARNING("No parameterization given");
     JPetCachedFunctionParams params("pol0", {-1});
-    ToTConverter conv(params, Range(1, 0., 1));
+    EnergyConverter conv(params, Range(1, 0., 1));
     return conv;
   }
 }
 
-ToTConverter::ToTConverter(const ToTParams& params, const ToTRange range) : fFunction(params, range) {}
+EnergyConverter::EnergyConverter(const EnergyParams& params, const EnergyRange range) : fFunction(params, range) {}
 
-double ToTConverter::operator()(double E) const { return fFunction(E); }
+double EnergyConverter::operator()(double tot) const { return fFunction(tot); }

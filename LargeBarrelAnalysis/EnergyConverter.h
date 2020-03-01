@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2019 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -10,29 +10,28 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- *  @file ToTConverter.h
+ *  @file EnergyConverter.h
  */
 
-#ifndef TOTCONVERTER_H
-#define TOTCONVERTER_H
+#ifndef ENERGYCONVERTER_H
+#define ENERGYCONVERTER_H
 #include "CommonConstants.h"
 #include <JPetCachedFunction/JPetCachedFunction.h>
 
-class ToTConverter
+class EnergyConverter
 {
-
-  using ToTParams = jpet_common_tools::JPetCachedFunctionParams;
-  using ToTRange = jpet_common_tools::Range;
+  using EnergyParams = jpet_common_tools::JPetCachedFunctionParams;
+  using EnergyRange = jpet_common_tools::Range;
   using CachedFunction = jpet_common_tools::JPetCachedFunction1D;
 
 public:
-  ToTConverter(const ToTParams& params, ToTRange);
-  double operator()(double E) const;
+  EnergyConverter(const EnergyParams& params, EnergyRange);
+  double operator()(double tot) const;
 
 private:
   CachedFunction fFunction;
 };
 
-ToTConverter getConverter(jpet_common_tools::RunType type);
+EnergyConverter getConverter(jpet_common_tools::RunType type);
 
-#endif /*  !TOTCONVERTER_H */
+#endif /*  !ENERGYCONVERTER_H */
