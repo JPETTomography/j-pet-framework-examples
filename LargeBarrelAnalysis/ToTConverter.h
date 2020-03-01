@@ -33,6 +33,6 @@ private:
   CachedFunction fFunction;
 };
 
-ToTConverter getConverter(jpet_common_tools::RunType type);
+ToTConverter getToTConverter(jpet_common_tools::RunType type);
 
 #endif /*  !TOTCONVERTER_H */

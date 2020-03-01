@@ -32,6 +32,6 @@ private:
   CachedFunction fFunction;
 };
 
-EnergyConverter getConverter(jpet_common_tools::RunType type);
+EnergyConverter getEnergyConverter(jpet_common_tools::RunType type);
 
 #endif /*  !ENERGYCONVERTER_H */
