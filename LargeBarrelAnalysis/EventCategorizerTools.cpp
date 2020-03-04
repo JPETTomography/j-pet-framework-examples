@@ -111,7 +111,7 @@ bool EventCategorizerTools::checkForPrompt(
   double deexTOTCutMin, double deexTOTCutMax)
 {
   for (unsigned i = 0; i < event.getHits().size(); i++) {
-    double tot = calculateTOT(event.getHits().at(i));
+    double tot = calculateTOT(event.getHits().at(i), TOTCalculationType::kStandard);
     if (tot > deexTOTCutMin && tot < deexTOTCutMax) {
       if (saveHistos) {
         stats.getHisto1D("Deex_TOT_cut")->Fill(tot);
@@ -153,8 +153,8 @@ bool EventCategorizerTools::checkForScatter(
 
       if (fabs(scattTOF - timeDiff) < scatterTOFTimeDiff) {
         if (saveHistos) {
-          stats.getHisto2D("ScatterAngle_PrimaryTOT")->Fill(scattAngle, calculateTOT(primaryHit));
-          stats.getHisto2D("ScatterAngle_ScatterTOT")->Fill(scattAngle, calculateTOT(scatterHit));
+          stats.getHisto2D("ScatterAngle_PrimaryTOT")->Fill(scattAngle, calculateTOT(primaryHit, TOTCalculationType::kStandard));
+          stats.getHisto2D("ScatterAngle_ScatterTOT")->Fill(scattAngle, calculateTOT(scatterHit, TOTCalculationType::kStandard));
         }
         return true;
       }
@@ -167,10 +167,11 @@ bool EventCategorizerTools::checkForScatter(
 * Calculation of the total TOT of the hit - Time over Threshold:
 * the sum of the TOTs on all of the thresholds (1-4) and on the both sides (A,B)
 */
-double EventCategorizerTools::calculateTOT(const JPetHit& hit)
+double EventCategorizerTools::calculateTOT(const JPetHit& hit, TOTCalculationType type)
 {
   double tot = 0.0;
-
+  double weight = 1.;
+                                         
   auto sigALead = hit.getSignalA().getRecoSignal().getRawSignal()
                   .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
   auto sigBLead = hit.getSignalB().getRecoSignal().getRawSignal()
@@ -179,15 +180,41 @@ double EventCategorizerTools::calculateTOT(const JPetHit& hit)
                    .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
   auto sigBTrail = hit.getSignalB().getRecoSignal().getRawSignal()
                    .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-
+                   
   if (sigALead.size() > 0 && sigATrail.size() > 0) {
     for (unsigned i = 0; i < sigALead.size() && i < sigATrail.size(); i++) {
-      tot += (sigATrail.at(i).getValue() - sigALead.at(i).getValue());
+      if( i>0 ) {
+        if( type == TOTCalculationType::kAdjustedToThresholds || type == TOTCalculationType::kAdjustedToThresholdsExtended) {
+          weight = (sigALead.at(i).getThreshold() - sigALead.at(i-1).getThreshold())/sigALead.at(0).getThreshold();
+          if( type == TOTCalculationType::kAdjustedToThresholdsExtended ) {
+            tot += weight*((sigATrail.at(i).getValue() - sigALead.at(i).getValue()) - 
+                            (sigATrail.at(i-1).getValue() - sigALead.at(i-1).getValue()))/2;
+          }
+        }
+        else
+          weight = 1.;
+      }
+      else 
+        weight = 1.;
+      tot += weight*(sigATrail.at(i).getValue() - sigALead.at(i).getValue());
     }
   }
   if (sigBLead.size() > 0 && sigBTrail.size() > 0) {
     for (unsigned i = 0; i < sigBLead.size() && i < sigBTrail.size(); i++) {
-      tot += (sigBTrail.at(i).getValue() - sigBLead.at(i).getValue());
+      if( i>0 ) {
+        if( type == TOTCalculationType::kAdjustedToThresholds || type == TOTCalculationType::kAdjustedToThresholdsExtended) {
+          weight = (sigBLead.at(i).getThreshold() - sigBLead.at(i-1).getThreshold())/sigBLead.at(0).getThreshold();
+          if( type == TOTCalculationType::kAdjustedToThresholdsExtended ) {
+            tot += weight*((sigBTrail.at(i).getValue() - sigBLead.at(i).getValue()) - 
+                            (sigBTrail.at(i-1).getValue() - sigBLead.at(i-1).getValue()))/2;
+          }
+        }
+        else
+          weight = 1.;
+      }
+      else 
+        weight = 1.;
+      tot += weight*(sigBTrail.at(i).getValue() - sigBLead.at(i).getValue());
     }
   }
   return tot;
