@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_SUITE(SignalTransformerToolsTestSuite)
 BOOST_AUTO_TEST_CASE(getRawSigMtxMap_test_empty)
 {
   JPetStatistics stats;
-  auto results = SignalTransformerTools::getRawSigMtxMap(nullptr, stats, false);
+  auto results = SignalTransformerTools::getRawSigMtxMap(nullptr);
   BOOST_REQUIRE(results.empty());
 }
 
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(getRawSigMtxMap_test)
   slot.add<JPetRawSignal>(sig39);
 
   JPetStatistics stats;
-  auto results = SignalTransformerTools::getRawSigMtxMap(&slot, stats, false);
+  auto results = SignalTransformerTools::getRawSigMtxMap(&slot);
 
   BOOST_REQUIRE_EQUAL(results.size(), 3);
 
@@ -166,6 +166,13 @@ BOOST_AUTO_TEST_CASE(mergeRawSignalsOnSide_test)
 
   JPetSigCh sigChD1(JPetSigCh::Leading, 31.5);
 
+  JPetSigCh sigChE1(JPetSigCh::Leading, 40.5);
+  JPetSigCh sigChE2(JPetSigCh::Leading, 40.9);
+  JPetSigCh sigChE3(JPetSigCh::Leading, 41.2);
+  JPetSigCh sigChE4(JPetSigCh::Leading, 41.8);
+  JPetSigCh sigChE5(JPetSigCh::Leading, 42.5);
+  JPetSigCh sigChE6(JPetSigCh::Leading, 42.9);
+
   sigChA1.setChannel(channel1);
   sigChA2.setChannel(channel2);
   sigChA3.setChannel(channel3);
@@ -180,10 +187,18 @@ BOOST_AUTO_TEST_CASE(mergeRawSignalsOnSide_test)
 
   sigChD1.setChannel(channel2);
 
+  sigChE1.setChannel(channel1);
+  sigChE2.setChannel(channel2);
+  sigChE3.setChannel(channel3);
+  sigChE4.setChannel(channel4);
+  sigChE5.setChannel(channel2);
+  sigChE6.setChannel(channel3);
+
   JPetRawSignal sigA1, sigA2, sigA3, sigA4;
   JPetRawSignal sigB1, sigB2;
   JPetRawSignal sigC1, sigC2, sigC3;
   JPetRawSignal sigD1;
+  JPetRawSignal sigE1, sigE2, sigE3, sigE4, sigE5, sigE6;
 
   sigA1.setPM(sigChA1.getChannel().getPM());
   sigA1.addPoint(sigChA1);
@@ -209,17 +224,41 @@ BOOST_AUTO_TEST_CASE(mergeRawSignalsOnSide_test)
   sigD1.setPM(sigChD1.getChannel().getPM());
   sigD1.addPoint(sigChD1);
 
+  sigE1.setPM(sigChE1.getChannel().getPM());
+  sigE1.addPoint(sigChE1);
+  sigE2.setPM(sigChE2.getChannel().getPM());
+  sigE2.addPoint(sigChE2);
+  sigE3.setPM(sigChE3.getChannel().getPM());
+  sigE3.addPoint(sigChE3);
+  sigE4.setPM(sigChE4.getChannel().getPM());
+  sigE4.addPoint(sigChE4);
+  sigE5.setPM(sigChE5.getChannel().getPM());
+  sigE5.addPoint(sigChE5);
+  sigE6.setPM(sigChE6.getChannel().getPM());
+  sigE6.addPoint(sigChE6);
+
   std::vector<JPetRawSignal> rawSigVec;
   rawSigVec.push_back(sigA1);
   rawSigVec.push_back(sigA2);
   rawSigVec.push_back(sigA3);
   rawSigVec.push_back(sigA4);
+
   rawSigVec.push_back(sigB1);
   rawSigVec.push_back(sigB2);
+
   rawSigVec.push_back(sigC1);
   rawSigVec.push_back(sigC2);
   rawSigVec.push_back(sigC3);
+
   rawSigVec.push_back(sigD1);
+
+  rawSigVec.push_back(sigE1);
+  rawSigVec.push_back(sigE2);
+  rawSigVec.push_back(sigE3);
+  rawSigVec.push_back(sigE4);
+  rawSigVec.push_back(sigE5);
+  rawSigVec.push_back(sigE6);
+
 
   JPetStatistics stats;
   auto result = SignalTransformerTools::mergeRawSignalsOnSide(
@@ -227,11 +266,13 @@ BOOST_AUTO_TEST_CASE(mergeRawSignalsOnSide_test)
   );
 
   double epsilon = 0.00001;
-  BOOST_REQUIRE_EQUAL(result.size(), 4);
+  BOOST_REQUIRE_EQUAL(result.size(), 6);
   BOOST_REQUIRE_EQUAL(result.at(0).getRawSignals().size(), 4);
   BOOST_REQUIRE_EQUAL(result.at(1).getRawSignals().size(), 2);
   BOOST_REQUIRE_EQUAL(result.at(2).getRawSignals().size(), 3);
   BOOST_REQUIRE_EQUAL(result.at(3).getRawSignals().size(), 1);
+  BOOST_REQUIRE_EQUAL(result.at(4).getRawSignals().size(), 4);
+  BOOST_REQUIRE_EQUAL(result.at(5).getRawSignals().size(), 2);
 
   auto timeA1 = SignalTransformerTools::getRawSigBaseTime(result.at(0).getRawSignals().at(1));
   auto timeA2 = SignalTransformerTools::getRawSigBaseTime(result.at(0).getRawSignals().at(2));
@@ -247,6 +288,13 @@ BOOST_AUTO_TEST_CASE(mergeRawSignalsOnSide_test)
 
   auto timeD1 = SignalTransformerTools::getRawSigBaseTime(result.at(3).getRawSignals().at(2));
 
+  auto timeE1 = SignalTransformerTools::getRawSigBaseTime(result.at(4).getRawSignals().at(1));
+  auto timeE2 = SignalTransformerTools::getRawSigBaseTime(result.at(4).getRawSignals().at(2));
+  auto timeE3 = SignalTransformerTools::getRawSigBaseTime(result.at(4).getRawSignals().at(3));
+  auto timeE4 = SignalTransformerTools::getRawSigBaseTime(result.at(4).getRawSignals().at(4));
+  auto timeE5 = SignalTransformerTools::getRawSigBaseTime(result.at(5).getRawSignals().at(2));
+  auto timeE6 = SignalTransformerTools::getRawSigBaseTime(result.at(5).getRawSignals().at(3));
+
   BOOST_REQUIRE_CLOSE(timeA1, 10.0, epsilon);
   BOOST_REQUIRE_CLOSE(timeA2, 11.0, epsilon);
   BOOST_REQUIRE_CLOSE(timeA3, 12.0, epsilon);
@@ -261,6 +309,12 @@ BOOST_AUTO_TEST_CASE(mergeRawSignalsOnSide_test)
 
   BOOST_REQUIRE_CLOSE(timeD1, 31.5, epsilon);
 
+  BOOST_REQUIRE_CLOSE(timeE1, 40.5, epsilon);
+  BOOST_REQUIRE_CLOSE(timeE2, 40.9, epsilon);
+  BOOST_REQUIRE_CLOSE(timeE3, 41.2, epsilon);
+  BOOST_REQUIRE_CLOSE(timeE4, 41.8, epsilon);
+  BOOST_REQUIRE_CLOSE(timeE5, 42.5, epsilon);
+  BOOST_REQUIRE_CLOSE(timeE6, 42.9, epsilon);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
