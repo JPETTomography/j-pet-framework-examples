@@ -76,12 +76,12 @@ bool TimeWindowCreator::exec()
       auto tdcChannel = dynamic_cast<TDCChannel* const> (tdcChannels->At(i));
       auto channelNumber = tdcChannel->GetChannel();
 
-      // Skip trigger signals - every 105th
-      if(channelNumber % 105 == 0) continue;
+      // Skip trigger signals - every 105th modulo 104
+      if(channelNumber % 105 == 104) continue;
 
-      // Check if channel exists in database from loaded local xml file
+      // Check if channel exists in database from loaded local json file
       if(getParamBank().getChannels().count(channelNumber) == 0) {
-        getStatistics().getHisto1D("wrong_ftab")->Fill(channelNumber);
+        getStatistics().getHisto1D("wrong_channel")->Fill(channelNumber);
         continue;
       }
 
@@ -123,12 +123,12 @@ void TimeWindowCreator::saveSigChs(const vector<JPetSigCh>& sigChVec)
         fOutputEvents->add<JPetSigCh>(sigCh);
 
         if(fSaveControlHistos){
-          getStatistics().getHisto1D("channel_occ")->Fill(sigCh.getChannel().getID());
-          getStatistics().getHisto1D("pm_occ")->Fill(sigCh.getChannel().getPM().getID());
-          getStatistics().getHisto1D("scin_occ")->Fill(sigCh.getChannel().getPM().getScin().getID());
           if(gRandom->Uniform()<fScalingFactor){
+            getStatistics().getHisto1D("channel_occ")->Fill(sigCh.getChannel().getID());
             getStatistics().getHisto1D("channel_thrnum")->Fill(sigCh.getChannel().getThresholdNumber());
+            getStatistics().getHisto1D("pm_occ")->Fill(sigCh.getChannel().getPM().getID());
             getStatistics().getHisto1D("matrix_occ")->Fill(sigCh.getChannel().getPM().getMatrixPosition());
+            getStatistics().getHisto1D("scin_occ")->Fill(sigCh.getChannel().getPM().getScin().getID());
             if(sigCh.getChannel().getPM().getSide()==JPetPM::SideA){
               getStatistics().getHisto1D("pm_occ_sides")->Fill(1);
             } else if(sigCh.getChannel().getPM().getSide()==JPetPM::SideB){
@@ -167,23 +167,23 @@ void TimeWindowCreator::initialiseHistograms(){
   getStatistics().getHisto1D("sig_ch_per_time_slot")
   ->GetYaxis()->SetTitle("Number of Time Slots");
 
+  // Channels
+  auto minChannelID = getParamBank().getChannels().begin()->first;
+  auto maxChannelID = getParamBank().getChannels().rbegin()->first;
+
   // Wrong configuration
   getStatistics().createHistogram(
     new TH1F(
-      "wrong_ftab", "FTAB IDs not found in the xml configuration",
-      12150, 0.5, 12150.5
+      "wrong_channel", "Channel IDs not found in the json configuration",
+      maxChannelID-minChannelID+1, minChannelID-0.5, maxChannelID+0.5
     )
   );
-  getStatistics().getHisto1D("wrong_ftab")->GetXaxis()->SetTitle("FTAB ID");
-  getStatistics().getHisto1D("wrong_ftab")->GetYaxis()->SetTitle("Number of SigCh");
-
-  // Channels
-  auto minChannelID = getParamBank().getChannels().begin()->first;
-  auto maxChannelID = getParamBank().getChannels().end()->first;
+  getStatistics().getHisto1D("wrong_channel")->GetXaxis()->SetTitle("Channel ID");
+  getStatistics().getHisto1D("wrong_channel")->GetYaxis()->SetTitle("Number of SigCh");
 
   getStatistics().createHistogram(
     new TH1F(
-      "channel_occ", "Channels occupation",
+      "channel_occ", "Channels occupation (downscaled)",
       maxChannelID-minChannelID+1, minChannelID-0.5, maxChannelID+0.5
     )
   );
@@ -198,11 +198,11 @@ void TimeWindowCreator::initialiseHistograms(){
 
   // SiPMs
   auto minPMID = getParamBank().getPMs().begin()->first;
-  auto maxPMID = getParamBank().getPMs().end()->first;
+  auto maxPMID = getParamBank().getPMs().rbegin()->first;
 
   getStatistics().createHistogram(
     new TH1F(
-      "pm_occ", "PMs occupation",
+      "pm_occ", "PMs occupation (downscaled)",
       maxPMID-minPMID+1, minPMID-0.5, maxPMID+0.5
     )
   );
@@ -219,11 +219,11 @@ void TimeWindowCreator::initialiseHistograms(){
   // Scins
   auto scinsMap = getParamBank().getScins();
   auto minScinID = scinsMap.begin()->first;
-  auto maxScinID = scinsMap.end()->first;
+  auto maxScinID = scinsMap.rbegin()->first;
 
   getStatistics().createHistogram(
     new TH1F(
-      "scin_occ", "Scins occupation",
+      "scin_occ", "Scins occupation (downscaled)",
       maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5
     )
   );

@@ -75,28 +75,26 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeSignalsAllSiPMs(
   for (auto& rawSigScin : rawSigMtxMap) {
     for (auto& rawSigSide : rawSigScin.second){
 
-      if(saveHistos) {
+      // if(saveHistos) {
         // Iterate over all signals, to get consecutive time difference
-        for (unsigned int i=0; i<rawSigSide.size()-1; i++){
-          if(i>=rawSigSide.size()){ break; }
+        // for (unsigned int i=0; i<rawSigSide.size()-1; i++){
+        //   if(i>=rawSigSide.size()){ break; }
 
-          auto pos1 = rawSigSide.at(i).getPM().getMatrixPosition();
-          auto pos2 = rawSigSide.at(i+1).getPM().getMatrixPosition();
-          if(pos1 == pos2) { continue; }
+          // auto pos1 = rawSigSide.at(i).getPM().getMatrixPosition();
+          // auto pos2 = rawSigSide.at(i+1).getPM().getMatrixPosition();
+          // if(pos1 == pos2) { continue; }
+          //
+          // auto scinID = rawSigSide.at(i).getPM().getScin().getID();
+          // auto t1 = getRawSigBaseTime(rawSigSide.at(i));
+          // auto t2 = getRawSigBaseTime(rawSigSide.at(i+1));
 
-          auto scinID = rawSigSide.at(i).getPM().getScin().getID();
-          auto t1 = getRawSigBaseTime(rawSigSide.at(i));
-          auto t2 = getRawSigBaseTime(rawSigSide.at(i+1));
-
-          // std::cout << Form("tdiff_%d_A_%d_%d", scinID, pos1, pos1) << std::endl;
-
-          if(rawSigSide.at(i).getPM().getSide()==JPetPM::SideA){
-            stats.getHisto1D(Form("tdiff_%d_A_%d_%d", scinID, pos1, pos2))->Fill(t2-t1);
-          } else if(rawSigSide.at(i).getPM().getSide()==JPetPM::SideB){
-            stats.getHisto1D(Form("tdiff_%d_B_%d_%d", scinID, pos1, pos2))->Fill(t2-t1);
-          }
-        }
-      }
+          // if(rawSigSide.at(i).getPM().getSide()==JPetPM::SideA){
+          //   stats.getHisto1D(Form("tdiff_%d_A_%d_%d", scinID, pos1, pos2))->Fill(t2-t1);
+          // } else if(rawSigSide.at(i).getPM().getSide()==JPetPM::SideB){
+          //   stats.getHisto1D(Form("tdiff_%d_B_%d_%d", scinID, pos1, pos2))->Fill(t2-t1);
+          // }
+        // }
+      // }
 
       auto mtxSignals = mergeRawSignalsOnSide(
         rawSigSide, mergingTime, stats, saveHistos
@@ -126,40 +124,23 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(
       ERROR("Problem with adding the first signal to new object.");
       break;
     }
+    mtxSig.setTime(getRawSigBaseTime(rawSigVec.at(0)));
 
     unsigned int nextIndex = 1;
     while(true){
+
       if(rawSigVec.size() <= nextIndex){
         // nothing left to check
         break;
       }
 
-      // signal mathing condidion
-      if(getRawSigBaseTime(rawSigVec.at(nextIndex))
-        -getRawSigBaseTime(rawSigVec.at(0))<mergingTime
+      // signal matching condidion
+      if(fabs(getRawSigBaseTime(rawSigVec.at(nextIndex))
+        -getRawSigBaseTime(rawSigVec.at(0))) < mergingTime
       ){
-
         // mathing signal found
         if(mtxSig.addRawSignal(rawSigVec.at(nextIndex))){
           // added succesfully
-          // if(saveHistos){
-          //
-          //   auto scinID = rawSigVec.at(0).getPM().getScin().getID();
-          //   auto pos1 = 0;
-          //   auto pos2 = 0;
-          //
-          //   if(rawSigVec.at(0).getPM().getMatrixPosition()
-          //   < rawSigVec.at(nextIndex).getPM().getMatrixPosition()) {
-          //     pos1 = rawSigVec.at(0).getPM().getMatrixPosition();
-          //     pos2 = rawSigVec.at(nextIndex).getPM().getMatrixPosition();
-          //   }else{
-          //     pos1 = rawSigVec.at(nextIndex).getPM().getMatrixPosition();
-          //     pos2 = rawSigVec.at(0).getPM().getMatrixPosition();
-          //   }
-
-            // stats.getHisto1D(Form("tdiff_Scin_%d_Pos_%d_%d", scinID, pos1, pos2))
-            // ->Fill(getRawSigBaseTime(rawSigVec.at(nextIndex))-getRawSigBaseTime(rawSigVec.at(0)));
-          // }
           rawSigVec.erase(rawSigVec.begin()+nextIndex);
         } else {
           // this mtx pos is already occupied, check the next one

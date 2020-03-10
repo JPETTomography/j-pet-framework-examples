@@ -14,6 +14,7 @@
  */
 
 #include "SignalFinderTools.h"
+#include <TRandom.h>
 
 using namespace std;
 
@@ -103,6 +104,11 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(
     );
     if(closestTrailingSigCh != -1) {
       rawSig.addPoint(thrTrailingSigCh.at(0).at(closestTrailingSigCh));
+      if(saveHistos){
+        stats.getHisto1D("lead_trail_thr1_diff")->Fill(
+          thrTrailingSigCh.at(0).at(closestTrailingSigCh).getTime()-thrLeadingSigCh.at(0).at(0).getTime()
+        );
+      }
       thrTrailingSigCh.at(0).erase(thrTrailingSigCh.at(0).begin()+closestTrailingSigCh);
     }
 
@@ -133,7 +139,7 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(
   }
 
   // Filling control histograms
-  if(saveHistos){
+  if(saveHistos && gRandom->Uniform() < 0.001) {
     for(int jj=0; jj<numberOfThrs; jj++){
       for(auto sigCh : thrLeadingSigCh.at(jj)){
         stats.getHisto1D("unused_sigch_thr")->Fill(2*sigCh.getChannel().getThresholdNumber()-1);

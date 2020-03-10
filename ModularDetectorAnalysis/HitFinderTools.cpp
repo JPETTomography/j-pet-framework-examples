@@ -39,6 +39,8 @@ void HitFinderTools::sortByTime(vector<JPetMatrixSignal>& sigVec)
 map<int, vector<JPetMatrixSignal>> HitFinderTools::getSignalsByScin(
   const JPetTimeWindow* timeWindow
 ){
+  // INFO("Hit finding mapping");
+
   map<int, vector<JPetMatrixSignal>> signalScinMap;
   if (!timeWindow) {
     WARNING("Pointer of Time Window object is not set, returning empty map");
@@ -67,6 +69,9 @@ vector<JPetHit> HitFinderTools::matchAllSignals(
   map<int, vector<JPetMatrixSignal>>& allSignals,
   double timeDiffAB, JPetStatistics& stats, bool saveHistos
 ) {
+  // INFO("Hit finding matching all");
+  INFO(Form("Vec size %d", (int) allSignals.size()));
+
   vector<JPetHit> allHits;
   for (auto& scinSigals : allSignals) {
     // Loop for other slots than reference one
@@ -85,6 +90,8 @@ vector<JPetHit> HitFinderTools::matchSignals(
   vector<JPetMatrixSignal>& scinSigals, double timeDiffAB,
   JPetStatistics& stats, bool saveHistos
 ) {
+  INFO("Hit finding matching scin");
+
   vector<JPetHit> scinHits;
   vector<JPetMatrixSignal> remainSignals;
   sortByTime(scinSigals);
@@ -149,10 +156,10 @@ JPetHit HitFinderTools::createHit(
   JPetHit hit;
   hit.setSignals(signalA, signalB);
   hit.setTime((signalA.getTime() + signalB.getTime()) / 2.0);
-  hit.setQualityOfTime((signalA.getTimeStdDev() + signalB.getTimeStdDev()) / 2.0);
+  hit.setQualityOfTime(-1.0);
   hit.setTimeDiff(signalB.getTime() - signalA.getTime());
-  hit.setQualityOfTimeDiff((signalA.getTimeStdDev() + signalB.getTimeStdDev()) / 2.0);
-  hit.setEnergy(-1.0);
+  hit.setQualityOfTimeDiff(-1.0);
+  hit.setEnergy(signalA.getTOT()+signalB.getTOT());
   hit.setQualityOfEnergy(-1.0);
   hit.setPosX(signalA.getPM().getScin().getCenterX());
   hit.setPosY(signalA.getPM().getScin().getCenterY());

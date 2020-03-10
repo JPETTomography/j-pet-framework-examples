@@ -61,7 +61,9 @@ bool SignalTransformer::exec()
     );
 
     // Saving method invocation
-    saveMatrixSignals(mergedSignals);
+    if(mergedSignals.size()>0){
+      saveMatrixSignals(mergedSignals);
+    }
 
   } else { return false; }
   return true;
@@ -76,8 +78,11 @@ bool SignalTransformer::terminate()
 /**
 * Save objects and make some histograms
 */
-void SignalTransformer::saveMatrixSignals(std::vector<JPetMatrixSignal>& mtxSigVec)
+void SignalTransformer::saveMatrixSignals(const std::vector<JPetMatrixSignal>& mtxSigVec)
 {
+  if(fSaveControlHistos){
+    getStatistics().getHisto1D("mtxsig_tslot")->Fill(mtxSigVec.size());
+  }
   for (auto& mtxSig : mtxSigVec) {
     fOutputEvents->add<JPetMatrixSignal>(mtxSig);
     if(fSaveControlHistos){
@@ -93,16 +98,51 @@ void SignalTransformer::saveMatrixSignals(std::vector<JPetMatrixSignal>& mtxSigV
 
 void SignalTransformer::initialiseHistograms()
 {
-  auto scinsMap = getParamBank().getScins();
-  auto minScinID = scinsMap.begin()->first;
-  auto maxScinID = scinsMap.end()->first;
-
   // MatrixSignal multiplicity
   getStatistics().createHistogram(new TH1F(
     "mtxsig_multi", "Multiplicity of matched MatrixSignals", 4, 0.5, 4.5
   ));
   getStatistics().getHisto1D("mtxsig_multi")->GetXaxis()->SetTitle("Number of Raw Signals in Matrix Signal");
   getStatistics().getHisto1D("mtxsig_multi")->GetYaxis()->SetTitle("Number of Matrix Signals");
+
+  getStatistics().createHistogram(new TH1F(
+    "mtxsig_tslot", "Number of Matrix Signals in Time Window", 150, -0.5, 149.5
+  ));
+  getStatistics().getHisto1D("mtxsig_tslot")->GetXaxis()->SetTitle("Number of Matrix Signal in Time Window");
+  getStatistics().getHisto1D("mtxsig_tslot")->GetYaxis()->SetTitle("Number of Time Windows");
+
+  auto minScinID = getParamBank().getScins().begin()->first;
+  auto maxScinID = getParamBank().getScins().rbegin()->first;
+
+  // Time differences of consecutive RawSigs per SiPMs pair - all combinations
+  // for(auto& scin : getParamBank().getScins()) {
+  //   auto scinID = scin.second->getID();
+  //   if(scinID > 230) { break; }
+  //   for(int i=1; i<=4; i++){
+  //     for(int j=1; j<=4; j++){
+  //       if(i == j) { continue; }
+  //       getStatistics().createHistogram(new TH1F(
+  //         Form("tdiff_%d_A_%d_%d", scinID, i, j),
+  //         Form("Time diff of consecutive signals on scin %d side A matrix positions %d vs %d", scinID, i, j),
+  //         200, 0.0, 100000.0
+  //       ));
+  //       getStatistics().getHisto1D(Form("tdiff_%d_A_%d_%d", scinID, i, j))
+  //       ->GetXaxis()->SetTitle("Time difference [ps]");
+  //       getStatistics().getHisto1D(Form("tdiff_%d_A_%d_%d", scinID, i, j))
+  //       ->GetYaxis()->SetTitle("Number of Raw Signal pairs");
+  //
+  //       getStatistics().createHistogram(new TH1F(
+  //         Form("tdiff_%d_B_%d_%d", scinID, i, j),
+  //         Form("Time diff of consecutive signals on scin %d side B matrix positions %d vs %d", scinID, i, j),
+  //         200, 0.0, 100000.0
+  //       ));
+  //       getStatistics().getHisto1D(Form("tdiff_%d_B_%d_%d", scinID, i, j))
+  //       ->GetXaxis()->SetTitle("Time difference [ps]");
+  //       getStatistics().getHisto1D(Form("tdiff_%d_B_%d_%d", scinID, i, j))
+  //       ->GetYaxis()->SetTitle("Number of Raw Signal pairs");
+  //     }
+  //   }
+  // }
 
   // Mtx Signals per scintillator
   getStatistics().createHistogram(new TH1F(
@@ -118,34 +158,4 @@ void SignalTransformer::initialiseHistograms()
   ));
   getStatistics().getHisto1D("mtxsig_per_scin_sideB")->GetXaxis()->SetTitle("Scin ID");
   getStatistics().getHisto1D("mtxsig_per_scin_sideB")->GetYaxis()->SetTitle("Number of Matrix Signals");
-
-  // Time differences
-  // Per SiPMs pair - all combinations
-  for(auto& scin : scinsMap) {
-    auto scinID = scin.first;
-    for(int i=1; i<=4; i++){
-      for(int j=1; j<=4; j++){
-        if(i == j) { continue; }
-        getStatistics().createHistogram(new TH1F(
-          Form("tdiff_%d_A_%d_%d", scinID, i, j),
-          Form("Time diff of consecutive signals on scin %d side A matrix positions %d vs %d", scinID, i, j),
-          200, 0.0, 25000.0
-        ));
-        getStatistics().getHisto1D(Form("tdiff_%d_A_%d_%d", scinID, i, j))
-        ->GetXaxis()->SetTitle("Time difference [ps]");
-        getStatistics().getHisto1D(Form("tdiff_%d_A_%d_%d", scinID, i, j))
-        ->GetYaxis()->SetTitle("Number of Raw Signal pairs");
-
-        getStatistics().createHistogram(new TH1F(
-          Form("tdiff_%d_B_%d_%d", scinID, i, j),
-          Form("Time diff of consecutive signals on scin %d side B matrix positions %d vs %d", scinID, i, j),
-          200, 0.0, 25000.0
-        ));
-        getStatistics().getHisto1D(Form("tdiff_%d_B_%d_%d", scinID, i, j))
-        ->GetXaxis()->SetTitle("Time difference [ps]");
-        getStatistics().getHisto1D(Form("tdiff_%d_B_%d_%d", scinID, i, j))
-        ->GetYaxis()->SetTitle("Number of Raw Signal pairs");
-      }
-    }
-  }
 }

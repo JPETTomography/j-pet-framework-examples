@@ -87,23 +87,23 @@ bool EventCategorizer::exec()
       bool is2Gamma = EventCategorizerTools::checkFor2Gamma(
         event, getStatistics(), fSaveControlHistos, fB2BSlotThetaDiff
       );
-      bool is3Gamma = EventCategorizerTools::checkFor3Gamma(
-        event, getStatistics(), fSaveControlHistos
-      );
-      bool isPrompt = EventCategorizerTools::checkForPrompt(
-        event, getStatistics(), fSaveControlHistos, fDeexTOTCutMin, fDeexTOTCutMax
-      );
-      bool isScattered = EventCategorizerTools::checkForScatter(
-        event, getStatistics(), fSaveControlHistos, fScatterTOFTimeDiff
-      );
+      // bool is3Gamma = EventCategorizerTools::checkFor3Gamma(
+      //   event, getStatistics(), fSaveControlHistos
+      // );
+      // bool isPrompt = EventCategorizerTools::checkForPrompt(
+      //   event, getStatistics(), fSaveControlHistos, fDeexTOTCutMin, fDeexTOTCutMax
+      // );
+      // bool isScattered = EventCategorizerTools::checkForScatter(
+      //   event, getStatistics(), fSaveControlHistos, fScatterTOFTimeDiff
+      // );
+
+      // if(is3Gamma) newEvent.addEventType(JPetEventType::k3Gamma);
+      // if(isPrompt) newEvent.addEventType(JPetEventType::kPrompt);
+      // if(isScattered) newEvent.addEventType(JPetEventType::kScattered);
 
       JPetEvent newEvent = event;
-      if(is2Gamma) newEvent.addEventType(JPetEventType::k2Gamma);
-      if(is3Gamma) newEvent.addEventType(JPetEventType::k3Gamma);
-      if(isPrompt) newEvent.addEventType(JPetEventType::kPrompt);
-      if(isScattered) newEvent.addEventType(JPetEventType::kScattered);
-
-      if(fSaveControlHistos){
+      if(is2Gamma) {
+        newEvent.addEventType(JPetEventType::k2Gamma);
         for(auto hit : event.getHits()){
           getStatistics().getHisto2D("All_XYpos")->Fill(hit.getPosX(), hit.getPosY());
         }

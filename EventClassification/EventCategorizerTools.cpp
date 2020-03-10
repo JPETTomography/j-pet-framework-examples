@@ -14,7 +14,6 @@
  */
 
 #include <JPetMatrixSignal/JPetMatrixSignal.h>
-#include <JPetPhysSignal/JPetPhysSignal.h>
 #include "EventCategorizerTools.h"
 #include <TMath.h>
 #include <vector>
@@ -170,50 +169,25 @@ double EventCategorizerTools::calculateTOT(const JPetHit& hit)
 {
   double tot = 0.0;
 
-  if(hit.getScin().getSlot().getType() == JPetSlot::Barrel) {
-    auto physSigA = dynamic_cast<const JPetPhysSignal&>(hit.getSignalA());
-    auto physSigB = dynamic_cast<const JPetPhysSignal&>(hit.getSignalB());
+  auto rawSignalsA = hit.getSignalA().getRawSignals();
+  auto rawSignalsB = hit.getSignalB().getRawSignals();
 
-    auto sigALead = physSigA.getRecoSignal().getRawSignal()
-    .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-    auto sigBLead = physSigB.getRecoSignal().getRawSignal()
-    .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-    auto sigATrail = physSigA.getRecoSignal().getRawSignal()
-    .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-    auto sigBTrail = physSigB.getRecoSignal().getRawSignal()
-    .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-
-    if (sigALead.size() > 0 && sigATrail.size() > 0) {
-      for (unsigned i = 0; i < sigALead.size() && i < sigATrail.size(); i++) {
+  for(auto rawSig: rawSignalsA){
+    auto sigALead = rawSig.second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+    auto sigATrail = rawSig.second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+    if (sigALead.size() > 0 && sigATrail.size() > 0){
+      for (unsigned i = 0; i < sigALead.size() && i < sigATrail.size(); i++){
         tot += (sigATrail.at(i).getTime() - sigALead.at(i).getTime());
       }
     }
-    if (sigBLead.size() > 0 && sigBTrail.size() > 0) {
-      for (unsigned i = 0; i < sigBLead.size() && i < sigBTrail.size(); i++) {
+  }
+
+  for(auto rawSig: rawSignalsB){
+    auto sigBLead = rawSig.second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+    auto sigBTrail = rawSig.second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+    if (sigBLead.size() > 0 && sigBTrail.size() > 0){
+      for (unsigned i = 0; i < sigBLead.size() && i < sigBTrail.size(); i++){
         tot += (sigBTrail.at(i).getTime() - sigBLead.at(i).getTime());
-      }
-    }
-  } else if(hit.getScin().getSlot().getType() == JPetSlot::Module){
-    auto rawSignalsA = dynamic_cast<const JPetMatrixSignal&>(hit.getSignalA()).getRawSignals();
-    auto rawSignalsB = dynamic_cast<const JPetMatrixSignal&>(hit.getSignalB()).getRawSignals();
-
-    for(auto rawSig: rawSignalsA){
-      auto sigALead = rawSig.second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-      auto sigATrail = rawSig.second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-      if (sigALead.size() > 0 && sigATrail.size() > 0){
-        for (unsigned i = 0; i < sigALead.size() && i < sigATrail.size(); i++){
-          tot += (sigATrail.at(i).getTime() - sigALead.at(i).getTime());
-        }
-      }
-    }
-
-    for(auto rawSig: rawSignalsB){
-      auto sigBLead = rawSig.second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-      auto sigBTrail = rawSig.second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-      if (sigBLead.size() > 0 && sigBTrail.size() > 0){
-        for (unsigned i = 0; i < sigBLead.size() && i < sigBTrail.size(); i++){
-          tot += (sigBTrail.at(i).getTime() - sigBLead.at(i).getTime());
-        }
       }
     }
   }
@@ -263,9 +237,11 @@ TVector3 EventCategorizerTools::calculateAnnihilationPoint(const TVector3& hitA,
   TVector3 versorOnLOR = (hitB - hitA).Unit()  ;
 
   double shift = 0.5 * tof  * kLightVelocity_cm_ps;
-  TVector3 annihilationPoint(middleOfLOR.X() + shift * versorOnLOR.X(),
-                             middleOfLOR.Y() + shift * versorOnLOR.Y(),
-                             middleOfLOR.Z() + shift * versorOnLOR.Z());
+  TVector3 annihilationPoint(
+    middleOfLOR.X() + shift * versorOnLOR.X(),
+    middleOfLOR.Y() + shift * versorOnLOR.Y(),
+    middleOfLOR.Z() + shift * versorOnLOR.Z()
+  );
   return annihilationPoint;
 }
 
