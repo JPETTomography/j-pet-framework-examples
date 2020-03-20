@@ -29,51 +29,56 @@ EventCategorizer::~EventCategorizer() {}
 bool EventCategorizer::init()
 {
   INFO("Event categorization started.");
-  // Parameter for back to back categorization
-  if (isOptionSet(fParams.getOptions(), kBack2BackSlotThetaDiffParamKey)){
-    fB2BSlotThetaDiff = getOptionAsFloat(fParams.getOptions(), kBack2BackSlotThetaDiffParamKey);
-  } else {
-    WARNING(Form(
-      "No value of the %s parameter provided by the user. Using default value of %lf.",
-      kBack2BackSlotThetaDiffParamKey.c_str(), fB2BSlotThetaDiff
-    ));
-  }
-  // Parameter for scattering determination
-  if (isOptionSet(fParams.getOptions(), kScatterTOFTimeDiffParamKey)) {
-    fScatterTOFTimeDiff = getOptionAsFloat(fParams.getOptions(), kScatterTOFTimeDiffParamKey);
-  } else {
-    WARNING(Form(
-      "No value of the %s parameter provided by the user. Using default value of %lf.",
-      kScatterTOFTimeDiffParamKey.c_str(), fScatterTOFTimeDiff
-    ));
-  }
-  // Parameters for deexcitation TOT cut
-  if (isOptionSet(fParams.getOptions(), kDeexTOTCutMinParamKey)) {
-    fDeexTOTCutMin = getOptionAsFloat(fParams.getOptions(), kDeexTOTCutMinParamKey);
-  } else {
-    WARNING(Form(
-      "No value of the %s parameter provided by the user. Using default value of %lf.",
-      kDeexTOTCutMinParamKey.c_str(), fDeexTOTCutMin
-    ));
-  }
-  if (isOptionSet(fParams.getOptions(), kDeexTOTCutMaxParamKey)) {
-    fDeexTOTCutMax = getOptionAsFloat(fParams.getOptions(), kDeexTOTCutMaxParamKey);
-  } else {
-    WARNING(Form(
-      "No value of the %s parameter provided by the user. Using default value of %lf.",
-      kDeexTOTCutMaxParamKey.c_str(), fDeexTOTCutMax
-    ));
-  }
-  // Getting bool for saving histograms
-  if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey)) {
-    fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
-  }
+   // Parameter for back to back categorization
+   if (isOptionSet(fParams.getOptions(), kBack2BackSlotThetaDiffParamKey)){
+     fB2BSlotThetaDiff = getOptionAsFloat(fParams.getOptions(), kBack2BackSlotThetaDiffParamKey);
+   } else {
+     WARNING(Form(
+       "No value of the %s parameter provided by the user. Using default value of %lf.",
+       kBack2BackSlotThetaDiffParamKey.c_str(), fB2BSlotThetaDiff
+     ));
+   }
+   // Parameter for scattering determination
+   if (isOptionSet(fParams.getOptions(), kScatterTOFTimeDiffParamKey)) {
+     fScatterTOFTimeDiff = getOptionAsFloat(fParams.getOptions(), kScatterTOFTimeDiffParamKey);
+   } else {
+     WARNING(Form(
+       "No value of the %s parameter provided by the user. Using default value of %lf.",
+       kScatterTOFTimeDiffParamKey.c_str(), fScatterTOFTimeDiff
+     ));
+   }
+   // Parameters for deexcitation TOT cut
+   if (isOptionSet(fParams.getOptions(), kDeexTOTCutMinParamKey)) {
+     fDeexTOTCutMin = getOptionAsFloat(fParams.getOptions(), kDeexTOTCutMinParamKey);
+   } else {
+     WARNING(Form(
+       "No value of the %s parameter provided by the user. Using default value of %lf.",
+       kDeexTOTCutMinParamKey.c_str(), fDeexTOTCutMin
+     ));
+   }
+   if (isOptionSet(fParams.getOptions(), kDeexTOTCutMaxParamKey)) {
+     fDeexTOTCutMax = getOptionAsFloat(fParams.getOptions(), kDeexTOTCutMaxParamKey);
+   } else {
+     WARNING(Form(
+       "No value of the %s parameter provided by the user. Using default value of %lf.",
+       kDeexTOTCutMaxParamKey.c_str(), fDeexTOTCutMax
+     ));
+   }
+   if (isOptionSet(fParams.getOptions(), kMaxTimeDiffParamKey)) {
+     fMaxTimeDiff = getOptionAsFloat(fParams.getOptions(), kMaxTimeDiffParamKey);
+   } else {
+     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMaxTimeDiffParamKey.c_str(), fMaxTimeDiff));
+   }
+   // Getting bool for saving histograms
+   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey)) {
+     fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
+   }
 
-  // Input events type
-  fOutputEvents = new JPetTimeWindow("JPetEvent");
-  // Initialise hisotgrams
-  if(fSaveControlHistos) initialiseHistograms();
-  return true;
+   // Input events type
+   fOutputEvents = new JPetTimeWindow("JPetEvent");
+   // Initialise hisotgrams
+   if(fSaveControlHistos) initialiseHistograms();
+   return true;
 }
 
 bool EventCategorizer::exec()
@@ -87,23 +92,23 @@ bool EventCategorizer::exec()
       bool is2Gamma = EventCategorizerTools::checkFor2Gamma(
         event, getStatistics(), fSaveControlHistos, fB2BSlotThetaDiff
       );
-      // bool is3Gamma = EventCategorizerTools::checkFor3Gamma(
-      //   event, getStatistics(), fSaveControlHistos
-      // );
-      // bool isPrompt = EventCategorizerTools::checkForPrompt(
-      //   event, getStatistics(), fSaveControlHistos, fDeexTOTCutMin, fDeexTOTCutMax
-      // );
-      // bool isScattered = EventCategorizerTools::checkForScatter(
-      //   event, getStatistics(), fSaveControlHistos, fScatterTOFTimeDiff
-      // );
-
-      // if(is3Gamma) newEvent.addEventType(JPetEventType::k3Gamma);
-      // if(isPrompt) newEvent.addEventType(JPetEventType::kPrompt);
-      // if(isScattered) newEvent.addEventType(JPetEventType::kScattered);
+      bool is3Gamma = EventCategorizerTools::checkFor3Gamma(
+        event, getStatistics(), fSaveControlHistos
+      );
+      bool isPrompt = EventCategorizerTools::checkForPrompt(
+        event, getStatistics(), fSaveControlHistos, fDeexTOTCutMin, fDeexTOTCutMax
+      );
+      bool isScattered = EventCategorizerTools::checkForScatter(
+        event, getStatistics(), fSaveControlHistos, fScatterTOFTimeDiff
+      );
 
       JPetEvent newEvent = event;
-      if(is2Gamma) {
-        newEvent.addEventType(JPetEventType::k2Gamma);
+      if(is2Gamma) newEvent.addEventType(JPetEventType::k2Gamma);
+      if(is3Gamma) newEvent.addEventType(JPetEventType::k3Gamma);
+      if(isPrompt) newEvent.addEventType(JPetEventType::kPrompt);
+      if(isScattered) newEvent.addEventType(JPetEventType::kScattered);
+
+      if(fSaveControlHistos){
         for(auto hit : event.getHits()){
           getStatistics().getHisto2D("All_XYpos")->Fill(hit.getPosX(), hit.getPosY());
         }
@@ -127,14 +132,18 @@ void EventCategorizer::saveEvents(const vector<JPetEvent>& events)
 }
 
 void EventCategorizer::initialiseHistograms(){
-
   // General histograms
   getStatistics().createHistogram(
-    new TH2F("All_XYpos", "Hit position XY", 242, -60.5, 60.5, 121, -60.5, 60.5));
-  getStatistics().getHisto2D("All_XYpos")->GetXaxis()->SetTitle("Hit X position [cm]");
-  getStatistics().getHisto2D("All_XYpos")->GetYaxis()->SetTitle("Hit Y position [cm]");
+    new TH2F("All_XYpos", "Hits position XY", 222, -50.5, 50.5, 222, -50.5, 50.5));
+  getStatistics().getHisto2D("All_XYpos")->GetXaxis()->SetTitle("Y position [cm]");
+  getStatistics().getHisto2D("All_XYpos")->GetYaxis()->SetTitle("X position [cm]");
 
   // Histograms for 2Gamama category
+  getStatistics().createHistogram(
+    new TH2F("2Gamma_XYpos", "2 gamma hits position XY", 222, -50.5, 50.5, 222, -50.5, 50.5));
+  getStatistics().getHisto2D("All_XYpos")->GetXaxis()->SetTitle("Y position [cm]");
+  getStatistics().getHisto2D("All_XYpos")->GetYaxis()->SetTitle("X position [cm]");
+
   getStatistics().createHistogram(
     new TH1F("2Gamma_Zpos", "B2B hits Z position", 200, -50.0, 50.0));
   getStatistics().getHisto1D("2Gamma_Zpos")->GetXaxis()->SetTitle("Z axis position [cm]");
@@ -156,9 +165,9 @@ void EventCategorizer::initialiseHistograms(){
   getStatistics().getHisto1D("Annih_TOF")->GetYaxis()->SetTitle("Number of Annihilation Pairs");
 
   getStatistics().createHistogram(
-     new TH2F("AnnihPoint_XY", "XY position of annihilation point", 121, -60.5, 60.5, 121, -60.5, 60.5));
-  getStatistics().getHisto2D("AnnihPoint_XY")->GetXaxis()->SetTitle("X position [cm]");
-  getStatistics().getHisto2D("AnnihPoint_XY")->GetYaxis()->SetTitle("Y position [cm]");
+     new TH2F("AnnihPoint_XY", "XY position of annihilation point", 222, -50.5, 50.5, 222, -50.5, 50.5));
+  getStatistics().getHisto2D("AnnihPoint_XY")->GetXaxis()->SetTitle("Y position [cm]");
+  getStatistics().getHisto2D("AnnihPoint_XY")->GetYaxis()->SetTitle("X position [cm]");
 
   getStatistics().createHistogram(
     new TH2F("AnnihPoint_XZ", "XZ position of annihilation point", 121, -60.5, 60.5, 121, -60.5, 60.5));

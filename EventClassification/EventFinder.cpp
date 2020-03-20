@@ -17,6 +17,7 @@ using namespace std;
 
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include <JPetWriter/JPetWriter.h>
+#include "EventCategorizerTools.h"
 #include "EventFinder.h"
 #include <iostream>
 

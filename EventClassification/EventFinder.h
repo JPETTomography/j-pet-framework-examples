@@ -54,7 +54,7 @@ protected:
   const std::string kEventMinMultiplicity = "EventFinder_MinEventMultiplicity_int";
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kEventTimeParamKey = "EventFinder_EventTime_float";
-  double fEventTimeWindow = 5000.0;
+  double fEventTimeWindow = 15000.0;
   bool fUseCorruptedHits = false;
   bool fSaveControlHistos = true;
   uint fMinMultiplicity = 1;

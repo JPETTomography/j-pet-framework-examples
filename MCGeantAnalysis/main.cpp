@@ -27,8 +27,8 @@ int main(int argc, const char* argv[])
     manager.registerTask<EventFinder>("EventFinder");
     manager.registerTask<EventCategorizer>("EventCategorizer");
 
-    manager.useTask("EventFinder", "mc.hits", "unk.evt");
-    manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
+    manager.useTask("EventFinder", "hits", "unk.evt", 1);
+    manager.useTask("EventCategorizer", "unk.evt", "cat.evt", 1);
 
     manager.run(argc, argv);
   } catch (const std::exception& except) {

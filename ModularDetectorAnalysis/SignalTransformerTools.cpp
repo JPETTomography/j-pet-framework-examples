@@ -75,26 +75,28 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeSignalsAllSiPMs(
   for (auto& rawSigScin : rawSigMtxMap) {
     for (auto& rawSigSide : rawSigScin.second){
 
-      // if(saveHistos) {
+      if(saveHistos) {
         // Iterate over all signals, to get consecutive time difference
-        // for (unsigned int i=0; i<rawSigSide.size()-1; i++){
-        //   if(i>=rawSigSide.size()){ break; }
+        for (unsigned int i=0; i<rawSigSide.size()-1; i++){
+          if(i>=rawSigSide.size()){ break; }
 
-          // auto pos1 = rawSigSide.at(i).getPM().getMatrixPosition();
-          // auto pos2 = rawSigSide.at(i+1).getPM().getMatrixPosition();
-          // if(pos1 == pos2) { continue; }
-          //
-          // auto scinID = rawSigSide.at(i).getPM().getScin().getID();
-          // auto t1 = getRawSigBaseTime(rawSigSide.at(i));
-          // auto t2 = getRawSigBaseTime(rawSigSide.at(i+1));
+          auto pos1 = rawSigSide.at(i).getPM().getMatrixPosition();
+          auto pos2 = rawSigSide.at(i+1).getPM().getMatrixPosition();
+          if(pos1 == pos2) { continue; }
 
-          // if(rawSigSide.at(i).getPM().getSide()==JPetPM::SideA){
-          //   stats.getHisto1D(Form("tdiff_%d_A_%d_%d", scinID, pos1, pos2))->Fill(t2-t1);
-          // } else if(rawSigSide.at(i).getPM().getSide()==JPetPM::SideB){
-          //   stats.getHisto1D(Form("tdiff_%d_B_%d_%d", scinID, pos1, pos2))->Fill(t2-t1);
-          // }
-        // }
-      // }
+          auto scinID = rawSigSide.at(i).getPM().getScin().getID();
+          auto t1 = getRawSigBaseTime(rawSigSide.at(i));
+          auto t2 = getRawSigBaseTime(rawSigSide.at(i+1));
+
+          if(scinID < 200 || scinID > 227) { continue; }
+
+          if(rawSigSide.at(i).getPM().getSide()==JPetPM::SideA){
+            stats.getHisto1D(Form("tdiff_%d_A_%d_%d", scinID, pos1, pos2))->Fill(t2-t1);
+          } else if(rawSigSide.at(i).getPM().getSide()==JPetPM::SideB){
+            stats.getHisto1D(Form("tdiff_%d_B_%d_%d", scinID, pos1, pos2))->Fill(t2-t1);
+          }
+        }
+      }
 
       auto mtxSignals = mergeRawSignalsOnSide(
         rawSigSide, mergingTime, stats, saveHistos

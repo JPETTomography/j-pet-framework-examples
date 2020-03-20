@@ -139,6 +139,17 @@ void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& rawSigVec)
           ->Fill(trails.at(1).getTime()-trails.at(0).getTime());
         }
       }
+
+    }
+    if(leads.size() == 2 && pmID > 399 && pmID < 451){
+      getStatistics().getHisto1D(Form("lead_thr1_thr2_tdiff_pm_%d",
+      leads.at(0).getChannel().getPM().getID()))
+      ->Fill(leads.at(1).getTime()-leads.at(0).getTime());
+    }
+    if(trails.size() == 2 && pmID > 399 && pmID < 451){
+      getStatistics().getHisto1D(Form("trail_thr1_thr2_tdiff_pm_%d",
+      leads.at(0).getChannel().getPM().getID()))
+      ->Fill(leads.at(1).getTime()-leads.at(0).getTime());
     }
   }
 }
@@ -208,7 +219,6 @@ void SignalFinder::initialiseHistograms(){
   getStatistics().getHisto1D("rawsig_tslot")->GetXaxis()->SetTitle("Number of Raw Signal in Time Window");
   getStatistics().getHisto1D("rawsig_tslot")->GetYaxis()->SetTitle("Number of Time Windows");
 
-
   // Time differences
   getStatistics().createHistogram(new TH1F(
     "lead_thr1_thr2_diff",
@@ -218,7 +228,7 @@ void SignalFinder::initialiseHistograms(){
   getStatistics().getHisto1D("lead_thr1_thr2_diff")
     ->GetXaxis()->SetTitle("time diff [ps]");
   getStatistics().getHisto1D("lead_thr1_thr2_diff")
-    ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
+    ->GetYaxis()->SetTitle("Number of Signal Channel Pairs");
 
   getStatistics().createHistogram(new TH1F(
     "trail_thr1_thr2_diff",
@@ -228,7 +238,7 @@ void SignalFinder::initialiseHistograms(){
   getStatistics().getHisto1D("trail_thr1_thr2_diff")
   ->GetXaxis()->SetTitle("time diff [ps]");
   getStatistics().getHisto1D("trail_thr1_thr2_diff")
-  ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
+  ->GetYaxis()->SetTitle("Number of Signal Channel Pairs");
 
   getStatistics().createHistogram(new TH1F(
     "lead_trail_thr1_diff",
@@ -238,7 +248,7 @@ void SignalFinder::initialiseHistograms(){
   getStatistics().getHisto1D("lead_trail_thr1_diff")
     ->GetXaxis()->SetTitle("time diff [ps]");
   getStatistics().getHisto1D("lead_trail_thr1_diff")
-    ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
+    ->GetYaxis()->SetTitle("Number of Signal Channel Pairs");
 
   getStatistics().createHistogram(new TH1F(
     "lead_trail_thr2_diff",
@@ -248,5 +258,29 @@ void SignalFinder::initialiseHistograms(){
   getStatistics().getHisto1D("lead_trail_thr2_diff")
     ->GetXaxis()->SetTitle("time diff [ps]");
   getStatistics().getHisto1D("lead_trail_thr2_diff")
-    ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
+    ->GetYaxis()->SetTitle("Number of Signal Channel Pairs");
+
+  // Time differences THR1 and THR2 per SiPM
+  for(int i=400; i<=450; i++){
+    getStatistics().createHistogram(new TH1F(
+      Form("lead_thr1_thr2_tdiff_pm_%d", i),
+      Form("Time Difference between leading Signal Channels THR1 and THR2 in found signals on SiPM ID %d", i),
+      200, -fSigChEdgeMaxTime, fSigChEdgeMaxTime
+    ));
+    getStatistics().getHisto1D(Form("lead_thr1_thr2_tdiff_pm_%d", i))
+      ->GetXaxis()->SetTitle("time diff [ps]");
+    getStatistics().getHisto1D(Form("lead_thr1_thr2_tdiff_pm_%d", i))
+      ->GetYaxis()->SetTitle("Number of Signal Channel Pairs");
+
+    getStatistics().createHistogram(new TH1F(
+      Form("trail_thr1_thr2_tdiff_pm_%d", i),
+      Form("Time Difference between trailing Signal Channels THR1 and THR2 in found signals on SiPM ID %d", i),
+      200, -fSigChEdgeMaxTime, fSigChEdgeMaxTime
+    ));
+    getStatistics().getHisto1D(Form("trail_thr1_thr2_tdiff_pm_%d", i))
+    ->GetXaxis()->SetTitle("time diff [ps]");
+    getStatistics().getHisto1D(Form("trail_thr1_thr2_tdiff_pm_%d", i))
+    ->GetYaxis()->SetTitle("Number of Signal Channel Pairs");
+
+  }
 }
