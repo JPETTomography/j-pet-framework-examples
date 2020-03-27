@@ -69,12 +69,10 @@ vector<JPetHit> HitFinderTools::matchAllSignals(
   map<int, vector<JPetMatrixSignal>>& allSignals,
   double timeDiffAB, JPetStatistics& stats, bool saveHistos
 ) {
-  // INFO("Hit finding matching all");
-  INFO(Form("Vec size %d", (int) allSignals.size()));
+  INFO("Hit finding matching all");
 
   vector<JPetHit> allHits;
   for (auto& scinSigals : allSignals) {
-    // Loop for other slots than reference one
     auto scinHits = matchSignals(
       scinSigals.second, timeDiffAB, stats, saveHistos
     );
@@ -138,7 +136,7 @@ vector<JPetHit> HitFinderTools::matchSignals(
 }
 
 /**
- * Method for Hit creation - setting all fields, that make sense here
+ * Method for Hit creation - setting all fields that make sense here
  */
 JPetHit HitFinderTools::createHit(
   const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2,

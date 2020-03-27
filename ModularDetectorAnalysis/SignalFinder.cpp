@@ -141,15 +141,15 @@ void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& rawSigVec)
       }
 
     }
-    if(leads.size() == 2 && pmID > 399 && pmID < 451){
+    if(leads.size() == 2 && pmID > 400 && pmID < 618){
       getStatistics().getHisto1D(Form("lead_thr1_thr2_tdiff_pm_%d",
       leads.at(0).getChannel().getPM().getID()))
       ->Fill(leads.at(1).getTime()-leads.at(0).getTime());
     }
-    if(trails.size() == 2 && pmID > 399 && pmID < 451){
+    if(trails.size() == 2 && pmID > 400 && pmID < 618){
       getStatistics().getHisto1D(Form("trail_thr1_thr2_tdiff_pm_%d",
-      leads.at(0).getChannel().getPM().getID()))
-      ->Fill(leads.at(1).getTime()-leads.at(0).getTime());
+      trails.at(0).getChannel().getPM().getID()))
+      ->Fill(trails.at(1).getTime()-trails.at(0).getTime());
     }
   }
 }
@@ -261,7 +261,7 @@ void SignalFinder::initialiseHistograms(){
     ->GetYaxis()->SetTitle("Number of Signal Channel Pairs");
 
   // Time differences THR1 and THR2 per SiPM
-  for(int i=400; i<=450; i++){
+  for(int i=401; i<=617; i++){
     getStatistics().createHistogram(new TH1F(
       Form("lead_thr1_thr2_tdiff_pm_%d", i),
       Form("Time Difference between leading Signal Channels THR1 and THR2 in found signals on SiPM ID %d", i),

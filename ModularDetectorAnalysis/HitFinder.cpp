@@ -53,8 +53,6 @@ bool HitFinder::init()
 
 bool HitFinder::exec()
 {
-  // INFO("Hit finding exec");
-
   if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     auto signalsBySlot = HitFinderTools::getSignalsByScin(timeWindow);
     auto allHits = HitFinderTools::matchAllSignals(
@@ -79,6 +77,7 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
   auto sortedHits = JPetAnalysisTools::getHitsOrderedByTime(hits);
   for (auto& hit : sortedHits) {
     if (fSaveControlHistos) {
+      
       getStatistics().getHisto1D("tot_all_hits")->Fill(hit.getEnergy());
     }
     fOutputEvents->add<JPetHit>(hit);

@@ -57,7 +57,7 @@ bool SignalTransformer::exec()
 
     // Merging max. 4 Raw Signals into a MatrixSignal
     auto mergedSignals = SignalTransformerTools::mergeSignalsAllSiPMs(
-      rawSigMtxMap, 11.0, getStatistics(), true
+      rawSigMtxMap, fMergingTime, getStatistics(), true
     );
 
     // Saving method invocation
@@ -100,7 +100,7 @@ void SignalTransformer::initialiseHistograms()
 {
   // MatrixSignal multiplicity
   getStatistics().createHistogram(new TH1F(
-    "mtxsig_multi", "Multiplicity of matched MatrixSignals", 4, 0.5, 4.5
+    "mtxsig_multi", "Multiplicity of matched MatrixSignals", 5, 0.5, 5.5
   ));
   getStatistics().getHisto1D("mtxsig_multi")->GetXaxis()->SetTitle("Number of Raw Signals in Matrix Signal");
   getStatistics().getHisto1D("mtxsig_multi")->GetYaxis()->SetTitle("Number of Matrix Signals");
@@ -116,14 +116,13 @@ void SignalTransformer::initialiseHistograms()
 
   // Time differences of consecutive RawSigs per SiPMs pair - all combinations
   for(int scinID=201; scinID<227; scinID++) {
-    // if(scinID > 226) { break; }
     for(int i=1; i<=4; i++){
       for(int j=1; j<=4; j++){
         if(i == j) { continue; }
         getStatistics().createHistogram(new TH1F(
           Form("tdiff_%d_A_%d_%d", scinID, i, j),
           Form("Time diff of consecutive signals on scin %d side A matrix positions %d vs %d", scinID, i, j),
-          200, 0.0, 100000.0
+          200, 0.0, 2.0*fMergingTime
         ));
         getStatistics().getHisto1D(Form("tdiff_%d_A_%d_%d", scinID, i, j))
         ->GetXaxis()->SetTitle("Time difference [ps]");
@@ -133,7 +132,7 @@ void SignalTransformer::initialiseHistograms()
         getStatistics().createHistogram(new TH1F(
           Form("tdiff_%d_B_%d_%d", scinID, i, j),
           Form("Time diff of consecutive signals on scin %d side B matrix positions %d vs %d", scinID, i, j),
-          200, 0.0, 100000.0
+          200, 0.0, 2.0*fMergingTime
         ));
         getStatistics().getHisto1D(Form("tdiff_%d_B_%d_%d", scinID, i, j))
         ->GetXaxis()->SetTitle("Time difference [ps]");
