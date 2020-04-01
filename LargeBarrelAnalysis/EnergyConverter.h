@@ -15,7 +15,6 @@
 
 #ifndef ENERGYCONVERTER_H
 #define ENERGYCONVERTER_H
-#include "CommonConstants.h"
 #include <JPetCachedFunction/JPetCachedFunction.h>
 
 class EnergyConverter
@@ -32,6 +31,6 @@ private:
   CachedFunction fFunction;
 };
 
-EnergyConverter getEnergyConverter(jpet_common_tools::RunType type);
+EnergyConverter getEnergyConverter();
 
 #endif /*  !ENERGYCONVERTER_H */

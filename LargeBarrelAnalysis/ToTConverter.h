@@ -15,7 +15,6 @@
 
 #ifndef TOTCONVERTER_H
 #define TOTCONVERTER_H
-#include "CommonConstants.h"
 #include <JPetCachedFunction/JPetCachedFunction.h>
 
 class ToTConverter
@@ -33,6 +32,6 @@ private:
   CachedFunction fFunction;
 };
 
-ToTConverter getToTConverter(jpet_common_tools::RunType type);
+ToTConverter getToTConverter();
 
 #endif /*  !TOTCONVERTER_H */

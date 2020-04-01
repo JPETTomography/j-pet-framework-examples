@@ -14,28 +14,15 @@
  */
 
 #include "EnergyConverter.h"
-#include "CommonConstants.h"
 #include "JPetLoggerInclude.h"
 
-using namespace jpet_common_tools;
-
-EnergyConverter getEnergyConverter(RunType type)
+EnergyConverter getEnergyConverter()
 {
-  if (type == kRun4)
-  {
-    JPetCachedFunctionParams params("[0]+ [1] * TMath::Log(x - [2]) + [3]* "
-                                    "TMath::Power(TMath::Log(x - [2]), 2)",
-                                    {-2332.32, 632.038, 606.909, -42.0769});
-    EnergyConverter conv(params, Range(10000, 100., 940.));
-    return conv;
-  }
-  else
-  {
-    WARNING("No parameterization given");
-    JPetCachedFunctionParams params("pol0", {-1});
-    EnergyConverter conv(params, Range(1, 0., 1));
-    return conv;
-  }
+  JPetCachedFunctionParams params("[0]+ [1] * TMath::Log(x - [2]) + [3]* "
+                                  "TMath::Power(TMath::Log(x - [2]), 2)",
+                                  {-2332.32, 632.038, 606.909, -42.0769});
+  EnergyConverter conv(params, Range(10000, 100., 940.));
+  return conv;
 }
 
 EnergyConverter::EnergyConverter(const EnergyParams& params, const EnergyRange range) : fFunction(params, range) {}
