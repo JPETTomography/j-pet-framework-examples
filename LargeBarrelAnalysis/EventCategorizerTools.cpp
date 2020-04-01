@@ -111,7 +111,7 @@ bool EventCategorizerTools::checkForPrompt(
   double deexTOTCutMin, double deexTOTCutMax)
 {
   for (unsigned i = 0; i < event.getHits().size(); i++) {
-    double tot = calculateTOT(event.getHits().at(i), TOTCalculationType::kStandard);
+    double tot = calculateTOT(event.getHits().at(i), TOTCalculationType::kSimplified);
     if (tot > deexTOTCutMin && tot < deexTOTCutMax) {
       if (saveHistos) {
         stats.getHisto1D("Deex_TOT_cut")->Fill(tot);
@@ -153,8 +153,8 @@ bool EventCategorizerTools::checkForScatter(
 
       if (fabs(scattTOF - timeDiff) < scatterTOFTimeDiff) {
         if (saveHistos) {
-          stats.getHisto2D("ScatterAngle_PrimaryTOT")->Fill(scattAngle, calculateTOT(primaryHit, TOTCalculationType::kStandard));
-          stats.getHisto2D("ScatterAngle_ScatterTOT")->Fill(scattAngle, calculateTOT(scatterHit, TOTCalculationType::kStandard));
+          stats.getHisto2D("ScatterAngle_PrimaryTOT")->Fill(scattAngle, calculateTOT(primaryHit, TOTCalculationType::kSimplified));
+          stats.getHisto2D("ScatterAngle_ScatterTOT")->Fill(scattAngle, calculateTOT(scatterHit, TOTCalculationType::kSimplified));
         }
         return true;
       }
@@ -180,41 +180,32 @@ double EventCategorizerTools::calculateTOT(const JPetHit& hit, TOTCalculationTyp
                    .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
   auto sigBTrail = hit.getSignalB().getRecoSignal().getRawSignal()
                    .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-                   
-  if (sigALead.size() > 0 && sigATrail.size() > 0) {
-    for (unsigned i = 0; i < sigALead.size() && i < sigATrail.size(); i++) {
-      if( i>0 ) {
-        if( type == TOTCalculationType::kAdjustedToThresholds || type == TOTCalculationType::kAdjustedToThresholdsExtended) {
-          weight = (sigALead.at(i).getThreshold() - sigALead.at(i-1).getThreshold())/sigALead.at(0).getThreshold();
-          if( type == TOTCalculationType::kAdjustedToThresholdsExtended ) {
-            tot += weight*((sigATrail.at(i).getValue() - sigALead.at(i).getValue()) - 
-                            (sigATrail.at(i-1).getValue() - sigALead.at(i-1).getValue()))/2;
-          }
-        }
-        else
+
+  tot += calculateTOTside(sigALead, sigATrail, type);
+  tot += calculateTOTside(sigBLead, sigBTrail, type);
+  return tot;
+}
+
+double EventCategorizerTools::calculateTOTside(const std::vector<JPetSigCh> & leadPoints, const std::vector<JPetSigCh> & trailPoints, TOTCalculationType type)
+{
+  double tot = 0., weight = 1.;
+  if (leadPoints.size() > 0 && trailPoints.size() > 0) {
+    tot += (trailPoints.at(0).getValue() - leadPoints.at(0).getValue());
+    for (unsigned i = 1; i < leadPoints.size() && i < trailPoints.size(); i++) {
+      switch(type) {
+        case TOTCalculationType::kSimplified:
           weight = 1.;
+          break;
+        case TOTCalculationType::kThresholdRectangular:
+          weight = (leadPoints.at(i).getThreshold() - leadPoints.at(i-1).getThreshold())/leadPoints.at(0).getThreshold();
+          break;
+        case TOTCalculationType::kThresholdTrapeze:
+          weight = (leadPoints.at(i).getThreshold() - leadPoints.at(i-1).getThreshold())/leadPoints.at(0).getThreshold();
+          tot += weight*((trailPoints.at(i).getValue() - leadPoints.at(i).getValue()) - 
+                    (trailPoints.at(i-1).getValue() - leadPoints.at(i-1).getValue()))/2;
+          break;
       }
-      else 
-        weight = 1.;
-      tot += weight*(sigATrail.at(i).getValue() - sigALead.at(i).getValue());
-    }
-  }
-  if (sigBLead.size() > 0 && sigBTrail.size() > 0) {
-    for (unsigned i = 0; i < sigBLead.size() && i < sigBTrail.size(); i++) {
-      if( i>0 ) {
-        if( type == TOTCalculationType::kAdjustedToThresholds || type == TOTCalculationType::kAdjustedToThresholdsExtended) {
-          weight = (sigBLead.at(i).getThreshold() - sigBLead.at(i-1).getThreshold())/sigBLead.at(0).getThreshold();
-          if( type == TOTCalculationType::kAdjustedToThresholdsExtended ) {
-            tot += weight*((sigBTrail.at(i).getValue() - sigBLead.at(i).getValue()) - 
-                            (sigBTrail.at(i-1).getValue() - sigBLead.at(i-1).getValue()))/2;
-          }
-        }
-        else
-          weight = 1.;
-      }
-      else 
-        weight = 1.;
-      tot += weight*(sigBTrail.at(i).getValue() - sigBLead.at(i).getValue());
+      tot += weight*(trailPoints.at(i).getValue() - leadPoints.at(i).getValue());
     }
   }
   return tot;

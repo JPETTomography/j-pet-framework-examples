@@ -225,7 +225,7 @@ JPetEvent EventCategorizerPhysics::physicsAnalysis(vector<JPetHit> hits)
 
   for (unsigned i = 0; i < hits.size(); i++) {
     if (fabs(hits[i].getPosZ()) < fMaxZPos) {
-      double TOTofHit = EventCategorizerTools::calculateTOT(hits[i], EventCategorizerTools::TOTCalculationType::kStandard);
+      double TOTofHit = EventCategorizerTools::calculateTOT(hits[i], EventCategorizerTools::TOTCalculationType::kSimplified);
       if (fSaveControlHistos) {
         getStatistics().getHisto1D("AllHitTOT")->Fill(TOTofHit / 1000.);
       }
