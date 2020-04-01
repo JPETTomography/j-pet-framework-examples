@@ -16,6 +16,8 @@
 #include "EnergyConverter.h"
 #include "JPetLoggerInclude.h"
 
+using namespace jpet_common_tools;
+
 EnergyConverter getEnergyConverter()
 {
   JPetCachedFunctionParams params("[0]+ [1] * TMath::Log(x - [2]) + [3]* "

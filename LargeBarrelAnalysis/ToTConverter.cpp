@@ -16,6 +16,8 @@
 #include "ToTConverter.h"
 #include "JPetLoggerInclude.h"
 
+using namespace jpet_common_tools;
+
 ToTConverter getToTConverter()
 {
   JPetCachedFunctionParams params("[0]+ [1] * TMath::Log(x - [2]) + [3]* "
