@@ -20,7 +20,7 @@ using namespace jpet_common_tools;
 using FunctionFormula = std::string;
 using FunctionLimits = std::pair<double, double>;
 using FunctionParams = std::vector<double>;
-using FuncParamsAndLimits = std::pair<FunctionFormula , std::pair<FunctionParams, FunctionLimits> >;
+using FuncParamsAndLimits = std::pair<FunctionFormula, std::pair<FunctionParams, FunctionLimits>>;
 
 ToTConverter::ToTConverter(const ToTParams& params, const ToTRange range) : fFunction(params, range) {}
 
@@ -31,6 +31,7 @@ ToTConverter generateToTConverter(const FuncParamsAndLimits& formula)
   auto func = formula.first;
   auto funcParams = formula.second.first;
   auto funcLimits = formula.second.second;
+
   JPetCachedFunctionParams params(func, funcParams);
   ToTConverter conv(params, Range(10000, funcLimits.first, funcLimits.second));
   return conv;

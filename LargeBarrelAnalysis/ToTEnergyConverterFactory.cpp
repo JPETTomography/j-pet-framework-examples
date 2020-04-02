@@ -75,11 +75,10 @@ void ToTEnergyConverterFactory::loadOptions(const ToTEnergyConverterFactory::MyO
 
 ToTConverter ToTEnergyConverterFactory::getToTConverter() const
 {
-  return generateToTConverter(fToT2EnergyAll);
-
+  return generateToTConverter(fEnergy2ToTAll);
 }
 
 EnergyConverter ToTEnergyConverterFactory::getEnergyConverter() const
 {
-  return generateEnergyConverter(fEnergy2ToTAll);
+  return generateEnergyConverter(fToT2EnergyAll);
 }

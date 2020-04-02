@@ -40,7 +40,7 @@ public:
   EnergyConverter getEnergyConverter() const;
 
 private:
-  const std::string kEnergy2ToTParametersParamKey = "_ToTEnergyConverterFactory_Energy2ToTParameters_std::vector<double>";
+  const std::string kEnergy2ToTParametersParamKey = "ToTEnergyConverterFactory_Energy2ToTParameters_std::vector<double>";
   const std::string kEnergy2ToTFunctionParamKey = "ToTEnergyConverterFactory_Energy2ToTFunction_std::string";
   const std::string kEnergy2ToTFunctionLimitsParamKey = "ToTEnergyConverterFactory_Energy2ToTFunctionLimits_std::vector<double>";
 
