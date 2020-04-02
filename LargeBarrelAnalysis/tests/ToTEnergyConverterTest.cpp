@@ -1,17 +1,18 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE ToTEnergyConverterTest
 
-#include <boost/test/unit_test.hpp>
-#include "JPetLoggerInclude.h"
 #include "../ToTEnergyConverter.h"
+#include "JPetLoggerInclude.h"
+#include <boost/test/unit_test.hpp>
 using namespace jpet_common_tools;
 
 /// Returns Time-over-threshold for given deposited energy
 /// the current parametrization is par1 + par2 * eDep
 /// Returned value in ps, and eDep is given in keV.
-double getToT1(double eDep, double  par1 = -91958, double par2 = 19341)
+double getToT1(double eDep, double par1 = -91958, double par2 = 19341)
 {
-  if (eDep < 0 ) return 0;
+  if (eDep < 0)
+    return 0;
   double value = par1 + eDep * par2;
   return value;
 }

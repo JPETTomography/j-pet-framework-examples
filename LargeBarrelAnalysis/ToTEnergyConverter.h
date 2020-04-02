@@ -32,6 +32,6 @@ private:
   CachedFunction fFunction;
 };
 
-ToTEnergyConverter generateToTEnergyConverter(const std::pair<std::string, std::pair<std::vector<double>, std::pair<double, double> >>& formula);
+ToTEnergyConverter generateToTEnergyConverter(const std::pair<std::string, std::pair<std::vector<double>, std::pair<double, double>>>& formula);
 
 #endif /*  !TOTENERGYCONVERTER_H */

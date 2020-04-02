@@ -16,10 +16,10 @@
 #ifndef TOTENERGYCONVERTERFACTORY_H
 #define TOTENERGYCONVERTERFACTORY_H
 
-#include <string>
-#include <TF1.h>
 #include "JPetOptionsTools/JPetOptionsTools.h"
 #include "ToTEnergyConverter.h"
+#include <TF1.h>
+#include <string>
 
 class ToTEnergyConverterFactory
 {
@@ -28,14 +28,14 @@ public:
   using FunctionFormula = std::string;
   using FunctionParams = std::vector<double>;
   using FunctionLimits = std::pair<double, double>;
-  using FuncParamsAndLimits = std::pair<FunctionFormula , std::pair<FunctionParams, FunctionLimits> >;
+  using FuncParamsAndLimits = std::pair<FunctionFormula, std::pair<FunctionParams, FunctionLimits>>;
 
   ToTEnergyConverterFactory();
   ToTEnergyConverterFactory(ToTEnergyConverterFactory const&) = delete;
   ToTEnergyConverterFactory& operator=(ToTEnergyConverterFactory const&) = delete;
 
   void loadOptions(const MyOptions& opts);
-  ToTEnergyConverter getToTConverter() const ;
+  ToTEnergyConverter getToTConverter() const;
   ToTEnergyConverter getEnergyConverter() const;
 
 private:
@@ -50,6 +50,5 @@ private:
   FuncParamsAndLimits fEnergy2ToTAll;
   FuncParamsAndLimits fToT2EnergyAll;
 };
-
 
 #endif /*  !TOTENERGYCONVERTERFACTORY_H */

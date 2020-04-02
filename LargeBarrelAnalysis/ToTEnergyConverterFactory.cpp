@@ -18,7 +18,7 @@
 
 using namespace jpet_options_tools;
 
-ToTEnergyConverterFactory::ToTEnergyConverterFactory() { }
+ToTEnergyConverterFactory::ToTEnergyConverterFactory() {}
 
 void ToTEnergyConverterFactory::loadOptions(const ToTEnergyConverterFactory::MyOptions& opts)
 {
@@ -40,10 +40,12 @@ void ToTEnergyConverterFactory::loadOptions(const ToTEnergyConverterFactory::MyO
     energy2ToTLimits = getOptionAsVectorOfDoubles(opts, kEnergy2ToTFunctionLimitsParamKey);
   }
 
-  
-  if (energy2ToTLimits.size() == 2) {
+  if (energy2ToTLimits.size() == 2)
+  {
     fEnergy2ToTAll = {energy2ToTFormula, {energy2ToTParameters, {energy2ToTLimits[0], energy2ToTLimits[1]}}};
-  } else {
+  }
+  else
+  {
     fEnergy2ToTAll = {energy2ToTFormula, {energy2ToTParameters, {}}};
   }
 
@@ -65,20 +67,16 @@ void ToTEnergyConverterFactory::loadOptions(const ToTEnergyConverterFactory::MyO
     toT2EnergyLimits = getOptionAsVectorOfDoubles(opts, kToT2EnergyFunctionLimitsParamKey);
   }
 
-  if (toT2EnergyLimits.size() == 2) {
+  if (toT2EnergyLimits.size() == 2)
+  {
     fToT2EnergyAll = {toT2EnergyFormula, {toT2EnergyParameters, {toT2EnergyLimits[0], toT2EnergyLimits[1]}}};
-  } else {
+  }
+  else
+  {
     fToT2EnergyAll = {toT2EnergyFormula, {toT2EnergyParameters, {}}};
   }
 }
 
+ToTEnergyConverter ToTEnergyConverterFactory::getToTConverter() const { return generateToTEnergyConverter(fEnergy2ToTAll); }
 
-ToTEnergyConverter ToTEnergyConverterFactory::getToTConverter() const
-{
-  return generateToTEnergyConverter(fEnergy2ToTAll);
-}
-
-ToTEnergyConverter ToTEnergyConverterFactory::getEnergyConverter() const
-{
-  return generateToTEnergyConverter(fToT2EnergyAll);
-}
+ToTEnergyConverter ToTEnergyConverterFactory::getEnergyConverter() const { return generateToTEnergyConverter(fToT2EnergyAll); }
