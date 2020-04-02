@@ -43,7 +43,7 @@ private:
   const std::string kEnergy2ToTFunctionParamKey = "ToTEnergyConverterFactory_Energy2ToTFunction_std::string";
   const std::string kEnergy2ToTFunctionLimitsParamKey = "ToTEnergyConverterFactory_Energy2ToTFunctionLimits_std::vector<double>";
 
-  const std::string kToT2EnergyParametersParamKey = "_ToTEnergyConverterFactory_ToT2EnergyParameters_std::vector<double>";
+  const std::string kToT2EnergyParametersParamKey = "ToTEnergyConverterFactory_ToT2EnergyParameters_std::vector<double>";
   const std::string kToT2EnergyFunctionParamKey = "ToTEnergyConverterFactory_ToT2EnergyFunction_std::string";
   const std::string kToT2EnergyFunctionLimitsParamKey = "ToTEnergyConverterFactory_ToT2EnergyFunctionLimits_std::vector<double>";
 
