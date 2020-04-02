@@ -32,6 +32,6 @@ private:
   CachedFunction fFunction;
 };
 
-ToTConverter getToTConverter();
+ToTConverter generateToTConverter(const std::pair<std::string, std::pair<std::vector<double>, std::pair<double, double> >>& formula);
 
 #endif /*  !TOTCONVERTER_H */

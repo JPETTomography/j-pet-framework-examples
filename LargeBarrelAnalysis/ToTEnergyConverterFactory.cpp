@@ -10,15 +10,15 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- *  @file ToTEnergyConverter.cpp
+ *  @file ToTEnergyConverterFactory.cpp
  */
 
-#include "ToTEnergyConverter.h"
+#include "ToTEnergyConverterFactory.h"
 #include "JPetLoggerInclude.h"
 
 using namespace jpet_options_tools;
 
-void ToTEnergyConverter::loadOptions(const ToTEnergyConverter::MyOptions& opts)
+void ToTEnergyConverterFactory::loadOptions(const ToTEnergyConverterFactory::MyOptions& opts)
 {
   std::vector<double> energy2ToTParameters;
   if (isOptionSet(opts, kEnergy2ToTParametersParamKey))
@@ -38,6 +38,13 @@ void ToTEnergyConverter::loadOptions(const ToTEnergyConverter::MyOptions& opts)
     energy2ToTLimits = getOptionAsVectorOfDoubles(opts, kEnergy2ToTFunctionLimitsParamKey);
   }
 
+  
+  if (energy2ToTLimits.size() == 2) {
+    fEnergy2ToTAll = {energy2ToTFormula, {energy2ToTParameters, {energy2ToTLimits[0], energy2ToTLimits[1]}}};
+  } else {
+    fEnergy2ToTAll = {energy2ToTFormula, {energy2ToTParameters, {}}};
+  }
+
   std::vector<double> toT2EnergyParameters;
   if (isOptionSet(opts, kToT2EnergyParametersParamKey))
   {
@@ -55,4 +62,22 @@ void ToTEnergyConverter::loadOptions(const ToTEnergyConverter::MyOptions& opts)
   {
     toT2EnergyLimits = getOptionAsVectorOfDoubles(opts, kToT2EnergyFunctionLimitsParamKey);
   }
+
+  if (toT2EnergyLimits.size() == 2) {
+    fToT2EnergyAll = {toT2EnergyFormula, {toT2EnergyParameters, {toT2EnergyLimits[0], toT2EnergyLimits[1]}}};
+  } else {
+    fToT2EnergyAll = {toT2EnergyFormula, {toT2EnergyParameters, {}}};
+  }
+}
+
+
+ToTConverter ToTEnergyConverterFactory::getToTConverter()
+{
+  return generateToTConverter(fToT2EnergyAll);
+
+}
+
+EnergyConverter ToTEnergyConverterFactory::getEnergyConverter()
+{
+  return generateEnergyConverter(fEnergy2ToTAll);
 }

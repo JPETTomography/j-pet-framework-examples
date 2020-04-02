@@ -17,16 +17,21 @@
 #include "JPetLoggerInclude.h"
 
 using namespace jpet_common_tools;
-
-EnergyConverter getEnergyConverter()
-{
-  JPetCachedFunctionParams params("[0]+ [1] * TMath::Log(x - [2]) + [3]* "
-                                  "TMath::Power(TMath::Log(x - [2]), 2)",
-                                  {-2332.32, 632.038, 606.909, -42.0769});
-  EnergyConverter conv(params, Range(10000, 100., 940.));
-  return conv;
-}
+using FunctionFormula = std::string;
+using FunctionLimits = std::pair<double, double>;
+using FunctionParams = std::vector<double>;
+using FuncParamsAndLimits = std::pair<FunctionFormula , std::pair<FunctionParams, FunctionLimits> >;
 
 EnergyConverter::EnergyConverter(const EnergyParams& params, const EnergyRange range) : fFunction(params, range) {}
 
 double EnergyConverter::operator()(double tot) const { return fFunction(tot); }
+
+EnergyConverter generateEnergyConverter(const FuncParamsAndLimits& formula)
+{
+  auto func = formula.first;
+  auto funcParams = formula.second.first;
+  auto funcLimits = formula.second.second;
+  JPetCachedFunctionParams params(func, funcParams);
+  EnergyConverter conv(params, Range(10000, funcLimits.first, funcLimits.second));
+  return conv;
+}

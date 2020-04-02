@@ -23,6 +23,7 @@ class EnergyConverter
   using EnergyRange = jpet_common_tools::Range;
   using CachedFunction = jpet_common_tools::JPetCachedFunction1D;
 
+
 public:
   EnergyConverter(const EnergyParams& params, EnergyRange);
   double operator()(double tot) const;
@@ -31,6 +32,6 @@ private:
   CachedFunction fFunction;
 };
 
-EnergyConverter getEnergyConverter();
+EnergyConverter generateEnergyConverter(const std::pair<std::string, std::pair<std::vector<double>, std::pair<double, double>>>& formula);
 
 #endif /*  !ENERGYCONVERTER_H */
