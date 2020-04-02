@@ -24,28 +24,20 @@
 
 class ToTEnergyConverterFactory
 {
-  enum ConvertionType
-  {
-    kEnergy2ToT,
-    kToT2Energy
-  };
-
 public:
   using MyOptions = jpet_options_tools::OptsStrAny;
   using FunctionFormula = std::string;
   using FunctionParams = std::vector<double>;
   using FunctionLimits = std::pair<double, double>;
   using FuncParamsAndLimits = std::pair<FunctionFormula , std::pair<FunctionParams, FunctionLimits> >;
-  using FuncPtr = std::unique_ptr<TF1>;
 
   ToTEnergyConverterFactory();
   ToTEnergyConverterFactory(ToTEnergyConverterFactory const&) = delete;
   ToTEnergyConverterFactory& operator=(ToTEnergyConverterFactory const&) = delete;
 
   void loadOptions(const MyOptions& opts);
-
-  ToTConverter getToTConverter();
-  EnergyConverter getEnergyConverter();
+  ToTConverter getToTConverter() const ;
+  EnergyConverter getEnergyConverter() const;
 
 private:
   const std::string kEnergy2ToTParametersParamKey = "_ToTEnergyConverterFactory_Energy2ToTParameters_std::vector<double>";

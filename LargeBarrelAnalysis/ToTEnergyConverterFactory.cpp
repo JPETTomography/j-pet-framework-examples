@@ -18,6 +18,8 @@
 
 using namespace jpet_options_tools;
 
+ToTEnergyConverterFactory::ToTEnergyConverterFactory() { }
+
 void ToTEnergyConverterFactory::loadOptions(const ToTEnergyConverterFactory::MyOptions& opts)
 {
   std::vector<double> energy2ToTParameters;
@@ -71,13 +73,13 @@ void ToTEnergyConverterFactory::loadOptions(const ToTEnergyConverterFactory::MyO
 }
 
 
-ToTConverter ToTEnergyConverterFactory::getToTConverter()
+ToTConverter ToTEnergyConverterFactory::getToTConverter() const
 {
   return generateToTConverter(fToT2EnergyAll);
 
 }
 
-EnergyConverter ToTEnergyConverterFactory::getEnergyConverter()
+EnergyConverter ToTEnergyConverterFactory::getEnergyConverter() const
 {
   return generateEnergyConverter(fEnergy2ToTAll);
 }

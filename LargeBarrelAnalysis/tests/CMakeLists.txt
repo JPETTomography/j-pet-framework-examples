@@ -8,13 +8,7 @@ set(UNIT_TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizerToolsTest.cpp
                       ${CMAKE_CURRENT_SOURCE_DIR}/SignalFinderToolsTest.cpp
                       ${CMAKE_CURRENT_SOURCE_DIR}/TimeWindowCreatorToolsTest.cpp
                       ${CMAKE_CURRENT_SOURCE_DIR}/UniversalFileLoaderTest.cpp
-                      ${CMAKE_CURRENT_SOURCE_DIR}/ToTConverterTest.cpp)
-
-set(UNIT_TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizerToolsTest.cpp
-                      ${CMAKE_CURRENT_SOURCE_DIR}/HitFinderToolsTest.cpp
-                      ${CMAKE_CURRENT_SOURCE_DIR}/SignalFinderToolsTest.cpp
-                      ${CMAKE_CURRENT_SOURCE_DIR}/TimeWindowCreatorToolsTest.cpp
-                      ${CMAKE_CURRENT_SOURCE_DIR}/UniversalFileLoaderTest.cpp
+                      ${CMAKE_CURRENT_SOURCE_DIR}/ToTEnergyConverterFactoryTest.cpp
                       ${CMAKE_CURRENT_SOURCE_DIR}/ToTConverterTest.cpp)
 
 #Configure Boost
@@ -54,6 +48,8 @@ foreach(test_source IN ITEMS ${UNIT_TEST_SOURCES})
     get_filename_component(test ${test_source} NAME_WE)
     if(${test} MATCHES TimeWindowCreatorToolsTest|HitFinderToolsTest)
       package_add_test(${test} ${test_source} ../UniversalFileLoader.cpp) #TimeWindowCreatorToolsTests and HitFinderToolsTest require also UniversalFileLoader
+    elseif(${test} MATCHES ToTEnergyConverterFactoryTest)
+      package_add_test(${test} ${test_source} ../ToTConverter.cpp ../EnergyConverter.cpp)
     else()
       package_add_test(${test} ${test_source})
     endif(${test} MATCHES TimeWindowCreatorToolsTest|HitFinderToolsTest)
