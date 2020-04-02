@@ -19,8 +19,7 @@
 #include <string>
 #include <TF1.h>
 #include "JPetOptionsTools/JPetOptionsTools.h"
-#include "EnergyConverter.h"
-#include "ToTConverter.h"
+#include "ToTEnergyConverter.h"
 
 class ToTEnergyConverterFactory
 {
@@ -36,8 +35,8 @@ public:
   ToTEnergyConverterFactory& operator=(ToTEnergyConverterFactory const&) = delete;
 
   void loadOptions(const MyOptions& opts);
-  ToTConverter getToTConverter() const ;
-  EnergyConverter getEnergyConverter() const;
+  ToTEnergyConverter getToTConverter() const ;
+  ToTEnergyConverter getEnergyConverter() const;
 
 private:
   const std::string kEnergy2ToTParametersParamKey = "ToTEnergyConverterFactory_Energy2ToTParameters_std::vector<double>";

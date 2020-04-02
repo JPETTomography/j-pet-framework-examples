@@ -1,9 +1,9 @@
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE ToTConverterTest
+#define BOOST_TEST_MODULE ToTEnergyConverterTest
 
 #include <boost/test/unit_test.hpp>
 #include "JPetLoggerInclude.h"
-#include "../ToTConverter.h"
+#include "../ToTEnergyConverter.h"
 using namespace jpet_common_tools;
 
 /// Returns Time-over-threshold for given deposited energy
@@ -21,7 +21,7 @@ BOOST_AUTO_TEST_SUITE(ToTConverterTestSuite)
 BOOST_AUTO_TEST_CASE(getTot_standardFunc)
 {
   JPetCachedFunctionParams params("pol1", {-91958, 19341});
-  ToTConverter conv(params, Range(10000, 0., 100.));
+  ToTEnergyConverter conv(params, Range(10000, 0., 100.));
   BOOST_CHECK_CLOSE(conv(0), getToT1(0), 0.1);
   BOOST_CHECK_CLOSE(conv(1), getToT1(1), 0.1);
   BOOST_CHECK_CLOSE(conv(10), getToT1(10), 0.1);

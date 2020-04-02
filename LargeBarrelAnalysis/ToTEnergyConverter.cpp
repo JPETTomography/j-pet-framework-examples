@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2019 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -10,28 +10,29 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- *  @file EnergyConverter.cpp
+ *  @file ToTEnergyConverter.cpp
  */
 
-#include "EnergyConverter.h"
+#include "ToTEnergyConverter.h"
 #include "JPetLoggerInclude.h"
 
 using namespace jpet_common_tools;
 using FunctionFormula = std::string;
 using FunctionLimits = std::pair<double, double>;
 using FunctionParams = std::vector<double>;
-using FuncParamsAndLimits = std::pair<FunctionFormula , std::pair<FunctionParams, FunctionLimits> >;
+using FuncParamsAndLimits = std::pair<FunctionFormula, std::pair<FunctionParams, FunctionLimits>>;
 
-EnergyConverter::EnergyConverter(const EnergyParams& params, const EnergyRange range) : fFunction(params, range) {}
+ToTEnergyConverter::ToTEnergyConverter(const ToTEParams& params, const ToTERange range) : fFunction(params, range) {}
 
-double EnergyConverter::operator()(double tot) const { return fFunction(tot); }
+double ToTEnergyConverter::operator()(double x) const { return fFunction(x); }
 
-EnergyConverter generateEnergyConverter(const FuncParamsAndLimits& formula)
+ToTEnergyConverter generateToTEnergyConverter(const FuncParamsAndLimits& formula)
 {
   auto func = formula.first;
   auto funcParams = formula.second.first;
   auto funcLimits = formula.second.second;
+
   JPetCachedFunctionParams params(func, funcParams);
-  EnergyConverter conv(params, Range(10000, funcLimits.first, funcLimits.second));
+  ToTEnergyConverter conv(params, Range(10000, funcLimits.first, funcLimits.second));
   return conv;
 }

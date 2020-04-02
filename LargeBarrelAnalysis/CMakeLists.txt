@@ -45,8 +45,7 @@ set(HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizer.h
             ${CMAKE_CURRENT_SOURCE_DIR}/TimeWindowCreator.h
             ${CMAKE_CURRENT_SOURCE_DIR}/TimeWindowCreatorTools.h
             ${CMAKE_CURRENT_SOURCE_DIR}/UniversalFileLoader.h
-            ${CMAKE_CURRENT_SOURCE_DIR}/EnergyConverter.h
-            ${CMAKE_CURRENT_SOURCE_DIR}/ToTConverter.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/ToTEnergyConverter.h
             ${CMAKE_CURRENT_SOURCE_DIR}/ToTEnergyConverterFactory.h)
 
 set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizer.cpp
@@ -60,8 +59,7 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizer.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/TimeWindowCreator.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/TimeWindowCreatorTools.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/UniversalFileLoader.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/EnergyConverter.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/ToTConverter.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/ToTEnergyConverter.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/ToTEnergyConverterFactory.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
 
