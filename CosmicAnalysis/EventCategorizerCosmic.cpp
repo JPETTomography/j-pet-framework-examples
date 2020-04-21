@@ -88,7 +88,7 @@ JPetEvent EventCategorizerCosmic::cosmicAnalysis(vector<JPetHit> hits)
 {
   JPetEvent cosmicEvent;
   for (unsigned i = 0; i < hits.size(); i++) {
-    double TOTofHit = EventCategorizerTools::calculateTOT(hits[i]);
+    double TOTofHit = EventCategorizerTools::calculateTOT(hits[i], EventCategorizerTools::TOTCalculationType::kSimplified);
     if (TOTofHit >= fMinCosmicTOT) {
       cosmicEvent.addHit(hits[i]);
       //Uncomment if kCosmic type will be avalible

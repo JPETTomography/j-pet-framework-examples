@@ -111,7 +111,7 @@ bool EventCategorizerTools::checkForPrompt(
   double deexTOTCutMin, double deexTOTCutMax)
 {
   for (unsigned i = 0; i < event.getHits().size(); i++) {
-    double tot = calculateTOT(event.getHits().at(i));
+    double tot = calculateTOT(event.getHits().at(i), TOTCalculationType::kSimplified);
     if (tot > deexTOTCutMin && tot < deexTOTCutMax) {
       if (saveHistos) {
         stats.getHisto1D("Deex_TOT_cut")->Fill(tot);
@@ -153,8 +153,8 @@ bool EventCategorizerTools::checkForScatter(
 
       if (fabs(scattTOF - timeDiff) < scatterTOFTimeDiff) {
         if (saveHistos) {
-          stats.getHisto2D("ScatterAngle_PrimaryTOT")->Fill(scattAngle, calculateTOT(primaryHit));
-          stats.getHisto2D("ScatterAngle_ScatterTOT")->Fill(scattAngle, calculateTOT(scatterHit));
+          stats.getHisto2D("ScatterAngle_PrimaryTOT")->Fill(scattAngle, calculateTOT(primaryHit, TOTCalculationType::kSimplified));
+          stats.getHisto2D("ScatterAngle_ScatterTOT")->Fill(scattAngle, calculateTOT(scatterHit, TOTCalculationType::kSimplified));
         }
         return true;
       }
@@ -167,10 +167,11 @@ bool EventCategorizerTools::checkForScatter(
 * Calculation of the total TOT of the hit - Time over Threshold:
 * the sum of the TOTs on all of the thresholds (1-4) and on the both sides (A,B)
 */
-double EventCategorizerTools::calculateTOT(const JPetHit& hit)
+double EventCategorizerTools::calculateTOT(const JPetHit& hit, TOTCalculationType type)
 {
   double tot = 0.0;
-
+  double weight = 1.;
+                                         
   auto sigALead = hit.getSignalA().getRecoSignal().getRawSignal()
                   .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
   auto sigBLead = hit.getSignalB().getRecoSignal().getRawSignal()
@@ -180,14 +181,31 @@ double EventCategorizerTools::calculateTOT(const JPetHit& hit)
   auto sigBTrail = hit.getSignalB().getRecoSignal().getRawSignal()
                    .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
 
-  if (sigALead.size() > 0 && sigATrail.size() > 0) {
-    for (unsigned i = 0; i < sigALead.size() && i < sigATrail.size(); i++) {
-      tot += (sigATrail.at(i).getValue() - sigALead.at(i).getValue());
-    }
-  }
-  if (sigBLead.size() > 0 && sigBTrail.size() > 0) {
-    for (unsigned i = 0; i < sigBLead.size() && i < sigBTrail.size(); i++) {
-      tot += (sigBTrail.at(i).getValue() - sigBLead.at(i).getValue());
+  tot += calculateTOTside(sigALead, sigATrail, type);
+  tot += calculateTOTside(sigBLead, sigBTrail, type);
+  return tot;
+}
+
+double EventCategorizerTools::calculateTOTside(const std::vector<JPetSigCh> & leadPoints, const std::vector<JPetSigCh> & trailPoints, TOTCalculationType type)
+{
+  double tot = 0., weight = 1.;
+  if (leadPoints.size() > 0 && trailPoints.size() > 0) {
+    tot += (trailPoints.at(0).getValue() - leadPoints.at(0).getValue());
+    for (unsigned i = 1; i < leadPoints.size() && i < trailPoints.size(); i++) {
+      switch(type) {
+        case TOTCalculationType::kSimplified:
+          weight = 1.;
+          break;
+        case TOTCalculationType::kThresholdRectangular:
+          weight = (leadPoints.at(i).getThreshold() - leadPoints.at(i-1).getThreshold())/leadPoints.at(0).getThreshold();
+          break;
+        case TOTCalculationType::kThresholdTrapeze:
+          weight = (leadPoints.at(i).getThreshold() - leadPoints.at(i-1).getThreshold())/leadPoints.at(0).getThreshold();
+          tot += weight*((trailPoints.at(i).getValue() - leadPoints.at(i).getValue()) - 
+                    (trailPoints.at(i-1).getValue() - leadPoints.at(i-1).getValue()))/2;
+          break;
+      }
+      tot += weight*(trailPoints.at(i).getValue() - leadPoints.at(i).getValue());
     }
   }
   return tot;
