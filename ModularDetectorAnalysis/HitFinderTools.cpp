@@ -39,8 +39,6 @@ void HitFinderTools::sortByTime(vector<JPetMatrixSignal>& sigVec)
 map<int, vector<JPetMatrixSignal>> HitFinderTools::getSignalsByScin(
   const JPetTimeWindow* timeWindow
 ){
-  // INFO("Hit finding mapping");
-
   map<int, vector<JPetMatrixSignal>> signalScinMap;
   if (!timeWindow) {
     WARNING("Pointer of Time Window object is not set, returning empty map");
@@ -69,8 +67,6 @@ vector<JPetHit> HitFinderTools::matchAllSignals(
   map<int, vector<JPetMatrixSignal>>& allSignals,
   double timeDiffAB, JPetStatistics& stats, bool saveHistos
 ) {
-  INFO("Hit finding matching all");
-
   vector<JPetHit> allHits;
   for (auto& scinSigals : allSignals) {
     auto scinHits = matchSignals(
@@ -88,8 +84,6 @@ vector<JPetHit> HitFinderTools::matchSignals(
   vector<JPetMatrixSignal>& scinSigals, double timeDiffAB,
   JPetStatistics& stats, bool saveHistos
 ) {
-  INFO("Hit finding matching scin");
-
   vector<JPetHit> scinHits;
   vector<JPetMatrixSignal> remainSignals;
   sortByTime(scinSigals);
@@ -142,8 +136,10 @@ JPetHit HitFinderTools::createHit(
   const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2,
   JPetStatistics& stats, bool saveHistos
 ) {
+
   JPetMatrixSignal signalA;
   JPetMatrixSignal signalB;
+  
   if (signal1.getPM().getSide() == JPetPM::SideA) {
     signalA = signal1;
     signalB = signal2;
@@ -151,6 +147,7 @@ JPetHit HitFinderTools::createHit(
     signalA = signal2;
     signalB = signal1;
   }
+
   JPetHit hit;
   hit.setSignals(signalA, signalB);
   hit.setTime((signalA.getTime() + signalB.getTime()) / 2.0);
@@ -166,11 +163,33 @@ JPetHit HitFinderTools::createHit(
   hit.setScin(signalA.getPM().getScin());
 
   if(saveHistos) {
+    auto multi = signalA.getRawSignals().size()+ signalB.getRawSignals().size();
+
     stats.getHisto2D("time_diff_per_scin")
     ->Fill(hit.getTimeDiff(), hit.getScin().getID());
+
+    stats.getHisto2D(Form("time_diff_per_scin_multi_%d", ((int) multi)))
+    ->Fill(hit.getTimeDiff(), hit.getScin().getID());
+
+    stats.getHisto2D("time_diff_per_scin")
+    ->Fill(hit.getTimeDiff(), hit.getScin().getID());
+
     stats.getHisto2D("hit_pos_per_scin")
     ->Fill(hit.getPosZ(), hit.getScin().getID());
+
+    stats.getHisto1D("tot_hits_all")->Fill(hit.getEnergy());
+
+    stats.getHisto1D("hit_sig_multi")->Fill(multi);
+
+    stats.getHisto2D("time_diff_per_multi")->Fill(hit.getTimeDiff(), multi);
+
+    stats.getHisto1D(Form("tot_hits_mtx_%d", ((int) multi)))
+    ->Fill(hit.getEnergy());
+
+    stats.getHisto1D(Form("tot_hits_mtx_%d_mod", ((int) multi)))
+    ->Fill(hit.getEnergy()/((float) multi));
   }
+
   return hit;
 }
 

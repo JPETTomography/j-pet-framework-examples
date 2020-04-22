@@ -30,8 +30,6 @@ MakeFile
 
 *.1
 
-*.xml
-
 *.hld
 
 FrameworkExample
@@ -41,8 +39,6 @@ ScopeLoaderExample/cfg/data/1/
 LargeBarrelExample
 
 build/
-
-*.json
 
 unitTestData/*
 AnalysisExample/*.root.old
