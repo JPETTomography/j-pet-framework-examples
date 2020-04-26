@@ -34,7 +34,7 @@
  {
  public:
    static const std::map<int, std::vector<std::vector<JPetRawSignal>>> getRawSigMtxMap(
-     const JPetTimeWindow* timeWindow
+     const JPetTimeWindow* timeWindow, int refDerScinID, int refDetSiPMID
    );
 
    static std::vector<JPetMatrixSignal> mergeSignalsAllSiPMs(

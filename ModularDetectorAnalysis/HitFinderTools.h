@@ -38,7 +38,7 @@ public:
   );
   static std::vector<JPetHit> matchAllSignals(
     std::map<int, std::vector<JPetMatrixSignal>>& allSignals,
-    double timeDiffAB, JPetStatistics& stats, bool saveHistos
+    double timeDiffAB, int refDetScinID, JPetStatistics& stats, bool saveHistos
   );
   static std::vector<JPetHit> matchSignals(
     std::vector<JPetMatrixSignal>& scinSignals,
@@ -48,6 +48,7 @@ public:
     const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2,
     JPetStatistics& stats, bool saveHistos
   );
+  static JPetHit createDummyRefDetHit(const JPetMatrixSignal& signal);
   static double calculateTOT(JPetHit& hit);
 };
 

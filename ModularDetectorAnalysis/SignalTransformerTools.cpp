@@ -23,7 +23,9 @@ using namespace std;
  * Side A is the first element int he vector, Side B is the second one.
  */
 const map<int, vector<vector<JPetRawSignal>>>
-SignalTransformerTools::getRawSigMtxMap(const JPetTimeWindow* timeWindow){
+SignalTransformerTools::getRawSigMtxMap(
+  const JPetTimeWindow* timeWindow, int refDerScinID, int refDetSiPMID
+){
   map<int, vector<vector<JPetRawSignal>>> rawSigMtxMap;
 
   if (!timeWindow) {
@@ -38,6 +40,11 @@ SignalTransformerTools::getRawSigMtxMap(const JPetTimeWindow* timeWindow){
     auto scinID = rawSig.getPM().getScin().getID();
     auto pmSide = rawSig.getPM().getSide();
     auto search = rawSigMtxMap.find(scinID);
+
+    // Cutting crosstalks from reference detector channel 
+    if(scinID == refDerScinID && rawSig.getPM().getID() != refDetSiPMID) {
+      continue;
+    }
 
     if (search == rawSigMtxMap.end()) {
       // There is no element with searched scin ID in this map, adding new one

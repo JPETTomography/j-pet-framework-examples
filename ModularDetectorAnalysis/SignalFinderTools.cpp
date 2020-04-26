@@ -104,11 +104,6 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(
     );
     if(closestTrailingSigCh != -1) {
       rawSig.addPoint(thrTrailingSigCh.at(0).at(closestTrailingSigCh));
-      if(saveHistos){
-        stats.getHisto1D("lead_trail_thr1_diff")->Fill(
-          thrTrailingSigCh.at(0).at(closestTrailingSigCh).getTime()-thrLeadingSigCh.at(0).at(0).getTime()
-        );
-      }
       thrTrailingSigCh.at(0).erase(thrTrailingSigCh.at(0).begin()+closestTrailingSigCh);
     }
 
@@ -122,11 +117,6 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(
       );
       if (closestTrailingSigCh != -1) {
         rawSig.addPoint(thrTrailingSigCh.at(1).at(closestTrailingSigCh));
-        if(saveHistos){
-          stats.getHisto1D("lead_trail_thr2_diff")->Fill(
-            thrTrailingSigCh.at(1).at(closestTrailingSigCh).getTime()-thrLeadingSigCh.at(1).at(nextThrSigChIndex).getTime()
-          );
-        }
         thrTrailingSigCh.at(1).erase(thrTrailingSigCh.at(1).begin()+closestTrailingSigCh);
       }
       rawSig.addPoint(thrLeadingSigCh.at(1).at(nextThrSigChIndex));

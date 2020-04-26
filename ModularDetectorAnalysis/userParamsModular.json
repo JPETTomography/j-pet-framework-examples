@@ -1,6 +1,7 @@
 {
   "Save_Control_Histograms_bool":true,
-  "Unpacker_TDCnonlinearityCalib_std::string":"ftab_calib_200122.root",
+  "Unpacker_TDCnonlinearityCalib_std::string":"tdc.root",
+  "Unpacker_EndpointsNumber_int":2,
   "TimeWindowCreator_MinTime_float":0.0,
   "TimeWindowCreator_MaxTime_float":50000.0,
   "SignalFinder_EdgeMaxTime_float":10000.0,

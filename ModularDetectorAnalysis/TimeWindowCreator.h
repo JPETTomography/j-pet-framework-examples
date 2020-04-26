@@ -50,21 +50,15 @@ public:
 protected:
 	void saveSigChs(const std::vector<JPetSigCh>& sigChVec);
 	void initialiseHistograms();
-	void fillChannelHistos(
-	  const JPetChannel& channel, JPetSigCh::EdgeType edge
-	);
 	const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
 	const std::string kMaxTimeParamKey = "TimeWindowCreator_MaxTime_float";
 	const std::string kMinTimeParamKey = "TimeWindowCreator_MinTime_float";
-	long long int fCurrEventNumber = 0;
 	bool fSaveControlHistos = true;
-	double fMinTime = -1.e6;
-	double fMaxTime = 0.;
+	double fMinTime = 0.0;
+	double fMaxTime = 1.e6;
 	// Number for scaling some histograms, so they are not reaching their memory capacity
 	double fScalingFactor = 0.001;
-	static JPetSigCh generateSigCh(
-		double time, const JPetChannel& channel, JPetSigCh::EdgeType edge
-	);
+
 
 };
 

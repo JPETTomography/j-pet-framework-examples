@@ -33,6 +33,16 @@ bool SignalTransformer::init()
     fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
   }
 
+  // Parameters fof reference detector
+  if (isOptionSet(fParams.getOptions(), kRefDetSiPMIDParamKey)) {
+    fRefDetSiPMID = getOptionAsInt(fParams.getOptions(), kRefDetSiPMIDParamKey);
+    INFO(Form("Using reference detector - SiPM ID: %d", fRefDetSiPMID));
+  }
+  if (isOptionSet(fParams.getOptions(), kRefDetScinIDParamKey)) {
+    fRefDetScinID = getOptionAsInt(fParams.getOptions(), kRefDetScinIDParamKey);
+    INFO(Form("Using reference detector - scintillator ID: %d", fRefDetScinID));
+  }
+
   // Signal merging time parameter
   if (isOptionSet(fParams.getOptions(), kMergeSignalsTimeParamKey)) {
     fMergingTime = getOptionAsFloat(fParams.getOptions(), kMergeSignalsTimeParamKey);
@@ -53,7 +63,9 @@ bool SignalTransformer::exec()
   if(auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
 
     // Distribute Raw Signals per Matrices
-    auto rawSigMtxMap = SignalTransformerTools::getRawSigMtxMap(timeWindow);
+    auto rawSigMtxMap = SignalTransformerTools::getRawSigMtxMap(
+      timeWindow, fRefDetScinID, fRefDetSiPMID
+    );
 
     // Merging max. 4 Raw Signals into a MatrixSignal
     auto mergedSignals = SignalTransformerTools::mergeSignalsAllSiPMs(

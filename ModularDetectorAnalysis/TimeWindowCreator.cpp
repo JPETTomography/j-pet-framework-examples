@@ -67,9 +67,7 @@ bool TimeWindowCreator::exec()
 {
   if (auto event = dynamic_cast<EventIII* const> (fEvent)) {
     int kTDCChannels = event->GetTotalNTDCChannels();
-    if (fSaveControlHistos){
-      getStatistics().getHisto1D("sig_ch_per_time_slot")->Fill(kTDCChannels);
-    }
+
     // Loop over all TDC channels in file
     auto tdcChannels = event->GetTDCChannelsArray();
     for (int i = 0; i < kTDCChannels; ++i) {
@@ -81,14 +79,16 @@ bool TimeWindowCreator::exec()
 
       // Check if channel exists in database from loaded local json file
       if(getParamBank().getChannels().count(channelNumber) == 0) {
-        getStatistics().getHisto1D("wrong_channel")->Fill(channelNumber);
+        if (fSaveControlHistos){
+         getStatistics().getHisto1D("wrong_channel")->Fill(channelNumber);
+       }
         continue;
       }
 
       // Get channel for corresponding number
       auto& channel = getParamBank().getChannel(channelNumber);
 
-      // Building Signal Channels for this TOMB Channel
+      // Building Signal Channels for this Channel
       auto allSigChs = TimeWindowCreatorTools::buildSigChs(
         tdcChannel, channel, fMaxTime, fMinTime
       );
@@ -102,7 +102,6 @@ bool TimeWindowCreator::exec()
       // Save result
       saveSigChs(allSigChs);
     }
-    fCurrEventNumber++;
   } else { return false; }
   return true;
 }
@@ -116,6 +115,10 @@ bool TimeWindowCreator::terminate()
 void TimeWindowCreator::saveSigChs(const vector<JPetSigCh>& sigChVec)
 {
   if(sigChVec.size()>0){
+    if (fSaveControlHistos){
+      getStatistics().getHisto1D("sig_ch_per_time_slot")->Fill(sigChVec.size());
+    }
+
     double lastTime = 0.0;
 
     for (auto & sigCh : sigChVec) {
@@ -134,14 +137,6 @@ void TimeWindowCreator::saveSigChs(const vector<JPetSigCh>& sigChVec)
             } else if(sigCh.getChannel().getPM().getSide()==JPetPM::SideB){
               getStatistics().getHisto1D("pm_occ_sides")->Fill(2);
             }
-          }
-
-          if(sigCh.getChannel().getPM().getSide()==JPetPM::SideA){
-            getStatistics().getHisto1D(Form("mtx_%d_A", sigCh.getChannel().getPM().getScin().getID()))
-            ->Fill(sigCh.getChannel().getPM().getMatrixPosition());
-          } else if(sigCh.getChannel().getPM().getSide()==JPetPM::SideB){
-            getStatistics().getHisto1D(Form("mtx_%d_B", sigCh.getChannel().getPM().getScin().getID()))
-            ->Fill(sigCh.getChannel().getPM().getMatrixPosition());
           }
 
           if(sigCh.getType() == JPetSigCh::Leading && sigCh.getChannel().getThresholdNumber()==1){
@@ -163,7 +158,7 @@ void TimeWindowCreator::initialiseHistograms(){
     new TH1F("sig_ch_per_time_slot", "Signal Channels Per Time Slot", 200, -0.5, 200.5)
   );
   getStatistics().getHisto1D("sig_ch_per_time_slot")
-    ->GetXaxis()->SetTitle("Signal Channels in Time Slot");
+  ->GetXaxis()->SetTitle("Signal Channels in Time Slot");
   getStatistics().getHisto1D("sig_ch_per_time_slot")
   ->GetYaxis()->SetTitle("Number of Time Slots");
 
@@ -200,12 +195,10 @@ void TimeWindowCreator::initialiseHistograms(){
   auto minPMID = getParamBank().getPMs().begin()->first;
   auto maxPMID = getParamBank().getPMs().rbegin()->first;
 
-  getStatistics().createHistogram(
-    new TH1F(
-      "pm_occ", "PMs occupation (downscaled)",
-      maxPMID-minPMID+1, minPMID-0.5, maxPMID+0.5
-    )
-  );
+  getStatistics().createHistogram(new TH1F(
+    "pm_occ", "PMs occupation (downscaled)",
+    maxPMID-minPMID+1, minPMID-0.5, maxPMID+0.5
+  ));
   getStatistics().getHisto1D("pm_occ")->GetXaxis()->SetTitle("PM ID");
   getStatistics().getHisto1D("pm_occ")->GetYaxis()->SetTitle("Number of SigCh");
 
@@ -236,30 +229,6 @@ void TimeWindowCreator::initialiseHistograms(){
   );
   getStatistics().getHisto1D("matrix_occ")->GetXaxis()->SetTitle("Matrix position");
   getStatistics().getHisto1D("matrix_occ")->GetYaxis()->SetTitle("Number of SigCh");
-
-  // Histograms per matrix
-  for(auto& scin : scinsMap) {
-    auto scinID = scin.second->getID();
-    getStatistics().createHistogram(
-      new TH1F(
-        Form("mtx_%d_A", scinID),
-        Form("SiPM occupation in matrix slot %d side A", scinID),
-        6, -0.5, 5.5
-      )
-    );
-    getStatistics().getHisto1D(Form("mtx_%d_A", scinID))->GetXaxis()->SetTitle("SiPM matrix position");
-    getStatistics().getHisto1D(Form("mtx_%d_A", scinID))->GetYaxis()->SetTitle("Number of SigCh");
-
-    getStatistics().createHistogram(
-      new TH1F(
-        Form("mtx_%d_B", scinID),
-        Form("SiPM occupation in matrix slot %d side B", scinID),
-        6, -0.5, 5.5
-      )
-    );
-    getStatistics().getHisto1D(Form("mtx_%d_B", scinID))->GetXaxis()->SetTitle("SiPM matrix position");
-    getStatistics().getHisto1D(Form("mtx_%d_B", scinID))->GetYaxis()->SetTitle("Number of SigCh");
-  }
 
   // Flagging histograms
   getStatistics().createHistogram(new TH1F(

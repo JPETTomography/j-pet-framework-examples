@@ -42,9 +42,14 @@ public:
 protected:
 	const std::string kMergeSignalsTimeParamKey = "SignalTransformer_MergeSignalsTime_float";
 	const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
+	const std::string kRefDetSiPMIDParamKey = "TimeCalibration_RefDetSiPMID_int";
+	const std::string kRefDetScinIDParamKey = "TimeCalibration_RefDetScinID_int";
 	void saveMatrixSignals(const std::vector<JPetMatrixSignal>& mtxSigVec);
+	int fRefDetSiPMID = -1;
+	int fRefDetScinID = -1;
 	bool fSaveControlHistos = true;
 	double fMergingTime = 20000.0;
 	void initialiseHistograms();
 };
+
 #endif /* !SIGNALTRANSFORMER_H */

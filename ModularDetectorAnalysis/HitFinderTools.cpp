@@ -64,11 +64,20 @@ map<int, vector<JPetMatrixSignal>> HitFinderTools::getSignalsByScin(
  * Loop over all Scins invoking matching procedure
  */
 vector<JPetHit> HitFinderTools::matchAllSignals(
-  map<int, vector<JPetMatrixSignal>>& allSignals,
-  double timeDiffAB, JPetStatistics& stats, bool saveHistos
+  map<int, vector<JPetMatrixSignal>>& allSignals, double timeDiffAB,
+  int refDetScinID, JPetStatistics& stats, bool saveHistos
 ) {
   vector<JPetHit> allHits;
   for (auto& scinSigals : allSignals) {
+    // Loop for Reference Detector ID
+    if (scinSigals.first == refDetScinID) {
+      for (auto refSignal : scinSigals.second) {
+        auto refHit = createDummyRefDetHit(refSignal);
+        allHits.push_back(refHit);
+      }
+      continue;
+    }
+    // Match signals for scintillators
     auto scinHits = matchSignals(
       scinSigals.second, timeDiffAB, stats, saveHistos
     );
@@ -139,7 +148,7 @@ JPetHit HitFinderTools::createHit(
 
   JPetMatrixSignal signalA;
   JPetMatrixSignal signalB;
-  
+
   if (signal1.getPM().getSide() == JPetPM::SideA) {
     signalA = signal1;
     signalB = signal2;
@@ -168,28 +177,40 @@ JPetHit HitFinderTools::createHit(
     stats.getHisto2D("time_diff_per_scin")
     ->Fill(hit.getTimeDiff(), hit.getScin().getID());
 
-    stats.getHisto2D(Form("time_diff_per_scin_multi_%d", ((int) multi)))
-    ->Fill(hit.getTimeDiff(), hit.getScin().getID());
-
-    stats.getHisto2D("time_diff_per_scin")
-    ->Fill(hit.getTimeDiff(), hit.getScin().getID());
-
-    stats.getHisto2D("hit_pos_per_scin")
-    ->Fill(hit.getPosZ(), hit.getScin().getID());
-
-    stats.getHisto1D("tot_hits_all")->Fill(hit.getEnergy());
-
     stats.getHisto1D("hit_sig_multi")->Fill(multi);
 
-    stats.getHisto2D("time_diff_per_multi")->Fill(hit.getTimeDiff(), multi);
+    // stats.getHisto2D("hit_pos_per_scin")
+    // ->Fill(hit.getPosZ(), hit.getScin().getID());
 
-    stats.getHisto1D(Form("tot_hits_mtx_%d", ((int) multi)))
-    ->Fill(hit.getEnergy());
+    stats.getHisto1D(Form("hit_tdiff_scin_%d_m_%d", hit.getScin().getID(), ((int) multi)))
+    ->Fill(hit.getTimeDiff());
 
-    stats.getHisto1D(Form("tot_hits_mtx_%d_mod", ((int) multi)))
+    stats.getHisto1D(Form("hit_tot_scin_%d_m_%d", hit.getScin().getID(), ((int) multi)))
     ->Fill(hit.getEnergy()/((float) multi));
   }
 
+  return hit;
+}
+
+/**
+ * Method for Hit creation in case of reference detector.
+ * Setting only some necessary fields.
+ */
+JPetHit HitFinderTools::createDummyRefDetHit(const JPetMatrixSignal& signal)
+{
+  JPetHit hit;
+  JPetMatrixSignal dummy;
+  hit.setSignalB(signal);
+  hit.setTime(signal.getTime());
+  hit.setQualityOfTime(-1.0);
+  hit.setTimeDiff(0.0);
+  hit.setQualityOfTimeDiff(-1.0);
+  hit.setEnergy(-1.0);
+  hit.setQualityOfEnergy(-1.0);
+  hit.setPosX(signal.getPM().getScin().getCenterX());
+  hit.setPosY(signal.getPM().getScin().getCenterY());
+  hit.setPosZ(0.0);
+  hit.setScin(signal.getPM().getScin());
   return hit;
 }
 
