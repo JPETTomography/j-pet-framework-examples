@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -73,43 +73,43 @@ bool SignalTransformer::exec()
         auto leads = rawSignal.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
         auto trails = rawSignal.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
         for(unsigned int i=0;i<leads.size();i++){
-          getStatistics().getHisto1D("raw_sigs_multi")->Fill(2*i+1);
+          getStatistics().fillHistogram("raw_sigs_multi", 2*i+1);
         }
         for(unsigned int i=0;i<trails.size();i++){
-          getStatistics().getHisto1D("raw_sigs_multi")->Fill(2*(i+1));
+          getStatistics().fillHistogram("raw_sigs_multi", 2*(i+1));
         }
         if(rawSignal.getRecoFlag()==JPetBaseSignal::Good){
-          getStatistics().getHisto1D("good_vs_bad_signals")->Fill(1);
+          getStatistics().fillHistogram("good_vs_bad_signals", 1);
           for(unsigned int i=0;i<leads.size();i++){
-            getStatistics().getHisto1D("raw_sigs_multi_good")->Fill(2*i+1);
+            getStatistics().fillHistogram("raw_sigs_multi_good", 2*i+1);
           }
           for(unsigned int i=0;i<trails.size();i++){
-            getStatistics().getHisto1D("raw_sigs_multi_good")->Fill(2*(i+1));
+            getStatistics().fillHistogram("raw_sigs_multi_good", 2*(i+1));
           }
         } else if(rawSignal.getRecoFlag()==JPetBaseSignal::Corrupted){
 	  //
 	  int PMid = leads.at(0).getPM().getID();
 	  
-	  getStatistics().getHisto1D("PmIdCorrupted")->Fill(PMid);
-          getStatistics().getHisto1D("good_vs_bad_signals")->Fill(2);
+	  getStatistics().fillHistogram("PmIdCorrupted", PMid);
+          getStatistics().fillHistogram("good_vs_bad_signals", 2);
           for(unsigned int i=0;i<leads.size();i++){
-            getStatistics().getHisto1D("raw_sigs_multi_corr")->Fill(2*i+1);
+            getStatistics().fillHistogram("raw_sigs_multi_corr", 2*i+1);
             if(leads.at(i).getRecoFlag()==JPetSigCh::Good){
-              getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_good")->Fill(2*i+1);
+              getStatistics().fillHistogram("raw_sigs_multi_corr_sigch_good", 2*i+1);
             } else if(leads.at(i).getRecoFlag()==JPetSigCh::Corrupted){
-              getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_corr")->Fill(2*i+1);
+              getStatistics().fillHistogram("raw_sigs_multi_corr_sigch_corr", 2*i+1);
             }
           }
           for(unsigned int i=0;i<trails.size();i++){
-            getStatistics().getHisto1D("raw_sigs_multi_corr")->Fill(2*(i+1));
+            getStatistics().fillHistogram("raw_sigs_multi_corr", 2*(i+1));
             if(trails.at(i).getRecoFlag()==JPetSigCh::Good){
-              getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_good")->Fill(2*(i+1));
+              getStatistics().fillHistogram("raw_sigs_multi_corr_sigch_good", 2*(i+1));
             } else if(trails.at(i).getRecoFlag()==JPetSigCh::Corrupted){
-              getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_corr")->Fill(2*(i+1));
+              getStatistics().fillHistogram("raw_sigs_multi_corr_sigch_corr", 2*(i+1));
             }
           }
         } else if(rawSignal.getRecoFlag()==JPetBaseSignal::Unknown){
-          getStatistics().getHisto1D("good_vs_bad_signals")->Fill(3);
+          getStatistics().fillHistogram("good_vs_bad_signals", 3);
         }
       }
       // Make Reco Signal from Raw Signal
@@ -181,115 +181,93 @@ void SignalTransformer::correctForWalk(const JPetRecoSignal& recoSignal)
      if(TOT>0. && fWalkCorrConst[i] >0.){
        double WalkCorr = fWalkCorrConst[i]/sqrt(TOT);
        leadingSigChVec.at(i).setValue(leadingSigChVec.at(i).getValue() - WalkCorr);
-       getStatistics().getHisto1D("WalkCorrLead")->Fill(WalkCorr);
+       getStatistics().fillHistogram("WalkCorrLead", WalkCorr);
      }
    for (unsigned i = 0; i < trailingSigChVec.size();i++){
      if(TOT>0. && fWalkCorrConst[i] >0.){
        double WalkCorr = fWalkCorrConst[i]/sqrt(TOT);
        trailingSigChVec.at(i).setValue(trailingSigChVec.at(i).getValue() - WalkCorr);
-       getStatistics().getHisto1D("WalkCorrTrail")->Fill(WalkCorr);
+       getStatistics().fillHistogram("WalkCorrTrail", WalkCorr);
      }
    }
   }
 }
 void SignalTransformer::initialiseHistograms(){
-  getStatistics().createHistogram(
-    new TH1F("good_vs_bad_signals", "Number of good and corrupted signals created", 3, 0.5, 3.5)
-  );
-  getStatistics().getHisto1D("good_vs_bad_signals")->GetXaxis()->SetBinLabel(1,"GOOD");
-  getStatistics().getHisto1D("good_vs_bad_signals")->GetXaxis()->SetBinLabel(2,"CORRUPTED");
-  getStatistics().getHisto1D("good_vs_bad_signals")->GetXaxis()->SetBinLabel(3,"UNKNOWN");
-  getStatistics().getHisto1D("good_vs_bad_signals")->GetYaxis()->SetTitle("Number of Signals");
+  TH1D* tempHisto = new TH1D("good_vs_bad_signals", "Number of good and corrupted signals created", 3, 0.5, 3.5);
+  tempHisto->GetXaxis()->SetBinLabel(1,"GOOD");
+  tempHisto->GetXaxis()->SetBinLabel(2,"CORRUPTED");
+  tempHisto->GetXaxis()->SetBinLabel(3,"UNKNOWN");
+  tempHisto->GetYaxis()->SetTitle("Number of Signals");
+  getStatistics().createHistogram(tempHisto);
 
-  getStatistics().createHistogram(
-    new TH1F("PmIdCorrupted", "PMs yielding corrupted signals", 400, -0.5, 399.5)
-  );
-  getStatistics().getHisto1D("PmIdCorrupted")->GetXaxis()->SetTitle("PM id");
-  getStatistics().getHisto1D("PmIdCorrupted")->GetYaxis()->SetTitle("Number of Signals");
-  
-  getStatistics().createHistogram(new TH1F(
-    "raw_sigs_multi", "Multiplicity of created Raw Signals",
-    8, 0.5, 8.5
-  ));
-  getStatistics().getHisto1D("raw_sigs_multi")->GetXaxis()->SetBinLabel(1,"THR 1 Lead");
-  getStatistics().getHisto1D("raw_sigs_multi")->GetXaxis()->SetBinLabel(2,"THR 1 Trail");
-  getStatistics().getHisto1D("raw_sigs_multi")->GetXaxis()->SetBinLabel(3,"THR 2 Lead");
-  getStatistics().getHisto1D("raw_sigs_multi")->GetXaxis()->SetBinLabel(4,"THR 2 Trail");
-  getStatistics().getHisto1D("raw_sigs_multi")->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
-  getStatistics().getHisto1D("raw_sigs_multi")->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
-  getStatistics().getHisto1D("raw_sigs_multi")->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
-  getStatistics().getHisto1D("raw_sigs_multi")->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
-  getStatistics().getHisto1D("raw_sigs_multi")->GetYaxis()->SetTitle("Number of SigChs");
+  getStatistics().createHistogramWithAxes(new TH1D("PmIdCorrupted", "PMs yielding corrupted signals", 400, -0.5, 399.5),
+                                                        "PM id", "Number of Signals");
 
-  getStatistics().createHistogram(new TH1F(
-    "raw_sigs_multi_good", "Multiplicity of created Raw Signals with GOOD flag",
-    8, 0.5, 8.5
-  ));
-  getStatistics().getHisto1D("raw_sigs_multi_good")->GetXaxis()->SetBinLabel(1,"THR 1 Lead");
-  getStatistics().getHisto1D("raw_sigs_multi_good")->GetXaxis()->SetBinLabel(2,"THR 1 Trail");
-  getStatistics().getHisto1D("raw_sigs_multi_good")->GetXaxis()->SetBinLabel(3,"THR 2 Lead");
-  getStatistics().getHisto1D("raw_sigs_multi_good")->GetXaxis()->SetBinLabel(4,"THR 2 Trail");
-  getStatistics().getHisto1D("raw_sigs_multi_good")->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
-  getStatistics().getHisto1D("raw_sigs_multi_good")->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
-  getStatistics().getHisto1D("raw_sigs_multi_good")->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
-  getStatistics().getHisto1D("raw_sigs_multi_good")->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
-  getStatistics().getHisto1D("raw_sigs_multi_good")->GetYaxis()->SetTitle("Number of SigChs");
+  tempHisto = new TH1D("raw_sigs_multi", "Multiplicity of created Raw Signals", 8, 0.5, 8.5);
+  tempHisto->GetXaxis()->SetBinLabel(1,"THR 1 Lead");
+  tempHisto->GetXaxis()->SetBinLabel(2,"THR 1 Trail");
+  tempHisto->GetXaxis()->SetBinLabel(3,"THR 2 Lead");
+  tempHisto->GetXaxis()->SetBinLabel(4,"THR 2 Trail");
+  tempHisto->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
+  tempHisto->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
+  tempHisto->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
+  tempHisto->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
+  tempHisto->GetYaxis()->SetTitle("Number of SigChs");
+  getStatistics().createHistogram(tempHisto);
 
-  getStatistics().createHistogram(new TH1F(
-    "raw_sigs_multi_corr", "Multiplicity of created Raw Signals with CORRUPTED flag",
-    8, 0.5, 8.5
-  ));
-  getStatistics().getHisto1D("raw_sigs_multi_corr")->GetXaxis()->SetBinLabel(1,"THR 1 Lead");
-  getStatistics().getHisto1D("raw_sigs_multi_corr")->GetXaxis()->SetBinLabel(2,"THR 1 Trail");
-  getStatistics().getHisto1D("raw_sigs_multi_corr")->GetXaxis()->SetBinLabel(3,"THR 2 Lead");
-  getStatistics().getHisto1D("raw_sigs_multi_corr")->GetXaxis()->SetBinLabel(4,"THR 2 Trail");
-  getStatistics().getHisto1D("raw_sigs_multi_corr")->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
-  getStatistics().getHisto1D("raw_sigs_multi_corr")->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
-  getStatistics().getHisto1D("raw_sigs_multi_corr")->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
-  getStatistics().getHisto1D("raw_sigs_multi_corr")->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
-  getStatistics().getHisto1D("raw_sigs_multi_corr")->GetYaxis()->SetTitle("Number of SigChs");
+  tempHisto = new TH1D("raw_sigs_multi_good", "Multiplicity of created Raw Signals with GOOD flag", 8, 0.5, 8.5);
+  tempHisto->GetXaxis()->SetBinLabel(1,"THR 1 Lead");
+  tempHisto->GetXaxis()->SetBinLabel(2,"THR 1 Trail");
+  tempHisto->GetXaxis()->SetBinLabel(3,"THR 2 Lead");
+  tempHisto->GetXaxis()->SetBinLabel(4,"THR 2 Trail");
+  tempHisto->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
+  tempHisto->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
+  tempHisto->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
+  tempHisto->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
+  tempHisto->GetYaxis()->SetTitle("Number of SigChs");
+  getStatistics().createHistogram(tempHisto);
 
-  getStatistics().createHistogram(new TH1F(
-    "raw_sigs_multi_corr_sigch_good", "Multiplicity of created Raw Signals with CORRUPTED flag - GOOD SigCh olny",
-    8, 0.5, 8.5
-  ));
-  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_good")->GetXaxis()->SetBinLabel(1,"THR 1 Lead");
-  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_good")->GetXaxis()->SetBinLabel(2,"THR 1 Trail");
-  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_good")->GetXaxis()->SetBinLabel(3,"THR 2 Lead");
-  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_good")->GetXaxis()->SetBinLabel(4,"THR 2 Trail");
-  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_good")->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
-  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_good")->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
-  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_good")->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
-  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_good")->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
-  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_good")->GetYaxis()->SetTitle("Number of GOOD SigChs");
+  tempHisto = new TH1D("raw_sigs_multi_corr", "Multiplicity of created Raw Signals with CORRUPTED flag", 8, 0.5, 8.5);
+  tempHisto->GetXaxis()->SetBinLabel(1,"THR 1 Lead");
+  tempHisto->GetXaxis()->SetBinLabel(2,"THR 1 Trail");
+  tempHisto->GetXaxis()->SetBinLabel(3,"THR 2 Lead");
+  tempHisto->GetXaxis()->SetBinLabel(4,"THR 2 Trail");
+  tempHisto->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
+  tempHisto->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
+  tempHisto->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
+  tempHisto->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
+  tempHisto->GetYaxis()->SetTitle("Number of SigChs");
+  getStatistics().createHistogram(tempHisto);
 
-  getStatistics().createHistogram(new TH1F(
-    "raw_sigs_multi_corr_sigch_corr", "Multiplicity of created Raw Signals with CORRUPTED flag - CORRUPTED SigCh olny",
-    8, 0.5, 8.5
-  ));
-  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_corr")->GetXaxis()->SetBinLabel(1,"THR 1 Lead");
-  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_corr")->GetXaxis()->SetBinLabel(2,"THR 1 Trail");
-  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_corr")->GetXaxis()->SetBinLabel(3,"THR 2 Lead");
-  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_corr")->GetXaxis()->SetBinLabel(4,"THR 2 Trail");
-  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_corr")->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
-  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_corr")->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
-  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_corr")->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
-  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_corr")->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
-  getStatistics().getHisto1D("raw_sigs_multi_corr_sigch_corr")->GetYaxis()->SetTitle("Number of CORRUPTED SigChs");
+  tempHisto = new TH1D("raw_sigs_multi_corr_sigch_good", 
+                       "Multiplicity of created Raw Signals with CORRUPTED flag - GOOD SigCh only", 8, 0.5, 8.5);
+  tempHisto->GetXaxis()->SetBinLabel(1,"THR 1 Lead");
+  tempHisto->GetXaxis()->SetBinLabel(2,"THR 1 Trail");
+  tempHisto->GetXaxis()->SetBinLabel(3,"THR 2 Lead");
+  tempHisto->GetXaxis()->SetBinLabel(4,"THR 2 Trail");
+  tempHisto->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
+  tempHisto->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
+  tempHisto->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
+  tempHisto->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
+  tempHisto->GetYaxis()->SetTitle("Number of GOOD SigChs");
+  getStatistics().createHistogram(tempHisto);
 
-  getStatistics().createHistogram(new TH1F(
-					   "WalkCorrLead", "Walk Correction applied on the leading edge",
-					   1000, 0.,50.
-  ));
-  getStatistics().getHisto1D("WalkCorrLead")->GetXaxis()->SetTitle("Walk Correction [ps]");
-  getStatistics().getHisto1D("WalkCorrLead")->GetYaxis()->SetTitle("Counts");
-  getStatistics().getHisto1D("WalkCorrLead")->GetYaxis()->SetTitle("Walk Correction applied on the leading edge");
+  tempHisto = new TH1D("raw_sigs_multi_corr_sigch_corr", 
+                       "Multiplicity of created Raw Signals with CORRUPTED flag - CORRUPTED SigCh only", 8, 0.5, 8.5);
+  tempHisto->GetXaxis()->SetBinLabel(1,"THR 1 Lead");
+  tempHisto->GetXaxis()->SetBinLabel(2,"THR 1 Trail");
+  tempHisto->GetXaxis()->SetBinLabel(3,"THR 2 Lead");
+  tempHisto->GetXaxis()->SetBinLabel(4,"THR 2 Trail");
+  tempHisto->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
+  tempHisto->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
+  tempHisto->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
+  tempHisto->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
+  tempHisto->GetYaxis()->SetTitle("Number of CORRUPTED SigChs");
+  getStatistics().createHistogram(tempHisto);
 
-  getStatistics().createHistogram(new TH1F(
-                                           "WalkCorrTrail", "Walk Correction applied on the trailing edge",
-                                           1000, 0.,50.
-					   ));
-  getStatistics().getHisto1D("WalkCorrTrail")->GetXaxis()->SetTitle("Walk Correction [ps]");
-  getStatistics().getHisto1D("WalkCorrTrail")->GetYaxis()->SetTitle("Counts");
-  getStatistics().getHisto1D("WalkCorrTrail")->GetYaxis()->SetTitle("Walk Correction applied on the trailing edge");
+  getStatistics().createHistogramWithAxes(new TH1D("WalkCorrLead", "Walk Correction applied on the leading edge",
+                        1000, -0.025, 49.975), "Walk Correction [ps]", "Walk Correction applied on the leading edge");
+
+  getStatistics().createHistogramWithAxes(new TH1D("WalkCorrTrail", "Walk Correction applied on the trailing edge",
+                        1000, -0.025, 49.975), "Walk Correction [ps]", "Walk Correction applied on the trailing edge");
 }

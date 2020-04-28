@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -131,20 +131,20 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
       } else { break; }
     }
     count+=nextCount;
-    if(fSaveControlHistos) {
-      getStatistics().getHisto1D("hits_per_event_all")->Fill(event.getHits().size());
+if(fSaveControlHistos) {
+      getStatistics().fillHistogram("hits_per_event_all", event.getHits().size());
       if(event.getRecoFlag()==JPetEvent::Good){
-        getStatistics().getHisto1D("good_vs_bad_events")->Fill(1);
+        getStatistics().fillHistogram("good_vs_bad_events", 1);
       } else if(event.getRecoFlag()==JPetEvent::Corrupted){
-        getStatistics().getHisto1D("good_vs_bad_events")->Fill(2);
+        getStatistics().fillHistogram("good_vs_bad_events", 2);
       } else {
-        getStatistics().getHisto1D("good_vs_bad_events")->Fill(3);
+        getStatistics().fillHistogram("good_vs_bad_events", 3);
       }
     }
     if(event.getHits().size() >= fMinMultiplicity){
       eventVec.push_back(event);
       if(fSaveControlHistos) {
-        getStatistics().getHisto1D("hits_per_event_selected")->Fill(event.getHits().size());
+        getStatistics().fillHistogram("hits_per_event_selected", event.getHits().size());
       }
     }
   }
@@ -152,24 +152,20 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
 }
 
 void EventFinder::initialiseHistograms(){
-  getStatistics().createHistogram(
-    new TH1F("hits_per_event_all", "Number of Hits in an all Events", 20, 0.5, 20.5)
-  );
-  getStatistics().getHisto1D("hits_per_event_all")->GetXaxis()->SetTitle("Hits in Event");
-  getStatistics().getHisto1D("hits_per_event_all")->GetYaxis()->SetTitle("Number of Hits");
+  getStatistics().createHistogramWithAxes(
+    new TH1D("hits_per_event_all", "Number of Hits in an all Events", 20, 0.5, 20.5),
+                                            "Hits in Event", "Number of Hits");
 
-  getStatistics().createHistogram(
-    new TH1F("hits_per_event_selected", "Number of Hits in selected Events (min. multiplicity)",
-    20, fMinMultiplicity-0.5, fMinMultiplicity+19.5)
-  );
-  getStatistics().getHisto1D("hits_per_event_selected")->GetXaxis()->SetTitle("Hits in Event");
-  getStatistics().getHisto1D("hits_per_event_selected")->GetYaxis()->SetTitle("Number of Hits");
+  getStatistics().createHistogramWithAxes(
+    new TH1D("hits_per_event_selected", "Number of Hits in selected Events (min. multiplicity)",
+                                            20, fMinMultiplicity-0.5, fMinMultiplicity+19.5),
+                                            "Hits in Event", "Number of Hits");
 
-  getStatistics().createHistogram(
-    new TH1F("good_vs_bad_events", "Number of good and corrupted Events created", 3, 0.5, 3.5)
-  );
-  getStatistics().getHisto1D("good_vs_bad_events")->GetXaxis()->SetBinLabel(1,"GOOD");
-  getStatistics().getHisto1D("good_vs_bad_events")->GetXaxis()->SetBinLabel(2,"CORRUPTED");
-  getStatistics().getHisto1D("good_vs_bad_events")->GetXaxis()->SetBinLabel(3,"UNKNOWN");
-  getStatistics().getHisto1D("good_vs_bad_events")->GetYaxis()->SetTitle("Number of Events");
+//Before implementing to the JPetStatistic getObject or sth like that
+  TH1D* tempHisto = new TH1D("good_vs_bad_events", "Number of good and corrupted Events created", 3, 0.5, 3.5);
+  tempHisto->GetXaxis()->SetBinLabel(1,"GOOD");
+  tempHisto->GetXaxis()->SetBinLabel(2,"CORRUPTED");
+  tempHisto->GetXaxis()->SetBinLabel(3,"UNKNOWN");
+  tempHisto->GetYaxis()->SetTitle("Number of Events");
+  getStatistics().createHistogram(tempHisto);
 }
