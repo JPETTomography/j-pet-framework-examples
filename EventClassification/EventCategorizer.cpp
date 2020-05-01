@@ -74,6 +74,12 @@ bool EventCategorizer::init()
      fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
    }
 
+   // Parameters fof reference detector
+   if (isOptionSet(fParams.getOptions(), kRefDetScinIDParamKey)) {
+     fRefDetScinID = getOptionAsInt(fParams.getOptions(), kRefDetScinIDParamKey);
+     INFO(Form("Using reference detector - scintillator ID: %d", fRefDetScinID));
+   }
+
    // Input events type
    fOutputEvents = new JPetTimeWindow("JPetEvent");
    // Initialise hisotgrams
@@ -90,29 +96,29 @@ bool EventCategorizer::exec()
 
       // Check types of current event
       bool is2Gamma = EventCategorizerTools::checkFor2Gamma(
-        event, getStatistics(), fSaveControlHistos, fB2BSlotThetaDiff
+        event, getStatistics(), fSaveControlHistos, ((double)fRefDetScinID)
       );
-      bool is3Gamma = EventCategorizerTools::checkFor3Gamma(
-        event, getStatistics(), fSaveControlHistos
-      );
-      bool isPrompt = EventCategorizerTools::checkForPrompt(
-        event, getStatistics(), fSaveControlHistos, fDeexTOTCutMin, fDeexTOTCutMax
-      );
-      bool isScattered = EventCategorizerTools::checkForScatter(
-        event, getStatistics(), fSaveControlHistos, fScatterTOFTimeDiff
-      );
-
+      // bool is3Gamma = EventCategorizerTools::checkFor3Gamma(
+      //   event, getStatistics(), fSaveControlHistos
+      // );
+      // bool isPrompt = EventCategorizerTools::checkForPrompt(
+      //   event, getStatistics(), fSaveControlHistos, fDeexTOTCutMin, fDeexTOTCutMax
+      // );
+      // bool isScattered = EventCategorizerTools::checkForScatter(
+      //   event, getStatistics(), fSaveControlHistos, fScatterTOFTimeDiff
+      // );
+      //
       JPetEvent newEvent = event;
       if(is2Gamma) newEvent.addEventType(JPetEventType::k2Gamma);
-      if(is3Gamma) newEvent.addEventType(JPetEventType::k3Gamma);
-      if(isPrompt) newEvent.addEventType(JPetEventType::kPrompt);
-      if(isScattered) newEvent.addEventType(JPetEventType::kScattered);
-
-      if(fSaveControlHistos){
-        for(auto hit : event.getHits()){
-          getStatistics().getHisto2D("All_XYpos")->Fill(hit.getPosX(), hit.getPosY());
-        }
-      }
+      // if(is3Gamma) newEvent.addEventType(JPetEventType::k3Gamma);
+      // if(isPrompt) newEvent.addEventType(JPetEventType::kPrompt);
+      // if(isScattered) newEvent.addEventType(JPetEventType::kScattered);
+      //
+      // if(fSaveControlHistos){
+      //   for(auto hit : event.getHits()){
+      //     getStatistics().getHisto2D("All_XYpos")->Fill(hit.getPosX(), hit.getPosY());
+      //   }
+      // }
       events.push_back(newEvent);
     }
     saveEvents(events);
@@ -132,6 +138,56 @@ void EventCategorizer::saveEvents(const vector<JPetEvent>& events)
 }
 
 void EventCategorizer::initialiseHistograms(){
+
+  getStatistics().createHistogram(new TH1F(
+    "ref_pm_hits_tdiff",
+    "RefDet hits signals time diff",
+    200, -1.1 * 10000.0, 1.1 * 10000.0
+  ));
+  getStatistics().getHisto1D("ref_pm_hits_tdiff")->GetXaxis()->SetTitle("Time difference [ps]");
+  getStatistics().getHisto1D("ref_pm_hits_tdiff")->GetYaxis()->SetTitle("Number of hits");
+
+  getStatistics().createHistogram(new TH1F(
+    "ref_pm_hits_tot",
+    "RefDet hits TOT",
+    200, 0.0, 375000.0
+  ));
+  getStatistics().getHisto1D("ref_pm_hits_tot")->GetXaxis()->SetTitle("TOT [ps]");
+  getStatistics().getHisto1D("ref_pm_hits_tot")->GetYaxis()->SetTitle("Number of hits");
+
+  auto minScinID = getParamBank().getScins().begin()->first;
+  auto maxScinID = 230;
+
+  // Time diff and TOT per scin per multi
+  for(int scinID = minScinID; scinID<= maxScinID; scinID++){
+    for(int multi = 1; multi <=8; multi++){
+
+      getStatistics().createHistogram(new TH1F(
+        Form("hit_tdiff_scin_%d_m_%d", scinID, multi),
+        Form("Module 1 Hit time difference, scin %d,  multiplicity %d", scinID, multi),
+        200, -1.1 * 10000.0, 1.1 * 10000.0
+      ));
+      getStatistics().getHisto1D(Form("hit_tdiff_scin_%d_m_%d", scinID, multi))
+      ->GetXaxis()->SetTitle("Time difference [ps]");
+      getStatistics().getHisto1D(Form("hit_tdiff_scin_%d_m_%d", scinID, multi))
+      ->GetYaxis()->SetTitle("Number of Hits");
+
+      getStatistics().createHistogram(new TH1F(
+        Form("hit_tot_scin_%d_m_%d", scinID, multi),
+        Form("Module 1  Hit TOT divided by multiplicity, scin %d multi %d", scinID, multi),
+        200, 0.0, 375000.0
+      ));
+      getStatistics().getHisto1D(Form("hit_tot_scin_%d_m_%d", scinID, multi))
+      ->GetXaxis()->SetTitle("Time over Threshold [ps]");
+      getStatistics().getHisto1D(Form("hit_tot_scin_%d_m_%d", scinID, multi))
+      ->GetYaxis()->SetTitle("Number of Hits");
+    }
+  }
+
+
+
+
+
   // General histograms
   getStatistics().createHistogram(
     new TH2F("All_XYpos", "Hits position XY", 222, -50.5, 50.5, 222, -50.5, 50.5));

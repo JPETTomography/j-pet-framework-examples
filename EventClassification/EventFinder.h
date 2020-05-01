@@ -54,11 +54,7 @@ protected:
   const std::string kEventMinMultiplicity = "EventFinder_MinEventMultiplicity_int";
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kEventTimeParamKey = "EventFinder_EventTime_float";
-  const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_float";
-  const std::string kRefDetScinIDParamKey = "TimeCalibration_RefDetScinID_int";
   double fEventTimeWindow = 5000.0;
-  double fABTimeDiff = 10000.0;
-  int fRefDetScinID = -1;
   bool fUseCorruptedHits = false;
   bool fSaveControlHistos = true;
   uint fMinMultiplicity = 1;

@@ -29,6 +29,9 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
   if (event.getHits().size() < 2) {
     return false;
   }
+
+  int refScinID = (int) b2bSlotThetaDiff;
+
   for (uint i = 0; i < event.getHits().size(); i++) {
     for (uint j = i + 1; j < event.getHits().size(); j++) {
       JPetHit firstHit, secondHit;
@@ -39,29 +42,89 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
         firstHit = event.getHits().at(j);
         secondHit = event.getHits().at(i);
       }
-      // Checking for back to back
-      double thetaDiff = fabs(
-        firstHit.getScin().getSlot().getTheta() - secondHit.getScin().getSlot().getTheta()
-      );
-      double minTheta = 180.0 - b2bSlotThetaDiff;
-      double maxTheta = 180.0 + b2bSlotThetaDiff;
-      if (thetaDiff > minTheta && thetaDiff < maxTheta) {
-        if (saveHistos) {
-          double distance = calculateDistance(secondHit, firstHit);
-          TVector3 annhilationPoint = calculateAnnihilationPoint(firstHit, secondHit);
-          stats.getHisto1D("2Gamma_Zpos")->Fill(firstHit.getPosZ());
-          stats.getHisto1D("2Gamma_Zpos")->Fill(secondHit.getPosZ());
-          stats.getHisto1D("2Gamma_TimeDiff")->Fill(secondHit.getTime() - firstHit.getTime());
-          stats.getHisto1D("2Gamma_Dist")->Fill(distance);
-          stats.getHisto1D("Annih_TOF")->Fill(calculateTOF(firstHit, secondHit));
-          stats.getHisto2D("AnnihPoint_XY")->Fill(annhilationPoint.X(), annhilationPoint.Y());
-          stats.getHisto2D("AnnihPoint_XZ")->Fill(annhilationPoint.X(), annhilationPoint.Z());
-          stats.getHisto2D("AnnihPoint_YZ")->Fill(annhilationPoint.Y(), annhilationPoint.Z());
-        }
+
+      if(firstHit.getScin().getID()==refScinID){
+        auto multiRef = firstHit.getSignalB().getRawSignals().size();
+        stats.getHisto1D("ref_pm_hits_tdiff")
+        ->Fill(firstHit.getTimeDiff());
+        stats.getHisto1D("ref_pm_hits_tot")
+        ->Fill(firstHit.getEnergy()/((float) multiRef));
+
+        auto multiSecond = secondHit.getSignalA().getRawSignals().size()
+        + secondHit.getSignalB().getRawSignals().size();
+        stats.getHisto1D(
+          Form("hit_tdiff_scin_%d_m_%d", secondHit.getScin().getID(), ((int) multiSecond))
+        )->Fill(secondHit.getTimeDiff());
+        stats.getHisto1D(
+          Form("hit_tot_scin_%d_m_%d", secondHit.getScin().getID(), ((int) multiSecond))
+        )->Fill(secondHit.getEnergy()/((float) multiSecond));
+        return true;
+
+      } else if(secondHit.getScin().getID()==refScinID){
+        auto multiRef = secondHit.getSignalB().getRawSignals().size();
+        stats.getHisto1D("ref_pm_hits_tdiff")
+        ->Fill(secondHit.getTimeDiff());
+        stats.getHisto1D("ref_pm_hits_tot")
+        ->Fill(secondHit.getEnergy()/((float) multiRef));
+
+        auto multiFirst = firstHit.getSignalA().getRawSignals().size()
+        + firstHit.getSignalB().getRawSignals().size();
+        stats.getHisto1D(
+          Form("hit_tdiff_scin_%d_m_%d", firstHit.getScin().getID(), ((int) multiFirst))
+        )->Fill(firstHit.getTimeDiff());
+        stats.getHisto1D(
+          Form("hit_tot_scin_%d_m_%d", firstHit.getScin().getID(), ((int) multiFirst))
+        )->Fill(firstHit.getEnergy()/((float) multiFirst));
+        return true;
+
+      } else if(firstHit.getScin().getSlot().getID() != secondHit.getScin().getSlot().getID()){
+        auto multiFirst = firstHit.getSignalA().getRawSignals().size()
+        + firstHit.getSignalB().getRawSignals().size();
+        auto multiSecond = secondHit.getSignalA().getRawSignals().size()
+        + secondHit.getSignalB().getRawSignals().size();
+
+        stats.getHisto1D(
+          Form("hit_tdiff_scin_%d_m_%d", firstHit.getScin().getID(), ((int) multiFirst))
+        )->Fill(firstHit.getTimeDiff());
+        stats.getHisto1D(
+          Form("hit_tot_scin_%d_m_%d", firstHit.getScin().getID(), ((int) multiFirst))
+        )->Fill(firstHit.getEnergy()/((float) multiFirst));
+
+        stats.getHisto1D(
+          Form("hit_tdiff_scin_%d_m_%d", secondHit.getScin().getID(), ((int) multiSecond))
+        )->Fill(secondHit.getTimeDiff());
+        stats.getHisto1D(
+          Form("hit_tot_scin_%d_m_%d", secondHit.getScin().getID(), ((int) multiSecond))
+        )->Fill(secondHit.getEnergy()/((float) multiSecond));
+
         return true;
       }
     }
   }
+
+      // Checking for back to back
+      // double thetaDiff = fabs(
+        // firstHit.getScin().getSlot().getTheta() - secondHit.getScin().getSlot().getTheta()
+      // );
+      // double minTheta = 180.0 - b2bSlotThetaDiff;
+      // double maxTheta = 180.0 + b2bSlotThetaDiff;
+      // if (thetaDiff > minTheta && thetaDiff < maxTheta) {
+        // if (saveHistos) {
+          // double distance = calculateDistance(secondHit, firstHit);
+          // TVector3 annhilationPoint = calculateAnnihilationPoint(firstHit, secondHit);
+          // stats.getHisto1D("2Gamma_Zpos")->Fill(firstHit.getPosZ());
+          // stats.getHisto1D("2Gamma_Zpos")->Fill(secondHit.getPosZ());
+          // stats.getHisto1D("2Gamma_TimeDiff")->Fill(secondHit.getTime() - firstHit.getTime());
+          // stats.getHisto1D("2Gamma_Dist")->Fill(distance);
+          // stats.getHisto1D("Annih_TOF")->Fill(calculateTOF(firstHit, secondHit));
+          // stats.getHisto2D("AnnihPoint_XY")->Fill(annhilationPoint.X(), annhilationPoint.Y());
+          // stats.getHisto2D("AnnihPoint_XZ")->Fill(annhilationPoint.X(), annhilationPoint.Z());
+          // stats.getHisto2D("AnnihPoint_YZ")->Fill(annhilationPoint.Y(), annhilationPoint.Z());
+        // }
+        // return true;
+      // }
+    // }
+  // }
   return false;
 }
 
