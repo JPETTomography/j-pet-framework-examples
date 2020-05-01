@@ -38,37 +38,41 @@ public:
 
 protected:
 	void fillHistosForHit(
-		const JPetHit& hit, const std::vector<double>& RefTimesL,
-		const std::vector<double> & RefTimesT
+		const JPetHit& hit, const std::vector<double>& refTimesL,
+		const std::vector<double> & refTimesT
 	);
 
-	const std::string fTOTcutHigh  = "TimeCalibration_TOTCutHigh_float";
 	const std::string kMainStripKey = "TimeWindowCreator_MainStrip_int";
-	const std::string fTOTcutLow  = "TimeCalibration_TOTCutLow_float";
-	const std::string outputFile = "TimeConstantsCalib.txt";
-	const std::string fCalibRunKey = "TimeCalibRunNumber";
+	const std::string kTOTcutHighKey  = "TimeCalibration_TOTCutHigh_float";
+	const std::string kTOTcutLowKey  = "TimeCalibration_TOTCutLow_float";
+	const std::string kRefDetPMIDKey = "TimeCalib_RefDet_PM_ID_int";
+	const std::string kOutputFile = "TimeConstantsCalib.txt";
+	const std::string kCalibRunKey = "TimeCalib_RunNumber";
+	int fNumberOfThresholds = 2;
 
-	const float Cl[3] = {0., 0.1418, 0.5003};    //[ns]
-	const float SigCl[3] = {0., 0.0033, 0.0033}; //[ns]
-	//Number of calibration run associated with Acquisition Campaign
-  int calibRun = 1;
-	//TOT cuts for slot hits (sum of TOTs from both sides)
-	float TOTcut[2] = {-300000000.,300000000.};
-	//maximal fractional uncertainty of parameters accepted by calibration
-	double frac_err = 0.3;
-	//minimal number of events for a distribution to be fitted
-	int min_ev = 100;
-	//Layer of calibrated slot
-	int LayerToCalib = 0;
-	//Slot to be calibrated
-	int StripToCalib = 0;
-	float CAlTmp[4]    = {0.,0.,0.,0.};
-	float SigCAlTmp[4] = {0.,0.,0.,0.};
-	float CAtTemp[4]   = {0.,0.,0.,0.};
-	float SigCAtTmp[4] = {0.,0.,0.,0.};
-	float CBlTmp[4]    = {0.,0.,0.,0.};
-	float SigCBlTmp[4] = {0.,0.,0.,0.};
-	float CBtTmp[4]    = {0.,0.,0.,0.};
-	float SigCBtTmp[4] = {0.,0.,0.,0.};
+	int fPMidRef = 385;
+
+	const float fCl[3] = {0., 0.1418, 0.5003};    //[ns]
+	const float fSigCl[3] = {0., 0.0033, 0.0033}; //[ns]
+	// Number of calibration run associated with Acquisition Campaign
+  int fCalibRun = 1;
+	// TOT cuts for slot hits (sum of TOTs from both sides)
+	float fTOTcut[2] = {-300000000., 300000000.};
+	// maximal fractional uncertainty of parameters accepted by calibration
+	double fFracError = 0.3;
+	// Minimal number of events for a distribution to be fitted
+	int fMinEvtNum = 100;
+	// Strip to be calibrated - ID of a scintillator
+	int fStripToCalib = 0;
+	// Some temporary arrays for fitting
+	float fCAlTmp[4]    = {0.,0.,0.,0.};
+	float fSigCAlTmp[4] = {0.,0.,0.,0.};
+	float fCAtTemp[4]   = {0.,0.,0.,0.};
+	float fSigCAtTmp[4] = {0.,0.,0.,0.};
+	float fCBlTmp[4]    = {0.,0.,0.,0.};
+	float fSigCBlTmp[4] = {0.,0.,0.,0.};
+	float fCBtTmp[4]    = {0.,0.,0.,0.};
+	float fSigCBtTmp[4] = {0.,0.,0.,0.};
 };
+
 #endif /* !TIMECALIBRATION_H */

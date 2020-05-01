@@ -126,6 +126,7 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
 }
 
 void HitFinder::initialiseHistograms(){
+
   getStatistics().createHistogram(new TH1F(
     "good_vs_bad_hits", "Number of good and corrupted Hits created", 3, 0.5, 3.5
   ));
@@ -145,18 +146,18 @@ void HitFinder::initialiseHistograms(){
     200, -2 * fABTimeDiff, 2 * fABTimeDiff, 192, 0.5, 192.5
   ));
   getStatistics().getHisto2D("time_diff_per_scin")
-    ->GetXaxis()->SetTitle("A-B time difference");
+  ->GetXaxis()->SetTitle("A-B time difference");
   getStatistics().getHisto2D("time_diff_per_scin")
-    ->GetYaxis()->SetTitle("ID of Scintillator");
+  ->GetYaxis()->SetTitle("ID of Scintillator");
 
   getStatistics().createHistogram(new TH2F(
     "hit_pos_per_scin", "Hit Position per Scintillator ID",
     200, -50.0, 50.0, 192, 0.5, 192.5
   ));
   getStatistics().getHisto2D("hit_pos_per_scin")
-    ->GetXaxis()->SetTitle("Hit z position [cm]");
+  ->GetXaxis()->SetTitle("Hit z position [cm]");
   getStatistics().getHisto2D("hit_pos_per_scin")
-    ->GetYaxis()->SetTitle("ID of Scintillator");
+  ->GetYaxis()->SetTitle("ID of Scintillator");
 
   // TOT calculating for all hits and reco flags
   getStatistics().createHistogram(new TH1F(

@@ -68,12 +68,20 @@ vector<JPetHit> HitFinderTools::matchAllSignals(
   int refDetScinID, JPetStatistics& stats, bool saveHistos
 ) {
   vector<JPetHit> allHits;
+  vector<JPetHit> refHits;
   for (auto& scinSigals : allSignals) {
     // Loop for Reference Detector ID
     if (scinSigals.first == refDetScinID) {
       for (auto refSignal : scinSigals.second) {
         auto refHit = createDummyRefDetHit(refSignal);
-        allHits.push_back(refHit);
+        refHits.push_back(refHit);
+        if (saveHistos) {
+          stats.getHisto1D("ref_hit_signalB_tot")->Fill(refHit.getEnergy());
+        }
+      }
+      allHits.insert(allHits.end(), refHits.begin(), refHits.end());
+      if (saveHistos) {
+        stats.getHisto1D("ref_hits_per_time_slot")->Fill(refHits.size());
       }
       continue;
     }
@@ -82,6 +90,9 @@ vector<JPetHit> HitFinderTools::matchAllSignals(
       scinSigals.second, timeDiffAB, stats, saveHistos
     );
     allHits.insert(allHits.end(), scinHits.begin(), scinHits.end());
+  }
+  if (saveHistos) {
+    stats.getHisto1D("hits_per_time_slot")->Fill(allHits.size());
   }
   return allHits;
 }
@@ -172,10 +183,12 @@ JPetHit HitFinderTools::createHit(
   hit.setScin(signalA.getPM().getScin());
 
   if(saveHistos) {
-    auto multi = signalA.getRawSignals().size()+ signalB.getRawSignals().size();
+    auto multi = signalA.getRawSignals().size() + signalB.getRawSignals().size();
 
     stats.getHisto2D("time_diff_per_scin")
     ->Fill(hit.getTimeDiff(), hit.getScin().getID());
+
+    stats.getHisto2D("hit_pos_XY")->Fill(hit.getPosY(), hit.getPosX());
 
     stats.getHisto1D("hit_sig_multi")->Fill(multi);
 
@@ -200,12 +213,13 @@ JPetHit HitFinderTools::createDummyRefDetHit(const JPetMatrixSignal& signal)
 {
   JPetHit hit;
   JPetMatrixSignal dummy;
+  hit.setSignalA(dummy);
   hit.setSignalB(signal);
   hit.setTime(signal.getTime());
   hit.setQualityOfTime(-1.0);
   hit.setTimeDiff(0.0);
   hit.setQualityOfTimeDiff(-1.0);
-  hit.setEnergy(-1.0);
+  hit.setEnergy(signal.getTOT());
   hit.setQualityOfEnergy(-1.0);
   hit.setPosX(signal.getPM().getScin().getCenterX());
   hit.setPosY(signal.getPM().getScin().getCenterY());

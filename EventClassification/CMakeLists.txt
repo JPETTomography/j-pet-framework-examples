@@ -21,7 +21,7 @@ set(projectName EventClassification)
 
 ## Auxiliary files
 #set(AUXILIARY_FILES
-  #userParams.json
+  userParamsEvent.json
   #PARAMETERS.md
   #README.md
   #run.sh

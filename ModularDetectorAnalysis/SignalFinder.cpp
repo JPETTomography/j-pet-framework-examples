@@ -111,7 +111,7 @@ void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& rawSigVec)
 
       if(fSaveControlHistos){
 
-        if(pmID > 400 && pmID < 505) {
+        if(pmID > 400 && pmID < 560) {
           getStatistics().getHisto1D(Form("tot_thr1_sipm_%d", pmID))
           ->Fill(trails.at(0).getTime()-leads.at(0).getTime());
 
@@ -155,7 +155,7 @@ void SignalFinder::initialiseHistograms(){
 
   auto minPMID = getParamBank().getPMs().begin()->first;
   // auto maxPMID = getParamBank().getPMs().rbegin()->first;
-  auto maxPMID = 505;
+  auto maxPMID = 560;
   auto minScinD = getParamBank().getScins().begin()->first;
   auto maxScinID = getParamBank().getScins().rbegin()->first;
 
@@ -219,7 +219,7 @@ void SignalFinder::initialiseHistograms(){
   getStatistics().getHisto1D("rawsig_tslot")->GetYaxis()->SetTitle("Number of Time Windows");
 
   // Time differences lead/trail/THR1/THR2 per SiPM
-  for(int i=minPMID; i<=505; i++){
+  for(int i=minPMID; i<=560; i++){
     getStatistics().createHistogram(new TH1F(
       Form("lead_thr1_thr2_tdiff_sipm_%d", i),
       Form("Time Difference between leading Signal Channels THR1 and THR2 in found signals on SiPM ID %d", i),

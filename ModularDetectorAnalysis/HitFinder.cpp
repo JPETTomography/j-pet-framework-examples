@@ -64,9 +64,6 @@ bool HitFinder::exec()
     auto allHits = HitFinderTools::matchAllSignals(
       signalsBySlot, fABTimeDiff, fRefDetScinID, getStatistics(), fSaveControlHistos
     );
-    if (fSaveControlHistos) {
-      getStatistics().getHisto1D("hits_per_time_slot")->Fill(allHits.size());
-    }
     saveHits(allHits);
   } else return false;
   return true;
@@ -93,7 +90,7 @@ void HitFinder::initialiseHistograms(){
   // auto maxScinID = getParamBank().getScins().rbegin()->first;
 
   getStatistics().createHistogram(new TH1F(
-    "hits_per_time_slot", "Number of Hits in Time Window", 60, -0.5, 60.5
+    "hits_per_time_slot", "Number of Hits in Time Window", 40, -0.5, 40.5
   ));
   getStatistics().getHisto1D("hits_per_time_slot")
   ->GetXaxis()->SetTitle("Hits in Time Slot");
@@ -109,6 +106,13 @@ void HitFinder::initialiseHistograms(){
   ->GetXaxis()->SetTitle("A-B time difference [ps]");
   getStatistics().getHisto2D("time_diff_per_scin")
   ->GetYaxis()->SetTitle("ID of Scintillator");
+
+  getStatistics().createHistogram(new TH2F(
+    "hit_pos_XY", "Hit Position XY projection",
+    121, -60.5, 60.5, 121, -60.5, 60.5
+  ));
+  getStatistics().getHisto2D("hit_pos_XY")->GetXaxis()->SetTitle("Y [cm]");
+  getStatistics().getHisto2D("hit_pos_XY")->GetYaxis()->SetTitle("X [cm]");
 
   // getStatistics().createHistogram(new TH2F(
   //   "hit_pos_per_scin", "Hit Position per Scintillator ID",
@@ -153,6 +157,23 @@ void HitFinder::initialiseHistograms(){
       ->GetYaxis()->SetTitle("Number of Hits");
     }
   }
+
+  // Reference detector hits - signal B only
+  getStatistics().createHistogram(new TH1F(
+    "ref_hits_per_time_slot", "Number of Reference Detector Hits in Time Window", 40, -0.5, 40.5
+  ));
+  getStatistics().getHisto1D("ref_hits_per_time_slot")
+  ->GetXaxis()->SetTitle("Hits in Time Slot");
+  getStatistics().getHisto1D("ref_hits_per_time_slot")
+  ->GetYaxis()->SetTitle("Number of Time Slots");
+
+  getStatistics().createHistogram(new TH1F(
+    "ref_hit_signalB_tot",
+    "RefDet hits TOT of signal B",
+    200, 0.0, 100000.0
+  ));
+  getStatistics().getHisto1D("ref_hit_signalB_tot")->GetXaxis()->SetTitle("TOT [ps]");
+  getStatistics().getHisto1D("ref_hit_signalB_tot")->GetYaxis()->SetTitle("Number of hits");
 
   // Unused sigals stats
   getStatistics().createHistogram(new TH1F(

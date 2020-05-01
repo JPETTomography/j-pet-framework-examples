@@ -13,10 +13,10 @@
  *  @file main.cpp
  */
 
-#include "../LargeBarrelAnalysis/TimeWindowCreator.h"
-#include "../LargeBarrelAnalysis/SignalTransformer.h"
-#include "../LargeBarrelAnalysis/SignalFinder.h"
-#include "../LargeBarrelAnalysis/HitFinder.h"
+#include "../ModularDetectorAnalysis/TimeWindowCreator.h"
+#include "../ModularDetectorAnalysis/SignalTransformer.h"
+#include "../ModularDetectorAnalysis/SignalFinder.h"
+#include "../ModularDetectorAnalysis/HitFinder.h"
 #include <JPetManager/JPetManager.h>
 #include "TimeCalibration.h"
 using namespace std;
