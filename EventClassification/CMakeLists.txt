@@ -20,12 +20,12 @@ endif()
 set(projectName EventClassification)
 
 ## Auxiliary files
-#set(AUXILIARY_FILES
+set(AUXILIARY_FILES
   userParamsEvent.json
   #PARAMETERS.md
   #README.md
   #run.sh
-#)
+)
 
 ################################################################################
 ## Binary, header and source files definitions
