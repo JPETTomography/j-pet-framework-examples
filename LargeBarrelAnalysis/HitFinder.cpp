@@ -126,12 +126,15 @@ if (fSaveControlHistos) {
 }
 
 void HitFinder::initialiseHistograms(){
-  TH1D* tempHisto = new TH1D("good_vs_bad_hits", "Number of good and corrupted Hits created", 3, 0.5, 3.5);
-  tempHisto->GetXaxis()->SetBinLabel(1,"GOOD");
-  tempHisto->GetXaxis()->SetBinLabel(2,"CORRUPTED");
-  tempHisto->GetXaxis()->SetBinLabel(3,"UNKNOWN");
-  tempHisto->GetYaxis()->SetTitle("Number of Hits");
-  getStatistics().createHistogram(tempHisto);
+  getStatistics().createHistogramWithAxes(
+    new TH1D("good_vs_bad_hits", "Number of good and corrupted Hits created",
+                                            3, 0.5, 3.5), "Quality", "Number of Hits");
+  std::vector<std::pair<unsigned, std::string>> binLabels;
+  binLabels.push_back(std::make_pair(1,"GOOD"));
+  binLabels.push_back(std::make_pair(2,"CORRUPTED"));
+  binLabels.push_back(std::make_pair(3,"UNKNOWN"));
+  getStatistics().setHistogramBinLabel("good_vs_bad_hits",
+                                       getStatistics().AxisLabel::kXaxis, binLabels);
 
   getStatistics().createHistogramWithAxes(new TH1D("hits_per_time_slot", "Number of Hits in Time Window", 100, -0.5, 99.5),
                                                 "Hits in Time Slot", "Number of Time Slots");

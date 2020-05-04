@@ -193,77 +193,57 @@ void SignalTransformer::correctForWalk(const JPetRecoSignal& recoSignal)
   }
 }
 void SignalTransformer::initialiseHistograms(){
-  TH1D* tempHisto = new TH1D("good_vs_bad_signals", "Number of good and corrupted signals created", 3, 0.5, 3.5);
-  tempHisto->GetXaxis()->SetBinLabel(1,"GOOD");
-  tempHisto->GetXaxis()->SetBinLabel(2,"CORRUPTED");
-  tempHisto->GetXaxis()->SetBinLabel(3,"UNKNOWN");
-  tempHisto->GetYaxis()->SetTitle("Number of Signals");
-  getStatistics().createHistogram(tempHisto);
+  getStatistics().createHistogramWithAxes(
+    new TH1D("good_vs_bad_signals", "Number of good and corrupted signals created",
+                                            3, 0.5, 3.5), "Quality", "Number of Signals");
+  std::vector<std::pair<unsigned, std::string>> binLabels;
+  binLabels.push_back(std::make_pair(1,"GOOD"));
+  binLabels.push_back(std::make_pair(2,"CORRUPTED"));
+  binLabels.push_back(std::make_pair(3,"UNKNOWN"));
+  getStatistics().setHistogramBinLabel("good_vs_bad_signals",
+                                       getStatistics().AxisLabel::kXaxis, binLabels);
 
   getStatistics().createHistogramWithAxes(new TH1D("PmIdCorrupted", "PMs yielding corrupted signals", 400, -0.5, 399.5),
                                                         "PM id", "Number of Signals");
+  
+  getStatistics().createHistogramWithAxes(
+    new TH1D("raw_sigs_multi", "Multiplicity of created Raw Signals",
+                                            8, 0.5, 8.5), "Signal label", "Number of SigChs");
+  binLabels.clear();
+  binLabels.push_back(std::make_pair(1,"THR 1 Lead"));
+  binLabels.push_back(std::make_pair(2,"THR 1 Trail"));
+  binLabels.push_back(std::make_pair(3,"THR 2 Lead"));
+  binLabels.push_back(std::make_pair(4,"THR 2 Trail"));
+  binLabels.push_back(std::make_pair(5,"THR 3 Lead"));
+  binLabels.push_back(std::make_pair(6,"THR 3 Trail"));
+  binLabels.push_back(std::make_pair(7,"THR 4 Lead"));
+  binLabels.push_back(std::make_pair(8,"THR 4 Trail"));
+  getStatistics().setHistogramBinLabel("raw_sigs_multi",
+                                       getStatistics().AxisLabel::kXaxis, binLabels);
 
-  tempHisto = new TH1D("raw_sigs_multi", "Multiplicity of created Raw Signals", 8, 0.5, 8.5);
-  tempHisto->GetXaxis()->SetBinLabel(1,"THR 1 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(2,"THR 1 Trail");
-  tempHisto->GetXaxis()->SetBinLabel(3,"THR 2 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(4,"THR 2 Trail");
-  tempHisto->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
-  tempHisto->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
-  tempHisto->GetYaxis()->SetTitle("Number of SigChs");
-  getStatistics().createHistogram(tempHisto);
+  getStatistics().createHistogramWithAxes(
+    new TH1D("raw_sigs_multi_good", "Multiplicity of created Raw Signals with GOOD flag",
+                                            8, 0.5, 8.5), "Signal label", "Number of SigChs");
+  getStatistics().setHistogramBinLabel("raw_sigs_multi_good",
+                                       getStatistics().AxisLabel::kXaxis, binLabels);
 
-  tempHisto = new TH1D("raw_sigs_multi_good", "Multiplicity of created Raw Signals with GOOD flag", 8, 0.5, 8.5);
-  tempHisto->GetXaxis()->SetBinLabel(1,"THR 1 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(2,"THR 1 Trail");
-  tempHisto->GetXaxis()->SetBinLabel(3,"THR 2 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(4,"THR 2 Trail");
-  tempHisto->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
-  tempHisto->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
-  tempHisto->GetYaxis()->SetTitle("Number of SigChs");
-  getStatistics().createHistogram(tempHisto);
+  getStatistics().createHistogramWithAxes(
+    new TH1D("raw_sigs_multi_corr", "Multiplicity of created Raw Signals with CORRUPTED flag",
+                                            8, 0.5, 8.5), "Signal label", "Number of SigChs");
+  getStatistics().setHistogramBinLabel("raw_sigs_multi_corr",
+                                       getStatistics().AxisLabel::kXaxis, binLabels);
 
-  tempHisto = new TH1D("raw_sigs_multi_corr", "Multiplicity of created Raw Signals with CORRUPTED flag", 8, 0.5, 8.5);
-  tempHisto->GetXaxis()->SetBinLabel(1,"THR 1 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(2,"THR 1 Trail");
-  tempHisto->GetXaxis()->SetBinLabel(3,"THR 2 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(4,"THR 2 Trail");
-  tempHisto->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
-  tempHisto->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
-  tempHisto->GetYaxis()->SetTitle("Number of SigChs");
-  getStatistics().createHistogram(tempHisto);
+  getStatistics().createHistogramWithAxes(
+    new TH1D("raw_sigs_multi_corr_sigch_good", "Multiplicity of created Raw Signals with CORRUPTED flag - GOOD SigCh only",
+                                            8, 0.5, 8.5), "Signal label", "Number of GOOD SigChs");
+  getStatistics().setHistogramBinLabel("raw_sigs_multi_corr_sigch_good",
+                                       getStatistics().AxisLabel::kXaxis, binLabels);
 
-  tempHisto = new TH1D("raw_sigs_multi_corr_sigch_good", 
-                       "Multiplicity of created Raw Signals with CORRUPTED flag - GOOD SigCh only", 8, 0.5, 8.5);
-  tempHisto->GetXaxis()->SetBinLabel(1,"THR 1 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(2,"THR 1 Trail");
-  tempHisto->GetXaxis()->SetBinLabel(3,"THR 2 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(4,"THR 2 Trail");
-  tempHisto->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
-  tempHisto->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
-  tempHisto->GetYaxis()->SetTitle("Number of GOOD SigChs");
-  getStatistics().createHistogram(tempHisto);
-
-  tempHisto = new TH1D("raw_sigs_multi_corr_sigch_corr", 
-                       "Multiplicity of created Raw Signals with CORRUPTED flag - CORRUPTED SigCh only", 8, 0.5, 8.5);
-  tempHisto->GetXaxis()->SetBinLabel(1,"THR 1 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(2,"THR 1 Trail");
-  tempHisto->GetXaxis()->SetBinLabel(3,"THR 2 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(4,"THR 2 Trail");
-  tempHisto->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
-  tempHisto->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
-  tempHisto->GetYaxis()->SetTitle("Number of CORRUPTED SigChs");
-  getStatistics().createHistogram(tempHisto);
+  getStatistics().createHistogramWithAxes(
+    new TH1D("raw_sigs_multi_corr_sigch_corr", "Multiplicity of created Raw Signals with CORRUPTED flag - CORRUPTED SigCh only",
+                                            8, 0.5, 8.5), "Signal label", "Number of CORRUPTED SigChs");
+  getStatistics().setHistogramBinLabel("raw_sigs_multi_corr_sigch_corr",
+                                       getStatistics().AxisLabel::kXaxis, binLabels);
 
   getStatistics().createHistogramWithAxes(new TH1D("WalkCorrLead", "Walk Correction applied on the leading edge",
                         1000, -0.025, 49.975), "Walk Correction [ps]", "Walk Correction applied on the leading edge");

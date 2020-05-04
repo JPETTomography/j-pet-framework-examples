@@ -161,11 +161,13 @@ void EventFinder::initialiseHistograms(){
                                             20, fMinMultiplicity-0.5, fMinMultiplicity+19.5),
                                             "Hits in Event", "Number of Hits");
 
-//Before implementing to the JPetStatistic getObject or sth like that
-  TH1D* tempHisto = new TH1D("good_vs_bad_events", "Number of good and corrupted Events created", 3, 0.5, 3.5);
-  tempHisto->GetXaxis()->SetBinLabel(1,"GOOD");
-  tempHisto->GetXaxis()->SetBinLabel(2,"CORRUPTED");
-  tempHisto->GetXaxis()->SetBinLabel(3,"UNKNOWN");
-  tempHisto->GetYaxis()->SetTitle("Number of Events");
-  getStatistics().createHistogram(tempHisto);
+  getStatistics().createHistogramWithAxes(
+    new TH1D("good_vs_bad_events", "Number of good and corrupted Events created",
+                                            3, 0.5, 3.5), "Quality", "Number of Events");
+  std::vector<std::pair<unsigned, std::string>> binLabels;
+  binLabels.push_back(std::make_pair(1,"GOOD"));
+  binLabels.push_back(std::make_pair(2,"CORRUPTED"));
+  binLabels.push_back(std::make_pair(3,"UNKNOWN"));
+  getStatistics().setHistogramBinLabel("good_vs_bad_events",
+                                       getStatistics().AxisLabel::kXaxis, binLabels);
 }

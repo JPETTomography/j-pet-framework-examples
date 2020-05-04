@@ -211,12 +211,15 @@ void TimeWindowCreator::initialiseHistograms() {
                                                     385, 0.5, 385.5), "PM ID)", "Number of Signal Channels");
   }
 
-  TH1D* tempHisto = new TH1D("good_vs_bad_sigch", "Number of good and corrupted SigChs created", 3, 0.5, 3.5);
-  tempHisto->GetXaxis()->SetBinLabel(1,"GOOD");
-  tempHisto->GetXaxis()->SetBinLabel(2,"CORRUPTED");
-  tempHisto->GetXaxis()->SetBinLabel(3,"UNKNOWN");
-  tempHisto->GetYaxis()->SetTitle("Number of SigChs");
-  getStatistics().createHistogram(tempHisto);
+  getStatistics().createHistogramWithAxes(
+    new TH1D("good_vs_bad_sigch", "Number of good and corrupted SigChs created",
+                                            3, 0.5, 3.5), "Quality", "Number of SigChs");
+  std::vector<std::pair<unsigned, std::string>> binLabels;
+  binLabels.push_back(std::make_pair(1,"GOOD"));
+  binLabels.push_back(std::make_pair(2,"CORRUPTED"));
+  binLabels.push_back(std::make_pair(3,"UNKNOWN"));
+  getStatistics().setHistogramBinLabel("good_vs_bad_sigch",
+                                       getStatistics().AxisLabel::kXaxis, binLabels);
 
   getStatistics().createHistogramWithAxes(new TH1D("LT_time_diff", "LT time diff", 200, -250.0, 999750.0),
                                                     "Time Diff [ps]", "Number of LL pairs");

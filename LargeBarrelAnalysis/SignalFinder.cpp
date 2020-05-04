@@ -118,41 +118,32 @@ void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& rawSigVec)
 }
 
 void SignalFinder::initialiseHistograms(){
-  TH1D* tempHisto = new TH1D("unused_sigch_all", "Unused Signal Channels", 8, 0.5, 8.5);
-  tempHisto->GetXaxis()->SetBinLabel(1,"THR 1 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(2,"THR 1 Trail");
-  tempHisto->GetXaxis()->SetBinLabel(3,"THR 2 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(4,"THR 2 Trail");
-  tempHisto->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
-  tempHisto->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
-  tempHisto->GetYaxis()->SetTitle("Number of SigChs");
-  getStatistics().createHistogram(tempHisto);
+  getStatistics().createHistogramWithAxes(
+    new TH1D("unused_sigch_all", "Unused Signal Channels",
+                                            8, 0.5, 8.5), "Signal label", "Number of SigChs");
+  std::vector<std::pair<unsigned, std::string>> binLabels;
+  binLabels.push_back(std::make_pair(1,"THR 1 Lead"));
+  binLabels.push_back(std::make_pair(2,"THR 1 Trail"));
+  binLabels.push_back(std::make_pair(3,"THR 2 Lead"));
+  binLabels.push_back(std::make_pair(4,"THR 2 Trail"));
+  binLabels.push_back(std::make_pair(5,"THR 3 Lead"));
+  binLabels.push_back(std::make_pair(6,"THR 3 Trail"));
+  binLabels.push_back(std::make_pair(7,"THR 4 Lead"));
+  binLabels.push_back(std::make_pair(8,"THR 4 Trail"));
+  getStatistics().setHistogramBinLabel("unused_sigch_all",
+                                       getStatistics().AxisLabel::kXaxis, binLabels);
 
-  tempHisto = new TH1D("unused_sigch_good", "Unused Signal Channels with GOOD flag", 8, 0.5, 8.5);
-  tempHisto->GetXaxis()->SetBinLabel(1,"THR 1 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(2,"THR 1 Trail");
-  tempHisto->GetXaxis()->SetBinLabel(3,"THR 2 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(4,"THR 2 Trail");
-  tempHisto->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
-  tempHisto->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
-  tempHisto->GetYaxis()->SetTitle("Number of SigChs");
-  getStatistics().createHistogram(tempHisto);
+  getStatistics().createHistogramWithAxes(
+    new TH1D("unused_sigch_good", "Unused Signal Channels with GOOD flag",
+                                            8, 0.5, 8.5), "Signal label", "Number of SigChs");
+  getStatistics().setHistogramBinLabel("unused_sigch_good",
+                                       getStatistics().AxisLabel::kXaxis, binLabels);
 
-  tempHisto = new TH1D("unused_sigch_corr", "Unused Signal Channels with CORRUPTED flag", 8, 0.5, 8.5);
-  tempHisto->GetXaxis()->SetBinLabel(1,"THR 1 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(2,"THR 1 Trail");
-  tempHisto->GetXaxis()->SetBinLabel(3,"THR 2 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(4,"THR 2 Trail");
-  tempHisto->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
-  tempHisto->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
-  tempHisto->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
-  tempHisto->GetYaxis()->SetTitle("Number of SigChs");
-  getStatistics().createHistogram(tempHisto);
+  getStatistics().createHistogramWithAxes(
+    new TH1D("unused_sigch_corr", "Unused Signal Channels with CORRUPTED flag",
+                                            8, 0.5, 8.5), "Signal label", "Number of SigChs");
+  getStatistics().setHistogramBinLabel("unused_sigch_corr",
+                                       getStatistics().AxisLabel::kXaxis, binLabels);
 
   getStatistics().createHistogramWithAxes(
       new TH1D("lead_thr1_thr2_diff", "Time Difference between leading Signal Channels THR1 and THR2 in found signals",
@@ -183,10 +174,13 @@ void SignalFinder::initialiseHistograms(){
                                                     fSigChLeadTrailMaxTime/100.0, -125.0, fSigChLeadTrailMaxTime-125.0),
                                                     "time diff [ps]", "Number of Signal Channels Pairs");
 
-  tempHisto = new TH1D("good_v_bad_raw_sigs", "Number of good and corrupted signals created", 3, 0.5, 3.5);
-  tempHisto->GetXaxis()->SetBinLabel(1,"GOOD");
-  tempHisto->GetXaxis()->SetBinLabel(2,"CORRUPTED");
-  tempHisto->GetXaxis()->SetBinLabel(3,"UNKNOWN");
-  tempHisto->GetYaxis()->SetTitle("Number of Raw Signals");
-  getStatistics().createHistogram(tempHisto);
+  getStatistics().createHistogramWithAxes(
+    new TH1D("good_v_bad_raw_sigs", "Number of good and corrupted signals created",
+                                            3, 0.5, 3.5), "Quality", "Number of Raw Signals");
+  binLabels.clear();
+  binLabels.push_back(std::make_pair(1,"GOOD"));
+  binLabels.push_back(std::make_pair(2,"CORRUPTED"));
+  binLabels.push_back(std::make_pair(3,"UNKNOWN"));
+  getStatistics().setHistogramBinLabel("good_v_bad_raw_sigs",
+                                       getStatistics().AxisLabel::kXaxis, binLabels);
 }
