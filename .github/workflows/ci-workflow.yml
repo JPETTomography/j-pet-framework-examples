@@ -25,7 +25,7 @@ jobs:
       run: |
         source root/bin/thisroot.sh
         rm -rf j-pet-framework || true
-        git clone --single-branch --branch cmake https://github.com/JPETTomography/j-pet-framework.git
+        git clone --single-branch --branch develop https://github.com/JPETTomography/j-pet-framework.git
         mkdir -p j-pet-framework/build
         cd j-pet-framework/build
         cmake ..
