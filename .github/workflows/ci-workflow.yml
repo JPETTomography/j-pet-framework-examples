@@ -22,6 +22,7 @@ jobs:
         tar xzf root_v6.12.06.Linux-ubuntu16-x86_64-gcc5.4.tar.gz
 
     - name: build j-pet framework
+      run: |
         source root/bin/thisroot.sh
         rm -rf j-pet-framework || true
         git clone --single-branch --branch cmake https://github.com/JPETTomgraphy/j-pet-framework.git
@@ -33,6 +34,7 @@ jobs:
         cd ../..
 
     - name: build framework examples 
+      run: |
         source root/bin/thisroot.sh
         mkdir build
         cd build
