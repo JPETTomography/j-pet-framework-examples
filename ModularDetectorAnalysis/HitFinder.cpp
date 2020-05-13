@@ -39,6 +39,11 @@ bool HitFinder::init()
   // Allowed time difference between signals on A and B sides
   if (isOptionSet(fParams.getOptions(), kABTimeDiffParamKey)) {
     fABTimeDiff = getOptionAsFloat(fParams.getOptions(), kABTimeDiffParamKey);
+  } else {
+    WARNING(Form(
+      "No value of the %s parameter provided by the user. Using default value of %lf.",
+      kABTimeDiffParamKey.c_str(), fABTimeDiff
+    ));
   }
   // Getting bool for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey)) {

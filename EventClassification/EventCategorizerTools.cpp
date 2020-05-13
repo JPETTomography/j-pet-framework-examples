@@ -60,7 +60,7 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
         )->Fill(secondHit.getEnergy()/((float) multiSecond));
         return true;
 
-      } else if(secondHit.getScin().getID()==refScinID){
+      } else if(secondHit.getScin().getID()==refScinID) {
         auto multiRef = secondHit.getSignalB().getRawSignals().size();
         stats.getHisto1D("ref_pm_hits_tdiff")
         ->Fill(secondHit.getTimeDiff());

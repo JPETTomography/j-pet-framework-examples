@@ -1,9 +1,10 @@
 {
   "Save_Control_Histograms_bool": true,
-  "TimeCalibration_RefDetScinID_int":220,
-  "HitFinder_ABTimeDiff_float":10000.0,
   "EventFinder_UseCorruptedHits_bool":true,
+  "HitFinder_ABTimeDiff_float":10000.0,
   "EventFinder_MinEventMultiplicity_int": 2,
   "EventFinder_EventTime_float": 10000.0,
-  "Back2Back_Categorizer_SlotThetaDiff_float": 3.0
+  "Back2Back_Categorizer_SlotThetaDiff_float": 3.0,
+  "EventFinder_TOTCutMin_float": 130000.0,
+  "EventFinder_TOTCutMax_float": 220000.0
 }

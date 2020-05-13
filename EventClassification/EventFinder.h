@@ -54,9 +54,15 @@ protected:
   const std::string kEventMinMultiplicity = "EventFinder_MinEventMultiplicity_int";
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kEventTimeParamKey = "EventFinder_EventTime_float";
+  const std::string kTOTCutMinParamKey = "EventFinder_TOTCutMin_float";
+  const std::string kTOTCutMaxParamKey = "EventFinder_TOTCutMax_float";
+  const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_float";
+  double fABTimeDiff = 10000.0;
   double fEventTimeWindow = 5000.0;
   bool fUseCorruptedHits = false;
   bool fSaveControlHistos = true;
   uint fMinMultiplicity = 1;
+  double fTOTCutMin = 130000.0;
+  double fTOTCutMax = 220000.0;
 };
 #endif /* !EVENTFINDER_H */
