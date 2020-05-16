@@ -252,7 +252,7 @@ void SignalFinder::initialiseHistograms(){
 
     getStatistics().createHistogram(new TH1F(
       Form("tot_thr2_sipm_%d", i),
-      Form("Signal Time over Threshold on THR1 on SiPM ID %d", i),
+      Form("Signal Time over Threshold on THR2 on SiPM ID %d", i),
       200, 0.0, 1.1*fSigChLeadTrailMaxTime
     ));
     getStatistics().getHisto1D(Form("tot_thr2_sipm_%d", i))
