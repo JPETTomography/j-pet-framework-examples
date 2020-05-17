@@ -41,7 +41,7 @@ SignalTransformerTools::getRawSigMtxMap(
     auto pmSide = rawSig.getPM().getSide();
     auto search = rawSigMtxMap.find(scinID);
 
-    // Cutting crosstalks from reference detector channel 
+    // Cutting crosstalks from reference detector channel
     if(scinID == refDerScinID && rawSig.getPM().getID() != refDetSiPMID) {
       continue;
     }
@@ -114,11 +114,9 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(
       auto t1 = getRawSigBaseTime(rawSigVec.at(i));
       auto t2 = getRawSigBaseTime(rawSigVec.at(i+1));
 
-      if(scinID < 200 || scinID > 227) { continue; }
-
-      if(rawSigVec.at(i).getPM().getSide()==JPetPM::SideA){
+      if(rawSigVec.at(i).getPM().getSide()==JPetPM::SideA) {
         stats.getHisto1D(Form("tdiff_%d_A_%d_%d", scinID, pos1, pos2))->Fill(t2-t1);
-      } else if(rawSigVec.at(i).getPM().getSide()==JPetPM::SideB){
+      } else if(rawSigVec.at(i).getPM().getSide()==JPetPM::SideB) {
         stats.getHisto1D(Form("tdiff_%d_B_%d_%d", scinID, pos1, pos2))->Fill(t2-t1);
       }
     }
