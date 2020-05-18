@@ -171,6 +171,12 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
             nextHit.getSignalA().getRawSignals().size()
             + nextHit.getSignalB().getRawSignals().size();
 
+            // TOTs divided by multipliity
+            auto totHit = hit.getEnergy()/((float) multiHit);
+            auto totNext = nextHit.getEnergy()/((float) multiNextHit);
+            auto revTOTHit = reverseTOTDiff(hit, multiHit);
+            auto revTOTNext = reverseTOTDiff(nextHit, multiNextHit);
+
             // all hits
             getStatistics().getHisto1D("coin_hit_sig_multi")->Fill(multiHit);
             getStatistics().getHisto1D("coin_hit_sig_multi")->Fill(multiNextHit);
@@ -185,10 +191,10 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
             getStatistics().getHisto1D("coin_hits_tdiff_recalc")
             ->Fill(recalculateTimeDiff(nextHit));
 
-            getStatistics().getHisto1D("coin_hits_tot")
-            ->Fill(hit.getEnergy()/((float) multiHit));
-            getStatistics().getHisto1D("coin_hits_tot")
-            ->Fill(nextHit.getEnergy()/((float) multiNextHit));
+            getStatistics().getHisto1D("coin_hits_tot")->Fill(totHit);
+            getStatistics().getHisto1D("coin_hits_tot")->Fill(totNext);
+            getStatistics().getHisto1D("coin_hits_tot_reverse")->Fill(revTOTHit);
+            getStatistics().getHisto1D("coin_hits_tot_reverse")->Fill(revTOTNext);
 
             // Per scin ID
             getStatistics().getHisto1D(Form(
@@ -207,23 +213,37 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
 
             getStatistics().getHisto1D(Form(
               "coin_tot_scin_%d", hit.getScin().getID()
-            ))->Fill(hit.getEnergy()/((float) multiHit));
-
+            ))->Fill(totHit);
             getStatistics().getHisto1D(Form(
               "coin_tot_scin_%d", nextHit.getScin().getID()
-            ))->Fill(nextHit.getEnergy()/((float) multiNextHit));
+            ))->Fill(totNext);
+
+            getStatistics().getHisto1D(Form(
+              "coin_tot_scin_%d_reverse", hit.getScin().getID()
+            ))->Fill(revTOTHit);
+            getStatistics().getHisto1D(Form(
+              "coin_tot_scin_%d_reverse", nextHit.getScin().getID()
+            ))->Fill(revTOTNext);
 
             getStatistics().getHisto2D(Form("tdiff_tot_scin_%d", hit.getScin().getID()))
-            ->Fill(hit.getTimeDiff(), hit.getEnergy()/((float) multiHit));
-
+            ->Fill(hit.getTimeDiff(), totHit);
             getStatistics().getHisto2D(Form("tdiff_tot_scin_%d", nextHit.getScin().getID()))
-            ->Fill(nextHit.getTimeDiff(), nextHit.getEnergy()/((float) multiNextHit));
+            ->Fill(nextHit.getTimeDiff(), totNext);
+
+            getStatistics().getHisto2D(Form("tdiff_tot_scin_%d_reverse", hit.getScin().getID()))
+            ->Fill(hit.getTimeDiff(), totHit);
+            getStatistics().getHisto2D(Form("tdiff_tot_scin_%d_reverse", nextHit.getScin().getID()))
+            ->Fill(nextHit.getTimeDiff(), totNext);
 
             getStatistics().getHisto2D(Form("tdiff_tot_scin_%d_recalc", hit.getScin().getID()))
-            ->Fill(recalculateTimeDiff(hit), hit.getEnergy()/((float) multiHit));
-
+            ->Fill(recalculateTimeDiff(hit), totHit);
             getStatistics().getHisto2D(Form("tdiff_tot_scin_%d_recalc", nextHit.getScin().getID()))
-            ->Fill(recalculateTimeDiff(nextHit), nextHit.getEnergy()/((float) multiNextHit));
+            ->Fill(recalculateTimeDiff(nextHit), totNext);
+
+            getStatistics().getHisto2D(Form("tdiff_tot_scin_%d_recalc_reverse", hit.getScin().getID()))
+            ->Fill(recalculateTimeDiff(hit), revTOTHit);
+            getStatistics().getHisto2D(Form("tdiff_tot_scin_%d_recalc_reverse", nextHit.getScin().getID()))
+            ->Fill(recalculateTimeDiff(nextHit), revTOTNext);
 
             // Per scin ID and multiplicity
             getStatistics().getHisto1D(Form(
@@ -247,27 +267,48 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
             getStatistics().getHisto1D(Form(
               "coin_tot_scin_%d_m_%d",
               hit.getScin().getID(), ((int) multiHit)
-            ))->Fill(hit.getEnergy()/((float) multiHit));
+            ))->Fill(totHit);
             getStatistics().getHisto1D(Form(
               "coin_tot_scin_%d_m_%d",
               nextHit.getScin().getID(), ((int) multiNextHit)
-            ))->Fill(nextHit.getEnergy()/((float) multiNextHit));
+            ))->Fill(totNext);
+
+            getStatistics().getHisto1D(Form(
+              "coin_tot_scin_%d_m_%d_reverse",
+              hit.getScin().getID(), ((int) multiHit)
+            ))->Fill(revTOTHit);
+            getStatistics().getHisto1D(Form(
+              "coin_tot_scin_%d_m_%d_reverse",
+              nextHit.getScin().getID(), ((int) multiNextHit)
+            ))->Fill(revTOTNext);
 
             getStatistics().getHisto2D(Form(
               "tdiff_tot_scin_%d_m_%d", hit.getScin().getID(), ((int) multiHit)
-            ))->Fill(hit.getTimeDiff(), hit.getEnergy()/((float) multiHit));
-
+            ))->Fill(hit.getTimeDiff(), totHit);
             getStatistics().getHisto2D(Form(
               "tdiff_tot_scin_%d_m_%d", nextHit.getScin().getID(), ((int) multiNextHit)
-            ))->Fill(nextHit.getTimeDiff(), nextHit.getEnergy()/((float) multiNextHit));
+            ))->Fill(nextHit.getTimeDiff(), totNext);
+
+            getStatistics().getHisto2D(Form(
+              "tdiff_tot_scin_%d_m_%d_reverse", hit.getScin().getID(), ((int) multiHit)
+            ))->Fill(hit.getTimeDiff(), revTOTHit);
+            getStatistics().getHisto2D(Form(
+              "tdiff_tot_scin_%d_m_%d_reverse", nextHit.getScin().getID(), ((int) multiNextHit)
+            ))->Fill(nextHit.getTimeDiff(), revTOTNext);
 
             getStatistics().getHisto2D(Form(
               "tdiff_tot_scin_%d_m_%d_recalc", hit.getScin().getID(), ((int) multiHit)
             ))->Fill(recalculateTimeDiff(hit), hit.getEnergy()/((float) multiHit));
-
             getStatistics().getHisto2D(Form(
               "tdiff_tot_scin_%d_m_%d_recalc", nextHit.getScin().getID(), ((int) multiNextHit)
             ))->Fill(recalculateTimeDiff(nextHit), nextHit.getEnergy()/((float) multiNextHit));
+
+            getStatistics().getHisto2D(Form(
+              "tdiff_tot_scin_%d_m_%d_recalc_reverse", hit.getScin().getID(), ((int) multiHit)
+            ))->Fill(recalculateTimeDiff(hit), revTOTHit);
+            getStatistics().getHisto2D(Form(
+              "tdiff_tot_scin_%d_m_%d_recalc_reverse", nextHit.getScin().getID(), ((int) multiNextHit)
+            ))->Fill(recalculateTimeDiff(nextHit), revTOTNext);
           }
         }
       } else {
@@ -356,6 +397,15 @@ void EventFinder::initialiseHistograms(){
   getStatistics().getHisto1D("coin_hits_tot")
   ->GetYaxis()->SetTitle("Number of Hit Pairs");
 
+  getStatistics().createHistogram(new TH1F(
+    "coin_hits_tot_reverse", "Coincidental hits - signal reversed TOT A-B difference",
+    200, -0.0002, 0.0002
+  ));
+  getStatistics().getHisto1D("coin_hits_tot_reverse")
+  ->GetXaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
+  getStatistics().getHisto1D("coin_hits_tot_reverse")
+  ->GetYaxis()->SetTitle("Number of Hit Pairs");
+
   auto minScinID = getParamBank().getScins().begin()->first;
   auto maxScinID = 215;
 
@@ -393,6 +443,16 @@ void EventFinder::initialiseHistograms(){
     getStatistics().getHisto1D(Form("coin_tot_scin_%d", scinID))
     ->GetYaxis()->SetTitle("Number of Hits");
 
+    getStatistics().createHistogram(new TH1F(
+      Form("coin_tot_scin_%d_reverse", scinID),
+      Form("Hits coincidence, TOT divided by multiplicity, scin %d", scinID),
+      200, -0.0002, 0.0002
+    ));
+    getStatistics().getHisto1D(Form("coin_tot_scin_%d_reverse", scinID))
+    ->GetXaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
+    getStatistics().getHisto1D(Form("coin_tot_scin_%d_reverse", scinID))
+    ->GetYaxis()->SetTitle("Number of Hits");
+
     getStatistics().createHistogram(new TH2F(
       Form("tdiff_tot_scin_%d", scinID),
       Form("Hits coincidence, time difference vs. TOT divided by multiplicity, scin %d",  scinID),
@@ -412,6 +472,26 @@ void EventFinder::initialiseHistograms(){
     ->GetXaxis()->SetTitle("Time difference [ps]");
     getStatistics().getHisto2D(Form("tdiff_tot_scin_%d_recalc", scinID))
     ->GetYaxis()->SetTitle("Time over Threshold [ps]");
+
+    getStatistics().createHistogram(new TH2F(
+      Form("tdiff_tot_scin_%d_reverse", scinID),
+      Form("Hits coincidence, time difference vs. TOT reversed, scin %d",  scinID),
+      200, -1.1 * fABTimeDiff, 1.1 * fABTimeDiff, 200, -0.0002, 0.0002
+    ));
+    getStatistics().getHisto2D(Form("tdiff_tot_scin_%d_reverse", scinID))
+    ->GetXaxis()->SetTitle("Time difference [ps]");
+    getStatistics().getHisto2D(Form("tdiff_tot_scin_%d_reverse", scinID))
+    ->GetYaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
+
+    getStatistics().createHistogram(new TH2F(
+      Form("tdiff_tot_scin_%d_recalc_reverse", scinID),
+      Form("Hits coincidence, recalcualted time difference vs. TOT reversed, scin %d",  scinID),
+      200, -1.1 * fABTimeDiff, 1.1 * fABTimeDiff, 200, -0.0002, 0.0002
+    ));
+    getStatistics().getHisto2D(Form("tdiff_tot_scin_%d_recalc", scinID))
+    ->GetXaxis()->SetTitle("Time difference [ps]");
+    getStatistics().getHisto2D(Form("tdiff_tot_scin_%d_recalc", scinID))
+    ->GetYaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
 
     for(int multi = 2; multi <=8; multi++){
 
@@ -445,6 +525,16 @@ void EventFinder::initialiseHistograms(){
       getStatistics().getHisto1D(Form("coin_tot_scin_%d_m_%d", scinID, multi))
       ->GetYaxis()->SetTitle("Number of Hits");
 
+      getStatistics().createHistogram(new TH1F(
+        Form("coin_tot_scin_%d_m_%d_reverse", scinID, multi),
+        Form("Hits coincidence, TOT reversed, scin %d multi %d", scinID, multi),
+        200, -0.0002, 0.0002
+      ));
+      getStatistics().getHisto1D(Form("coin_tot_scin_%d_m_%d_reverse", scinID, multi))
+      ->GetXaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
+      getStatistics().getHisto1D(Form("coin_tot_scin_%d_m_%d_reverse", scinID, multi))
+      ->GetYaxis()->SetTitle("Number of Hits");
+
       getStatistics().createHistogram(new TH2F(
         Form("tdiff_tot_scin_%d_m_%d", scinID, multi),
         Form("Hits coincidence, time difference vs. TOT divided by multiplicity, scin %d multi %d",
@@ -457,6 +547,17 @@ void EventFinder::initialiseHistograms(){
       ->GetYaxis()->SetTitle("Time over Threshold [ps]");
 
       getStatistics().createHistogram(new TH2F(
+        Form("tdiff_tot_scin_%d_m_%d_reverse", scinID, multi),
+        Form("Hits coincidence, time difference vs. TOT reversed, scin %d multi %d",
+        scinID, multi),
+        200, -1.1 * fABTimeDiff, 1.1 * fABTimeDiff, 200, -0.0002, 0.0002
+      ));
+      getStatistics().getHisto2D(Form("tdiff_tot_scin_%d_m_%d", scinID, multi))
+      ->GetXaxis()->SetTitle("Time difference [ps]");
+      getStatistics().getHisto2D(Form("tdiff_tot_scin_%d_m_%d", scinID, multi))
+      ->GetYaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
+
+      getStatistics().createHistogram(new TH2F(
         Form("tdiff_tot_scin_%d_m_%d_recalc", scinID, multi),
         Form("Hits coincidence, recalcualted time difference vs. TOT divided by multiplicity, scin %d multi %d",
         scinID, multi),
@@ -466,6 +567,17 @@ void EventFinder::initialiseHistograms(){
       ->GetXaxis()->SetTitle("Time difference [ps]");
       getStatistics().getHisto2D(Form("tdiff_tot_scin_%d_m_%d_recalc", scinID, multi))
       ->GetYaxis()->SetTitle("Time over Threshold [ps]");
+
+      getStatistics().createHistogram(new TH2F(
+        Form("tdiff_tot_scin_%d_m_%d_recalc_reverse", scinID, multi),
+        Form("Hits coincidence, recalcualted time difference vs. TOT reversed, scin %d multi %d",
+        scinID, multi),
+        200, -1.1 * fABTimeDiff, 1.1 * fABTimeDiff, 200, -0.0002, 0.0002
+      ));
+      getStatistics().getHisto2D(Form("tdiff_tot_scin_%d_m_%d_recalc_reverse", scinID, multi))
+      ->GetXaxis()->SetTitle("Time difference [ps]");
+      getStatistics().getHisto2D(Form("tdiff_tot_scin_%d_m_%d_recalc_reverse", scinID, multi))
+      ->GetYaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
     }
   }
 
@@ -497,4 +609,39 @@ float EventFinder::recalculateTimeDiff(const JPetHit& hit)
   timeA = timeA/((float) signalARaws.size());
   timeB = timeB/((float) signalBRaws.size());
   return timeB - timeA;
+}
+
+float EventFinder::reverseTOTDiff(const JPetHit& hit, int multi)
+{
+  double totA = 0.0;
+  double totB = 0.0;
+
+  for(auto rawSig: hit.getSignalA().getRawSignals()){
+    auto sigALead = rawSig.second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+    auto sigATrail = rawSig.second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+    if (sigALead.size() > 0 && sigATrail.size() > 0){
+      for (unsigned i = 0; i < sigALead.size() && i < sigATrail.size(); i++){
+        totA += (sigATrail.at(i).getTime() - sigALead.at(i).getTime());
+      }
+    }
+  }
+
+  for(auto rawSig: hit.getSignalB().getRawSignals()){
+    auto sigBLead = rawSig.second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+    auto sigBTrail = rawSig.second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+    if (sigBLead.size() > 0 && sigBTrail.size() > 0){
+      for (unsigned i = 0; i < sigBLead.size() && i < sigBTrail.size(); i++){
+        totB += (sigBTrail.at(i).getTime() - sigBLead.at(i).getTime());
+      }
+    }
+  }
+
+  totA = totA/((float) multi);
+  totB = totB/((float) multi);
+
+  if(totA != 0.0 && totB != 0.0){
+    return 1/totB - 1/totA;
+  } else {
+    return 0.0;
+  }
 }

@@ -50,6 +50,7 @@ protected:
   std::vector<JPetEvent> buildEvents(const JPetTimeWindow & hits);
   void saveEvents(const std::vector<JPetEvent>& event);
   float recalculateTimeDiff(const JPetHit& hit);
+  float reverseTOTDiff(const JPetHit& hit, int multi);
   void initialiseHistograms();
   const std::string kUseCorruptedHitsParamKey = "EventFinder_UseCorruptedHits_bool";
   const std::string kEventMinMultiplicity = "EventFinder_MinEventMultiplicity_int";
