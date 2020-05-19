@@ -17,6 +17,7 @@
 #include "JPetLoggerInclude.h"
 
 using namespace jpet_options_tools;
+using namespace tot_energy_converter;
 
 ToTEnergyConverterFactory::ToTEnergyConverterFactory() {}
 

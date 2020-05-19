@@ -35,8 +35,8 @@ public:
   ToTEnergyConverterFactory& operator=(ToTEnergyConverterFactory const&) = delete;
 
   void loadOptions(const MyOptions& opts);
-  ToTEnergyConverter getToTConverter() const;
-  ToTEnergyConverter getEnergyConverter() const;
+  tot_energy_converter::ToTEnergyConverter getToTConverter() const;
+  tot_energy_converter::ToTEnergyConverter getEnergyConverter() const;
 
 private:
   const std::string kEnergy2ToTParametersParamKey = "ToTEnergyConverterFactory_Energy2ToTParameters_std::vector<double>";
