@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -128,7 +128,7 @@ bool TimeWindowCreator::exec() {
   if (auto event = dynamic_cast<EventIII *const>(fEvent)) {
     int kTDCChannels = event->GetTotalNTDCChannels();
     if (fSaveControlHistos) {
-      getStatistics().getHisto1D("sig_ch_per_time_slot")->Fill(kTDCChannels);
+      getStatistics().fillHistogram("sig_ch_per_time_slot", kTDCChannels);
     }
     // Loop over all TDC channels in file
     auto tdcChannels = event->GetTDCChannelsArray();
@@ -203,114 +203,36 @@ bool TimeWindowCreator::isAllowedChannel(JPetTOMBChannel &tombChannel) const {
 }
 
 void TimeWindowCreator::initialiseHistograms() {
-  getStatistics().createHistogram(new TH1F("sig_ch_per_time_slot",
-                                           "Signal Channels Per Time Slot", 250,
-                                           -0.5, 999.5));
-  getStatistics()
-      .getHisto1D("sig_ch_per_time_slot")
-      ->GetXaxis()
-      ->SetTitle("Signal Channels in Time Slot");
-  getStatistics()
-      .getHisto1D("sig_ch_per_time_slot")
-      ->GetYaxis()
-      ->SetTitle("Number of Time Slots");
+  getStatistics().createHistogramWithAxes(new TH1D("sig_ch_per_time_slot", "Signal Channels Per Time Slot", 250, -0.125, 999.875),
+                                                    "Signal Channels in Time Slot", "Number of Time Slots");
 
   for (int i = 1; i <= kNumOfThresholds; i++) {
-    getStatistics().createHistogram(
-        new TH1F(Form("pm_occupation_thr%d", i),
-                 Form("Signal Channels per PM on THR %d", i), 385, 0.5, 385.5));
-    getStatistics()
-        .getHisto1D(Form("pm_occupation_thr%d", i))
-        ->GetXaxis()
-        ->SetTitle("PM ID)");
-    getStatistics()
-        .getHisto1D(Form("pm_occupation_thr%d", i))
-        ->GetYaxis()
-        ->SetTitle("Number of Signal Channels");
+    getStatistics().createHistogramWithAxes(new TH1D(Form("pm_occupation_thr%d", i), Form("Signal Channels per PM on THR %d", i), 
+                                                    385, 0.5, 385.5), "PM ID)", "Number of Signal Channels");
   }
 
-  getStatistics().createHistogram(
-      new TH1F("good_vs_bad_sigch",
-               "Number of good and corrupted SigChs created", 3, 0.5, 3.5));
-  getStatistics()
-      .getHisto1D("good_vs_bad_sigch")
-      ->GetXaxis()
-      ->SetBinLabel(1, "GOOD");
-  getStatistics()
-      .getHisto1D("good_vs_bad_sigch")
-      ->GetXaxis()
-      ->SetBinLabel(2, "CORRUPTED");
-  getStatistics()
-      .getHisto1D("good_vs_bad_sigch")
-      ->GetXaxis()
-      ->SetBinLabel(3, "UNKNOWN");
-  getStatistics()
-      .getHisto1D("good_vs_bad_sigch")
-      ->GetYaxis()
-      ->SetTitle("Number of SigChs");
+  getStatistics().createHistogramWithAxes(
+    new TH1D("good_vs_bad_sigch", "Number of good and corrupted SigChs created",
+                                            3, 0.5, 3.5), "Quality", "Number of SigChs");
+  std::vector<std::pair<unsigned, std::string>> binLabels;
+  binLabels.push_back(std::make_pair(1,"GOOD"));
+  binLabels.push_back(std::make_pair(2,"CORRUPTED"));
+  binLabels.push_back(std::make_pair(3,"UNKNOWN"));
+  getStatistics().setHistogramBinLabel("good_vs_bad_sigch",
+                                       getStatistics().AxisLabel::kXaxis, binLabels);
 
-  getStatistics().createHistogram(
-      new TH1F("LT_time_diff", "LT time diff", 200, 0.0, 100000.0));
-  getStatistics()
-      .getHisto1D("LT_time_diff")
-      ->GetXaxis()
-      ->SetTitle("Time Diff [ps]");
-  getStatistics()
-      .getHisto1D("LT_time_diff")
-      ->GetYaxis()
-      ->SetTitle("Number of LL pairs");
-
-  getStatistics().createHistogram(
-      new TH1F("LL_per_PM", "Number of LL found on PMs", 385, 0.5, 385.5));
-  getStatistics().getHisto1D("LL_per_PM")->GetXaxis()->SetTitle("PM ID");
-  getStatistics()
-      .getHisto1D("LL_per_PM")
-      ->GetYaxis()
-      ->SetTitle("Number of LL pairs");
-
-  getStatistics().createHistogram(
-      new TH1F("LL_per_THR", "Number of found LL on Thresolds", 4, 0.5, 4.5));
-  getStatistics().getHisto1D("LL_per_THR")->GetXaxis()->SetTitle("THR Number");
-  getStatistics()
-      .getHisto1D("LL_per_THR")
-      ->GetYaxis()
-      ->SetTitle("Number of LL pairs");
-
-  getStatistics().createHistogram(
-      new TH1F("LL_time_diff", "Time diff of LL pairs", 200, 0.0, 300000.0));
-  getStatistics()
-      .getHisto1D("LL_time_diff")
-      ->GetXaxis()
-      ->SetTitle("Time Diff [ps]");
-  getStatistics()
-      .getHisto1D("LL_time_diff")
-      ->GetYaxis()
-      ->SetTitle("Number of LL pairs");
-
-  getStatistics().createHistogram(
-      new TH1F("TT_per_PM", "Number of TT found on PMs", 385, 0.5, 385.5));
-  getStatistics().getHisto1D("TT_per_PM")->GetXaxis()->SetTitle("PM ID");
-  getStatistics()
-      .getHisto1D("TT_per_PM")
-      ->GetYaxis()
-      ->SetTitle("Number of TT pairs");
-
-  getStatistics().createHistogram(
-      new TH1F("TT_per_THR", "Number of found TT on Thresolds", 4, 0.5, 4.5));
-  getStatistics().getHisto1D("TT_per_THR")->GetXaxis()->SetTitle("THR Number");
-  getStatistics()
-      .getHisto1D("TT_per_THR")
-      ->GetYaxis()
-      ->SetTitle("Number of TT pairs");
-
-  getStatistics().createHistogram(
-      new TH1F("TT_time_diff", "Time diff of TT pairs", 200, 0.0, 300000.0));
-  getStatistics()
-      .getHisto1D("TT_time_diff")
-      ->GetXaxis()
-      ->SetTitle("Time Diff [ps]");
-  getStatistics()
-      .getHisto1D("TT_time_diff")
-      ->GetYaxis()
-      ->SetTitle("Number of TT pairs");
+  getStatistics().createHistogramWithAxes(new TH1D("LT_time_diff", "LT time diff", 200, -250.0, 999750.0),
+                                                    "Time Diff [ps]", "Number of LL pairs");
+  getStatistics().createHistogramWithAxes(new TH1D("LL_per_PM", "Number of LL found on PMs", 385, 0.5, 385.5),
+                                                    "PM ID", "Number of LL pairs");
+  getStatistics().createHistogramWithAxes(new TH1D("LL_per_THR", "Number of found LL on Thresolds", 4, 0.5, 4.5),
+                                                    "THR Number", "Number of LL pairs");
+  getStatistics().createHistogramWithAxes(new TH1D("LL_time_diff", "Time diff of LL pairs", 200, -750.0, 299250.0),
+                                                    "Time Diff [ps]", "Number of LL pairs");
+  getStatistics().createHistogramWithAxes(new TH1D("TT_per_PM", "Number of TT found on PMs", 385, 0.5, 385.5),
+                                                    "PM ID", "Number of TT pairs");
+  getStatistics().createHistogramWithAxes(new TH1D("TT_per_THR", "Number of found TT on Thresolds", 4, 0.5, 4.5),
+                                                    "THR Number", "Number of TT pairs");
+  getStatistics().createHistogramWithAxes(new TH1D("TT_time_diff", "Time diff of TT pairs", 200, -750.0, 299250.0),
+                                                    "Time Diff [ps]", "Number of TT pairs");
 }

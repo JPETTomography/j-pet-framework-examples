@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -47,18 +47,18 @@ bool EventCategorizerTools::checkFor2Gamma(
       double theta2 = max(firstHit.getBarrelSlot().getTheta(), secondHit.getBarrelSlot().getTheta());
       double thetaDiff = min(theta2 - theta1, 360.0 - theta2 + theta1);
       if (saveHistos) {
-        stats.getHisto1D("2Gamma_TimeDiff")->Fill(timeDiff / 1000.0);
-        stats.getHisto1D("2Gamma_DLOR")->Fill(deltaLor);
-        stats.getHisto1D("2Gamma_ThetaDiff")->Fill(thetaDiff);
+        stats.fillHistogram("2Gamma_TimeDiff", timeDiff / 1000.0);
+        stats.fillHistogram("2Gamma_DLOR", deltaLor);
+        stats.fillHistogram("2Gamma_ThetaDiff", thetaDiff);
       }
       if (fabs(thetaDiff - 180.0) < b2bSlotThetaDiff && timeDiff < b2bTimeDiff) {
         if (saveHistos) {
           TVector3 annhilationPoint = calculateAnnihilationPoint(firstHit, secondHit);
-          stats.getHisto1D("2Annih_TimeDiff")->Fill(timeDiff / 1000.0);
-          stats.getHisto1D("2Annih_DLOR")->Fill(deltaLor);
-          stats.getHisto1D("2Annih_ThetaDiff")->Fill(thetaDiff);
-          stats.getHisto2D("2Annih_XY")->Fill(annhilationPoint.X(), annhilationPoint.Y());
-          stats.getHisto1D("2Annih_Z")->Fill(annhilationPoint.Z());
+          stats.fillHistogram("2Annih_TimeDiff", timeDiff / 1000.0);
+          stats.fillHistogram("2Annih_DLOR", deltaLor);
+          stats.fillHistogram("2Annih_ThetaDiff", thetaDiff);
+          stats.fillHistogram("2Annih_XY", annhilationPoint.X(), annhilationPoint.Y());
+          stats.fillHistogram("2Annih_Z", annhilationPoint.Z());
         }
         return true;
       }
@@ -95,7 +95,7 @@ bool EventCategorizerTools::checkFor3Gamma(const JPetEvent& event, JPetStatistic
         double transformedY = relativeAngles.at(1) - relativeAngles.at(0);
 
         if (saveHistos) {
-          stats.getHisto2D("3Gamma_Angles")->Fill(transformedX, transformedY);
+          stats.fillHistogram("3Gamma_Angles", transformedX, transformedY);
         }
       }
     }
@@ -114,7 +114,7 @@ bool EventCategorizerTools::checkForPrompt(
     double tot = calculateTOT(event.getHits().at(i), TOTCalculationType::kSimplified);
     if (tot > deexTOTCutMin && tot < deexTOTCutMax) {
       if (saveHistos) {
-        stats.getHisto1D("Deex_TOT_cut")->Fill(tot);
+        stats.fillHistogram("Deex_TOT_cut", tot);
       }
       return true;
     }
@@ -148,13 +148,13 @@ bool EventCategorizerTools::checkForScatter(
       double timeDiff = scatterHit.getTime() - primaryHit.getTime();
 
       if (saveHistos) {
-        stats.getHisto1D("ScatterTOF_TimeDiff")->Fill(fabs(scattTOF - timeDiff));
+        stats.fillHistogram("ScatterTOF_TimeDiff", fabs(scattTOF - timeDiff));
       }
 
       if (fabs(scattTOF - timeDiff) < scatterTOFTimeDiff) {
         if (saveHistos) {
-          stats.getHisto2D("ScatterAngle_PrimaryTOT")->Fill(scattAngle, calculateTOT(primaryHit, TOTCalculationType::kSimplified));
-          stats.getHisto2D("ScatterAngle_ScatterTOT")->Fill(scattAngle, calculateTOT(scatterHit, TOTCalculationType::kSimplified));
+          stats.fillHistogram("ScatterAngle_PrimaryTOT", scattAngle, calculateTOT(primaryHit, TOTCalculationType::kSimplified));
+          stats.fillHistogram("ScatterAngle_ScatterTOT", scattAngle, calculateTOT(scatterHit, TOTCalculationType::kSimplified));
         }
         return true;
       }
@@ -293,5 +293,3 @@ double EventCategorizerTools::calculatePlaneCenterDistance(
     return -1.;
   }
 }
-
-

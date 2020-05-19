@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -129,7 +129,7 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
         rawSig.setRecoFlag(JPetBaseSignal::Corrupted);
       }
       if(saveHistos){
-        stats.getHisto1D("lead_trail_thr1_diff")->Fill(
+        stats.fillHistogram("lead_trail_thr1_diff",
           thrTrailingSigCh.at(0).at(closestTrailingSigCh).getValue()-thrLeadingSigCh.at(0).at(0).getValue()
         );
       }
@@ -152,7 +152,7 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
             rawSig.setRecoFlag(JPetBaseSignal::Corrupted);
           }
           if(saveHistos){
-            stats.getHisto1D(Form("lead_trail_thr%d_diff", kk+1))->Fill(
+            stats.fillHistogram(Form("lead_trail_thr%d_diff", kk+1),
               thrTrailingSigCh.at(kk).at(closestTrailingSigCh).getValue()
                 -thrLeadingSigCh.at(kk).at(nextThrSigChIndex).getValue()
             );
@@ -164,7 +164,7 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
           rawSig.setRecoFlag(JPetBaseSignal::Corrupted);
         }
         if(saveHistos){
-          stats.getHisto1D(Form("lead_thr1_thr%d_diff", kk+1))->Fill(
+          stats.fillHistogram(Form("lead_thr1_thr%d_diff", kk+1),
             thrLeadingSigCh.at(kk).at(nextThrSigChIndex).getValue()-thrLeadingSigCh.at(0).at(0).getValue()
           );
         }
@@ -173,11 +173,11 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
     }
     if(saveHistos){
       if(rawSig.getRecoFlag()==JPetBaseSignal::Good){
-        stats.getHisto1D("good_v_bad_raw_sigs")->Fill(1);
+        stats.fillHistogram("good_v_bad_raw_sigs", 1);
       } else if(rawSig.getRecoFlag()==JPetBaseSignal::Corrupted){
-        stats.getHisto1D("good_v_bad_raw_sigs")->Fill(2);
+        stats.fillHistogram("good_v_bad_raw_sigs", 2);
       } else if(rawSig.getRecoFlag()==JPetBaseSignal::Unknown){
-        stats.getHisto1D("good_v_bad_raw_sigs")->Fill(3);
+        stats.fillHistogram("good_v_bad_raw_sigs", 3);
       }
     }
     // Adding created Raw Signal to vector
@@ -188,19 +188,19 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(
   if(saveHistos){
     for(unsigned int jj=0;jj<kNumberOfThresholds;jj++){
       for(auto sigCh : thrLeadingSigCh.at(jj)){
-        stats.getHisto1D("unused_sigch_all")->Fill(2*sigCh.getThresholdNumber()-1);
+        stats.fillHistogram("unused_sigch_all", 2*sigCh.getThresholdNumber()-1);
         if(sigCh.getRecoFlag()==JPetSigCh::Good){
-          stats.getHisto1D("unused_sigch_good")->Fill(2*sigCh.getThresholdNumber()-1);
+          stats.fillHistogram("unused_sigch_good", 2*sigCh.getThresholdNumber()-1);
         } else if(sigCh.getRecoFlag()==JPetSigCh::Corrupted){
-          stats.getHisto1D("unused_sigch_corr")->Fill(2*sigCh.getThresholdNumber()-1);
+          stats.fillHistogram("unused_sigch_corr", 2*sigCh.getThresholdNumber()-1);
         }
       }
       for(auto sigCh : thrTrailingSigCh.at(jj)){
-        stats.getHisto1D("unused_sigch_all")->Fill(2*sigCh.getThresholdNumber());
+        stats.fillHistogram("unused_sigch_all", 2*sigCh.getThresholdNumber());
         if(sigCh.getRecoFlag()==JPetSigCh::Good){
-          stats.getHisto1D("unused_sigch_good")->Fill(2*sigCh.getThresholdNumber());
+          stats.fillHistogram("unused_sigch_good", 2*sigCh.getThresholdNumber());
         } else if(sigCh.getRecoFlag()==JPetSigCh::Corrupted){
-          stats.getHisto1D("unused_sigch_corr")->Fill(2*sigCh.getThresholdNumber());
+          stats.fillHistogram("unused_sigch_corr", 2*sigCh.getThresholdNumber());
         }
       }
     }
