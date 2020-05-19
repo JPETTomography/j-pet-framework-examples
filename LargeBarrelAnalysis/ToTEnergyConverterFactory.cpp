@@ -78,6 +78,6 @@ void ToTEnergyConverterFactory::loadOptions(const ToTEnergyConverterFactory::MyO
   }
 }
 
-ToTEnergyConverter ToTEnergyConverterFactory::getToTConverter() const { return generateToTEnergyConverter(fEnergy2ToTAll); }
+tot_energy_converter::ToTEnergyConverter ToTEnergyConverterFactory::getToTConverter() const { return generateToTEnergyConverter(fEnergy2ToTAll); }
 
-ToTEnergyConverter ToTEnergyConverterFactory::getEnergyConverter() const { return generateToTEnergyConverter(fToT2EnergyAll); }
+tot_energy_converter::ToTEnergyConverter ToTEnergyConverterFactory::getEnergyConverter() const { return generateToTEnergyConverter(fToT2EnergyAll); }
