@@ -17,6 +17,9 @@
 #define TOTENERGYCONVERTER_H
 #include <JPetCachedFunction/JPetCachedFunction.h>
 
+namespace tot_energy_converter
+{
+
 class ToTEnergyConverter
 {
 
@@ -33,5 +36,6 @@ private:
 };
 
 ToTEnergyConverter generateToTEnergyConverter(const std::pair<std::string, std::pair<std::vector<double>, std::pair<double, double>>>& formula);
+}
 
 #endif /*  !TOTENERGYCONVERTER_H */
