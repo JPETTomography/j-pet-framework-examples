@@ -31,13 +31,6 @@ ToTEnergyConverter generateToTEnergyConverter(const FuncParamsAndLimits& formula
   auto func = formula.first;
   auto funcParams = formula.second.first;
   auto funcLimits = formula.second.second;
-  std::cout << func << std::endl;
-  std::cout << funcLimits.first << std::endl;
-  std::cout << funcLimits.second << std::endl;
-  for (int i = 0; i < funcParams.size(); i++)
-  {
-    std::cout << funcParams[i] << std::endl;
-  }
 
   JPetCachedFunctionParams params(func, funcParams);
   ToTEnergyConverter conv(params, Range(100000, funcLimits.first, funcLimits.second));
