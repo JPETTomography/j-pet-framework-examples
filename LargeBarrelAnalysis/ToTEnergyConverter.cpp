@@ -21,19 +21,21 @@ using FunctionFormula = std::string;
 using FunctionLimits = std::pair<double, double>;
 using FunctionParams = std::vector<double>;
 using FuncParamsAndLimits = std::pair<FunctionFormula, std::pair<FunctionParams, FunctionLimits>>;
-namespace tec = tot_energy_converter;
 
-tec::ToTEnergyConverter::ToTEnergyConverter(const ToTEParams& params, const ToTERange range) : fFunction(params, range) {}
+namespace tot_energy_converter {
 
-double tec::ToTEnergyConverter::operator()(double x) const { return fFunction(x); }
+ToTEnergyConverter::ToTEnergyConverter(const ToTEParams& params, const ToTERange range) : fFunction(params, range) {}
 
-tec::ToTEnergyConverter generateToTEnergyConverter(const FuncParamsAndLimits& formula)
+double ToTEnergyConverter::operator()(double x) const { return fFunction(x); }
+
+ToTEnergyConverter generateToTEnergyConverter(const FuncParamsAndLimits& formula)
 {
   auto func = formula.first;
   auto funcParams = formula.second.first;
   auto funcLimits = formula.second.second;
 
   JPetCachedFunctionParams params(func, funcParams);
-  tec::ToTEnergyConverter conv(params, Range(100000, funcLimits.first, funcLimits.second));
+  ToTEnergyConverter conv(params, Range(100000, funcLimits.first, funcLimits.second));
   return conv;
+}
 }

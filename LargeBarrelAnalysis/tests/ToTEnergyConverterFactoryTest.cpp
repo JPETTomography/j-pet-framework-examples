@@ -5,6 +5,7 @@
 #include "JPetLoggerInclude.h"
 #include <boost/test/unit_test.hpp>
 using namespace jpet_common_tools;
+using namespace tot_energy_converter;
 
 /// Returns Time-over-threshold for given deposited energy
 /// the current parametrization is par1 + par2 * eDep
