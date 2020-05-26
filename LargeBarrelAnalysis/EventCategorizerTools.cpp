@@ -171,41 +171,34 @@ double EventCategorizerTools::calculateTOT(const JPetHit& hit, TOTCalculationTyp
 {
   double tot = 0.0;
   double weight = 1.;
-                                         
-  auto sigALead = hit.getSignalA().getRecoSignal().getRawSignal()
-                  .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-  auto sigBLead = hit.getSignalB().getRecoSignal().getRawSignal()
-                  .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-  auto sigATrail = hit.getSignalA().getRecoSignal().getRawSignal()
-                   .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-  auto sigBTrail = hit.getSignalB().getRecoSignal().getRawSignal()
-                   .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-
-  tot += calculateTOTside(sigALead, sigATrail, type);
-  tot += calculateTOTside(sigBLead, sigBTrail, type);
+           
+  std::map<int, double> thrToTOT_sideA = hit.getSignalA().getRecoSignal().getRawSignal().getTOTsVsThresholdValue();
+  std::map<int, double> thrToTOT_sideB = hit.getSignalB().getRecoSignal().getRawSignal().getTOTsVsThresholdValue();
+  
+  tot += calculateTOTside(thrToTOT_sideA, type);
+  tot += calculateTOTside(thrToTOT_sideB, type);
   return tot;
 }
 
-double EventCategorizerTools::calculateTOTside(const std::vector<JPetSigCh> & leadPoints, const std::vector<JPetSigCh> & trailPoints, TOTCalculationType type)
+double EventCategorizerTools::calculateTOTside(const std::map<int, double> & thrToTOT_side, TOTCalculationType type)
 {
   double tot = 0., weight = 1.;
-  if (leadPoints.size() > 0 && trailPoints.size() > 0) {
-    tot += (trailPoints.at(0).getValue() - leadPoints.at(0).getValue());
-    for (unsigned i = 1; i < leadPoints.size() && i < trailPoints.size(); i++) {
+  double firstThr = std::next(thrToTOT_side.begin(), 1)->first;
+  if (!thrToTOT_side.empty()) {
+    for (auto it = thrToTOT_side.begin(); it != thrToTOT_side.end(); ++it) {
       switch(type) {
         case TOTCalculationType::kSimplified:
           weight = 1.;
           break;
         case TOTCalculationType::kThresholdRectangular:
-          weight = (leadPoints.at(i).getThreshold() - leadPoints.at(i-1).getThreshold())/leadPoints.at(0).getThreshold();
+          weight = (it->first - std::prev(it, 1)->first)/firstThr;
           break;
         case TOTCalculationType::kThresholdTrapeze:
-          weight = (leadPoints.at(i).getThreshold() - leadPoints.at(i-1).getThreshold())/leadPoints.at(0).getThreshold();
-          tot += weight*((trailPoints.at(i).getValue() - leadPoints.at(i).getValue()) - 
-                    (trailPoints.at(i-1).getValue() - leadPoints.at(i-1).getValue()))/2;
+          weight = (it->first - std::prev(it, 1)->first)/firstThr;
+          tot += weight*(it->second - std::prev(it, 1)->second)/2;
           break;
       }
-      tot += weight*(trailPoints.at(i).getValue() - leadPoints.at(i).getValue());
+      tot += weight*it->second;
     }
   }
   return tot;

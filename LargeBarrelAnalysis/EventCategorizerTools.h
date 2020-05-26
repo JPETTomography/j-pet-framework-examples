@@ -46,8 +46,7 @@ public:
   static bool checkForScatter(const JPetEvent& event, JPetStatistics& stats,
                               bool saveHistos, double scatterTOFTimeDiff);
   static double calculateTOT(const JPetHit& hit, TOTCalculationType type = TOTCalculationType::kSimplified);
-  static double calculateTOTside(const std::vector<JPetSigCh> & leadPoints, 
-                            const std::vector<JPetSigCh> & trailPoints, TOTCalculationType type);
+  static double calculateTOTside(const std::map<int, double> & thrToTOT_side, TOTCalculationType type);
   static double calculateDistance(const JPetHit& hit1, const JPetHit& hit2);
   static double calculateScatteringTime(const JPetHit& hit1, const JPetHit& hit2);
   static double calculateScatteringAngle(const JPetHit& hit1, const JPetHit& hit2);
