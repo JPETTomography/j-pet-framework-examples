@@ -160,13 +160,17 @@ void TimeCalibration::createHistograms()
     }
  
     const char* histo_name_l = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffAB_leading_", fLayerToCalib, fStripToCalib, thr);
-    getStatistics().createHistogram( new TH1F(histo_name_l, histo_name_l,NbinABl,tABlmin,tABlmax) );
+    getStatistics().createHistogramWithAxes( new TH1D(histo_name_l, histo_name_l, NbinABl, tABlmin, tABlmax),
+                                                            "Time difference AB Leading [ns]", "Counts");
     const char* histo_name_Ref_l = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffRef_leading_", fLayerToCalib, fStripToCalib, thr);
-    getStatistics().createHistogram( new TH1F(histo_name_Ref_l, histo_name_Ref_l,NbinReffl,tRefflMin,tRefflMax) );
+    getStatistics().createHistogramWithAxes( new TH1D(histo_name_Ref_l, histo_name_Ref_l, NbinReffl, tRefflMin, tRefflMax),
+                                                            "Time difference AB Leading reference detector [ns]", "Counts");
     const char* histo_name_t = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffAB_trailing_", fLayerToCalib, fStripToCalib, thr);
-    getStatistics().createHistogram( new TH1F(histo_name_t, histo_name_t,NbinABt,tABtmin,tABtmax) );
+    getStatistics().createHistogramWithAxes( new TH1D(histo_name_t, histo_name_t, NbinABt, tABtmin, tABtmax),
+                                                            "Time difference AB Trailing [ns]", "Counts");
     const char* histo_name_Ref_t = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffRef_trailing_", fLayerToCalib, fStripToCalib, thr);
-    getStatistics().createHistogram( new TH1F(histo_name_Ref_t, histo_name_Ref_t,NbinRefft,tRefftMin,tRefftMax) );
+    getStatistics().createHistogramWithAxes( new TH1D(histo_name_Ref_t, histo_name_Ref_t, NbinRefft, tRefftMin, tRefftMax),
+                                                            "Time difference AB Trailing reference detector [ns]", "Counts");
   }
 }
 
@@ -270,10 +274,7 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
       if ( lead_times_B.count(thr) > 0 ) {
         double timeDiffAB_l = (lead_times_B[thr] / 1000. + CBlCor[thr]) - (lead_times_A[thr] / 1000. + CAlCor[thr]);
         const char* histo_name_l = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffAB_leading_");
-        auto hist = getStatistics().getHisto1D(histo_name_l);
-        if (hist) {
-          getStatistics().getHisto1D(histo_name_l)->Fill( timeDiffAB_l);
-        }
+        getStatistics().fillHistogram(histo_name_l, timeDiffAB_l);
         timeDiffLmin = 10000000000000.;
         for (unsigned int i = 0; i < refTimesL.size(); i++) {
           double timeDiffHit_L = (lead_times_A[thr] / 1000. + CAlCor[thr]) + (lead_times_B[thr] / 1000. + CBlCor[thr]);
@@ -283,11 +284,8 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
           }
         }
         const char* histo_name_Ref_l = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffRef_leading_");
-        hist = getStatistics().getHisto1D(histo_name_Ref_l );
         if (timeDiffTmin < 100.) {
-          if (hist) {
-            getStatistics().getHisto1D(histo_name_Ref_l)->Fill(timeDiffLmin);
-          }
+          getStatistics().fillHistogram(histo_name_Ref_l, timeDiffLmin);
         }
       }
     }
@@ -297,10 +295,7 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
 
         double timeDiffAB_t = (trail_times_B[thr] / 1000. + CBtCor[thr]) - (trail_times_A[thr] / 1000. + CAtCor[thr]);
         const char* histo_name_t = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffAB_trailing_");
-        auto hist = getStatistics().getHisto1D(histo_name_t);
-        if (hist) {
-          getStatistics().getHisto1D(histo_name_t)->Fill( timeDiffAB_t);
-        }
+        getStatistics().fillHistogram(histo_name_t, timeDiffAB_t);
         timeDiffTmin = 10000000000000.;
         for (unsigned int i = 0; i < refTimesT.size(); i++) {
           double timeDiffHit_T = (trail_times_A[thr] / 1000. + CAtCor[thr]) + (trail_times_B[thr] / 1000. + CBtCor[thr]);
@@ -310,9 +305,8 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
           }
         }
         const char* histo_name_Ref_t = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffRef_trailing_");
-        hist = getStatistics().getHisto1D(histo_name_Ref_t);
         if (timeDiffTmin < 100.) {
-          getStatistics().getHisto1D(histo_name_Ref_t)->Fill(timeDiffTmin);
+          getStatistics().fillHistogram(histo_name_Ref_t, timeDiffTmin);
         }
       }
     }

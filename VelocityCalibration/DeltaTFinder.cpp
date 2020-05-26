@@ -40,17 +40,19 @@ bool DeltaTFinder::init()
     for (auto & scin : getParamBank().getScintillators()) {
       for (int thr = 1; thr <= 4; thr++) {
         const char* histo_name = formatUniqueSlotDescription(scin.second->getBarrelSlot(), thr, "timeDiffAB_");
-        getStatistics().createHistogram( new TH1F(histo_name, histo_name, 400, -20., 20.) );
+        getStatistics().createHistogramWithAxes( new TH1D(histo_name, histo_name, 400, -19.95, 20.05),
+                                                 "Time difference AB [ns]", "Counts");
       }
     }
     // create histograms for time diffrerence vs slot ID
     for (auto & layer : getParamBank().getLayers()) {
       for (int thr = 1; thr <= 4; thr++) {
         const char* histo_name = Form("TimeDiffVsID_layer_%d_thr_%d", (int)fBarrelMap->getLayerNumber(*layer.second), thr);
-        const char* histo_titile = Form("%s;Slot ID; TimeDiffAB [ns]", histo_name);
+        const char* histo_title = Form("%s;Slot ID; TimeDiffAB [ns]", histo_name);
         int n_slots_in_layer = fBarrelMap->getSlotsCount(*layer.second);
-        getStatistics().createHistogram( new TH2F(histo_name, histo_titile, n_slots_in_layer, 0.5, n_slots_in_layer + 0.5,
-                                         120, -20., 20.) );
+        getStatistics().createHistogramWithAxes(new TH2D(histo_name, histo_title, 
+                                                         n_slots_in_layer, 0.5, n_slots_in_layer + 0.5, 120, -20., 20.), 
+                                                         "Slot ID", "Time difference AB [ns]");
       }
     }
   }
@@ -174,13 +176,12 @@ void DeltaTFinder::fillHistosForHit(const JPetHit& hit)
       timeDiffAB /= 1000.; // we want the plots in ns instead of ps
       // fill the appropriate histogram
       const char* histo_name = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffAB_");
-      getStatistics().getHisto1D(histo_name)->Fill( timeDiffAB );
+      getStatistics().fillHistogram(histo_name, timeDiffAB);
 
       // fill the timeDiffAB vs slot ID histogram
       int layer_number = fBarrelMap->getLayerNumber( hit.getBarrelSlot().getLayer() );
       int slot_number = fBarrelMap->getSlotNumber( hit.getBarrelSlot() );
-      getStatistics().getHisto2D(Form("TimeDiffVsID_layer_%d_thr_%d", layer_number, thr))->Fill( slot_number,
-          timeDiffAB);
+      getStatistics().fillHistogram(Form("TimeDiffVsID_layer_%d_thr_%d", layer_number, thr), slot_number, timeDiffAB);     
     }
   }
 }

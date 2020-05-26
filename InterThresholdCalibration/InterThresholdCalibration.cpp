@@ -95,20 +95,24 @@ bool InterThresholdCalibration::init()
 //leading
 //histos for side A
         const char* histo_name_l_A = Form("timeDiffA_leading_layer_%d_slot_%d_thr_1%d", lay, sl, thre);
-        getStatistics().createHistogram( new TH1F(histo_name_l_A, histo_name_l_A, 200, -2., 2.));
+        getStatistics().createHistogramWithAxes( new TH1D(histo_name_l_A, histo_name_l_A, 200, -2., 2.),
+                                                            "Time difference A Leading [ns]", "Counts");
 
 //histos for side B
         const char* histo_name_l_B = Form("timeDiffB_leading_layer_%d_slot_%d_thr_1%d", lay, sl, thre);
-        getStatistics().createHistogram(new TH1F(histo_name_l_B, histo_name_l_B, 300, -3., 3.) );
+        getStatistics().createHistogramWithAxes( new TH1D(histo_name_l_B, histo_name_l_B, 300, -3., 3.),
+                                                            "Time difference B Leading reference detector [ns]", "Counts");
 
 //trailing
 //histos for side A
         const char* histo_name_t_A = Form("timeDiffA_trailing_layer_%d_slot_%d_thr_1%d", lay, sl, thre);
-        getStatistics().createHistogram( new TH1F(histo_name_t_A, histo_name_t_A, 200, -2., 2.));
+        getStatistics().createHistogramWithAxes( new TH1D(histo_name_t_A, histo_name_t_A, 200, -2., 2.),
+                                                            "Time difference A Trailing [ns]", "Counts");
 	
 //histos for side B
         const char* histo_name_t_B = Form("timeDiffB_trailing_layer_%d_slot_%d_thr_1%d", lay, sl, thre);
-        getStatistics().createHistogram(new TH1F(histo_name_t_B, histo_name_t_B, 300, -3., 3.));
+        getStatistics().createHistogramWithAxes( new TH1D(histo_name_t_B, histo_name_t_B, 300, -3., 3.),
+                                                            "Time difference B Trailing reference detector [ns]", "Counts");
       }
     }
   }
@@ -324,7 +328,7 @@ void InterThresholdCalibration::fillHistosForHit(const JPetHit& hit)
         thr_time_diff_A[thr] = lead_times_A[thr] / 1000 - lead_times_first_A / 1000;
 	
         char* histo_name_l_A = Form("timeDiffA_leading_layer_%d_slot_%d_thr_1%d", layer_number, slot_nr, thr);
-        getStatistics().getHisto1D(histo_name_l_A)->Fill(thr_time_diff_A[thr]);
+        getStatistics().fillHistogram(histo_name_l_A, thr_time_diff_A[thr]);
       }
     }
   }
@@ -343,7 +347,7 @@ void InterThresholdCalibration::fillHistosForHit(const JPetHit& hit)
         thr_time_diff_B[thr] = lead_times_B[thr] / 1000 - lead_times_first_B / 1000;
 
         char* histo_name_l_B = Form("timeDiffB_leading_layer_%d_slot_%d_thr_1%d", layer_number, slot_nr, thr);
-        getStatistics().getHisto1D(histo_name_l_B)->Fill(thr_time_diff_B[thr]);
+        getStatistics().fillHistogram(histo_name_l_B, thr_time_diff_B[thr]);
       }
     }
   }
@@ -363,8 +367,7 @@ void InterThresholdCalibration::fillHistosForHit(const JPetHit& hit)
         thr_time_diff_t_A[thr] = trail_times_A[thr] / 1000 - trail_times_first_A / 1000;
 
         char* histo_name_t_A = Form("timeDiffA_trailing_layer_%d_slot_%d_thr_1%d", layer_number, slot_nr, thr);
-        getStatistics().getHisto1D(histo_name_t_A)->Fill(thr_time_diff_t_A[thr]);
-
+        getStatistics().fillHistogram(histo_name_t_A, thr_time_diff_t_A[thr]);
       }
     }
   }
@@ -384,8 +387,7 @@ void InterThresholdCalibration::fillHistosForHit(const JPetHit& hit)
         thr_time_diff_t_B[thr] = trail_times_B[thr] / 1000 - trail_times_first_B / 1000;
 
         char* histo_name_t_B = Form("timeDiffB_trailing_layer_%d_slot_%d_thr_1%d", layer_number, slot_nr, thr);
-        getStatistics().getHisto1D(histo_name_t_B)->Fill(thr_time_diff_t_B[thr]);
-
+        getStatistics().fillHistogram(histo_name_t_B, thr_time_diff_t_B[thr]);
       }
     }
   }
