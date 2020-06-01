@@ -33,8 +33,9 @@ bool EventAnalyzer::init() {
       "z_res", "Resolution along Z;Z_{REC}-Z_{MC} [cm]", 100, -15., 15.));
 
   getStatistics().createHistogram(new TH1F(
-      "Edep_res", "Resolution of deposited energy;E_{REC}-E_{MC} [keV]", 100, -200., 200.));
-  
+      "Edep_res", "Resolution of deposited energy;E_{REC}-E_{MC} [keV]", 100,
+      -200., 200.));
+
   // Input events type
   fOutputEvents = new JPetTimeWindow("JPetEvent");
 
@@ -79,20 +80,21 @@ bool EventAnalyzer::terminate() {
   return true;
 }
 
-void EventAnalyzer::fillResolutionHistograms(const JPetEvent &event, const JPetTimeWindowMC* tw) {
+void EventAnalyzer::fillResolutionHistograms(const JPetEvent &event,
+                                             const JPetTimeWindowMC *tw) {
 
   int hits_number = event.getHits().size();
   for (int k = 0; k < hits_number; ++k) {
-    const JPetHit& reconstructed_hit = event.getHits().at(k);
+    const JPetHit &reconstructed_hit = event.getHits().at(k);
     // for each reconstructed hit, we access the corresponding
     // "true MC" hit
-    const JPetMCHit& mc_hit = tw->getMCHit<JPetMCHit>(reconstructed_hit.getMCindex());    
+    const JPetMCHit &mc_hit =
+        tw->getMCHit<JPetMCHit>(reconstructed_hit.getMCindex());
 
     getStatistics().getHisto1D("z_res")->Fill(reconstructed_hit.getPos().Z() -
                                               mc_hit.getPos().Z());
-    getStatistics().getHisto1D("Edep_res")->Fill(reconstructed_hit.getEnergy() -
-                                                 mc_hit.getEnergy());
-    
+    getStatistics()
+        .getHisto1D("Edep_res")
+        ->Fill(reconstructed_hit.getEnergy() - mc_hit.getEnergy());
   }
-  
 }

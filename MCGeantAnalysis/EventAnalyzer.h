@@ -34,7 +34,8 @@ public:
   virtual bool terminate() override;
 
 protected:
-  void fillResolutionHistograms(const JPetEvent &event, const JPetTimeWindowMC* tw);
+  void fillResolutionHistograms(const JPetEvent &event,
+                                const JPetTimeWindowMC *tw);
   bool fIsMC = false;
 };
 #endif /* !EVENTANALYZER_H */
