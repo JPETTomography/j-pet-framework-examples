@@ -24,7 +24,7 @@ Finally, inspect the produced files, e.g. the resolution histograms in the `ana.
 ## Creating analysis modules to work on both MC and data
 The `EventAnalyzer` module contained in this example shows how the users can create modules which can transparently work on both MC and data files, executing some additional actions in case of processing MC. For example, `EventAnalyzer` compares the exact simulated values of hit Z position and deposited energy with their smeared counterparts, filling resolution histograms which are useful for checking whether the user-provided smearing functions work as desired.
 
-Please not also that in this example, `EventAnalyzer` is applied to the results of the standard `EventFinder` module from the `LargeBarrelAnalysis` example, which is completely agnostic of whether it is working on MC or data files.
+Please also note that in this example, `EventAnalyzer` is applied to the results of the standard `EventFinder` module from the `LargeBarrelAnalysis` example, which is completely agnostic of whether it is working on MC or data files.
 
 ## Controlling the MC smearing
 When the `mcGeant.root` MC files are processed, exact simulated values of:

@@ -54,7 +54,7 @@ String specifying a valid C++ lambda function which returns probability density 
 Arguments: `double* x` - variable smeared energy deposition [keV]
 Parameters: `double* p` - an array of default parameters + user-defined parameters provided as described above (p[0]=ScinID, p[1]=Z, p[2]=E, p[3]=T, p[4]=user parameter 1, p[5]=user parameter 2, ...).
 
--"GeantParser_EnergySmearingFunctionLimits_std::vector<double>"
+- "GeantParser_EnergySmearingFunctionLimits_std::vector<double>"
 Vector of two values specifying the limits (in keV) around the MC-generated Edep value inside which the smearing should be allowed. Use limits large enough not to truncate your smearing probability distributions!
 
 ## Parameters controlling hit time smearing:
