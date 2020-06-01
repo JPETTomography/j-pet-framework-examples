@@ -46,9 +46,10 @@
      std::vector<JPetRawSignal>& rawSigVec, double mergingTime,
      JPetStatistics& stats, bool saveHistos
    );
-   static float getRawSigBaseTime(JPetRawSignal& rawSig);
 
  private:
+   static float getRawSigBaseTime(JPetRawSignal& rawSig);
+   static float calculateAverageTime(JPetMatrixSignal& mtxSig);
    static void sortByTime(std::vector<JPetRawSignal>& input);
 
  };

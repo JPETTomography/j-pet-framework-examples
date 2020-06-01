@@ -130,7 +130,6 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(
       ERROR("Problem with adding the first signal to new object.");
       break;
     }
-    mtxSig.setTime(getRawSigBaseTime(rawSigVec.at(0)));
 
     unsigned int nextIndex = 1;
     while(true){
@@ -157,6 +156,7 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(
         break;
       }
     }
+    mtxSig.setTime(calculateAverageTime(mtxSig));
     rawSigVec.erase(rawSigVec.begin());
     mtxSigVec.push_back(mtxSig);
   }
@@ -169,6 +169,20 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(
 float SignalTransformerTools::getRawSigBaseTime(JPetRawSignal& rawSig)
 {
   return rawSig.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrValue).at(0).getTime();
+}
+
+/**
+ * Calculating average time of Matrix Signal based on times of contained Raw Signals
+ */
+float SignalTransformerTools::calculateAverageTime(JPetMatrixSignal& mtxSig)
+{
+  float averageTime = 0.0;
+  auto rawSignals = mtxSig.getRawSignals();
+  for(auto rawSig : rawSignals){
+    averageTime += getRawSigBaseTime(rawSig.second);
+  }
+  averageTime = averageTime/((float) rawSignals.size());
+  return averageTime;
 }
 
 /**
