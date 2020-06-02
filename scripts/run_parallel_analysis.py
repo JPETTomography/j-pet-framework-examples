@@ -53,15 +53,13 @@ def main():
 
     run_id_setup = run_id
 
+    run6_mapping = {"61": "6A",
+                    "62": "6B",
+                    "63": "6C",
+                    "64": "6D"}
+
     if run_id[0] == "6":
-        if run_id[1] == "1":
-            run_id_setup = "6A"
-        elif run_id[1] == "2":
-            run_id_setup = "6B"
-        elif run_id[1] == "3":
-            run_id_setup = "6C"
-        elif run_id[1] == "4":
-            run_id_setup = "6D"
+        run_id_setup = run6_mapping[run_id]
 
     if threads > 20:
         print(colored("Try not to use more than 20 threads, let others also run analysis.",
