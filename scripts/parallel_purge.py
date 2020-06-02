@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from fnmatch import filter
-from os import system, path, listdir
+from os import path, listdir, popen
 import argparse
 
 from multiprocessing.dummy import Pool as PoolThread
@@ -53,7 +53,7 @@ def main():
     pool = PoolThread(threads)
 
     def run_macro_parallel(file):
-        system("root -l -b -q \"purge.C(\\\"{}{}\\\")\"".format(input_directory, file))
+        popen("root -l -b -q \"purge.C(\\\"{}{}\\\")\"".format(input_directory, file))
 
     if progress_bar:
         for _ in tqdm.tqdm(pool.imap(run_macro_parallel, list_of_files), total=len(list_of_files)):
