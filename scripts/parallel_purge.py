@@ -1,24 +1,25 @@
 #!/usr/bin/env python3
 from fnmatch import filter
-from termcolor import colored
-import tqdm
 import os
 import sys
 import subprocess
-
 import argparse
+
+try:
+    from termcolor import colored
+except ImportError:
+    print("\033[93m" + "Please instal module termcolor for Python3. \n \
+run command: sudo apt-get install python3-termcolor \n \
+or equivalent on your operating system" + "\033[0m")
+try:
+    import tqdm
+except ImportError:
+    print("\033[93m" + "Please instal module tqdm for Python3. \n \
+run command: sudo apt-get install python3-tqdm \n \
+or equivalent on your operating system" + "\033[0m")
 
 from multiprocessing.dummy import Pool as PoolThread
 
-parser = argparse.ArgumentParser(
-    "Python script to purge root files in parallel")
-parser.add_argument("directory", type=str,
-
-                    help="Directory in which you want to purge files.")
-parser.add_argument("-n", "--number-of-threads", required=False, default=20, type=int,
-                    help="Number of threads to run simultaneously")
-
-args = vars(parser.parse_args())
 # root macro run format
 # root -l "macro.C+(arg1,arg2,arg3,...,argn)"
 
