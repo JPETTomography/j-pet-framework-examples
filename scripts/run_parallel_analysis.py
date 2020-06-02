@@ -92,8 +92,10 @@ def main():
             exit()
 
     files_needed_for_analysis = [
-        "userParams.json", "conf_trb3.xml", "detectorSetupRun{}.json".format(run_id)]
+        "userParams.json", "conf_trb3.xml", "detectorSetupRun{}.json".format(run_id_setup)]
+
     needed_files_present = True
+
     for file in files_needed_for_analysis:
         if not path.isfile(file):
             print(
