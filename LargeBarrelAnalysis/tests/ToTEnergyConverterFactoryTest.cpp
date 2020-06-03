@@ -50,11 +50,10 @@ BOOST_AUTO_TEST_CASE(test1)
 
   TF1 funcTest("funcTest", "[0] + [1] * TMath::Log(x)", 2, 100);
   funcTest.SetParameters(1, -2);
-
-  BOOST_CHECK_CLOSE(conv2(3), funcTest.Eval(3), 1);
-  BOOST_CHECK_CLOSE(conv2(5.5), funcTest.Eval(5.5), 1);
-  BOOST_CHECK_CLOSE(conv2(45.25), funcTest.Eval(45.25), 1);
-  BOOST_CHECK_CLOSE(conv2(91), funcTest.Eval(91), 1);
+  BOOST_CHECK_CLOSE(conv2(3), funcTest.Eval(3), 0.1);
+  BOOST_CHECK_CLOSE(conv2(5.5), funcTest.Eval(5.5), 0.1);
+  BOOST_CHECK_CLOSE(conv2(45.25), funcTest.Eval(45.25), 0.1);
+  BOOST_CHECK_CLOSE(conv2(91), funcTest.Eval(91), 0.1);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
