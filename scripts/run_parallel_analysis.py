@@ -32,6 +32,9 @@ def main():
     parser.add_argument("-r", "--run-id", required=True, type=str,
                         help="Number of run which you are analyzing")
 
+    parser.add_argument("-e", "--extension", required=False, type=str, default="*",
+                        help="Extention of files you want to analyze")
+
     parser.add_argument("-t", "--type", required=False, type=str, default="root",
                         help="Path to the directory you want to analyze")
     parser.add_argument("-o", "--output", required=False,
@@ -50,6 +53,7 @@ def main():
     run_id = args["run_id"]
     file_type = args["type"]
     threads = args["number_of_threads"]
+    extension = args["extension"]
 
     run_id_setup = run_id
 
@@ -85,7 +89,7 @@ def main():
     if file_type != "root":
         allowed_types = ["root", "mcGeant", "hld", "zip", "scope"]
         if file_type not in allowed_types:
-            print(colored("Specified file type is not valid. Please check if it's one of the following: {}".format(
+            print(colored("Specified file type is not valid. Please check if it's one of the following: \n{}".format(
                 ", ".join(allowed_types)), "red"))
             exit()
 
@@ -103,6 +107,14 @@ def main():
     if not needed_files_present:
         exit()
 
+    supported_extensions = ["*", "hld", "hld.root", "tslot.calib.root", "raw.sig.root",
+                            "phys.sig.root", "hits.root", "unk.evt.root", "cat.evt.root"]
+
+    if extension not in supported_extensions:
+        print(colored("Specified file extension is not valid. Please check if it's one of the following: \n{}".format(
+            ", ".join(supported_extensions[1:])), "red"))
+        exit()
+
     if output_directory is not None:
         def run_analysis_parallel(filename):
             print("./{} -t root -f {}{} -p conf_trb3.xml -u userParams.json -i {} -l detectorSetupRun{}.json -o {}".format(
@@ -113,7 +125,7 @@ def main():
             print("./{} -t root -f {}{} -p conf_trb3.xml -u userParams.json -i {} -l detectorSetupRun{}.json".format(
                 executable, input_directory, filename, run_id, run_id_setup))
 
-    list_of_files = listdir(input_directory)
+    list_of_files = filter(listdir(input_directory), "*.{}".format(extension))
 
     print(colored("All checks passed, running analysis now.", "green"))
 
