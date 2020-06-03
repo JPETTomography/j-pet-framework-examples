@@ -2,7 +2,7 @@
 from fnmatch import filter
 from os import path, listdir, popen
 import argparse
-
+from subprocess import Popen, PIPE
 from multiprocessing.dummy import Pool as PoolThread
 
 try:
@@ -53,7 +53,8 @@ def main():
     pool = PoolThread(threads)
 
     def run_macro_parallel(file):
-        popen("root -l -b -q \"purge.C(\\\"{}{}\\\")\"".format(input_directory, file))
+        Popen("root -l -b -q \"purge.C(\\\"{}{}\\\")\"".format(input_directory,
+                                                               file), shell=True, stdout=PIPE).wait()
 
     if progress_bar:
         for _ in tqdm.tqdm(pool.imap(run_macro_parallel, list_of_files), total=len(list_of_files)):
@@ -61,8 +62,8 @@ def main():
     else:
         result = pool.map(run_macro_parallel, list_of_files)
 
-    pool.close()
     pool.join()
+    pool.close()
 
 
 if __name__ == "__main__":
