@@ -219,7 +219,7 @@ void SignalFinder::initialiseHistograms(){
 
   // Time differences lead/trail/THR1/THR2 per SiPM
   for(int pmID=minPMID; pmID<=maxPMID; pmID++){
-    if(pmID > 400 && pmID < 410 || pmID > 496 && pmID < 506) { continue; }
+    if(!(pmID > 400 && pmID < 410 || pmID > 496 && pmID < 506)) { continue; }
     getStatistics().createHistogram(new TH1F(
       Form("lead_thr1_thr2_tdiff_sipm_%d", pmID),
       Form("Time Difference between leading Signal Channels THR1 and THR2 in found signals on SiPM ID %d", pmID),
