@@ -75,7 +75,6 @@ void TimeWindowCreatorTools::flagSigChs(
   for(unsigned int i=0; i<inputSigChs.size(); i++) {
     if(i == inputSigChs.size()-1) {
       inputSigChs.at(i).setRecoFlag(JPetSigCh::Good);
-      if(saveHistos){ stats.getHisto1D("good_vs_bad_sigch")->Fill(1); }
       break;
     }
     auto& sigCh1 = inputSigChs.at(i);
@@ -84,21 +83,16 @@ void TimeWindowCreatorTools::flagSigChs(
     if((sigCh1.getType() == JPetSigCh::Leading && sigCh2.getType() == JPetSigCh::Trailing)){
       sigCh1.setRecoFlag(JPetSigCh::Good);
       sigCh2.setRecoFlag(JPetSigCh::Good);
-      if(saveHistos){
+      if(saveHistos) {
         stats.getHisto1D("filter_LT_tdiff")->Fill(sigCh2.getTime()-sigCh1.getTime());
-        stats.getHisto1D("good_vs_bad_sigch")->Fill(1, 2);
       }
     } else if (sigCh1.getType() == JPetSigCh::Trailing && sigCh2.getType() == JPetSigCh::Leading) {
       if(sigCh1.getRecoFlag() == JPetSigCh::Unknown){
         sigCh1.setRecoFlag(JPetSigCh::Good);
-        if(saveHistos){
-          stats.getHisto1D("good_vs_bad_sigch")->Fill(1);
-        }
       }
     } else if (sigCh1.getType() == JPetSigCh::Leading && sigCh2.getType() == JPetSigCh::Leading) {
       sigCh1.setRecoFlag(JPetSigCh::Corrupted);
       if(saveHistos){
-        stats.getHisto1D("good_vs_bad_sigch")->Fill(2);
         stats.getHisto1D("filter_LL_PM")->Fill(sigCh1.getChannel().getPM().getID());
         stats.getHisto1D("filter_LL_THR")->Fill(sigCh1.getChannel().getThresholdNumber());
         stats.getHisto1D("filter_LL_tdiff")->Fill(sigCh2.getTime()-sigCh1.getTime());
@@ -109,14 +103,10 @@ void TimeWindowCreatorTools::flagSigChs(
       }
       sigCh2.setRecoFlag(JPetSigCh::Corrupted);
       if(saveHistos){
-        stats.getHisto1D("good_vs_bad_sigch")->Fill(2);
         stats.getHisto1D("filter_TT_PM")->Fill(sigCh1.getChannel().getPM().getID());
         stats.getHisto1D("filter_TT_THR")->Fill(sigCh1.getChannel().getThresholdNumber());
         stats.getHisto1D("filter_TT_tdiff")->Fill(sigCh2.getTime()-sigCh1.getTime());
       }
-    }
-    if(sigCh1.getRecoFlag() == JPetSigCh::Unknown && saveHistos){
-      stats.getHisto1D("good_vs_bad_sigch")->Fill(3);
     }
   }
 }

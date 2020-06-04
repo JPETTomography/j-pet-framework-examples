@@ -384,7 +384,7 @@ void EventFinder::initialiseHistograms(){
 
   getStatistics().createHistogram(new TH1F(
     "coin_hits_tot_rev_zoom", "Coincidental hits - signal reversed TOT A-B difference",
-    200, -0.0001, 0.000005
+    200, fTOTCutMin, fTOTCutMax
   ));
   getStatistics().getHisto1D("coin_hits_tot_rev_zoom")
   ->GetXaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
@@ -431,7 +431,7 @@ void EventFinder::initialiseHistograms(){
     getStatistics().createHistogram(new TH1F(
       Form("coin_tot_scin_%d_rev_zoom", scinID),
       Form("Hits coincidence, TOT divided by multiplicity, scin %d", scinID),
-      200, -0.0001, 0.000005
+      200, fTOTCutMin, fTOTCutMax
     ));
     getStatistics().getHisto1D(Form("coin_tot_scin_%d_rev_zoom", scinID))
     ->GetXaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
@@ -461,7 +461,7 @@ void EventFinder::initialiseHistograms(){
     getStatistics().createHistogram(new TH2F(
       Form("tdiff_tot_scin_%d_rev_zoom", scinID),
       Form("Hits coincidence, time difference vs. TOT reversed, scin %d",  scinID),
-      200, -1.1 * fABTimeDiff, 1.1 * fABTimeDiff, 200, -0.0001, 0.000005
+      200, -1.1 * fABTimeDiff, 1.1 * fABTimeDiff, 200, fTOTCutMin, fTOTCutMax
     ));
     getStatistics().getHisto2D(Form("tdiff_tot_scin_%d_rev_zoom", scinID))
     ->GetXaxis()->SetTitle("Time difference [ps]");
@@ -503,7 +503,7 @@ void EventFinder::initialiseHistograms(){
       getStatistics().createHistogram(new TH1F(
         Form("coin_tot_scin_%d_m_%d_rev_zoom", scinID, multi),
         Form("Hits coincidence, TOT reversed, scin %d multi %d", scinID, multi),
-        200, -0.0001, 0.000005
+        200, fTOTCutMin, fTOTCutMax
       ));
       getStatistics().getHisto1D(Form("coin_tot_scin_%d_m_%d_rev_zoom", scinID, multi))
       ->GetXaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
@@ -536,7 +536,7 @@ void EventFinder::initialiseHistograms(){
         Form("tdiff_tot_scin_%d_m_%d_rev_zoom", scinID, multi),
         Form("Hits coincidence, time difference vs. TOT reversed, scin %d multi %d",
         scinID, multi),
-        200, -1.1 * fABTimeDiff, 1.1 * fABTimeDiff, 200, -0.0001, 0.000005
+        200, -1.1 * fABTimeDiff, 1.1 * fABTimeDiff, 200, fTOTCutMin, fTOTCutMax
       ));
       getStatistics().getHisto2D(Form("tdiff_tot_scin_%d_m_%d_rev_zoom", scinID, multi))
       ->GetXaxis()->SetTitle("Time difference [ps]");

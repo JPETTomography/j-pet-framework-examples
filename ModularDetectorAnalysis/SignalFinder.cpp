@@ -111,7 +111,7 @@ void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& rawSigVec)
 
       if(fSaveControlHistos){
 
-        if(pmID > 400 && pmID < 560) {
+        if(pmID > 400 && pmID < 410 || pmID > 496 && pmID < 506) {
           getStatistics().getHisto1D(Form("tot_thr1_sipm_%d", pmID))
           ->Fill(trails.at(0).getTime()-leads.at(0).getTime());
 
@@ -154,8 +154,7 @@ void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& rawSigVec)
 void SignalFinder::initialiseHistograms(){
 
   auto minPMID = getParamBank().getPMs().begin()->first;
-  // auto maxPMID = getParamBank().getPMs().rbegin()->first;
-  auto maxPMID = 560;
+  auto maxPMID = getParamBank().getPMs().rbegin()->first;
   auto minScinD = getParamBank().getScins().begin()->first;
   auto maxScinID = getParamBank().getScins().rbegin()->first;
 
@@ -219,46 +218,46 @@ void SignalFinder::initialiseHistograms(){
   getStatistics().getHisto1D("rawsig_tslot")->GetYaxis()->SetTitle("Number of Time Windows");
 
   // Time differences lead/trail/THR1/THR2 per SiPM
-  for(int i=minPMID; i<=560; i++){
+  for(int pmID=minPMID; pmID<=maxPMID; pmID++){
+    if(pmID > 400 && pmID < 410 || pmID > 496 && pmID < 506) { continue; }
     getStatistics().createHistogram(new TH1F(
-      Form("lead_thr1_thr2_tdiff_sipm_%d", i),
-      Form("Time Difference between leading Signal Channels THR1 and THR2 in found signals on SiPM ID %d", i),
+      Form("lead_thr1_thr2_tdiff_sipm_%d", pmID),
+      Form("Time Difference between leading Signal Channels THR1 and THR2 in found signals on SiPM ID %d", pmID),
       200, -1.1*fSigChEdgeMaxTime, 1.1*fSigChEdgeMaxTime
     ));
-    getStatistics().getHisto1D(Form("lead_thr1_thr2_tdiff_sipm_%d", i))
+    getStatistics().getHisto1D(Form("lead_thr1_thr2_tdiff_sipm_%d", pmID))
     ->GetXaxis()->SetTitle("time diff [ps]");
-    getStatistics().getHisto1D(Form("lead_thr1_thr2_tdiff_sipm_%d", i))
+    getStatistics().getHisto1D(Form("lead_thr1_thr2_tdiff_sipm_%d", pmID))
     ->GetYaxis()->SetTitle("Number of Signal Channel Pairs");
 
     getStatistics().createHistogram(new TH1F(
-      Form("trail_thr1_thr2_tdiff_sipm_%d", i),
-      Form("Time Difference between trailing Signal Channels THR1 and THR2 in found signals on SiPM ID %d", i),
+      Form("trail_thr1_thr2_tdiff_sipm_%d", pmID),
+      Form("Time Difference between trailing Signal Channels THR1 and THR2 in found signals on SiPM ID %d", pmID),
       200, -2.0*fSigChEdgeMaxTime, 2.0*fSigChEdgeMaxTime
     ));
-    getStatistics().getHisto1D(Form("trail_thr1_thr2_tdiff_sipm_%d", i))
+    getStatistics().getHisto1D(Form("trail_thr1_thr2_tdiff_sipm_%d", pmID))
     ->GetXaxis()->SetTitle("time diff [ps]");
-    getStatistics().getHisto1D(Form("trail_thr1_thr2_tdiff_sipm_%d", i))
+    getStatistics().getHisto1D(Form("trail_thr1_thr2_tdiff_sipm_%d", pmID))
     ->GetYaxis()->SetTitle("Number of Signal Channel Pairs");
 
     getStatistics().createHistogram(new TH1F(
-      Form("tot_thr1_sipm_%d", i),
-      Form("Signal Time over Threshold on THR1 on SiPM ID %d", i),
+      Form("tot_thr1_sipm_%d", pmID),
+      Form("Signal Time over Threshold on THR1 on SiPM ID %d", pmID),
       200, 0.0, 1.1*fSigChLeadTrailMaxTime
     ));
-    getStatistics().getHisto1D(Form("tot_thr1_sipm_%d", i))
+    getStatistics().getHisto1D(Form("tot_thr1_sipm_%d", pmID))
     ->GetXaxis()->SetTitle("TOT [ps]");
-    getStatistics().getHisto1D(Form("tot_thr1_sipm_%d", i))
+    getStatistics().getHisto1D(Form("tot_thr1_sipm_%d", pmID))
     ->GetYaxis()->SetTitle("Number of Raw Signal");
 
     getStatistics().createHistogram(new TH1F(
-      Form("tot_thr2_sipm_%d", i),
-      Form("Signal Time over Threshold on THR2 on SiPM ID %d", i),
+      Form("tot_thr2_sipm_%d", pmID),
+      Form("Signal Time over Threshold on THR2 on SiPM ID %d", pmID),
       200, 0.0, 1.1*fSigChLeadTrailMaxTime
     ));
-    getStatistics().getHisto1D(Form("tot_thr2_sipm_%d", i))
+    getStatistics().getHisto1D(Form("tot_thr2_sipm_%d", pmID))
     ->GetXaxis()->SetTitle("TOT [ps]");
-    getStatistics().getHisto1D(Form("tot_thr2_sipm_%d", i))
+    getStatistics().getHisto1D(Form("tot_thr2_sipm_%d", pmID))
     ->GetYaxis()->SetTitle("Number of Raw Signal");
-
   }
 }

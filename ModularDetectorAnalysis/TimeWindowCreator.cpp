@@ -137,6 +137,13 @@ void TimeWindowCreator::saveSigChs(const vector<JPetSigCh>& sigChVec)
             } else if(sigCh.getChannel().getPM().getSide()==JPetPM::SideB){
               getStatistics().getHisto1D("pm_occ_sides")->Fill(2);
             }
+            if(sigCh.getRecoFlag() == JPetSigCh::Good){
+              getStatistics().getHisto1D("good_vs_bad_sigch")->Fill(1);
+            } else if(sigCh.getRecoFlag() == JPetSigCh::Corrupted) {
+              getStatistics().getHisto1D("good_vs_bad_sigch")->Fill(2);
+            } else if(sigCh.getRecoFlag() == JPetSigCh::Unknown) {
+              getStatistics().getHisto1D("good_vs_bad_sigch")->Fill(3);
+            }
           }
 
           if(sigCh.getType() == JPetSigCh::Leading && sigCh.getChannel().getThresholdNumber()==1){
