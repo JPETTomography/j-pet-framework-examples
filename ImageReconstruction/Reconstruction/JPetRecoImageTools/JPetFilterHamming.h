@@ -25,9 +25,10 @@ class JPetFilterHamming : public JPetFilterInterface {
 public:
   JPetFilterHamming() {}
   explicit JPetFilterHamming(double maxCutOff) : fCutOff(maxCutOff) {}
+  const double alpha = 0.54;
   virtual double operator()(double pos) override
   {
-    return pos < fCutOff ? 0.54 + 0.46 * std::cos((2. * M_PI * pos) / fCutOff) : 0.;
+    return pos < fCutOff ? alpha + (1. - alpha) * std::cos((2. * M_PI * pos) / fCutOff) : 0.;
   }
 
 private:
