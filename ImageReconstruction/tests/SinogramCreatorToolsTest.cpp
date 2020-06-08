@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(test_lor_slice) {
       0.f, EPSILON);
 }
 
-/*
+
 BOOST_AUTO_TEST_CASE(remap_to_single_layer) {
   const float EPSILON = 0.1f;
   float x1 = 0.f;
@@ -189,24 +189,6 @@ BOOST_AUTO_TEST_CASE(remap_to_single_layer) {
   BOOST_REQUIRE_CLOSE(result.second.X(), 0.f, EPSILON);
   BOOST_REQUIRE_CLOSE(result.second.Y(), -radius, EPSILON);
   BOOST_REQUIRE_CLOSE(result.second.Z(), z2, EPSILON);
-
-  x1 = 0.f;
-  y1 = 30.f;
-  z1 = -25.f;
-
-  x2 = 0.f;
-  y2 = -30.f;
-  z2 = 25.f;
-
-  result = SinogramCreatorTools::remapToSingleLayer(
-      TVector3(x1, y1, z1), TVector3(x2, y2, z2), radius);
-  BOOST_REQUIRE_CLOSE(result.first.X(), 0.f, EPSILON);
-  BOOST_REQUIRE_CLOSE(result.first.Y(), radius, EPSILON);
-  BOOST_REQUIRE_CLOSE(result.first.Z(), z1, EPSILON);
-
-  BOOST_REQUIRE_CLOSE(result.second.X(), 0.f, EPSILON);
-  BOOST_REQUIRE_CLOSE(result.second.Y(), -radius, EPSILON);
-  BOOST_REQUIRE_CLOSE(result.second.Z(), z2, EPSILON);
 }
 
 BOOST_AUTO_TEST_CASE(polyfit_test) {
@@ -227,6 +209,7 @@ BOOST_AUTO_TEST_CASE(polyfit_test) {
       SinogramCreatorTools::getPolyFit(
           {std::sqrt((1.84 * 1.84) + (-8.89 * -8.89)), -std::abs(-4.77)}),
       7.430144030486940e-01, kEPSILON);
-}*/
+}
 
 BOOST_AUTO_TEST_SUITE_END()
+
