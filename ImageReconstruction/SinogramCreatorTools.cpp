@@ -127,6 +127,11 @@ int SinogramCreatorTools::getSplitRangeNumber(float firstZ, float secondZ, const
   return -1;
 }
 
+/* This function returns number in zSplitRange vector based on `z` value of "reconstructed" LOR annihilation point,
+ * e.g. it maps `z` value of LOR annihilation point to sinogram slice (based on used settings).
+ * When no connect value can be found in `zSliceRange` vector, -1 is returned.
+ */
+
 int SinogramCreatorTools::getSplitRangeNumber(float z, const std::vector<std::pair<float, float>>& zSplitRange)
 {
   for (unsigned int i = 0; i < zSplitRange.size(); i++)
