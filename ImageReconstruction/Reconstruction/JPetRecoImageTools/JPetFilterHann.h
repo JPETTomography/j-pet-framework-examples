@@ -34,3 +34,4 @@ private:
 };
 
 #endif /*  !_JPetFilterHann_H_ */
+
