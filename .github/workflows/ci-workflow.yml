@@ -41,9 +41,9 @@ jobs:
         cmake ..
         make
         make tests_largebarrel
-        #make tests_imagereconstruction
+        make tests_imagereconstruction
 
-    #- name: run image reconstruction test       
+    - name: run image reconstruction test       
       run: |
         source root/bin/thisroot.sh
         cd build/ImageReconstruction
