@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -47,18 +47,18 @@ bool EventCategorizerTools::checkFor2Gamma(
       double theta2 = max(firstHit.getBarrelSlot().getTheta(), secondHit.getBarrelSlot().getTheta());
       double thetaDiff = min(theta2 - theta1, 360.0 - theta2 + theta1);
       if (saveHistos) {
-        stats.getHisto1D("2Gamma_TimeDiff")->Fill(timeDiff / 1000.0);
-        stats.getHisto1D("2Gamma_DLOR")->Fill(deltaLor);
-        stats.getHisto1D("2Gamma_ThetaDiff")->Fill(thetaDiff);
+        stats.fillHistogram("2Gamma_TimeDiff", timeDiff / 1000.0);
+        stats.fillHistogram("2Gamma_DLOR", deltaLor);
+        stats.fillHistogram("2Gamma_ThetaDiff", thetaDiff);
       }
       if (fabs(thetaDiff - 180.0) < b2bSlotThetaDiff && timeDiff < b2bTimeDiff) {
         if (saveHistos) {
           TVector3 annhilationPoint = calculateAnnihilationPoint(firstHit, secondHit);
-          stats.getHisto1D("2Annih_TimeDiff")->Fill(timeDiff / 1000.0);
-          stats.getHisto1D("2Annih_DLOR")->Fill(deltaLor);
-          stats.getHisto1D("2Annih_ThetaDiff")->Fill(thetaDiff);
-          stats.getHisto2D("2Annih_XY")->Fill(annhilationPoint.X(), annhilationPoint.Y());
-          stats.getHisto1D("2Annih_Z")->Fill(annhilationPoint.Z());
+          stats.fillHistogram("2Annih_TimeDiff", timeDiff / 1000.0);
+          stats.fillHistogram("2Annih_DLOR", deltaLor);
+          stats.fillHistogram("2Annih_ThetaDiff", thetaDiff);
+          stats.fillHistogram("2Annih_XY", annhilationPoint.X(), annhilationPoint.Y());
+          stats.fillHistogram("2Annih_Z", annhilationPoint.Z());
         }
         return true;
       }
@@ -95,7 +95,7 @@ bool EventCategorizerTools::checkFor3Gamma(const JPetEvent& event, JPetStatistic
         double transformedY = relativeAngles.at(1) - relativeAngles.at(0);
 
         if (saveHistos) {
-          stats.getHisto2D("3Gamma_Angles")->Fill(transformedX, transformedY);
+          stats.fillHistogram("3Gamma_Angles", transformedX, transformedY);
         }
       }
     }
@@ -111,10 +111,10 @@ bool EventCategorizerTools::checkForPrompt(
   double deexTOTCutMin, double deexTOTCutMax)
 {
   for (unsigned i = 0; i < event.getHits().size(); i++) {
-    double tot = calculateTOT(event.getHits().at(i));
+    double tot = calculateTOT(event.getHits().at(i), TOTCalculationType::kSimplified);
     if (tot > deexTOTCutMin && tot < deexTOTCutMax) {
       if (saveHistos) {
-        stats.getHisto1D("Deex_TOT_cut")->Fill(tot);
+        stats.fillHistogram("Deex_TOT_cut", tot);
       }
       return true;
     }
@@ -148,13 +148,13 @@ bool EventCategorizerTools::checkForScatter(
       double timeDiff = scatterHit.getTime() - primaryHit.getTime();
 
       if (saveHistos) {
-        stats.getHisto1D("ScatterTOF_TimeDiff")->Fill(fabs(scattTOF - timeDiff));
+        stats.fillHistogram("ScatterTOF_TimeDiff", fabs(scattTOF - timeDiff));
       }
 
       if (fabs(scattTOF - timeDiff) < scatterTOFTimeDiff) {
         if (saveHistos) {
-          stats.getHisto2D("ScatterAngle_PrimaryTOT")->Fill(scattAngle, calculateTOT(primaryHit));
-          stats.getHisto2D("ScatterAngle_ScatterTOT")->Fill(scattAngle, calculateTOT(scatterHit));
+          stats.fillHistogram("ScatterAngle_PrimaryTOT", scattAngle, calculateTOT(primaryHit, TOTCalculationType::kSimplified));
+          stats.fillHistogram("ScatterAngle_ScatterTOT", scattAngle, calculateTOT(scatterHit, TOTCalculationType::kSimplified));
         }
         return true;
       }
@@ -167,10 +167,11 @@ bool EventCategorizerTools::checkForScatter(
 * Calculation of the total TOT of the hit - Time over Threshold:
 * the sum of the TOTs on all of the thresholds (1-4) and on the both sides (A,B)
 */
-double EventCategorizerTools::calculateTOT(const JPetHit& hit)
+double EventCategorizerTools::calculateTOT(const JPetHit& hit, TOTCalculationType type)
 {
   double tot = 0.0;
-
+  double weight = 1.;
+                                         
   auto sigALead = hit.getSignalA().getRecoSignal().getRawSignal()
                   .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
   auto sigBLead = hit.getSignalB().getRecoSignal().getRawSignal()
@@ -180,14 +181,31 @@ double EventCategorizerTools::calculateTOT(const JPetHit& hit)
   auto sigBTrail = hit.getSignalB().getRecoSignal().getRawSignal()
                    .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
 
-  if (sigALead.size() > 0 && sigATrail.size() > 0) {
-    for (unsigned i = 0; i < sigALead.size() && i < sigATrail.size(); i++) {
-      tot += (sigATrail.at(i).getValue() - sigALead.at(i).getValue());
-    }
-  }
-  if (sigBLead.size() > 0 && sigBTrail.size() > 0) {
-    for (unsigned i = 0; i < sigBLead.size() && i < sigBTrail.size(); i++) {
-      tot += (sigBTrail.at(i).getValue() - sigBLead.at(i).getValue());
+  tot += calculateTOTside(sigALead, sigATrail, type);
+  tot += calculateTOTside(sigBLead, sigBTrail, type);
+  return tot;
+}
+
+double EventCategorizerTools::calculateTOTside(const std::vector<JPetSigCh> & leadPoints, const std::vector<JPetSigCh> & trailPoints, TOTCalculationType type)
+{
+  double tot = 0., weight = 1.;
+  if (leadPoints.size() > 0 && trailPoints.size() > 0) {
+    tot += (trailPoints.at(0).getValue() - leadPoints.at(0).getValue());
+    for (unsigned i = 1; i < leadPoints.size() && i < trailPoints.size(); i++) {
+      switch(type) {
+        case TOTCalculationType::kSimplified:
+          weight = 1.;
+          break;
+        case TOTCalculationType::kThresholdRectangular:
+          weight = (leadPoints.at(i).getThreshold() - leadPoints.at(i-1).getThreshold())/leadPoints.at(0).getThreshold();
+          break;
+        case TOTCalculationType::kThresholdTrapeze:
+          weight = (leadPoints.at(i).getThreshold() - leadPoints.at(i-1).getThreshold())/leadPoints.at(0).getThreshold();
+          tot += weight*((trailPoints.at(i).getValue() - leadPoints.at(i).getValue()) - 
+                    (trailPoints.at(i-1).getValue() - leadPoints.at(i-1).getValue()))/2;
+          break;
+      }
+      tot += weight*(trailPoints.at(i).getValue() - leadPoints.at(i).getValue());
     }
   }
   return tot;
@@ -275,5 +293,3 @@ double EventCategorizerTools::calculatePlaneCenterDistance(
     return -1.;
   }
 }
-
-

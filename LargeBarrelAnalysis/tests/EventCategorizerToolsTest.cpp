@@ -234,10 +234,10 @@ BOOST_AUTO_TEST_CASE(checkForPromptTest_checkTOTCalc) {
   hit2.setSignals(physSignal2A, physSignal2B);
   hit3.setSignals(physSignal3A, physSignal3B);
 
-  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit1), 0.0, kEpsilon);
-  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit2), 56.0,
+  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit1, EventCategorizerTools::TOTCalculationType::kSimplified), 0.0, kEpsilon);
+  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit2, EventCategorizerTools::TOTCalculationType::kSimplified), 56.0,
                       kEpsilon);
-  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit3), 560.0,
+  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit3, EventCategorizerTools::TOTCalculationType::kSimplified), 560.0,
                       kEpsilon);
 
   JPetEvent event1;
