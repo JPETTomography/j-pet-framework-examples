@@ -44,10 +44,10 @@ jobs:
         #make tests_imagereconstruction
 
     #- name: run image reconstruction test       
-      #run: |
-        #source root/bin/thisroot.sh
-        #cd build/ImageReconstruction
-        #ctest -j6 -C Debug -T test --output-on-failure
+      run: |
+        source root/bin/thisroot.sh
+        cd build/ImageReconstruction
+        ctest -j6 -C Debug -T test --output-on-failure
 
     - name: run large barrel test       
       run: |
