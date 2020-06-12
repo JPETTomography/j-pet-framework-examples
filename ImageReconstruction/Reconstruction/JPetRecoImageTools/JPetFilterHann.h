@@ -10,28 +10,28 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- *  @file JPetFilterCosine.h
+ *  @file JPetFilterHann.h
  */
 
-#ifndef _JPetFilterCosine_H_
-#define _JPetFilterCosine_H_
-#include "./JPetFilterInterface.h"
+#ifndef _JPetFilterHann_H_
+#define _JPetFilterHann_H_
+#include "JPetFilterInterface.h"
 #include <cmath>
 
-/*! \brief Filter F(x) = x * cos(x * pi)
-*/
-class JPetFilterCosine : public JPetFilterInterface
+/*! \brief
+ */
+class JPetFilterHann : public JPetFilterInterface
 {
 public:
-  JPetFilterCosine() {}
-  virtual double operator()(double radius) override
-  {
-    return radius * std::cos(M_PI * radius);
+  JPetFilterHann() {}
+  explicit JPetFilterHann(double maxCutOff) : fCutOff(maxCutOff) {}
+  virtual double operator()(double pos) override {
+    return pos < fCutOff ? 0.5 + 0.5 * std::cos((2. * M_PI * pos) / fCutOff) : 0.;
   }
 
 private:
-  JPetFilterCosine(const JPetFilterCosine &) = delete;
-  JPetFilterCosine &operator=(const JPetFilterCosine &) = delete;
+  double fCutOff = 1.0;
 };
 
-#endif /*  !_JPetFilterCosine_H_ */
+#endif /*  !_JPetFilterHann_H_ */
+

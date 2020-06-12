@@ -1,3 +1,4 @@
+  
 /**
  *  @copyright Copyright 2016 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -10,28 +11,30 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- *  @file JPetFilterRidgelet.h
+ *  @file JPetFilterCosine.h
  */
 
-#ifndef _JPetFilterRidgelet_H_
-#define _JPetFilterRidgelet_H_
+#ifndef _JPetFilterCosine_H_
+#define _JPetFilterCosine_H_
 #include "./JPetFilterInterface.h"
 #include <cmath>
 
-/*! \brief Filter F(x) = sqrt(x)
+/*! \brief Filter F(x) = cos(x * pi)
 */
-class JPetFilterRidgelet : public JPetFilterInterface
+class JPetFilterCosine : public JPetFilterInterface
 {
 public:
-  JPetFilterRidgelet() {}
-  virtual double operator()(double radius) override
-  {
-    return std::sqrt(radius);
+  JPetFilterCosine() {}
+  explicit JPetFilterCosine(double maxCutOff) : fCutOff(maxCutOff) {}
+  virtual double operator()(double pos) override {
+    return pos < fCutOff ? std::cos(M_PI * pos / fCutOff) : 0.;
   }
 
 private:
-  JPetFilterRidgelet(const JPetFilterRidgelet &) = delete;
-  JPetFilterRidgelet &operator=(const JPetFilterRidgelet &) = delete;
+  JPetFilterCosine(const JPetFilterCosine &) = delete;
+  JPetFilterCosine &operator=(const JPetFilterCosine &) = delete;
+
+  double fCutOff = 1.0f;
 };
 
-#endif /*  !_JPetFilterRidgelet_H_ */
+#endif /*  !_JPetFilterCosine_H_ */

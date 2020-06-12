@@ -168,16 +168,12 @@ if(DOWNLOAD_DATA)
 endif()
 
 ################################################################################
-## Add general modules files
-add_subdirectory(modules)
-
-################################################################################
 ## Directories with examples
 add_subdirectory(InterThresholdCalibration)
 add_subdirectory(LargeBarrelAnalysis)
 add_subdirectory(VelocityCalibration)
 add_subdirectory(NewAnalysisTemplate)
-#add_subdirectory(ImageReconstruction)
+add_subdirectory(ImageReconstruction)
 add_subdirectory(ScopeLoaderExample)
 add_subdirectory(TimeCalibration)
 add_subdirectory(MCGeantAnalysis)

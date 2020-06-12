@@ -26,12 +26,11 @@
 #include "JPetHit/JPetHit.h"
 #include "JPetUserTask/JPetUserTask.h"
 #include "SinogramCreatorTools.h"
+#include <random>
 #include <string>
 #include <vector>
 
-#include "JPetFilterNone.h"
-#include "JPetFilterRamLak.h"
-#include "JPetRecoImageTools.h"
+#include "JPetSinogramType.h"
 
 /**
  * @brief Module creating sinogram from data
@@ -68,6 +67,8 @@ public:
 protected:
   bool analyzeHits(const JPetHit& firstHit, const JPetHit& secondHit);
   bool analyzeHits(const TVector3& firstHit, const float firstTOF, const TVector3& secondHit, const float secondTOF);
+  bool analyzeHits(const float firstX, const float firstY, const float firstZ, const double firstTOF, const float secondX, const float secondY,
+                   const float secondZ, const double secondTOF);
   /**
    * @brief Function returing value of TOF rescale, to match same annihilation point after projection from 3d to 2d
    * \param x_diff difference on x axis between hit ends
@@ -76,36 +77,19 @@ protected:
    */
   float getTOFRescaleFactor(const TVector3& posDiff) const;
 
-  /**
-   * @brief Helper function used in saving result
-   * \param result matrix to find max value
-   * \return max value of matrix
-   */
-  int getMaxValue(const JPetRecoImageTools::Matrix2DProj& result);
-  /**
-   * @brief Helper function used to save results(sinograms and reconstructed images)
-   * \param result resulted matrix to save
-   * \param outputFileName name with path where to save result
-   */
-  void saveResult(const JPetRecoImageTools::Matrix2DProj& result, const std::string& outputFileName);
-
-  JPetRecoImageTools::Matrix2DProj** fSinogram = nullptr;
-  JPetRecoImageTools::Matrix2DTOF* fTOFInformation = nullptr;
+  void readAndAnalyzeGojaFile();
+  bool atenuation(const float value);
 
   const int kReconstructionMaxAngle = 180;
   int fZSplitNumber = 1;
   int fMaxDistanceNumber = 0;
   std::vector<std::pair<float, float>> fZSplitRange;
 
-  int* fMaxValueInSinogram = nullptr; // to fill later in output file
-  int* fCurrentValueInSinogram = nullptr;
-
   float fMaxReconstructionLayerRadius = 0.f;    // in cm
   float fReconstructionDistanceAccuracy = 0.1f; // in cm, 1mm accuracy, maximal accuracy: 0.001f
   float fScintillatorLenght = 50.0f;            // in cm
   bool fEnableObliqueLORRemapping = false;      // enable remapping LORs to correct sinogram slices based on TOF value
   bool fEnableKDEReconstruction = false;        // enable saving extra TOF information
-  std::vector<int> fReconstructSliceNumbers;    // reconstruct only slices that was given in userParams
 
   const float kEPSILON = 0.0001f;
 
@@ -116,13 +100,32 @@ private:
   void setUpOptions();
 
   const std::string kOutFileNameKey = "SinogramCreator_OutFileName_std::string";
+
   const std::string kReconstructionDistanceAccuracy = "SinogramCreator_ReconstructionDistanceAccuracy_float";
+  const std::string kMaxReconstructionLayerRadius = "SinogramCreator_MaxReconstructionLayerRadius_float";
   const std::string kZSplitNumber = "SinogramCreator_SinogramZSplitNumber_int";
   const std::string kScintillatorLenght = "SinogramCreator_ScintillatorLenght_float";
   const std::string kEnableObliqueLORRemapping = "SinogramCreator_EnableObliqueLORRemapping_bool";
   const std::string kEnableTOFReconstrution = "SinogramCreator_EnableKDEReconstruction_bool";
-  const std::string kReconstructSliceNumbers = "SinogramCreator_ReconstructSliceNumbers_std::vector<int>";
-  std::string fOutFileName = "sinogram";
+  const std::string kEnableNEMAAttenuation = "SinogramCreator_EnableNEMAAttenuation_bool";
+  const std::string kTOFBinSliceSize = "SinogramCreator_TOFBinSliceSize_float";
+
+  const std::string kGojaInputFilePath = "SinogramCreator_GojaInputFilesPaths_std::vector<std::string>";
+
+  std::string fOutFileName = "sinogram.root";
+  std::vector<std::string> fGojaInputFilePath;
+
+  JPetSinogramType::WholeSinogram fSinogramData;
+  float fTOFBinSliceSize = 100.f;
+
+  bool fEnableNEMAAttenuation = false;
+
+  unsigned int fTotalAnalyzedHits = 0;
+  unsigned int fNumberOfCorrectHits = 0;
+  unsigned int fTotalAttenuatedHits = 0;
+
+  std::default_random_engine generator;
+  std::uniform_real_distribution<double> distribution;
 };
 
 #endif /*  !SINOGRAMCREATOR_H */

@@ -31,6 +31,8 @@ target_compile_options(${TESTNAME}.x PRIVATE -Wunused-parameter -Wall)
 target_link_libraries(${TESTNAME}.x JPetFramework::JPetFramework Boost::unit_test_framework)
 add_test(NAME ${TESTNAME}.x COMMAND ${TESTNAME}.x --log_level=error --log_format=XML --log_sink=${TESTNAME}.xml)
 set_target_properties(${TESTNAME}.x PROPERTIES FOLDER tests)
+set_target_properties( PROPERTIES FOLDER tests)
+
 add_dependencies(${TESTNAME}.x link_target_imagereconstruction)
 
 
