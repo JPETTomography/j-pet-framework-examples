@@ -1,29 +1,22 @@
 # Template for custom analysis
 
 ## Aim
-This is an example of creating one's own analysis based on the `LargeBarrelAnalysis`. You can start your own analysis by copying the `NewAnalysisTemplate` directory.
+This is an example of  performing study to develop a relationship between Energy deposition by incident photon in interaction with plastic scintillator and the measured TOT value. 
+For the details please refer the article : [S. Sharma et al., https://arxiv.org/abs/1911.12059.]
 
-## Starting you own Analysis
-When starting you own analysis, do not edit any of the existing examples as this will lead to problems with Git-based version control. Instead, follow this procedure:
+Some pointers in using  the algorithem: 
 
- 1. Copy the `NewAnalysisTemplate` directory to a name you wish to give to you analysis. Let us use `MyAnalysis` as an example:  
-    `cp -r NewAnalysisTemplate MyAnalysis`
+1.  Events with only 3 hits are selected.
+2. Analysis is divided in two parts: 
+	a). Tagging photons of two different energies 511 keV and 1275 keV . Eventwise calculating the scattering of respective photons (primary) and calculate the  
+	     energy deposition. 
+	b). For the associated of scatterd photon to its primary interaction, scattering test is used. For this purpose, elliptical cuts ( equations ) are provided in the  
+	     code, one can modify the shape of ellipse  by changing the parameters. 
+	c). Once we have energy deposition for a hit, we have one-to-one correspondence of energy loss in a hit and the corresponding measured TOT value.
+3). In selecting the 511 keV photons or 1275 keV photons we are not using sharp cuts on TOT spectra, only the higher limits to cover the full range of energy depositions.
+4). Apart from higher ranges cut on TOT, the selection of photons are also based on the angular correlations of the 3 hits ( sum of two smallest vs their difference azimuth angles between the hits).
+5). Two methods are in code : (i) Based on multiple of any threshold values ( e.g., run4 - 80,160,240,320 like in Run 4) : calculateSumOfTOTs(hit)
+(ii) Irregular thresholds values - one has to normalize  ( Run 7, 9, 11): calculateTOTAdjusted(hit)
 
- 2. Add the following line at the end of the `j-pet-framework-examples/CMakeLists.txt`:  
-    `add_subdirectory(MyAnalysis)`  
-    (replace `MyAnalysis` with whichever name you gave to your directory)
-
- 3. Edit the file `CMakeLists.txt` located in you new directory, e.g. `MyAnalysis/CMakeLists.txt` and and in the following line:  
-    `set(projectName NewProjectName)`  
-    replace `NewProjectName` with your project name, e.g. `MyAnalysis`
-
- 4. Furter in the `CMakeLists.txt` file, you will see lines responsible for using modules from the `LargeBarrelAnalysis` example. In case you want to customize any of the modules, copy this modules `.h` and `.cpp` files to your directory and comment out the lines concerning this module.
-
- 5. Now when you follow the standard procedure to configure and build all of the J-PET framework examples, a directory with the name you chose will be created in your build directory, e.g. `build/MyAnalysis` and will contain an executable with the name you chose for the project, e.g. `MyAnalysis.x`.
-
-## Additional Info
-Note that the `TimeCalibration` and `VelocityCalibration` examples follow exactly the above scheme of being based on `LargeBarrelAnalysis` and its modules, so you can refer to these examples for advanced usage of the template described here.
-
-## Author
-[Aleksander Gajos](https://github.com/alekgajos)  
-Please report any bugs and suggestions of corrections to: [aleksander.gajos@uj.edu.pl](aleksander.gajos@uj.edu.pl)
+## Author 
+Please report any bugs and suggestion of corrections to : [sushil.sharma@uj.edu.pl] or any core member from the framework developers team. 
