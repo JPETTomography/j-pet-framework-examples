@@ -16,10 +16,10 @@
 #ifndef EVENTANALYZER_H
 #define EVENTANALYZER_H
 
-#include "../LargeBarrelAnalysis/EventCategorizerTools.h"
 #include <JPetEvent/JPetEvent.h>
 #include <JPetHit/JPetHit.h>
 #include <JPetUserTask/JPetUserTask.h>
+#include "../LargeBarrelAnalysis/EventCategorizerTools.h"
 
 #ifdef __CINT__
 #define override

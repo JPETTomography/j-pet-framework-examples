@@ -13,11 +13,10 @@
  *  @file EventAnalyzer.cpp
  */
 
-#include "EventAnalyzer.h"
-#include "../LargeBarrelAnalysis/EventCategorizerTools.h"
 #include <JPetMCHit/JPetMCHit.h>
 #include <JPetOptionsTools/JPetOptionsTools.h>
-#include <iostream>
+#include "EventAnalyzer.h"
+#include "../LargeBarrelAnalysis/EventCategorizerTools.h"
 
 using namespace jpet_options_tools;
 using namespace std;
