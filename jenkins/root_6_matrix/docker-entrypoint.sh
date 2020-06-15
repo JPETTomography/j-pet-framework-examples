@@ -12,7 +12,7 @@ executeCommand "export CMAKE_INCLUDE_PATH=$CMAKE_INCLUDE_PATH:/framework-depende
 executeCommand "source /root-system/bin/thisroot.sh"
 
 executeCommand "rm -rf j-pet-framework || true"
-executeCommand "git clone --single-branch --branch cmake https://github.com/grey277/j-pet-framework.git"
+executeCommand "git clone --single-branch --branch develop https://github.com/grey277/j-pet-framework.git"
 executeCommand "mkdir -p j-pet-framework/build"
 executeCommand "cd j-pet-framework/build"
 executeCommand "cmake .."
