@@ -94,19 +94,23 @@ bool TimeCalibration::init()
 //		  const char * histo_name_l = formatUniqueSlotDescription(scin.at()->getBarrelSlot(), thr, "timeDiffAB_leading_");
 //
     const char* histo_name_l = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffAB_leading_", LayerToCalib, StripToCalib, thr);
-    getStatistics().createHistogram( new TH1F(histo_name_l, histo_name_l, 400, -20., 20.) );
+    getStatistics().createHistogramWithAxes( new TH1D(histo_name_l, histo_name_l, 400, -20., 20.),
+                                                            "Time difference AB Leading [ns]", "Counts");
     //
 //histograms for leading edge refference detector time difference
     const char* histo_name_Ref_l = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffRef_leading_", LayerToCalib, StripToCalib, thr);
-    getStatistics().createHistogram( new TH1F(histo_name_Ref_l, histo_name_Ref_l, 800, -80., 80.) );
+    getStatistics().createHistogramWithAxes( new TH1D(histo_name_Ref_l, histo_name_Ref_l, 800, -80., 80.),
+                                                            "Time difference AB Leading reference detector [ns]", "Counts");
     //
 //histos for trailing edge
     const char* histo_name_t = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffAB_trailing_", LayerToCalib, StripToCalib, thr);
-    getStatistics().createHistogram( new TH1F(histo_name_t, histo_name_t, 400, -20., 20.) );
+    getStatistics().createHistogramWithAxes( new TH1D(histo_name_t, histo_name_t, 400, -20., 20.),
+                                                            "Time difference AB Trailing [ns]", "Counts");
     //
 //histograms for leading edge refference detector time difference
     const char* histo_name_Ref_t = Form("%slayer_%d_slot_%d_thr_%d", "timeDiffRef_trailing_", LayerToCalib, StripToCalib, thr);
-    getStatistics().createHistogram( new TH1F(histo_name_Ref_t, histo_name_Ref_t, 1000, -100., 100.) );
+    getStatistics().createHistogramWithAxes( new TH1D(histo_name_Ref_t, histo_name_Ref_t, 1000, -100., 100.),
+                                                            "Time difference AB Trailing reference detector [ns]", "Counts");
     //
   }
   INFO("#############");
@@ -381,7 +385,7 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
         // fill the appropriate histogram
         const char* histo_name_l = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffAB_leading_");
         //**const char * histo_name_l = Form("%slayer_%d_slot_%d_thr_%d","timeDiffAB_leading_",LayerToCalib,StripToCalib,thr);
-        getStatistics().getHisto1D(histo_name_l)->Fill( timeDiffAB_l);
+        getStatistics().fillHistogram(histo_name_l, timeDiffAB_l);
 //
 //take minimum time difference between Ref and Scint
         timeDiffLmin = 10000000000000.;
@@ -395,7 +399,7 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
         //**			const char * histo_name_Ref_l = Form("%slayer_%d_slot_%d_thr_%d","timeDiffRef_leading_",LayerToCalib,StripToCalib,thr);
         const char* histo_name_Ref_l = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffRef_leading_");
         if (timeDiffTmin < 100.) {
-          getStatistics().getHisto1D(histo_name_Ref_l)->Fill(timeDiffLmin);
+          getStatistics().fillHistogram(histo_name_Ref_l, timeDiffLmin);
         }
       }
     }
@@ -416,7 +420,7 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
         //fill the appropriate histogram
         const char* histo_name_t = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffAB_trailing_");
         //**const char * histo_name_t = Form("%slayer_%d_slot_%d_thr_%d","timeDiffAB_trailing_",LayerToCalib,StripToCalib,thr);
-        getStatistics().getHisto1D(histo_name_t)->Fill( timeDiffAB_t);
+        getStatistics().fillHistogram(histo_name_t, timeDiffAB_t);
 //
 //taken minimal time difference between Ref and Scint
         timeDiffTmin = 10000000000000.;
@@ -430,7 +434,7 @@ void TimeCalibration::fillHistosForHit(const JPetHit& hit, const std::vector<dou
         //**const char* histo_name_Ref_t = Form("%slayer_%d_slot_%d_thr_%d","timeDiffRef_trailing_",LayerToCalib,StripToCalib,thr);
         const char* histo_name_Ref_t = formatUniqueSlotDescription(hit.getBarrelSlot(), thr, "timeDiffRef_trailing_");
         if (timeDiffTmin < 100.) {
-          getStatistics().getHisto1D(histo_name_Ref_t)->Fill(timeDiffTmin);
+          getStatistics().fillHistogram(histo_name_Ref_t, timeDiffTmin);
         }
       }
     }
