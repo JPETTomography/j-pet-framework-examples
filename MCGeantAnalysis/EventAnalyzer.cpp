@@ -29,11 +29,11 @@ bool EventAnalyzer::init() {
   INFO("Event analysis started.");
 
   getStatistics().createHistogramWithAxes(
-      new TH1D("z_res", "Resolution along Z", 100, -15., 15.),
+      new TH1D("z_res", "Resolution along Z", 301, -15.05, 15.05),
       "Z_{REC}-Z_{MC} [cm]");
 
   getStatistics().createHistogramWithAxes(
-      new TH1D("Edep_res", "Resolution of deposited energy", 100, -200., 200.),
+      new TH1D("Edep_res", "Resolution of deposited energy", 201, -201., 201.),
       "E_{REC}-E_{MC} [keV]");
 
   // Input events type
