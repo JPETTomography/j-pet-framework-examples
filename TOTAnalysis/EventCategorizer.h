@@ -17,6 +17,7 @@
 #define EVENTCATEGORIZER_H
 
 #include <JPetCommonTools/JPetCommonTools.h>
+#include "../LargeBarrelAnalysis/EventCategorizerTools.h"
 #include <JPetUserTask/JPetUserTask.h>
 #include <JPetEvent/JPetEvent.h>
 #include <JPetHit/JPetHit.h>
@@ -44,6 +45,8 @@ private:
 	// Counters
 	int fEventNumber = 0;
 	int fTotal3HitEvents = 0;
+	double TimeDiff_From = 10 ; //ns   time diff between Prompt and annihilation photon from o-Ps
+	double TimeDiff_To   = 100; //ns 
 	bool fSaveControlHistos = true;
 	void initialiseHistograms();
   void saveEvents(const std::vector<JPetEvent>& event);
@@ -66,7 +69,7 @@ private:
 	void writeSelected(JPetHit orig, JPetHit scatter, std::vector<double_t> values,
 		bool isScatter, double,double, int ScinID
 	);
-
+	double calculateTOTAdjusted(const JPetHit&);
 };
 
 #endif /* !EVENTCATEGORIZER_H */

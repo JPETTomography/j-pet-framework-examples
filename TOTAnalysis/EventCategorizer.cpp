@@ -69,6 +69,7 @@ void EventCategorizer::saveEvents(const vector<JPetEvent>& events)
 // Three hit events
 vector<JPetEvent> EventCategorizer::analyseThreeHitEvent(const JPetEvent *event)
 {
+	
   vector<JPetHit> hits = event->getHits();
   for(unsigned int i=0; i<hits.size(); i++) {
     for(unsigned int j=i+1; j<hits.size(); j++) {
@@ -92,6 +93,8 @@ vector<JPetEvent> EventCategorizer::analyseThreeHitEvent(const JPetEvent *event)
         JPetHit firstHit2 = orderedHits.at(0);
         JPetHit secondHit2 = orderedHits.at(1);
         JPetHit thirdHit2 = orderedHits.at(2);
+		  
+	   // Time difference after ordering
 
         getStatistics().getHisto1D("Time difference 2-1")->Fill(
           TMath::Abs(secondHit2.getTime()-firstHit2.getTime())*pow(10,-3)
@@ -135,7 +138,7 @@ void EventCategorizer::deexcitationSelection(
 ){
   if((angles[0]+angles[1]) < 178 || (angles[0]+angles[1]) > 182) {
     double time_diff_check = (thirdHit2.getTime()-firstHit2.getTime())*pow(10,-3);
-    double deex_selection = calculateSumOfTOTs(firstHit2)/1000.0;
+    double deex_selection = calculateTOTAdjusted(firstHit2)/1000.0;
     getStatistics().getHisto2D("3_hit_angles after cut")->Fill(angles[0] + angles[1], angles[1]-angles[0]);
     getStatistics().getHisto1D("De-exci time criteria t3-t1")->Fill(time_diff_check);
 
@@ -143,8 +146,10 @@ void EventCategorizer::deexcitationSelection(
     int secondHitScinID = secondHit2.getScintillator().getID();
     int thirdHitScinID = thirdHit2.getScintillator().getID();
 
+    //TimeDiff_From && TimeDiff_To used to put time difference between prompt photon and annihilation photon  registration, values are fixed in EventCategorizer.h 
+
     // Make it sure the first hit is from center
-    if(time_diff_check > 10.0 && time_diff_check < 100.0
+    if(time_diff_check > TimeDiff_From && time_diff_check < TimeDiff_To
     && deex_selection < 65.0
     && TMath::Abs(firstHit2.getPosZ()) < 23.0
     && TMath::Abs(secondHit2.getPosZ()) < 23.0
@@ -152,9 +157,7 @@ void EventCategorizer::deexcitationSelection(
     && firstHitScinID != secondHitScinID
     && firstHitScinID != thirdHitScinID
     && secondHitScinID != thirdHitScinID
-    && firstHitScinID != 186
-    && secondHitScinID != 186
-    && thirdHitScinID != 186) {
+    ) {
       fTotal3HitEvents++;
       vector<double> vec0 = scatterAnalysis(firstHit2, secondHit2, thirdHit2, 1274.6);
       getStatistics().getHisto1D("2 hit assignment")->Fill(vec0.at(5));
@@ -190,14 +193,11 @@ void EventCategorizer::annihilationSelection(
   && TMath::Abs(firstHit2.getPosZ()) < 23.0
   && TMath::Abs(secondHit2.getPosZ()) < 23.0
   && TMath::Abs(thirdHit2.getPosZ()) < 23.0
-  && calculateSumOfTOTs(firstHit2)/1000.0 < 35.0
-  && calculateSumOfTOTs(secondHit2)/1000.0 < 35.0
+  && calculateTOTAdjusted(firstHit2)/1000.0 < 35.0
+  && calculateTOTAdjusted(secondHit2)/1000.0 < 35.0
   && firstHitScinID != secondHitScinID
   && firstHitScinID != thirdHitScinID
-  && secondHitScinID != thirdHitScinID
-  && firstHitScinID != 186
-  && secondHitScinID != 186
-  && thirdHitScinID != 186) {
+  && secondHitScinID != thirdHitScinID) {
 
     fTotal3HitEvents++;
 
@@ -213,21 +213,12 @@ void EventCategorizer::annihilationSelection(
     vector<double> vec1 = scatterAnalysis(firstHit2, thirdHit2, secondHit2, 511.0);
     vector<double> vec2 = scatterAnalysis(secondHit2, thirdHit2, firstHit2, 511.0);
 
-    if(TMath::Abs(vec1.at(14)>2)) return;
+    if(TMath::Abs(vec1.at(13)>2)) return;
     if(vec1.at(9)<4 || vec1.at(9)<4) return;
     
     getStatistics().getHisto2D("3rd hit assignment_wc")->Fill(vec1.at(5), vec2.at(5));
-    getStatistics().getHisto2D("Sctter test vs theta1")->Fill(vec1.at(5), vec1.at(2));
-    getStatistics().getHisto2D("Sctter test vs theta2")->Fill(vec2.at(5), vec2.at(2));
-    getStatistics().getHisto2D("Annihilation points XY position")->Fill(vec1.at(11),vec1.at(12));
-/*
-    TCutG *cutg[2];
-    // Wider Cuts
-    TFile *file = TFile::Open("CutsB.root");
-    cutg[0] = (TCutG*) file->Get("CUT13")->Clone();
-    cutg[1] = (TCutG*) file->Get("CUT23")->Clone();
-    file->Close();
-*/
+    getStatistics().getHisto2D("Annihilation points XY position")->Fill(vec1.at(10),vec1.at(11));
+
     // Implementation of ellip. cuts :
 
     // Calculate the equations:
@@ -290,8 +281,8 @@ vector<double> EventCategorizer::scatterAnalysis(
   double xcor, ycor, zcor, distanceFromCenter;
 
   if(gamma == 511.0) {
-    TVector3 anniPoint = recoPos2Hit(primary1, primary2);
-    xcor = anniPoint.X();
+	TVector3 anniPoint = EventCategorizerTools::calculateAnnihilationPoint (primary1, primary2);
+	  xcor = anniPoint.X();
     ycor = anniPoint.Y();
     zcor = anniPoint.Z();
     distanceFromCenter = sqrt(pow(xcor, 2) + pow(ycor, 2));
@@ -347,22 +338,11 @@ vector<double> EventCategorizer::scatterAnalysis(
 	  getStatistics().getHisto1D("scatter_angle_all_1275")->Fill(scatterAngle);
 	  }
 
-  // Removing the cloning of 1275 by less energetic gamma
-  double tempTOT;
-  double Eng_deex_selection;
-  double Energy_diff = 0.0;
-
-  if(gamma == 1274.6) {
-    tempTOT = calculateSumOfTOTsCalib(primary1, 1, 5)*pow(10, -3);
-    Eng_deex_selection = exp((tempTOT + 1.1483*pow(10,5))/23144.0);
-    Energy_diff = TMath::Abs(Edep-Eng_deex_selection);
-  }
-
   // FILLING VALUES
   // 0: distance, 1: thetaDiff, 2: scatterAngle, 3: distance-computedDistance
   // 4: speed of light constrain 5: hit-assignemnet 6:angle-edep
   // 7: Primary Scint ID, 8: Scint_Id of scintillator with scattering
-  // 9: Phi angle of scatter
+  // 9: Phi angle of scatter, 10,11,12 - annihilation point coordinates,..
   values.push_back(distance);
   values.push_back(thetaDiff);
   values.push_back(scatterAngle);
@@ -373,7 +353,6 @@ vector<double> EventCategorizer::scatterAnalysis(
   values.push_back(primary1.getScintillator().getID());
   values.push_back(scatter.getScintillator().getID());
   values.push_back(PhiAngle);
-  values.push_back(Energy_diff);
   values.push_back(xcor);
   values.push_back(ycor);
   values.push_back(zcor);
@@ -395,33 +374,64 @@ double EventCategorizer::calcAngle(JPetHit primary, JPetHit scatter)
   return acos(scalarProd/magProd)*180/3.14159265;
 }
 
-// Reconstructed annihilation point - Kamil
-TVector3 EventCategorizer::recoPos2Hit(const JPetHit Hit1, const JPetHit Hit2)
-{
-  double tof = fabs(Hit1.getTime() - Hit2.getTime())/1000.0;
-  // Pos in cm
-  double VecLength = sqrt(pow(Hit1.getPosX()-Hit2.getPosX(), 2)
-    + pow(Hit1.getPosY()-Hit2.getPosY(),2) + pow(Hit1.getPosZ()-Hit2.getPosZ(),2));
-  double middleX = (Hit1.getPosX()+Hit2.getPosX() )/2;
-  double middleY = (Hit1.getPosY()+Hit2.getPosY() )/2;
-  double middleZ = (Hit1.getPosZ()+Hit2.getPosZ() )/2;
-  double Fraction = 2*tof*29.979246/VecLength;
-  TVector3 vec1(1000, 1000, 1000);
-  if( Hit1.getTime() >= Hit2.getTime()) {
-    vec1(0) = middleX + Fraction*( Hit1.getPosX()-middleX );
-    vec1(1) = middleY + Fraction*( Hit1.getPosY()-middleY );
-    vec1(2) = middleZ + Fraction*( Hit1.getPosZ()-middleZ );
-    return vec1;
-  } else {
-    vec1(0) = middleX + Fraction*( Hit2.getPosX()-middleX );
-    vec1(1) = middleY + Fraction*( Hit2.getPosY()-middleY );
-    vec1(2) = middleZ + Fraction*( Hit2.getPosZ()-middleZ );
-    return vec1;
-  }
-  return vec1;
-}
 
 // Sum over all threshold
+
+//New TOT method : needs to be weighted
+double EventCategorizer::calculateTOTAdjusted(const JPetHit& hit)
+{
+	double tot = 0.0;
+	
+	auto sigALead = hit.getSignalA().getRecoSignal().getRawSignal().getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+	auto sigBLead = hit.getSignalB().getRecoSignal().getRawSignal().getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+	auto sigATrail = hit.getSignalA().getRecoSignal().getRawSignal().getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+	auto sigBTrail = hit.getSignalB().getRecoSignal().getRawSignal().getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+	if (sigALead.size() > 0 && sigATrail.size() > 0)
+		{
+		for (unsigned i = 0; i < sigALead.size() && i < sigATrail.size(); i++)
+			{
+			switch( i )
+				{
+					case 0:
+					tot += (sigATrail.at(i).getValue() - sigALead.at(i).getValue()) * 3 / 11;
+					break;
+					case 1:
+					tot += (sigATrail.at(i).getValue() - sigALead.at(i).getValue()) * 5 / 11;
+					break;
+					case 2:
+					tot += (sigATrail.at(i).getValue() - sigALead.at(i).getValue());
+					break;
+					case 3:
+					tot += (sigATrail.at(i).getValue() - sigALead.at(i).getValue());
+					break;
+				}
+			}
+		}
+	if (sigBLead.size() > 0 && sigBTrail.size() > 0)
+		{
+		for (unsigned i = 0; i < sigBLead.size() && i < sigBTrail.size(); i++)
+			{
+			switch( i )
+				{
+					case 0:
+					tot += (sigBTrail.at(i).getValue() - sigBLead.at(i).getValue()) * 3 / 11;
+					break;
+					case 1:
+					tot += (sigBTrail.at(i).getValue() - sigBLead.at(i).getValue()) * 5 / 11;
+					break;
+					case 2:
+					tot += (sigBTrail.at(i).getValue() - sigBLead.at(i).getValue());
+					break;
+					case 3:
+					tot += (sigBTrail.at(i).getValue() - sigBLead.at(i).getValue());
+					break;
+				}
+			}
+		}
+	return tot;
+}
+//
+// TOT estimation when thresholds are equidistant-
 double EventCategorizer::calculateSumOfTOTs(JPetHit hit)
 {
   double TOT = calculateSumOfTOTsForSignal(hit, 'A', 1, 5);
@@ -485,22 +495,6 @@ void EventCategorizer::writeSelected(
     getStatistics().getHisto1D("TOT_Spectra_3-Hit")->Fill(
       calculateSumOfTOTsCalib(orig,1,5)*pow(10,-3)
     );
-    getStatistics().getHisto2D("TOT_EDEP_1")->Fill(
-      values.at(6), calculateSumOfTOTsCalib(orig,1,2)*pow(10,-3)
-    );
-    getStatistics().getHisto2D("TOT_EDEP_2")->Fill(
-      values.at(6), calculateSumOfTOTsCalib(orig,2,3)*pow(10,-3)
-    );
-    getStatistics().getHisto2D("TOT_EDEP_3")->Fill(
-      values.at(6), calculateSumOfTOTsCalib(orig,3,4)*pow(10,-3)
-    );
-    getStatistics().getHisto2D("TOT_EDEP_4")->Fill(
-      values.at(6), calculateSumOfTOTsCalib(orig,4,5)*pow(10,-3)
-    );
-    getStatistics().getHisto2D("TOT_scatter_angle")->Fill(
-      values.at(2), calculateSumOfTOTsCalib(orig,1,5)*pow(10,-3)
-    );
-	  
     }
 
     // 511 keV fill
@@ -528,21 +522,21 @@ void EventCategorizer::initialiseHistograms()
 {
   // 3-HIT ANGLES
   getStatistics().createHistogram(
-    new TH2F("3_hit_angles", "3 Hit angles", 360, -0.5, 359.5, 360, -0.5, 359.5)
+    new TH2F("3_hit_angles", "3 Hit angles", 360, 0, 360, 360,0, 360)
   );
   getStatistics().getHisto2D("3_hit_angles")->GetXaxis()->SetTitle("(Smallest angle + Second smallest angle) [deg]");
   getStatistics().getHisto2D("3_hit_angles")->GetYaxis()->SetTitle("(Second smallest angle - Smallest angle) [deg]");
 
   // 3-HIT ANGLES B2B
   getStatistics().createHistogram(
-    new TH2F("3_hit_angles after cut BTB", "3 Hit angles", 360, -0.5, 359.5, 360, -0.5, 359.5)
+    new TH2F("3_hit_angles after cut BTB", "3 Hit angles", 360, 0, 360, 360, 0, 360)
   );
   getStatistics().getHisto2D("3_hit_angles after cut BTB")->GetXaxis()->SetTitle("(Smallest angle + Second smallest angle) [deg]");
   getStatistics().getHisto2D("3_hit_angles after cut BTB")->GetYaxis()->SetTitle("(Second smallest angle - Smallest angle) [deg]");
 
   // 3-HIT ANGLES NOT B2B
   getStatistics().createHistogram(
-    new TH2F("3_hit_angles after cut", "3 Hit angles", 360, -0.5, 359.5, 360, -0.5, 359.5)
+    new TH2F("3_hit_angles after cut", "3 Hit angles", 360, 0, 360, 360, 0, 360)
   );
   getStatistics().getHisto2D("3_hit_angles after cut")->GetXaxis()->SetTitle("(Smallest angle + Second smallest angle) [deg]");
   getStatistics().getHisto2D("3_hit_angles after cut")->GetYaxis()->SetTitle("(Second smallest angle - Smallest angle) [deg]");
@@ -552,27 +546,15 @@ void EventCategorizer::initialiseHistograms()
   getStatistics().createHistogram(
     new TH2F("3rd hit assignment_wc", "3rd hit assignment_wc", 90, -8.5, 9.5, 90, -8.5, 9.5)
   );
-  getStatistics().getHisto2D("3rd hit assignment_wc")->GetYaxis()->SetTitle("(t3-t2)-L32/c");
-  getStatistics().getHisto2D("3rd hit assignment_wc")->GetXaxis()->SetTitle("(t3-t1)-L31/c");
-
-  getStatistics().createHistogram(
-    new TH2F("Sctter test vs theta1", "probability of accepted scatterings", 90, -8.5, 9.5, 360, -0.5, 359.5)
-  );
-  getStatistics().getHisto2D("Sctter test vs theta1")->GetYaxis()->SetTitle("Scatt. Ang [deg]");
-  getStatistics().getHisto2D("Sctter test vs theta1")->GetXaxis()->SetTitle("Scatter test [ns]");
-
-  getStatistics().createHistogram(
-    new TH2F("Sctter test vs theta2", "probability of accepted scatterings", 90, -8.5, 9.5, 360, -0.5, 359.5)
-  );
-  getStatistics().getHisto2D("Sctter test vs theta2")->GetYaxis()->SetTitle("Scatt. Ang [deg]");
-  getStatistics().getHisto2D("Sctter test vs theta2")->GetXaxis()->SetTitle("Scatter test [ns]");
+  getStatistics().getHisto2D("3rd hit assignment_wc")->GetYaxis()->SetTitle("(t3-t2) - L32/c [ns]");
+  getStatistics().getHisto2D("3rd hit assignment_wc")->GetXaxis()->SetTitle("(t3-t1) - L31/c [ns]");
 
   // Scatter test after Cut
   getStatistics().createHistogram(
     new TH2F("3rd hit assignment", "3rd hit assignment", 90, -8.5, 9.5, 90, -8.5, 9.5)
   );
-  getStatistics().getHisto2D("3rd hit assignment")->GetYaxis()->SetTitle("(t3-t2)-L32/c");
-  getStatistics().getHisto2D("3rd hit assignment")->GetXaxis()->SetTitle("(t3-t1)-L31/c");
+  getStatistics().getHisto2D("3rd hit assignment")->GetYaxis()->SetTitle("(t3-t2) - L32/c [ns]");
+  getStatistics().getHisto2D("3rd hit assignment")->GetXaxis()->SetTitle("(t3-t1) - L31/c [ns]");
 
   // ANGLE DIFFERENCES ends
 
@@ -620,8 +602,8 @@ void EventCategorizer::initialiseHistograms()
   getStatistics().createHistogram(
     new TH1F("2 hit assignment", "criteria for 2 hit assignment", 4000, -19.5, 60.5)
   );
-  getStatistics().getHisto1D("2 hit assignment")->GetYaxis()->SetTitle("(t1-t2)-L12/c");
-  getStatistics().getHisto1D("2 hit assignment")->GetXaxis()->SetTitle("(t1-t2)-L12/c");
+  getStatistics().getHisto1D("2 hit assignment")->GetYaxis()->SetTitle("counts [a.u]");
+  getStatistics().getHisto1D("2 hit assignment")->GetXaxis()->SetTitle("( t2 - t1 ) - Distance12/c [ns]");
 
   // COMMON HISTOGRAMS
   // More TOT spectra
@@ -629,118 +611,81 @@ void EventCategorizer::initialiseHistograms()
 
   // TOT sum spectra 3-hit events
   getStatistics().createHistogram(
-    new TH1F("TOT_Spectra_3-Hit", "Time over Threshold 1-4", 1500, 0.0, 150.0)
+    new TH1F("TOT_Spectra_3-Hit", "Time over Thresholds", 1500, 0.0, 150.0)
   );
-  getStatistics().getHisto1D("TOT_Spectra_3-Hit")->GetXaxis()->SetTitle(" TOT 1-4 [ps]");
+  getStatistics().getHisto1D("TOT_Spectra_3-Hit")->GetXaxis()->SetTitle(" TOT [ns]");
   getStatistics().getHisto1D("TOT_Spectra_3-Hit")->GetYaxis()->SetTitle("counts [a.u]");
 
   // SCATTERED ANGLE ALL
   getStatistics().createHistogram(
     new TH1F("scatter_angle_all", "Scattered Angles", 180, -0.5, 179.5)
   );
-  getStatistics().getHisto1D("scatter_angle_all")->GetXaxis()->SetTitle("Scatter Angle [deg]");
-  getStatistics().getHisto1D("scatter_angle_all")->GetYaxis()->SetTitle("Events [a.u]");
+  getStatistics().getHisto1D("scatter_angle_all")->GetXaxis()->SetTitle("Scattering angles [deg]");
+  getStatistics().getHisto1D("scatter_angle_all")->GetYaxis()->SetTitle("counts [a.u]");
 	
   // Scatter Angle All 511
 	getStatistics().createHistogram(
 									new TH1F("scatter_angle_all_511", "Scattered Angles all 511", 180, -0.5, 179.5)
 									);
-	getStatistics().getHisto1D("scatter_angle_all_511")->GetXaxis()->SetTitle("Scatter Angle [deg]");
-	getStatistics().getHisto1D("scatter_angle_all_511")->GetYaxis()->SetTitle("Events [a.u]");
+	getStatistics().getHisto1D("scatter_angle_all_511")->GetXaxis()->SetTitle("Scattering angles [deg]");
+	getStatistics().getHisto1D("scatter_angle_all_511")->GetYaxis()->SetTitle("counts [a.u]");
 	
   // Scatter Angle All 1275
 	getStatistics().createHistogram(
 									new TH1F("scatter_angle_all_1275", "Scattered Angles all 1275", 180, -0.5, 179.5)
 									);
-	getStatistics().getHisto1D("scatter_angle_all_1275")->GetXaxis()->SetTitle("Scatter Angle [deg]");
-	getStatistics().getHisto1D("scatter_angle_all_1275")->GetYaxis()->SetTitle("Events [a.u]");
+	getStatistics().getHisto1D("scatter_angle_all_1275")->GetXaxis()->SetTitle("Scattering angles [deg]");
+	getStatistics().getHisto1D("scatter_angle_all_1275")->GetYaxis()->SetTitle("counts [a.u]");
 	
   // SCATTERED ANGLES SELECTED
   getStatistics().createHistogram(
     new TH1F("scatter_angle_sel", "Selected Scatter Angle", 180, -0.5, 179.5)
   );
-  getStatistics().getHisto1D("scatter_angle_sel")->GetXaxis()->SetTitle("Scatter Angle [deg]");
-  getStatistics().getHisto1D("scatter_angle_sel")->GetYaxis()->SetTitle("Events [a.u]");
+  getStatistics().getHisto1D("scatter_angle_sel")->GetXaxis()->SetTitle("Scattering angles [deg]");
+  getStatistics().getHisto1D("scatter_angle_sel")->GetYaxis()->SetTitle("counts [a.u]");
 
   // 511 keV
   getStatistics().createHistogram(
     new TH1F("scatter_angle_sel_511", "Selected Scatter Angle", 180, -0.5, 179.5)
   );
-  getStatistics().getHisto1D("scatter_angle_sel_511")->GetXaxis()->SetTitle("Scatter Angle [deg]");
-  getStatistics().getHisto1D("scatter_angle_sel_511")->GetYaxis()->SetTitle("Events [a.u]");
+  getStatistics().getHisto1D("scatter_angle_sel_511")->GetXaxis()->SetTitle("Scatter angles [deg]");
+  getStatistics().getHisto1D("scatter_angle_sel_511")->GetYaxis()->SetTitle("counts [a.u]");
 
   // 1275 keV
   getStatistics().createHistogram(
     new TH1F("scatter_angle_sel_1275", "Selected Scatter Angle", 180, -0.5, 179.5)
   );
-  getStatistics().getHisto1D("scatter_angle_sel_1275")->GetXaxis()->SetTitle("Scatter Angle [deg]");
-  getStatistics().getHisto1D("scatter_angle_sel_1275")->GetYaxis()->SetTitle("Events [a.u]");
-
-  // 2D TOT VS SCATTERED ANGLE
-  // TOT vs angle / TOT vs Edep TOTAL
-  // TOT vs ScattAngle
-  getStatistics().createHistogram(
-    new TH2F("TOT_scatter_angle", "TOT vs. scatter angle", 180, -0.5, 179.5, 1500, 0.0, 150.0)
-  );
-  getStatistics().getHisto2D("TOT_scatter_angle")->GetXaxis()->SetTitle("Scatter Angle [deg]");
-  getStatistics().getHisto2D("TOT_scatter_angle")->GetYaxis()->SetTitle("Time over Threshold 1-4 [ps]");
+  getStatistics().getHisto1D("scatter_angle_sel_1275")->GetXaxis()->SetTitle("Scattering angles [deg]");
+  getStatistics().getHisto1D("scatter_angle_sel_1275")->GetYaxis()->SetTitle("counts [a.u]");
 
   // TOT vs Edep total
   getStatistics().createHistogram(
     new TH2F("TOT_EDEP", "TOT vs. Energy Deposition", 3600, 0, 1200, 1500, 0.0, 150.0)
   );
-  getStatistics().getHisto2D("TOT_EDEP")->GetYaxis()->SetTitle("Time over Threshold 1-4 [ns]");
+  getStatistics().getHisto2D("TOT_EDEP")->GetYaxis()->SetTitle("Time over Thresholds [ns]");
   getStatistics().getHisto2D("TOT_EDEP")->GetXaxis()->SetTitle("Energy Deposition [keV]");
 
   // TOT vs Edep total primary2 to find entry fo low energy photon in 1274.6 keV loop
   getStatistics().createHistogram(
     new TH2F("TOT_EDEP_dummy", "TOT vs. Energy Deposition dummy", 3600, 0, 1200, 1500, 0, 150.)
   );
-  getStatistics().getHisto2D("TOT_EDEP_dummy")->GetYaxis()->SetTitle("Time over Threshold 1-4 [ns]");
+  getStatistics().getHisto2D("TOT_EDEP_dummy")->GetYaxis()->SetTitle("Time over Thresholds [ns]");
   getStatistics().getHisto2D("TOT_EDEP_dummy")->GetXaxis()->SetTitle("Energy Deposition [keV]");
 
   //+++++++++++ Hit wise filling TOT vs Edep ++++++++++++++++++++++++++++++
-
-  // TOT_vs_Edep_1
-  getStatistics().createHistogram(
-    new TH2F("TOT_EDEP_1", "TOT vs. Energy Deposition", 3600, 0, 1200, 1500, 0, 150.)
-  );
-  getStatistics().getHisto2D("TOT_EDEP_1")->GetYaxis()->SetTitle("Time over Threshold 1 [ns]");
-  getStatistics().getHisto2D("TOT_EDEP_1")->GetXaxis()->SetTitle("Energy Deposition [keV]");
-
-  //TOT_vs_Edep_2
-  getStatistics().createHistogram(
-    new TH2F("TOT_EDEP_2", "TOT vs. Energy Deposition", 3600, 0, 1200, 1500, 0, 150.)
-  );
-  getStatistics().getHisto2D("TOT_EDEP_2")->GetYaxis()->SetTitle("Time over Threshold 2 [ns]");
-  getStatistics().getHisto2D("TOT_EDEP_2")->GetXaxis()->SetTitle("Energy Deposition [keV]");
-
-  //TOT_vs_Edep_3
-  getStatistics().createHistogram(
-    new TH2F("TOT_EDEP_3", "TOT vs. Energy Deposition", 3600, 0, 1200, 1500, 0, 150.)
-  );
-  getStatistics().getHisto2D("TOT_EDEP_3")->GetYaxis()->SetTitle("Time over Threshold 3 [ns]");
-  getStatistics().getHisto2D("TOT_EDEP_3")->GetXaxis()->SetTitle("Energy Deposition [keV]");
-
-  //TOT_vs_Edep_4
-  getStatistics().createHistogram(
-    new TH2F("TOT_EDEP_4", "TOT vs. Energy Deposition", 3600, 0, 1200, 1500, 0, 150.)
-  );
-  getStatistics().getHisto2D("TOT_EDEP_4")->GetYaxis()->SetTitle("Time over Threshold 4 [ns]");
-  getStatistics().getHisto2D("TOT_EDEP_4")->GetXaxis()->SetTitle("Energy Deposition [keV]");
 
   // TOT vs Edep for 511 keV
   getStatistics().createHistogram(
     new TH2F("TOT_EDEP 511", "TOT vs. Energy Deposition for 511", 1500, 0, 500, 1500, 0, 150.)
   );
-  getStatistics().getHisto2D("TOT_EDEP 511")->GetYaxis()->SetTitle("Time over Threshold 1-4 [ns]");
+  getStatistics().getHisto2D("TOT_EDEP 511")->GetYaxis()->SetTitle("Time over Thresholds [ns]");
   getStatistics().getHisto2D("TOT_EDEP 511")->GetXaxis()->SetTitle("Energy Deposition [keV]");
 
   // TOT vs Edep for 1274.6 keV
   getStatistics().createHistogram(
     new TH2F("TOT_EDEP 1274", "TOT vs. Energy Deposition", 3600, 0, 1200, 1500, 0, 150.)
   );
-  getStatistics().getHisto2D("TOT_EDEP 1274")->GetYaxis()->SetTitle("Time over Threshold 1-4 [ns]");
+  getStatistics().getHisto2D("TOT_EDEP 1274")->GetYaxis()->SetTitle("Time over Thresholds [ns]");
   getStatistics().getHisto2D("TOT_EDEP 1274")->GetXaxis()->SetTitle("Energy Deposition [keV]");
 
   // SPEED OF LIGHT AND HIT-CRITERION
@@ -770,13 +715,13 @@ void EventCategorizer::initialiseHistograms()
   getStatistics().createHistogram(
     new TH1F("De-exci time criteria t3-t1", "Time difference between hit 3 and 1", 310, -10, 300)
   );
-  getStatistics().getHisto1D("De-exci time criteria t3-t1")->GetXaxis()->SetTitle("time difference t3-t1 [nsec]");
+  getStatistics().getHisto1D("De-exci time criteria t3-t1")->GetXaxis()->SetTitle("time difference t3-t1 [ns]");
   getStatistics().getHisto1D("De-exci time criteria t3-t1")->GetYaxis()->SetTitle("counts [ au ]");
 
   getStatistics().createHistogram(
     new TH1F("De-exci time accepted t3-t1", "Time difference accepted between hit 3 and 1", 310, -10, 300)
   );
-  getStatistics().getHisto1D("De-exci time accepted t3-t1")->GetXaxis()->SetTitle("time difference t3-t1 [nsec]");
+  getStatistics().getHisto1D("De-exci time accepted t3-t1")->GetXaxis()->SetTitle("time difference t3-t1 [ns]");
   getStatistics().getHisto1D("De-exci time accepted t3-t1")->GetYaxis()->SetTitle("counts [ au ]");
 
   // Added on 29 April 2018
@@ -799,7 +744,7 @@ void EventCategorizer::initialiseHistograms()
 
   // Hit multiplicity
   getStatistics().createHistogram(
-    new TH1F("Hit Multiplicity", "Event wise hit multiplicity", 15,-0.5, 14.5)
+    new TH1F("Hit Multiplicity", "Event wise hit multiplicity", 100,-0.5, 99.5)
   );
   getStatistics().getHisto1D("Hit Multiplicity")->GetXaxis()->SetTitle("Hits");
   getStatistics().getHisto1D("Hit Multiplicity")->GetYaxis()->SetTitle("counts [a.u]");

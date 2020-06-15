@@ -2,8 +2,6 @@
 ## Data analysis project based on J-PET Framework
 ## Created by J-PET Framework developers 2016-2018
 ##
-## Description:
-##   Builds template for new analysis project
 ################################################################################
 
 cmake_minimum_required(VERSION 3.1...3.14)
@@ -15,8 +13,7 @@ else()
 endif()
 
 ######################################################################
-## Project name - set this section appropriately for your project
-## (please remove this comment in your template-derived analysis)
+## Project name - TOT vs Edep 
 ######################################################################
 set(projectName TOTAnalysis)
 
@@ -48,7 +45,6 @@ set(HEADERS ${use_modules_from}/TimeWindowCreator.h
             ${use_modules_from}/HitFinder.h
             ${use_modules_from}/HitFinderTools.h
             ${use_modules_from}/EventFinder.h
-	    #${use_modules_from}/EventCategorizer.h
 	    EventCategorizer.h
             ${use_modules_from}/EventCategorizerTools.h)
 
@@ -62,7 +58,6 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
             ${use_modules_from}/HitFinder.cpp
             ${use_modules_from}/HitFinderTools.cpp
             ${use_modules_from}/EventFinder.cpp
-	    #  ${use_modules_from}/EventCategorizer.cpp
 	    EventCategorizer.cpp
 	    ${use_modules_from}/EventCategorizerTools.cpp)
 
