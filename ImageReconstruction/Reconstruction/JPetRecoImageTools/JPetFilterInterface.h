@@ -10,24 +10,23 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- *  @file JPetFilterRamLak.h
+ *  @file JPetFilterInterface.h
  */
 
-#ifndef _JPetFilterRamLak_H_
-#define _JPetFilterRamLak_H_
-#include "JPetFilterInterface.h"
+#ifndef _JPetFilterInterface_H_
+#define _JPetFilterInterface_H_
 
-/*! \brief Filter F(x) = |x| if x < maxThreshold otherwise 0.;
- * default maxThreshold = 0.9
- */
-class JPetFilterRamLak : public JPetFilterInterface {
+/*! \brief Interface that all filters should implement.
+*/
+class JPetFilterInterface
+{
 public:
-  JPetFilterRamLak() {}
-  explicit JPetFilterRamLak(double maxThreshold) { threshold = maxThreshold; }
-  virtual double operator()(double radius) override { return radius < threshold ? radius : 0.; }
-
-private:
-  double threshold = 0.9;
+  JPetFilterInterface() {};
+  virtual ~JPetFilterInterface(){};
+  /*! @brief Returns rescale factor, that should be variable at pos scaled
+      @par pos Position of variable rescaled to [0, 1] 
+   */
+  virtual double operator()(double pos) = 0;
 };
 
-#endif /*  !_JPetFilterRamLak_H_ */
+#endif /*  !_JPetFilterInterface_H_ */

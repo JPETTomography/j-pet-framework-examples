@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2016 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2019 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -10,20 +10,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- *  @file JPetFilterInterface.h
+ *  @file JPetSinogramType.cpp
  */
 
-#ifndef _JPetFilterInterface_H_
-#define _JPetFilterInterface_H_
+#include "JPetSinogramType.h"
 
-/*! \brief Interface that all filters should implement.
-*/
-class JPetFilterInterface
-{
-public:
-  JPetFilterInterface() {}
-  virtual ~JPetFilterInterface(){};
-  virtual double operator()(double) = 0;
-};
+ClassImp(JPetSinogramType);
 
-#endif /*  !_JPetFilterInterface_H_ */
+JPetSinogramType::~JPetSinogramType() {}

@@ -35,7 +35,7 @@ set(HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/FilterEvents.h
             ${CMAKE_CURRENT_SOURCE_DIR}/ImageReco.h
             ${CMAKE_CURRENT_SOURCE_DIR}/MLEMRunner.h
             ${CMAKE_CURRENT_SOURCE_DIR}/SinogramCreator.h
-            ${CMAKE_CURRENT_SOURCE_DIR}/SinogramCreatorMC.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/ReconstructionTask.h
             ${CMAKE_CURRENT_SOURCE_DIR}/SinogramCreatorTools.h
             ${CMAKE_CURRENT_SOURCE_DIR}/../j-pet-mlem/src/util/png_writer.h)
 
@@ -43,10 +43,12 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/FilterEvents.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/ImageReco.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/MLEMRunner.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/SinogramCreator.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/SinogramCreatorMC.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/ReconstructionTask.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/SinogramCreatorTools.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/../j-pet-mlem/src/util/png_writer.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
+
+add_subdirectory(Reconstruction)
 
 ################################################################################
 ## Add options from j-pet-mlem as compile flags removing PET_ prefix
@@ -54,7 +56,7 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/FilterEvents.cpp
 ## that are limited to project, it is necessary to copy them here
 # configuration time options
 set(PET_MAX_DETECTORS 512
-    CACHE INTEGER
+    CACHE STRING
     "maximum number of detectors allowed in the scanner (impacts performance)"  )
 set(PET_GRANULARITY_TYPE "WARP"
     CACHE STRING
@@ -75,13 +77,13 @@ set(PET_THROW_ON_ZERO_DENOMINATOR OFF
     CACHE BOOL
     "throw on zero denominator (event outside FOV)"  )
 set(PET_MAX_PIXELS_PER_THREAD 12
-    CACHE INTEGER
+    CACHE STRING
     "chosen arbitrarily, no more than 11 pixels per thread in current config"  )
 set(PET_WARP_SIZE 32
-    CACHE INTEGER
+    CACHE STRING
     "normally it should not be changed to anything else than 32"  )
 set(PET_MAX_THREADS_PER_BLOCK 512
-    CACHE INTEGER
+    CACHE STRING
     "not used in current implementation"  )
 set(PET_USE_FAST_TEXT_PARSER ON
     CACHE BOOL
