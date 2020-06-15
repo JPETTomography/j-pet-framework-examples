@@ -51,7 +51,7 @@ set(HEADERS ${use_modules_from}/EventCategorizer.h
             ${use_modules_from}/TimeWindowCreator.h
             ${use_modules_from}/TimeWindowCreatorTools.h
             ${use_modules_from}/UniversalFileLoader.h
-            ${use_modules_from}/ToTConverter.h
+            ${use_modules_from}/ToTEnergyConverter.h
             ${CMAKE_CURRENT_SOURCE_DIR}/LORFinder.h
             ${CMAKE_CURRENT_SOURCE_DIR}/JPetLORevent.h)
           
@@ -66,7 +66,7 @@ set(SOURCES ${use_modules_from}/EventCategorizer.cpp
             ${use_modules_from}/TimeWindowCreator.cpp
             ${use_modules_from}/TimeWindowCreatorTools.cpp
             ${use_modules_from}/UniversalFileLoader.cpp
-            ${use_modules_from}/ToTConverter.cpp
+            ${use_modules_from}/ToTEnergyConverter.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/LORFinder.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/JPetLORevent.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)

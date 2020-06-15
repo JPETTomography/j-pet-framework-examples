@@ -10,29 +10,32 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- *  @file ToTConverter.h
+ *  @file ToTEnergyConverter.h
  */
 
-#ifndef TOTCONVERTER_H
-#define TOTCONVERTER_H
+#ifndef TOTENERGYCONVERTER_H
+#define TOTENERGYCONVERTER_H
 #include <JPetCachedFunction/JPetCachedFunction.h>
-using ToTParams = jpet_common_tools::JPetCachedFunctionParams;
-using ToTRange = jpet_common_tools::Range;
-using CachedFunction = jpet_common_tools::JPetCachedFunction1D;
 
-enum RunType { kUnknown, kRun4 };
-
-class ToTConverter
+namespace tot_energy_converter
 {
 
+class ToTEnergyConverter
+{
+
+  using ToTEParams = jpet_common_tools::JPetCachedFunctionParams;
+  using ToTERange = jpet_common_tools::Range;
+  using CachedFunction = jpet_common_tools::JPetCachedFunction1D;
+
 public:
-  ToTConverter(const ToTParams &params, ToTRange);
-  double operator()(double E) const;
+  ToTEnergyConverter(const ToTEParams& params, ToTERange);
+  double operator()(double val) const;
 
 private:
   CachedFunction fFunction;
 };
 
-ToTConverter getConverter(RunType type);
+ToTEnergyConverter generateToTEnergyConverter(const std::pair<std::string, std::pair<std::vector<double>, std::pair<double, double>>>& formula);
+}
 
-#endif /*  !TOTCONVERTER_H */
+#endif /*  !TOTENERGYCONVERTER_H */
