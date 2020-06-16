@@ -18,6 +18,7 @@
 
 #include <JPetStatistics/JPetStatistics.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
+#include "ToTEnergyConverter.h"
 #include <JPetHit/JPetHit.h>
 #include <vector>
 
@@ -38,16 +39,21 @@ public:
   static std::vector<JPetHit> matchAllSignals(
     std::map<int, std::vector<JPetPhysSignal>>& allSignals,
     const std::map<unsigned int, std::vector<double>>& velocitiesMap,
-    double timeDiffAB, int refDetScinId, JPetStatistics& stats, bool saveHistos
+    double timeDiffAB, int refDetScinId, bool fConvertTOT,
+    const tot_energy_converter::ToTEnergyConverter& totConverter,
+    JPetStatistics& stats, bool saveHistos
   );
   static std::vector<JPetHit> matchSignals(
     std::vector<JPetPhysSignal>& slotSignals,
     const std::map<unsigned int, std::vector<double>>& velocitiesMap,
-    double timeDiffAB, JPetStatistics& stats, bool saveHistos
+    double timeDiffAB, bool fConvertTOT,
+    const tot_energy_converter::ToTEnergyConverter& totConverter,
+    JPetStatistics& stats, bool saveHistos
   );
   static JPetHit createHit(
     const JPetPhysSignal& signal1, const JPetPhysSignal& signal2,
     const std::map<unsigned int, std::vector<double>>& velocitiesMap,
+    bool fConvertTOT, const tot_energy_converter::ToTEnergyConverter& totConverter,
     JPetStatistics& stats, bool saveHistos
   );
   static JPetHit createDummyRefDetHit(const JPetPhysSignal& signal);

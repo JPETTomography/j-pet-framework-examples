@@ -19,13 +19,17 @@ using namespace std;
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include <JPetGeomMapping/JPetGeomMapping.h>
 #include <JPetWriter/JPetWriter.h>
+
+#include "ToTEnergyConverterFactory.h"
 #include "UniversalFileLoader.h"
 #include "HitFinderTools.h"
 #include "HitFinder.h"
+
 #include <string>
 #include <vector>
 #include <map>
 
+using namespace tot_energy_converter;
 using namespace jpet_options_tools;
 
 HitFinder::HitFinder(const char* name) : JPetUserTask(name) {}
@@ -80,6 +84,17 @@ bool HitFinder::init()
     ERROR("Velocities map seems to be empty");
   }
 
+  // Loading parameters for conversion to TOT to energy
+  if (isOptionSet(fParams.getOptions(), kConvertTOTParamKey)) {
+    fConvertTOT = getOptionAsInt(fParams.getOptions(), kRefDetScinIDParamKey);
+    if(fConvertTOT){
+      INFO("Hit finder performs conversion of TOT to energy with provided params.");
+      fTOTConverterFactory.loadOptions(fParams.getOptions());
+    } else {
+      INFO("Hit finder is not converting TOT to energy.");
+    }
+  }
+
   // Control histograms
   if(fSaveControlHistos) { initialiseHistograms(); }
   return true;
@@ -91,8 +106,10 @@ bool HitFinder::exec()
     auto signalsBySlot = HitFinderTools::getSignalsBySlot(
       timeWindow, fUseCorruptedSignals
     );
+    auto totConverter = fTOTConverterFactory.getEnergyConverter();
     auto allHits = HitFinderTools::matchAllSignals(
-      signalsBySlot, fVelocities, fABTimeDiff, fRefDetScinID, getStatistics(), fSaveControlHistos
+      signalsBySlot, fVelocities, fABTimeDiff, fRefDetScinID,
+      fConvertTOT, totConverter, getStatistics(), fSaveControlHistos
     );
     if (fSaveControlHistos) {
       getStatistics().fillHistogram("hits_per_time_slot", allHits.size());

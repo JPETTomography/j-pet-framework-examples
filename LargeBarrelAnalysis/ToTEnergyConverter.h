@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2019 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -15,6 +15,7 @@
 
 #ifndef TOTENERGYCONVERTER_H
 #define TOTENERGYCONVERTER_H
+
 #include <JPetCachedFunction/JPetCachedFunction.h>
 
 namespace tot_energy_converter
@@ -22,7 +23,6 @@ namespace tot_energy_converter
 
 class ToTEnergyConverter
 {
-
   using ToTEParams = jpet_common_tools::JPetCachedFunctionParams;
   using ToTERange = jpet_common_tools::Range;
   using CachedFunction = jpet_common_tools::JPetCachedFunction1D;
@@ -35,7 +35,8 @@ private:
   CachedFunction fFunction;
 };
 
-ToTEnergyConverter generateToTEnergyConverter(const std::pair<std::string, std::pair<std::vector<double>, std::pair<double, double>>>& formula);
+ToTEnergyConverter generateToTEnergyConverter(
+  const std::pair<std::string, std::pair<std::vector<double>, std::pair<double, double>>>& formula);
 }
 
-#endif /*  !TOTENERGYCONVERTER_H */
+#endif /* !TOTENERGYCONVERTER_H */

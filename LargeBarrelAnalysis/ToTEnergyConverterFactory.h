@@ -24,7 +24,7 @@
 class ToTEnergyConverterFactory
 {
 public:
-  using MyOptions = jpet_options_tools::OptsStrAny;
+  using LoadOptions = jpet_options_tools::OptsStrAny;
   using FunctionFormula = std::string;
   using FunctionParams = std::vector<double>;
   using FunctionLimits = std::pair<double, double>;
@@ -34,7 +34,7 @@ public:
   ToTEnergyConverterFactory(ToTEnergyConverterFactory const&) = delete;
   ToTEnergyConverterFactory& operator=(ToTEnergyConverterFactory const&) = delete;
 
-  void loadOptions(const MyOptions& opts);
+  void loadOptions(const LoadOptions& opts);
   tot_energy_converter::ToTEnergyConverter getToTConverter() const;
   tot_energy_converter::ToTEnergyConverter getEnergyConverter() const;
 
@@ -51,4 +51,4 @@ private:
   FuncParamsAndLimits fToT2EnergyAll;
 };
 
-#endif /*  !TOTENERGYCONVERTERFACTORY_H */
+#endif /* !TOTENERGYCONVERTERFACTORY_H */

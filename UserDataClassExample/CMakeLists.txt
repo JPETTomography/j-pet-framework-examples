@@ -45,6 +45,8 @@ set(HEADERS ${use_modules_from}/EventCategorizer.h
             ${use_modules_from}/EventFinder.h
             ${use_modules_from}/HitFinder.h
             ${use_modules_from}/HitFinderTools.h
+            ${use_modules_from}/ToTEnergyConverter.h
+            ${use_modules_from}/ToTEnergyConverterFactory.h
             ${use_modules_from}/SignalFinder.h
             ${use_modules_from}/SignalFinderTools.h
             ${use_modules_from}/SignalTransformer.h
@@ -54,12 +56,14 @@ set(HEADERS ${use_modules_from}/EventCategorizer.h
             ${use_modules_from}/ToTEnergyConverter.h
             ${CMAKE_CURRENT_SOURCE_DIR}/LORFinder.h
             ${CMAKE_CURRENT_SOURCE_DIR}/JPetLORevent.h)
-          
+
 set(SOURCES ${use_modules_from}/EventCategorizer.cpp
             ${use_modules_from}/EventCategorizerTools.cpp
             ${use_modules_from}/EventFinder.cpp
             ${use_modules_from}/HitFinder.cpp
             ${use_modules_from}/HitFinderTools.cpp
+            ${use_modules_from}/ToTEnergyConverter.cpp
+            ${use_modules_from}/ToTEnergyConverterFactory.cpp
             ${use_modules_from}/SignalFinder.cpp
             ${use_modules_from}/SignalFinderTools.cpp
             ${use_modules_from}/SignalTransformer.cpp
@@ -116,4 +120,3 @@ add_custom_target(clean_data_${projectName}
 ################################################################################
 ## Copy the example auxiliary files
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/${AUXILIARY_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
-

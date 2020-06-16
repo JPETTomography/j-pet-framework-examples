@@ -13,14 +13,15 @@
  *  @file HitFinderTools.cpp
  */
 
-using namespace std;
-
 #include "UniversalFileLoader.h"
 #include "HitFinderTools.h"
 #include <TMath.h>
 #include <vector>
 #include <cmath>
 #include <map>
+
+using namespace tot_energy_converter;
+using namespace std;
 
 /**
  * Helper method for sotring signals in vector
@@ -68,7 +69,8 @@ map<int, vector<JPetPhysSignal>> HitFinderTools::getSignalsBySlot(
 vector<JPetHit> HitFinderTools::matchAllSignals(
   map<int, vector<JPetPhysSignal>>& allSignals,
   const map<unsigned int, vector<double>>& velocitiesMap,
-  double timeDiffAB, int refDetScinId, JPetStatistics& stats, bool saveHistos
+  double timeDiffAB, int refDetScinId, bool fConvertTOT,
+  const ToTEnergyConverter& totConverter, JPetStatistics& stats, bool saveHistos
 ) {
   vector<JPetHit> allHits;
   for (auto& slotSigals : allSignals) {
@@ -82,7 +84,8 @@ vector<JPetHit> HitFinderTools::matchAllSignals(
     }
     // Loop for other slots than reference one
     auto slotHits = matchSignals(
-      slotSigals.second, velocitiesMap, timeDiffAB, stats, saveHistos
+      slotSigals.second, velocitiesMap, timeDiffAB,
+      fConvertTOT, totConverter, stats, saveHistos
     );
     allHits.insert(allHits.end(), slotHits.begin(), slotHits.end());
   }
@@ -94,8 +97,9 @@ vector<JPetHit> HitFinderTools::matchAllSignals(
  */
 vector<JPetHit> HitFinderTools::matchSignals(
   vector<JPetPhysSignal>& slotSignals,
-  const map<unsigned int, vector<double>>& velocitiesMap,
-  double timeDiffAB, JPetStatistics& stats, bool saveHistos
+  const map<unsigned int, vector<double>>& velocitiesMap, double timeDiffAB,
+  bool fConvertTOT, const ToTEnergyConverter& totConverter, JPetStatistics& stats,
+  bool saveHistos
 ) {
   vector<JPetHit> slotHits;
   vector<JPetPhysSignal> remainSignals;
@@ -110,7 +114,8 @@ vector<JPetHit> HitFinderTools::matchSignals(
       if (slotSignals.at(j).getTime() - physSig.getTime() < timeDiffAB) {
         if (physSig.getPM().getSide() != slotSignals.at(j).getPM().getSide()) {
           auto hit = createHit(
-            physSig, slotSignals.at(j), velocitiesMap, stats, saveHistos
+            physSig, slotSignals.at(j), velocitiesMap,
+            fConvertTOT, totConverter, stats, saveHistos
           );
           slotHits.push_back(hit);
           slotSignals.erase(slotSignals.begin() + j);
@@ -148,7 +153,8 @@ vector<JPetHit> HitFinderTools::matchSignals(
 JPetHit HitFinderTools::createHit(
   const JPetPhysSignal& signal1, const JPetPhysSignal& signal2,
   const map<unsigned int, vector<double>>& velocitiesMap,
-  JPetStatistics& stats, bool saveHistos
+  bool fConvertTOT, const ToTEnergyConverter& totConverter, JPetStatistics& stats,
+  bool saveHistos
 ) {
   JPetPhysSignal signalA;
   JPetPhysSignal signalB;
@@ -173,15 +179,25 @@ JPetHit HitFinderTools::createHit(
   hit.setQualityOfTime(-1.0);
   hit.setTimeDiff(signalB.getTime() - signalA.getTime());
   hit.setQualityOfTimeDiff(-1.0);
-  hit.setEnergy(-1.0);
-  hit.setQualityOfEnergy(-1.0);
   hit.setScintillator(signalA.getPM().getScin());
   hit.setBarrelSlot(signalA.getPM().getBarrelSlot());
   hit.setPosX(radius * cos(theta));
   hit.setPosY(radius * sin(theta));
   hit.setPosZ(velocity * hit.getTimeDiff() / 2000.0);
 
- if(signalA.getRecoFlag() == JPetBaseSignal::Good
+  if(fConvertTOT) {
+    auto energy = totConverter(calculateTOT(hit));
+    if(!isnan(energy)){
+      hit.setEnergy(energy);
+    } else {
+      hit.setEnergy(-1.0);
+    }
+  } else {
+    hit.setEnergy(-1.0);
+  }
+  hit.setQualityOfEnergy(-1.0);
+
+  if(signalA.getRecoFlag() == JPetBaseSignal::Good
     && signalB.getRecoFlag() == JPetBaseSignal::Good) {
       hit.setRecoFlag(JPetHit::Good);
       if(saveHistos) {

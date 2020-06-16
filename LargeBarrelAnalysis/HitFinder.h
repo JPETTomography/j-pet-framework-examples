@@ -18,6 +18,7 @@
 
 #include <JPetRawSignal/JPetRawSignal.h>
 #include <JPetUserTask/JPetUserTask.h>
+#include "ToTEnergyConverterFactory.h"
 #include <JPetHit/JPetHit.h>
 #include <vector>
 #include <map>
@@ -53,8 +54,11 @@ protected:
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kRefDetScinIDParamKey = "HitFinder_RefDetScinID_int";
   const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_float";
+  const std::string kConvertTOTParamKey = "HitFinder_ConvertTOT_bool";
+  ToTEnergyConverterFactory fTOTConverterFactory;
   bool fUseCorruptedSignals = false;
   bool fSaveControlHistos = true;
+  bool fConvertTOT = false;
   double fABTimeDiff = 6000.0;
   int fRefDetScinID = -1;
 };

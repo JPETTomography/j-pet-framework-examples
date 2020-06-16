@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -16,17 +16,25 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE HitFinderToolsTest
 
+#include <JPetCachedFunction/JPetCachedFunction.h>
+#include <JPetPhysSignal/JPetPhysSignal.h>
+#include <JPetRecoSignal/JPetRecoSignal.h>
+#include <JPetRawSignal/JPetRawSignal.h>
+#include <JPetSigCh/JPetSigCh.h>
+#include <JPetLoggerInclude.h>
+
+#include "../ToTEnergyConverter.h"
 #include "../HitFinderTools.h"
-#include "JPetLoggerInclude.h"
-#include "JPetPhysSignal/JPetPhysSignal.h"
-#include "JPetRawSignal/JPetRawSignal.h"
-#include "JPetRecoSignal/JPetRecoSignal.h"
-#include "JPetSigCh/JPetSigCh.h"
+
 #include <boost/test/unit_test.hpp>
+
+using namespace tot_energy_converter;
+using namespace jpet_common_tools;
 
 BOOST_AUTO_TEST_SUITE(HitFinderTestSuite)
 
-BOOST_AUTO_TEST_CASE(sortByTime_test) {
+BOOST_AUTO_TEST_CASE(sortByTime_test)
+{
   JPetPhysSignal sig1;
   JPetPhysSignal sig2;
   JPetPhysSignal sig3;
@@ -62,7 +70,8 @@ BOOST_AUTO_TEST_CASE(getSignalsBySlot_test_empty) {
   BOOST_REQUIRE(results.empty());
 }
 
-BOOST_AUTO_TEST_CASE(getSignalsBySlot_test) {
+BOOST_AUTO_TEST_CASE(getSignalsBySlot_test)
+{
   JPetBarrelSlot slot1(1, true, "one", 15.0, 1);
   JPetBarrelSlot slot2(2, true, "two", 25.0, 1);
   JPetBarrelSlot slot3(3, true, "three", 35.0, 1);
@@ -108,7 +117,8 @@ BOOST_AUTO_TEST_CASE(getSignalsBySlot_test) {
   BOOST_REQUIRE_EQUAL(results2[3].size(), 3);
 }
 
-BOOST_AUTO_TEST_CASE(matchAllSignals_test_refDetID) {
+BOOST_AUTO_TEST_CASE(matchAllSignals_test_refDetID)
+{
   JPetBarrelSlot slot(1, true, "one", 15.0, 1);
   JPetBarrelSlot refSlot(193, true, "refDet", 15.0, 1);
   JPetPM pm(11, "first");
@@ -136,17 +146,128 @@ BOOST_AUTO_TEST_CASE(matchAllSignals_test_refDetID) {
   JPetStatistics stats;
   std::map<unsigned int, std::vector<double>> velocitiesMap;
 
-  auto result1 = HitFinderTools::matchAllSignals(allSignals, velocitiesMap, 5.0,
-                                                 193, stats, false);
+  JPetCachedFunctionParams params("pol1", {0.0, 10.0});
+  ToTEnergyConverter conv(params, Range(10000, 0., 100.));
 
-  auto result2 = HitFinderTools::matchAllSignals(allSignals, velocitiesMap, 5.0,
-                                                 1, stats, false);
+  auto result1 = HitFinderTools::matchAllSignals(
+    allSignals, velocitiesMap, 5.0, 193, false, conv, stats, false
+  );
+
+  auto result2 = HitFinderTools::matchAllSignals(
+    allSignals, velocitiesMap, 5.0, 1, false, conv, stats, false
+  );
 
   BOOST_REQUIRE_EQUAL(result1.size(), 2);
   BOOST_REQUIRE_EQUAL(result2.size(), 1);
 }
 
-BOOST_AUTO_TEST_CASE(matchSignals_test_sameSide) {
+BOOST_AUTO_TEST_CASE(createHit_test)
+{
+  JPetLayer layer1(1, true, "layer1", 10.0);
+  JPetBarrelSlot slot1(2, true, "barel1", 30.0, 23);
+  slot1.setLayer(layer1);
+
+  JPetScin scin1(1);
+  scin1.setBarrelSlot(slot1);
+
+  JPetPM pmA(11, "first"), pmB(22, "second");
+  pmA.setScin(scin1);
+  pmB.setScin(scin1);
+  pmA.setBarrelSlot(slot1);
+  pmB.setBarrelSlot(slot1);
+  pmA.setSide(JPetPM::SideA);
+  pmB.setSide(JPetPM::SideB);
+
+  JPetTOMBChannel channel1(66), channel2(88);
+  JPetSigCh sigCh1L(JPetSigCh::Leading, 10.0);
+  JPetSigCh sigCh1T(JPetSigCh::Trailing, 12.0);
+  JPetSigCh sigCh2L(JPetSigCh::Leading, 11.0);
+  JPetSigCh sigCh2T(JPetSigCh::Trailing, 13.0);
+  sigCh1L.setTOMBChannel(channel1);
+  sigCh1T.setTOMBChannel(channel1);
+  sigCh2L.setTOMBChannel(channel2);
+  sigCh2T.setTOMBChannel(channel2);
+  sigCh1L.setThresholdNumber(1);
+  sigCh1T.setThresholdNumber(1);
+  sigCh2L.setThresholdNumber(1);
+  sigCh2T.setThresholdNumber(1);
+  sigCh1L.setPM(pmA);
+  sigCh1T.setPM(pmA);
+  sigCh2L.setPM(pmB);
+  sigCh2T.setPM(pmB);
+
+  JPetRawSignal raw1, raw2;
+  raw1.addPoint(sigCh1L);
+  raw1.addPoint(sigCh1T);
+  raw2.addPoint(sigCh2L);
+  raw2.addPoint(sigCh2T);
+  raw1.setBarrelSlot(slot1);
+  raw2.setBarrelSlot(slot1);
+  raw1.setPM(pmA);
+  raw2.setPM(pmB);
+
+  JPetRecoSignal reco1, reco2;
+  reco1.setRawSignal(raw1);
+  reco2.setRawSignal(raw2);
+  reco1.setBarrelSlot(slot1);
+  reco2.setBarrelSlot(slot1);
+  reco1.setPM(pmA);
+  reco2.setPM(pmB);
+
+  JPetPhysSignal physSigA, physSigB;
+  physSigA.setTime(10.0);
+  physSigB.setTime(12.0);
+  physSigA.setRecoSignal(reco1);
+  physSigB.setRecoSignal(reco2);
+
+  std::map<unsigned int, std::vector<double>> velocitiesMap;
+  std::vector<double> velVec = {2.0, 3.4, 4.5, 5.6};
+  velocitiesMap.insert(std::make_pair(66, velVec));
+  velocitiesMap.insert(std::make_pair(88, velVec));
+
+  JPetCachedFunctionParams params("pol1", {0.0, 10.0});
+  ToTEnergyConverter conv(params, Range(10000, 0., 100.));
+
+  JPetStatistics stats;
+  auto hit = HitFinderTools::createHit(
+    physSigA, physSigB, velocitiesMap, true, conv, stats, false
+  );
+
+  auto epsilon = 0.0001;
+
+  BOOST_REQUIRE_CLOSE(hit.getTime(), 11.0, epsilon);
+  BOOST_REQUIRE_CLOSE(hit.getQualityOfTime(), -1.0, epsilon);
+  BOOST_REQUIRE_CLOSE(hit.getTimeDiff(), 2.0, epsilon);
+  BOOST_REQUIRE_CLOSE(hit.getQualityOfTimeDiff(), -1.0, epsilon);
+  BOOST_REQUIRE_EQUAL(hit.getScintillator().getID(), 1);
+  BOOST_REQUIRE_EQUAL(hit.getBarrelSlot().getID(), 2);
+  BOOST_REQUIRE_CLOSE(hit.getPosX(), 10.0*cos(TMath::DegToRad() * 30.0), epsilon);
+  BOOST_REQUIRE_CLOSE(hit.getPosY(), 10.0*sin(TMath::DegToRad() * 30.0), epsilon);
+  BOOST_REQUIRE_CLOSE(hit.getPosZ(), 4.0*1.0/2000.0, epsilon);
+  BOOST_REQUIRE_CLOSE(hit.getEnergy(), 40.0, epsilon);
+  BOOST_REQUIRE_CLOSE(hit.getQualityOfEnergy(), -1.0, epsilon);
+
+  JPetCachedFunctionParams params2("sqrt([0]*x)", {1.0});
+  ToTEnergyConverter conv2(params2, Range(10000, 0., 100.));
+
+  auto hit2 = HitFinderTools::createHit(
+    physSigA, physSigB, velocitiesMap, true, conv2, stats, false
+  );
+  BOOST_REQUIRE_CLOSE(hit2.getEnergy(), 2, epsilon);
+
+  // Case: result is -nan, energy set to -1.0
+  JPetCachedFunctionParams params3("sqrt([0]*x)", {-1.0});
+  ToTEnergyConverter conv3(params3, Range(10000, 0., 100.));
+
+  auto hit3 = HitFinderTools::createHit(
+    physSigA, physSigB, velocitiesMap, true, conv3, stats, false
+  );
+  BOOST_REQUIRE_CLOSE(hit3.getEnergy(), -1.0, epsilon);
+
+}
+
+BOOST_AUTO_TEST_CASE(matchSignals_test_sameSide)
+{
   JPetBarrelSlot slot1(1, true, "one", 15.0, 1);
   JPetScin scin1(1);
   JPetPM pm1(11, "first");
@@ -167,14 +288,20 @@ BOOST_AUTO_TEST_CASE(matchSignals_test_sameSide) {
   slotSignals.push_back(physSig1);
   slotSignals.push_back(physSig2);
   slotSignals.push_back(physSig3);
+
   JPetStatistics stats;
   std::map<unsigned int, std::vector<double>> velocitiesMap;
-  auto result = HitFinderTools::matchSignals(slotSignals, velocitiesMap, 5.0,
-                                             stats, false);
+  JPetCachedFunctionParams params("pol1", {0.0, 10.0});
+  ToTEnergyConverter conv(params, Range(10000, 0., 100.));
+
+  auto result = HitFinderTools::matchSignals(
+    slotSignals, velocitiesMap, 5.0, false, conv, stats, false
+  );
   BOOST_REQUIRE(result.empty());
 }
 
-BOOST_AUTO_TEST_CASE(matchSignals_test) {
+BOOST_AUTO_TEST_CASE(matchSignals_test)
+{
   JPetLayer layer1(1, true, "layer1", 10.0);
   JPetBarrelSlot slot1(23, true, "barel1", 30.0, 23);
   slot1.setLayer(layer1);
@@ -268,8 +395,13 @@ BOOST_AUTO_TEST_CASE(matchSignals_test) {
   std::vector<double> velVec = {2.0, 3.4, 4.5, 5.6};
   velocitiesMap.insert(std::make_pair(66, velVec));
   velocitiesMap.insert(std::make_pair(88, velVec));
-  auto result = HitFinderTools::matchSignals(slotSignals, velocitiesMap, 1.0,
-                                             stats, false);
+
+  JPetCachedFunctionParams params("pol1", {0.0, 10.0});
+  ToTEnergyConverter conv(params, Range(10000, 0., 100.));
+
+  auto result = HitFinderTools::matchSignals(
+    slotSignals, velocitiesMap, 1.0, false, conv, stats, false
+  );
   auto epsilon = 0.0001;
 
   BOOST_REQUIRE_EQUAL(result.size(), 3);
