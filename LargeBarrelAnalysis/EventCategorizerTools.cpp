@@ -185,6 +185,7 @@ double EventCategorizerTools::calculateTOTside(const std::map<int, double> & thr
   double tot = 0., weight = 1.;
   if (!thrToTOT_side.empty()) {
     double firstThr = thrToTOT_side.begin()->first;
+    tot += weight*it->second;
     for (auto it = thrToTOT_side.begin(); it != thrToTOT_side.end(); ++it) {
       switch(type) {
         case TOTCalculationType::kSimplified:
