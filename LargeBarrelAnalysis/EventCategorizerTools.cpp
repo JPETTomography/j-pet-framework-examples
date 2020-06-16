@@ -183,8 +183,8 @@ double EventCategorizerTools::calculateTOT(const JPetHit& hit, TOTCalculationTyp
 double EventCategorizerTools::calculateTOTside(const std::map<int, double> & thrToTOT_side, TOTCalculationType type)
 {
   double tot = 0., weight = 1.;
-  double firstThr = std::next(thrToTOT_side.begin(), 1)->first;
   if (!thrToTOT_side.empty()) {
+    double firstThr = thrToTOT_side.begin()->first;
     for (auto it = thrToTOT_side.begin(); it != thrToTOT_side.end(); ++it) {
       switch(type) {
         case TOTCalculationType::kSimplified:
