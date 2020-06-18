@@ -186,20 +186,23 @@ double EventCategorizerTools::calculateTOTside(const std::map<int, double> & thr
   if (!thrToTOT_side.empty()) {
     double firstThr = thrToTOT_side.begin()->first;
     tot += weight*it->second;
-    for (auto it = thrToTOT_side.begin(); it != thrToTOT_side.end(); ++it) {
-      switch(type) {
-        case TOTCalculationType::kSimplified:
-          weight = 1.;
-          break;
-        case TOTCalculationType::kThresholdRectangular:
-          weight = (it->first - std::prev(it, 1)->first)/firstThr;
-          break;
-        case TOTCalculationType::kThresholdTrapeze:
-          weight = (it->first - std::prev(it, 1)->first)/firstThr;
-          tot += weight*(it->second - std::prev(it, 1)->second)/2;
-          break;
+    if( thrToTOT_side.size() > 1 )
+    {
+      for (auto it = std::next(thrToTOT_side.begin(), 1); it != thrToTOT_side.end(); ++it) {
+        switch(type) {
+          case TOTCalculationType::kSimplified:
+            weight = 1.;
+            break;
+          case TOTCalculationType::kThresholdRectangular:
+            weight = (it->first - std::prev(it, 1)->first)/firstThr;
+            break;
+          case TOTCalculationType::kThresholdTrapeze:
+            weight = (it->first - std::prev(it, 1)->first)/firstThr;
+            tot += weight*(it->second - std::prev(it, 1)->second)/2;
+            break;
+        }
+        tot += weight*it->second;
       }
-      tot += weight*it->second;
     }
   }
   return tot;
