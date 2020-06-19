@@ -197,9 +197,11 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
               ->Fill(hitTHR1.second.first, hitTHR1.second.second);
               getStatistics().getHisto2D("tdiff_tot_thr_1_z")
               ->Fill(hitTHR1.second.first, hitTHR1.second.second);
+
+              auto correction = (hitTHR1.second.second-fTimeWalkBParamTHR1)/fTimeWalkAParamTHR1;
               getStatistics().getHisto2D("tdiff_tot_thr_1_z_tw")
               ->Fill(
-                hitTHR1.second.first*fTimeWalkAParamTHR1+fTimeWalkBParamTHR1,
+                hitTHR1.second.first-correction,
                 hitTHR1.second.second
               );
             }
@@ -209,9 +211,11 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
               ->Fill(hitTHR2.second.first, hitTHR2.second.second);
               getStatistics().getHisto2D("tdiff_tot_thr_2_z")
               ->Fill(hitTHR2.second.first, hitTHR2.second.second);
+              
+              auto correction = (hitTHR2.second.second-fTimeWalkBParamTHR2)/fTimeWalkAParamTHR2;
               getStatistics().getHisto2D("tdiff_tot_thr_2_z_tw")
               ->Fill(
-                hitTHR2.second.first*fTimeWalkAParamTHR2+fTimeWalkBParamTHR2,
+                hitTHR2.second.first-correction,
                 hitTHR2.second.second
               );
             }
@@ -219,10 +223,10 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
             if(hitTHR1.first+hitTHR2.first == 16) {
               auto avTdiff = (hitTHR1.second.first+hitTHR2.second.first)/2.0;
               auto avTOT = (hitTHR1.second.second+hitTHR2.second.second)/2.0;
-
               getStatistics().getHisto2D("tdiff_tot_av_z")->Fill(avTdiff, avTOT);
+              auto correction = (avTOT-fTimeWalkBParamAV)/fTimeWalkAParamAV;
               getStatistics().getHisto2D("tdiff_tot_av_z_tw")
-              ->Fill(avTdiff*fTimeWalkAParamAV+fTimeWalkBParamAV, avTOT);
+              ->Fill(avTdiff-correction, avTOT);
             }
 
           }else if(nextHit.getScin().getID() == 213){
@@ -234,9 +238,11 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
               ->Fill(nextTHR1.second.first, nextTHR1.second.second);
               getStatistics().getHisto2D("tdiff_tot_thr_1_z")
               ->Fill(nextTHR1.second.first, nextTHR1.second.second);
+
+              auto correction = (nextTHR1.second.second-fTimeWalkBParamTHR1)/fTimeWalkAParamTHR1;
               getStatistics().getHisto2D("tdiff_tot_thr_1_z_tw")
               ->Fill(
-                nextTHR1.second.first*fTimeWalkAParamTHR1+fTimeWalkBParamTHR1,
+                nextTHR1.second.first-correction,
                 nextTHR1.second.second
               );
             }
@@ -246,9 +252,11 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
               ->Fill(nextTHR2.second.first, nextTHR2.second.second);
               getStatistics().getHisto2D("tdiff_tot_thr_2_z")
               ->Fill(nextTHR2.second.first, nextTHR2.second.second);
+
+              auto correction = (nextTHR2.second.second-fTimeWalkBParamTHR2)/fTimeWalkAParamTHR2;
               getStatistics().getHisto2D("tdiff_tot_thr_2_z_tw")
               ->Fill(
-                nextTHR2.second.first*fTimeWalkAParamTHR2+fTimeWalkBParamTHR2,
+                nextTHR2.second.first-correction,
                 nextTHR2.second.second
               );
             }
@@ -256,8 +264,8 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
             if(nextTHR1.first+nextTHR2.first == 16) {
               auto avTdiff = (nextTHR1.second.first+nextTHR2.second.first)/2.0;
               auto avTOT = (nextTHR1.second.second+nextTHR2.second.second)/2.0;
-
               getStatistics().getHisto2D("tdiff_tot_av_z")->Fill(avTdiff, avTOT);
+              auto correction = (avTOT-fTimeWalkBParamAV)/fTimeWalkAParamAV;
               getStatistics().getHisto2D("tdiff_tot_av_z_tw")
               ->Fill(avTdiff*fTimeWalkAParamAV+fTimeWalkBParamAV, avTOT);
             }

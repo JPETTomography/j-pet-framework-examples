@@ -56,6 +56,8 @@ protected:
   const std::string kEventMinMultiplicity = "EventFinder_MinEventMultiplicity_int";
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
 
+  const std::string kEventTimeParamKey = "EventFinder_EventTime_double";
+
   const std::string kTimeWalkCorrATHR1ParamKey = "EventFinder_TimeWalk_A_THR1_double";
   const std::string kTimeWalkCorrATHR2ParamKey = "EventFinder_TimeWalk_A_THR2_double";
   const std::string kTimeWalkCorrAAVParamKey = "EventFinder_TimeWalk_A_AV_double";
@@ -63,8 +65,6 @@ protected:
   const std::string kTimeWalkCorrBTHR1ParamKey = "EventFinder_TimeWalk_B_THR1_double";
   const std::string kTimeWalkCorrBTHR2ParamKey = "EventFinder_TimeWalk_B_THR2_double";
   const std::string kTimeWalkCorrBAVParamKey = "EventFinder_TimeWalk_B_AV_double";
-
-  const std::string kEventTimeParamKey = "EventFinder_EventTime_double";
 
   const std::string kHistoTDiffMinParamKey = "EventFinder_HistoTDiffMin_double";
   const std::string kHistoTDiffMaxParamKey = "EventFinder_HistoTDiffMax_double";
