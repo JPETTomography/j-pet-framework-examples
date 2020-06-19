@@ -126,6 +126,15 @@ BOOST_AUTO_TEST_CASE(checkForPromptTest_checkTOTCalc) {
   sigCh6.setThresholdNumber(2);
   sigCh7.setThresholdNumber(3);
   sigCh8.setThresholdNumber(4);
+  
+  sigCh1.setThreshold(80);
+  sigCh2.setThreshold(160);
+  sigCh3.setThreshold(240);
+  sigCh4.setThreshold(320);
+  sigCh5.setThreshold(80);
+  sigCh6.setThreshold(160);
+  sigCh7.setThreshold(240);
+  sigCh8.setThreshold(360);
 
   sigCh1.setValue(10.0);
   sigCh2.setValue(12.0);
