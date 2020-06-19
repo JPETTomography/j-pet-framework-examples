@@ -243,10 +243,13 @@ BOOST_AUTO_TEST_CASE(checkForPromptTest_checkTOTCalc) {
   hit2.setSignals(physSignal2A, physSignal2B);
   hit3.setSignals(physSignal3A, physSignal3B);
 
-  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit1, EventCategorizerTools::TOTCalculationType::kSimplified), 0.0, kEpsilon);
-  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit2, EventCategorizerTools::TOTCalculationType::kSimplified), 56.0,
+std::cout << "A" << " " << EventCategorizerTools::calculateTOT(hit1, EventCategorizerTools::TOTCalculationType::kSimplified) << std::endl;
+  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit1, EventCategorizerTools::TOTCalculationType::kSimplified), -2000.0, kEpsilon);
+std::cout << "B" << " " << EventCategorizerTools::calculateTOT(hit2, EventCategorizerTools::TOTCalculationType::kSimplified) << std::endl;
+  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit2, EventCategorizerTools::TOTCalculationType::kSimplified), 54.0,
                       kEpsilon);
-  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit3, EventCategorizerTools::TOTCalculationType::kSimplified), 560.0,
+std::cout << "C" << " " << EventCategorizerTools::calculateTOT(hit3, EventCategorizerTools::TOTCalculationType::kSimplified) << std::endl;
+  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit3, EventCategorizerTools::TOTCalculationType::kSimplified), 540.0,
                       kEpsilon);
 
   JPetEvent event1;

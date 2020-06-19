@@ -205,6 +205,8 @@ double EventCategorizerTools::calculateTOTside(const std::map<int, double> & thr
       }
     }
   }
+  else
+    return -0;
   return tot;
 }
 
