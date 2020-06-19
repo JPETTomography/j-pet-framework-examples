@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE(checkForPromptTest_checkTOTCalc) {
   sigCh5.setThreshold(80);
   sigCh6.setThreshold(160);
   sigCh7.setThreshold(240);
-  sigCh8.setThreshold(360);
+  sigCh8.setThreshold(320);
 
   sigCh1.setValue(10.0);
   sigCh2.setValue(12.0);
@@ -242,14 +242,11 @@ BOOST_AUTO_TEST_CASE(checkForPromptTest_checkTOTCalc) {
   hit1.setSignals(physSignal1A, physSignal1B);
   hit2.setSignals(physSignal2A, physSignal2B);
   hit3.setSignals(physSignal3A, physSignal3B);
-
-std::cout << "A" << " " << EventCategorizerTools::calculateTOT(hit1, EventCategorizerTools::TOTCalculationType::kSimplified) << std::endl;
-  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit1, EventCategorizerTools::TOTCalculationType::kSimplified), -2000.0, kEpsilon);
-std::cout << "B" << " " << EventCategorizerTools::calculateTOT(hit2, EventCategorizerTools::TOTCalculationType::kSimplified) << std::endl;
-  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit2, EventCategorizerTools::TOTCalculationType::kSimplified), 54.0,
+  
+  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit1, EventCategorizerTools::TOTCalculationType::kSimplified), 0.0, kEpsilon);
+  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit2, EventCategorizerTools::TOTCalculationType::kSimplified), 56.0,
                       kEpsilon);
-std::cout << "C" << " " << EventCategorizerTools::calculateTOT(hit3, EventCategorizerTools::TOTCalculationType::kSimplified) << std::endl;
-  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit3, EventCategorizerTools::TOTCalculationType::kSimplified), 540.0,
+  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit3, EventCategorizerTools::TOTCalculationType::kSimplified), 560.0,
                       kEpsilon);
 
   JPetEvent event1;

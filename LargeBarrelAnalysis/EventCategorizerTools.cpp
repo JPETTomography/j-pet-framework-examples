@@ -170,7 +170,6 @@ bool EventCategorizerTools::checkForScatter(
 double EventCategorizerTools::calculateTOT(const JPetHit& hit, TOTCalculationType type)
 {
   double tot = 0.0;
-  double weight = 1.;
            
   std::map<int, double> thrToTOT_sideA = hit.getSignalA().getRecoSignal().getRawSignal().getTOTsVsThresholdValue();
   std::map<int, double> thrToTOT_sideB = hit.getSignalB().getRecoSignal().getRawSignal().getTOTsVsThresholdValue();
@@ -188,15 +187,15 @@ double EventCategorizerTools::calculateTOTside(const std::map<int, double> & thr
     tot += weight*thrToTOT_side.begin()->second;
     if( thrToTOT_side.size() > 1 )
     {
-      for (auto it = std::next(thrToTOT_side.begin(), 1); it != thrToTOT_side.end(); ++it) {
+      for (auto it = std::next(thrToTOT_side.begin(), 1); it != thrToTOT_side.end(); it++) {
         switch(type) {
-          case TOTCalculationType::kSimplified:
+        case TOTCalculationType::kSimplified:
             weight = 1.;
             break;
-          case TOTCalculationType::kThresholdRectangular:
+        case TOTCalculationType::kThresholdRectangular:
             weight = (it->first - std::prev(it, 1)->first)/firstThr;
             break;
-          case TOTCalculationType::kThresholdTrapeze:
+        case TOTCalculationType::kThresholdTrapeze:
             weight = (it->first - std::prev(it, 1)->first)/firstThr;
             tot += weight*(it->second - std::prev(it, 1)->second)/2;
             break;
@@ -206,7 +205,7 @@ double EventCategorizerTools::calculateTOTside(const std::map<int, double> & thr
     }
   }
   else
-    return -0;
+    return 0;
   return tot;
 }
 
