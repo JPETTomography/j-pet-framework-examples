@@ -49,21 +49,55 @@ public:
 protected:
   std::vector<JPetEvent> buildEvents(const JPetTimeWindow & hits);
   void saveEvents(const std::vector<JPetEvent>& event);
-  float reverseTOTDiff(const JPetHit& hit);
+  std::pair<int, std::pair<double, double>> getStatsPerTHR(const JPetHit& hit, int thrNum);
   void initialiseHistograms();
+
   const std::string kUseCorruptedHitsParamKey = "EventFinder_UseCorruptedHits_bool";
   const std::string kEventMinMultiplicity = "EventFinder_MinEventMultiplicity_int";
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
-  const std::string kEventTimeParamKey = "EventFinder_EventTime_float";
-  const std::string kTOTCutMinParamKey = "EventFinder_TOTCutMin_float";
-  const std::string kTOTCutMaxParamKey = "EventFinder_TOTCutMax_float";
-  const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_float";
-  double fABTimeDiff = 10000.0;
-  double fEventTimeWindow = 5000.0;
+
+  const std::string kTimeWalkCorrATHR1ParamKey = "EventFinder_TimeWalk_A_THR1_double";
+  const std::string kTimeWalkCorrATHR2ParamKey = "EventFinder_TimeWalk_A_THR2_double";
+  const std::string kTimeWalkCorrAAVParamKey = "EventFinder_TimeWalk_A_AV_double";
+
+  const std::string kTimeWalkCorrBTHR1ParamKey = "EventFinder_TimeWalk_B_THR1_double";
+  const std::string kTimeWalkCorrBTHR2ParamKey = "EventFinder_TimeWalk_B_THR2_double";
+  const std::string kTimeWalkCorrBAVParamKey = "EventFinder_TimeWalk_B_AV_double";
+
+  const std::string kEventTimeParamKey = "EventFinder_EventTime_double";
+
+  const std::string kHistoTDiffMinParamKey = "EventFinder_HistoTDiffMin_double";
+  const std::string kHistoTDiffMaxParamKey = "EventFinder_HistoTDiffMax_double";
+  const std::string kHistoTOTMinParamKey = "EventFinder_HistoTOTOMin_double";
+  const std::string kHistoTOTMaxParamKey = "EventFinder_HistoTOTMax_double";
+
+  const std::string kZoomTDiffMinParamKey = "EventFinder_ZoomTDiffMin_double";
+  const std::string kZoomTDiffMaxParamKey = "EventFinder_ZoomTDiffMax_double";
+  const std::string kZoomTOTMinParamKey = "EventFinder_ZoomTOTOMin_double";
+  const std::string kZoomTOTMaxParamKey = "EventFinder_ZoomTOTMax_double";
+
   bool fUseCorruptedHits = false;
   bool fSaveControlHistos = true;
+  double fEventTimeWindow = 5000.0;
+
+  double fTimeWalkAParamTHR1 = 1.0;
+  double fTimeWalkAParamTHR2 = 1.0;
+  double fTimeWalkAParamAV = 1.0;
+
+  double fTimeWalkBParamTHR1 = 0.0;
+  double fTimeWalkBParamTHR2 = 0.0;
+  double fTimeWalkBParamAV = 0.0;
+
+  double fHistoTDiffMin = -10000.0;
+  double fHistoTDiffMax = 10000.0;
+  double fHistoTOTMin = -0.0002;
+  double fHistoTOTMax = 0.0002;
+
+  double fZoomTDiffMin = -5000.0;
+  double fZoomTDiffMax = 5000.0;
+  double fZoomTOTMin = -0.00001;
+  double fZoomTOTMax = 0.00001;
+
   uint fMinMultiplicity = 1;
-  double fTOTCutMin = 130000.0;
-  double fTOTCutMax = 220000.0;
 };
 #endif /* !EVENTFINDER_H */

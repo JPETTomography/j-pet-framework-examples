@@ -112,7 +112,7 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(
     JPetRawSignal rawSig;
     rawSig.setPM(thrLeadingSigCh.at(0).at(0).getPM());
     rawSig.setBarrelSlot(thrLeadingSigCh.at(0).at(0).getPM().getBarrelSlot());
-    // First THR leading added by default
+    // First THR leading added by defaultz
     rawSig.addPoint(thrLeadingSigCh.at(0).at(0));
     if(thrLeadingSigCh.at(0).at(0).getRecoFlag()==JPetSigCh::Good){
       rawSig.setRecoFlag(JPetBaseSignal::Good);
