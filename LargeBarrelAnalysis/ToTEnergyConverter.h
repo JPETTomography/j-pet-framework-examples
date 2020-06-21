@@ -30,6 +30,8 @@ class ToTEnergyConverter
 public:
   ToTEnergyConverter(const ToTEParams& params, ToTERange);
   double operator()(double val) const;
+  /// Function returns the range of energy for which the converter is valid
+  std::pair<double, double> getEnergyRange() const; 
 
 private:
   CachedFunction fFunction;
