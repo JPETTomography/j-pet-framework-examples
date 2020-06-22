@@ -28,7 +28,7 @@ ToTEnergyConverter::ToTEnergyConverter(const ToTEParams& params, const ToTERange
 
 double ToTEnergyConverter::operator()(double x) const { return fFunction(x); }
 
-std::pair<double, double> ToTEnergyConverter::getEnergyRange() const { return {fFunction.getRange().fMin, fFunction.getRange().fMax };  }
+std::pair<double, double> ToTEnergyConverter::getRange() const { return {fFunction.getRange().fMin, fFunction.getRange().fMax };  }
 
 ToTEnergyConverter generateToTEnergyConverter(const FuncParamsAndLimits& formula)
 {
@@ -40,5 +40,4 @@ ToTEnergyConverter generateToTEnergyConverter(const FuncParamsAndLimits& formula
   ToTEnergyConverter conv(params, Range(100000, funcLimits.first, funcLimits.second));
   return conv;
 }
-
 }
