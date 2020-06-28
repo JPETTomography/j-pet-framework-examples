@@ -198,7 +198,7 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
               getStatistics().getHisto2D("tdiff_tot_thr_1_z")
               ->Fill(hitTHR1.second.first, hitTHR1.second.second);
 
-              auto correction = (hitTHR1.second.second-fTimeWalkBParamTHR1)/fTimeWalkAParamTHR1;
+              auto correction = fTimeWalkAParamTHR1*hitTHR1.second.second+fTimeWalkBParamTHR1;
               getStatistics().getHisto2D("tdiff_tot_thr_1_z_tw")
               ->Fill(
                 hitTHR1.second.first-correction,
@@ -211,8 +211,8 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
               ->Fill(hitTHR2.second.first, hitTHR2.second.second);
               getStatistics().getHisto2D("tdiff_tot_thr_2_z")
               ->Fill(hitTHR2.second.first, hitTHR2.second.second);
-              
-              auto correction = (hitTHR2.second.second-fTimeWalkBParamTHR2)/fTimeWalkAParamTHR2;
+
+              auto correction = fTimeWalkAParamTHR2*hitTHR2.second.second+fTimeWalkBParamTHR2;
               getStatistics().getHisto2D("tdiff_tot_thr_2_z_tw")
               ->Fill(
                 hitTHR2.second.first-correction,
@@ -224,7 +224,8 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
               auto avTdiff = (hitTHR1.second.first+hitTHR2.second.first)/2.0;
               auto avTOT = (hitTHR1.second.second+hitTHR2.second.second)/2.0;
               getStatistics().getHisto2D("tdiff_tot_av_z")->Fill(avTdiff, avTOT);
-              auto correction = (avTOT-fTimeWalkBParamAV)/fTimeWalkAParamAV;
+
+              auto correction = fTimeWalkAParamAV*avTOT+fTimeWalkBParamAV;
               getStatistics().getHisto2D("tdiff_tot_av_z_tw")
               ->Fill(avTdiff-correction, avTOT);
             }
