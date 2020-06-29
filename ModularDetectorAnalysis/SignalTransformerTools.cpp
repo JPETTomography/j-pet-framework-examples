@@ -42,9 +42,9 @@ SignalTransformerTools::getRawSigMtxMap(
     auto search = rawSigMtxMap.find(scinID);
 
     // Cutting crosstalks from reference detector channel
-    if(scinID == refDerScinID && rawSig.getPM().getID() != refDetSiPMID) {
-      continue;
-    }
+    // if(scinID == refDerScinID && rawSig.getPM().getID() != refDetSiPMID) {
+    //   continue;
+    // }
 
     if (search == rawSigMtxMap.end()) {
       // There is no element with searched scin ID in this map, adding new one
