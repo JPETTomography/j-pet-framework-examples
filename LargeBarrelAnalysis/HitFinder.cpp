@@ -204,5 +204,11 @@ void HitFinder::initialiseHistograms(){
       200, converterRange.first, converterRange.second),
       "Deposited energy [keV]", "Number of Hits"
     );
+    getStatistics().createHistogramWithAxes(
+      new TH2D("hit_dep_energy_vs_tot",
+      "Deposited energy of hits, converted from ToT with provied formula vs. input ToT",
+      200, converterRange.first, converterRange.second, 200, -250.0, 99750.0),
+      "Deposited energy [keV]", "ToT of Hit [ps]"
+    );
   }
 }
