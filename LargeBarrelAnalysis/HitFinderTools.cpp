@@ -69,7 +69,7 @@ map<int, vector<JPetPhysSignal>> HitFinderTools::getSignalsBySlot(
 vector<JPetHit> HitFinderTools::matchAllSignals(
   map<int, vector<JPetPhysSignal>>& allSignals,
   const map<unsigned int, vector<double>>& velocitiesMap,
-  double timeDiffAB, int refDetScinId, bool fConvertTOT,
+  double timeDiffAB, int refDetScinId, bool convertToT,
   const ToTEnergyConverter& totConverter, JPetStatistics& stats, bool saveHistos
 ) {
   vector<JPetHit> allHits;
@@ -85,7 +85,7 @@ vector<JPetHit> HitFinderTools::matchAllSignals(
     // Loop for other slots than reference one
     auto slotHits = matchSignals(
       slotSigals.second, velocitiesMap, timeDiffAB,
-      fConvertTOT, totConverter, stats, saveHistos
+      convertToT, totConverter, stats, saveHistos
     );
     allHits.insert(allHits.end(), slotHits.begin(), slotHits.end());
   }
@@ -98,7 +98,7 @@ vector<JPetHit> HitFinderTools::matchAllSignals(
 vector<JPetHit> HitFinderTools::matchSignals(
   vector<JPetPhysSignal>& slotSignals,
   const map<unsigned int, vector<double>>& velocitiesMap, double timeDiffAB,
-  bool fConvertTOT, const ToTEnergyConverter& totConverter, JPetStatistics& stats,
+  bool convertToT, const ToTEnergyConverter& totConverter, JPetStatistics& stats,
   bool saveHistos
 ) {
   vector<JPetHit> slotHits;
@@ -115,7 +115,7 @@ vector<JPetHit> HitFinderTools::matchSignals(
         if (physSig.getPM().getSide() != slotSignals.at(j).getPM().getSide()) {
           auto hit = createHit(
             physSig, slotSignals.at(j), velocitiesMap,
-            fConvertTOT, totConverter, stats, saveHistos
+            convertToT, totConverter, stats, saveHistos
           );
           slotHits.push_back(hit);
           slotSignals.erase(slotSignals.begin() + j);
@@ -153,7 +153,7 @@ vector<JPetHit> HitFinderTools::matchSignals(
 JPetHit HitFinderTools::createHit(
   const JPetPhysSignal& signal1, const JPetPhysSignal& signal2,
   const map<unsigned int, vector<double>>& velocitiesMap,
-  bool fConvertTOT, const ToTEnergyConverter& totConverter, JPetStatistics& stats,
+  bool convertToT, const ToTEnergyConverter& totConverter, JPetStatistics& stats,
   bool saveHistos
 ) {
   JPetPhysSignal signalA;
@@ -185,10 +185,17 @@ JPetHit HitFinderTools::createHit(
   hit.setPosY(radius * sin(theta));
   hit.setPosZ(velocity * hit.getTimeDiff() / 2000.0);
 
-  if(fConvertTOT) {
-    auto energy = totConverter(calculateTOT(hit));
-    if(!isnan(energy)){
-      hit.setEnergy(energy);
+  if(convertToT) {
+    auto tot = calculateToT(hit);
+    /// Checking if provided conversion function accepts calculated value of ToT
+    if(tot > totConverter.getRange().first && tot < totConverter.getRange().second){
+      auto energy = totConverter(tot);
+      if(!isnan(energy)){
+        hit.setEnergy(energy);
+        stats.fillHistogram("hit_dep_energy", energy);
+      } else {
+        hit.setEnergy(-1.0);
+      }
     } else {
       hit.setEnergy(-1.0);
     }
@@ -258,10 +265,10 @@ void HitFinderTools::checkTheta(const double& theta)
 }
 
 /**
-* Calculation of the total TOT of the hit - Time over Threshold:
-* the sum of the TOTs on all of the thresholds (1-4) and on the both sides (A,B)
+* Calculation of the total ToT of the hit - Time over Threshold:
+* the sum of the ToTs on all of the thresholds (1-4) and on the both sides (A,B)
 */
-double HitFinderTools::calculateTOT(const JPetHit& hit)
+double HitFinderTools::calculateToT(const JPetHit& hit)
 {
   double tot = 0.0;
 

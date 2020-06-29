@@ -15,7 +15,7 @@
 
 #include <JPetManager/JPetManager.h>
 #include "../LargeBarrelAnalysis/EventFinder.h"
-#include "../LargeBarrelAnalysis/EventCategorizer.h"
+#include "EventAnalyzer.h"
 using namespace std;
 
 int main(int argc, const char* argv[])
@@ -24,10 +24,10 @@ int main(int argc, const char* argv[])
     JPetManager& manager = JPetManager::getManager();
     
     manager.registerTask<EventFinder>("EventFinder");
-    manager.registerTask<EventCategorizer>("EventCategorizer");
+    manager.registerTask<EventAnalyzer>("EventAnalyzer");
     
-    manager.useTask("EventFinder", "mc.hits", "unk.evt");
-    manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
+    manager.useTask("EventFinder", "hits", "unk.evt");
+    manager.useTask("EventAnalyzer", "unk.evt", "ana.evt");
     
     manager.run(argc, argv);
   } catch (const std::exception& except) {

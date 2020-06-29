@@ -54,11 +54,11 @@ protected:
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kRefDetScinIDParamKey = "HitFinder_RefDetScinID_int";
   const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_float";
-  const std::string kConvertTOTParamKey = "HitFinder_ConvertTOT_bool";
-  ToTEnergyConverterFactory fTOTConverterFactory;
+  const std::string kConvertToTParamKey = "HitFinder_ConvertToT_bool";
+  ToTEnergyConverterFactory fToTConverterFactory;
   bool fUseCorruptedSignals = false;
   bool fSaveControlHistos = true;
-  bool fConvertTOT = false;
+  bool fConvertToT = false;
   double fABTimeDiff = 6000.0;
   int fRefDetScinID = -1;
 };

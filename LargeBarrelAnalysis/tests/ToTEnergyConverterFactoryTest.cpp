@@ -30,15 +30,17 @@ BOOST_AUTO_TEST_CASE(test1)
   std::vector<double> params2 = {1, -2};
   std::vector<double> limits2 = {2, 100};
 
-  std::map<std::string, boost::any> options = {{"ToTEnergyConverterFactory_Energy2ToTParameters_std::vector<double>", params1},
-                                               {"ToTEnergyConverterFactory_Energy2ToTFunction_std::string", formula1},
-                                               {"ToTEnergyConverterFactory_Energy2ToTFunctionLimits_std::vector<double>", limits1},
-                                               {"ToTEnergyConverterFactory_ToT2EnergyParameters_std::vector<double>", params2},
-                                               {"ToTEnergyConverterFactory_ToT2EnergyFunction_std::string", formula2},
-                                               {"ToTEnergyConverterFactory_ToT2EnergyFunctionLimits_std::vector<double>", limits2}};
+  std::map<std::string, boost::any> options = {
+    {"ToTEnergyConverterFactory_Energy2ToTParameters_std::vector<double>", params1},
+    {"ToTEnergyConverterFactory_Energy2ToTFunction_std::string", formula1},
+    {"ToTEnergyConverterFactory_Energy2ToTFunctionLimits_std::vector<double>", limits1},
+    {"ToTEnergyConverterFactory_ToT2EnergyParameters_std::vector<double>", params2},
+    {"ToTEnergyConverterFactory_ToT2EnergyFunction_std::string", formula2},
+    {"ToTEnergyConverterFactory_ToT2EnergyFunctionLimits_std::vector<double>", limits2}
+  };
 
   ToTEnergyConverterFactory fact;
-  fact.loadOptions(options);
+  fact.getConverterOptions(options);
   auto conv = fact.getToTConverter();
   BOOST_CHECK_CLOSE(conv(0), getToT1(0), 0.1);
   BOOST_CHECK_CLOSE(conv(1), getToT1(1), 0.1);

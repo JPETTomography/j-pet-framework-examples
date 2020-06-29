@@ -39,27 +39,27 @@ public:
   static std::vector<JPetHit> matchAllSignals(
     std::map<int, std::vector<JPetPhysSignal>>& allSignals,
     const std::map<unsigned int, std::vector<double>>& velocitiesMap,
-    double timeDiffAB, int refDetScinId, bool fConvertTOT,
+    double timeDiffAB, int refDetScinId, bool convertToT,
     const tot_energy_converter::ToTEnergyConverter& totConverter,
     JPetStatistics& stats, bool saveHistos
   );
   static std::vector<JPetHit> matchSignals(
     std::vector<JPetPhysSignal>& slotSignals,
     const std::map<unsigned int, std::vector<double>>& velocitiesMap,
-    double timeDiffAB, bool fConvertTOT,
+    double timeDiffAB, bool convertToT,
     const tot_energy_converter::ToTEnergyConverter& totConverter,
     JPetStatistics& stats, bool saveHistos
   );
   static JPetHit createHit(
     const JPetPhysSignal& signal1, const JPetPhysSignal& signal2,
     const std::map<unsigned int, std::vector<double>>& velocitiesMap,
-    bool fConvertTOT, const tot_energy_converter::ToTEnergyConverter& totConverter,
+    bool convertToT, const tot_energy_converter::ToTEnergyConverter& totConverter,
     JPetStatistics& stats, bool saveHistos
   );
   static JPetHit createDummyRefDetHit(const JPetPhysSignal& signal);
   static int getProperChannel(const JPetPhysSignal& signal);
   static void checkTheta(const double& theta);
-  static double calculateTOT(const JPetHit& hit);
+  static double calculateToT(const JPetHit& hit);
 };
 
 #endif /* !HITFINDERTOOLS_H */

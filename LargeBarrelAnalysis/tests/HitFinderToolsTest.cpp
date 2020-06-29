@@ -225,45 +225,55 @@ BOOST_AUTO_TEST_CASE(createHit_test)
   velocitiesMap.insert(std::make_pair(66, velVec));
   velocitiesMap.insert(std::make_pair(88, velVec));
 
-  JPetCachedFunctionParams params("pol1", {0.0, 10.0});
-  ToTEnergyConverter conv(params, Range(10000, 0., 100.));
-
   JPetStatistics stats;
-  auto hit = HitFinderTools::createHit(
-    physSigA, physSigB, velocitiesMap, true, conv, stats, false
+
+  JPetCachedFunctionParams params1("pol1", {0.0, 10.0});
+  ToTEnergyConverter conv1(params1, Range(10000, 0., 100.));
+
+  auto hit1 = HitFinderTools::createHit(
+    physSigA, physSigB, velocitiesMap, true, conv1, stats, false
   );
 
   auto epsilon = 0.0001;
 
-  BOOST_REQUIRE_CLOSE(hit.getTime(), 11.0, epsilon);
-  BOOST_REQUIRE_CLOSE(hit.getQualityOfTime(), -1.0, epsilon);
-  BOOST_REQUIRE_CLOSE(hit.getTimeDiff(), 2.0, epsilon);
-  BOOST_REQUIRE_CLOSE(hit.getQualityOfTimeDiff(), -1.0, epsilon);
-  BOOST_REQUIRE_EQUAL(hit.getScintillator().getID(), 1);
-  BOOST_REQUIRE_EQUAL(hit.getBarrelSlot().getID(), 2);
-  BOOST_REQUIRE_CLOSE(hit.getPosX(), 10.0*cos(TMath::DegToRad() * 30.0), epsilon);
-  BOOST_REQUIRE_CLOSE(hit.getPosY(), 10.0*sin(TMath::DegToRad() * 30.0), epsilon);
-  BOOST_REQUIRE_CLOSE(hit.getPosZ(), 4.0*1.0/2000.0, epsilon);
-  BOOST_REQUIRE_CLOSE(hit.getEnergy(), 40.0, epsilon);
-  BOOST_REQUIRE_CLOSE(hit.getQualityOfEnergy(), -1.0, epsilon);
+  BOOST_REQUIRE_CLOSE(hit1.getTime(), 11.0, epsilon);
+  BOOST_REQUIRE_CLOSE(hit1.getQualityOfTime(), -1.0, epsilon);
+  BOOST_REQUIRE_CLOSE(hit1.getTimeDiff(), 2.0, epsilon);
+  BOOST_REQUIRE_CLOSE(hit1.getQualityOfTimeDiff(), -1.0, epsilon);
+  BOOST_REQUIRE_EQUAL(hit1.getScintillator().getID(), 1);
+  BOOST_REQUIRE_EQUAL(hit1.getBarrelSlot().getID(), 2);
+  BOOST_REQUIRE_CLOSE(hit1.getPosX(), 10.0*cos(TMath::DegToRad() * 30.0), epsilon);
+  BOOST_REQUIRE_CLOSE(hit1.getPosY(), 10.0*sin(TMath::DegToRad() * 30.0), epsilon);
+  BOOST_REQUIRE_CLOSE(hit1.getPosZ(), 4.0*1.0/2000.0, epsilon);
+  BOOST_REQUIRE_CLOSE(hit1.getEnergy(), 40.0, epsilon);
+  BOOST_REQUIRE_CLOSE(hit1.getQualityOfEnergy(), -1.0, epsilon);
 
-  JPetCachedFunctionParams params2("sqrt([0]*x)", {1.0});
-  ToTEnergyConverter conv2(params2, Range(10000, 0., 100.));
+  // Case: resultcan be caluculated but ToT is outside range of function
+  JPetCachedFunctionParams params2("pol1", {0.0, 10.0});
+  ToTEnergyConverter conv2(params2, Range(10000, 0., 1.));
 
   auto hit2 = HitFinderTools::createHit(
     physSigA, physSigB, velocitiesMap, true, conv2, stats, false
   );
-  BOOST_REQUIRE_CLOSE(hit2.getEnergy(), 2, epsilon);
+  BOOST_REQUIRE_CLOSE(hit2.getEnergy(), -1.0, epsilon);
 
-  // Case: result is -nan, energy set to -1.0
-  JPetCachedFunctionParams params3("sqrt([0]*x)", {-1.0});
+  // Case with different function
+  JPetCachedFunctionParams params3("sqrt([0]*x)", {1.0});
   ToTEnergyConverter conv3(params3, Range(10000, 0., 100.));
 
   auto hit3 = HitFinderTools::createHit(
     physSigA, physSigB, velocitiesMap, true, conv3, stats, false
   );
-  BOOST_REQUIRE_CLOSE(hit3.getEnergy(), -1.0, epsilon);
+  BOOST_REQUIRE_CLOSE(hit3.getEnergy(), 2, epsilon);
 
+  // Case: result is -nan, energy set to -1.0
+  JPetCachedFunctionParams params4("sqrt([0]*x)", {-1.0});
+  ToTEnergyConverter conv4(params4, Range(10000, -100.0, 100.));
+
+  auto hit4 = HitFinderTools::createHit(
+    physSigA, physSigB, velocitiesMap, true, conv4, stats, false
+  );
+  BOOST_REQUIRE_CLOSE(hit4.getEnergy(), -1.0, epsilon);
 }
 
 BOOST_AUTO_TEST_CASE(matchSignals_test_sameSide)
