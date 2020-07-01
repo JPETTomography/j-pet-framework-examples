@@ -6,21 +6,6 @@ from sys import exit
 from fnmatch import filter
 import argparse
 
-try:
-    from termcolor import colored
-except ImportError:
-    print("\033[93m" + "Please instal module termcolor for Python3. \n \
-run command: sudo apt-get install python3-termcolor \n \
-or equivalent on your operating system" + "\033[0m")
-    exit()
-try:
-    import tqdm
-except ImportError:
-    print("\033[93m" + "Please instal module tqdm for Python3. \n \
-run command: sudo apt-get install python3-tqdm \n \
-or equivalent on your operating system" + "\033[0m")
-    exit()
-
 
 def main():
     parser = argparse.ArgumentParser(
@@ -55,6 +40,13 @@ def main():
     threads = args["number_of_threads"]
     extension = args["extension"]
 
+    try:
+        import tqdm
+    except ImportError:
+        print(
+            "\033[93m" + "Module tqdm for Python3 not found. Running without progress bar" + "\033[0m")
+        progress_bar = False
+
     run_id_setup = run_id
 
     run6_mapping = {"61": "6A",
@@ -66,12 +58,11 @@ def main():
         run_id_setup = run6_mapping[run_id]
 
     if threads > 20:
-        print(colored("Try not to use more than 20 threads, let others also run analysis.",
-                      "red", attrs=["underline"]))
+        print("\033[31m" + "Try not to use more than 20 threads, let others also run analysis." + "\033[0m", attrs=["underline"]))
 
     if not path.isdir(input_directory):
-        print(colored(
-            "Specified input drectory des not exist. Please check spelling.", "red"))
+        print(
+            "\033[31m" + "Specified input drectory des not exist. Please check spelling." + "\033[0m")
         exit()
 
     if input_directory[-1] != "/":
@@ -79,21 +70,21 @@ def main():
 
     if output_directory is not None:
         if not path.isdir(output_directory):
-            print(colored(
-                "Specified output drectory des not exist. Please check spelling or create a directory.", "red"))
+            print(
+                "\033[31m" + "Specified output drectory des not exist. Please check spelling or create a directory.", + "\033[0m")
             exit()
 
         if output_directory[-1] is not "/":
             output_directory += "/"
 
     if file_type != "root":
-        allowed_types = ["root", "mcGeant", "hld", "zip", "scope"]
+        allowed_types=["root", "mcGeant", "hld", "zip", "scope"]
         if file_type not in allowed_types:
-            print(colored("Specified file type is not valid. Please check if it's one of the following: \n{}".format(
-                ", ".join(allowed_types)), "red"))
+            print("\033[31m" + "Specified file type is not valid. Please check if it's one of the following: \n{}".format(
+                ", ".join(allowed_types)) + "\033[0m")
             exit()
 
-    files_needed_for_analysis = [
+    files_needed_for_analysis=[
         "userParams.json", "conf_trb3.xml", "detectorSetupRun{}.json".format(run_id_setup)]
 
     needed_files_present = True
@@ -101,18 +92,18 @@ def main():
     for file in files_needed_for_analysis:
         if not path.isfile(file):
             print(
-                colored("File {} does not exist in current directory.".format(file), "red"))
-            needed_files_present = False
+                "\033[31m" + "File {} does not exist in current directory.".format(file), + "\033[0m")
+            needed_files_present=False
 
     if not needed_files_present:
         exit()
 
-    supported_extensions = ["*", "hld", "hld.root", "tslot.calib.root", "raw.sig.root",
+    supported_extensions=["*", "hld", "hld.root", "tslot.calib.root", "raw.sig.root",
                             "phys.sig.root", "hits.root", "unk.evt.root", "cat.evt.root"]
 
     if extension not in supported_extensions:
-        print(colored("Specified file extension is not valid. Please check if it's one of the following: \n{}".format(
-            ", ".join(supported_extensions[1:])), "red"))
+        print("\033[31m" + "Specified file extension is not valid. Please check if it's one of the following: \n{}".format(
+            ", ".join(supported_extensions[1:])) + "\033[0m")
         exit()
 
     if output_directory is not None:
@@ -127,7 +118,7 @@ def main():
 
     list_of_files = filter(listdir(input_directory), "*.{}".format(extension))
 
-    print(colored("All checks passed, running analysis now.", "green"))
+    print("\033[32m" + "All checks passed, running analysis now." + "\033[0m")
 
     pool = PoolThread(threads)
 
