@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(test1)
   };
 
   ToTEnergyConverterFactory fact;
-  fact.getConverterOptions(options);
+  fact.loadConverterOptions(options);
   auto conv = fact.getToTConverter();
   BOOST_CHECK_CLOSE(conv(0), getToT1(0), 0.1);
   BOOST_CHECK_CLOSE(conv(1), getToT1(1), 0.1);

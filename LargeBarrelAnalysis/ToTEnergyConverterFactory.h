@@ -34,7 +34,7 @@ public:
   ToTEnergyConverterFactory(ToTEnergyConverterFactory const&) = delete;
   ToTEnergyConverterFactory& operator=(ToTEnergyConverterFactory const&) = delete;
 
-  void getConverterOptions(const ConverterOptions& opts);
+  void loadConverterOptions(const ConverterOptions& opts);
   tot_energy_converter::ToTEnergyConverter getToTConverter() const;
   tot_energy_converter::ToTEnergyConverter getEnergyConverter() const;
 

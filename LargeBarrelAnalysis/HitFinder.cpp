@@ -86,12 +86,12 @@ bool HitFinder::init()
 
   // Loading parameters for conversion to ToT to energy
   if (isOptionSet(fParams.getOptions(), kConvertToTParamKey)) {
-    fConvertToT = getOptionAsInt(fParams.getOptions(), kConvertToTParamKey);
+    fConvertToT = getOptionAsBool(fParams.getOptions(), kConvertToTParamKey);
     if(fConvertToT){
       INFO("Hit finder performs conversion of ToT to deposited energy with provided params.");
-      fToTConverterFactory.getConverterOptions(fParams.getOptions());
+      fToTConverterFactory.loadConverterOptions(fParams.getOptions());
     } else {
-      INFO("Hit finder is not converting ToT to deposited energy.");
+      INFO("Hit finder will not convert ToT to deposited energy since no user parameters are provided.");
     }
   }
 
@@ -199,15 +199,26 @@ void HitFinder::initialiseHistograms(){
 
   if(fConvertToT) {
     auto converterRange = fToTConverterFactory.getEnergyConverter().getRange();
+    auto totConverter = fToTConverterFactory.getEnergyConverter();
+
+    auto minToT = converterRange.first;
+    auto maxToT = converterRange.second;
+    auto minEDep = totConverter(converterRange.first);
+    auto maxEDep = totConverter(converterRange.second);
+
     getStatistics().createHistogramWithAxes(
-      new TH1D("hit_dep_energy", "Deposited energy of hits, converted from ToT with provied formula",
-      200, converterRange.first, converterRange.second),
+      new TH1D("conv_tot_range", "TOT of hits in range of conversion function", 200, minToT, maxToT),
+      "Time over Threshold [ps]", "Number of Hits"
+    );
+    getStatistics().createHistogramWithAxes(
+      new TH1D("conv_dep_energy", "Deposited energy of hits, converted from ToT with provied formula",
+      200, minEDep, maxEDep),
       "Deposited energy [keV]", "Number of Hits"
     );
     getStatistics().createHistogramWithAxes(
-      new TH2D("hit_dep_energy_vs_tot",
+      new TH2D("conv_dep_energy_vs_tot",
       "Deposited energy of hits, converted from ToT with provied formula vs. input ToT",
-      200, converterRange.first, converterRange.second, 200, -250.0, 99750.0),
+      200, minEDep, maxEDep, 200, minToT, maxToT),
       "Deposited energy [keV]", "ToT of Hit [ps]"
     );
   }

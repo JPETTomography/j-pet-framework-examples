@@ -192,8 +192,9 @@ JPetHit HitFinderTools::createHit(
       auto energy = totConverter(tot);
       if(!isnan(energy)){
         hit.setEnergy(energy);
-        stats.fillHistogram("hit_dep_energy", energy);
-        stats.fillHistogram("hit_dep_energy_vs_tot", energy, tot);
+        stats.fillHistogram("conv_tot_range", tot);
+        stats.fillHistogram("conv_dep_energy", energy);
+        stats.fillHistogram("conv_dep_energy_vs_tot", energy, tot);
       } else {
         hit.setEnergy(-1.0);
       }

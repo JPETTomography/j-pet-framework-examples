@@ -21,7 +21,7 @@ using namespace tot_energy_converter;
 
 ToTEnergyConverterFactory::ToTEnergyConverterFactory() {}
 
-void ToTEnergyConverterFactory::getConverterOptions(const ToTEnergyConverterFactory::ConverterOptions& opts)
+void ToTEnergyConverterFactory::loadConverterOptions(const ToTEnergyConverterFactory::ConverterOptions& opts)
 {
   std::vector<double> energy2ToTParameters;
   if (isOptionSet(opts, kEnergy2ToTParametersParamKey))

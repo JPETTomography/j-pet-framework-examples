@@ -175,7 +175,7 @@ void EventCategorizer::initialiseHistograms(){
 
   // Histograms for scattering category
   getStatistics().createHistogramWithAxes(
-    new TH1D("ScatterTOF_TimeDiff", "Difference of Scatter TOF and hits time difference", 
+    new TH1D("ScatterTOF_TimeDiff", "Difference of Scatter TOF and hits time difference",
                                             3.0*fScatterTOFTimeDiff, -0.5, 3.0*fScatterTOFTimeDiff-0.5),
                                             "Scat_TOF & time diff [ps]", "Number of Hit Pairs");
   getStatistics().createHistogramWithAxes(
