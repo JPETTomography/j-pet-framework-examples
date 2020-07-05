@@ -46,13 +46,17 @@ add_custom_target(link_target_largebarrelanalysis ALL
 
 foreach(test_source IN ITEMS ${UNIT_TEST_SOURCES})
     get_filename_component(test ${test_source} NAME_WE)
-    if(${test} MATCHES TimeWindowCreatorToolsTest|HitFinderToolsTest)
-      package_add_test(${test} ${test_source} ../UniversalFileLoader.cpp) #TimeWindowCreatorToolsTests and HitFinderToolsTest require also UniversalFileLoader
+    if(${test} MATCHES TimeWindowCreatorToolsTest)
+      # TimeWindowCreatorToolsTests requires UniversalFileLoader
+      package_add_test(${test} ${test_source} ../UniversalFileLoader.cpp)
+    elseif(${test} MATCHES HitFinderToolsTest)
+      # HitFinderToolsTest requires UniversalFileLoader and ToTEnergyConverter
+      package_add_test(${test} ${test_source} ../UniversalFileLoader.cpp ../ToTEnergyConverter.cpp)
     elseif(${test} MATCHES ToTEnergyConverterFactoryTest)
       package_add_test(${test} ${test_source} ../ToTEnergyConverter.cpp)
     else()
       package_add_test(${test} ${test_source})
-    endif(${test} MATCHES TimeWindowCreatorToolsTest|HitFinderToolsTest)
+    endif(${test} MATCHES TimeWindowCreatorToolsTest)
     list(APPEND tests_names ${test}.x)
 endforeach()
 

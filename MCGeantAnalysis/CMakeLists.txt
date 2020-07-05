@@ -33,18 +33,16 @@ project(${projectName} CXX)
 
 
 set(use_modules_from ../LargeBarrelAnalysis)
-set(HEADERS ${use_modules_from}/HitFinder.h
-            ${CMAKE_CURRENT_SOURCE_DIR}/EventAnalyzer.h
-            ${use_modules_from}/HitFinderTools.h
-            ${use_modules_from}/EventFinder.h
-            ${use_modules_from}/UniversalFileLoader.h)
-          
-set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/EventAnalyzer.cpp
-            ${use_modules_from}/HitFinder.cpp
-            ${use_modules_from}/HitFinderTools.cpp
-            ${use_modules_from}/EventFinder.cpp
-            ${use_modules_from}/UniversalFileLoader.cpp)
+set(HEADERS
+  ${CMAKE_CURRENT_SOURCE_DIR}/EventAnalyzer.h
+  ${use_modules_from}/EventFinder.h
+)
+
+set(SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/EventAnalyzer.cpp
+  ${use_modules_from}/EventFinder.cpp
+)
 
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})
 target_link_libraries(${projectBinary} JPetFramework::JPetFramework)
