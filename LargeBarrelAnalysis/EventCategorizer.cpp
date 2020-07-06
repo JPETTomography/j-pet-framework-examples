@@ -140,7 +140,7 @@ void EventCategorizer::initialiseHistograms(){
     "Hit X position [cm]", "Hit Y position [cm]"
   );
 
-  // Histograms for 2Gamama category
+  // Histograms for 2Gamma category
   getStatistics().createHistogramWithAxes(
     new TH1D("2Gamma_Zpos", "Z-axis position of 2 gamma hits", 201, -50.25, 50.25),
     "Z axis position [cm]", "Number of Hits"
@@ -152,7 +152,7 @@ void EventCategorizer::initialiseHistograms(){
   );
 
   getStatistics().createHistogramWithAxes(
-    new TH1D("2Gamma_ThetaDiff", "Difference of angles of 2 gamma hits ", 181, -0.5, 180.5),
+    new TH1D("2Gamma_ThetaDiff", "Angle difference of 2 gamma hits ", 181, -0.5, 180.5),
     "Hits theta diff [deg]", "Counts"
   );
 
