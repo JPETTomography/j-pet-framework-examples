@@ -12,8 +12,8 @@ def main():
         "Python script to analyze files in parallel")
     parser.add_argument("executable", type=str,
                         help="Executable you want to run")
-    parser.add_argument("-i", "--input", required=True, type=str,
-                        help="Path to the directory you want to analyze")
+    parser.add_argument("-i", "--input", required=True, type=str, nargs="+",
+                        help="Path to the directories you want to analyze")
     parser.add_argument("-r", "--run-id", required=True, type=str,
                         help="Number of run which you are analyzing")
 
@@ -32,7 +32,7 @@ def main():
     args = vars(parser.parse_args())
 
     executable = args["executable"]
-    input_directory = args["input"]
+    input_directories = args["input"]
     output_directory = args["output"]
     progress_bar = args["progress_bar"]
     run_id = args["run_id"]
@@ -61,13 +61,14 @@ def main():
         print(
             "\033[31m" + "Try not to use more than 20 threads, let others also run analysis." + "\033[0m")
 
-    if not path.isdir(input_directory):
-        print(
-            "\033[31m" + "Specified input drectory des not exist. Please check spelling." + "\033[0m")
-        exit()
+    for directory in input_directories:
+        if not path.isdir(directory):
+            print(
+                "\033[31m" + "Directory {} input drectory des not exist. Please check spelling.".format(directory) + "\033[0m")
+            exit()
 
-    if input_directory[-1] != "/":
-        input_directory += "/"
+    input_directories = [directory + "/" if directory[-1] !=
+                         "/" else directory for directory in input_directories]
 
     if output_directory is not None:
         if not path.isdir(output_directory):
@@ -109,15 +110,19 @@ def main():
 
     if output_directory is not None:
         def run_analysis_parallel(filename):
-            print("./{} -t root -f {}{} -p conf_trb3.xml -u userParams.json -i {} -l detectorSetupRun{}.json -o {}".format(
-                executable, input_directory, filename, run_id, run_id_setup, output_directory))
+            system("./{} -t root -f {} -p conf_trb3.xml -u userParams.json -i {} -l detectorSetupRun{}.json -o {}".format(
+                executable, filename, run_id, run_id_setup, output_directory))
 
     else:
         def run_analysis_parallel(i):
-            print("./{} -t root -f {}{} -p conf_trb3.xml -u userParams.json -i {} -l detectorSetupRun{}.json".format(
-                executable, input_directory, filename, run_id, run_id_setup))
+            system("./{} -t root -f {} -p conf_trb3.xml -u userParams.json -i {} -l detectorSetupRun{}.json".format(
+                executable, filename, run_id, run_id_setup))
 
-    list_of_files = filter(listdir(input_directory), "*.{}".format(extension))
+    list_of_files = []
+
+    for directory in input_directories:
+        for file in filter(listdir(directory), "*.{}".format(extension)):
+            list_of_files.append(directory + file)
 
     print("\033[32m" + "All checks passed, running analysis now." + "\033[0m")
 
