@@ -136,59 +136,89 @@ void EventCategorizer::initialiseHistograms(){
 
   // General histograms
   getStatistics().createHistogramWithAxes(
-      new TH2D("All_XYpos", "Hit position XY", 240, -60.25, 59.75, 240, -60.25, 59.75),
-                                            "Hit X position [cm]", "Hit Y position [cm]");
+    new TH2D("All_XYpos", "Hit position XY", 240, -60.25, 59.75, 240, -60.25, 59.75),
+    "Hit X position [cm]", "Hit Y position [cm]"
+  );
 
-  // Histograms for 2Gamama category
+  // Histograms for 2Gamma category
   getStatistics().createHistogramWithAxes(
-      new TH1D("2Gamma_Zpos", "B2B hits Z position", 200, -50.25, 49.75),
-                                            "Z axis position [cm]", "Number of Hits");
+    new TH1D("2Gamma_Zpos", "Z-axis position of 2 gamma hits", 201, -50.25, 50.25),
+    "Z axis position [cm]", "Number of Hits"
+  );
+
   getStatistics().createHistogramWithAxes(
-      new TH1D("2Gamma_DLOR", "Delta LOR distance", 100, -0.25, 49.25),
-                                            "Delta LOR [cm]", "Counts");
+    new TH1D("2Gamma_DLOR", "Delta LOR distance", 100, -0.25, 49.25),
+    "Delta LOR [cm]", "Counts"
+  );
+
   getStatistics().createHistogramWithAxes(
-      new TH1D("2Gamma_ThetaDiff", "2 Gamma Hits angles", 180, -0.5, 179.5),
-                                            "Hits theta diff [deg]", "Counts");
+    new TH1D("2Gamma_ThetaDiff", "Angle difference of 2 gamma hits ", 181, -0.5, 180.5),
+    "Hits theta diff [deg]", "Counts"
+  );
+
   getStatistics().createHistogramWithAxes(
-      new TH1D("2Gamma_TimeDiff", "B2B hits time difference", 100, -10100.0, 99900.0),
-                                            "Time Difference [ps]", "Number of Hit Pairs");
+    new TH1D("2Gamma_TimeDiff", "Time difference of 2 gamma hits", 200, -10100.0, 99900.0),
+    "Time Difference [ps]", "Number of Hit Pairs"
+  );
+
   getStatistics().createHistogramWithAxes(
-      new TH1D("2Gamma_Dist", "B2B hits distance", 150, -0.5, 149.5),
-                                            "Distance [cm]", "Number of Hit Pairs");
+    new TH1D("2Gamma_Dist", "B2B hits distance", 150, -0.5, 149.5),
+    "Distance [cm]", "Number of Hit Pairs"
+  );
+
   getStatistics().createHistogramWithAxes(
-      new TH1D("Annih_TOF", "Annihilation pairs Time of Flight", 200, -3015.0, 2985.0),
-                                            "Time of Flight [ps]", "Number of Annihilation Pairs");
+    new TH1D("Annih_TOF", "Annihilation pairs Time of Flight", 201, -3015.0, 3015.0),
+    "Time of Flight [ps]", "Number of Annihilation Pairs"
+  );
+
   getStatistics().createHistogramWithAxes(
-      new TH2D("AnnihPoint_XY", "XY position of annihilation point", 240, -60.25, 59.75, 240, -60.25, 59.75),
-                                            "X position [cm]", "Y position [cm]");
+    new TH2D("AnnihPoint_XY", "XY position of annihilation point", 240, -60.25, 59.75, 240, -60.25, 59.75),
+    "X position [cm]", "Y position [cm]"
+  );
+
   getStatistics().createHistogramWithAxes(
-      new TH2D("AnnihPoint_XZ", "XZ position of annihilation point", 240, -60.25, 59.75, 240, -60.25, 59.75),
-                                            "X position [cm]", "Z position [cm]");
+    new TH2D("AnnihPoint_ZX", "ZX position of annihilation point", 240, -60.25, 59.75, 240, -60.25, 59.75),
+    "Z position [cm]", "X position [cm]"
+  );
+
   getStatistics().createHistogramWithAxes(
-    new TH2D("AnnihPoint_YZ", "YZ position of annihilation point", 240, -60.25, 59.75, 240, -60.25, 59.75),
-                                            "Y position [cm]", "Z position [cm]");
+    new TH2D("AnnihPoint_ZY", "ZY position of annihilation point", 240, -60.25, 59.75, 240, -60.25, 59.75),
+    "Z position [cm]", "Y position [cm]"
+  );
+
+  getStatistics().createHistogramWithAxes(
+    new TH1D("Annih_DLOR", "Delta LOR distance of annihilation photons", 100, -0.25, 49.25),
+    "Delta LOR [cm]", "Counts"
+  );
 
   // Histograms for 3Gamama category
   getStatistics().createHistogramWithAxes(
     new TH2D("3Gamma_Angles", "Relative angles - transformed", 250, -0.5, 249.5, 20, -0.5, 199.5),
-                                            "Relative angle 1-2", "Relative angle 2-3");
+    "Relative angle 1-2", "Relative angle 2-3"
+  );
 
   // Histograms for scattering category
   getStatistics().createHistogramWithAxes(
     new TH1D("ScatterTOF_TimeDiff", "Difference of Scatter TOF and hits time difference",
-                                            3.0*fScatterTOFTimeDiff, -0.5, 3.0*fScatterTOFTimeDiff-0.5),
-                                            "Scat_TOF & time diff [ps]", "Number of Hit Pairs");
+    3.0*fScatterTOFTimeDiff, -0.5, 3.0*fScatterTOFTimeDiff-0.5),
+    "Scat_TOF - time diff [ps]", "Number of Hit Pairs"
+  );
+
   getStatistics().createHistogramWithAxes(
-     new TH2D("ScatterAngle_PrimaryTOT", "Angle of scattering vs. TOT of primary hits",
-                                            200, -0.5, 199.5, 200, -100.0, 39900.0),
-                                            "Scattering Angle", "TOT of primary hit [ps]");
+    new TH2D("ScatterAngle_PrimaryTOT", "Angle of scattering vs. TOT of primary hits",
+    200, -0.5, 199.5, 200, -100.0, 39900.0),
+    "Scattering Angle", "TOT of primary hit [ps]"
+  );
+
   getStatistics().createHistogramWithAxes(
-     new TH2D("ScatterAngle_ScatterTOT", "Angle of scattering vs. TOT of scattered hits",
-                                            200, -0.5, 199.5, 200, -100.0, 39900.0),
-                                            "Scattering Angle", "TOT of scattered hit [ps]");
+    new TH2D("ScatterAngle_ScatterTOT", "Angle of scattering vs. TOT of scattered hits",
+    200, -0.5, 199.5, 200, -100.0, 39900.0),
+    "Scattering Angle", "TOT of scattered hit [ps]"
+  );
 
   // Histograms for deexcitation
   getStatistics().createHistogramWithAxes(
     new TH1D("Deex_TOT_cut", "TOT of all hits with deex cut (30,50) ns", 200, 24950.0, 54950.0),
-                                            "TOT [ps]", "Number of Hits");
+    "TOT [ps]", "Number of Hits"
+  );
 }

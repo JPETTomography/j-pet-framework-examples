@@ -47,18 +47,21 @@ bool EventCategorizerTools::checkFor2Gamma(
       double theta2 = max(firstHit.getBarrelSlot().getTheta(), secondHit.getBarrelSlot().getTheta());
       double thetaDiff = min(theta2 - theta1, 360.0 - theta2 + theta1);
       if (saveHistos) {
+        stats.fillHistogram("2Gamma_Zpos", firstHit.getPosZ());
+        stats.fillHistogram("2Gamma_Zpos", secondHit.getPosZ());
         stats.fillHistogram("2Gamma_TimeDiff", timeDiff / 1000.0);
         stats.fillHistogram("2Gamma_DLOR", deltaLor);
         stats.fillHistogram("2Gamma_ThetaDiff", thetaDiff);
+        stats.fillHistogram("2Gamma_Dist", calculateDistance(firstHit, secondHit));
       }
       if (fabs(thetaDiff - 180.0) < b2bSlotThetaDiff && timeDiff < b2bTimeDiff) {
         if (saveHistos) {
           TVector3 annhilationPoint = calculateAnnihilationPoint(firstHit, secondHit);
-          stats.fillHistogram("2Annih_TimeDiff", timeDiff / 1000.0);
-          stats.fillHistogram("2Annih_DLOR", deltaLor);
-          stats.fillHistogram("2Annih_ThetaDiff", thetaDiff);
-          stats.fillHistogram("2Annih_XY", annhilationPoint.X(), annhilationPoint.Y());
-          stats.fillHistogram("2Annih_Z", annhilationPoint.Z());
+          stats.fillHistogram("Annih_TOF", calculateTOFByConvention(firstHit, secondHit));
+          stats.fillHistogram("AnnihPoint_XY", annhilationPoint.X(), annhilationPoint.Y());
+          stats.fillHistogram("AnnihPoint_ZX", annhilationPoint.Z(), annhilationPoint.X());
+          stats.fillHistogram("AnnihPoint_ZY", annhilationPoint.Z(), annhilationPoint.Y());
+          stats.fillHistogram("Annih_DLOR", deltaLor);
         }
         return true;
       }
@@ -170,10 +173,10 @@ bool EventCategorizerTools::checkForScatter(
 double EventCategorizerTools::calculateTOT(const JPetHit& hit, TOTCalculationType type)
 {
   double tot = 0.0;
-           
+
   std::map<int, double> thrToTOT_sideA = hit.getSignalA().getRecoSignal().getRawSignal().getTOTsVsThresholdValue();
   std::map<int, double> thrToTOT_sideB = hit.getSignalB().getRecoSignal().getRawSignal().getTOTsVsThresholdValue();
-  
+
   tot += calculateTOTside(thrToTOT_sideA, type);
   tot += calculateTOTside(thrToTOT_sideB, type);
   return tot;
