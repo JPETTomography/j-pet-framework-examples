@@ -58,7 +58,8 @@ def main():
         run_id_setup = run6_mapping[run_id]
 
     if threads > 20:
-        print("\033[31m" + "Try not to use more than 20 threads, let others also run analysis." + "\033[0m", attrs=["underline"]))
+        print(
+            "\033[31m" + "Try not to use more than 20 threads, let others also run analysis." + "\033[0m")
 
     if not path.isdir(input_directory):
         print(
@@ -71,20 +72,20 @@ def main():
     if output_directory is not None:
         if not path.isdir(output_directory):
             print(
-                "\033[31m" + "Specified output drectory des not exist. Please check spelling or create a directory.", + "\033[0m")
+                "\033[31m" + "Specified output drectory des not exist. Please check spelling or create a directory." + "\033[0m")
             exit()
 
         if output_directory[-1] is not "/":
             output_directory += "/"
 
     if file_type != "root":
-        allowed_types=["root", "mcGeant", "hld", "zip", "scope"]
+        allowed_types = ["root", "mcGeant", "hld", "zip", "scope"]
         if file_type not in allowed_types:
             print("\033[31m" + "Specified file type is not valid. Please check if it's one of the following: \n{}".format(
                 ", ".join(allowed_types)) + "\033[0m")
             exit()
 
-    files_needed_for_analysis=[
+    files_needed_for_analysis = [
         "userParams.json", "conf_trb3.xml", "detectorSetupRun{}.json".format(run_id_setup)]
 
     needed_files_present = True
@@ -92,13 +93,13 @@ def main():
     for file in files_needed_for_analysis:
         if not path.isfile(file):
             print(
-                "\033[31m" + "File {} does not exist in current directory.".format(file), + "\033[0m")
-            needed_files_present=False
+                "\033[31m" + "File {} does not exist in current directory.".format(file) + "\033[0m")
+            needed_files_present = False
 
     if not needed_files_present:
         exit()
 
-    supported_extensions=["*", "hld", "hld.root", "tslot.calib.root", "raw.sig.root",
+    supported_extensions = ["*", "hld", "hld.root", "tslot.calib.root", "raw.sig.root",
                             "phys.sig.root", "hits.root", "unk.evt.root", "cat.evt.root"]
 
     if extension not in supported_extensions:
