@@ -302,7 +302,7 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
 void EventFinder::initialiseHistograms(){
 
   getStatistics().createHistogram(
-    new TH1F("hits_rejected_tdiff", "Time difference of consecutive unmatched mtx signals",
+    new TH1F("hits_rejected_tdiff", "Time difference of consecutive unmatched hits",
     200, 0.0, 500000.0)
   );
   getStatistics().getHisto1D("hits_rejected_tdiff")->GetXaxis()->SetTitle("Time difference [ps]");
