@@ -54,7 +54,7 @@ SignalTransformerTools::getRawSigMtxMap(
       tmpVecVec.push_back(tmpVec);
       if(pmSide==JPetPM::SideA){
         tmpVecVec.at(0).push_back(rawSig);
-      }else if(pmSide==JPetPM::SideB){
+      } else if(pmSide==JPetPM::SideB){
         tmpVecVec.at(1).push_back(rawSig);
       }
       rawSigMtxMap.insert(pair<int, vector<vector<JPetRawSignal>>>(scinID, tmpVecVec));
@@ -90,13 +90,12 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeSignalsAllSiPMs(
         for (auto& mtxSig : mtxSignals){
           auto rawSigVec = mtxSig.getRawSignals();
           if(rawSigVec.size() == 4){
-            auto scinID = rawSigVec.at(0).getPM().getScin().getID();
-            auto side = rawSigVec.at(0).getPM().getSide();
-            auto t1 = getRawSigBaseTime(rawSigVec.at(0));
-            auto t2 = getRawSigBaseTime(rawSigVec.at(1));
-            auto t3 = getRawSigBaseTime(rawSigVec.at(2));
-            auto t4 = getRawSigBaseTime(rawSigVec.at(3));
-
+            auto scinID = rawSigVec.at(1).getPM().getScin().getID();
+            auto side = rawSigVec.at(1).getPM().getSide();
+            auto t1 = getRawSigBaseTime(rawSigVec.at(1));
+            auto t2 = getRawSigBaseTime(rawSigVec.at(2));
+            auto t3 = getRawSigBaseTime(rawSigVec.at(3));
+            auto t4 = getRawSigBaseTime(rawSigVec.at(4));
             if(side==JPetPM::SideA) {
               stats.getHisto1D(Form("tdiff_%d_A_%d_%d", scinID, 2, 1))->Fill(t2-t1);
               stats.getHisto1D(Form("tdiff_%d_A_%d_%d", scinID, 3, 1))->Fill(t3-t1);
