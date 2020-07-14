@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 from fnmatch import filter
-from os import path, listdir, popen
+from os import path, listdir
 import argparse
 from subprocess import Popen, PIPE
 from multiprocessing.dummy import Pool as PoolThread
-
+from sys import exit
 
 def main():
     parser = argparse.ArgumentParser(
@@ -31,7 +31,7 @@ def main():
 
     if threads > 20:
         print("\033[31m" + "Try not to use more than 20 threads, let others also run analysis." +
-              "\033[0m", attrs=["underline"])
+              "\033[0m")
         exit()
 
     if not path.isdir(input_directory):
@@ -56,7 +56,7 @@ def main():
         for _ in tqdm.tqdm(pool.imap(run_macro_parallel, list_of_files), total=len(list_of_files)):
             pass
     else:
-        result = pool.map(run_macro_parallel, list_of_files)
+        pool.map(run_macro_parallel, list_of_files)
 
     pool.join()
     pool.close()

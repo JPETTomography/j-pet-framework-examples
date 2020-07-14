@@ -5,7 +5,9 @@ from os import listdir, system, path
 from sys import exit
 from fnmatch import filter
 import argparse
+from sys import exit
 
+ALLOWED_TYPES = ["root", "mcGeant", "hld", "zip", "scope"]
 
 def main():
     parser = argparse.ArgumentParser(
@@ -47,15 +49,9 @@ def main():
             "\033[93m" + "Module tqdm for Python3 not found. Running without progress bar" + "\033[0m")
         progress_bar = False
 
-    run_id_setup = run_id
 
-    run6_mapping = {"61": "6A",
-                    "62": "6B",
-                    "63": "6C",
-                    "64": "6D"}
+    run_id_setup = get_run_id_setup_mapping(run_id)
 
-    if run_id[0] == "6":
-        run_id_setup = run6_mapping[run_id]
 
     if threads > 20:
         print(
@@ -76,14 +72,13 @@ def main():
                 "\033[31m" + "Specified output drectory des not exist. Please check spelling or create a directory." + "\033[0m")
             exit()
 
-        if output_directory[-1] is not "/":
+        if output_directory[-1] != "/":
             output_directory += "/"
 
     if file_type != "root":
-        allowed_types = ["root", "mcGeant", "hld", "zip", "scope"]
-        if file_type not in allowed_types:
+        if file_type not in ALLOWED_TYPES:
             print("\033[31m" + "Specified file type is not valid. Please check if it's one of the following: \n{}".format(
-                ", ".join(allowed_types)) + "\033[0m")
+                ", ".join(ALLOWED_TYPES)) + "\033[0m")
             exit()
 
     files_needed_for_analysis = [
@@ -114,7 +109,7 @@ def main():
                 executable, filename, run_id, run_id_setup, output_directory))
 
     else:
-        def run_analysis_parallel(i):
+        def run_analysis_parallel(filename):
             system("./{} -t root -f {} -p conf_trb3.xml -u userParams.json -i {} -l detectorSetupRun{}.json".format(
                 executable, filename, run_id, run_id_setup))
 
@@ -136,6 +131,18 @@ def main():
 
     pool.close()
     pool.join()
+
+
+def get_run_id_setup_mapping(run_id):
+    run6_mapping = {"61": "6A",
+                    "62": "6B",
+                    "63": "6C",
+                    "64": "6D"}
+
+    if run_id[0] == "6":
+        run_id_setup = run6_mapping[run_id]
+    else:
+        run_id_setup = run_id
 
 
 if __name__ == "__main__":
