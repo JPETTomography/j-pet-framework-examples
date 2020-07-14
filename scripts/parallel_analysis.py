@@ -19,7 +19,7 @@ def main():
     parser.add_argument("-r", "--run-id", required=True, type=str,
                         help="Number of run which you are analyzing")
 
-    parser.add_argument("-e", "--extension", required=False, type=str, default="*",
+    parser.add_argument("-e", "--extension", required=False, type=str, default="root",
                         help="Extention of files you want to analyze")
 
     parser.add_argument("-t", "--type", required=False, type=str, default="root",
@@ -103,31 +103,23 @@ def main():
             ", ".join(supported_extensions[1:])) + "\033[0m")
         exit()
 
-    if output_directory is not None:
-        def run_analysis_parallel(filename):
-            system("./{} -t root -f {} -p conf_trb3.xml -u userParams.json -i {} -l detectorSetupRun{}.json -o {}".format(
-                executable, filename, run_id, run_id_setup, output_directory))
+    list_of_params = []
 
-    else:
-        def run_analysis_parallel(filename):
-            system("./{} -t root -f {} -p conf_trb3.xml -u userParams.json -i {} -l detectorSetupRun{}.json".format(
-                executable, filename, run_id, run_id_setup))
-
-    list_of_files = []
 
     for directory in input_directories:
         for file in filter(listdir(directory), "*.{}".format(extension)):
-            list_of_files.append(directory + file)
+            list_of_params.append([executable, directory + file, run_id, run_id_setup, output_directory])
+
 
     print("\033[32m" + "All checks passed, running analysis now." + "\033[0m")
 
     pool = PoolThread(threads)
 
     if progress_bar:
-        for _ in tqdm.tqdm(pool.imap(run_analysis_parallel, list_of_files), total=len(list_of_files)):
+        for _ in tqdm.tqdm(pool.imap(parallel_analysis_wrapper, list_of_params), total=len(list_of_params)):
             pass
     else:
-        results = pool.map(run_analysis_parallel, list_of_files)
+        results = pool.map(parallel_analysis_wrapper, list_of_params)
 
     pool.close()
     pool.join()
@@ -140,10 +132,20 @@ def get_run_id_setup_mapping(run_id):
                     "64": "6D"}
 
     if run_id[0] == "6":
-        run_id_setup = run6_mapping[run_id]
+        return run6_mapping[run_id]
     else:
-        run_id_setup = run_id
+        return run_id
 
+def parallel_analysis_wrapper(list_of_params):
+    parallel_analysis(*list_of_params)
+
+def parallel_analysis(executable, filename, run_id, run_id_setup, output_directory):
+    if output_directory is not None:
+        system("./{} -t root -f {} -p conf_trb3.xml -u userParams.json -i {} -l detectorSetupRun{}.json -o {}".format(
+            executable, filename, run_id, run_id_setup, output_directory))
+    else:
+        system("./{} -t root -f {} -p conf_trb3.xml -u userParams.json -i {} -l detectorSetupRun{}.json".format(
+            executable, filename, run_id, run_id_setup))
 
 if __name__ == "__main__":
     main()
