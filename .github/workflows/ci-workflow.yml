@@ -30,9 +30,21 @@ jobs:
         tar xzf root-6-20-06-ubuntu18-jpet.tar.gz
       if: matrix.os == 'ubuntu-18.04'
 
+    - name: build unpacker 
+      run: |
+        source root/bin/thisroot.sh
+        git clone https://github.com/JPETTomography/Unpacker2.git --single-branch --branch develop unpacker
+        mkdir -p unpacker/build
+        cd unpacker/build
+        cmake ..
+        cmake --build .
+        sudo make install
+        cd ../..
+
     - name: build j-pet framework
       run: |
         source root/bin/thisroot.sh
+        source unpacker/build/bin/thisunpacker.sh
         rm -rf j-pet-framework || true
         git clone --single-branch --branch develop https://github.com/JPETTomography/j-pet-framework.git
         mkdir -p j-pet-framework/build
@@ -45,6 +57,7 @@ jobs:
     - name: build framework examples 
       run: |
         source root/bin/thisroot.sh
+        source unpacker/build/bin/thisunpacker.sh
         mkdir build
         cd build
         cmake ..
@@ -55,6 +68,7 @@ jobs:
     - name: run image reconstruction test       
       run: |
         source root/bin/thisroot.sh
+        source unpacker/build/bin/thisunpacker.sh
         cd build/ImageReconstruction
         ctest -j6 -C Debug -T test --output-on-failure
 
