@@ -2,12 +2,72 @@
 
 from multiprocessing.dummy import Pool as PoolThread
 from os import listdir, system, path
-from sys import exit
+import sys
 from fnmatch import filter
 import argparse
-from sys import exit
+
+try:
+    import tqdm
+except ImportError:
+    print(
+        "\033[93m" + "Module tqdm for Python3 not found. Running without progress bar" + "\033[0m")
+
+    class tqdm():
+
+        @staticmethod
+        def tqdm(args):
+            pass
 
 ALLOWED_TYPES = ["root", "mcGeant", "hld", "zip", "scope"]
+SUPPORTED_EXTENSIONS = ["*", "hld", "hld.root", "tslot.calib.root", "raw.sig.root",
+                        "phys.sig.root", "hits.root", "unk.evt.root", "cat.evt.root"]
+
+
+def are_valid_args(threads, input_directories, output_directory, file_type, run_id_setup, extension):
+
+    if threads > 20:
+        print(
+            "\033[31m" + "Try not to use more than 20 threads, let others also run analysis." + "\033[0m")
+
+    for directory in input_directories:
+        if not path.isdir(directory):
+            print(
+                "\033[31m" + "Directory {} input drectory des not exist. Please check spelling.".format(directory) + "\033[0m")
+            return False
+
+    if output_directory is not None:
+        if not path.isdir(output_directory):
+            print(
+                "\033[31m" + "Specified output drectory des not exist. Please check spelling or create a directory." + "\033[0m")
+            return False
+
+    if file_type != "root":
+        if file_type not in ALLOWED_TYPES:
+            print("\033[31m" + "Specified file type is not valid. Please check if it's one of the following: \n{}".format(
+                ", ".join(ALLOWED_TYPES)) + "\033[0m")
+            return False
+
+    files_needed_for_analysis = [
+        "userParams.json", "conf_trb3.xml", "detectorSetupRun{}.json".format(run_id_setup)]
+
+    needed_files_present = True
+
+    for fname in files_needed_for_analysis:
+        if not path.isfile(fname):
+            print(
+                "\033[31m" + "File {} does not exist in current directory.".format(fname) + "\033[0m")
+            needed_files_present = False
+
+    if not needed_files_present:
+        return False
+
+    if extension not in SUPPORTED_EXTENSIONS:
+        print("\033[31m" + "Specified file extension is not valid. Please check if it's one of the following: \n{}".format(
+            ", ".join(SUPPORTED_EXTENSIONS[1:])) + "\033[0m")
+        return False
+
+    return True
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -42,84 +102,29 @@ def main():
     threads = args["number_of_threads"]
     extension = args["extension"]
 
-    try:
-        import tqdm
-    except ImportError:
-        print(
-            "\033[93m" + "Module tqdm for Python3 not found. Running without progress bar" + "\033[0m")
-        progress_bar = False
-
-
-    run_id_setup = get_run_id_setup_mapping(run_id)
-
-
-    if threads > 20:
-        print(
-            "\033[31m" + "Try not to use more than 20 threads, let others also run analysis." + "\033[0m")
-
-    for directory in input_directories:
-        if not path.isdir(directory):
-            print(
-                "\033[31m" + "Directory {} input drectory des not exist. Please check spelling.".format(directory) + "\033[0m")
-            exit()
-
     input_directories = [directory + "/" if directory[-1] !=
                          "/" else directory for directory in input_directories]
 
-    if output_directory is not None:
-        if not path.isdir(output_directory):
-            print(
-                "\033[31m" + "Specified output drectory des not exist. Please check spelling or create a directory." + "\033[0m")
-            exit()
-
+    if output_directory:
         if output_directory[-1] != "/":
             output_directory += "/"
 
-    if file_type != "root":
-        if file_type not in ALLOWED_TYPES:
-            print("\033[31m" + "Specified file type is not valid. Please check if it's one of the following: \n{}".format(
-                ", ".join(ALLOWED_TYPES)) + "\033[0m")
-            exit()
+    run_id_setup = get_run_id_setup_mapping(run_id)
 
-    files_needed_for_analysis = [
-        "userParams.json", "conf_trb3.xml", "detectorSetupRun{}.json".format(run_id_setup)]
+    if not are_valid_args(threads, input_directories, output_directory, file_type, run_id_setup, extension):
+        sys.exit()
 
-    needed_files_present = True
-
-    for file in files_needed_for_analysis:
-        if not path.isfile(file):
-            print(
-                "\033[31m" + "File {} does not exist in current directory.".format(file) + "\033[0m")
-            needed_files_present = False
-
-    if not needed_files_present:
-        exit()
-
-    supported_extensions = ["*", "hld", "hld.root", "tslot.calib.root", "raw.sig.root",
-                            "phys.sig.root", "hits.root", "unk.evt.root", "cat.evt.root"]
-
-    if extension not in supported_extensions:
-        print("\033[31m" + "Specified file extension is not valid. Please check if it's one of the following: \n{}".format(
-            ", ".join(supported_extensions[1:])) + "\033[0m")
-        exit()
-
-    list_of_params = []
-
-
-    for directory in input_directories:
-        for file in filter(listdir(directory), "*.{}".format(extension)):
-            list_of_params.append([executable, directory + file, run_id, run_id_setup, output_directory])
-
+    list_of_params = get_parameters_for_analysis(
+        executable, extension, run_id, run_id_setup, input_directories, output_directory)
 
     print("\033[32m" + "All checks passed, running analysis now." + "\033[0m")
 
     pool = PoolThread(threads)
-
     if progress_bar:
-        for _ in tqdm.tqdm(pool.imap(parallel_analysis_wrapper, list_of_params), total=len(list_of_params)):
+        for _ in tqdm.tqdm(pool.imap(run_analysis, list_of_params), total=len(list_of_params)):
             pass
     else:
-        results = pool.map(parallel_analysis_wrapper, list_of_params)
+        pool.map(run_analysis, list_of_params)
 
     pool.close()
     pool.join()
@@ -133,19 +138,28 @@ def get_run_id_setup_mapping(run_id):
 
     if run_id[0] == "6":
         return run6_mapping[run_id]
-    else:
-        return run_id
+    return run_id
 
-def parallel_analysis_wrapper(list_of_params):
-    parallel_analysis(*list_of_params)
 
-def parallel_analysis(executable, filename, run_id, run_id_setup, output_directory):
-    if output_directory is not None:
-        system("./{} -t root -f {} -p conf_trb3.xml -u userParams.json -i {} -l detectorSetupRun{}.json -o {}".format(
-            executable, filename, run_id, run_id_setup, output_directory))
-    else:
-        system("./{} -t root -f {} -p conf_trb3.xml -u userParams.json -i {} -l detectorSetupRun{}.json".format(
-            executable, filename, run_id, run_id_setup))
+def run_analysis(params):
+    system(params)
+
+
+def get_run_express_from_params(executable, filename, run_id, run_id_setup, output_directory):
+    if output_directory:
+        return "./{} -t root -f {} -p conf_trb3.xml -u userParams.json -i {} -l detectorSetupRun{}.json -o {}".format(
+            executable, filename, run_id, run_id_setup, output_directory)
+    return "./{} -t root -f {} -p conf_trb3.xml -u userParams.json -i {} -l detectorSetupRun{}.json".format(
+        executable, filename, run_id, run_id_setup)
+
+
+def get_parameters_for_analysis(executable, extension, run_id, run_id_setup, input_directories, output_directory):
+    list_of_params = []
+    for directory in input_directories:
+        for fname in filter(listdir(directory), "*.{}".format(extension)):
+            list_of_params.append(
+                [executable, directory + fname, run_id, run_id_setup, output_directory])
+    return [get_run_express_from_params(*x) for x in list_of_params]
 
 if __name__ == "__main__":
     main()
