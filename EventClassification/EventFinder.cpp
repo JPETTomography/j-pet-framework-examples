@@ -291,7 +291,7 @@ void EventFinder::initialiseHistograms(){
   //////////////////////////////////////////////////////////////////////////////
   getStatistics().createHistogram(
     new TH1F("coin_tot", "Coincidence hits ToT before cut",
-    20, 0.0, 350000.0)
+    100, 0.0, 150000.0)
   );
   getStatistics().getHisto1D("hits_per_event_selected")->GetXaxis()->SetTitle("Hits in Event");
   getStatistics().getHisto1D("hits_per_event_selected")->GetYaxis()->SetTitle("Number of Hits");
