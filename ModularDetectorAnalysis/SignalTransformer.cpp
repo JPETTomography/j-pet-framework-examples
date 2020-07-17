@@ -127,8 +127,8 @@ void SignalTransformer::initialiseHistograms()
   auto maxScinID = getParamBank().getScins().rbegin()->first;
 
   // Time differences of consecutive RawSigs per SiPMs pair - all combinations
-  for(int scinID=201; scinID<227; scinID++) {
-    if(scinID != 201 && scinID != 213) { continue; }
+  for(int scinID=201; scinID<214; scinID++) {
+    // if(scinID != 201 && scinID != 213) { continue; }
     for(int i=1; i<=4; i++){
       for(int j=1; j<=4; j++){
         if(i == j) { continue; }
