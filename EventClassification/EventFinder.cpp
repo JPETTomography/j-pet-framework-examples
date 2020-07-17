@@ -203,6 +203,8 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
         auto tot = get<2>(hitStats);
         auto revToT = get<3>(hitStats);
 
+        getStatistics().getHisto1D("coin_tot")->Fill(tot);
+
         // Checking multi cut and ToT cut
         if(multi == 16 && tot>fToTCutMin && tot<fToTCutMax) {
           // Good coincidence, creating new event
@@ -213,7 +215,6 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
           event.addHit(nextHit);
           eventVec.push_back(event);
 
-          // TODO Fill histograms
           if(fSaveControlHistos){
             getStatistics().getHisto2D("tdiff_tot")->Fill(tdiff, revToT);
             getStatistics().getHisto2D("tdiff_tot_zoom")->Fill(tdiff, revToT);
@@ -288,6 +289,13 @@ void EventFinder::initialiseHistograms(){
   getStatistics().getHisto1D("good_vs_bad_events")->GetYaxis()->SetTitle("Number of Events");
 
   //////////////////////////////////////////////////////////////////////////////
+  getStatistics().createHistogram(
+    new TH1F("coin_tot", "Coincidence hits ToT before cut",
+    20, 0.0, 350000.0)
+  );
+  getStatistics().getHisto1D("hits_per_event_selected")->GetXaxis()->SetTitle("Hits in Event");
+  getStatistics().getHisto1D("hits_per_event_selected")->GetYaxis()->SetTitle("Number of Hits");
+
   getStatistics().createHistogram(new TH2F(
     "tdiff_tot", "TDiff vs. TOT",
     200, fHistoTDiffMin, fHistoTDiffMax, 200, fHistoTOTMin, fHistoTOTMax
