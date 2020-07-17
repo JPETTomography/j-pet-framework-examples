@@ -49,33 +49,30 @@ bool EventFinder::init()
   // Event time window
   if (isOptionSet(fParams.getOptions(), kEventTimeParamKey)) {
     fEventTimeWindow = getOptionAsDouble(fParams.getOptions(), kEventTimeParamKey);
-  } else {
-    WARNING(Form(
-      "No value of the %s parameter provided by the user. Using default value of %lf.",
-      kEventTimeParamKey.c_str(), fEventTimeWindow
-    ));
+  }
+
+  // Main and ref scin IDs
+  if (isOptionSet(fParams.getOptions(), kMainScinIDParamKey)) {
+    fMainScinID = getOptionAsInt(fParams.getOptions(), kMainScinIDParamKey);
+  }
+  if (isOptionSet(fParams.getOptions(), kRefScinIDParamKey)) {
+    fRefScinID = getOptionAsInt(fParams.getOptions(), kRefScinIDParamKey);
   }
 
   // Time walk corrections
-  if (isOptionSet(fParams.getOptions(), kTimeWalkCorrATHR1ParamKey)) {
-    fTimeWalkAParamTHR1 = getOptionAsDouble(fParams.getOptions(), kTimeWalkCorrATHR1ParamKey);
+  if (isOptionSet(fParams.getOptions(), kTimeWalkCorrAParamKey)) {
+    fTimeWalkAParam = getOptionAsDouble(fParams.getOptions(), kTimeWalkCorrAParamKey);
   }
-  if (isOptionSet(fParams.getOptions(), kTimeWalkCorrBTHR1ParamKey)) {
-    fTimeWalkBParamTHR1 = getOptionAsDouble(fParams.getOptions(), kTimeWalkCorrBTHR1ParamKey);
-  }
-
-  if (isOptionSet(fParams.getOptions(), kTimeWalkCorrATHR2ParamKey)) {
-    fTimeWalkAParamTHR2 = getOptionAsDouble(fParams.getOptions(), kTimeWalkCorrATHR2ParamKey);
-  }
-  if (isOptionSet(fParams.getOptions(), kTimeWalkCorrBTHR2ParamKey)) {
-    fTimeWalkBParamTHR2 = getOptionAsDouble(fParams.getOptions(), kTimeWalkCorrBTHR2ParamKey);
+  if (isOptionSet(fParams.getOptions(), kTimeWalkCorrBParamKey)) {
+    fTimeWalkBParam = getOptionAsDouble(fParams.getOptions(), kTimeWalkCorrBParamKey);
   }
 
-  if (isOptionSet(fParams.getOptions(), kTimeWalkCorrAAVParamKey)) {
-    fTimeWalkAParamAV = getOptionAsDouble(fParams.getOptions(), kTimeWalkCorrAAVParamKey);
+  // ToT cut params
+  if (isOptionSet(fParams.getOptions(), kToTCutMinParamKey)) {
+    fToTCutMin = getOptionAsDouble(fParams.getOptions(), kToTCutMinParamKey);
   }
-  if (isOptionSet(fParams.getOptions(), kTimeWalkCorrBAVParamKey)) {
-    fTimeWalkBParamAV = getOptionAsDouble(fParams.getOptions(), kTimeWalkCorrBAVParamKey);
+  if (isOptionSet(fParams.getOptions(), kToTCutMaxParamKey)) {
+    fToTCutMax = getOptionAsDouble(fParams.getOptions(), kToTCutMaxParamKey);
   }
 
   // Limits of histograms
@@ -116,6 +113,11 @@ bool EventFinder::init()
       "No value of the %s parameter provided by the user. Using default value of %d.",
       kEventMinMultiplicity.c_str(), fMinMultiplicity
     ));
+  }
+
+  // Signal merging time parameter
+  if (isOptionSet(fParams.getOptions(), kMergeSignalsTimeParamKey)) {
+    fMergingTime = getOptionAsDouble(fParams.getOptions(), kMergeSignalsTimeParamKey);
   }
 
   // Getting bool for saving histograms
@@ -160,141 +162,97 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
   const unsigned int nHits = timeWindow.getNumberOfEvents();
   unsigned int count = 0;
   while(count<nHits){
+
     auto hit = dynamic_cast<const JPetHit&>(timeWindow.operator[](count));
+
+    // Corrupted filter
     if(!fUseCorruptedHits && hit.getRecoFlag()==JPetHit::Corrupted){
       count++;
       continue;
     }
-    // Creating new event with the first hit
-    JPetEvent event;
-    event.setEventType(JPetEventType::kUnknown);
-    event.addHit(hit);
-    if(hit.getRecoFlag() == JPetHit::Good) {
-      event.setRecoFlag(JPetEvent::Good);
-    } else if(hit.getRecoFlag() == JPetHit::Corrupted){
-      event.setRecoFlag(JPetEvent::Corrupted);
-    }
-    // Checking, if following hits fulfill time window condition,
-    // then moving interator
+
+    // Checking, if following hits meets selection conditions
+    // if not, moving interator
     unsigned int nextCount = 1;
-    while(count+nextCount < nHits){
+    while(count+nextCount < nHits) {
+
       auto nextHit = dynamic_cast<const JPetHit&>(timeWindow.operator[](count+nextCount));
+
+      // coincidence condition
       if (fabs(nextHit.getTime() - hit.getTime()) < fEventTimeWindow) {
-        if(nextHit.getRecoFlag() == JPetHit::Corrupted) {
-          event.setRecoFlag(JPetEvent::Corrupted);
+
+        // different scin IDs conditioin
+        if(hit.getScin().getID() == nextHit.getScin().getID()) {
+          nextCount++;
+          continue;
         }
-        event.addHit(nextHit);
-        nextCount++;
 
-        if(fSaveControlHistos){
-          if(hit.getScin().getID() == 213){
-            // Coincidental hits
-            auto hitTHR1 = getStatsPerTHR(hit, 1);
-            auto hitTHR2 = getStatsPerTHR(hit, 2);
+        // Proper coincidence found - assigning main scin hit and ref scin hit
+        JPetHit mainHit, refHit;
+        if(hit.getScin().getID() == kMainScinIDParamKey) {
+          mainHit = hit;
+          refHit = nextHit;
+        } else {
+          mainHit = nextHit;
+          refHit = hit;
+        }
 
-            if(hitTHR1.first == 8) {
-              getStatistics().getHisto2D("tdiff_tot_thr_1")
-              ->Fill(hitTHR1.second.first, hitTHR1.second.second);
-              getStatistics().getHisto2D("tdiff_tot_thr_1_z")
-              ->Fill(hitTHR1.second.first, hitTHR1.second.second);
+        auto hitStats = getStats(mainHit);
+        auto multi = get<0>(hitStats);
+        auto tdiff = get<1>(hitStats);
+        auto tot = get<2>(hitStats);
+        auto revToT = get<3>(hitStats);
 
-              auto correction = fTimeWalkAParamTHR1*hitTHR1.second.second+fTimeWalkBParamTHR1;
-              getStatistics().getHisto2D("tdiff_tot_thr_1_z_tw")
-              ->Fill(
-                hitTHR1.second.first-correction,
-                hitTHR1.second.second
-              );
-            }
+        // Checking multi cut and ToT cut
+        if(multi == 16 && tot>fToTCutMin && tot<fToTCutMax) {
+          // Good coincidence, creating new event
+          JPetEvent event;
+          event.setEventType(JPetEventType::k2Gamma);
+          event.setRecoFlag(JPetEvent::Good);
+          event.addHit(hit);
+          event.addHit(nextHit);
+          eventVec.push_back(event);
 
-            if(hitTHR2.first == 8) {
-              getStatistics().getHisto2D("tdiff_tot_thr_2")
-              ->Fill(hitTHR2.second.first, hitTHR2.second.second);
-              getStatistics().getHisto2D("tdiff_tot_thr_2_z")
-              ->Fill(hitTHR2.second.first, hitTHR2.second.second);
+          // TODO Fill histograms
+          if(fSaveControlHistos){
+            getStatistics().getHisto2D("tdiff_tot")->Fill(tdiff, revToT);
+            getStatistics().getHisto2D("tdiff_tot_zoom")->Fill(tdiff, revToT);
+            auto correction = (revToT-fTimeWalkBParam)/fTimeWalkAParam;
+            getStatistics().getHisto2D("tdiff_tot_zoom_tw")->Fill(tdiff*fTimeWalkAParam+fTimeWalkBParam, revToT);
 
-              auto correction = fTimeWalkAParamTHR2*hitTHR2.second.second+fTimeWalkBParamTHR2;
-              getStatistics().getHisto2D("tdiff_tot_thr_2_z_tw")
-              ->Fill(
-                hitTHR2.second.first-correction,
-                hitTHR2.second.second
-              );
-            }
-
-            if(hitTHR1.first+hitTHR2.first == 16) {
-              auto avTdiff = (hitTHR1.second.first+hitTHR2.second.first)/2.0;
-              auto avTOT = (hitTHR1.second.second+hitTHR2.second.second)/2.0;
-              getStatistics().getHisto2D("tdiff_tot_av_z")->Fill(avTdiff, avTOT);
-
-              auto correction = fTimeWalkAParamAV*avTOT+fTimeWalkBParamAV;
-              getStatistics().getHisto2D("tdiff_tot_av_z_tw")
-              ->Fill(avTdiff-correction, avTOT);
-            }
-
-          }else if(nextHit.getScin().getID() == 213){
-            auto nextTHR1 = getStatsPerTHR(hit, 1);
-            auto nextTHR2 = getStatsPerTHR(hit, 2);
-
-            if(nextTHR1.first == 8) {
-              getStatistics().getHisto2D("tdiff_tot_thr_1")
-              ->Fill(nextTHR1.second.first, nextTHR1.second.second);
-              getStatistics().getHisto2D("tdiff_tot_thr_1_z")
-              ->Fill(nextTHR1.second.first, nextTHR1.second.second);
-
-              auto correction = (nextTHR1.second.second-fTimeWalkBParamTHR1)/fTimeWalkAParamTHR1;
-              getStatistics().getHisto2D("tdiff_tot_thr_1_z_tw")
-              ->Fill(
-                nextTHR1.second.first-correction,
-                nextTHR1.second.second
-              );
-            }
-
-            if(nextTHR2.first == 8) {
-              getStatistics().getHisto2D("tdiff_tot_thr_2")
-              ->Fill(nextTHR2.second.first, nextTHR2.second.second);
-              getStatistics().getHisto2D("tdiff_tot_thr_2_z")
-              ->Fill(nextTHR2.second.first, nextTHR2.second.second);
-
-              auto correction = (nextTHR2.second.second-fTimeWalkBParamTHR2)/fTimeWalkAParamTHR2;
-              getStatistics().getHisto2D("tdiff_tot_thr_2_z_tw")
-              ->Fill(
-                nextTHR2.second.first-correction,
-                nextTHR2.second.second
-              );
-            }
-
-            if(nextTHR1.first+nextTHR2.first == 16) {
-              auto avTdiff = (nextTHR1.second.first+nextTHR2.second.first)/2.0;
-              auto avTOT = (nextTHR1.second.second+nextTHR2.second.second)/2.0;
-              getStatistics().getHisto2D("tdiff_tot_av_z")->Fill(avTdiff, avTOT);
-              auto correction = (avTOT-fTimeWalkBParamAV)/fTimeWalkAParamAV;
-              getStatistics().getHisto2D("tdiff_tot_av_z_tw")
-              ->Fill(avTdiff*fTimeWalkAParamAV+fTimeWalkBParamAV, avTOT);
-            }
+            // Offsets histograms
+            plotOffsetHistograms(mainHit.getSignalA(), "A", "main");
+            plotOffsetHistograms(mainHit.getSignalB(), "B", "main");
+            plotOffsetHistograms(refHit.getSignalA(), "A", "ref");
+            plotOffsetHistograms(refHit.getSignalA(), "B", "ref");
           }
         }
       } else {
         getStatistics().getHisto1D("hits_rejected_tdiff")
         ->Fill(fabs(nextHit.getTime() - hit.getTime()));
-        break;
       }
+      break;
     }
+    // moving to next uninvestigated hit
     count+=nextCount;
-    if(fSaveControlHistos) {
-      getStatistics().getHisto1D("hits_per_event_all")->Fill(event.getHits().size());
-      if(event.getRecoFlag()==JPetEvent::Good){
-        getStatistics().getHisto1D("good_vs_bad_events")->Fill(1);
-      } else if(event.getRecoFlag()==JPetEvent::Corrupted){
-        getStatistics().getHisto1D("good_vs_bad_events")->Fill(2);
-      } else {
-        getStatistics().getHisto1D("good_vs_bad_events")->Fill(3);
-      }
-    }
-    if(event.getHits().size() >= fMinMultiplicity){
-      eventVec.push_back(event);
-      if(fSaveControlHistos) {
-        getStatistics().getHisto1D("hits_per_event_selected")->Fill(event.getHits().size());
-      }
-    }
+
+    // Not needed now
+    // if(fSaveControlHistos) {
+    //   getStatistics().getHisto1D("hits_per_event_all")->Fill(event.getHits().size());
+    //   if(event.getRecoFlag()==JPetEvent::Good){
+    //     getStatistics().getHisto1D("good_vs_bad_events")->Fill(1);
+    //   } else if(event.getRecoFlag()==JPetEvent::Corrupted){
+    //     getStatistics().getHisto1D("good_vs_bad_events")->Fill(2);
+    //   } else {
+    //     getStatistics().getHisto1D("good_vs_bad_events")->Fill(3);
+    //   }
+    // }
+    // if(event.getHits().size() >= fMinMultiplicity){
+    //   eventVec.push_back(event);
+    //   if(fSaveControlHistos) {
+    //     getStatistics().getHisto1D("hits_per_event_selected")->Fill(event.getHits().size());
+    //   }
+    // }
   }
   return eventVec;
 }
@@ -331,89 +289,74 @@ void EventFinder::initialiseHistograms(){
 
   //////////////////////////////////////////////////////////////////////////////
   getStatistics().createHistogram(new TH2F(
-    "tdiff_tot_thr_1", "THR 1 TDiff vs. TOT, scin 213, multi 8",
+    "tdiff_tot", "TDiff vs. TOT",
     200, fHistoTDiffMin, fHistoTDiffMax, 200, fHistoTOTMin, fHistoTOTMax
   ));
-  getStatistics().getHisto2D("tdiff_tot_thr_1")
-  ->GetXaxis()->SetTitle("Time difference [ps]");
-  getStatistics().getHisto2D("tdiff_tot_thr_1")
-  ->GetYaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
+  getStatistics().getHisto2D("tdiff_tot")->GetXaxis()->SetTitle("Time difference [ps]");
+  getStatistics().getHisto2D("tdiff_tot")->GetYaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
 
   getStatistics().createHistogram(new TH2F(
-    "tdiff_tot_thr_2", "THR 2 TDiff vs. TOT, scin 213, multi 8",
-    200, fHistoTDiffMin, fHistoTDiffMax, 200, fHistoTOTMin, fHistoTOTMax
-  ));
-  getStatistics().getHisto2D("tdiff_tot_thr_2")
-  ->GetXaxis()->SetTitle("Time difference [ps]");
-  getStatistics().getHisto2D("tdiff_tot_thr_2")
-  ->GetYaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
-
-  getStatistics().createHistogram(new TH2F(
-    "tdiff_tot_thr_1_z", "THR 1 TDiff vs. TOT, scin 213, multi 8",
+    "tdiff_tot_zoom", "TDiff vs. TOT",
     200, fZoomTDiffMin, fZoomTDiffMax, 200, fZoomTOTMin, fZoomTOTMax
   ));
-  getStatistics().getHisto2D("tdiff_tot_thr_1_z")
-  ->GetXaxis()->SetTitle("Time difference [ps]");
-  getStatistics().getHisto2D("tdiff_tot_thr_1_z")
-  ->GetYaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
+  getStatistics().getHisto2D("tdiff_tot_zoom")->GetXaxis()->SetTitle("Time difference [ps]");
+  getStatistics().getHisto2D("tdiff_tot_zoom")->GetYaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
 
   getStatistics().createHistogram(new TH2F(
-    "tdiff_tot_thr_2_z", "THR 2 TDiff vs. TOT, scin 213, multi 8",
-    200, fZoomTDiffMin, fZoomTDiffMax, 200, fZoomTOTMin, fZoomTOTMax
-  ));
-  getStatistics().getHisto2D("tdiff_tot_thr_2_z")
-  ->GetXaxis()->SetTitle("Time difference [ps]");
-  getStatistics().getHisto2D("tdiff_tot_thr_2_z")
-  ->GetYaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
-
-  getStatistics().createHistogram(new TH2F(
-    "tdiff_tot_thr_1_z_tw", "THR 1 TDiff vs. TOT, scin 213, multi 8, time walk correction",
+    "tdiff_tot_zoom_tw", "TDiff vs. TOT with time walk correction",
     200, fHistoTDiffMin/2.0, fHistoTDiffMax/2.0, 200, fZoomTOTMin, fZoomTOTMax
   ));
-  getStatistics().getHisto2D("tdiff_tot_thr_1_z_tw")
-  ->GetXaxis()->SetTitle("Time difference [ps]");
-  getStatistics().getHisto2D("tdiff_tot_thr_1_z_tw")
-  ->GetYaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
+  getStatistics().getHisto2D("tdiff_tot_zoom_tw")->GetXaxis()->SetTitle("Time difference [ps]");
+  getStatistics().getHisto2D("tdiff_tot_zoom_tw")->GetYaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
 
-  getStatistics().createHistogram(new TH2F(
-    "tdiff_tot_thr_2_z_tw", "THR 2 TDiff vs. TOT, scin 213, multi 8, time walk correction",
-    200, fHistoTDiffMin/2.0, fHistoTDiffMax/2.0, 200, fZoomTOTMin, fZoomTOTMax
-  ));
-  getStatistics().getHisto2D("tdiff_tot_thr_2_z_tw")
-  ->GetXaxis()->SetTitle("Time difference [ps]");
-  getStatistics().getHisto2D("tdiff_tot_thr_2_z_tw")
-  ->GetYaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
-
-  // For average of two THRs
-  getStatistics().createHistogram(new TH2F(
-    "tdiff_tot_av_z", "THR average TDiff vs. TOT, scin 213, multi 16",
-    200, fZoomTDiffMin, fZoomTDiffMax, 200, fZoomTOTMin, fZoomTOTMax
-  ));
-  getStatistics().getHisto2D("tdiff_tot_av_z")
-  ->GetXaxis()->SetTitle("Time difference [ps]");
-  getStatistics().getHisto2D("tdiff_tot_av_z")
-  ->GetYaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
-
-  getStatistics().createHistogram(new TH2F(
-    "tdiff_tot_av_z_tw", "THR average TDiff vs. TOT, scin 213, multi 16, time walk correction",
-    200, fHistoTDiffMin/2.0, fHistoTDiffMax/2.0, 200, fZoomTOTMin, fZoomTOTMax
-  ));
-  getStatistics().getHisto2D("tdiff_tot_av_z_tw")
-  ->GetXaxis()->SetTitle("Time difference [ps]");
-  getStatistics().getHisto2D("tdiff_tot_av_z_tw")
-  ->GetYaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
+  // Histograms for matrix SiPMs synchronization
+  // <side, main/ref, other SiPM>
+  vector<tuple<string, string, int>> histoConfs = {
+    {"A", "main", 2}, {"A", "main", 3}, {"A", "main", 4},
+    {"A", "ref", 2}, {"A", "ref", 3}, {"A", "ref", 4},
+    {"B", "main", 2}, {"B", "main", 3}, {"B", "main", 4},
+    {"B", "ref", 2}, {"B", "ref", 3}, {"B", "ref", 4},
+  };
+  for(auto conf : histoConfs){
+    getStatistics().createHistogram(new TH1F(
+      Form("mtx_offsets_%s_%s_1_%d", ((string)get<0>(conf)).c_str(), ((string)get<1>(conf)).c_str(), get<2>(conf)),
+      Form("Time offsets of SiPM 1 and %d on side %s of %s strip", get<2>(conf), ((string)get<0>(conf)).c_str(), ((string)get<1>(conf)).c_str()),
+      200, -1.1*fMergingTime, 1.1*fMergingTime
+    ));
+    getStatistics().getHisto1D(Form("mtx_offsets_%s_%s_1_%d", ((string)get<0>(conf)).c_str(), ((string)get<1>(conf)).c_str(), get<2>(conf)))->GetXaxis()->SetTitle("Time difference [ps]");
+    getStatistics().getHisto1D(Form("mtx_offsets_%s_%s_1_%d", ((string)get<0>(conf)).c_str(), ((string)get<1>(conf)).c_str(), get<2>(conf)))->GetYaxis()->SetTitle("Number of Raw Signal pairs");
+  }
 }
 
 /**
- * @return <multi <tdiff, rev_tot>>
+ * Gets stats for THR 1 and 2, returns average
+ * @return <multi, tdiff, tot/multi, rev_tot>
  */
-pair<int, pair<double, double>> EventFinder::getStatsPerTHR(const JPetHit& hit, int thrNum)
+tuple<int, double, double, double> EventFinder::getStats(const JPetHit& hit)
+{
+  auto statsTHR1 = getStatsPerTHR(hit, 1);
+  auto statsTHR2 = getStatsPerTHR(hit, 2);
+
+  auto multi = get<0>(statsTHR1)+get<0>(statsTHR2);
+  auto avTDiff = (get<1>(statsTHR1)+get<1>(statsTHR2))/2.0;
+  auto avToT = (get<2>(statsTHR1)+get<2>(statsTHR2))/((double) get<0>(statsTHR1)+get<0>(statsTHR2));
+  auto avRevToT = (get<3>(statsTHR1)+get<3>(statsTHR2))/2.0;
+
+  return make_tuple(multi, avTDiff, avToT, avRevToT);
+}
+
+/**
+ * @return <multi, tdiff, tot, rev_tot>
+ */
+tuple<int, double, double, double> EventFinder::getStatsPerTHR(const JPetHit& hit, int thrNum)
 {
   int multi = 0;
-  float timeA = 0.0;
-  float timeB = 0.0;
-  float totA = 0.0;
-  float totB = 0.0;
+  double timeA = 0.0;
+  double timeB = 0.0;
+  double totA = 0.0;
+  double totB = 0.0;
+  double revToTA = 0.0;
+  double revToTB = 0.0;
 
   for(auto signalA : hit.getSignalA().getRawSignals()){
     auto leads = signalA.second.getTimesVsThresholdNumber(JPetSigCh::Leading);
@@ -421,7 +364,8 @@ pair<int, pair<double, double>> EventFinder::getStatsPerTHR(const JPetHit& hit, 
     if(leads.find(thrNum)!=leads.end() && trails.find(thrNum)!=trails.end()){
       multi++;
       timeA += leads.at(thrNum);
-      totA += 1.0/(trails.at(thrNum)-leads.at(thrNum));
+      totA += trails.at(thrNum)-leads.at(thrNum);
+      revToTA += 1.0/(trails.at(thrNum)-leads.at(thrNum));
     }
   }
 
@@ -431,13 +375,39 @@ pair<int, pair<double, double>> EventFinder::getStatsPerTHR(const JPetHit& hit, 
     if(leads.find(thrNum)!=leads.end() && trails.find(thrNum)!=trails.end()){
       multi++;
       timeB += leads.at(thrNum);
-      totB += 1.0/(trails.at(thrNum)-leads.at(thrNum));
+      totB += trails.at(thrNum)-leads.at(thrNum);
+      revToTB += 1.0/(trails.at(thrNum)-leads.at(thrNum));
     }
   }
 
   timeA = timeA/((float) hit.getSignalA().getRawSignals().size());
   timeB = timeB/((float) hit.getSignalB().getRawSignals().size());
 
-  auto tPair = make_pair(timeB-timeA, totB-totA);
-  return make_pair(multi, tPair);
+  return make_tuple(multi, timeB-timeA, totB-totA, revToTB-revToTA);
+}
+
+/**
+ * Returning time of leading Signal Channel on the first threshold from Raw Signal
+ */
+double EventFinder::getRawSigBaseTime(const JPetRawSignal& rawSig)
+{
+  return rawSig.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrValue).at(0).getTime();
+}
+
+void EventFinder::plotOffsetHistograms(const JPetMatrixSignal& mtxSig, string side, string type)
+{
+  auto rawSigMap = mtxSig.getRawSignals();
+
+  // Looking for first
+  auto search1 = rawSigMap.find(1);
+  if (search1 != rawSigMap.end()) {
+    auto t1 = getRawSigBaseTime(rawSigMap.at(1));
+    for(int i=2;i<5;i++){
+      auto searchI = rawSigMap.find(i);
+      if (searchI != rawSigMap.end()) {
+        auto tI = getRawSigBaseTime(rawSigMap.at(i));
+        getStatistics().getHisto1D(Form("mtx_offsets_%s_%s_1_%d", side.c_str(), type.c_str(), i))->Fill(tI-t1);
+      }
+    }
+  }
 }
