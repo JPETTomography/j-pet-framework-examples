@@ -37,7 +37,7 @@ jobs:
     - name: build framework examples 
       run: |
         source root/bin/thisroot.sh
-        j-pet-framework/build/bin/thisframework.sh
+        source j-pet-framework/build/bin/thisframework.sh
         mkdir build
         cd build
         cmake ..
