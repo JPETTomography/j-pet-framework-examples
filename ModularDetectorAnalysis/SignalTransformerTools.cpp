@@ -23,9 +23,8 @@ using namespace std;
  * Side A is the first element int he vector, Side B is the second one.
  */
 const map<int, vector<vector<JPetRawSignal>>>
-SignalTransformerTools::getRawSigMtxMap(
-  const JPetTimeWindow* timeWindow, int refDerScinID, int refDetSiPMID
-){
+SignalTransformerTools::getRawSigMtxMap(const JPetTimeWindow* timeWindow)
+{
   map<int, vector<vector<JPetRawSignal>>> rawSigMtxMap;
 
   if (!timeWindow) {
@@ -40,11 +39,6 @@ SignalTransformerTools::getRawSigMtxMap(
     auto scinID = rawSig.getPM().getScin().getID();
     auto pmSide = rawSig.getPM().getSide();
     auto search = rawSigMtxMap.find(scinID);
-
-    // Cutting crosstalks from reference detector channel
-    // if(scinID == refDerScinID && rawSig.getPM().getID() != refDetSiPMID) {
-    //   continue;
-    // }
 
     if (search == rawSigMtxMap.end()) {
       // There is no element with searched scin ID in this map, adding new one
@@ -85,29 +79,6 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeSignalsAllSiPMs(
         rawSigSide, mergingTime, stats, saveHistos
       );
       allMtxSignals.insert(allMtxSignals.end(), mtxSignals.begin(), mtxSignals.end());
-
-      if(saveHistos) {
-        for (auto& mtxSig : mtxSignals){
-          auto rawSigVec = mtxSig.getRawSignals();
-          if(rawSigVec.size() == 4){
-            auto scinID = rawSigVec.at(1).getPM().getScin().getID();
-            auto side = rawSigVec.at(1).getPM().getSide();
-            auto t1 = getRawSigBaseTime(rawSigVec.at(1));
-            auto t2 = getRawSigBaseTime(rawSigVec.at(2));
-            auto t3 = getRawSigBaseTime(rawSigVec.at(3));
-            auto t4 = getRawSigBaseTime(rawSigVec.at(4));
-            if(side==JPetPM::SideA) {
-              stats.getHisto1D(Form("tdiff_%d_A_%d_%d", scinID, 2, 1))->Fill(t2-t1);
-              stats.getHisto1D(Form("tdiff_%d_A_%d_%d", scinID, 3, 1))->Fill(t3-t1);
-              stats.getHisto1D(Form("tdiff_%d_A_%d_%d", scinID, 4, 1))->Fill(t4-t1);
-            } else {
-              stats.getHisto1D(Form("tdiff_%d_B_%d_%d", scinID, 2, 1))->Fill(t2-t1);
-              stats.getHisto1D(Form("tdiff_%d_B_%d_%d", scinID, 3, 1))->Fill(t3-t1);
-              stats.getHisto1D(Form("tdiff_%d_B_%d_%d", scinID, 4, 1))->Fill(t4-t1);
-            }
-          }
-        }
-      }
     }
   }
   return allMtxSignals;
@@ -168,7 +139,7 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(
 /**
  * Returning time of leading Signal Channel on the first threshold from Raw Signal
  */
-float SignalTransformerTools::getRawSigBaseTime(JPetRawSignal& rawSig)
+double SignalTransformerTools::getRawSigBaseTime(JPetRawSignal& rawSig)
 {
   return rawSig.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrValue).at(0).getTime();
 }
@@ -176,14 +147,14 @@ float SignalTransformerTools::getRawSigBaseTime(JPetRawSignal& rawSig)
 /**
  * Calculating average time of Matrix Signal based on times of contained Raw Signals
  */
-float SignalTransformerTools::calculateAverageTime(JPetMatrixSignal& mtxSig)
+double SignalTransformerTools::calculateAverageTime(JPetMatrixSignal& mtxSig)
 {
-  float averageTime = 0.0;
+  double averageTime = 0.0;
   auto rawSignals = mtxSig.getRawSignals();
   for(auto rawSig : rawSignals){
     averageTime += getRawSigBaseTime(rawSig.second);
   }
-  averageTime = averageTime/((float) rawSignals.size());
+  averageTime = averageTime/((double) rawSignals.size());
   return averageTime;
 }
 
@@ -197,4 +168,12 @@ void SignalTransformerTools::sortByTime(vector<JPetRawSignal>& input)
       return getRawSigBaseTime(rawSig1) < getRawSigBaseTime(rawSig2);
     }
   );
+}
+
+bool SignalTransformerTools::isScinActive(vector<int> activeIDs, int id)
+{
+  for(auto element : activeIDs) {
+    if(element==id) return true;
+  }
+  return false;
 }

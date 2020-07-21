@@ -40,13 +40,11 @@ public:
 	virtual bool terminate() override;
 
 protected:
-	const std::string kMergeSignalsTimeParamKey = "SignalTransformer_MergeSignalsTime_float";
+	const std::string kMergeSignalsTimeParamKey = "SignalTransformer_MergeSignalsTime_double";
 	const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
-	const std::string kRefDetSiPMIDParamKey = "TimeCalibration_RefDetSiPMID_int";
-	const std::string kRefDetScinIDParamKey = "TimeCalibration_RefDetScinID_int";
+	const std::string kActiveScinsIDParamKey = "ActiveScinsID_std::vector<int>";
 	void saveMatrixSignals(const std::vector<JPetMatrixSignal>& mtxSigVec);
-	int fRefDetSiPMID = -1;
-	int fRefDetScinID = -1;
+	std::vector<int> fActiveScinIDs;
 	bool fSaveControlHistos = true;
 	double fMergingTime = 20000.0;
 	void initialiseHistograms();

@@ -22,7 +22,7 @@ using namespace std;
  * Method returns a map of vectors of JPetSigCh ordered by photomultiplier ID
  */
 const map<int, vector<JPetSigCh>> SignalFinderTools::getSigChByPM(
-  const JPetTimeWindow* timeWindow
+  const JPetTimeWindow* timeWindow, std::vector<int>& activePMIDs
 ){
   map<int, vector<JPetSigCh>> sigChsPMMap;
   if (!timeWindow) {
@@ -34,6 +34,7 @@ const map<int, vector<JPetSigCh>> SignalFinderTools::getSigChByPM(
   for (unsigned int i = 0; i < nSigChs; i++) {
     auto sigCh = dynamic_cast<const JPetSigCh&>(timeWindow->operator[](i));
     auto pmtID = sigCh.getChannel().getPM().getID();
+    if(!isPMActive(activePMIDs, pmtID)) { continue; }
     auto search = sigChsPMMap.find(pmtID);
     if (search == sigChsPMMap.end()) {
       vector<JPetSigCh> tmp;
@@ -177,4 +178,12 @@ int SignalFinderTools::findTrailingSigCh(
   if (trailingFoundIdices.size() == 0) { return -1; }
   sort(trailingFoundIdices.begin(), trailingFoundIdices.end());
   return trailingFoundIdices.at(0);
+}
+
+bool SignalFinderTools::isPMActive(vector<int> activeIDs, int id)
+{
+  for(auto element : activeIDs) {
+    if(element==id) return true;
+  }
+  return false;
 }

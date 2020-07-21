@@ -33,9 +33,7 @@
  class SignalTransformerTools
  {
  public:
-   static const std::map<int, std::vector<std::vector<JPetRawSignal>>> getRawSigMtxMap(
-     const JPetTimeWindow* timeWindow, int refDerScinID, int refDetSiPMID
-   );
+   static const std::map<int, std::vector<std::vector<JPetRawSignal>>> getRawSigMtxMap(const JPetTimeWindow* timeWindow);
 
    static std::vector<JPetMatrixSignal> mergeSignalsAllSiPMs(
      std::map<int, std::vector<std::vector<JPetRawSignal>>>& rawSigMtxMap,
@@ -46,11 +44,11 @@
      std::vector<JPetRawSignal>& rawSigVec, double mergingTime,
      JPetStatistics& stats, bool saveHistos
    );
+   static bool isScinActive(std::vector<int> activeIDs, int id);
+   static double getRawSigBaseTime(JPetRawSignal& rawSig);
 
  private:
-   static float getRawSigBaseTime(JPetRawSignal& rawSig);
-   static float calculateAverageTime(JPetMatrixSignal& mtxSig);
+   static double calculateAverageTime(JPetMatrixSignal& mtxSig);
    static void sortByTime(std::vector<JPetRawSignal>& input);
-
  };
  #endif /* !SIGNALTRANSFORMERTOOLS_H */

@@ -174,21 +174,17 @@ void TimeWindowCreator::initialiseHistograms(){
   auto maxChannelID = getParamBank().getChannels().rbegin()->first;
 
   // Wrong configuration
-  getStatistics().createHistogram(
-    new TH1F(
-      "wrong_channel", "Channel IDs not found in the json configuration",
-      maxChannelID-minChannelID+1, minChannelID-0.5, maxChannelID+0.5
-    )
-  );
+  getStatistics().createHistogram(new TH1F(
+    "wrong_channel", "Channel IDs not found in the json configuration",
+    maxChannelID-minChannelID+1, minChannelID-0.5, maxChannelID+0.5
+  ));
   getStatistics().getHisto1D("wrong_channel")->GetXaxis()->SetTitle("Channel ID");
   getStatistics().getHisto1D("wrong_channel")->GetYaxis()->SetTitle("Number of SigCh");
 
-  getStatistics().createHistogram(
-    new TH1F(
-      "channel_occ", "Channels occupation (downscaled)",
-      maxChannelID-minChannelID+1, minChannelID-0.5, maxChannelID+0.5
-    )
-  );
+  getStatistics().createHistogram(new TH1F(
+    "channel_occ", "Channels occupation (downscaled)",
+    maxChannelID-minChannelID+1, minChannelID-0.5, maxChannelID+0.5
+  ));
   getStatistics().getHisto1D("channel_occ")->GetXaxis()->SetTitle("Channel ID");
   getStatistics().getHisto1D("channel_occ")->GetYaxis()->SetTitle("Number of SigCh");
 

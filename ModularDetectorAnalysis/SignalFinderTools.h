@@ -34,7 +34,7 @@ class SignalFinderTools
 {
 public:
   static const std::map<int, std::vector<JPetSigCh>> getSigChByPM(
-     const JPetTimeWindow* timeWindow
+     const JPetTimeWindow* timeWindow, std::vector<int>& activePMIDs
   );
   static std::vector<JPetRawSignal> buildAllSignals(
     const std::map<int, std::vector<JPetSigCh>>& sigChByPM,
@@ -54,5 +54,6 @@ public:
     const JPetSigCh& leadingSigCh,double sigChLeadTrailMaxTime,
     const std::vector<JPetSigCh>& trailingSigChVec
   );
+  static bool isPMActive(std::vector<int> activeIDs, int id);
 };
 #endif /* !SIGNALFINDERTOOLS_H */

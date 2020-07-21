@@ -59,7 +59,7 @@ protected:
   const std::string kEventMinMultiplicity = "EventFinder_MinEventMultiplicity_int";
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
 
-  // coincidence time cut
+  // scins IDs
   const std::string kMainScinIDParamKey = "EventFinder_MainScinID_int";
   const std::string kRefScinIDParamKey = "EventFinder_RefScinID_int";
 

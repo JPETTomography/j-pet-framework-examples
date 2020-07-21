@@ -181,7 +181,7 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
       // coincidence condition
       if (fabs(nextHit.getTime() - hit.getTime()) < fEventTimeWindow) {
 
-        // different scin IDs conditioin
+        // different scin IDs condition
         if(hit.getScin().getID() == nextHit.getScin().getID()) {
           nextCount++;
           continue;

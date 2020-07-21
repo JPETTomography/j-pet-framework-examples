@@ -38,7 +38,7 @@ bool HitFinder::init()
   // Reading values from the user options if available
   // Allowed time difference between signals on A and B sides
   if (isOptionSet(fParams.getOptions(), kABTimeDiffParamKey)) {
-    fABTimeDiff = getOptionAsFloat(fParams.getOptions(), kABTimeDiffParamKey);
+    fABTimeDiff = getOptionAsDouble(fParams.getOptions(), kABTimeDiffParamKey);
   } else {
     WARNING(Form(
       "No value of the %s parameter provided by the user. Using default value of %lf.",
@@ -54,6 +54,11 @@ bool HitFinder::init()
   if (isOptionSet(fParams.getOptions(), kRefDetScinIDParamKey)) {
     fRefDetScinID = getOptionAsInt(fParams.getOptions(), kRefDetScinIDParamKey);
     INFO(Form("Using reference detector - scintillator ID: %d", fRefDetScinID));
+  }
+
+  // Vector of active Scins ID
+  if (isOptionSet(fParams.getOptions(), kActiveScinsIDParamKey)) {
+    fActiveScinIDs = getOptionAsVectorOfInts(fParams.getOptions(), kActiveScinsIDParamKey);
   }
 
   // Control histograms
@@ -91,30 +96,24 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
 void HitFinder::initialiseHistograms(){
 
   auto minScinID = getParamBank().getScins().begin()->first;
-  auto maxScinID = 230;
-  // auto maxScinID = getParamBank().getScins().rbegin()->first;
+  auto maxScinID = getParamBank().getScins().rbegin()->first;
 
   getStatistics().createHistogram(new TH1F(
     "hits_per_time_slot", "Number of Hits in Time Window", 40, -0.5, 40.5
   ));
-  getStatistics().getHisto1D("hits_per_time_slot")
-  ->GetXaxis()->SetTitle("Hits in Time Slot");
-  getStatistics().getHisto1D("hits_per_time_slot")
-  ->GetYaxis()->SetTitle("Number of Time Slots");
+  getStatistics().getHisto1D("hits_per_time_slot")->GetXaxis()->SetTitle("Hits in Time Slot");
+  getStatistics().getHisto1D("hits_per_time_slot")->GetYaxis()->SetTitle("Number of Time Slots");
 
   getStatistics().createHistogram(new TH2F(
     "time_diff_per_scin", "Signals Time Difference per Scintillator ID",
     200, -1.1 * fABTimeDiff, 1.1 * fABTimeDiff,
     maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5
   ));
-  getStatistics().getHisto2D("time_diff_per_scin")
-  ->GetXaxis()->SetTitle("A-B time difference [ps]");
-  getStatistics().getHisto2D("time_diff_per_scin")
-  ->GetYaxis()->SetTitle("ID of Scintillator");
+  getStatistics().getHisto2D("time_diff_per_scin")->GetXaxis()->SetTitle("A-B time difference [ps]");
+  getStatistics().getHisto2D("time_diff_per_scin")->GetYaxis()->SetTitle("ID of Scintillator");
 
   getStatistics().createHistogram(new TH2F(
-    "hit_pos_XY", "Hit Position XY projection",
-    121, -60.5, 60.5, 121, -60.5, 60.5
+    "hit_pos_XY", "Hit Position XY projection", 121, -60.5, 60.5, 121, -60.5, 60.5
   ));
   getStatistics().getHisto2D("hit_pos_XY")->GetXaxis()->SetTitle("Y [cm]");
   getStatistics().getHisto2D("hit_pos_XY")->GetYaxis()->SetTitle("X [cm]");
@@ -132,13 +131,11 @@ void HitFinder::initialiseHistograms(){
   getStatistics().createHistogram(new TH1F(
     "hit_sig_multi", "Number of signals from SiPMs in created hit", 10, -0.5, 9.5
   ));
-  getStatistics().getHisto1D("hit_sig_multi")
-  ->GetXaxis()->SetTitle("Number of signals");
-  getStatistics().getHisto1D("hit_sig_multi")
-  ->GetYaxis()->SetTitle("Number of Hits");
+  getStatistics().getHisto1D("hit_sig_multi")->GetXaxis()->SetTitle("Number of signals");
+  getStatistics().getHisto1D("hit_sig_multi")->GetYaxis()->SetTitle("Number of Hits");
 
   // Time diff and TOT per scin per multi
-  for(int scinID = minScinID; scinID<= maxScinID; scinID++){
+  for(auto scinID : fActiveScinIDs){
     for(int multi = 2; multi <=8; multi++){
 
       getStatistics().createHistogram(new TH1F(
@@ -167,15 +164,11 @@ void HitFinder::initialiseHistograms(){
   getStatistics().createHistogram(new TH1F(
     "ref_hits_per_time_slot", "Number of Reference Detector Hits in Time Window", 40, -0.5, 40.5
   ));
-  getStatistics().getHisto1D("ref_hits_per_time_slot")
-  ->GetXaxis()->SetTitle("Hits in Time Slot");
-  getStatistics().getHisto1D("ref_hits_per_time_slot")
-  ->GetYaxis()->SetTitle("Number of Time Slots");
+  getStatistics().getHisto1D("ref_hits_per_time_slot")->GetXaxis()->SetTitle("Hits in Time Slot");
+  getStatistics().getHisto1D("ref_hits_per_time_slot")->GetYaxis()->SetTitle("Number of Time Slots");
 
   getStatistics().createHistogram(new TH1F(
-    "ref_hit_signalB_tot",
-    "RefDet hits TOT of signal B",
-    200, 0.0, 100000.0
+    "ref_hit_signalB_tot", "RefDet hits TOT of signal B", 200, 0.0, 100000.0
   ));
   getStatistics().getHisto1D("ref_hit_signalB_tot")->GetXaxis()->SetTitle("TOT [ps]");
   getStatistics().getHisto1D("ref_hit_signalB_tot")->GetYaxis()->SetTitle("Number of hits");
