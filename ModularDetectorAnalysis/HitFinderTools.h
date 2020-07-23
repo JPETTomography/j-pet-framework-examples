@@ -38,18 +38,22 @@ public:
   );
   static std::vector<JPetHit> matchAllSignals(
     std::map<int, std::vector<JPetMatrixSignal>>& allSignals,
-    double timeDiffAB, int refDetScinID, JPetStatistics& stats, bool saveHistos
+    double timeDiffAB, int refDetScinID, JPetStatistics& stats,
+    bool saveHistos, std::vector<int>& activeScinsIDs
   );
   static std::vector<JPetHit> matchSignals(
     std::vector<JPetMatrixSignal>& scinSignals,
-    double timeDiffAB, JPetStatistics& stats, bool saveHistos
+    double timeDiffAB, JPetStatistics& stats,
+    bool saveHistos, std::vector<int>& activeScinsIDs
   );
   static JPetHit createHit(
     const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2,
-    JPetStatistics& stats, bool saveHistos
+    JPetStatistics& stats, bool saveHistos, std::vector<int>& activeScinsIDs
   );
   static JPetHit createDummyRefDetHit(const JPetMatrixSignal& signal);
   static double calculateTOT(JPetHit& hit);
+  static bool isScinActive(std::vector<int> activeIDs, int id);
+  
 };
 
 #endif /* !HITFINDERTOOLS_H */

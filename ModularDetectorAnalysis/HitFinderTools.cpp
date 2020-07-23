@@ -65,7 +65,7 @@ map<int, vector<JPetMatrixSignal>> HitFinderTools::getSignalsByScin(
  */
 vector<JPetHit> HitFinderTools::matchAllSignals(
   map<int, vector<JPetMatrixSignal>>& allSignals, double timeDiffAB,
-  int refDetScinID, JPetStatistics& stats, bool saveHistos
+  int refDetScinID, JPetStatistics& stats, bool saveHistos, vector<int>& activeScinsIDs
 ) {
   vector<JPetHit> allHits;
   vector<JPetHit> refHits;
@@ -87,7 +87,7 @@ vector<JPetHit> HitFinderTools::matchAllSignals(
     }
     // Match signals for scintillators
     auto scinHits = matchSignals(
-      scinSigals.second, timeDiffAB, stats, saveHistos
+      scinSigals.second, timeDiffAB, stats, saveHistos, activeScinsIDs
     );
     allHits.insert(allHits.end(), scinHits.begin(), scinHits.end());
   }
@@ -102,7 +102,7 @@ vector<JPetHit> HitFinderTools::matchAllSignals(
  */
 vector<JPetHit> HitFinderTools::matchSignals(
   vector<JPetMatrixSignal>& scinSigals, double timeDiffAB,
-  JPetStatistics& stats, bool saveHistos
+  JPetStatistics& stats, bool saveHistos, vector<int>& activeScinsIDs
 ) {
   vector<JPetHit> scinHits;
   vector<JPetMatrixSignal> remainSignals;
@@ -117,7 +117,7 @@ vector<JPetHit> HitFinderTools::matchSignals(
       if (scinSigals.at(j).getTime() - mtxSig.getTime() < timeDiffAB) {
         if (mtxSig.getPM().getSide() != scinSigals.at(j).getPM().getSide()) {
           auto hit = createHit(
-            mtxSig, scinSigals.at(j), stats, saveHistos
+            mtxSig, scinSigals.at(j), stats, saveHistos, activeScinsIDs
           );
           scinHits.push_back(hit);
           scinSigals.erase(scinSigals.begin() + j);
@@ -144,7 +144,7 @@ vector<JPetHit> HitFinderTools::matchSignals(
   }
   if(remainSignals.size()>0 && saveHistos){
     stats.getHisto1D("remain_signals_per_scin")
-      ->Fill((float)(remainSignals.at(0).getPM().getScin().getID()), remainSignals.size());
+      ->Fill((double)(remainSignals.at(0).getPM().getScin().getID()), remainSignals.size());
   }
   return scinHits;
 }
@@ -154,7 +154,7 @@ vector<JPetHit> HitFinderTools::matchSignals(
  */
 JPetHit HitFinderTools::createHit(
   const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2,
-  JPetStatistics& stats, bool saveHistos
+  JPetStatistics& stats, bool saveHistos, vector<int>& activeScinsIDs
 ) {
 
   JPetMatrixSignal signalA;
@@ -185,23 +185,21 @@ JPetHit HitFinderTools::createHit(
   if(saveHistos) {
     auto multi = signalA.getRawSignals().size() + signalB.getRawSignals().size();
 
-    stats.getHisto2D("time_diff_per_scin")
-    ->Fill(hit.getTimeDiff(), hit.getScin().getID());
-
+    stats.getHisto2D("time_diff_per_scin")->Fill(hit.getTimeDiff(), hit.getScin().getID());
     stats.getHisto2D("hit_pos_XY")->Fill(hit.getPosY(), hit.getPosX());
-
+    stats.getHisto1D("hit_sig_multi")->Fill(multi);
     stats.getHisto1D("hit_sig_multi")->Fill(multi);
 
-    // stats.getHisto2D("hit_pos_per_scin")
-    // ->Fill(hit.getPosZ(), hit.getScin().getID());
-
-    stats.getHisto1D(Form("hit_tdiff_scin_%d_m_%d", hit.getScin().getID(), ((int) multi)))
-    ->Fill(hit.getTimeDiff());
-
-    stats.getHisto1D(Form("hit_tot_scin_%d_m_%d", hit.getScin().getID(), ((int) multi)))
-    ->Fill(hit.getEnergy()/((float) multi));
+    auto scinID = hit.getScin().getID();
+    if(isScinActive(activeScinsIDs, scinID)){
+      stats.getHisto1D(Form("hit_sig_multi_scin_%d", scinID))->Fill(multi);
+      stats.getHisto1D(Form("hit_tdiff_scin_%d_m_%d", hit.getScin().getID(), ((int) multi)))
+      ->Fill(hit.getTimeDiff());
+      stats.getHisto1D(Form("hit_tot_scin_%d_m_%d", hit.getScin().getID(), ((int) multi)))
+      ->Fill(hit.getEnergy()/((double) multi));
+      // stats.getHisto2D("hit_pos_per_scin")->Fill(hit.getPosZ(), hit.getScin().getID());
+    }
   }
-
   return hit;
 }
 
@@ -260,4 +258,12 @@ double HitFinderTools::calculateTOT(JPetHit& hit)
   }
 
   return tot;
+}
+
+bool HitFinderTools::isScinActive(vector<int> activeIDs, int id)
+{
+  for(auto element : activeIDs) {
+    if(element==id) return true;
+  }
+  return false;
 }

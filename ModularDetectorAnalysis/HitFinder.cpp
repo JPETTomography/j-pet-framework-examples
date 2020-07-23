@@ -58,7 +58,7 @@ bool HitFinder::init()
 
   // Vector of active Scins ID
   if (isOptionSet(fParams.getOptions(), kActiveScinsIDParamKey)) {
-    fActiveScinIDs = getOptionAsVectorOfInts(fParams.getOptions(), kActiveScinsIDParamKey);
+    fActiveScinsIDs = getOptionAsVectorOfInts(fParams.getOptions(), kActiveScinsIDParamKey);
   }
 
   // Control histograms
@@ -72,7 +72,8 @@ bool HitFinder::exec()
   if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     auto signalsBySlot = HitFinderTools::getSignalsByScin(timeWindow);
     auto allHits = HitFinderTools::matchAllSignals(
-      signalsBySlot, fABTimeDiff, fRefDetScinID, getStatistics(), fSaveControlHistos
+      signalsBySlot, fABTimeDiff, fRefDetScinID,
+      getStatistics(), fSaveControlHistos, fActiveScinsIDs
     );
     saveHits(allHits);
   } else return false;
@@ -135,9 +136,18 @@ void HitFinder::initialiseHistograms(){
   getStatistics().getHisto1D("hit_sig_multi")->GetYaxis()->SetTitle("Number of Hits");
 
   // Time diff and TOT per scin per multi
-  for(auto scinID : fActiveScinIDs){
-    for(int multi = 2; multi <=8; multi++){
+  for(auto scinID : fActiveScinsIDs){
 
+    getStatistics().createHistogram(new TH1F(
+      Form("hit_sig_multi_scin_%d", scinID),
+      Form("Number of signals from SiPMs in created hit for scin %d", scinID),
+      10, -0.5, 9.5
+    ));
+    getStatistics().getHisto1D(Form("hit_sig_multi_scin_%d", scinID))->GetXaxis()->SetTitle("Number of signals");
+    getStatistics().getHisto1D(Form("hit_sig_multi_scin_%d", scinID))->GetYaxis()->SetTitle("Number of Hits");
+
+
+    for(int multi = 2; multi <=8; multi++){
       getStatistics().createHistogram(new TH1F(
         Form("hit_tdiff_scin_%d_m_%d", scinID, multi),
         Form("Hit time difference, scin %d,  multiplicity %d", scinID, multi),

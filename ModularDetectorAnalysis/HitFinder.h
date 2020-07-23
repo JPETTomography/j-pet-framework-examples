@@ -51,7 +51,7 @@ protected:
   const std::string kRefDetScinIDParamKey = "TimeCalibration_RefDetScinID_int";
   const std::string kActiveScinsIDParamKey = "ActiveScinsID_std::vector<int>";
   const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_double";
-  std::vector<int> fActiveScinIDs;
+  std::vector<int> fActiveScinsIDs;
   bool fSaveControlHistos = true;
   double fABTimeDiff = 10000.0;
   int fRefDetScinID = -1;
