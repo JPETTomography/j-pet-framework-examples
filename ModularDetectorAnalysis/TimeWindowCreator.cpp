@@ -162,7 +162,7 @@ void TimeWindowCreator::saveSigChs(const vector<JPetSigCh>& sigChVec)
 void TimeWindowCreator::initialiseHistograms(){
 
   getStatistics().createHistogram(
-    new TH1F("sig_ch_per_time_slot", "Signal Channels Per Time Slot", 200, -0.5, 200.5)
+    new TH1F("sig_ch_per_time_slot", "Signal Channels Per Time Slot", 50, -0.5, 50.5)
   );
   getStatistics().getHisto1D("sig_ch_per_time_slot")
   ->GetXaxis()->SetTitle("Signal Channels in Time Slot");
@@ -199,8 +199,7 @@ void TimeWindowCreator::initialiseHistograms(){
   auto maxPMID = getParamBank().getPMs().rbegin()->first;
 
   getStatistics().createHistogram(new TH1F(
-    "pm_occ", "PMs occupation (downscaled)",
-    maxPMID-minPMID+1, minPMID-0.5, maxPMID+0.5
+    "pm_occ", "PMs occupation (downscaled)", maxPMID-minPMID+1, minPMID-0.5, maxPMID+0.5
   ));
   getStatistics().getHisto1D("pm_occ")->GetXaxis()->SetTitle("PM ID");
   getStatistics().getHisto1D("pm_occ")->GetYaxis()->SetTitle("Number of SigCh");
@@ -217,19 +216,16 @@ void TimeWindowCreator::initialiseHistograms(){
   auto minScinID = scinsMap.begin()->first;
   auto maxScinID = scinsMap.rbegin()->first;
 
-  getStatistics().createHistogram(
-    new TH1F(
-      "scin_occ", "Scins occupation (downscaled)",
-      maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5
-    )
-  );
+  getStatistics().createHistogram(new TH1F(
+    "scin_occ", "Scins occupation (downscaled)", maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5
+  ));
   getStatistics().getHisto1D("scin_occ")->GetXaxis()->SetTitle("SCIN ID");
   getStatistics().getHisto1D("scin_occ")->GetYaxis()->SetTitle("Number of SigCh");
 
   // Matrix position
-  getStatistics().createHistogram(
-    new TH1F("matrix_occ", "Position in matrix in PMs occupation (downscaled)", 6, -0.5, 5.5)
-  );
+  getStatistics().createHistogram(new TH1F(
+    "matrix_occ", "Position in matrix in PMs occupation (downscaled)", 6, -0.5, 5.5
+  ));
   getStatistics().getHisto1D("matrix_occ")->GetXaxis()->SetTitle("Matrix position");
   getStatistics().getHisto1D("matrix_occ")->GetYaxis()->SetTitle("Number of SigCh");
 
@@ -267,7 +263,7 @@ void TimeWindowCreator::initialiseHistograms(){
   getStatistics().getHisto1D("filter_LL_tdiff")->GetYaxis()->SetTitle("Number of LL pairs");
 
   getStatistics().createHistogram(new TH1F(
-    "filter_TT_PM", "Number of TT found on PMs", 111, 399.5, 510.5
+    "filter_TT_PM", "Number of TT found on PMs", maxPMID-minPMID+1, minPMID-0.5, maxPMID+0.5
   ));
   getStatistics().getHisto1D("filter_TT_PM")->GetXaxis()->SetTitle("PM ID");
   getStatistics().getHisto1D("filter_TT_PM")->GetYaxis()->SetTitle("Number of TT pairs");

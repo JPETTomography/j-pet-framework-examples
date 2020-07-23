@@ -133,7 +133,7 @@ void SignalTransformer::initialiseHistograms()
   getStatistics().getHisto1D("mtxsig_multi")->GetYaxis()->SetTitle("Number of Matrix Signals");
 
   getStatistics().createHistogram(new TH1F(
-    "mtxsig_tslot", "Number of Matrix Signals in Time Window", 150, -0.5, 149.5
+    "mtxsig_tslot", "Number of Matrix Signals in Time Window", 50, -0.5, 49.5
   ));
   getStatistics().getHisto1D("mtxsig_tslot")->GetXaxis()->SetTitle("Number of Matrix Signal in Time Window");
   getStatistics().getHisto1D("mtxsig_tslot")->GetYaxis()->SetTitle("Number of Time Windows");

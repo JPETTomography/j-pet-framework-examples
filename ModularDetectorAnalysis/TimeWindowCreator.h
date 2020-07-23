@@ -51,8 +51,8 @@ protected:
 	void saveSigChs(const std::vector<JPetSigCh>& sigChVec);
 	void initialiseHistograms();
 	const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
-	const std::string kMaxTimeParamKey = "TimeWindowCreator_MaxTime_float";
-	const std::string kMinTimeParamKey = "TimeWindowCreator_MinTime_float";
+	const std::string kMaxTimeParamKey = "TimeWindowCreator_MaxTime_double";
+	const std::string kMinTimeParamKey = "TimeWindowCreator_MinTime_double";
 	bool fSaveControlHistos = true;
 	double fMinTime = 0.0;
 	double fMaxTime = 1.e6;
