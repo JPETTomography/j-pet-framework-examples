@@ -35,7 +35,7 @@ bool TimeWindowCreator::init()
   // Reading values from the user options if available
   // Min allowed signal time
   if (isOptionSet(fParams.getOptions(), kMinTimeParamKey)) {
-    fMinTime = getOptionAsFloat(fParams.getOptions(), kMinTimeParamKey);
+    fMinTime = getOptionAsDouble(fParams.getOptions(), kMinTimeParamKey);
   } else {
     WARNING(
       Form("No value of the %s parameter provided by the user. Using default value of %lf.",
@@ -45,7 +45,7 @@ bool TimeWindowCreator::init()
   }
   // Max allowed signal time
   if (isOptionSet(fParams.getOptions(), kMaxTimeParamKey)) {
-    fMaxTime = getOptionAsFloat(fParams.getOptions(), kMaxTimeParamKey);
+    fMaxTime = getOptionAsDouble(fParams.getOptions(), kMaxTimeParamKey);
   } else {
     WARNING(
       Form("No value of the %s parameter provided by the user. Using default value of %lf.",
