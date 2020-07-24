@@ -7,7 +7,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-16.04]
+        os: [ubuntu-16.04, ubuntu-18.04]
    
     steps:
     - uses: actions/checkout@v2
@@ -18,14 +18,33 @@ jobs:
        sudo apt-get -qq update
        sudo apt-get install -y git libboost-all-dev libtbb-dev cmake libfftw3-3 libfftw3-dev sshpass
       
-    - name: download  ROOT 
+    - name: download  ROOT (for ubuntu 16.04)
       run: |
         wget https://root.cern/download/root_v6.12.06.Linux-ubuntu16-x86_64-gcc5.4.tar.gz
         tar xzf root_v6.12.06.Linux-ubuntu16-x86_64-gcc5.4.tar.gz
+      if: matrix.os == 'ubuntu-16.04'
+
+    - name: download  ROOT (for ubuntu-18.04)
+      run: |
+        wget http://sphinx.if.uj.edu.pl/framework/root-6-20-06-ubuntu18-jpet.tar.gz 
+        tar xzf root-6-20-06-ubuntu18-jpet.tar.gz
+      if: matrix.os == 'ubuntu-18.04'
+
+    - name: build unpacker 
+      run: |
+        source root/bin/thisroot.sh
+        git clone https://github.com/JPETTomography/Unpacker2.git --single-branch --branch develop unpacker
+        mkdir -p unpacker/build
+        cd unpacker/build
+        cmake ..
+        cmake --build .
+        sudo make install
+        cd ../..
 
     - name: build j-pet framework
       run: |
         source root/bin/thisroot.sh
+        source unpacker/build/bin/thisunpacker.sh
         rm -rf j-pet-framework || true
         git clone --single-branch --branch develop https://github.com/JPETTomography/j-pet-framework.git
         mkdir -p j-pet-framework/build
@@ -37,6 +56,7 @@ jobs:
     - name: build framework examples 
       run: |
         source root/bin/thisroot.sh
+        source unpacker/build/bin/thisunpacker.sh
         source j-pet-framework/build/bin/thisframework.sh
         mkdir build
         cd build
@@ -48,6 +68,7 @@ jobs:
     - name: run image reconstruction test       
       run: |
         source root/bin/thisroot.sh
+        source unpacker/build/bin/thisunpacker.sh
         cd build/ImageReconstruction
         ctest -j6 -C Debug -T test --output-on-failure
 
