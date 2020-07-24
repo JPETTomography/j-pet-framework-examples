@@ -77,11 +77,11 @@ bool SignalFinder::init()
     fToTCutLimitsAll = make_pair(0.0, 1.1*fSigChLeadTrailMaxTime);
   }
 
-  // Looking for limits for ToT cut for this SiPMs
+  // Looking for limits for ToT cut of active SiPM
   for(auto pmID : fActivePMIDs){
-    string paramKey = kToTCutPrefix+to_string(pmID)+kToTCutSuffix;
-    if (isOptionSet(fParams.getOptions(), paramKey)) {
-      auto tempVec = getOptionAsVectorOfDoubles(fParams.getOptions(), paramKey);
+    string paramKeyToT = kToTCutPrefix+to_string(pmID)+kToTCutSuffix;
+    if (isOptionSet(fParams.getOptions(), paramKeyToT)) {
+      auto tempVec = getOptionAsVectorOfDoubles(fParams.getOptions(), paramKeyToT);
       if(tempVec.size()>1) {
         fToTCutLimitsMap[pmID] = make_pair(tempVec.at(0), tempVec.at(1));
       }

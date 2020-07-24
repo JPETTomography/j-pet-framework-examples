@@ -34,13 +34,14 @@ public:
 
   static std::vector<JPetSigCh> buildSigChs(
     TDCChannel *tdcChannel, const JPetChannel &channel,
-    double maxTime, double minTime
+    double maxTime, double minTime, std::map<int, double>& siPMOffsetMap
   );
   static void flagSigChs(
     std::vector<JPetSigCh> &inputSigChs, JPetStatistics &stats, bool saveHistos
   );
   static JPetSigCh generateSigCh(
-    double tdcChannelTime, const JPetChannel &channel, JPetSigCh::EdgeType edge
+    double tdcChannelTime, const JPetChannel &channel,
+    JPetSigCh::EdgeType edge, std::map<int, double>& siPMOffsetMap
   );
 };
 

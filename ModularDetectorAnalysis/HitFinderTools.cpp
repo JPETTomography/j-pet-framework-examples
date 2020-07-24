@@ -75,7 +75,7 @@ vector<JPetHit> HitFinderTools::matchAllSignals(
       for (auto refSignal : scinSigals.second) {
         auto refHit = createDummyRefDetHit(refSignal);
         refHits.push_back(refHit);
-        if (saveHistos) {
+        if (saveHistos && refHit.getEnergy()!=0.0) {
           stats.getHisto1D("ref_hit_signalB_tot")->Fill(refHit.getEnergy());
         }
       }
@@ -195,8 +195,10 @@ JPetHit HitFinderTools::createHit(
       stats.getHisto1D(Form("hit_sig_multi_scin_%d", scinID))->Fill(multi);
       stats.getHisto1D(Form("hit_tdiff_scin_%d_m_%d", hit.getScin().getID(), ((int) multi)))
       ->Fill(hit.getTimeDiff());
-      stats.getHisto1D(Form("hit_tot_scin_%d_m_%d", hit.getScin().getID(), ((int) multi)))
-      ->Fill(hit.getEnergy()/((double) multi));
+      if(hit.getEnergy()!=0.0){
+        stats.getHisto1D(Form("hit_tot_scin_%d_m_%d", hit.getScin().getID(), ((int) multi)))
+        ->Fill(hit.getEnergy()/((double) multi));
+      }
       // stats.getHisto2D("hit_pos_per_scin")->Fill(hit.getPosZ(), hit.getScin().getID());
     }
   }

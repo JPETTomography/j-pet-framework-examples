@@ -161,7 +161,7 @@ void HitFinder::initialiseHistograms(){
       getStatistics().createHistogram(new TH1F(
         Form("hit_tot_scin_%d_m_%d", scinID, multi),
         Form("Hit TOT divided by multiplicity, scin %d multi %d", scinID, multi),
-        200, 0.0, 375000.0
+        200, 0.0, 400000.0
       ));
       getStatistics().getHisto1D(Form("hit_tot_scin_%d_m_%d", scinID, multi))
       ->GetXaxis()->SetTitle("Time over Threshold [ps]");
@@ -178,7 +178,7 @@ void HitFinder::initialiseHistograms(){
   getStatistics().getHisto1D("ref_hits_per_time_slot")->GetYaxis()->SetTitle("Number of Time Slots");
 
   getStatistics().createHistogram(new TH1F(
-    "ref_hit_signalB_tot", "RefDet hits TOT of signal B", 200, 0.0, 100000.0
+    "ref_hit_signalB_tot", "RefDet hits TOT of signal B", 200, 0.0, 400000.0
   ));
   getStatistics().getHisto1D("ref_hit_signalB_tot")->GetXaxis()->SetTitle("TOT [ps]");
   getStatistics().getHisto1D("ref_hit_signalB_tot")->GetYaxis()->SetTitle("Number of hits");

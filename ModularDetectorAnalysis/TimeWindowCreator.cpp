@@ -53,6 +53,20 @@ bool TimeWindowCreator::init()
       )
     );
   }
+
+  // Vector of active PMs ID
+  if (isOptionSet(fParams.getOptions(), kActivePMsIDParamKey)) {
+    fActivePMIDs = getOptionAsVectorOfInts(fParams.getOptions(), kActivePMsIDParamKey);
+  }
+
+  // Looking for offsets of active SiPM
+  for(auto pmID : fActivePMIDs){
+    string paramKeyOffset = kSiPMOffsetPrefix+to_string(pmID)+kSiPMOffsetSuffix;
+    if (isOptionSet(fParams.getOptions(), paramKeyOffset)) {
+      fSiPMOffsetMap[pmID] = getOptionAsDouble(fParams.getOptions(), paramKeyOffset);
+    }
+  }
+
   // Getting bool for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey)) {
     fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
@@ -90,7 +104,7 @@ bool TimeWindowCreator::exec()
 
       // Building Signal Channels for this Channel
       auto allSigChs = TimeWindowCreatorTools::buildSigChs(
-        tdcChannel, channel, fMaxTime, fMinTime
+        tdcChannel, channel, fMaxTime, fMinTime, fSiPMOffsetMap
       );
 
       // Sort Signal Channels in time
