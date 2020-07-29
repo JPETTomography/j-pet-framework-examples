@@ -1,4 +1,4 @@
-# Scripts usefull for analysis in J-PET Framework
+# Scripts for running the J-PET Framework analyses in parallel
 
 ## parallel_analysis.py
 
@@ -7,7 +7,7 @@ This script is used to run parallel analysis of J-PET Framework example in easy 
 ### Usage:
 
 ```
-./parallel_analysis.py <exacutable> [-i | --input] <directory_to_analyze> [-r | --run_id] <id_of_run> 
+./parallel_analysis.py <exacutable> [-i | --input] <directory_to_analyze> [-r | --run_id] <id_of_run>
 ```
 User can specify a single directory, list of directories (ex. dir1 dir2 dir3), or the glob expression (dir*, or dir/*/dir)
 
@@ -16,13 +16,13 @@ To see all possible options run:
 ```
 ./parallel_analysis.py [-h | --help]
 ```
-User can specify optput directory with a flag:
+User can specify output directory with a flag:
 ```
-[-o | --output] <output_directory> (default: same as inptut)
+[-o | --output] <output_directory> (default: same as input)
 ```
 analyse only files with specific extension:
 ```
-[-e | --extension] <extension>  (dafault: root)
+[-e | --extension] <extension>  (default: root)
 ```
 analyze different type of file:
 ```
@@ -32,16 +32,16 @@ disable progress bar:
 ```
 [-p | --progress-bar]
 ```
-or change defaul number of processes run simultaneously:
+or change default number of processes to run simultaneously:
 ```
-[-n  | --number_of_threads]
+[-n  | --number_of_threads] (default: 20)
 ```
 
 ## purge.C
 
 ROOT script to remove all ROOT file contents except for TDirectory-based objects.
 
-In practice, when applied to a file produced by hadd-ing multiple output files from the J-PET Analysis Framework, it will remove anything besides directories with histograms (especially multiple instances of ParamBank which are a common nuisance with hadd-ed files will be deleted) allowing for faster opening of files and inspection of histograms.  
+In practice, when applied to a file produced by hadd-ing multiple output files from the J-PET Analysis Framework, it will remove anything besides directories with histograms (especially multiple instances of ParamBank, which are a common nuisance with hadd-ed files, will be deleted) allowing for faster opening of files and inspection of histograms.
 
 ### Usage:
 
@@ -54,7 +54,7 @@ The script modifies the indicated file in-place
 
 ## parallel_purge.py
 
-Python script to run purge.C in parallel to, for ex. purge files before hadding. Script "purge.C" must be locatet in the same directory as parallel_purge.py
+Python script to run purge.C in parallel to, i.e. purge files before hadding. Script "purge.C" must be located in the same directory as parallel_purge.py
 
 ### Usage:
 ```
@@ -73,5 +73,5 @@ You can disable progress bar by running:
 ```
 and set number of parallel proceses by:
 ```
-[-n | --number_of_threads]
+[-n | --number_of_threads] (default: 20)
 ```
