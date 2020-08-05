@@ -10,7 +10,9 @@ See comment above
 
 - "GeantParser_SourceActivity_double"
 default value [MBq]: 4.7
-Activity for the analyzed run - see proper report at PetWiki
+Activity for the analyzed run. The provided acvitivy will be used to distribute the simulated events in the time windows in appropriate time intervals.
+Please note that application of the provided source activity assumes that complete output of MC simulations with [J-PET-geant4](https://github.com/JPETTomography/J-PET-geant4/) was saved to the mcGeant.root files.
+In case the MC-simulated events were filtered e.g. by requirements of a given number of recorded hits, the applied source activity will not be physically meaningful.
 
 - "GeantParser_MakeHistograms_bool"
 default value : true
