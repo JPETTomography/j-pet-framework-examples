@@ -47,20 +47,17 @@ protected:
   const std::string kLeadTrailMaxTimeParamKey = "SignalFinder_LeadTrailMaxTime_double";
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kEdgeMaxTimeParamKey = "SignalFinder_EdgeMaxTime_double";
-  const std::string kActivePMsIDParamKey = "ActivePMIDs_std::vector<int>";
-  const std::string kSaveCutDataParamKey = "Save_Cut_Data_bool";
-  const std::string kToTCutAllParamKey = "SignalFinder_ToTCutLimits_AllPMs_std::vector<double>";
-  const std::string kToTCutPrefix = "SignalFinder_ToTCutLimits_";
-  const std::string kToTCutSuffix = "_std::vector<double>";
+  const std::string kMinPMIDParamKey = "Histo_MinPMID_int";
+  const std::string kMaxPMIDParamKey = "Histo_MaxPMID_int";
+
   const int kNumOfThresholds = 2;
-  std::map<int, std::pair<double, double>> fToTCutLimitsMap;
-  std::pair<double, double> fToTCutLimitsAll;
-  std::vector<int> fActivePMIDs;
   double fSigChLeadTrailMaxTime = 23000.0;
   double fSigChEdgeMaxTime = 5000.0;
   bool fSaveControlHistos = true;
-  bool fSaveCutData = false;
   double fScalingFactor = 0.01;
+  int fMinPMID = 0;
+  int fMaxPMID = 1;
+
   void initialiseHistograms();
 };
 

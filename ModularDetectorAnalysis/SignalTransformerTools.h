@@ -44,7 +44,6 @@
      std::vector<JPetRawSignal>& rawSigVec, double mergingTime,
      JPetStatistics& stats, bool saveHistos
    );
-   static bool isScinActive(std::vector<int> activeIDs, int id);
    static double getRawSigBaseTime(JPetRawSignal& rawSig);
 
  private:

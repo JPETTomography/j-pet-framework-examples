@@ -67,14 +67,6 @@ bool EventFinder::init()
     fTimeWalkBParam = getOptionAsDouble(fParams.getOptions(), kTimeWalkCorrBParamKey);
   }
 
-  // ToT cut params
-  if (isOptionSet(fParams.getOptions(), kToTCutMinParamKey)) {
-    fToTCutMin = getOptionAsDouble(fParams.getOptions(), kToTCutMinParamKey);
-  }
-  if (isOptionSet(fParams.getOptions(), kToTCutMaxParamKey)) {
-    fToTCutMax = getOptionAsDouble(fParams.getOptions(), kToTCutMaxParamKey);
-  }
-
   // Limits of histograms
   if (isOptionSet(fParams.getOptions(), kHistoTDiffMinParamKey)) {
     fHistoTDiffMin = getOptionAsDouble(fParams.getOptions(), kHistoTDiffMinParamKey);
@@ -161,6 +153,7 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
   vector<JPetEvent> eventVec;
   const unsigned int nHits = timeWindow.getNumberOfEvents();
   unsigned int count = 0;
+
   while(count<nHits){
 
     auto hit = dynamic_cast<const JPetHit&>(timeWindow.operator[](count));
@@ -206,7 +199,7 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
         getStatistics().getHisto1D("coin_tot")->Fill(tot);
 
         // Checking multi cut and ToT cut
-        if(multi == 16 && tot>fToTCutMin && tot<fToTCutMax) {
+        if(multi == 16) {
           // Good coincidence, creating new event
           JPetEvent event;
           event.setEventType(JPetEventType::k2Gamma);

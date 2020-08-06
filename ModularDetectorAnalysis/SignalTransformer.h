@@ -42,12 +42,15 @@ public:
 protected:
 	const std::string kMergeSignalsTimeParamKey = "SignalTransformer_MergeSignalsTime_double";
 	const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
-	const std::string kActiveScinsIDParamKey = "ActiveScinsID_std::vector<int>";
+	const std::string kMinScinIDParamKey = "Histo_MinScinID_int";
+	const std::string kMaxScinIDParamKey = "Histo_MaxScinID_int";
+
 	void saveMatrixSignals(const std::vector<JPetMatrixSignal>& mtxSigVec);
-	std::vector<int> fActiveScinIDs;
+	void initialiseHistograms();
 	bool fSaveControlHistos = true;
 	double fMergingTime = 20000.0;
-	void initialiseHistograms();
+	int fMinScinID = 0;
+	int fMaxScinID = 1;
 };
 
 #endif /* !SIGNALTRANSFORMER_H */

@@ -53,12 +53,7 @@ protected:
 	const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
 	const std::string kMaxTimeParamKey = "TimeWindowCreator_MaxTime_double";
 	const std::string kMinTimeParamKey = "TimeWindowCreator_MinTime_double";
-	const std::string kActivePMsIDParamKey = "ActivePMIDs_std::vector<int>";
-	const std::string kSiPMOffsetPrefix = "TimeWindowCreator_SiPMOffset_";
-	const std::string kSiPMOffsetSuffix = "_double";
-	std::map<int, double> fSiPMOffsetMap;
 	bool fSaveControlHistos = true;
-	std::vector<int> fActivePMIDs;
 	double fMinTime = 0.0;
 	double fMaxTime = 1.e6;
 	// Number for scaling some histograms, so they are not reaching their memory capacity

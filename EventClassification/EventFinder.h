@@ -96,9 +96,6 @@ protected:
   double fTimeWalkAParam = 1.0;
   double fTimeWalkBParam = 0.0;
 
-  double fToTCutMin = 110000.0;
-  double fToTCutMax = 170000.0;
-
   double fHistoTDiffMin = -10000.0;
   double fHistoTDiffMax = 10000.0;
   double fHistoTOTMin = -0.0002;

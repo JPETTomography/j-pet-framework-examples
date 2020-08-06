@@ -49,12 +49,14 @@ protected:
   void initialiseHistograms();
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kRefDetScinIDParamKey = "TimeCalibration_RefDetScinID_int";
-  const std::string kActiveScinsIDParamKey = "ActiveScinsID_std::vector<int>";
   const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_double";
-  std::vector<int> fActiveScinsIDs;
+  const std::string kMinScinIDParamKey = "Histo_MinScinID_int";
+  const std::string kMaxScinIDParamKey = "Histo_MaxScinID_int";
   bool fSaveControlHistos = true;
   double fABTimeDiff = 10000.0;
   int fRefDetScinID = -1;
+  int fMinScinID = 0;
+  int fMaxScinID = 1;
 };
 
 #endif /* !HITFINDER1_H */

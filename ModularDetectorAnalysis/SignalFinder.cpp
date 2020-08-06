@@ -57,45 +57,21 @@ bool SignalFinder::init()
     ));
   }
 
-  // Vector of active PMs ID
-  if (isOptionSet(fParams.getOptions(), kActivePMsIDParamKey)) {
-    fActivePMIDs = getOptionAsVectorOfInts(fParams.getOptions(), kActivePMsIDParamKey);
-  }
-
-  // Limits for ToT cut for all SiPMs (used if limits not defined for specific PMs)
-  if (isOptionSet(fParams.getOptions(), kToTCutAllParamKey)) {
-    auto tempVec = getOptionAsVectorOfDoubles(fParams.getOptions(), kToTCutAllParamKey);
-    if(tempVec.size()>1) {
-      // reading limits from options vector
-      fToTCutLimitsAll = make_pair(tempVec.at(0), tempVec.at(1));
-    } else {
-      // if there is something worng with the vector - all spectrum - no cut
-      fToTCutLimitsAll = make_pair(0.0, 1.1*fSigChLeadTrailMaxTime);
-    }
+  if (isOptionSet(fParams.getOptions(), kMinPMIDParamKey)) {
+    fMinPMID = getOptionAsInt(fParams.getOptions(), kMinPMIDParamKey);
   } else {
-    // no cut
-    fToTCutLimitsAll = make_pair(0.0, 1.1*fSigChLeadTrailMaxTime);
+    fMinPMID = getParamBank().getPMs().begin()->first;
   }
 
-  // Looking for limits for ToT cut of active SiPM
-  for(auto pmID : fActivePMIDs){
-    string paramKeyToT = kToTCutPrefix+to_string(pmID)+kToTCutSuffix;
-    if (isOptionSet(fParams.getOptions(), paramKeyToT)) {
-      auto tempVec = getOptionAsVectorOfDoubles(fParams.getOptions(), paramKeyToT);
-      if(tempVec.size()>1) {
-        fToTCutLimitsMap[pmID] = make_pair(tempVec.at(0), tempVec.at(1));
-      }
-    }
+  if (isOptionSet(fParams.getOptions(), kMaxPMIDParamKey)) {
+    fMaxPMID = getOptionAsInt(fParams.getOptions(), kMaxPMIDParamKey);
+  } else {
+    fMaxPMID = getParamBank().getPMs().rbegin()->first;
   }
 
   // Getting bool for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey)) {
     fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
-  }
-
-  // Getting bool for saving histograms
-  if (isOptionSet(fParams.getOptions(), kSaveCutDataParamKey)) {
-    fSaveCutData = getOptionAsBool(fParams.getOptions(), kSaveCutDataParamKey);
   }
 
   // Creating control histograms
@@ -108,7 +84,7 @@ bool SignalFinder::exec()
   // Getting the data from event in an apropriate format
   if(auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     // Distribute signal channels by PM IDs
-    auto& sigChByPM = SignalFinderTools::getSigChByPM(timeWindow, fActivePMIDs);
+    auto& sigChByPM = SignalFinderTools::getSigChByPM(timeWindow);
     // Building signals
     auto allSignals = SignalFinderTools::buildAllSignals(
       sigChByPM, fSigChEdgeMaxTime, fSigChLeadTrailMaxTime,
@@ -139,54 +115,26 @@ void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& rawSigVec)
   for (auto & rawSig : rawSigVec) {
     auto leads = rawSig.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrValue);
     auto trails = rawSig.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrValue);
-    bool cut = false;
 
     // Saving only signals with lead-trail pair on threshold
     if(leads.size()==kNumOfThresholds && trails.size()==kNumOfThresholds) {
+      fOutputEvents->add<JPetRawSignal>(rawSig);
 
       auto scinID = rawSig.getPM().getScin().getID();
       auto pmID = rawSig.getPM().getID();
+      if(pmID<fMinPMID || pmID>fMaxPMID) { continue; }
 
       double leadsDiff = leads.at(1).getTime()-leads.at(0).getTime();
       double trailsDiff = trails.at(1).getTime()-trails.at(0).getTime();
 
       double tot1 = trails.at(0).getTime()-leads.at(0).getTime();
       double tot2 = trails.at(1).getTime()-leads.at(1).getTime();
-      pair<double, double> limits;
-
-      auto search = fToTCutLimitsMap.find(pmID);
-      if(search != fToTCutLimitsMap.end()){
-        // cut with parameters specific for this SiPM
-        limits = fToTCutLimitsMap.at(pmID);
-      } else {
-        // cut with general parameters
-        limits = fToTCutLimitsAll;
-      }
-      if(tot1 > limits.first && tot1 < limits.second && tot2 > limits.first && tot2 < limits.second) {
-        if(fSaveControlHistos && SignalFinderTools::isPMActive(fActivePMIDs, pmID)) {
-          getStatistics().getHisto1D(Form("cut_tot_thr1_sipm_%d", pmID))->Fill(tot1);
-          getStatistics().getHisto1D(Form("cut_tot_thr2_sipm_%d", pmID))->Fill(tot2);
-          getStatistics().getHisto1D(Form("cut_lead_thr1_thr2_tdiff_sipm_%d", pmID))->Fill(leadsDiff);
-          getStatistics().getHisto1D(Form("cut_trail_thr1_thr2_tdiff_sipm_%d", pmID))->Fill(trailsDiff);
-        }
-      } else {
-        cut = true;
-      }
 
       if(fSaveControlHistos){
+        getStatistics().getHisto1D(Form("tot_sipm_%d", pmID))->Fill((tot1+tot2)/2);
 
-        if(cut) {
-          getStatistics().getHisto1D("cuts_stats")->Fill(2);
-        } else {
-          getStatistics().getHisto1D("cuts_stats")->Fill(1);
-        }
-
-        if(SignalFinderTools::isPMActive(fActivePMIDs, pmID)){
-          getStatistics().getHisto1D(Form("lead_thr1_thr2_tdiff_sipm_%d", pmID))->Fill(leadsDiff);
-          getStatistics().getHisto1D(Form("trail_thr1_thr2_tdiff_sipm_%d", pmID))->Fill(trailsDiff);
-          getStatistics().getHisto1D(Form("tot_thr1_sipm_%d", pmID))->Fill(tot1);
-          getStatistics().getHisto1D(Form("tot_thr2_sipm_%d", pmID))->Fill(tot2);
-        }
+        // getStatistics().getHisto1D(Form("lead_thr1_thr2_tdiff_sipm_%d", pmID))->Fill(leadsDiff);
+        // getStatistics().getHisto1D(Form("trail_thr1_thr2_tdiff_sipm_%d", pmID))->Fill(trailsDiff);
 
         if(gRandom->Uniform()<fScalingFactor) {
           getStatistics().getHisto1D("rawsig_per_pm")->Fill(pmID);
@@ -204,26 +152,12 @@ void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& rawSigVec)
           }
         }
       }
-    } else {
-      cut = true;
-      if(fSaveControlHistos){
-        getStatistics().getHisto1D("cuts_stats")->Fill(3);
-      }
-    }
-
-    // Saving or not
-    if(fSaveCutData){
-      fOutputEvents->add<JPetRawSignal>(rawSig);
-    } else if(!cut){
-      fOutputEvents->add<JPetRawSignal>(rawSig);
     }
   }
 }
 
 void SignalFinder::initialiseHistograms(){
 
-  auto minPMID = getParamBank().getPMs().begin()->first;
-  auto maxPMID = getParamBank().getPMs().rbegin()->first;
   auto minScinD = getParamBank().getScins().begin()->first;
   auto maxScinID = getParamBank().getScins().rbegin()->first;
 
@@ -240,7 +174,7 @@ void SignalFinder::initialiseHistograms(){
 
   getStatistics().createHistogram(new TH1F(
     "unused_sigch_pm", "Unused Signal Channels per SiPM",
-    maxPMID-minPMID+1, minPMID-0.5, maxPMID+0.5
+    fMaxPMID-fMinPMID+1, fMinPMID-0.5, fMaxPMID+0.5
   ));
   getStatistics().getHisto1D("unused_sigch_pm")->GetXaxis()->SetTitle("SiPM ID");
   getStatistics().getHisto1D("unused_sigch_pm")->GetYaxis()->SetTitle("Number of Signal Channels");
@@ -248,7 +182,7 @@ void SignalFinder::initialiseHistograms(){
   // Occupancies and multiplicities
   getStatistics().createHistogram(new TH1F(
     "rawsig_per_pm", "Raw Signals per SiPM",
-    maxPMID-minPMID+1, minPMID-0.5, maxPMID+0.5
+    fMaxPMID-fMinPMID+1, fMinPMID-0.5, fMaxPMID+0.5
   ));
   getStatistics().getHisto1D("rawsig_per_pm")->GetXaxis()->SetTitle("SiPM ID");
   getStatistics().getHisto1D("rawsig_per_pm")->GetYaxis()->SetTitle("Number of Raw Signals");
@@ -281,102 +215,38 @@ void SignalFinder::initialiseHistograms(){
   getStatistics().getHisto1D("rawsig_multi")->GetYaxis()->SetTitle("Number of Signal Channels");
 
   getStatistics().createHistogram(new TH1F(
-    "rawsig_tslot", "Number of Raw Signals in Time Window", 200, -0.5, 199.5
+    "rawsig_tslot", "Number of Raw Signals in Time Window", 50, -0.5, 50.5
   ));
   getStatistics().getHisto1D("rawsig_tslot")->GetXaxis()->SetTitle("Number of Raw Signal in Time Window");
   getStatistics().getHisto1D("rawsig_tslot")->GetYaxis()->SetTitle("Number of Time Windows");
 
-  // ToT cut stats
-  getStatistics().createHistogram(new TH1F(
-    "cuts_stats", "Number of Raw Signals vs. cuts", 4, 0.5, 4.5
-  ));
-  getStatistics().getHisto1D("cuts_stats")->GetXaxis()->SetBinLabel(1, "ALL PASS");
-  getStatistics().getHisto1D("cuts_stats")->GetXaxis()->SetBinLabel(2, "TOT CUT");
-  getStatistics().getHisto1D("cuts_stats")->GetXaxis()->SetBinLabel(3, "2THR CUT");
-  getStatistics().getHisto1D("cuts_stats")->GetXaxis()->SetBinLabel(4, " ");
-
-  // Time differences lead/trail/THR1/THR2 per SiPM
-  for(auto pmID : fActivePMIDs) {
+  for(int pmID=fMinPMID; pmID<=fMaxPMID; pmID++){
     getStatistics().createHistogram(new TH1F(
-      Form("lead_thr1_thr2_tdiff_sipm_%d", pmID),
-      Form("Time Difference between leading Signal Channels THR1 and THR2 in found signals on SiPM ID %d", pmID),
-      200, -1.1*fSigChEdgeMaxTime, 1.1*fSigChEdgeMaxTime
-    ));
-    getStatistics().getHisto1D(Form("lead_thr1_thr2_tdiff_sipm_%d", pmID))
-    ->GetXaxis()->SetTitle("time diff [ps]");
-    getStatistics().getHisto1D(Form("lead_thr1_thr2_tdiff_sipm_%d", pmID))
-    ->GetYaxis()->SetTitle("Number of Signal Channel Pairs");
-
-    getStatistics().createHistogram(new TH1F(
-      Form("trail_thr1_thr2_tdiff_sipm_%d", pmID),
-      Form("Time Difference between trailing Signal Channels THR1 and THR2 in found signals on SiPM ID %d", pmID),
-      200, -2.0*fSigChEdgeMaxTime, 2.0*fSigChEdgeMaxTime
-    ));
-    getStatistics().getHisto1D(Form("trail_thr1_thr2_tdiff_sipm_%d", pmID))
-    ->GetXaxis()->SetTitle("time diff [ps]");
-    getStatistics().getHisto1D(Form("trail_thr1_thr2_tdiff_sipm_%d", pmID))
-    ->GetYaxis()->SetTitle("Number of Signal Channel Pairs");
-
-    // After ToT cut
-    getStatistics().createHistogram(new TH1F(
-      Form("cut_lead_thr1_thr2_tdiff_sipm_%d", pmID),
-      Form("Time Difference between leading Signal Channels THR1 and THR2 in found signals on SiPM ID %d after ToT cut", pmID),
-      200, -1.1*fSigChEdgeMaxTime, 1.1*fSigChEdgeMaxTime
-    ));
-    getStatistics().getHisto1D(Form("cut_lead_thr1_thr2_tdiff_sipm_%d", pmID))
-    ->GetXaxis()->SetTitle("time diff [ps]");
-    getStatistics().getHisto1D(Form("cut_lead_thr1_thr2_tdiff_sipm_%d", pmID))
-    ->GetYaxis()->SetTitle("Number of Signal Channel Pairs");
-
-    getStatistics().createHistogram(new TH1F(
-      Form("cut_trail_thr1_thr2_tdiff_sipm_%d", pmID),
-      Form("Time Difference between trailing Signal Channels THR1 and THR2 in found signals on SiPM ID %d after cut", pmID),
-      200, -2.0*fSigChEdgeMaxTime, 2.0*fSigChEdgeMaxTime
-    ));
-    getStatistics().getHisto1D(Form("cut_trail_thr1_thr2_tdiff_sipm_%d", pmID))
-    ->GetXaxis()->SetTitle("time diff [ps]");
-    getStatistics().getHisto1D(Form("cut_trail_thr1_thr2_tdiff_sipm_%d", pmID))
-    ->GetYaxis()->SetTitle("Number of Signal Channel Pairs");
-
-    getStatistics().createHistogram(new TH1F(
-      Form("tot_thr1_sipm_%d", pmID),
-      Form("Signal Time over Threshold on THR1 on SiPM ID %d", pmID),
+      Form("tot_sipm_%d", pmID),
+      Form("Signal Time over Threshold - SiPM ID %d", pmID),
       200, 0.0, 1.1*fSigChLeadTrailMaxTime
     ));
-    getStatistics().getHisto1D(Form("tot_thr1_sipm_%d", pmID))
-    ->GetXaxis()->SetTitle("TOT [ps]");
-    getStatistics().getHisto1D(Form("tot_thr1_sipm_%d", pmID))
-    ->GetYaxis()->SetTitle("Number of Raw Signal");
+    getStatistics().getHisto1D(Form("tot_sipm_%d", pmID))->GetXaxis()->SetTitle("TOT [ps]");
+    getStatistics().getHisto1D(Form("tot_sipm_%d", pmID))->GetYaxis()->SetTitle("Number of Raw Signal");
 
-    getStatistics().createHistogram(new TH1F(
-      Form("tot_thr2_sipm_%d", pmID),
-      Form("Signal Time over Threshold on THR2 on SiPM ID %d", pmID),
-      200, 0.0, 1.1*fSigChLeadTrailMaxTime
-    ));
-    getStatistics().getHisto1D(Form("tot_thr2_sipm_%d", pmID))
-    ->GetXaxis()->SetTitle("TOT [ps]");
-    getStatistics().getHisto1D(Form("tot_thr2_sipm_%d", pmID))
-    ->GetYaxis()->SetTitle("Number of Raw Signal");
-
-    // After ToT cut
-    getStatistics().createHistogram(new TH1F(
-      Form("cut_tot_thr1_sipm_%d", pmID),
-      Form("Signal Time over Threshold on THR1 on SiPM ID %d after cut", pmID),
-      200, 0.0, 1.1*fSigChLeadTrailMaxTime
-    ));
-    getStatistics().getHisto1D(Form("cut_tot_thr1_sipm_%d", pmID))
-    ->GetXaxis()->SetTitle("TOT [ps]");
-    getStatistics().getHisto1D(Form("cut_tot_thr1_sipm_%d", pmID))
-    ->GetYaxis()->SetTitle("Number of Raw Signal");
-
-    getStatistics().createHistogram(new TH1F(
-      Form("cut_tot_thr2_sipm_%d", pmID),
-      Form("Signal Time over Threshold on THR2 on SiPM ID %d after cut", pmID),
-      200, 0.0, 1.1*fSigChLeadTrailMaxTime
-    ));
-    getStatistics().getHisto1D(Form("cut_tot_thr2_sipm_%d", pmID))
-    ->GetXaxis()->SetTitle("TOT [ps]");
-    getStatistics().getHisto1D(Form("cut_tot_thr2_sipm_%d", pmID))
-    ->GetYaxis()->SetTitle("Number of Raw Signal");
+    // getStatistics().createHistogram(new TH1F(
+    //   Form("lead_thr1_thr2_tdiff_sipm_%d", pmID),
+    //   Form("Time Difference between leading Signal Channels THR1 and THR2 in found signals on SiPM ID %d", pmID),
+    //   200, -1.1*fSigChEdgeMaxTime, 1.1*fSigChEdgeMaxTime
+    // ));
+    // getStatistics().getHisto1D(Form("lead_thr1_thr2_tdiff_sipm_%d", pmID))
+    // ->GetXaxis()->SetTitle("time diff [ps]");
+    // getStatistics().getHisto1D(Form("lead_thr1_thr2_tdiff_sipm_%d", pmID))
+    // ->GetYaxis()->SetTitle("Number of Signal Channel Pairs");
+    //
+    // getStatistics().createHistogram(new TH1F(
+    //   Form("trail_thr1_thr2_tdiff_sipm_%d", pmID),
+    //   Form("Time Difference between trailing Signal Channels THR1 and THR2 in found signals on SiPM ID %d", pmID),
+    //   200, -2.0*fSigChEdgeMaxTime, 2.0*fSigChEdgeMaxTime
+    // ));
+    // getStatistics().getHisto1D(Form("trail_thr1_thr2_tdiff_sipm_%d", pmID))
+    // ->GetXaxis()->SetTitle("time diff [ps]");
+    // getStatistics().getHisto1D(Form("trail_thr1_thr2_tdiff_sipm_%d", pmID))
+    // ->GetYaxis()->SetTitle("Number of Signal Channel Pairs");
   }
 }

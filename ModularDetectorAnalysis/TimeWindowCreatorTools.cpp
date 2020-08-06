@@ -33,8 +33,7 @@ using namespace std;
  * Building all Signal Chnnels from one TDC
  */
 vector<JPetSigCh> TimeWindowCreatorTools::buildSigChs(
-  TDCChannel* tdcChannel, const JPetChannel& channel,
-  double maxTime, double minTime, map<int, double>& siPMOffsetMap
+  TDCChannel* tdcChannel, const JPetChannel& channel, double maxTime, double minTime
 ){
   vector<JPetSigCh> allSigChs;
 
@@ -43,7 +42,7 @@ vector<JPetSigCh> TimeWindowCreatorTools::buildSigChs(
     auto leadTime = tdcChannel->GetLeadTime(j);
     if (leadTime > maxTime || leadTime < minTime ) { continue; }
     auto leadSigCh = generateSigCh(
-      leadTime, channel, JPetSigCh::Leading, siPMOffsetMap
+      leadTime, channel, JPetSigCh::Leading
     );
     allSigChs.push_back(leadSigCh);
   }
@@ -53,7 +52,7 @@ vector<JPetSigCh> TimeWindowCreatorTools::buildSigChs(
     auto trailTime = tdcChannel->GetTrailTime(j);
     if (trailTime > maxTime || trailTime < minTime ) { continue; }
     auto trailSigCh = generateSigCh(
-      trailTime, channel, JPetSigCh::Trailing, siPMOffsetMap
+      trailTime, channel, JPetSigCh::Trailing
     );
     allSigChs.push_back(trailSigCh);
   }
@@ -115,17 +114,10 @@ void TimeWindowCreatorTools::flagSigChs(
 * Sets up Signal Channel fields
 */
 JPetSigCh TimeWindowCreatorTools::generateSigCh(
-  double tdcChannelTime, const JPetChannel& channel,
-  JPetSigCh::EdgeType edge, map<int, double>& siPMOffsetMap
+  double tdcChannelTime, const JPetChannel& channel, JPetSigCh::EdgeType edge
 ) {
-  double offset = 0.0;
-  auto search = siPMOffsetMap.find(channel.getPM().getID());
-  if(search != siPMOffsetMap.end()){
-    offset = siPMOffsetMap.at(channel.getPM().getID());
-  }
-
   JPetSigCh sigCh;
-  sigCh.setTime(1000.0*tdcChannelTime - offset);
+  sigCh.setTime(1000.0*tdcChannelTime);
   sigCh.setType(edge);
   sigCh.setChannel(channel);
   sigCh.setRecoFlag(JPetSigCh::Unknown);

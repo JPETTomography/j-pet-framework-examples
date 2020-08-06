@@ -169,11 +169,3 @@ void SignalTransformerTools::sortByTime(vector<JPetRawSignal>& input)
     }
   );
 }
-
-bool SignalTransformerTools::isScinActive(vector<int> activeIDs, int id)
-{
-  for(auto element : activeIDs) {
-    if(element==id) return true;
-  }
-  return false;
-}
