@@ -32,6 +32,12 @@
 class HitFinderTools
 {
 public:
+  enum TOTCalculationType
+  {
+    kSimplified,
+    kThresholdRectangular,
+    kThresholdTrapeze
+  };
   static void sortByTime(std::vector<JPetPhysSignal>& signals);
   static std::map<int, std::vector<JPetPhysSignal>> getSignalsBySlot(
     const JPetTimeWindow* timeWindow, bool useCorrupts
@@ -59,7 +65,12 @@ public:
   static JPetHit createDummyRefDetHit(const JPetPhysSignal& signal);
   static int getProperChannel(const JPetPhysSignal& signal);
   static void checkTheta(const double& theta);
-  static double calculateToT(const JPetHit& hit);
+  static void setTOTCalculationType(std::string type);
+  static double calculateTOT(const JPetHit& hit);
+  static double calculateTOTside(const std::map<int, double> & thrToTOT_side);
+private:
+    
+  static TOTCalculationType fTOTCalculationType;
 };
 
 #endif /* !HITFINDERTOOLS_H */

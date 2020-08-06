@@ -60,6 +60,9 @@ time window for matching Signals on the same scintillator and different sides. D
 - `HitFinder_RefDetScinID_int`  
 `ID` of Reference Detector Scintillator, needed for creating reference hits
 
+- `HitFinder_TOTCalculationType_std::string`  
+Type of the calculations of the TOT - it can be standard sum (option "standard"), a extended sum taking into account thresholds differences and calculated as rectangulars (option "rectangular"), additional extension that add also differences between the TOTs on different thresholds and calculates sum as sum of the trapezes (option "trapeze")
+
 - `EventFinder_UseCorruptedHits_bool`  
 Indication if Event Finder module should use hits flagged as Corrupted in the previous task. Default value: `false`
 

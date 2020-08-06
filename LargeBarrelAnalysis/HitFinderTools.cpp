@@ -23,6 +23,8 @@
 using namespace tot_energy_converter;
 using namespace std;
 
+HitFinderTools::TOTCalculationType HitFinderTools::fTOTCalculationType;
+
 /**
  * Helper method for sotring signals in vector
  */
@@ -186,7 +188,7 @@ JPetHit HitFinderTools::createHit(
   hit.setPosZ(velocity * hit.getTimeDiff() / 2000.0);
 
   if(convertToT) {
-    auto tot = calculateToT(hit);
+    auto tot = calculateTOT(hit);
     /// Checking if provided conversion function accepts calculated value of ToT
     if(tot > totConverter.getRange().first && tot < totConverter.getRange().second){
       auto energy = totConverter(tot);
@@ -267,31 +269,59 @@ void HitFinderTools::checkTheta(const double& theta)
 }
 
 /**
-* Calculation of the total ToT of the hit - Time over Threshold:
-* the sum of the ToTs on all of the thresholds (1-4) and on the both sides (A,B)
+* Calculation of the total TOT of the hit - Time over Threshold:
+* the weighted sum of the TOTs on all of the thresholds (1-4) and on the both sides (A,B) 
 */
-double HitFinderTools::calculateToT(const JPetHit& hit)
+
+void HitFinderTools::setTOTCalculationType(std::string type)
+{
+    if (type == "rectangular") {
+      fTOTCalculationType = TOTCalculationType::kThresholdRectangular;
+    } else if (type == "trapeze") {
+      fTOTCalculationType = TOTCalculationType::kThresholdTrapeze;
+    } else {
+      fTOTCalculationType = TOTCalculationType::kSimplified;
+    }
+}
+
+double HitFinderTools::calculateTOT(const JPetHit& hit)
 {
   double tot = 0.0;
 
-  auto sigALead = hit.getSignalA().getRecoSignal().getRawSignal()
-    .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-  auto sigBLead = hit.getSignalB().getRecoSignal().getRawSignal()
-    .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-  auto sigATrail = hit.getSignalA().getRecoSignal().getRawSignal()
-    .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-  auto sigBTrail = hit.getSignalB().getRecoSignal().getRawSignal()
-    .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+  std::map<int, double> thrToTOT_sideA = hit.getSignalA().getRecoSignal().getRawSignal().getTOTsVsThresholdValue();
+  std::map<int, double> thrToTOT_sideB = hit.getSignalB().getRecoSignal().getRawSignal().getTOTsVsThresholdValue();
 
-  if (sigALead.size() > 0 && sigATrail.size() > 0){
-    for (unsigned i = 0; i < sigALead.size() && i < sigATrail.size(); i++){
-      tot += (sigATrail.at(i).getValue() - sigALead.at(i).getValue());
+  tot += calculateTOTside(thrToTOT_sideA);
+  tot += calculateTOTside(thrToTOT_sideB);
+  return tot;
+}
+
+double HitFinderTools::calculateTOTside(const std::map<int, double> & thrToTOT_side)
+{
+  double tot = 0., weight = 1.;
+  if (!thrToTOT_side.empty()) {
+    double firstThr = thrToTOT_side.begin()->first;
+    tot += weight*thrToTOT_side.begin()->second;
+    if( thrToTOT_side.size() > 1 )
+    {
+      for (auto it = std::next(thrToTOT_side.begin(), 1); it != thrToTOT_side.end(); it++) {
+        switch(fTOTCalculationType) {
+        case TOTCalculationType::kSimplified:
+            weight = 1.;
+            break;
+        case TOTCalculationType::kThresholdRectangular:
+            weight = (it->first - std::prev(it, 1)->first)/firstThr;
+            break;
+        case TOTCalculationType::kThresholdTrapeze:
+            weight = (it->first - std::prev(it, 1)->first)/firstThr;
+            tot += weight*(it->second - std::prev(it, 1)->second)/2;
+            break;
+        }
+        tot += weight*it->second;
+      }
     }
   }
-  if (sigBLead.size() > 0 && sigBTrail.size() > 0){
-    for (unsigned i = 0; i < sigBLead.size() && i < sigBTrail.size(); i++){
-      tot += (sigBTrail.at(i).getValue() - sigBLead.at(i).getValue());
-    }
-  }
+  else
+    return 0;
   return tot;
 }

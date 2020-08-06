@@ -14,6 +14,7 @@
  */
 
 #include "EventCategorizerTools.h"
+#include "HitFinderTools.h"
 #include <TMath.h>
 #include <vector>
 
@@ -114,7 +115,7 @@ bool EventCategorizerTools::checkForPrompt(
   double deexTOTCutMin, double deexTOTCutMax)
 {
   for (unsigned i = 0; i < event.getHits().size(); i++) {
-    double tot = calculateTOT(event.getHits().at(i), TOTCalculationType::kSimplified);
+    double tot = HitFinderTools::calculateTOT(event.getHits().at(i));
     if (tot > deexTOTCutMin && tot < deexTOTCutMax) {
       if (saveHistos) {
         stats.fillHistogram("Deex_TOT_cut", tot);
@@ -156,60 +157,14 @@ bool EventCategorizerTools::checkForScatter(
 
       if (fabs(scattTOF - timeDiff) < scatterTOFTimeDiff) {
         if (saveHistos) {
-          stats.fillHistogram("ScatterAngle_PrimaryTOT", scattAngle, calculateTOT(primaryHit, TOTCalculationType::kSimplified));
-          stats.fillHistogram("ScatterAngle_ScatterTOT", scattAngle, calculateTOT(scatterHit, TOTCalculationType::kSimplified));
+          stats.fillHistogram("ScatterAngle_PrimaryTOT", scattAngle, HitFinderTools::calculateTOT(primaryHit));
+          stats.fillHistogram("ScatterAngle_ScatterTOT", scattAngle, HitFinderTools::calculateTOT(scatterHit));
         }
         return true;
       }
     }
   }
   return false;
-}
-
-/**
-* Calculation of the total TOT of the hit - Time over Threshold:
-* the sum of the TOTs on all of the thresholds (1-4) and on the both sides (A,B)
-*/
-double EventCategorizerTools::calculateTOT(const JPetHit& hit, TOTCalculationType type)
-{
-  double tot = 0.0;
-
-  std::map<int, double> thrToTOT_sideA = hit.getSignalA().getRecoSignal().getRawSignal().getTOTsVsThresholdValue();
-  std::map<int, double> thrToTOT_sideB = hit.getSignalB().getRecoSignal().getRawSignal().getTOTsVsThresholdValue();
-
-  tot += calculateTOTside(thrToTOT_sideA, type);
-  tot += calculateTOTside(thrToTOT_sideB, type);
-  return tot;
-}
-
-double EventCategorizerTools::calculateTOTside(const std::map<int, double> & thrToTOT_side, TOTCalculationType type)
-{
-  double tot = 0., weight = 1.;
-  if (!thrToTOT_side.empty()) {
-    double firstThr = thrToTOT_side.begin()->first;
-    tot += weight*thrToTOT_side.begin()->second;
-    if( thrToTOT_side.size() > 1 )
-    {
-      for (auto it = std::next(thrToTOT_side.begin(), 1); it != thrToTOT_side.end(); it++) {
-        switch(type) {
-        case TOTCalculationType::kSimplified:
-            weight = 1.;
-            break;
-        case TOTCalculationType::kThresholdRectangular:
-            weight = (it->first - std::prev(it, 1)->first)/firstThr;
-            break;
-        case TOTCalculationType::kThresholdTrapeze:
-            weight = (it->first - std::prev(it, 1)->first)/firstThr;
-            tot += weight*(it->second - std::prev(it, 1)->second)/2;
-            break;
-        }
-        tot += weight*it->second;
-      }
-    }
-  }
-  else
-    return 0;
-  return tot;
 }
 
 /**

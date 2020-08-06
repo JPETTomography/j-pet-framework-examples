@@ -14,6 +14,7 @@
  */
 
 #include "../LargeBarrelAnalysis/EventCategorizerTools.h"
+#include "../LargeBarrelAnalysis/HitFinderTools.h"
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include "EventCategorizerCosmic.h"
 #include <JPetWriter/JPetWriter.h>
@@ -88,7 +89,7 @@ JPetEvent EventCategorizerCosmic::cosmicAnalysis(vector<JPetHit> hits)
 {
   JPetEvent cosmicEvent;
   for (unsigned i = 0; i < hits.size(); i++) {
-    double TOTofHit = EventCategorizerTools::calculateTOT(hits[i], EventCategorizerTools::TOTCalculationType::kSimplified);
+    double TOTofHit = HitFinderTools::calculateTOT(hits[i]);
     if (TOTofHit >= fMinCosmicTOT) {
       cosmicEvent.addHit(hits[i]);
       //Uncomment if kCosmic type will be avalible

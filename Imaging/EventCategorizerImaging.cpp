@@ -14,6 +14,7 @@
  */
 
 #include "../LargeBarrelAnalysis/EventCategorizerTools.h"
+#include "../LargeBarrelAnalysis/HitFinderTools.h"
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include "EventCategorizerImaging.h"
 #include <JPetWriter/JPetWriter.h>
@@ -191,7 +192,7 @@ JPetEvent EventCategorizerImaging::imageReconstruction(vector<JPetHit> hits)
 {
   JPetEvent imagingEvent;
   for (unsigned i = 0; i < hits.size(); i++) {
-    double TOTofHit = EventCategorizerTools::calculateTOT(hits[i], EventCategorizerTools::TOTCalculationType::kSimplified);
+    double TOTofHit = HitFinderTools::calculateTOT(hits[i]);
     if (TOTofHit >= fMinAnnihilationTOT && TOTofHit <= fMaxAnnihilationTOT && fabs(hits[i].getPosZ()) < fMaxZPos) {
       imagingEvent.addHit(hits[i]);
     }

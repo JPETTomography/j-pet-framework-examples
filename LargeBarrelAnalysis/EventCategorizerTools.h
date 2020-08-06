@@ -30,14 +30,7 @@ static const double kUndefinedValue = 999.0;
 */
 class EventCategorizerTools
 {
-public:
-  enum TOTCalculationType
-  {
-    kSimplified,
-    kThresholdRectangular,
-    kThresholdTrapeze
-  };    
-
+public:  
   static bool checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats,
                            bool saveHistos, double b2bSlotThetaDiff, double b2bTimeDiff);
   static bool checkFor3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos);
@@ -45,8 +38,6 @@ public:
                              bool saveHistos, double deexTOTCutMin, double deexTOTCutMax);
   static bool checkForScatter(const JPetEvent& event, JPetStatistics& stats,
                               bool saveHistos, double scatterTOFTimeDiff);
-  static double calculateTOT(const JPetHit& hit, TOTCalculationType type = TOTCalculationType::kSimplified);
-  static double calculateTOTside(const std::map<int, double> & thrToTOT_side, TOTCalculationType type);
   static double calculateDistance(const JPetHit& hit1, const JPetHit& hit2);
   static double calculateScatteringTime(const JPetHit& hit1, const JPetHit& hit2);
   static double calculateScatteringAngle(const JPetHit& hit1, const JPetHit& hit2);

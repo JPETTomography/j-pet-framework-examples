@@ -14,6 +14,7 @@
  */
 
 #include "../LargeBarrelAnalysis/EventCategorizerTools.h"
+#include "../LargeBarrelAnalysis/HitFinderTools.h"
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include "EventCategorizerPhysics.h"
 #include <JPetWriter/JPetWriter.h>
@@ -225,7 +226,7 @@ JPetEvent EventCategorizerPhysics::physicsAnalysis(vector<JPetHit> hits)
 
   for (unsigned i = 0; i < hits.size(); i++) {
     if (fabs(hits[i].getPosZ()) < fMaxZPos) {
-      double TOTofHit = EventCategorizerTools::calculateTOT(hits[i], EventCategorizerTools::TOTCalculationType::kSimplified);
+      double TOTofHit = HitFinderTools::calculateTOT(hits[i]);
       if (fSaveControlHistos) {
         getStatistics().getHisto1D("AllHitTOT")->Fill(TOTofHit / 1000.);
       }

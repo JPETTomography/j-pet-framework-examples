@@ -55,6 +55,7 @@ protected:
   const std::string kRefDetScinIDParamKey = "HitFinder_RefDetScinID_int";
   const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_float";
   const std::string kConvertToTParamKey = "HitFinder_ConvertToT_bool";
+  const std::string kTOTCalculationType = "HitFinder_TOTCalculationType_std::string";
   ToTEnergyConverterFactory fToTConverterFactory;
   bool fUseCorruptedSignals = false;
   bool fSaveControlHistos = true;
