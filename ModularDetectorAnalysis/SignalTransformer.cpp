@@ -17,6 +17,9 @@
 #include "JPetWriter/JPetWriter.h"
 #include "SignalTransformer.h"
 
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
+
 using namespace jpet_options_tools;
 
 SignalTransformer::SignalTransformer(const char* name): JPetUserTask(name) {}
@@ -96,6 +99,25 @@ bool SignalTransformer::exec()
 
 bool SignalTransformer::terminate()
 {
+  if (isOptionSet(fParams.getOptions(), kOffestsFileParamKey) && fSaveControlHistos) {
+    INFO("Signal transforming - printing out offsets for SiPMs in matrices");
+    fOffsetsFile = getOptionAsString(fParams.getOptions(), kOffestsFileParamKey);
+
+    namespace pt = boost::property_tree;
+    using namespace std;
+
+    pt::ptree root;
+    pt::ptree sipm_node;
+
+    for(int pmID=fMinPMID; pmID<=fMaxPMID; pmID++){
+      auto mean = getStatistics().getHisto1D(Form("offset_sipm_%d", pmID))->GetMean();
+      sipm_node.put(to_string(pmID), mean);
+    }
+
+    root.add_child("sipm_offsets", sipm_node);
+    pt::write_json(fOffsetsFile, root);
+  }
+
   INFO("Signal transforming finished");
   return true;
 }

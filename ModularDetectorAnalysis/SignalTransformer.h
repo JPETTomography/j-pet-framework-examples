@@ -42,6 +42,7 @@ public:
 protected:
 	const std::string kMergeSignalsTimeParamKey = "SignalTransformer_MergeSignalsTime_double";
 	const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
+	const std::string kOffestsFileParamKey = "SiPMsOffsets_File_std::string";
 	const std::string kMinScinIDParamKey = "Histo_MinScinID_int";
 	const std::string kMaxScinIDParamKey = "Histo_MaxScinID_int";
 	const std::string kMinPMIDParamKey = "Histo_MinPMID_int";
@@ -51,6 +52,7 @@ protected:
 	void initialiseHistograms();
 	bool fSaveControlHistos = true;
 	double fMergingTime = 20000.0;
+	std::string fOffsetsFile = "";
 	int fMinScinID = 0;
 	int fMaxScinID = 1;
 	int fMinPMID = 0;
