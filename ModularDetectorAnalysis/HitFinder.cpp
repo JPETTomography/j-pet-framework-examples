@@ -108,7 +108,7 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
       getStatistics().getHisto1D("hit_sig_multi")->Fill(multi);
 
       auto scinID = hit.getScin().getID();
-      if(scinID<fMinScinID || scinID>fMaxScinID){
+      if(scinID>=fMinScinID && scinID<=fMaxScinID){
         getStatistics().getHisto1D(Form("hit_sig_multi_scin_%d", scinID))->Fill(multi);
         getStatistics().getHisto1D(Form("hit_tdiff_scin_%d_m_%d", hit.getScin().getID(), ((int) multi)))
         ->Fill(hit.getTimeDiff());
@@ -213,17 +213,13 @@ void HitFinder::initialiseHistograms(){
     "remain_signals_per_scin", "Number of Unused Signals in Scintillator",
     fMaxScinID-fMinScinID+1, fMinScinID-0.5, fMaxScinID+0.5
   ));
-  getStatistics().getHisto1D("remain_signals_per_scin")
-    ->GetXaxis()->SetTitle("ID of Scintillator");
-  getStatistics().getHisto1D("remain_signals_per_scin")
-    ->GetYaxis()->SetTitle("Number of Unused Signals in Scintillator");
+  getStatistics().getHisto1D("remain_signals_per_scin")->GetXaxis()->SetTitle("ID of Scintillator");
+  getStatistics().getHisto1D("remain_signals_per_scin")->GetYaxis()->SetTitle("Number of Unused Signals in Scintillator");
 
   getStatistics().createHistogram(new TH1F(
     "remain_signals_tdiff", "Time Diff of an unused signal and the consecutive one",
     200, fABTimeDiff, 75000.0+fABTimeDiff
   ));
-  getStatistics().getHisto1D("remain_signals_tdiff")
-    ->GetXaxis()->SetTitle("Time difference [ps]");
-  getStatistics().getHisto1D("remain_signals_tdiff")
-    ->GetYaxis()->SetTitle("Number of Signals");
+  getStatistics().getHisto1D("remain_signals_tdiff")->GetXaxis()->SetTitle("Time difference [ps]");
+  getStatistics().getHisto1D("remain_signals_tdiff")->GetYaxis()->SetTitle("Number of Signals");
 }
