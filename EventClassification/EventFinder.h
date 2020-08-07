@@ -84,7 +84,7 @@ protected:
   const std::string kZoomTDiffMaxParamKey = "EventFinder_ZoomTDiffMax_double";
   const std::string kZoomTOTMinParamKey = "EventFinder_ZoomTOTOMin_double";
   const std::string kZoomTOTMaxParamKey = "EventFinder_ZoomTOTMax_double";
-
+  
   bool fUseCorruptedHits = false;
   bool fSaveControlHistos = true;
 
@@ -111,5 +111,6 @@ protected:
   // From Signal Transformer
   const std::string kMergeSignalsTimeParamKey = "SignalTransformer_MergeSignalsTime_double";
   double fMergingTime = 20000.0;
+
 };
 #endif /* !EVENTFINDER_H */

@@ -173,54 +173,65 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
 
       // coincidence condition
       if (fabs(nextHit.getTime() - hit.getTime()) < fEventTimeWindow) {
-
+        auto hitID = hit.getScin().getID();
+        auto nextHitID = hit.getScin().getID();
         // different scin IDs condition
-        if(hit.getScin().getID() == nextHit.getScin().getID()) {
+        if( !((hitID>=201 && hitID<=213 && nextHitID>=227 && nextHitID<252)
+          || (hitID>=227 && hitID<=252 && nextHitID>=201 && nextHitID<213))
+        ) {
           nextCount++;
           continue;
         }
 
         // Proper coincidence found - assigning main scin hit and ref scin hit
-        JPetHit mainHit, refHit;
-        if(hit.getScin().getID() == kMainScinIDParamKey) {
-          mainHit = hit;
-          refHit = nextHit;
-        } else {
-          mainHit = nextHit;
-          refHit = hit;
-        }
+        auto hitStats = getStats(hit);
+        auto nextHitStats = getStats(nextHit);
 
-        auto hitStats = getStats(mainHit);
-        auto multi = get<0>(hitStats);
-        auto tdiff = get<1>(hitStats);
-        auto tot = get<2>(hitStats);
-        auto revToT = get<3>(hitStats);
+        getStatistics().getHisto2D("coin_tdiff_per_scin")->Fill(get<1>(hitStats), hitID);
+        getStatistics().getHisto2D("coin_tot_per_scin")->Fill(get<2>(hitStats), hitID);
+        getStatistics().getHisto2D("coin_tdiff_per_scin")->Fill(get<1>(nextHitStats), nextHitID);
+        getStatistics().getHisto2D("coin_tot_per_scin")->Fill(get<2>(nextHitStats), nextHitID);
 
-        getStatistics().getHisto1D("coin_tot")->Fill(tot);
+        // JPetHit mainHit, refHit;
+        // if(hit.getScin().getID() == kMainScinIDParamKey) {
+        //   mainHit = hit;
+        //   refHit = nextHit;
+        // } else {
+        //   mainHit = nextHit;
+        //   refHit = hit;
+        // }
+
+        // auto hitStats = getStats(mainHit);
+        // auto multi = get<0>(hitStats);
+        // auto tdiff = get<1>(hitStats);
+        // auto tot = get<2>(hitStats);
+        // auto revToT = get<3>(hitStats);
+
+        // getStatistics().getHisto1D("coin_tot")->Fill(tot);
 
         // Checking multi cut and ToT cut
-        if(multi == 16) {
+        // if(multi == 16) {
           // Good coincidence, creating new event
-          JPetEvent event;
-          event.setEventType(JPetEventType::k2Gamma);
-          event.setRecoFlag(JPetEvent::Good);
-          event.addHit(hit);
-          event.addHit(nextHit);
-          eventVec.push_back(event);
+          // JPetEvent event;
+          // event.setEventType(JPetEventType::k2Gamma);
+          // event.setRecoFlag(JPetEvent::Good);
+          // event.addHit(hit);
+          // event.addHit(nextHit);
+          // eventVec.push_back(event);
 
-          if(fSaveControlHistos){
-            getStatistics().getHisto2D("tdiff_tot")->Fill(tdiff, revToT);
-            getStatistics().getHisto2D("tdiff_tot_zoom")->Fill(tdiff, revToT);
-            auto correction = (revToT-fTimeWalkBParam)/fTimeWalkAParam;
-            getStatistics().getHisto2D("tdiff_tot_zoom_tw")->Fill(tdiff*fTimeWalkAParam+fTimeWalkBParam, revToT);
-
-            // Offsets histograms
-            plotOffsetHistograms(mainHit.getSignalA(), "A", "main");
-            plotOffsetHistograms(mainHit.getSignalB(), "B", "main");
-            plotOffsetHistograms(refHit.getSignalA(), "A", "ref");
-            plotOffsetHistograms(refHit.getSignalA(), "B", "ref");
-          }
-        }
+          // if(fSaveControlHistos){
+          //   getStatistics().getHisto2D("tdiff_tot")->Fill(tdiff, revToT);
+          //   getStatistics().getHisto2D("tdiff_tot_zoom")->Fill(tdiff, revToT);
+          //   auto correction = (revToT-fTimeWalkBParam)/fTimeWalkAParam;
+          //   getStatistics().getHisto2D("tdiff_tot_zoom_tw")->Fill(tdiff*fTimeWalkAParam+fTimeWalkBParam, revToT);
+          //
+          //   // Offsets histograms
+          //   plotOffsetHistograms(mainHit.getSignalA(), "A", "main");
+          //   plotOffsetHistograms(mainHit.getSignalB(), "B", "main");
+          //   plotOffsetHistograms(refHit.getSignalA(), "A", "ref");
+          //   plotOffsetHistograms(refHit.getSignalA(), "B", "ref");
+          // }
+        // }
       } else {
         getStatistics().getHisto1D("hits_rejected_tdiff")
         ->Fill(fabs(nextHit.getTime() - hit.getTime()));
@@ -282,51 +293,66 @@ void EventFinder::initialiseHistograms(){
   getStatistics().getHisto1D("good_vs_bad_events")->GetYaxis()->SetTitle("Number of Events");
 
   //////////////////////////////////////////////////////////////////////////////
-  getStatistics().createHistogram(
-    new TH1F("coin_tot", "Coincidence hits ToT before cut",
-    100, 0.0, 150000.0)
-  );
-  getStatistics().getHisto1D("hits_per_event_selected")->GetXaxis()->SetTitle("Hits in Event");
-  getStatistics().getHisto1D("hits_per_event_selected")->GetYaxis()->SetTitle("Number of Hits");
+  // getStatistics().createHistogram(
+  //   new TH1F("coin_tot", "ToT of coincidence hits", 100, 0.0, 150000.0)
+  // );
+  // getStatistics().getHisto1D("coin_tot")->GetXaxis()->SetTitle("Hits in Event");
+  // getStatistics().getHisto1D("coin_tot")->GetYaxis()->SetTitle("Number of Hits");
 
   getStatistics().createHistogram(new TH2F(
-    "tdiff_tot", "TDiff vs. TOT",
-    200, fHistoTDiffMin, fHistoTDiffMax, 200, fHistoTOTMin, fHistoTOTMax
+    "coin_tdiff_per_scin", "Time difference of coincidence hits per scintillator",
+    200, -1.1 * 5000.0, 1.1 * 5000.0,
+    52, 201-0.5, 252+0.5
   ));
-  getStatistics().getHisto2D("tdiff_tot")->GetXaxis()->SetTitle("Time difference [ps]");
-  getStatistics().getHisto2D("tdiff_tot")->GetYaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
+  getStatistics().getHisto2D("coin_tdiff_per_scin")->GetXaxis()->SetTitle("A-B time difference [ps]");
+  getStatistics().getHisto2D("coin_tdiff_per_scin")->GetYaxis()->SetTitle("ID of Scintillator");
 
   getStatistics().createHistogram(new TH2F(
-    "tdiff_tot_zoom", "TDiff vs. TOT",
-    200, fZoomTDiffMin, fZoomTDiffMax, 200, fZoomTOTMin, fZoomTOTMax
+    "coin_tot_per_scin", "ToT of coincidence hits per scintillator",
+    200, 0.0, 150000.0,
+    52, 201-0.5, 252+0.5
   ));
-  getStatistics().getHisto2D("tdiff_tot_zoom")->GetXaxis()->SetTitle("Time difference [ps]");
-  getStatistics().getHisto2D("tdiff_tot_zoom")->GetYaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
+  getStatistics().getHisto2D("coin_tot_per_scin")->GetXaxis()->SetTitle("A-B time difference [ps]");
+  getStatistics().getHisto2D("coin_tot_per_scin")->GetYaxis()->SetTitle("ID of Scintillator");
 
-  getStatistics().createHistogram(new TH2F(
-    "tdiff_tot_zoom_tw", "TDiff vs. TOT with time walk correction",
-    200, fHistoTDiffMin/2.0, fHistoTDiffMax/2.0, 200, fZoomTOTMin, fZoomTOTMax
-  ));
-  getStatistics().getHisto2D("tdiff_tot_zoom_tw")->GetXaxis()->SetTitle("Time difference [ps]");
-  getStatistics().getHisto2D("tdiff_tot_zoom_tw")->GetYaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
+  // getStatistics().createHistogram(new TH2F(
+  //   "tdiff_tot", "TDiff vs. TOT",
+  //   200, fHistoTDiffMin, fHistoTDiffMax, 200, fHistoTOTMin, fHistoTOTMax
+  // ));
+  // getStatistics().getHisto2D("tdiff_tot")->GetXaxis()->SetTitle("Time difference [ps]");
+  // getStatistics().getHisto2D("tdiff_tot")->GetYaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
+  //
+  // getStatistics().createHistogram(new TH2F(
+  //   "tdiff_tot_zoom", "TDiff vs. TOT",
+  //   200, fZoomTDiffMin, fZoomTDiffMax, 200, fZoomTOTMin, fZoomTOTMax
+  // ));
+  // getStatistics().getHisto2D("tdiff_tot_zoom")->GetXaxis()->SetTitle("Time difference [ps]");
+  // getStatistics().getHisto2D("tdiff_tot_zoom")->GetYaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
+  //
+  // getStatistics().createHistogram(new TH2F(
+  //   "tdiff_tot_zoom_tw", "TDiff vs. TOT with time walk correction",
+  //   200, fHistoTDiffMin/2.0, fHistoTDiffMax/2.0, 200, fZoomTOTMin, fZoomTOTMax
+  // ));
+  // getStatistics().getHisto2D("tdiff_tot_zoom_tw")->GetXaxis()->SetTitle("Time difference [ps]");
+  // getStatistics().getHisto2D("tdiff_tot_zoom_tw")->GetYaxis()->SetTitle("1/TOT_B-1/TOT_A [1/ps]");
 
   // Histograms for matrix SiPMs synchronization
   // <side, main/ref, other SiPM>
-  vector<tuple<string, string, int>> histoConfs = {
-    {"A", "main", 2}, {"A", "main", 3}, {"A", "main", 4},
-    {"A", "ref", 2}, {"A", "ref", 3}, {"A", "ref", 4},
-    {"B", "main", 2}, {"B", "main", 3}, {"B", "main", 4},
-    {"B", "ref", 2}, {"B", "ref", 3}, {"B", "ref", 4},
-  };
-  for(auto conf : histoConfs){
-    getStatistics().createHistogram(new TH1F(
-      Form("mtx_offsets_%s_%s_1_%d", ((string)get<0>(conf)).c_str(), ((string)get<1>(conf)).c_str(), get<2>(conf)),
-      Form("Time offsets of SiPM 1 and %d on side %s of %s strip", get<2>(conf), ((string)get<0>(conf)).c_str(), ((string)get<1>(conf)).c_str()),
-      200, -1.1*fMergingTime, 1.1*fMergingTime
-    ));
-    getStatistics().getHisto1D(Form("mtx_offsets_%s_%s_1_%d", ((string)get<0>(conf)).c_str(), ((string)get<1>(conf)).c_str(), get<2>(conf)))->GetXaxis()->SetTitle("Time difference [ps]");
-    getStatistics().getHisto1D(Form("mtx_offsets_%s_%s_1_%d", ((string)get<0>(conf)).c_str(), ((string)get<1>(conf)).c_str(), get<2>(conf)))->GetYaxis()->SetTitle("Number of Raw Signal pairs");
-  }
+  // vector<tuple<string, string, int>> histoConfs = {
+  //   {"A", "main", 2}, {"A", "main", 3}, {"A", "main", 4},
+  //   {"A", "ref", 2}, {"A", "ref", 3}, {"A", "ref", 4},
+  //   {"B", "main", 2}, {"B", "main", 3}, {"B", "main", 4},
+  //   {"B", "ref", 2}, {"B", "ref", 3}, {"B", "ref", 4},
+  // };
+  // for(auto conf : histoConfs){
+  //   getStatistics().createHistogram(new TH1F(
+  //     Form("mtx_offsets_%s_%s_1_%d", ((string)get<0>(conf)).c_str(), ((string)get<1>(conf)).c_str(), get<2>(conf)),
+  //     Form("Time offsets of SiPM 1 and %d on side %s of %s strip", get<2>(conf), ((string)get<0>(conf)).c_str(), ((string)get<1>(conf)).c_str()),
+  //     200, -1.1*fMergingTime, 1.1*fMergingTime
+  //   ));
+  //   getStatistics().getHisto1D(Form("mtx_offsets_%s_%s_1_%d", ((string)get<0>(conf)).c_str(), ((string)get<1>(conf)).c_str(), get<2>(conf)))->GetXaxis()->SetTitle("Time difference [ps]");
+  //   getStatistics().getHisto1D(Form("mtx_offsets_%s_%s_1_%d", ((string)get<0>(conf)).c_str(), ((string)get<1>(conf)).c_str(), get<2>(conf)))->GetYaxis()->SetTitle("Number of Raw Signal pairs");
+  // }
 }
 
 /**
