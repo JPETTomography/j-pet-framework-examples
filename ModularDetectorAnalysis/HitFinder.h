@@ -50,6 +50,7 @@ protected:
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kRefDetScinIDParamKey = "TimeCalibration_RefDetScinID_int";
   const std::string kOffestsFileParamKey = "ScinsOffsets_File_std::string";
+  const std::string kScinCalibFileParamKey = "ScinsCalib_std::string";
   const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_double";
   const std::string kMinScinIDParamKey = "Histo_MinScinID_int";
   const std::string kMaxScinIDParamKey = "Histo_MaxScinID_int";

@@ -108,9 +108,29 @@ bool HitFinder::terminate()
       auto projX = getStatistics().getHisto2D("time_diff_per_scin")->ProjectionX("_px", bin, bin+1);
       scin_node.put(to_string(scinID), projX->GetMean());
     }
-
     root.add_child("scin_offsets", scin_node);
-    pt::write_json(fOffsetsFile, root);
+
+    // Merging used calibration with new one - iteration alike
+    if (isOptionSet(fParams.getOptions(), kScinCalibFileParamKey)) {
+      auto scinCalibFileName = getOptionAsString(fParams.getOptions(), kScinCalibFileParamKey);
+
+      pt::ptree rootOld;
+      pt::read_json(scinCalibFileName, rootOld);
+
+      pt::ptree new_root;
+      pt::ptree new_scin_node;
+
+      for(int scinID = fMinScinID; scinID<=fMaxScinID; scinID++){
+        double oldOffset = rootOld.get("scin_offsets."+to_string(scinID), 0.0);
+        double newOffset = root.get("scin_offsets."+to_string(scinID), 0.0);
+        new_scin_node.put(to_string(scinID), oldOffset+newOffset);
+      }
+      new_root.add_child("scin_offsets", new_scin_node);
+      pt::write_json(fOffsetsFile, new_root);
+
+    }else{
+      pt::write_json(fOffsetsFile, root);
+    }
   }
 
   INFO("Hit finding ended");

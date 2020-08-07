@@ -99,23 +99,45 @@ bool SignalTransformer::exec()
 
 bool SignalTransformer::terminate()
 {
-  if (isOptionSet(fParams.getOptions(), kOffestsFileParamKey) && fSaveControlHistos) {
-    INFO("Signal transforming - printing out offsets for SiPMs in matrices");
-    fOffsetsFile = getOptionAsString(fParams.getOptions(), kOffestsFileParamKey);
-
+  if(fSaveControlHistos){
     namespace pt = boost::property_tree;
     using namespace std;
 
-    pt::ptree root;
-    pt::ptree sipm_node;
+    if (isOptionSet(fParams.getOptions(), kOffestsFileParamKey)) {
+      INFO("Signal transforming - printing out offsets for SiPMs in matrices");
+      fOffsetsFile = getOptionAsString(fParams.getOptions(), kOffestsFileParamKey);
 
-    for(int pmID=fMinPMID; pmID<=fMaxPMID; pmID++){
-      auto mean = getStatistics().getHisto1D(Form("offset_sipm_%d", pmID))->GetMean();
-      sipm_node.put(to_string(pmID), mean);
+      pt::ptree root;
+      pt::ptree sipm_node;
+
+      for(int pmID=fMinPMID; pmID<=fMaxPMID; pmID++){
+        auto mean = getStatistics().getHisto1D(Form("offset_sipm_%d", pmID))->GetMean();
+        sipm_node.put(to_string(pmID), mean);
+      }
+      root.add_child("sipm_offsets", sipm_node);
+
+      // Merging used calibration with new one - iteration alike
+      if (isOptionSet(fParams.getOptions(), kSiPMCalibFileParamKey)) {
+        auto siPMCalibFileName = getOptionAsString(fParams.getOptions(), kSiPMCalibFileParamKey);
+
+        pt::ptree rootOld;
+        pt::read_json(siPMCalibFileName, rootOld);
+
+        pt::ptree new_root;
+        pt::ptree new_sipm_node;
+
+        for(int pmID=fMinPMID; pmID<=fMaxPMID; pmID++){
+          double oldOffset = rootOld.get("sipm_offsets."+to_string(pmID), 0.0);
+          double newOffset = root.get("sipm_offsets."+to_string(pmID), 0.0);
+          new_sipm_node.put(to_string(pmID), oldOffset+newOffset);
+        }
+        new_root.add_child("sipm_offsets", new_sipm_node);
+        pt::write_json(fOffsetsFile, new_root);
+
+      } else {
+        pt::write_json(fOffsetsFile, root);
+      }
     }
-
-    root.add_child("sipm_offsets", sipm_node);
-    pt::write_json(fOffsetsFile, root);
   }
 
   INFO("Signal transforming finished");
