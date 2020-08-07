@@ -55,6 +55,18 @@ bool SignalTransformer::init()
     fMaxScinID = getParamBank().getScins().rbegin()->first;
   }
 
+  if (isOptionSet(fParams.getOptions(), kMinPMIDParamKey)) {
+    fMinPMID = getOptionAsInt(fParams.getOptions(), kMinPMIDParamKey);
+  } else {
+    fMinPMID = getParamBank().getPMs().begin()->first;
+  }
+
+  if (isOptionSet(fParams.getOptions(), kMaxPMIDParamKey)) {
+    fMaxPMID = getOptionAsInt(fParams.getOptions(), kMaxPMIDParamKey);
+  } else {
+    fMaxPMID = getParamBank().getPMs().rbegin()->first;
+  }
+
   // Control histograms
   if(fSaveControlHistos) { initialiseHistograms(); }
   return true;
@@ -116,9 +128,15 @@ void SignalTransformer::saveMatrixSignals(const std::vector<JPetMatrixSignal>& m
         auto t3 = SignalTransformerTools::getRawSigBaseTime(rawSigVec.at(3));
         auto t4 = SignalTransformerTools::getRawSigBaseTime(rawSigVec.at(4));
 
-        getStatistics().getHisto1D(Form("offset_sipm_%d", rawSigVec.at(2).getPM().getID()))->Fill(t2-t1);
-        getStatistics().getHisto1D(Form("offset_sipm_%d", rawSigVec.at(3).getPM().getID()))->Fill(t3-t1);
-        getStatistics().getHisto1D(Form("offset_sipm_%d", rawSigVec.at(4).getPM().getID()))->Fill(t4-t1);
+        if(rawSigVec.at(2).getPM().getID()>fMinPMID && rawSigVec.at(2).getPM().getID()<fMaxPMID){
+          getStatistics().getHisto1D(Form("offset_sipm_%d", rawSigVec.at(2).getPM().getID()))->Fill(t2-t1);
+        }
+        if(rawSigVec.at(3).getPM().getID()>fMinPMID && rawSigVec.at(3).getPM().getID()<fMaxPMID){
+          getStatistics().getHisto1D(Form("offset_sipm_%d", rawSigVec.at(3).getPM().getID()))->Fill(t3-t1);
+        }
+        if(rawSigVec.at(4).getPM().getID()>fMinPMID && rawSigVec.at(4).getPM().getID()<fMaxPMID){
+          getStatistics().getHisto1D(Form("offset_sipm_%d", rawSigVec.at(4).getPM().getID()))->Fill(t4-t1);
+        }
 
         if(side==JPetPM::SideA) {
           getStatistics().getHisto1D(Form("tdiff_%d_A_%d_%d", scinID, 2, 1))->Fill(t2-t1);
@@ -163,17 +181,9 @@ void SignalTransformer::initialiseHistograms()
   getStatistics().getHisto1D("mtxsig_per_scin_sideB")->GetXaxis()->SetTitle("Scin ID");
   getStatistics().getHisto1D("mtxsig_per_scin_sideB")->GetYaxis()->SetTitle("Number of Matrix Signals");
 
-  // Time differences of consecutive RawSigs per SiPMs pair - all combinations
+  // Time offsets for SiPMs from the same matrix in respect to SiPM on position 1
   for(int scinID=fMinScinID; scinID<=fMaxScinID; scinID++) {
-
-    getStatistics().createHistogram(new TH1F(
-      Form("offset_sipm_%d", scinID), Form("Offset for SiPM %d", scinID),
-      200, -1.1*fMergingTime, 1.1*fMergingTime
-    ));
-    getStatistics().getHisto1D(Form("offset_sipm_%d", scinID))->GetXaxis()->SetTitle("Time difference [ps]");
-    getStatistics().getHisto1D(Form("offset_sipm_%d", scinID))->GetYaxis()->SetTitle("Number of Raw Signal pairs");
-
-    for(int i=2;i<=4;i++){
+    for(int i=2; i<=4; i++){
       int j = 1;
       getStatistics().createHistogram(new TH1F(
         Form("tdiff_%d_A_%d_%d", scinID, i, j),
@@ -194,13 +204,17 @@ void SignalTransformer::initialiseHistograms()
       ->GetXaxis()->SetTitle("Time difference [ps]");
       getStatistics().getHisto1D(Form("tdiff_%d_B_%d_%d", scinID, i, j))
       ->GetYaxis()->SetTitle("Number of Raw Signal pairs");
-
-      getStatistics().createHistogram(new TH1F(
-        Form("offset_sipm_%d", scinID), Form("Offset for SiPM %d", scinID),
-        200, -1.1*fMergingTime, 1.1*fMergingTime
-      ));
-      getStatistics().getHisto1D(Form("offset_sipm_%d", scinID))->GetXaxis()->SetTitle("Time difference [ps]");
-      getStatistics().getHisto1D(Form("offset_sipm_%d", scinID))->GetYaxis()->SetTitle("Number of Raw Signal pairs");
     }
   }
+
+  // Same offsets but with SiPM ID in the name
+  for(int pmID=fMinPMID; pmID<=fMaxPMID; pmID++){
+    getStatistics().createHistogram(new TH1F(
+      Form("offset_sipm_%d", pmID), Form("Offset for SiPM %d", pmID),
+      200, -1.1*fMergingTime, 1.1*fMergingTime
+    ));
+    getStatistics().getHisto1D(Form("offset_sipm_%d", pmID))->GetXaxis()->SetTitle("Time difference [ps]");
+    getStatistics().getHisto1D(Form("offset_sipm_%d", pmID))->GetYaxis()->SetTitle("Number of Raw Signal pairs");
+  }
+
 }
