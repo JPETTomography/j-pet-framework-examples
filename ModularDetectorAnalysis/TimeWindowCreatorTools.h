@@ -16,11 +16,14 @@
 #ifndef TIMEWINDOWCREATORTOOLS_H
 #define TIMEWINDOWCREATORTOOLS_H
 
+#include <boost/property_tree/ptree.hpp>
+
 #include "JPetStatistics/JPetStatistics.h"
 #include "JPetParamBank/JPetParamBank.h"
 #include "JPetChannel/JPetChannel.h"
 #include "JPetSigCh/JPetSigCh.h"
 #include "TDCChannel.h"
+
 #include <vector>
 
 /**
@@ -34,13 +37,16 @@ public:
 
   static std::vector<JPetSigCh> buildSigChs(
     TDCChannel *tdcChannel, const JPetChannel &channel,
-    double maxTime, double minTime
+    double maxTime, double minTime,
+    boost::property_tree::ptree& siPMCalib,
+    boost::property_tree::ptree& scinCalib
   );
   static void flagSigChs(
     std::vector<JPetSigCh> &inputSigChs, JPetStatistics &stats, bool saveHistos
   );
   static JPetSigCh generateSigCh(
-    double tdcChannelTime, const JPetChannel &channel, JPetSigCh::EdgeType edge
+    double tdcChannelTime, const JPetChannel &channel,
+    JPetSigCh::EdgeType edge, double offset
   );
 };
 

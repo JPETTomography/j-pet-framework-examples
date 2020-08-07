@@ -13,15 +13,19 @@
  *  @file TimeWindowCreator.cpp
  */
 
+#include <boost/property_tree/json_parser.hpp>
+
 #include <JPetOptionsTools/JPetOptionsTools.h>
-#include "TimeWindowCreatorTools.h"
 #include <JPetWriter/JPetWriter.h>
-#include "TimeWindowCreator.h"
 #include <EventIII.h>
 #include <TRandom.h>
 
+#include "TimeWindowCreatorTools.h"
+#include "TimeWindowCreator.h"
+
 using namespace jpet_options_tools;
 using namespace std;
+namespace pt = boost::property_tree;
 
 TimeWindowCreator::TimeWindowCreator(const char* name): JPetUserTask(name) {}
 
@@ -52,6 +56,18 @@ bool TimeWindowCreator::init()
         kMaxTimeParamKey.c_str(), fMaxTime
       )
     );
+  }
+
+  // Reading file with offsets to property tree - SiPM calibration per matrix
+  if (isOptionSet(fParams.getOptions(), kSiPMCalibFileParamKey)) {
+    auto siPMCalibFileName = getOptionAsString(fParams.getOptions(), kSiPMCalibFileParamKey);
+    pt::read_json(siPMCalibFileName, fSiPMCalibTree);
+  }
+
+  // Reading file with offsets to property tree - synchronization of scintillators
+  if (isOptionSet(fParams.getOptions(), kScinCalibFileParamKey)) {
+    auto scinCalibFileName = getOptionAsString(fParams.getOptions(), kScinCalibFileParamKey);
+    pt::read_json(scinCalibFileName, fScinCalibTree);
   }
 
   // Getting bool for saving histograms
@@ -91,7 +107,7 @@ bool TimeWindowCreator::exec()
 
       // Building Signal Channels for this Channel
       auto allSigChs = TimeWindowCreatorTools::buildSigChs(
-        tdcChannel, channel, fMaxTime, fMinTime
+        tdcChannel, channel, fMaxTime, fMinTime, fSiPMCalibTree, fScinCalibTree
       );
 
       // Sort Signal Channels in time

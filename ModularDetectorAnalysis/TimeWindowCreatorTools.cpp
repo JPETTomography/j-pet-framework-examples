@@ -33,16 +33,29 @@ using namespace std;
  * Building all Signal Chnnels from one TDC
  */
 vector<JPetSigCh> TimeWindowCreatorTools::buildSigChs(
-  TDCChannel* tdcChannel, const JPetChannel& channel, double maxTime, double minTime
+  TDCChannel* tdcChannel, const JPetChannel& channel, double maxTime, double minTime,
+  boost::property_tree::ptree& siPMCalib, boost::property_tree::ptree& scinCalib
 ){
   vector<JPetSigCh> allSigChs;
+
+  // Getting offsets for this channel -
+  // if calibrations are empty then default vaule is 0.0
+  double siPMOffset = siPMCalib.get("sipm_offsets."+to_string(channel.getPM().getID()), 0.0);
+  double scinOffset = scinCalib.get("scin_offsets."+to_string(channel.getPM().getScin().getID()), 0.0);
+
+  double offset = 0.0;
+  if(channel.getPM().getSide()==JPetPM::SideB){
+    offset = siPMOffset+scinOffset;
+  } else {
+    offset = siPMOffset;
+  }
 
   // Loop over all entries on leading edge in current TDCChannel and create SigCh
   for (int j = 0; j < tdcChannel->GetLeadHitsNum(); j++) {
     auto leadTime = tdcChannel->GetLeadTime(j);
     if (leadTime > maxTime || leadTime < minTime ) { continue; }
     auto leadSigCh = generateSigCh(
-      leadTime, channel, JPetSigCh::Leading
+      leadTime, channel, JPetSigCh::Leading, offset
     );
     allSigChs.push_back(leadSigCh);
   }
@@ -52,7 +65,7 @@ vector<JPetSigCh> TimeWindowCreatorTools::buildSigChs(
     auto trailTime = tdcChannel->GetTrailTime(j);
     if (trailTime > maxTime || trailTime < minTime ) { continue; }
     auto trailSigCh = generateSigCh(
-      trailTime, channel, JPetSigCh::Trailing
+      trailTime, channel, JPetSigCh::Trailing, offset
     );
     allSigChs.push_back(trailSigCh);
   }
@@ -114,10 +127,11 @@ void TimeWindowCreatorTools::flagSigChs(
 * Sets up Signal Channel fields
 */
 JPetSigCh TimeWindowCreatorTools::generateSigCh(
-  double tdcChannelTime, const JPetChannel& channel, JPetSigCh::EdgeType edge
+  double tdcChannelTime, const JPetChannel& channel,
+  JPetSigCh::EdgeType edge, double offset
 ) {
   JPetSigCh sigCh;
-  sigCh.setTime(1000.0*tdcChannelTime);
+  sigCh.setTime(1000.0*tdcChannelTime-offset);
   sigCh.setType(edge);
   sigCh.setChannel(channel);
   sigCh.setRecoFlag(JPetSigCh::Unknown);
