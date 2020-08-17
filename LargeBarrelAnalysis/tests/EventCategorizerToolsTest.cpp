@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(checkFor3GammaTest) {
   BOOST_REQUIRE(EventCategorizerTools::checkFor3Gamma(event3, stats, false));
 }
 
-BOOST_AUTO_TEST_CASE(checkForPromptTest_checkTOTCalc) {
+BOOST_AUTO_TEST_CASE(checkForPromptTest) {
   JPetBarrelSlot barrelSlot(666, true, "Some Slot", 66.0, 666);
   JPetPM pmA(1, "A");
   JPetPM pmB(2, "B");
@@ -242,12 +242,6 @@ BOOST_AUTO_TEST_CASE(checkForPromptTest_checkTOTCalc) {
   hit1.setSignals(physSignal1A, physSignal1B);
   hit2.setSignals(physSignal2A, physSignal2B);
   hit3.setSignals(physSignal3A, physSignal3B);
-  
-  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit1, EventCategorizerTools::TOTCalculationType::kSimplified), 0.0, kEpsilon);
-  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit2, EventCategorizerTools::TOTCalculationType::kSimplified), 56.0,
-                      kEpsilon);
-  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit3, EventCategorizerTools::TOTCalculationType::kSimplified), 560.0,
-                      kEpsilon);
 
   JPetEvent event1;
   JPetEvent event2;

@@ -475,4 +475,165 @@ BOOST_AUTO_TEST_CASE(matchSignals_test)
   BOOST_REQUIRE_EQUAL(result.at(2).getRecoFlag(), JPetHit::Good);
 }
 
+BOOST_AUTO_TEST_CASE(checkForPromptTest_checkTOTCalc) {
+  JPetBarrelSlot barrelSlot(666, true, "Some Slot", 66.0, 666);
+  JPetPM pmA(1, "A");
+  JPetPM pmB(2, "B");
+  pmA.setSide(JPetPM::SideA);
+  pmB.setSide(JPetPM::SideB);
+  pmA.setBarrelSlot(barrelSlot);
+  pmB.setBarrelSlot(barrelSlot);
+
+  JPetSigCh sigCh1;
+  JPetSigCh sigCh2;
+  JPetSigCh sigCh3;
+  JPetSigCh sigCh4;
+  JPetSigCh sigCh5;
+  JPetSigCh sigCh6;
+  JPetSigCh sigCh7;
+  JPetSigCh sigCh8;
+
+  sigCh1.setType(JPetSigCh::Leading);
+  sigCh2.setType(JPetSigCh::Leading);
+  sigCh3.setType(JPetSigCh::Leading);
+  sigCh4.setType(JPetSigCh::Leading);
+  sigCh5.setType(JPetSigCh::Trailing);
+  sigCh6.setType(JPetSigCh::Trailing);
+  sigCh7.setType(JPetSigCh::Trailing);
+  sigCh8.setType(JPetSigCh::Trailing);
+
+  sigCh1.setThresholdNumber(1);
+  sigCh2.setThresholdNumber(2);
+  sigCh3.setThresholdNumber(3);
+  sigCh4.setThresholdNumber(4);
+  sigCh5.setThresholdNumber(1);
+  sigCh6.setThresholdNumber(2);
+  sigCh7.setThresholdNumber(3);
+  sigCh8.setThresholdNumber(4);
+  
+  sigCh1.setThreshold(80);
+  sigCh2.setThreshold(160);
+  sigCh3.setThreshold(240);
+  sigCh4.setThreshold(320);
+  sigCh5.setThreshold(80);
+  sigCh6.setThreshold(160);
+  sigCh7.setThreshold(240);
+  sigCh8.setThreshold(320);
+
+  sigCh1.setValue(10.0);
+  sigCh2.setValue(12.0);
+  sigCh3.setValue(14.0);
+  sigCh4.setValue(16.0);
+  sigCh5.setValue(23.0);
+  sigCh6.setValue(21.0);
+  sigCh7.setValue(19.0);
+  sigCh8.setValue(17.0);
+
+  JPetRawSignal rawSig1A;
+  JPetRawSignal rawSig1B;
+  JPetRawSignal rawSig2A;
+  JPetRawSignal rawSig2B;
+  JPetRawSignal rawSig3A;
+  JPetRawSignal rawSig3B;
+
+  rawSig1A.setPM(pmA);
+  rawSig1B.setPM(pmB);
+  rawSig2A.setPM(pmA);
+  rawSig2B.setPM(pmB);
+  rawSig3A.setPM(pmA);
+  rawSig3B.setPM(pmB);
+
+  rawSig1A.addPoint(sigCh1);
+  rawSig1B.addPoint(sigCh1);
+
+  rawSig2A.addPoint(sigCh1);
+  rawSig2A.addPoint(sigCh2);
+  rawSig2A.addPoint(sigCh3);
+  rawSig2A.addPoint(sigCh4);
+  rawSig2A.addPoint(sigCh5);
+  rawSig2A.addPoint(sigCh6);
+  rawSig2A.addPoint(sigCh7);
+  rawSig2A.addPoint(sigCh8);
+
+  rawSig2B.addPoint(sigCh1);
+  rawSig2B.addPoint(sigCh2);
+  rawSig2B.addPoint(sigCh3);
+  rawSig2B.addPoint(sigCh4);
+  rawSig2B.addPoint(sigCh5);
+  rawSig2B.addPoint(sigCh6);
+  rawSig2B.addPoint(sigCh7);
+  rawSig2B.addPoint(sigCh8);
+
+  sigCh1.setValue(100.0);
+  sigCh2.setValue(120.0);
+  sigCh3.setValue(140.0);
+  sigCh4.setValue(160.0);
+  sigCh5.setValue(230.0);
+  sigCh6.setValue(210.0);
+  sigCh7.setValue(190.0);
+  sigCh8.setValue(170.0);
+
+  rawSig3A.addPoint(sigCh1);
+  rawSig3A.addPoint(sigCh2);
+  rawSig3A.addPoint(sigCh3);
+  rawSig3A.addPoint(sigCh4);
+  rawSig3A.addPoint(sigCh5);
+  rawSig3A.addPoint(sigCh6);
+  rawSig3A.addPoint(sigCh7);
+  rawSig3A.addPoint(sigCh8);
+
+  rawSig3B.addPoint(sigCh1);
+  rawSig3B.addPoint(sigCh2);
+  rawSig3B.addPoint(sigCh3);
+  rawSig3B.addPoint(sigCh4);
+  rawSig3B.addPoint(sigCh5);
+  rawSig3B.addPoint(sigCh6);
+  rawSig3B.addPoint(sigCh7);
+  rawSig3B.addPoint(sigCh8);
+
+  JPetRecoSignal recoSignal1A;
+  JPetRecoSignal recoSignal1B;
+  JPetRecoSignal recoSignal2A;
+  JPetRecoSignal recoSignal2B;
+  JPetRecoSignal recoSignal3A;
+  JPetRecoSignal recoSignal3B;
+
+  recoSignal1A.setRawSignal(rawSig1A);
+  recoSignal1B.setRawSignal(rawSig1B);
+  recoSignal2A.setRawSignal(rawSig2A);
+  recoSignal2B.setRawSignal(rawSig2B);
+  recoSignal3A.setRawSignal(rawSig3A);
+  recoSignal3B.setRawSignal(rawSig3B);
+
+  JPetPhysSignal physSignal1A;
+  JPetPhysSignal physSignal1B;
+  JPetPhysSignal physSignal2A;
+  JPetPhysSignal physSignal2B;
+  JPetPhysSignal physSignal3A;
+  JPetPhysSignal physSignal3B;
+
+  physSignal1A.setRecoSignal(recoSignal1A);
+  physSignal1B.setRecoSignal(recoSignal1B);
+  physSignal2A.setRecoSignal(recoSignal2A);
+  physSignal2B.setRecoSignal(recoSignal2B);
+  physSignal3A.setRecoSignal(recoSignal3A);
+  physSignal3B.setRecoSignal(recoSignal3B);
+
+  JPetHit hit1;
+  JPetHit hit2;
+  JPetHit hit3;
+
+  hit1.setSignals(physSignal1A, physSignal1B);
+  hit2.setSignals(physSignal2A, physSignal2B);
+  hit3.setSignals(physSignal3A, physSignal3B);
+  
+  std::string TOTCalculationType = "";
+  HitFinderTools::setTOTCalculationType(TOTCalculationType);
+  BOOST_REQUIRE_CLOSE(HitFinderTools::calculateTOT(hit1), 0.0, kEpsilon);
+  BOOST_REQUIRE_CLOSE(HitFinderTools::calculateTOT(hit2), 56.0,
+                      kEpsilon);
+  BOOST_REQUIRE_CLOSE(HitFinderTools::calculateTOT(hit3), 560.0,
+                      kEpsilon);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
