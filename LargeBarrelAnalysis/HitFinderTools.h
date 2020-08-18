@@ -65,12 +65,9 @@ public:
   static JPetHit createDummyRefDetHit(const JPetPhysSignal& signal);
   static int getProperChannel(const JPetPhysSignal& signal);
   static void checkTheta(const double& theta);
-  static void setTOTCalculationType(std::string type);
-  static double calculateTOT(const JPetHit& hit);
-  static double calculateTOTside(const std::map<int, double> & thrToTOT_side);
-private:
-    
-  static TOTCalculationType fTOTCalculationType;
+  static TOTCalculationType getTOTCalculationType(const std::string& type);
+  static double calculateTOT(const JPetHit& hit, TOTCalculationType type = kSimplified);
+  static double calculateTOTside(const std::map<int, double> & thrToTOT_side, TOTCalculationType type);
 };
 
 #endif /* !HITFINDERTOOLS_H */

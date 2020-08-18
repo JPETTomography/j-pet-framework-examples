@@ -31,6 +31,8 @@
 using namespace tot_energy_converter;
 using namespace jpet_common_tools;
 
+const double kEpsilon = 0.01;
+
 BOOST_AUTO_TEST_SUITE(HitFinderTestSuite)
 
 BOOST_AUTO_TEST_CASE(sortByTime_test)
@@ -627,12 +629,11 @@ BOOST_AUTO_TEST_CASE(checkForPromptTest_checkTOTCalc) {
   hit2.setSignals(physSignal2A, physSignal2B);
   hit3.setSignals(physSignal3A, physSignal3B);
   
-  std::string TOTCalculationType = "";
-  HitFinderTools::setTOTCalculationType(TOTCalculationType);
-  BOOST_REQUIRE_CLOSE(HitFinderTools::calculateTOT(hit1), 0.0, kEpsilon);
-  BOOST_REQUIRE_CLOSE(HitFinderTools::calculateTOT(hit2), 56.0,
+  std::string TOTCalculationType = "standard";
+  BOOST_REQUIRE_CLOSE(HitFinderTools::calculateTOT(hit1, HitFinderTools::getTOTCalculationType(TOTCalculationType)), 0.0, kEpsilon);
+  BOOST_REQUIRE_CLOSE(HitFinderTools::calculateTOT(hit2, HitFinderTools::getTOTCalculationType(TOTCalculationType)), 56.0,
                       kEpsilon);
-  BOOST_REQUIRE_CLOSE(HitFinderTools::calculateTOT(hit3), 560.0,
+  BOOST_REQUIRE_CLOSE(HitFinderTools::calculateTOT(hit3, HitFinderTools::getTOTCalculationType(TOTCalculationType)), 560.0,
                       kEpsilon);
 }
 

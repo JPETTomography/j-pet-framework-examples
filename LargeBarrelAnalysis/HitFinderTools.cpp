@@ -23,8 +23,6 @@
 using namespace tot_energy_converter;
 using namespace std;
 
-HitFinderTools::TOTCalculationType HitFinderTools::fTOTCalculationType;
-
 /**
  * Helper method for sotring signals in vector
  */
@@ -273,30 +271,33 @@ void HitFinderTools::checkTheta(const double& theta)
 * the weighted sum of the TOTs on all of the thresholds (1-4) and on the both sides (A,B) 
 */
 
-void HitFinderTools::setTOTCalculationType(std::string type)
+HitFinderTools::TOTCalculationType HitFinderTools::getTOTCalculationType(const std::string& type)
 {
     if (type == "rectangular") {
-      fTOTCalculationType = TOTCalculationType::kThresholdRectangular;
+      return TOTCalculationType::kThresholdRectangular;
     } else if (type == "trapeze") {
-      fTOTCalculationType = TOTCalculationType::kThresholdTrapeze;
+      return TOTCalculationType::kThresholdTrapeze;
+    } else if (type == "standard") {
+      return TOTCalculationType::kSimplified;
     } else {
-      fTOTCalculationType = TOTCalculationType::kSimplified;
+      WARNING("Undefinied type for the calculation of the TOTs. Probably missing option in userParams, typo, or mistake.");
+      return TOTCalculationType::kSimplified;
     }
 }
 
-double HitFinderTools::calculateTOT(const JPetHit& hit)
+double HitFinderTools::calculateTOT(const JPetHit& hit, TOTCalculationType type)
 {
   double tot = 0.0;
 
   std::map<int, double> thrToTOT_sideA = hit.getSignalA().getRecoSignal().getRawSignal().getTOTsVsThresholdValue();
   std::map<int, double> thrToTOT_sideB = hit.getSignalB().getRecoSignal().getRawSignal().getTOTsVsThresholdValue();
 
-  tot += calculateTOTside(thrToTOT_sideA);
-  tot += calculateTOTside(thrToTOT_sideB);
+  tot += calculateTOTside(thrToTOT_sideA, type);
+  tot += calculateTOTside(thrToTOT_sideB, type);
   return tot;
 }
 
-double HitFinderTools::calculateTOTside(const std::map<int, double> & thrToTOT_side)
+double HitFinderTools::calculateTOTside(const std::map<int, double> & thrToTOT_side, TOTCalculationType type)
 {
   double tot = 0., weight = 1.;
   if (!thrToTOT_side.empty()) {
@@ -305,7 +306,7 @@ double HitFinderTools::calculateTOTside(const std::map<int, double> & thrToTOT_s
     if( thrToTOT_side.size() > 1 )
     {
       for (auto it = std::next(thrToTOT_side.begin(), 1); it != thrToTOT_side.end(); it++) {
-        switch(fTOTCalculationType) {
+        switch(type) {
         case TOTCalculationType::kSimplified:
             weight = 1.;
             break;
