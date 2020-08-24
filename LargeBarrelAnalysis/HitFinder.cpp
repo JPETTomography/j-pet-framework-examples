@@ -96,7 +96,7 @@ bool HitFinder::init()
   }
   
   if (isOptionSet(fParams.getOptions(), kTOTCalculationType)) {
-    TOTCalculationType = getOptionAsString(fParams.getOptions(), kTOTCalculationType);
+    fTOTCalculationType = getOptionAsString(fParams.getOptions(), kTOTCalculationType);
   } else {
     WARNING("No TOT calculation option given by the user. Using standard sum.");
   }
@@ -136,7 +136,7 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
   auto sortedHits = JPetAnalysisTools::getHitsOrderedByTime(hits);
   for (const auto& hit : sortedHits) {
 if (fSaveControlHistos) {
-      auto tot = HitFinderTools::calculateTOT(hit, HitFinderTools::getTOTCalculationType(TOTCalculationType));
+      auto tot = HitFinderTools::calculateTOT(hit, HitFinderTools::getTOTCalculationType(fTOTCalculationType));
       getStatistics().fillHistogram("TOT_all_hits", tot);
       if(hit.getRecoFlag()==JPetHit::Good){
         getStatistics().fillHistogram("TOT_good_hits", tot);

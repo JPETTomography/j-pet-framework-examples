@@ -62,7 +62,7 @@ protected:
   bool fConvertToT = false;
   double fABTimeDiff = 6000.0;
   int fRefDetScinID = -1;
-  std::string TOTCalculationType = "";
+  std::string fTOTCalculationType = "";
 };
 
 #endif /* !HITFINDER_H */
