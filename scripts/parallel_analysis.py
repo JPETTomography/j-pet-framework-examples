@@ -19,7 +19,7 @@ except ImportError:
             pass
 
 ALLOWED_TYPES = ["root", "mcGeant", "hld", "zip", "scope"]
-SUPPORTED_EXTENSIONS = ["*", "hld", "hld.root", "tslot.calib.root", "raw.sig.root",
+SUPPORTED_EXTENSIONS = ["root", "hld", "hld.root", "tslot.calib.root", "raw.sig.root",
                         "phys.sig.root", "hits.root", "unk.evt.root", "cat.evt.root"]
 
 
@@ -115,7 +115,7 @@ def main():
         sys.exit()
 
     list_of_params = get_parameters_for_analysis(
-        executable, extension, run_id, run_id_setup, input_directories, output_directory)
+        executable, file_type, extension, run_id, run_id_setup, input_directories, output_directory)
 
     print("\033[32m" + "All checks passed, running analysis now." + "\033[0m")
 
@@ -145,20 +145,20 @@ def run_analysis(params):
     system(params)
 
 
-def get_run_express_from_params(executable, filename, run_id, run_id_setup, output_directory):
+def get_run_express_from_params(executable, file_type, filename, run_id, run_id_setup, output_directory):
     if output_directory:
-        return "./{} -t root -f {} -p conf_trb3.xml -u userParams.json -i {} -l detectorSetupRun{}.json -o {}".format(
-            executable, filename, run_id, run_id_setup, output_directory)
-    return "./{} -t root -f {} -p conf_trb3.xml -u userParams.json -i {} -l detectorSetupRun{}.json".format(
-        executable, filename, run_id, run_id_setup)
+        return "./{} -t {} -f {} -p conf_trb3.xml -u userParams.json -i {} -l detectorSetupRun{}.json -o {}".format(
+            executable, file_type, filename, run_id, run_id_setup, output_directory)
+    return "./{} -t {} -f {} -p conf_trb3.xml -u userParams.json -i {} -l detectorSetupRun{}.json".format(
+        executable, file_type, filename, run_id, run_id_setup)
 
 
-def get_parameters_for_analysis(executable, extension, run_id, run_id_setup, input_directories, output_directory):
+def get_parameters_for_analysis(executable, file_type, extension, run_id, run_id_setup, input_directories, output_directory):
     list_of_params = []
     for directory in input_directories:
         for fname in filter(listdir(directory), "*.{}".format(extension)):
             list_of_params.append(
-                [executable, directory + fname, run_id, run_id_setup, output_directory])
+                [executable, file_type, directory + fname, run_id, run_id_setup, output_directory])
     return [get_run_express_from_params(*x) for x in list_of_params]
 
 if __name__ == "__main__":
