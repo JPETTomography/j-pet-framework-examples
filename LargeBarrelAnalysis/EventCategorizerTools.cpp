@@ -112,10 +112,11 @@ bool EventCategorizerTools::checkFor3Gamma(const JPetEvent& event, JPetStatistic
 */
 bool EventCategorizerTools::checkForPrompt(
   const JPetEvent& event, JPetStatistics& stats, bool saveHistos,
-  double deexTOTCutMin, double deexTOTCutMax)
+  double deexTOTCutMin, double deexTOTCutMax, std::string fTOTCalculationType)
 {
   for (unsigned i = 0; i < event.getHits().size(); i++) {
-    double tot = HitFinderTools::calculateTOT(event.getHits().at(i));
+    double tot = HitFinderTools::calculateTOT(event.getHits().at(i), 
+                                              HitFinderTools::getTOTCalculationType(fTOTCalculationType));
     if (tot > deexTOTCutMin && tot < deexTOTCutMax) {
       if (saveHistos) {
         stats.fillHistogram("Deex_TOT_cut", tot);
@@ -130,8 +131,8 @@ bool EventCategorizerTools::checkForPrompt(
 * Method for determining type of event - scatter
 */
 bool EventCategorizerTools::checkForScatter(
-  const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double scatterTOFTimeDiff
-)
+  const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double scatterTOFTimeDiff, 
+  std::string fTOTCalculationType)
 {
   if (event.getHits().size() < 2) {
     return false;
@@ -157,8 +158,10 @@ bool EventCategorizerTools::checkForScatter(
 
       if (fabs(scattTOF - timeDiff) < scatterTOFTimeDiff) {
         if (saveHistos) {
-          stats.fillHistogram("ScatterAngle_PrimaryTOT", scattAngle, HitFinderTools::calculateTOT(primaryHit));
-          stats.fillHistogram("ScatterAngle_ScatterTOT", scattAngle, HitFinderTools::calculateTOT(scatterHit));
+          stats.fillHistogram("ScatterAngle_PrimaryTOT", scattAngle, HitFinderTools::calculateTOT(primaryHit, 
+                                                        HitFinderTools::getTOTCalculationType(fTOTCalculationType)));
+          stats.fillHistogram("ScatterAngle_ScatterTOT", scattAngle, HitFinderTools::calculateTOT(scatterHit, 
+                                                        HitFinderTools::getTOTCalculationType(fTOTCalculationType)));
         }
         return true;
       }

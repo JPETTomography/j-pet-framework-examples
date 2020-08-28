@@ -35,9 +35,11 @@ public:
                            bool saveHistos, double b2bSlotThetaDiff, double b2bTimeDiff);
   static bool checkFor3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos);
   static bool checkForPrompt(const JPetEvent& event, JPetStatistics& stats,
-                             bool saveHistos, double deexTOTCutMin, double deexTOTCutMax);
+                             bool saveHistos, double deexTOTCutMin, double deexTOTCutMax, 
+                             std::string fTOTCalculationType);
   static bool checkForScatter(const JPetEvent& event, JPetStatistics& stats,
-                              bool saveHistos, double scatterTOFTimeDiff);
+                              bool saveHistos, double scatterTOFTimeDiff, 
+                              std::string fTOTCalculationType);
   static double calculateDistance(const JPetHit& hit1, const JPetHit& hit2);
   static double calculateScatteringTime(const JPetHit& hit1, const JPetHit& hit2);
   static double calculateScatteringAngle(const JPetHit& hit1, const JPetHit& hit2);

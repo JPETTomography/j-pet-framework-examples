@@ -52,6 +52,7 @@ protected:
 	const std::string kDeexTOTCutMaxParamKey = "Deex_Categorizer_TOT_Cut_Max_float";
 	const std::string kMaxTimeDiffParamKey = "EventCategorizer_MaxTimeDiff_float";
 	const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
+    const std::string kTOTCalculationType = "HitFinder_TOTCalculationType_std::string";
 	void saveEvents(const std::vector<JPetEvent>& event);
 	double fScatterTOFTimeDiff = 2000.0;
 	double fB2BSlotThetaDiff = 3.0;
@@ -59,6 +60,7 @@ protected:
 	double fDeexTOTCutMax = 50000.0;
 	double fMaxTimeDiff = 1000.;
 	bool fSaveControlHistos = true;
+    std::string fTOTCalculationType = "";
 	void initialiseHistograms();
 };
 #endif /* !EVENTCATEGORIZER_H */
