@@ -94,6 +94,12 @@ bool HitFinder::init()
       INFO("Hit finder will not convert ToT to deposited energy since no user parameters are provided.");
     }
   }
+  
+  if (isOptionSet(fParams.getOptions(), kTOTCalculationType)) {
+    fTOTCalculationType = getOptionAsString(fParams.getOptions(), kTOTCalculationType);
+  } else {
+    WARNING("No TOT calculation option given by the user. Using standard sum.");
+  }
 
   // Control histograms
   if(fSaveControlHistos) { initialiseHistograms(); }
@@ -130,7 +136,7 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
   auto sortedHits = JPetAnalysisTools::getHitsOrderedByTime(hits);
   for (const auto& hit : sortedHits) {
 if (fSaveControlHistos) {
-      auto tot = HitFinderTools::calculateToT(hit);
+      auto tot = HitFinderTools::calculateTOT(hit, HitFinderTools::getTOTCalculationType(fTOTCalculationType));
       getStatistics().fillHistogram("TOT_all_hits", tot);
       if(hit.getRecoFlag()==JPetHit::Good){
         getStatistics().fillHistogram("TOT_good_hits", tot);

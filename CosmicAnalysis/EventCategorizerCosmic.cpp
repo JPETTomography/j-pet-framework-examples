@@ -14,6 +14,7 @@
  */
 
 #include "../LargeBarrelAnalysis/EventCategorizerTools.h"
+#include "../LargeBarrelAnalysis/HitFinderTools.h"
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include "EventCategorizerCosmic.h"
 #include <JPetWriter/JPetWriter.h>
@@ -36,19 +37,13 @@ bool EventCategorizerCosmic::init()
   } else {
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMinCosmicTOTParamKey.c_str(), fMinCosmicTOT));
   }
-  if (fSaveControlHistos) {
-    getStatistics().createHistogram(
-      new TH1F("Cosmic_TOT", "TOT of Cosmic Hits", 200, fMinCosmicTOT/1000.0, 100.0)
-    );
-    getStatistics().getHisto1D("Cosmic_TOT")->SetXTitle("TOT [ns]");
-    getStatistics().getHisto1D("Cosmic_TOT")->SetYTitle("Counts");
-
-    getStatistics().createHistogram(
-      new TH1F("CosmicHitsPerEvent", "Number of Cosmic Hits in Event", 50, -0.5, 49.5)
-    );
-    getStatistics().getHisto1D("CosmicHitsPerEvent")->SetXTitle("Number of Cosmic Hits in Event");
-    getStatistics().getHisto1D("CosmicHitsPerEvent")->SetYTitle("Counts");
+  if (isOptionSet(fParams.getOptions(), kTOTCalculationType)) {
+    fTOTCalculationType = getOptionAsString(fParams.getOptions(), kTOTCalculationType);
+  } else {
+    WARNING("No TOT calculation option given by the user. Using standard sum.");
   }
+  
+  if(fSaveControlHistos) initialiseHistograms();
   return true;
 }
 
@@ -88,7 +83,7 @@ JPetEvent EventCategorizerCosmic::cosmicAnalysis(vector<JPetHit> hits)
 {
   JPetEvent cosmicEvent;
   for (unsigned i = 0; i < hits.size(); i++) {
-    double TOTofHit = EventCategorizerTools::calculateTOT(hits[i], EventCategorizerTools::TOTCalculationType::kSimplified);
+    double TOTofHit = HitFinderTools::calculateTOT(hits[i], HitFinderTools::getTOTCalculationType(fTOTCalculationType));
     if (TOTofHit >= fMinCosmicTOT) {
       cosmicEvent.addHit(hits[i]);
       //Uncomment if kCosmic type will be avalible
@@ -103,4 +98,19 @@ JPetEvent EventCategorizerCosmic::cosmicAnalysis(vector<JPetHit> hits)
     getStatistics().getHisto1D("CosmicHitsPerEvent")->Fill(cosmicEvent.getHits().size());
   }
   return cosmicEvent;
+}
+
+void EventCategorizerCosmic::initialiseHistograms(){
+    
+  getStatistics().createHistogram(
+      new TH1F("Cosmic_TOT", "TOT of Cosmic Hits", 200, fMinCosmicTOT/1000.0, 100.0)
+  );
+  getStatistics().getHisto1D("Cosmic_TOT")->SetXTitle("TOT [ns]");
+  getStatistics().getHisto1D("Cosmic_TOT")->SetYTitle("Counts");
+
+  getStatistics().createHistogram(
+      new TH1F("CosmicHitsPerEvent", "Number of Cosmic Hits in Event", 50, -0.5, 49.5)
+  );
+  getStatistics().getHisto1D("CosmicHitsPerEvent")->SetXTitle("Number of Cosmic Hits in Event");
+  getStatistics().getHisto1D("CosmicHitsPerEvent")->SetYTitle("Counts");
 }

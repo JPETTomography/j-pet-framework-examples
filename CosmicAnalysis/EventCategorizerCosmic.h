@@ -41,9 +41,12 @@ public:
 
 protected:
 	const std::string kMinCosmicTOTParamKey = "EventCategorizer_MinCosmicTOT_float";
+    const std::string kTOTCalculationType = "HitFinder_TOTCalculationType_std::string";
 	void saveEvents(const std::vector<JPetEvent>& event);
 	double fMinCosmicTOT = 55000.0;
 	bool fSaveControlHistos = true;
+    std::string fTOTCalculationType = "";
+    void initialiseHistograms();
 };
 
 #endif /* !EVENTCATEGORIZERCOSMIC_H */

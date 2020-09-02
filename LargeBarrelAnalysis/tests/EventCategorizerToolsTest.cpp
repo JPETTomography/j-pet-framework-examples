@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(checkFor3GammaTest) {
   BOOST_REQUIRE(EventCategorizerTools::checkFor3Gamma(event3, stats, false));
 }
 
-BOOST_AUTO_TEST_CASE(checkForPromptTest_checkTOTCalc) {
+BOOST_AUTO_TEST_CASE(checkForPromptTest) {
   JPetBarrelSlot barrelSlot(666, true, "Some Slot", 66.0, 666);
   JPetPM pmA(1, "A");
   JPetPM pmB(2, "B");
@@ -242,12 +242,6 @@ BOOST_AUTO_TEST_CASE(checkForPromptTest_checkTOTCalc) {
   hit1.setSignals(physSignal1A, physSignal1B);
   hit2.setSignals(physSignal2A, physSignal2B);
   hit3.setSignals(physSignal3A, physSignal3B);
-  
-  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit1, EventCategorizerTools::TOTCalculationType::kSimplified), 0.0, kEpsilon);
-  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit2, EventCategorizerTools::TOTCalculationType::kSimplified), 56.0,
-                      kEpsilon);
-  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit3, EventCategorizerTools::TOTCalculationType::kSimplified), 560.0,
-                      kEpsilon);
 
   JPetEvent event1;
   JPetEvent event2;
@@ -266,17 +260,17 @@ BOOST_AUTO_TEST_CASE(checkForPromptTest_checkTOTCalc) {
   event5.addHit(hit3);
 
   JPetStatistics stats;
-
+  std::string fTOTCalculationType = "standard";
   BOOST_REQUIRE(
-      !EventCategorizerTools::checkForPrompt(event1, stats, false, 40.0, 60.0));
+      !EventCategorizerTools::checkForPrompt(event1, stats, false, 40.0, 60.0, fTOTCalculationType));
   BOOST_REQUIRE(!EventCategorizerTools::checkForPrompt(event2, stats, false,
-                                                       200.0, 400.0));
+                                                       200.0, 400.0, fTOTCalculationType));
   BOOST_REQUIRE(!EventCategorizerTools::checkForPrompt(event3, stats, false,
-                                                       200.0, 400.0));
+                                                       200.0, 400.0, fTOTCalculationType));
   BOOST_REQUIRE(
-      EventCategorizerTools::checkForPrompt(event4, stats, false, 40.0, 600.0));
+      EventCategorizerTools::checkForPrompt(event4, stats, false, 40.0, 600.0, fTOTCalculationType));
   BOOST_REQUIRE(EventCategorizerTools::checkForPrompt(event5, stats, false,
-                                                      500.0, 600.0));
+                                                      500.0, 600.0, fTOTCalculationType));
 }
 
 BOOST_AUTO_TEST_CASE(checkForScatterTest) {
@@ -295,12 +289,13 @@ BOOST_AUTO_TEST_CASE(checkForScatterTest) {
   event1.addHit(firstHit);
 
   JPetStatistics stats;
+  std::string fTOTCalculationType = "standard";
   BOOST_REQUIRE(
-      EventCategorizerTools::checkForScatter(event, stats, false, 2000.0));
+      EventCategorizerTools::checkForScatter(event, stats, false, 2000.0, fTOTCalculationType));
   BOOST_REQUIRE(
-      !EventCategorizerTools::checkForScatter(event, stats, false, 0.000001));
+      !EventCategorizerTools::checkForScatter(event, stats, false, 0.000001, fTOTCalculationType));
   BOOST_REQUIRE(
-      !EventCategorizerTools::checkForScatter(event1, stats, false, 2000.0));
+      !EventCategorizerTools::checkForScatter(event1, stats, false, 2000.0, fTOTCalculationType));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
