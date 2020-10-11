@@ -85,9 +85,9 @@ vector<JPetEvent> EventCategorizer::analyseThreeHitEvent(const JPetEvent *event)
         orderedHits.push_back(thirdHit);
         orderedHits = reorderHits(orderedHits);
 
-        getStatistics().getHisto1D("Time difference 2-1 BOrdering")->Fill(TMath::Abs(secondHit.getTime()-firstHit.getTime())*pow(10,-3));
-        getStatistics().getHisto1D("Time difference 3-2 BOrdering")->Fill(TMath::Abs(thirdHit.getTime()-secondHit.getTime())*pow(10,-3));
-        getStatistics().getHisto1D("Time difference 3-1 BOrdering")->Fill(TMath::Abs(thirdHit.getTime()-firstHit.getTime())*pow(10,-3));
+        getStatistics().getHisto1D("Time difference 2-1 BOrdering")->Fill(TMath::Abs(secondHit.getTime()-firstHit.getTime())*kPsToNs);
+        getStatistics().getHisto1D("Time difference 3-2 BOrdering")->Fill(TMath::Abs(thirdHit.getTime()-secondHit.getTime())*kPsToNs);
+        getStatistics().getHisto1D("Time difference 3-1 BOrdering")->Fill(TMath::Abs(thirdHit.getTime()-firstHit.getTime())*kPsToNs);
 
         // Ordered in time after corrections
         JPetHit firstHit2 = orderedHits.at(0);
@@ -97,13 +97,13 @@ vector<JPetEvent> EventCategorizer::analyseThreeHitEvent(const JPetEvent *event)
 	   // Time difference after ordering
 
         getStatistics().getHisto1D("Time difference 2-1")->Fill(
-          TMath::Abs(secondHit2.getTime()-firstHit2.getTime())*pow(10,-3)
+          TMath::Abs(secondHit2.getTime()-firstHit2.getTime())*kPsToNs
         );
         getStatistics().getHisto1D("Time difference 3-2")->Fill(
-          TMath::Abs(thirdHit2.getTime()-secondHit2.getTime())*pow(10,-3)
+          TMath::Abs(thirdHit2.getTime()-secondHit2.getTime())*kPsToNs
         );
         getStatistics().getHisto1D("Time difference 3-1")->Fill(
-          TMath::Abs(thirdHit2.getTime()-firstHit2.getTime())*pow(10,-3)
+          TMath::Abs(thirdHit2.getTime()-firstHit2.getTime())*kPsToNs
         );
 
         // ORDERING DONE (not beautifully however), NOW NEW HITS ARE NAMED AS firstHit2, secondHit2, thirdHit2
@@ -137,8 +137,8 @@ void EventCategorizer::deexcitationSelection(
   const JPetHit& secondHit2, const JPetHit& thirdHit2
 ){
   if((angles[0]+angles[1]) < 178 || (angles[0]+angles[1]) > 182) {
-    double time_diff_check = (thirdHit2.getTime()-firstHit2.getTime())*pow(10,-3);
-    double deex_selection = calculateTOTAdjusted(firstHit2)/1000.0;
+    double time_diff_check = (thirdHit2.getTime()-firstHit2.getTime())*kPsToNs;
+    double deex_selection = HitFinderTools::calculateTOT(firstHit2, HitFinderTools::getTOTCalculationType("standard"))*kPsToNs;
     getStatistics().getHisto2D("3_hit_angles after cut")->Fill(angles[0] + angles[1], angles[1]-angles[0]);
     getStatistics().getHisto1D("De-exci time criteria t3-t1")->Fill(time_diff_check);
 
@@ -146,11 +146,12 @@ void EventCategorizer::deexcitationSelection(
     int secondHitScinID = secondHit2.getScintillator().getID();
     int thirdHitScinID = thirdHit2.getScintillator().getID();
 
-    //TimeDiff_From && TimeDiff_To used to put time difference between prompt photon and annihilation photon  registration, values are fixed in EventCategorizer.h 
+    //TimeDiff_From && TimeDiff_To used to put time difference between prompt photon and annihilation photon  registration, values are fixed in EventCategorizerTOTvsEdep.h
+	// Only upper limit was applied on TOT values for the selection of prompt and annihilation photons fixed in EventCategorizationTOTvsEdep.h
 
     // Make it sure the first hit is from center
     if(time_diff_check > TimeDiff_From && time_diff_check < TimeDiff_To
-    && deex_selection < 65.0
+    && deex_selection < DeexSel_upper
     && TMath::Abs(firstHit2.getPosZ()) < 23.0
     && TMath::Abs(secondHit2.getPosZ()) < 23.0
     && TMath::Abs(thirdHit2.getPosZ()) < 23.0
@@ -178,10 +179,10 @@ void EventCategorizer::annihilationSelection(
 ){
   // b2b gammas selection
   getStatistics().getHisto1D("Time difference 2-1")->Fill(
-    TMath::Abs(secondHit2.getTime()-firstHit2.getTime())*pow(10,-3)
+    TMath::Abs(secondHit2.getTime()-firstHit2.getTime())*kPsToNs
   );
   getStatistics().getHisto1D("Time difference 3-2")->Fill(
-    TMath::Abs(thirdHit2.getTime()-secondHit2.getTime())*pow(10,-3)
+    TMath::Abs(thirdHit2.getTime()-secondHit2.getTime())*kPsToNs
   );
 
   int firstHitScinID = firstHit2.getScintillator().getID();
@@ -189,12 +190,12 @@ void EventCategorizer::annihilationSelection(
   int thirdHitScinID = thirdHit2.getScintillator().getID();
 
   if((angles[0]+angles[1]) > 178 && (angles[0]+angles[1]) < 182
-     && (TMath::Abs(firstHit2.getTime()-secondHit2.getTime())/1000)<0.2        // will cut elongation of scatter test  
+     && (TMath::Abs(firstHit2.getTime()-secondHit2.getTime())*kPsToNs)<0.2        // Time diff. criteria between hits will cut elongation of scatter test
   && TMath::Abs(firstHit2.getPosZ()) < 23.0
   && TMath::Abs(secondHit2.getPosZ()) < 23.0
   && TMath::Abs(thirdHit2.getPosZ()) < 23.0
-  && calculateTOTAdjusted(firstHit2)/1000.0 < 35.0
-  && calculateTOTAdjusted(secondHit2)/1000.0 < 35.0
+  && HitFinderTools::calculateTOT(firstHit2, HitFinderTools::getTOTCalculationType("standard"))*kPsToNs  < AnniSel_upper
+  && HitFinderTools::calculateTOT(secondHit2, HitFinderTools::getTOTCalculationType("standard"))*kPsToNs < AnniSel_upper
   && firstHitScinID != secondHitScinID
   && firstHitScinID != thirdHitScinID
   && secondHitScinID != thirdHitScinID) {
@@ -260,9 +261,9 @@ vector<JPetHit> EventCategorizer::reorderHits(vector<JPetHit> hits)
   // Corrected time is a original time in pico seconds
   // minus value of time of flight from the center - distance/speed of light
   // Setting the time of new hits as corrected ones
-  first->setTime(hits.at(0).getTime()-hits.at(0).getPos().Mag()*pow(10,3)/kLightVelocity_cm_ns);
-  second->setTime(hits.at(1).getTime()-hits.at(1).getPos().Mag()*pow(10,3)/kLightVelocity_cm_ns);
-  third->setTime(hits.at(2).getTime()-hits.at(2).getPos().Mag()*pow(10,3)/kLightVelocity_cm_ns);
+  first->setTime(hits.at(0).getTime()-hits.at(0).getPos().Mag()*kNsToPs/kLightVelocity_cm_ns);
+  second->setTime(hits.at(1).getTime()-hits.at(1).getPos().Mag()*kNsToPs/kLightVelocity_cm_ns);
+  third->setTime(hits.at(2).getTime()-hits.at(2).getPos().Mag()*kNsToPs/kLightVelocity_cm_ns);
 
   reorderedHits.push_back(*first);
   reorderedHits.push_back(*second);
@@ -314,14 +315,10 @@ vector<double> EventCategorizer::scatterAnalysis(
   }
 
   // Distance b/w hits
-  double computedDistance =
-    sqrt(pow((primary1.getPosX() - scatter.getPosX()), 2)
-      + pow((primary1.getPosY() - scatter.getPosY()), 2)
-      + pow((primary1.getPosZ() - scatter.getPosZ()), 2)
-    );
+	double computedDistance = (primary1.getPos() - scatter.getPos()).Mag();
 
   // pico to nano scatter conversion
-  double hitTimeDiff = (scatter.getTime()-primary1.getTime())*pow(10,-3);
+  double hitTimeDiff = (scatter.getTime()-primary1.getTime())*kPsToNs;
   double evalSpeedLight = distance/TMath::Abs(hitTimeDiff);
 
   // Using scattered angle, calculate theoretical value of energy deposition
@@ -363,121 +360,10 @@ vector<double> EventCategorizer::scatterAnalysis(
 // ANGLE CALCULATION
 double EventCategorizer::calcAngle(JPetHit primary, JPetHit scatter)
 {
-  double scalarProd = primary.getPosX()*scatter.getPosX()
-    + primary.getPosY()*scatter.getPosY() + primary.getPosZ()*scatter.getPosZ();
-  // Pos in cm
-  double magProd = sqrt((
-    pow(primary.getPosX(), 2) + pow(primary.getPosY(), 2)
-      + pow(primary.getPosZ(), 2))*(pow(scatter.getPosX(), 2)
-      + pow(scatter.getPosY(), 2) + pow(scatter.getPosZ(), 2))
-  );
-  return acos(scalarProd/magProd)*180/3.14159265;
-}
-
-
-// Sum over all threshold
-
-//New TOT method : needs to be weighted
-double EventCategorizer::calculateTOTAdjusted(const JPetHit& hit)
-{
-	double tot = 0.0;
+  double scalarProd =primary.getPos() * scatter.getPos();              // Tested, it seems okay
+  double magProd = primary.getPos().Mag() * scatter.getPos().Mag();   // Tested, it seems okay
 	
-	auto sigALead = hit.getSignalA().getRecoSignal().getRawSignal().getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-	auto sigBLead = hit.getSignalB().getRecoSignal().getRawSignal().getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-	auto sigATrail = hit.getSignalA().getRecoSignal().getRawSignal().getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-	auto sigBTrail = hit.getSignalB().getRecoSignal().getRawSignal().getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-	if (sigALead.size() > 0 && sigATrail.size() > 0)
-		{
-		for (unsigned i = 0; i < sigALead.size() && i < sigATrail.size(); i++)
-			{
-			switch( i )
-				{
-					case 0:
-					tot += (sigATrail.at(i).getValue() - sigALead.at(i).getValue()) * 3 / 11;
-					break;
-					case 1:
-					tot += (sigATrail.at(i).getValue() - sigALead.at(i).getValue()) * 5 / 11;
-					break;
-					case 2:
-					tot += (sigATrail.at(i).getValue() - sigALead.at(i).getValue());
-					break;
-					case 3:
-					tot += (sigATrail.at(i).getValue() - sigALead.at(i).getValue());
-					break;
-				}
-			}
-		}
-	if (sigBLead.size() > 0 && sigBTrail.size() > 0)
-		{
-		for (unsigned i = 0; i < sigBLead.size() && i < sigBTrail.size(); i++)
-			{
-			switch( i )
-				{
-					case 0:
-					tot += (sigBTrail.at(i).getValue() - sigBLead.at(i).getValue()) * 3 / 11;
-					break;
-					case 1:
-					tot += (sigBTrail.at(i).getValue() - sigBLead.at(i).getValue()) * 5 / 11;
-					break;
-					case 2:
-					tot += (sigBTrail.at(i).getValue() - sigBLead.at(i).getValue());
-					break;
-					case 3:
-					tot += (sigBTrail.at(i).getValue() - sigBLead.at(i).getValue());
-					break;
-				}
-			}
-		}
-	return tot;
-}
-//
-// TOT estimation when thresholds are equidistant-
-double EventCategorizer::calculateSumOfTOTs(JPetHit hit)
-{
-  double TOT = calculateSumOfTOTsForSignal(hit, 'A', 1, 5);
-  TOT += calculateSumOfTOTsForSignal(hit, 'B', 1, 5);
-  return TOT;
-}
-
-double EventCategorizer::calculateSumOfTOTsForSignal(JPetHit hit, char label, int thrI, int thrF)
-{
-  std::map<int,double> leadingPoints, trailingPoints;
-  string end_label = string("");
-  if('A' == label) {
-    leadingPoints = hit.getSignalA().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading);
-    trailingPoints = hit.getSignalA().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Trailing);
-    end_label='A';
-  } else if ('B' == label) {
-    leadingPoints = hit.getSignalB().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading);
-    trailingPoints = hit.getSignalB().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Trailing);
-    end_label='B';
-  } else {
-    ERROR("Wrong label provided to EventCategorizer::calculateSumOfTOTsForSignal");
-    return -10;
-  }
-  double TOT = 0;
-  // finding TOT for every threshold 1-4
-  // original for all threshold
-  // for(int i=1; i<5; i++)
-  for(int i=thrI; i<thrF; i++) {
-    auto leadSearch = leadingPoints.find(i);
-    auto trailSearch = trailingPoints.find(i);
-    if (leadSearch != leadingPoints.end() && trailSearch != trailingPoints.end()) {
-      // primary1 parameter unknown, scatter parameter is for Time
-      TOT+=(trailSearch->second - leadSearch->second);
-    }
-  }
-  return TOT;
-}
-
-// TOT CALIBRATED SUMMED OVER ALL THRESHOLD
-double EventCategorizer::calculateSumOfTOTsCalib(JPetHit hit,int ThrI, int ThrF)
-{
-  int thrI = ThrI;
-  int thrF = ThrF;
-  double TOT = calculateSumOfTOTsForSignal(hit, 'A', thrI, thrF);
-  TOT += calculateSumOfTOTsForSignal(hit, 'B', thrI, thrF);
-  return TOT;
+  return acos(scalarProd/magProd)*180/3.14159265;
 }
 
 
@@ -490,16 +376,14 @@ void EventCategorizer::writeSelected(
     // gerenal fill
     getStatistics().getHisto1D("scatter_angle_sel")->Fill(values.at(2));
     getStatistics().getHisto2D("TOT_EDEP")->Fill(
-      values.at(6), calculateSumOfTOTsCalib(orig,1,5)*pow(10,-3)
+      values.at(6),HitFinderTools::calculateTOT(orig, HitFinderTools::getTOTCalculationType("standard"))*kPsToNs
     );
-    getStatistics().getHisto1D("TOT_Spectra_3-Hit")->Fill(
-      calculateSumOfTOTsCalib(orig,1,5)*pow(10,-3)
-    );
+    getStatistics().getHisto1D("TOT_Spectra_3-Hit")->Fill(HitFinderTools::calculateTOT(orig, HitFinderTools::getTOTCalculationType("standard"))*kPsToNs);
     }
 
     // 511 keV fill
     if(Gamma_inv == 511) {
-      getStatistics().getHisto2D("TOT_EDEP 511")->Fill(values.at(6),calculateSumOfTOTsCalib(orig,1,5)*pow(10,-3)
+      getStatistics().getHisto2D("TOT_EDEP 511")->Fill(values.at(6),HitFinderTools::calculateTOT(orig, HitFinderTools::getTOTCalculationType("standard"))*kPsToNs
       );
     }
 
@@ -510,7 +394,7 @@ void EventCategorizer::writeSelected(
       double primary2_TOT_val = -2332.32 + 632.1*log(primary2_eng_dep_511+606.909) - 42.0769*pow(log(primary2_eng_dep_511+606.909),2);
       double primary2_eng_dep_1275 = Gamma_inv*(1-(1/(1+((Gamma_inv/511)*(1-cos(primary2_Scatt_angle*TMath::Pi()/180))))));
       getStatistics().getHisto2D("TOT_EDEP 1274")->Fill(
-        values.at(6),calculateSumOfTOTsCalib(orig,1,5)*pow(10,-3)
+        values.at(6),HitFinderTools::calculateTOT(orig, HitFinderTools::getTOTCalculationType("standard"))*kPsToNs
       );
       getStatistics().getHisto1D("scatter_angle_sel_1275")->Fill(values.at(2));
       getStatistics().getHisto2D("TOT_EDEP_dummy")->Fill(

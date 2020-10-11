@@ -13,10 +13,14 @@ Some pointers in using  the algorithem:
 	b). For the associated of scatterd photon to its primary interaction, scattering test is used. For this purpose, elliptical cuts ( equations ) are provided in the  
 	     code, one can modify the shape of ellipse  by changing the parameters. 
 	c). Once we have energy deposition for a hit, we have one-to-one correspondence of energy loss in a hit and the corresponding measured TOT value.
-3). In selecting the 511 keV photons or 1275 keV photons we are not using sharp cuts on TOT spectra, only the higher limits to cover the full range of energy depositions.
+	3). In selecting the 511 keV photons or 1275 keV photons we are not using sharp cuts on TOT spectra, only the higher limits to cover the full range of energy depositions. One can change the upper limits which will be required for differnt runs ( starting from Run7, the signals are not probed at equidistant threshold values).
+	For Run4 :   
+	(i)  AnniSel_upper = 35.0 ;
+	(ii) DeexSel_upper= 65.0 ;
+	For Run 7, 9, 11:
+	(i)  AnniSel_upper = 23.0 ;
+	(ii) DeexSel_upper= 45.0 ;
 4). Apart from higher ranges cut on TOT, the selection of photons are also based on the angular correlations of the 3 hits ( sum of two smallest vs their difference azimuth angles between the hits).
-5). Two methods are in code : (i) Based on multiple of any threshold values ( e.g., run4 - 80,160,240,320 like in Run 4) : calculateSumOfTOTs(hit)
-(ii) Irregular thresholds values - one has to normalize  ( Run 7, 9, 11): calculateTOTAdjusted(hit)
-
+5). Two methods  in code : The global way to extract the total TOT value for a hit is implemented as introduced by K Dulski. One can choose various options, for the current analysis, i am using the standard flag.
 ## Author 
 Please report any bugs and suggestion of corrections to : [sushil.sharma@uj.edu.pl] or any core member from the framework developers team. 

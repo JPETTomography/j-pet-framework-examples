@@ -45,7 +45,7 @@ set(HEADERS ${use_modules_from}/TimeWindowCreator.h
             ${use_modules_from}/HitFinder.h
             ${use_modules_from}/HitFinderTools.h
             ${use_modules_from}/EventFinder.h
-	    EventCategorizer.h
+	    EventCategorizerTOTvsEdep.h
             ${use_modules_from}/EventCategorizerTools.h)
 
 set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
@@ -58,7 +58,7 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
             ${use_modules_from}/HitFinder.cpp
             ${use_modules_from}/HitFinderTools.cpp
             ${use_modules_from}/EventFinder.cpp
-	    EventCategorizer.cpp
+	    EventCategorizerTOTvsEdep.cpp
 	    ${use_modules_from}/EventCategorizerTools.cpp)
 
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})
