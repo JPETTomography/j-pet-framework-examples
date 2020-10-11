@@ -18,6 +18,7 @@
 
 #include <JPetCommonTools/JPetCommonTools.h>
 #include "../LargeBarrelAnalysis/EventCategorizerTools.h"
+#include "../LargeBarrelAnalysis/HitFinderTools.h"
 #include <JPetUserTask/JPetUserTask.h>
 #include <JPetEvent/JPetEvent.h>
 #include <JPetHit/JPetHit.h>
@@ -31,7 +32,11 @@ class JPetWriter;
 #define override
 #endif
 
-static const double kLightVelocity_cm_ns = 29.9792458;
+static const double kLightVelocity_cm_ns = 29.9792458; // cm /ns
+static const double kNsToPs = 1000;      // nano second to pico second converter
+static const double kPsToNs = 0.001;     // pico second to nano second converter
+static const double AnniSel_upper = 35.;
+static const double DeexSel_upper = 65.0;
 
 class EventCategorizer : public JPetUserTask{
 public:
@@ -59,17 +64,13 @@ private:
   	const JPetHit& secondHit2, const JPetHit& thirdHit2
 	);
 	std::vector<JPetHit> reorderHits(std::vector<JPetHit> hits);
-  std::vector<JPetEvent> analyseThreeHitEvent(const JPetEvent *event);
+    std::vector<JPetEvent> analyseThreeHitEvent(const JPetEvent *event);
 	std::vector<double_t> scatterAnalysis(JPetHit orig, JPetHit scatter,JPetHit ,double);
-	double calcAngle(JPetHit orig, JPetHit scatter);   //sks
-	TVector3 recoPos2Hit(const JPetHit hit1, const JPetHit hit2 );
-	double calculateSumOfTOTs(JPetHit hit);
-	double calculateSumOfTOTsCalib(JPetHit hit,int ThrI, int ThrF);
-	double calculateSumOfTOTsForSignal(JPetHit hit, char label, int thrI, int thrF);
+	double calcAngle(JPetHit orig, JPetHit scatter);   
 	void writeSelected(JPetHit orig, JPetHit scatter, std::vector<double_t> values,
 		bool isScatter, double,double, int ScinID
 	);
-	double calculateTOTAdjusted(const JPetHit&);
+
 };
 
 #endif /* !EVENTCATEGORIZER_H */
