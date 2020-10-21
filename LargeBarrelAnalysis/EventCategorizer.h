@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -50,13 +50,17 @@ protected:
 	const std::string kScatterTOFTimeDiffParamKey = "Scatter_Categorizer_TOF_TimeDiff_float";
 	const std::string kDeexTOTCutMinParamKey = "Deex_Categorizer_TOT_Cut_Min_float";
 	const std::string kDeexTOTCutMaxParamKey = "Deex_Categorizer_TOT_Cut_Max_float";
+	const std::string kMaxTimeDiffParamKey = "EventCategorizer_MaxTimeDiff_float";
 	const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
+    const std::string kTOTCalculationType = "HitFinder_TOTCalculationType_std::string";
 	void saveEvents(const std::vector<JPetEvent>& event);
 	double fScatterTOFTimeDiff = 2000.0;
 	double fB2BSlotThetaDiff = 3.0;
 	double fDeexTOTCutMin = 30000.0;
 	double fDeexTOTCutMax = 50000.0;
+	double fMaxTimeDiff = 1000.;
 	bool fSaveControlHistos = true;
+    std::string fTOTCalculationType = "";
 	void initialiseHistograms();
 };
 #endif /* !EVENTCATEGORIZER_H */

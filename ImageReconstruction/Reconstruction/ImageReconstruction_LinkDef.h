@@ -1,0 +1,6 @@
+#pragma link C++ class JPetSinogramType+;
+#pragma link C++ class boost::numeric::ublas::mapped_matrix<double,boost::numeric::ublas::basic_row_major<unsigned long,long>,boost::numeric::ublas::map_std<unsigned long,double,allocator<pair<const unsigned long,double> > > >+;
+#pragma link C++ class boost::numeric::ublas::ublas_expression<boost::numeric::ublas::mapped_matrix<double,boost::numeric::ublas::basic_row_major<unsigned long,long>,boost::numeric::ublas::map_std<unsigned long,double,allocator<pair<const unsigned long,double> > > > >+;
+#pragma link C++ class boost::numeric::ublas::matrix_expression<boost::numeric::ublas::mapped_matrix<double,boost::numeric::ublas::basic_row_major<unsigned long,long>,boost::numeric::ublas::map_std<unsigned long,double,allocator<pair<const unsigned long,double> > > > >+;
+#pragma link C++ class boost::numeric::ublas::matrix_container<boost::numeric::ublas::mapped_matrix<double,boost::numeric::ublas::basic_row_major<unsigned long,long>,boost::numeric::ublas::map_std<unsigned long,double,allocator<pair<const unsigned long,double> > > > >+;
+#pragma link C++ class boost::numeric::ublas::map_std<unsigned long,double,allocator<pair<const unsigned long,double> > >+;

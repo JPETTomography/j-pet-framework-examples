@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -13,14 +13,15 @@
  *  @file HitFinderTools.cpp
  */
 
-using namespace std;
-
 #include "UniversalFileLoader.h"
 #include "HitFinderTools.h"
 #include <TMath.h>
 #include <vector>
 #include <cmath>
 #include <map>
+
+using namespace tot_energy_converter;
+using namespace std;
 
 /**
  * Helper method for sotring signals in vector
@@ -68,7 +69,8 @@ map<int, vector<JPetPhysSignal>> HitFinderTools::getSignalsBySlot(
 vector<JPetHit> HitFinderTools::matchAllSignals(
   map<int, vector<JPetPhysSignal>>& allSignals,
   const map<unsigned int, vector<double>>& velocitiesMap,
-  double timeDiffAB, int refDetScinId, JPetStatistics& stats, bool saveHistos
+  double timeDiffAB, int refDetScinId, bool convertToT,
+  const ToTEnergyConverter& totConverter, JPetStatistics& stats, bool saveHistos
 ) {
   vector<JPetHit> allHits;
   for (auto& slotSigals : allSignals) {
@@ -82,7 +84,8 @@ vector<JPetHit> HitFinderTools::matchAllSignals(
     }
     // Loop for other slots than reference one
     auto slotHits = matchSignals(
-      slotSigals.second, velocitiesMap, timeDiffAB, stats, saveHistos
+      slotSigals.second, velocitiesMap, timeDiffAB,
+      convertToT, totConverter, stats, saveHistos
     );
     allHits.insert(allHits.end(), slotHits.begin(), slotHits.end());
   }
@@ -94,8 +97,9 @@ vector<JPetHit> HitFinderTools::matchAllSignals(
  */
 vector<JPetHit> HitFinderTools::matchSignals(
   vector<JPetPhysSignal>& slotSignals,
-  const map<unsigned int, vector<double>>& velocitiesMap,
-  double timeDiffAB, JPetStatistics& stats, bool saveHistos
+  const map<unsigned int, vector<double>>& velocitiesMap, double timeDiffAB,
+  bool convertToT, const ToTEnergyConverter& totConverter, JPetStatistics& stats,
+  bool saveHistos
 ) {
   vector<JPetHit> slotHits;
   vector<JPetPhysSignal> remainSignals;
@@ -110,7 +114,8 @@ vector<JPetHit> HitFinderTools::matchSignals(
       if (slotSignals.at(j).getTime() - physSig.getTime() < timeDiffAB) {
         if (physSig.getPM().getSide() != slotSignals.at(j).getPM().getSide()) {
           auto hit = createHit(
-            physSig, slotSignals.at(j), velocitiesMap, stats, saveHistos
+            physSig, slotSignals.at(j), velocitiesMap,
+            convertToT, totConverter, stats, saveHistos
           );
           slotHits.push_back(hit);
           slotSignals.erase(slotSignals.begin() + j);
@@ -125,7 +130,7 @@ vector<JPetHit> HitFinderTools::matchSignals(
         }
       } else {
         if(saveHistos && physSig.getPM().getSide() != slotSignals.at(j).getPM().getSide()){
-          stats.getHisto1D("remain_signals_tdiff")->Fill(
+          stats.fillHistogram("remain_signals_tdiff",
             slotSignals.at(j).getTime() - physSig.getTime()
           );
         }
@@ -136,8 +141,8 @@ vector<JPetHit> HitFinderTools::matchSignals(
     }
   }
   if(remainSignals.size()>0 && saveHistos){
-    stats.getHisto1D("remain_signals_per_scin")
-      ->Fill((float)(remainSignals.at(0).getPM().getScin().getID()), remainSignals.size());
+    stats.fillHistogram("remain_signals_per_scin",
+            (float)(remainSignals.at(0).getPM().getScin().getID()), remainSignals.size());
   }
   return slotHits;
 }
@@ -148,7 +153,8 @@ vector<JPetHit> HitFinderTools::matchSignals(
 JPetHit HitFinderTools::createHit(
   const JPetPhysSignal& signal1, const JPetPhysSignal& signal2,
   const map<unsigned int, vector<double>>& velocitiesMap,
-  JPetStatistics& stats, bool saveHistos
+  bool convertToT, const ToTEnergyConverter& totConverter, JPetStatistics& stats,
+  bool saveHistos
 ) {
   JPetPhysSignal signalA;
   JPetPhysSignal signalB;
@@ -173,31 +179,50 @@ JPetHit HitFinderTools::createHit(
   hit.setQualityOfTime(-1.0);
   hit.setTimeDiff(signalB.getTime() - signalA.getTime());
   hit.setQualityOfTimeDiff(-1.0);
-  hit.setEnergy(-1.0);
-  hit.setQualityOfEnergy(-1.0);
   hit.setScintillator(signalA.getPM().getScin());
   hit.setBarrelSlot(signalA.getPM().getBarrelSlot());
   hit.setPosX(radius * cos(theta));
   hit.setPosY(radius * sin(theta));
   hit.setPosZ(velocity * hit.getTimeDiff() / 2000.0);
 
+  if(convertToT) {
+    auto tot = calculateTOT(hit);
+    /// Checking if provided conversion function accepts calculated value of ToT
+    if(tot > totConverter.getRange().first && tot < totConverter.getRange().second){
+      auto energy = totConverter(tot);
+      if(!isnan(energy)){
+        hit.setEnergy(energy);
+        stats.fillHistogram("conv_tot_range", tot);
+        stats.fillHistogram("conv_dep_energy", energy);
+        stats.fillHistogram("conv_dep_energy_vs_tot", energy, tot);
+      } else {
+        hit.setEnergy(-1.0);
+      }
+    } else {
+      hit.setEnergy(-1.0);
+    }
+  } else {
+    hit.setEnergy(-1.0);
+  }
+  hit.setQualityOfEnergy(-1.0);
+
   if(signalA.getRecoFlag() == JPetBaseSignal::Good
     && signalB.getRecoFlag() == JPetBaseSignal::Good) {
       hit.setRecoFlag(JPetHit::Good);
       if(saveHistos) {
-        stats.getHisto1D("good_vs_bad_hits")->Fill(1);
-        stats.getHisto2D("time_diff_per_scin")
-          ->Fill(hit.getTimeDiff(), (float)(hit.getScintillator().getID()));
-        stats.getHisto2D("hit_pos_per_scin")
-          ->Fill(hit.getPosZ(), (float)(hit.getScintillator().getID()));
+        stats.fillHistogram("good_vs_bad_hits",1);
+        stats.fillHistogram("time_diff_per_scin",
+          hit.getTimeDiff(), (float)(hit.getScintillator().getID()));
+        stats.fillHistogram("hit_pos_per_scin",
+          hit.getPosZ(), (float)(hit.getScintillator().getID()));
       }
   } else if (signalA.getRecoFlag() == JPetBaseSignal::Corrupted
     || signalB.getRecoFlag() == JPetBaseSignal::Corrupted){
       hit.setRecoFlag(JPetHit::Corrupted);
-      if(saveHistos) { stats.getHisto1D("good_vs_bad_hits")->Fill(2); }
+      if(saveHistos) { stats.fillHistogram("good_vs_bad_hits", 2); }
   } else {
     hit.setRecoFlag(JPetHit::Unknown);
-    if(saveHistos) { stats.getHisto1D("good_vs_bad_hits")->Fill(3); }
+    if(saveHistos) { stats.fillHistogram("good_vs_bad_hits", 3); }
   }
   return hit;
 }
@@ -243,30 +268,61 @@ void HitFinderTools::checkTheta(const double& theta)
 
 /**
 * Calculation of the total TOT of the hit - Time over Threshold:
-* the sum of the TOTs on all of the thresholds (1-4) and on the both sides (A,B)
+* the weighted sum of the TOTs on all of the thresholds (1-4) and on the both sides (A,B) 
 */
-double HitFinderTools::calculateTOT(const JPetHit& hit)
+
+HitFinderTools::TOTCalculationType HitFinderTools::getTOTCalculationType(const std::string& type)
+{
+    if (type == "rectangular") {
+      return TOTCalculationType::kThresholdRectangular;
+    } else if (type == "trapeze") {
+      return TOTCalculationType::kThresholdTrapeze;
+    } else if (type == "standard") {
+      return TOTCalculationType::kSimplified;
+    } else {
+      WARNING("Undefinied type for the calculation of the TOTs. Probably missing option in userParams, typo, or mistake.");
+      return TOTCalculationType::kSimplified;
+    }
+}
+
+double HitFinderTools::calculateTOT(const JPetHit& hit, TOTCalculationType type)
 {
   double tot = 0.0;
 
-  auto sigALead = hit.getSignalA().getRecoSignal().getRawSignal()
-    .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-  auto sigBLead = hit.getSignalB().getRecoSignal().getRawSignal()
-    .getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-  auto sigATrail = hit.getSignalA().getRecoSignal().getRawSignal()
-    .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-  auto sigBTrail = hit.getSignalB().getRecoSignal().getRawSignal()
-    .getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+  std::map<int, double> thrToTOT_sideA = hit.getSignalA().getRecoSignal().getRawSignal().getTOTsVsThresholdValue();
+  std::map<int, double> thrToTOT_sideB = hit.getSignalB().getRecoSignal().getRawSignal().getTOTsVsThresholdValue();
 
-  if (sigALead.size() > 0 && sigATrail.size() > 0){
-    for (unsigned i = 0; i < sigALead.size() && i < sigATrail.size(); i++){
-      tot += (sigATrail.at(i).getValue() - sigALead.at(i).getValue());
+  tot += calculateTOTside(thrToTOT_sideA, type);
+  tot += calculateTOTside(thrToTOT_sideB, type);
+  return tot;
+}
+
+double HitFinderTools::calculateTOTside(const std::map<int, double> & thrToTOT_side, TOTCalculationType type)
+{
+  double tot = 0., weight = 1.;
+  if (!thrToTOT_side.empty()) {
+    double firstThr = thrToTOT_side.begin()->first;
+    tot += weight*thrToTOT_side.begin()->second;
+    if( thrToTOT_side.size() > 1 )
+    {
+      for (auto it = std::next(thrToTOT_side.begin(), 1); it != thrToTOT_side.end(); it++) {
+        switch(type) {
+        case TOTCalculationType::kSimplified:
+            weight = 1.;
+            break;
+        case TOTCalculationType::kThresholdRectangular:
+            weight = (it->first - std::prev(it, 1)->first)/firstThr;
+            break;
+        case TOTCalculationType::kThresholdTrapeze:
+            weight = (it->first - std::prev(it, 1)->first)/firstThr;
+            tot += weight*(it->second - std::prev(it, 1)->second)/2;
+            break;
+        }
+        tot += weight*it->second;
+      }
     }
   }
-  if (sigBLead.size() > 0 && sigBTrail.size() > 0){
-    for (unsigned i = 0; i < sigBLead.size() && i < sigBTrail.size(); i++){
-      tot += (sigBTrail.at(i).getValue() - sigBLead.at(i).getValue());
-    }
-  }
+  else
+    return 0;
   return tot;
 }

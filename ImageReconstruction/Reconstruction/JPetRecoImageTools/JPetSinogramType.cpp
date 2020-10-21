@@ -10,29 +10,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- *  @file ToTConverter.h
+ *  @file JPetSinogramType.cpp
  */
 
-#ifndef TOTCONVERTER_H
-#define TOTCONVERTER_H
-#include <JPetCachedFunction/JPetCachedFunction.h>
-using ToTParams = jpet_common_tools::JPetCachedFunctionParams;
-using ToTRange = jpet_common_tools::Range;
-using CachedFunction = jpet_common_tools::JPetCachedFunction1D;
+#include "JPetSinogramType.h"
 
-enum RunType { kUnknown, kRun4 };
+ClassImp(JPetSinogramType);
 
-class ToTConverter
-{
-
-public:
-  ToTConverter(const ToTParams &params, ToTRange);
-  double operator()(double E) const;
-
-private:
-  CachedFunction fFunction;
-};
-
-ToTConverter getConverter(RunType type);
-
-#endif /*  !TOTCONVERTER_H */
+JPetSinogramType::~JPetSinogramType() {}

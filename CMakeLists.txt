@@ -22,7 +22,7 @@ message(STATUS "")
 message(STATUS "    == ${PROJECT_NAME} Project configuration ==")
 message(STATUS "")
 
-set(CMAKE_CXX_STANDARD 11) # maybe not best solution to set it globally? upgrate minimal cmake version to 3.8 or find another way to set it only for target with interface
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_PLATFORM_INDEPENDENT_CODE ON)
@@ -64,7 +64,7 @@ find_package(Threads REQUIRED)
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost 1.50 REQUIRED 
+find_package(Boost 1.50 REQUIRED
              COMPONENTS filesystem
                         program_options
                         regex
@@ -92,19 +92,24 @@ if(ROOT_FOUND)
   message(STATUS "ROOT (version ${ROOT_VERSION}) was found using ROOTConfig")
 endif()
 
-if(EXISTS "${ROOT_DIR}/modules/RootNewMacros.cmake")
-  include("${ROOT_DIR}/modules/RootNewMacros.cmake")
-  message(STATUS "Found RootNewMacros.cmake in: ${ROOT_DIR}/modules!")
-elseif(EXISTS "${ROOT_DIR}/cmake/modules/RootNewMacros.cmake")
-  include("${ROOT_DIR}/cmake/modules/RootNewMacros.cmake")
-  message(STATUS "Found RootNewMacros.cmake in: ${ROOT_DIR}/cmake/modules!")
-elseif(EXISTS "${ROOT_DIR}/../cmake/modules/RootNewMacros.cmake")
-  include("${ROOT_DIR}/../cmake/modules/RootNewMacros.cmake")
-  message(STATUS "Found RootNewMacros.cmake in: ${ROOT_DIR}/../cmake/modules!")
-else()
-  message("ERROR! Could not find RootNewMacros.cmake file! Aborting..")
-  return(1)
+# the RootNewMacros.cmake file has to be found and included manually
+# only for ROOT versions prior to 6.20
+if(ROOT_VERSION VERSION_LESS "6.20")
+  if(EXISTS "${ROOT_DIR}/modules/RootNewMacros.cmake")
+    include("${ROOT_DIR}/modules/RootNewMacros.cmake")
+    message(STATUS "Found RootNewMacros.cmake in: ${ROOT_DIR}/modules!")
+  elseif(EXISTS "${ROOT_DIR}/cmake/modules/RootNewMacros.cmake")
+    include("${ROOT_DIR}/cmake/modules/RootNewMacros.cmake")
+    message(STATUS "Found RootNewMacros.cmake in: ${ROOT_DIR}/cmake/modules!")
+  elseif(EXISTS "${ROOT_DIR}/../cmake/modules/RootNewMacros.cmake")
+    include("${ROOT_DIR}/../cmake/modules/RootNewMacros.cmake")
+    message(STATUS "Found RootNewMacros.cmake in: ${ROOT_DIR}/../cmake/modules!")
+  else()
+    message("ERROR! Could not find RootNewMacros.cmake file! Aborting..")
+    return(1)
+  endif()
 endif()
+
 # fix missing include directories property in versions < ROOT 6.12
 set_target_properties(ROOT::Core PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "${ROOT_INCLUDE_DIRS}")
@@ -145,7 +150,7 @@ endif(JPetFramework_FOUND)
 ## The script shouldn't do anything if the data is present and correct.
 option(DOWNLOAD_DATA "Download data" ON)
 if(DOWNLOAD_DATA)
-  set(DOWNLOAD_BASE_PATH ${PROJECT_SOURCE_DIR})  
+  set(DOWNLOAD_BASE_PATH ${PROJECT_SOURCE_DIR})
 
   file(DOWNLOAD "http://sphinx.if.uj.edu.pl/framework/examples_reformed.sha" ${DOWNLOAD_BASE_PATH}/examples_reformed.sha)
   file(READ ${DOWNLOAD_BASE_PATH}/examples_reformed.sha SHA_HASHES)
@@ -166,10 +171,6 @@ if(DOWNLOAD_DATA)
   endforeach(SHA_HASH ${SHA_HASHES})
   file(REMOVE ${DOWNLOAD_BASE_PATH}/examples_reformed.sha)
 endif()
-
-################################################################################
-## Add general modules files
-add_subdirectory(modules)
 
 ################################################################################
 ## Directories with examples

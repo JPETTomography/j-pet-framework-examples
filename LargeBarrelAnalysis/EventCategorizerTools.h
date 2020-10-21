@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -30,15 +30,16 @@ static const double kUndefinedValue = 999.0;
 */
 class EventCategorizerTools
 {
-public:
+public:  
   static bool checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats,
-                             bool saveHistos, double b2bSlotThetaDiff);
+                           bool saveHistos, double b2bSlotThetaDiff, double b2bTimeDiff);
   static bool checkFor3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos);
   static bool checkForPrompt(const JPetEvent& event, JPetStatistics& stats,
-                             bool saveHistos, double deexTOTCutMin, double deexTOTCutMax);
+                             bool saveHistos, double deexTOTCutMin, double deexTOTCutMax, 
+                             std::string fTOTCalculationType);
   static bool checkForScatter(const JPetEvent& event, JPetStatistics& stats,
-                              bool saveHistos, double scatterTOFTimeDiff);
-  static double calculateTOT(const JPetHit& hit);
+                              bool saveHistos, double scatterTOFTimeDiff, 
+                              std::string fTOTCalculationType);
   static double calculateDistance(const JPetHit& hit1, const JPetHit& hit2);
   static double calculateScatteringTime(const JPetHit& hit1, const JPetHit& hit2);
   static double calculateScatteringAngle(const JPetHit& hit1, const JPetHit& hit2);
@@ -55,10 +56,7 @@ public:
   static TVector3 calculateAnnihilationPoint(const TVector3& hitA, const TVector3& hitB, double tof);
   static double calculatePlaneCenterDistance(const JPetHit& firstHit,
       const JPetHit& secondHit, const JPetHit& thirdHit);
-  static bool stream2Gamma(const JPetEvent& event, JPetStatistics& stats,
-                           bool saveHistos, double b2bSlotThetaDiff, double b2bTimeDiff);
-  static bool stream3Gamma(const JPetEvent& event, JPetStatistics& stats,
-                           bool saveHistos, double d3SlotThetaMin, double d3TimeDiff, double d3DistanceFromCenter);
+
 };
 
 #endif /* !EVENTCATEGORIZERTOOLS_H */

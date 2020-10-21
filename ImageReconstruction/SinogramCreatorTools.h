@@ -26,22 +26,28 @@
 #include <tuple>
 #include <utility>
 #include <vector>
+#include "TVector3.h"
 
 class SinogramCreatorTools
 {
 public:
-  static unsigned int roundToNearesMultiplicity(float numberToRound, float muliFactor);
+  static unsigned int roundToNearesMultiplicity(double numberToRound, double muliFactor);
   static std::pair<int, float> getAngleAndDistance(float firstX, float firstY, float secondX, float secondY);
 
   static std::pair<int, int> getSinogramRepresentation(float firstX, float firstY, float secondX, float secondY, float fMaxReconstructionLayerRadius,
                                                        float fReconstructionDistanceAccuracy, int maxDistanceNumber, int kReconstructionMaxAngle);
 
-  static float calculateLORSlice(float x1, float y1, float z1, float t1, float x2, float y2, float z2, float t2);
+  static float calculateLORSlice(float x1, float y1, float z1, double t1, float x2, float y2, float z2, double t2);
 
   static int getSplitRangeNumber(float firstZ, float secondZ, const std::vector<std::pair<float, float>>& zSplitRange);
   static int getSplitRangeNumber(float z, const std::vector<std::pair<float, float>>& zSplitRange);
-  static int getSinogramSlice(float firstX, float firstY, float firstZ, float firstTOF, float secondX, float secondY, float secondZ, float secondTOF,
-                              const std::vector<std::pair<float, float>>& zSplitRange);
+  static int getSinogramSlice(float firstX, float firstY, float firstZ, double firstTOF, float secondX, float secondY, float secondZ,
+                              double secondTOF, const std::vector<std::pair<float, float>>& zSplitRange);
+  static unsigned int getTOFSlice(double firstTOF, double secondTOF, double sliceSize);
+
+  static std::pair<TVector3,TVector3> remapToSingleLayer(const TVector3& firstHit, const TVector3& secondHit, const float radius);
+
+  static double getPolyFit(std::vector<double> indepvar);
 
 private:
   SinogramCreatorTools() = delete;
@@ -51,6 +57,7 @@ private:
 
   static std::tuple<float, float, float> cart2sph(float x, float y, float z);
   static std::tuple<float, float, float> sph2cart(float theta, float phi, float r);
-};
 
+  static constexpr float kEPSILON = 0.00001f;
+};
 #endif /*  !SINOGRAMCREATORTOOLS_H */

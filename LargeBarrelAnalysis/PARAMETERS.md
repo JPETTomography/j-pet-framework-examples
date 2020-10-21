@@ -60,6 +60,9 @@ time window for matching Signals on the same scintillator and different sides. D
 - `HitFinder_RefDetScinID_int`  
 `ID` of Reference Detector Scintillator, needed for creating reference hits
 
+- `HitFinder_TOTCalculationType_std::string`  
+Type of the calculations of the TOT - it can be standard sum (option "standard"), a extended sum taking into account thresholds differences and calculated as rectangulars (option "rectangular"), additional extension that add also differences between the TOTs on different thresholds and calculates sum as sum of the trapezes (option "trapeze"). Default value: 'standard'
+
 - `EventFinder_UseCorruptedHits_bool`  
 Indication if Event Finder module should use hits flagged as Corrupted in the previous task. Default value: `false`
 
@@ -80,3 +83,12 @@ denotes Time over Threshold cut minimal value for simple selection of deexcitati
 
 - `Deex_Categorizer_TOT_Cut_Max_float`  
 denotes Time over Threshold cut maximal value for simple selection of deexcitation photons. Default value: `50 000 ps`
+
+- TOT to energy conversion parameters:  
+`ToTEnergyConverterFactory_ToT2EnergyFunction_std::string`  
+String with function formula in ROOT format  
+See documentation of [TFormula class](https://root.cern.ch/doc/master/classTFormula.html)
+`ToTEnergyConverterFactory_ToT2EnergyParameters_std::vector<double>`  
+Array of parameters for function above, given as a vector of doubles  
+`ToTEnergyConverterFactory_ToT2EnergyFunctionLimits_std::vector<double>`  
+Range of convertible TOT values, also a vector of doubles, consisting of 2 elements  

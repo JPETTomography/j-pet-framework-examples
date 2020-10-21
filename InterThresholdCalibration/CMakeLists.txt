@@ -39,6 +39,8 @@ set(HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/InterThresholdCalibration.h
             ${use_modules_from}/SignalFinder.h
             ${use_modules_from}/SignalFinderTools.h
             ${use_modules_from}/SignalTransformer.h
+            ${use_modules_from}/ToTEnergyConverter.h
+            ${use_modules_from}/ToTEnergyConverterFactory.h
             ${use_modules_from}/HitFinder.h
             ${use_modules_from}/HitFinderTools.h)
 
@@ -51,6 +53,8 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/InterThresholdCalibration.cpp
             ${use_modules_from}/SignalFinderTools.cpp
             ${use_modules_from}/SignalTransformer.cpp
             ${use_modules_from}/HitFinder.cpp
+            ${use_modules_from}/ToTEnergyConverter.cpp
+            ${use_modules_from}/ToTEnergyConverterFactory.cpp
             ${use_modules_from}/HitFinderTools.cpp)
 
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})

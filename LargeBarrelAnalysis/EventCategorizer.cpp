@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -64,10 +64,21 @@ bool EventCategorizer::init()
       kDeexTOTCutMaxParamKey.c_str(), fDeexTOTCutMax
     ));
   }
+  if (isOptionSet(fParams.getOptions(), kMaxTimeDiffParamKey)) {
+    fMaxTimeDiff = getOptionAsFloat(fParams.getOptions(), kMaxTimeDiffParamKey);
+  } else {
+    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMaxTimeDiffParamKey.c_str(), fMaxTimeDiff));
+  }
   // Getting bool for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey)) {
     fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
   }
+  if (isOptionSet(fParams.getOptions(), kTOTCalculationType)) {
+    fTOTCalculationType = getOptionAsString(fParams.getOptions(), kTOTCalculationType);
+  } else {
+    WARNING("No TOT calculation option given by the user. Using standard sum.");
+  }
+
 
   // Input events type
   fOutputEvents = new JPetTimeWindow("JPetEvent");
@@ -85,16 +96,16 @@ bool EventCategorizer::exec()
 
       // Check types of current event
       bool is2Gamma = EventCategorizerTools::checkFor2Gamma(
-        event, getStatistics(), fSaveControlHistos, fB2BSlotThetaDiff
+        event, getStatistics(), fSaveControlHistos, fB2BSlotThetaDiff, fMaxTimeDiff
       );
       bool is3Gamma = EventCategorizerTools::checkFor3Gamma(
         event, getStatistics(), fSaveControlHistos
       );
       bool isPrompt = EventCategorizerTools::checkForPrompt(
-        event, getStatistics(), fSaveControlHistos, fDeexTOTCutMin, fDeexTOTCutMax
+        event, getStatistics(), fSaveControlHistos, fDeexTOTCutMin, fDeexTOTCutMax, fTOTCalculationType
       );
       bool isScattered = EventCategorizerTools::checkForScatter(
-        event, getStatistics(), fSaveControlHistos, fScatterTOFTimeDiff
+        event, getStatistics(), fSaveControlHistos, fScatterTOFTimeDiff, fTOTCalculationType
       );
 
       JPetEvent newEvent = event;
@@ -105,7 +116,7 @@ bool EventCategorizer::exec()
 
       if(fSaveControlHistos){
         for(auto hit : event.getHits()){
-          getStatistics().getHisto2D("All_XYpos")->Fill(hit.getPosX(), hit.getPosY());
+          getStatistics().fillHistogram("All_XYpos", hit.getPosX(), hit.getPosY());
         }
       }
       events.push_back(newEvent);
@@ -129,76 +140,90 @@ void EventCategorizer::saveEvents(const vector<JPetEvent>& events)
 void EventCategorizer::initialiseHistograms(){
 
   // General histograms
-  getStatistics().createHistogram(
-    new TH2F("All_XYpos", "Hit position XY", 242, -60.5, 60.5, 121, -60.5, 60.5));
-  getStatistics().getHisto2D("All_XYpos")->GetXaxis()->SetTitle("Hit X position [cm]");
-  getStatistics().getHisto2D("All_XYpos")->GetYaxis()->SetTitle("Hit Y position [cm]");
+  getStatistics().createHistogramWithAxes(
+    new TH2D("All_XYpos", "Hit position XY", 240, -60.25, 59.75, 240, -60.25, 59.75),
+    "Hit X position [cm]", "Hit Y position [cm]"
+  );
 
-  // Histograms for 2Gamama category
-  getStatistics().createHistogram(
-    new TH1F("2Gamma_Zpos", "B2B hits Z position", 200, -50.0, 50.0));
-  getStatistics().getHisto1D("2Gamma_Zpos")->GetXaxis()->SetTitle("Z axis position [cm]");
-  getStatistics().getHisto1D("2Gamma_Zpos")->GetYaxis()->SetTitle("Number of Hits");
+  // Histograms for 2Gamma category
+  getStatistics().createHistogramWithAxes(
+    new TH1D("2Gamma_Zpos", "Z-axis position of 2 gamma hits", 201, -50.25, 50.25),
+    "Z axis position [cm]", "Number of Hits"
+  );
 
-  getStatistics().createHistogram(
-    new TH1F("2Gamma_TimeDiff", "B2B hits time difference", 100, -10000.0, 10000.0));
-  getStatistics().getHisto1D("2Gamma_TimeDiff")->GetXaxis()->SetTitle("Time Difference [ps]");
-  getStatistics().getHisto1D("2Gamma_TimeDiff")->GetYaxis()->SetTitle("Number of Hit Pairs");
+  getStatistics().createHistogramWithAxes(
+    new TH1D("2Gamma_DLOR", "Delta LOR distance", 100, -0.25, 49.25),
+    "Delta LOR [cm]", "Counts"
+  );
 
-  getStatistics().createHistogram(
-    new TH1F("2Gamma_Dist", "B2B hits distance", 150, 0.0, 150.0));
-  getStatistics().getHisto1D("2Gamma_Dist")->GetXaxis()->SetTitle("Distance [cm]");
-  getStatistics().getHisto1D("2Gamma_Dist")->GetYaxis()->SetTitle("Number of Hit Pairs");
+  getStatistics().createHistogramWithAxes(
+    new TH1D("2Gamma_ThetaDiff", "Angle difference of 2 gamma hits ", 181, -0.5, 180.5),
+    "Hits theta diff [deg]", "Counts"
+  );
 
-  getStatistics().createHistogram(
-    new TH1F("Annih_TOF", "Annihilation pairs Time of Flight", 200, -3000.0, 3000.0));
-  getStatistics().getHisto1D("Annih_TOF")->GetXaxis()->SetTitle("Time of Flight [ps]");
-  getStatistics().getHisto1D("Annih_TOF")->GetYaxis()->SetTitle("Number of Annihilation Pairs");
+  getStatistics().createHistogramWithAxes(
+    new TH1D("2Gamma_TimeDiff", "Time difference of 2 gamma hits", 200, -10100.0, 99900.0),
+    "Time Difference [ps]", "Number of Hit Pairs"
+  );
 
-  getStatistics().createHistogram(
-     new TH2F("AnnihPoint_XY", "XY position of annihilation point", 121, -60.5, 60.5, 121, -60.5, 60.5));
-  getStatistics().getHisto2D("AnnihPoint_XY")->GetXaxis()->SetTitle("X position [cm]");
-  getStatistics().getHisto2D("AnnihPoint_XY")->GetYaxis()->SetTitle("Y position [cm]");
+  getStatistics().createHistogramWithAxes(
+    new TH1D("2Gamma_Dist", "B2B hits distance", 150, -0.5, 149.5),
+    "Distance [cm]", "Number of Hit Pairs"
+  );
 
-  getStatistics().createHistogram(
-    new TH2F("AnnihPoint_XZ", "XZ position of annihilation point", 121, -60.5, 60.5, 121, -60.5, 60.5));
-  getStatistics().getHisto2D("AnnihPoint_XZ")->GetXaxis()->SetTitle("X position [cm]");
-  getStatistics().getHisto2D("AnnihPoint_XZ")->GetYaxis()->SetTitle("Z position [cm]");
+  getStatistics().createHistogramWithAxes(
+    new TH1D("Annih_TOF", "Annihilation pairs Time of Flight", 201, -3015.0, 3015.0),
+    "Time of Flight [ps]", "Number of Annihilation Pairs"
+  );
 
-  getStatistics().createHistogram(
-    new TH2F("AnnihPoint_YZ", "YZ position of annihilation point", 121, -60.5, 60.5, 121, -60.5, 60.5));
-  getStatistics().getHisto2D("AnnihPoint_YZ")->GetXaxis()->SetTitle("Y position [cm]");
-  getStatistics().getHisto2D("AnnihPoint_YZ")->GetYaxis()->SetTitle("Z position [cm]");
+  getStatistics().createHistogramWithAxes(
+    new TH2D("AnnihPoint_XY", "XY position of annihilation point", 240, -60.25, 59.75, 240, -60.25, 59.75),
+    "X position [cm]", "Y position [cm]"
+  );
+
+  getStatistics().createHistogramWithAxes(
+    new TH2D("AnnihPoint_ZX", "ZX position of annihilation point", 240, -60.25, 59.75, 240, -60.25, 59.75),
+    "Z position [cm]", "X position [cm]"
+  );
+
+  getStatistics().createHistogramWithAxes(
+    new TH2D("AnnihPoint_ZY", "ZY position of annihilation point", 240, -60.25, 59.75, 240, -60.25, 59.75),
+    "Z position [cm]", "Y position [cm]"
+  );
+
+  getStatistics().createHistogramWithAxes(
+    new TH1D("Annih_DLOR", "Delta LOR distance of annihilation photons", 100, -0.25, 49.25),
+    "Delta LOR [cm]", "Counts"
+  );
 
   // Histograms for 3Gamama category
-  getStatistics().createHistogram(
-    new TH2F("3Gamma_Angles", "Relative angles - transformed", 251, -0.5, 250.5, 201, -0.5, 200.5));
-  getStatistics().getHisto2D("3Gamma_Angles")->GetXaxis()->SetTitle("Relative angle 1-2");
-  getStatistics().getHisto2D("3Gamma_Angles")->GetYaxis()->SetTitle("Relative angle 2-3");
+  getStatistics().createHistogramWithAxes(
+    new TH2D("3Gamma_Angles", "Relative angles - transformed", 250, -0.5, 249.5, 20, -0.5, 199.5),
+    "Relative angle 1-2", "Relative angle 2-3"
+  );
 
   // Histograms for scattering category
-  getStatistics().createHistogram(
-    new TH1F("ScatterTOF_TimeDiff", "Difference of Scatter TOF and hits time difference",
-      200, 0.0, 3.0*fScatterTOFTimeDiff));
-  getStatistics().getHisto1D("ScatterTOF_TimeDiff")->GetXaxis()->SetTitle("Scat_TOF & time diff [ps]");
-  getStatistics().getHisto1D("ScatterTOF_TimeDiff")->GetYaxis()->SetTitle("Number of Hit Pairs");
+  getStatistics().createHistogramWithAxes(
+    new TH1D("ScatterTOF_TimeDiff", "Difference of Scatter TOF and hits time difference",
+    3.0*fScatterTOFTimeDiff, -0.5, 3.0*fScatterTOFTimeDiff-0.5),
+    "Scat_TOF - time diff [ps]", "Number of Hit Pairs"
+  );
 
-  getStatistics().createHistogram(
-     new TH2F("ScatterAngle_PrimaryTOT", "Angle of scattering vs. TOT of primary hits",
-      181, -0.5, 180.5, 200, 0.0, 40000.0));
-  getStatistics().getHisto2D("ScatterAngle_PrimaryTOT")->GetXaxis()->SetTitle("Scattering Angle");
-  getStatistics().getHisto2D("ScatterAngle_PrimaryTOT")->GetYaxis()->SetTitle("TOT of primary hit [ps]");
+  getStatistics().createHistogramWithAxes(
+    new TH2D("ScatterAngle_PrimaryTOT", "Angle of scattering vs. TOT of primary hits",
+    200, -0.5, 199.5, 200, -100.0, 39900.0),
+    "Scattering Angle", "TOT of primary hit [ps]"
+  );
 
-  getStatistics().createHistogram(
-     new TH2F("ScatterAngle_ScatterTOT", "Angle of scattering vs. TOT of scattered hits",
-      181, -0.5, 180.5, 200, 0.0, 40000.0));
-  getStatistics().getHisto2D("ScatterAngle_ScatterTOT")->GetXaxis()->SetTitle("Scattering Angle");
-  getStatistics().getHisto2D("ScatterAngle_ScatterTOT")->GetYaxis()->SetTitle("TOT of scattered hit [ps]");
+  getStatistics().createHistogramWithAxes(
+    new TH2D("ScatterAngle_ScatterTOT", "Angle of scattering vs. TOT of scattered hits",
+    200, -0.5, 199.5, 200, -100.0, 39900.0),
+    "Scattering Angle", "TOT of scattered hit [ps]"
+  );
 
   // Histograms for deexcitation
-  getStatistics().createHistogram(
-    new TH1F("Deex_TOT_cut", "TOT of all hits with deex cut (30,50) ns",
-      200, 25000.0, 55000.0));
-  getStatistics().getHisto1D("Deex_TOT_cut")->GetXaxis()->SetTitle("TOT [ps]");
-  getStatistics().getHisto1D("Deex_TOT_cut")->GetYaxis()->SetTitle("Number of Hits");
+  getStatistics().createHistogramWithAxes(
+    new TH1D("Deex_TOT_cut", "TOT of all hits with deex cut (30,50) ns", 200, 24950.0, 54950.0),
+    "TOT [ps]", "Number of Hits"
+  );
 }

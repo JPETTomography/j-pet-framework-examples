@@ -10,20 +10,28 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- *  @file JPetFilterInterface.h
+ *  @file JPetFilterNone.h
  */
 
-#ifndef _JPetFilterInterface_H_
-#define _JPetFilterInterface_H_
+#ifndef _JPetFilterNone_H_
+#define _JPetFilterNone_H_
+#include "./JPetFilterInterface.h"
 
-/*! \brief Interface that all filters should implement.
+/*! \brief Dummy filter not filtering data.
+ *
 */
-class JPetFilterInterface
+class JPetFilterNone : public JPetFilterInterface
 {
 public:
-  JPetFilterInterface() {}
-  virtual ~JPetFilterInterface(){};
-  virtual double operator()(double) = 0;
+  JPetFilterNone() {}
+  explicit JPetFilterNone(double maxCutOff) : fCutOff(maxCutOff) {}
+  virtual double operator()(double pos) override { return pos < fCutOff ? 1. : 0.; }
+
+private:
+  JPetFilterNone(const JPetFilterNone &) = delete;
+  JPetFilterNone &operator=(const JPetFilterNone &) = delete;
+
+  double fCutOff = 1.0f;
 };
 
-#endif /*  !_JPetFilterInterface_H_ */
+#endif /*  !_JPetFilterNone_H_ */

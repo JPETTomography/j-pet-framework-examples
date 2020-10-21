@@ -48,6 +48,7 @@ protected:
 	const std::string kMaxAnnihilationParamKey = "EventCategorizer_MaxAnnihilationTOT_float";
 	const std::string kMaxTimeDiffParamKey = "EventCategorizer_MaxTimeDiff_float";
 	const std::string kMaxZPosParamKey = "EventCategorizer_MaxHitZPos_float";
+    const std::string kTOTCalculationType = "HitFinder_TOTCalculationType_std::string";
 	double fMaxDistOfDecayPlaneFromCenter = 5.;
 	double fMinAnnihilationTOT = 10000.0;
 	double fMaxAnnihilationTOT = 25000.0;
@@ -57,7 +58,9 @@ protected:
 	double fMaxTimeDiff = 1000.;
 	double fMaxZPos = 23.;
 	bool fSaveControlHistos = true;
+    std::string fTOTCalculationType = "";
 	void saveEvents(const std::vector<JPetEvent>& event);
+    void initialiseHistograms();
 };
 
 #endif /* !EVENTCATEGORIZERIMAGING_H */

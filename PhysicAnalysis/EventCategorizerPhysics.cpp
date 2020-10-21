@@ -14,6 +14,7 @@
  */
 
 #include "../LargeBarrelAnalysis/EventCategorizerTools.h"
+#include "../LargeBarrelAnalysis/HitFinderTools.h"
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include "EventCategorizerPhysics.h"
 #include <JPetWriter/JPetWriter.h>
@@ -76,112 +77,13 @@ bool EventCategorizerPhysics::init()
   } else {
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kDecayInto3MinAngleParamKey.c_str(), fDecayInto3MinAngle));
   }
-
-  if (fSaveControlHistos) {
-    getStatistics().createHistogram(
-      new TH1F("AllHitTOT", "TOT of all Hits in physics stream", 200, 0.0, 100.0)
-    );
-    getStatistics().getHisto1D("AllHitTOT")->SetXTitle("TOT [ns]");
-    getStatistics().getHisto1D("AllHitTOT")->SetYTitle("Number of hits");
-
-    getStatistics().createHistogram(
-      new TH1F("AnnihHitsNumber", "Number of Annihilation Hits in Event", 50, -0.5, 49.5)
-    );
-    getStatistics().getHisto1D("AnnihHitsNumber")->SetXTitle("Number of Annihilation Hits in a Event");
-    getStatistics().getHisto1D("AnnihHitsNumber")->SetYTitle("Counts");
-
-    getStatistics().createHistogram(
-      new TH1F("DeexHitsNumber", "Number of Deexcitation Hits in Event", 50, -0.5, 49.5)
-    );
-    getStatistics().getHisto1D("DeexHitsNumber")->SetXTitle("Number of Deexcitation Hits in Event");
-    getStatistics().getHisto1D("DeexHitsNumber")->SetYTitle("Counts");
-
-    getStatistics().createHistogram(
-      new TH1F("DeexAnnihTimeDiff", "Deexcitation-Annihilation Hits Time Difference", 200, -200.0, 200.0)
-    );
-    getStatistics().getHisto1D("DeexAnnihTimeDiff")->SetXTitle("Time difference between deexcitation and annihilation hits [ns]");
-    getStatistics().getHisto1D("DeexAnnihTimeDiff")->SetYTitle("Counts");
-
-    getStatistics().createHistogram(
-      new TH1F("2Gamma_TimeDiff", "2 Gamma Hits Time Difference", 200, 0.0, 100.0)
-    );
-    getStatistics().getHisto1D("2Gamma_TimeDiff")->SetXTitle("Hits time difference [ns]");
-    getStatistics().getHisto1D("2Gamma_TimeDiff")->SetYTitle("Counts");
-
-    getStatistics().createHistogram(
-      new TH1F("2Gamma_ThetaDiff", "2 Gamma Hits angles", 180, -0.5, 179.5)
-    );
-    getStatistics().getHisto1D("2Gamma_ThetaDiff")->SetXTitle("Hits theta diff [deg]");
-    getStatistics().getHisto1D("2Gamma_ThetaDiff")->SetYTitle("Counts");
-
-    getStatistics().createHistogram(
-      new TH1F("2Gamma_DLOR", "Delta LOR distance", 100, 0.0, 50.0)
-    );
-    getStatistics().getHisto1D("2Gamma_DLOR")->SetXTitle("Delta LOR [cm]");
-    getStatistics().getHisto1D("2Gamma_DLOR")->SetYTitle("Counts");
-
-    getStatistics().createHistogram(
-      new TH1F("2Annih_TimeDiff", "2 gamma annihilation Hits Time Difference", 200, 0.0, fMaxTimeDiff/1000.0)
-    );
-    getStatistics().getHisto1D("2Annih_TimeDiff")->SetXTitle("Time difference between 2 annihilation hits [ns]");
-    getStatistics().getHisto1D("2Annih_TimeDiff")->SetYTitle("Counts");
-
-    getStatistics().createHistogram(
-      new TH1F("2Annih_ThetaDiff", "Annihilation Hits Theta Diff",
-      (int) 4*fBackToBackAngleWindow, 180.-fBackToBackAngleWindow, 180.+fBackToBackAngleWindow)
-    );
-    getStatistics().getHisto1D("2Annih_ThetaDiff")->SetXTitle("Annihilation hits theta diff [deg]");
-    getStatistics().getHisto1D("2Annih_ThetaDiff")->SetYTitle("Counts");
-
-    getStatistics().createHistogram(
-      new TH1F("2Annih_DLOR", "Delta LOR distance", 100, 0.0, 50.0)
-    );
-    getStatistics().getHisto1D("2Annih_ThetaDiff")->SetXTitle("Annihilation hits Delta LOR [cm]");
-    getStatistics().getHisto1D("2Annih_ThetaDiff")->SetYTitle("Counts");
-
-    getStatistics().createHistogram(
-      new TH2F("2Annih_XY", "Reconstructed XY position of annihilation point", 220, -54.5, 54.5, 220, -54.5, 54.5)
-    );
-    getStatistics().getHisto2D("2Annih_XY")->SetXTitle("Annihilation point X [cm]");
-    getStatistics().getHisto2D("2Annih_XY")->SetYTitle("Annihilation point Y [cm]");
-
-    getStatistics().createHistogram(
-      new TH1F("2Annih_Z", "Reconstructed Z position of annihilation point", 220, -54.5, 54.5)
-    );
-    getStatistics().getHisto1D("2Annih_Z")->SetXTitle("Annihilation point Z [cm]");
-    getStatistics().getHisto1D("2Annih_Z")->SetYTitle("Counts");
-
-    getStatistics().createHistogram(
-      new TH2F("3GammaThetas", "3 Gamma Thetas plot", 251, -0.5, 250.5, 201, -0.5, 200.5)
-    );
-    getStatistics().getHisto2D("3GammaThetas")->SetXTitle("Transformed thetas 1-2 [deg]");
-    getStatistics().getHisto2D("3GammaThetas")->SetYTitle("Transformed thetas 2-3 [deg]");
-
-    getStatistics().createHistogram(
-      new TH1F("3GammaPlaneDist", "3 Gamma Plane Distance to Center", 200, 0.0, 50.0)
-    );
-    getStatistics().getHisto1D("3GammaPlaneDist")->SetXTitle("Distance [cm]");
-    getStatistics().getHisto1D("3GammaPlaneDist")->SetYTitle("Counts");
-
-    getStatistics().createHistogram(
-      new TH1F("3GammaTimeDiff", "3 gamma last and first hit time difference", 200, 0.0, 20.0)
-    );
-    getStatistics().getHisto1D("3GammaTimeDiff")->SetXTitle("Time difference [ns]");
-    getStatistics().getHisto1D("3GammaTimeDiff")->SetYTitle("Counts");
-
-    getStatistics().createHistogram(
-      new TH1F("3AnnihPlaneDist", "3 Gamma Annihilation Plane Distance to Center",
-      100, 0.0, fMaxDistOfDecayPlaneFromCenter)
-    );
-    getStatistics().getHisto1D("3AnnihPlaneDist")->SetXTitle("Distance [cm]");
-    getStatistics().getHisto1D("3AnnihPlaneDist")->SetYTitle("Counts");
-
-    getStatistics().createHistogram(
-      new TH1F("3AnnihTimeDiff", "3 gamma Annihilation last and first hit time difference", 200, 0.0, fMaxTimeDiff/1000.0)
-    );
-    getStatistics().getHisto1D("3AnnihTimeDiff")->SetXTitle("Time difference [ns]");
-    getStatistics().getHisto1D("3AnnihTimeDiff")->SetYTitle("Counts");
+  if (isOptionSet(fParams.getOptions(), kTOTCalculationType)) {
+    fTOTCalculationType = getOptionAsString(fParams.getOptions(), kTOTCalculationType);
+  } else {
+    WARNING("No TOT calculation option given by the user. Using standard sum.");
   }
+
+  if(fSaveControlHistos) initialiseHistograms();
   return true;
 }
 
@@ -225,7 +127,7 @@ JPetEvent EventCategorizerPhysics::physicsAnalysis(vector<JPetHit> hits)
 
   for (unsigned i = 0; i < hits.size(); i++) {
     if (fabs(hits[i].getPosZ()) < fMaxZPos) {
-      double TOTofHit = EventCategorizerTools::calculateTOT(hits[i]);
+      double TOTofHit = HitFinderTools::calculateTOT(hits[i], HitFinderTools::getTOTCalculationType(fTOTCalculationType));
       if (fSaveControlHistos) {
         getStatistics().getHisto1D("AllHitTOT")->Fill(TOTofHit / 1000.);
       }
@@ -255,7 +157,7 @@ JPetEvent EventCategorizerPhysics::physicsAnalysis(vector<JPetHit> hits)
       );
     }
   }
-  if (EventCategorizerTools::stream2Gamma(
+  if (EventCategorizerTools::checkFor2Gamma(
     annihilationHits, getStatistics(), fSaveControlHistos,
     fBackToBackAngleWindow, fMaxTimeDiff)
   ) {
@@ -265,9 +167,8 @@ JPetEvent EventCategorizerPhysics::physicsAnalysis(vector<JPetHit> hits)
       physicEvent.addEventType(JPetEventType::k2Gamma);
     }
   }
-  if (EventCategorizerTools::stream3Gamma(
-    annihilationHits, getStatistics(), fSaveControlHistos,
-    fDecayInto3MinAngle, fMaxTimeDiff, fMaxDistOfDecayPlaneFromCenter)
+  if (EventCategorizerTools::checkFor3Gamma(
+    annihilationHits, getStatistics(), fSaveControlHistos)
   ) {
     if (physicEvent.isOnlyTypeOf(JPetEventType::kUnknown)){
       physicEvent.setEventType(JPetEventType::k3Gamma);
@@ -276,4 +177,111 @@ JPetEvent EventCategorizerPhysics::physicsAnalysis(vector<JPetHit> hits)
     }
   }
   return physicEvent;
+}
+
+void EventCategorizerPhysics::initialiseHistograms(){
+
+  getStatistics().createHistogram(
+    new TH1F("AllHitTOT", "TOT of all Hits in physics stream", 200, 0.0, 100.0)
+  );
+  getStatistics().getHisto1D("AllHitTOT")->SetXTitle("TOT [ns]");
+  getStatistics().getHisto1D("AllHitTOT")->SetYTitle("Number of hits");
+
+  getStatistics().createHistogram(
+    new TH1F("AnnihHitsNumber", "Number of Annihilation Hits in Event", 50, -0.5, 49.5)
+  );
+  getStatistics().getHisto1D("AnnihHitsNumber")->SetXTitle("Number of Annihilation Hits in a Event");
+  getStatistics().getHisto1D("AnnihHitsNumber")->SetYTitle("Counts");
+
+  getStatistics().createHistogram(
+    new TH1F("DeexHitsNumber", "Number of Deexcitation Hits in Event", 50, -0.5, 49.5)
+  );
+  getStatistics().getHisto1D("DeexHitsNumber")->SetXTitle("Number of Deexcitation Hits in Event");
+  getStatistics().getHisto1D("DeexHitsNumber")->SetYTitle("Counts");
+
+  getStatistics().createHistogram(
+    new TH1F("DeexAnnihTimeDiff", "Deexcitation-Annihilation Hits Time Difference", 200, -200.0, 200.0)
+  );
+  getStatistics().getHisto1D("DeexAnnihTimeDiff")->SetXTitle("Time difference between deexcitation and annihilation hits [ns]");
+  getStatistics().getHisto1D("DeexAnnihTimeDiff")->SetYTitle("Counts");
+
+  getStatistics().createHistogram(
+    new TH1F("2Gamma_TimeDiff", "2 Gamma Hits Time Difference", 200, 0.0, 100.0)
+  );
+  getStatistics().getHisto1D("2Gamma_TimeDiff")->SetXTitle("Hits time difference [ns]");
+  getStatistics().getHisto1D("2Gamma_TimeDiff")->SetYTitle("Counts");
+
+  getStatistics().createHistogram(
+    new TH1F("2Gamma_ThetaDiff", "2 Gamma Hits angles", 180, -0.5, 179.5)
+  );
+  getStatistics().getHisto1D("2Gamma_ThetaDiff")->SetXTitle("Hits theta diff [deg]");
+  getStatistics().getHisto1D("2Gamma_ThetaDiff")->SetYTitle("Counts");
+
+  getStatistics().createHistogram(
+    new TH1F("2Gamma_DLOR", "Delta LOR distance", 100, 0.0, 50.0)
+  );
+  getStatistics().getHisto1D("2Gamma_DLOR")->SetXTitle("Delta LOR [cm]");
+  getStatistics().getHisto1D("2Gamma_DLOR")->SetYTitle("Counts");
+
+  getStatistics().createHistogram(
+    new TH1F("2Annih_TimeDiff", "2 gamma annihilation Hits Time Difference", 200, 0.0, fMaxTimeDiff/1000.0)
+  );
+  getStatistics().getHisto1D("2Annih_TimeDiff")->SetXTitle("Time difference between 2 annihilation hits [ns]");
+  getStatistics().getHisto1D("2Annih_TimeDiff")->SetYTitle("Counts");
+
+  getStatistics().createHistogram(
+    new TH1F("2Annih_ThetaDiff", "Annihilation Hits Theta Diff",
+    (int) 4*fBackToBackAngleWindow, 180.-fBackToBackAngleWindow, 180.+fBackToBackAngleWindow)
+  );
+  getStatistics().getHisto1D("2Annih_ThetaDiff")->SetXTitle("Annihilation hits theta diff [deg]");
+  getStatistics().getHisto1D("2Annih_ThetaDiff")->SetYTitle("Counts");
+
+  getStatistics().createHistogram(
+    new TH1F("2Annih_DLOR", "Delta LOR distance", 100, 0.0, 50.0)
+  );
+  getStatistics().getHisto1D("2Annih_ThetaDiff")->SetXTitle("Annihilation hits Delta LOR [cm]");
+  getStatistics().getHisto1D("2Annih_ThetaDiff")->SetYTitle("Counts");
+
+  getStatistics().createHistogram(
+    new TH2F("2Annih_XY", "Reconstructed XY position of annihilation point", 220, -54.5, 54.5, 220, -54.5, 54.5)
+  );
+  getStatistics().getHisto2D("2Annih_XY")->SetXTitle("Annihilation point X [cm]");
+  getStatistics().getHisto2D("2Annih_XY")->SetYTitle("Annihilation point Y [cm]");
+
+  getStatistics().createHistogram(
+    new TH1F("2Annih_Z", "Reconstructed Z position of annihilation point", 220, -54.5, 54.5)
+  );
+  getStatistics().getHisto1D("2Annih_Z")->SetXTitle("Annihilation point Z [cm]");
+  getStatistics().getHisto1D("2Annih_Z")->SetYTitle("Counts");
+
+  getStatistics().createHistogram(
+    new TH2F("3GammaThetas", "3 Gamma Thetas plot", 251, -0.5, 250.5, 201, -0.5, 200.5)
+  );
+  getStatistics().getHisto2D("3GammaThetas")->SetXTitle("Transformed thetas 1-2 [deg]");
+  getStatistics().getHisto2D("3GammaThetas")->SetYTitle("Transformed thetas 2-3 [deg]");
+
+  getStatistics().createHistogram(
+    new TH1F("3GammaPlaneDist", "3 Gamma Plane Distance to Center", 200, 0.0, 50.0)
+  );
+  getStatistics().getHisto1D("3GammaPlaneDist")->SetXTitle("Distance [cm]");
+  getStatistics().getHisto1D("3GammaPlaneDist")->SetYTitle("Counts");
+
+  getStatistics().createHistogram(
+    new TH1F("3GammaTimeDiff", "3 gamma last and first hit time difference", 200, 0.0, 20.0)
+  );
+  getStatistics().getHisto1D("3GammaTimeDiff")->SetXTitle("Time difference [ns]");
+  getStatistics().getHisto1D("3GammaTimeDiff")->SetYTitle("Counts");
+
+  getStatistics().createHistogram(
+    new TH1F("3AnnihPlaneDist", "3 Gamma Annihilation Plane Distance to Center",
+    100, 0.0, fMaxDistOfDecayPlaneFromCenter)
+  );
+  getStatistics().getHisto1D("3AnnihPlaneDist")->SetXTitle("Distance [cm]");
+  getStatistics().getHisto1D("3AnnihPlaneDist")->SetYTitle("Counts");
+
+  getStatistics().createHistogram(
+    new TH1F("3AnnihTimeDiff", "3 gamma Annihilation last and first hit time difference", 200, 0.0, fMaxTimeDiff/1000.0)
+  );
+  getStatistics().getHisto1D("3AnnihTimeDiff")->SetXTitle("Time difference [ns]");
+  getStatistics().getHisto1D("3AnnihTimeDiff")->SetYTitle("Counts");
 }

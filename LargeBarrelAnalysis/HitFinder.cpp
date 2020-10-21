@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -19,13 +19,17 @@ using namespace std;
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include <JPetGeomMapping/JPetGeomMapping.h>
 #include <JPetWriter/JPetWriter.h>
+
+#include "ToTEnergyConverterFactory.h"
 #include "UniversalFileLoader.h"
 #include "HitFinderTools.h"
 #include "HitFinder.h"
+
 #include <string>
 #include <vector>
 #include <map>
 
+using namespace tot_energy_converter;
 using namespace jpet_options_tools;
 
 HitFinder::HitFinder(const char* name) : JPetUserTask(name) {}
@@ -80,6 +84,23 @@ bool HitFinder::init()
     ERROR("Velocities map seems to be empty");
   }
 
+  // Loading parameters for conversion to ToT to energy
+  if (isOptionSet(fParams.getOptions(), kConvertToTParamKey)) {
+    fConvertToT = getOptionAsBool(fParams.getOptions(), kConvertToTParamKey);
+    if(fConvertToT){
+      INFO("Hit finder performs conversion of ToT to deposited energy with provided params.");
+      fToTConverterFactory.loadConverterOptions(fParams.getOptions());
+    } else {
+      INFO("Hit finder will not convert ToT to deposited energy since no user parameters are provided.");
+    }
+  }
+  
+  if (isOptionSet(fParams.getOptions(), kTOTCalculationType)) {
+    fTOTCalculationType = getOptionAsString(fParams.getOptions(), kTOTCalculationType);
+  } else {
+    WARNING("No TOT calculation option given by the user. Using standard sum.");
+  }
+
   // Control histograms
   if(fSaveControlHistos) { initialiseHistograms(); }
   return true;
@@ -91,11 +112,13 @@ bool HitFinder::exec()
     auto signalsBySlot = HitFinderTools::getSignalsBySlot(
       timeWindow, fUseCorruptedSignals
     );
+    auto totConverter = fToTConverterFactory.getEnergyConverter();
     auto allHits = HitFinderTools::matchAllSignals(
-      signalsBySlot, fVelocities, fABTimeDiff, fRefDetScinID, getStatistics(), fSaveControlHistos
+      signalsBySlot, fVelocities, fABTimeDiff, fRefDetScinID,
+      fConvertToT, totConverter, getStatistics(), fSaveControlHistos
     );
     if (fSaveControlHistos) {
-      getStatistics().getHisto1D("hits_per_time_slot")->Fill(allHits.size());
+      getStatistics().fillHistogram("hits_per_time_slot", allHits.size());
     }
     saveHits(allHits);
   } else return false;
@@ -112,13 +135,13 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
 {
   auto sortedHits = JPetAnalysisTools::getHitsOrderedByTime(hits);
   for (const auto& hit : sortedHits) {
-    if (fSaveControlHistos) {
-      auto tot = HitFinderTools::calculateTOT(hit);
-      getStatistics().getHisto1D("TOT_all_hits")->Fill(tot);
+if (fSaveControlHistos) {
+      auto tot = HitFinderTools::calculateTOT(hit, HitFinderTools::getTOTCalculationType(fTOTCalculationType));
+      getStatistics().fillHistogram("TOT_all_hits", tot);
       if(hit.getRecoFlag()==JPetHit::Good){
-        getStatistics().getHisto1D("TOT_good_hits")->Fill(tot);
+        getStatistics().fillHistogram("TOT_good_hits", tot);
       } else if(hit.getRecoFlag()==JPetHit::Corrupted){
-        getStatistics().getHisto1D("TOT_corr_hits")->Fill(tot);
+        getStatistics().fillHistogram("TOT_corr_hits", tot);
       }
     }
     fOutputEvents->add<JPetHit>(hit);
@@ -126,71 +149,83 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
 }
 
 void HitFinder::initialiseHistograms(){
-  getStatistics().createHistogram(new TH1F(
-    "good_vs_bad_hits", "Number of good and corrupted Hits created", 3, 0.5, 3.5
-  ));
-  getStatistics().getHisto1D("good_vs_bad_hits")->GetXaxis()->SetBinLabel(1,"GOOD");
-  getStatistics().getHisto1D("good_vs_bad_hits")->GetXaxis()->SetBinLabel(2,"CORRUPTED");
-  getStatistics().getHisto1D("good_vs_bad_hits")->GetXaxis()->SetBinLabel(3,"UNKNOWN");
-  getStatistics().getHisto1D("good_vs_bad_hits")->GetYaxis()->SetTitle("Number of Hits");
 
-  getStatistics().createHistogram(new TH1F(
-    "hits_per_time_slot", "Number of Hits in Time Window", 101, -0.5, 100.5
-  ));
-  getStatistics().getHisto1D("hits_per_time_slot")->GetXaxis()->SetTitle("Hits in Time Slot");
-  getStatistics().getHisto1D("hits_per_time_slot")->GetYaxis()->SetTitle("Number of Time Slots");
+  getStatistics().createHistogramWithAxes(
+    new TH1D("good_vs_bad_hits", "Number of good and corrupted Hits created", 3, 0.5, 3.5),
+    "Quality", "Number of Hits"
+  );
 
-  getStatistics().createHistogram(new TH2F(
-    "time_diff_per_scin", "Signals Time Difference per Scintillator ID",
-    200, -2 * fABTimeDiff, 2 * fABTimeDiff, 192, 0.5, 192.5
-  ));
-  getStatistics().getHisto2D("time_diff_per_scin")
-    ->GetXaxis()->SetTitle("A-B time difference");
-  getStatistics().getHisto2D("time_diff_per_scin")
-    ->GetYaxis()->SetTitle("ID of Scintillator");
+  std::vector<std::pair<unsigned, std::string>> binLabels;
+  binLabels.push_back(std::make_pair(1,"GOOD"));
+  binLabels.push_back(std::make_pair(2,"CORRUPTED"));
+  binLabels.push_back(std::make_pair(3,"UNKNOWN"));
+  getStatistics().setHistogramBinLabel(
+    "good_vs_bad_hits", getStatistics().AxisLabel::kXaxis, binLabels
+  );
 
-  getStatistics().createHistogram(new TH2F(
-    "hit_pos_per_scin", "Hit Position per Scintillator ID",
-    200, -50.0, 50.0, 192, 0.5, 192.5
-  ));
-  getStatistics().getHisto2D("hit_pos_per_scin")
-    ->GetXaxis()->SetTitle("Hit z position [cm]");
-  getStatistics().getHisto2D("hit_pos_per_scin")
-    ->GetYaxis()->SetTitle("ID of Scintillator");
+  getStatistics().createHistogramWithAxes(
+    new TH1D("hits_per_time_slot", "Number of Hits in Time Window", 100, -0.5, 99.5),
+    "Hits in Time Slot", "Number of Time Slots"
+  );
+
+  getStatistics().createHistogramWithAxes(
+    new TH2D("time_diff_per_scin", "Signals Time Difference per Scintillator ID",
+    4 * fABTimeDiff / 10, -2 * fABTimeDiff, 2 * fABTimeDiff, 192, 0.5, 192.5),
+    "A-B time difference", "ID of Scintillator"
+  );
+
+  getStatistics().createHistogramWithAxes(
+    new TH2D("hit_pos_per_scin", "Hit Position per Scintillator ID",
+    200, -49.75, 50.25, 192, 0.5, 192.5),
+    "Hit z position [cm]", "ID of Scintillator"
+  );
 
   // TOT calculating for all hits and reco flags
-  getStatistics().createHistogram(new TH1F(
-    "TOT_all_hits", "TOT of all hits", 200, 0.0, 100000.0
-  ));
-  getStatistics().getHisto1D("TOT_all_hits")->GetXaxis()->SetTitle("Time over Threshold [ps]");
-  getStatistics().getHisto1D("TOT_all_hits")->GetYaxis()->SetTitle("Number of Hits");
+  getStatistics().createHistogramWithAxes(
+    new TH1D("TOT_all_hits", "TOT of all hits", 200, -250.0, 99750.0),
+    "Time over Threshold [ps]", "Number of Hits"
+  );
+  getStatistics().createHistogramWithAxes(
+    new TH1D("TOT_good_hits", "TOT of hits with GOOD flag", 200, -250.0, 99750.0),
+    "Time over Threshold [ps]", "Number of Hits"
+  );
+  getStatistics().createHistogramWithAxes(
+    new TH1D("TOT_corr_hits", "TOT of hits with CORRUPTED flag", 200, -250.0, 99750.0),
+    "Time over Threshold [ps]", "Number of Hits"
+  );
+  getStatistics().createHistogramWithAxes(
+    new TH1D("remain_signals_per_scin", "Number of Unused Signals in Scintillator", 192, 0.5, 192.5),
+    "ID of Scintillator", "Number of Unused Signals in Scintillator"
+  );
+  getStatistics().createHistogramWithAxes(
+    new TH1D("remain_signals_tdiff", "Time Diff of an unused signal and the consecutive one",
+    200, fABTimeDiff-125.0, 49875.0+fABTimeDiff),
+    "Time difference [ps]", "Number of Signals"
+  );
 
-  getStatistics().createHistogram(new TH1F(
-    "TOT_good_hits", "TOT of hits with GOOD flag", 200, 0.0, 100000.0
-  ));
-  getStatistics().getHisto1D("TOT_good_hits")->GetXaxis()->SetTitle("Time over Threshold [ps]");
-  getStatistics().getHisto1D("TOT_good_hits")->GetYaxis()->SetTitle("Number of Hits");
+  if(fConvertToT) {
+    auto converterRange = fToTConverterFactory.getEnergyConverter().getRange();
+    auto totConverter = fToTConverterFactory.getEnergyConverter();
 
-  getStatistics().createHistogram(new TH1F(
-    "TOT_corr_hits", "TOT of hits with CORRUPTED flag", 200, 0.0, 100000.0
-  ));
-  getStatistics().getHisto1D("TOT_corr_hits")->GetXaxis()->SetTitle("Time over Threshold [ps]");
-  getStatistics().getHisto1D("TOT_corr_hits")->GetYaxis()->SetTitle("Number of Hits");
+    auto minToT = converterRange.first;
+    auto maxToT = converterRange.second;
+    auto minEDep = totConverter(converterRange.first);
+    auto maxEDep = totConverter(converterRange.second);
 
-  getStatistics().createHistogram(new TH1F(
-    "remain_signals_per_scin", "Number of Unused Signals in Scintillator", 192, 0.5, 192.5
-  ));
-  getStatistics().getHisto1D("remain_signals_per_scin")
-    ->GetXaxis()->SetTitle("ID of Scintillator");
-  getStatistics().getHisto1D("remain_signals_per_scin")
-    ->GetYaxis()->SetTitle("Number of Unused Signals in Scintillator");
-
-  getStatistics().createHistogram(new TH1F(
-    "remain_signals_tdiff", "Time Diff of an unused signal and the consecutive one",
-    200, fABTimeDiff, 50000.0+fABTimeDiff
-  ));
-  getStatistics().getHisto1D("remain_signals_tdiff")
-    ->GetXaxis()->SetTitle("Time difference [ps]");
-  getStatistics().getHisto1D("remain_signals_tdiff")
-    ->GetYaxis()->SetTitle("Number of Signals");
+    getStatistics().createHistogramWithAxes(
+      new TH1D("conv_tot_range", "TOT of hits in range of conversion function", 200, minToT, maxToT),
+      "Time over Threshold [ps]", "Number of Hits"
+    );
+    getStatistics().createHistogramWithAxes(
+      new TH1D("conv_dep_energy", "Deposited energy of hits, converted from ToT with provied formula",
+      200, minEDep, maxEDep),
+      "Deposited energy [keV]", "Number of Hits"
+    );
+    getStatistics().createHistogramWithAxes(
+      new TH2D("conv_dep_energy_vs_tot",
+      "Deposited energy of hits, converted from ToT with provied formula vs. input ToT",
+      200, minEDep, maxEDep, 200, minToT, maxToT),
+      "Deposited energy [keV]", "ToT of Hit [ps]"
+    );
+  }
 }
