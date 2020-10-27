@@ -22,9 +22,8 @@
   * Contains methods merging Raw Signals from matrix of SiPMs to a Physical Signal
   */
 
- #include <JPetStatistics/JPetStatistics.h>
- #include <JPetTimeWindow/JPetTimeWindow.h>
  #include <JPetMatrixSignal/JPetMatrixSignal.h>
+ #include <JPetTimeWindow/JPetTimeWindow.h>
  #include <JPetRawSignal/JPetRawSignal.h>
  #include <JPetPM/JPetPM.h>
  #include <utility>
@@ -37,12 +36,11 @@
 
    static std::vector<JPetMatrixSignal> mergeSignalsAllSiPMs(
      std::map<int, std::vector<std::vector<JPetRawSignal>>>& rawSigMtxMap,
-     double mergingTime, JPetStatistics& stats, bool saveHistos
+     double mergingTime
    );
 
    static std::vector<JPetMatrixSignal> mergeRawSignalsOnSide(
-     std::vector<JPetRawSignal>& rawSigVec, double mergingTime,
-     JPetStatistics& stats, bool saveHistos
+     std::vector<JPetRawSignal>& rawSigVec, double mergingTime
    );
    static double getRawSigBaseTime(JPetRawSignal& rawSig);
 

@@ -37,14 +37,12 @@ public:
     const JPetTimeWindow* timeWindow
   );
   static std::vector<JPetHit> matchAllSignals(
-    std::map<int, std::vector<JPetMatrixSignal>>& allSignals,
-    double timeDiffAB, int refDetScinID, JPetStatistics& stats,
-    bool saveHistos
+    std::map<int, std::vector<JPetMatrixSignal>>& allSignals, double timeDiffAB,
+    int refDetScinID, JPetStatistics& stats, bool saveHistos
   );
   static std::vector<JPetHit> matchSignals(
-    std::vector<JPetMatrixSignal>& scinSignals,
-    double timeDiffAB, JPetStatistics& stats,
-    bool saveHistos
+    std::vector<JPetMatrixSignal>& scinSignals, double timeDiffAB,
+    JPetStatistics& stats, bool saveHistos
   );
   static JPetHit createHit(
     const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2

@@ -15,6 +15,7 @@
   "HitFinder_ABTimeDiff_float":6000.0,
   "HitFinder_RefDetScinID_int":-1,
   "HitFinder_ConvertToT_bool": false,
+  "HitFinder_TOTCalculationType_std::string":"standard",
   "ToTEnergyConverterFactory_ToT2EnergyFunction_std::string": "pol1",
   "ToTEnergyConverterFactory_ToT2EnergyParameters_std::vector<double>": [0.0, 1.0],
   "ToTEnergyConverterFactory_ToT2EnergyFunctionLimits_std::vector<double>": [0.0, 100000.0],

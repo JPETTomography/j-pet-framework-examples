@@ -14,6 +14,7 @@
   "HitFinder_VelocityFile_std::string":"dummyCalibration.txt",
   "HitFinder_ABTimeDiff_float":6000.0,
   "HitFinder_RefDetScinID_int":-1,
+  "HitFinder_TOTCalculationType_std::string":"standard",
   "EventFinder_UseCorruptedHits_bool":false,
   "EventFinder_MinimalEventSize_int":1,
   "EventFinder_EventTime_float":5000.0,

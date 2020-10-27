@@ -75,24 +75,13 @@ vector<JPetHit> HitFinderTools::matchAllSignals(
       for (auto refSignal : scinSigals.second) {
         auto refHit = createDummyRefDetHit(refSignal);
         refHits.push_back(refHit);
-        if (saveHistos && refHit.getEnergy()!=0.0) {
-          stats.getHisto1D("ref_hit_signalB_tot")->Fill(refHit.getEnergy());
-        }
       }
       allHits.insert(allHits.end(), refHits.begin(), refHits.end());
-      if (saveHistos) {
-        stats.getHisto1D("ref_hits_per_time_slot")->Fill(refHits.size());
-      }
       continue;
     }
     // Match signals for scintillators
-    auto scinHits = matchSignals(
-      scinSigals.second, timeDiffAB, stats, saveHistos
-    );
+    auto scinHits = matchSignals(scinSigals.second, timeDiffAB, stats, saveHistos);
     allHits.insert(allHits.end(), scinHits.begin(), scinHits.end());
-  }
-  if (saveHistos) {
-    stats.getHisto1D("hits_per_time_slot")->Fill(allHits.size());
   }
   return allHits;
 }
@@ -109,7 +98,7 @@ vector<JPetHit> HitFinderTools::matchSignals(
   sortByTime(scinSigals);
   while (scinSigals.size() > 0) {
     auto mtxSig = scinSigals.at(0);
-    if(scinSigals.size() == 1){
+    if(scinSigals.size() == 1) {
       remainSignals.push_back(mtxSig);
       break;
     }
@@ -141,7 +130,7 @@ vector<JPetHit> HitFinderTools::matchSignals(
     }
   }
   if(remainSignals.size()>0 && saveHistos){
-    stats.getHisto1D("remain_signals_per_scin")
+    stats.getHisto1D("remain_signals_scin")
       ->Fill((double)(remainSignals.at(0).getPM().getScin().getID()), remainSignals.size());
   }
   return scinHits;

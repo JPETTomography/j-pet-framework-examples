@@ -12,6 +12,8 @@
 *.kate-swp
 *.kdev*
 *.exe
+*.json
+*.xml
 
 # CMake specific files
 CMakeFiles

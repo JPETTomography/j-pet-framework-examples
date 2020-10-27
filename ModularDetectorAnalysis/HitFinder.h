@@ -48,18 +48,13 @@ protected:
   void saveHits(const std::vector<JPetHit>& hits);
   void initialiseHistograms();
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
-  const std::string kRefDetScinIDParamKey = "TimeCalibration_RefDetScinID_int";
-  const std::string kOffestsFileParamKey = "ScinsOffsets_File_std::string";
-  const std::string kScinCalibFileParamKey = "ScinsCalib_std::string";
   const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_double";
-  const std::string kMinScinIDParamKey = "Histo_MinScinID_int";
-  const std::string kMaxScinIDParamKey = "Histo_MaxScinID_int";
   bool fSaveControlHistos = true;
-  std::string fOffsetsFile = "";
   double fABTimeDiff = 10000.0;
-  int fRefDetScinID = -1;
-  int fMinScinID = 0;
-  int fMaxScinID = 1;
+  
+  // const std::string kOffestsFileParamKey = "ScinsOffsets_File_std::string";
+  // const std::string kScinCalibFileParamKey = "ScinsCalib_std::string";
+  // std::string fOffsetsFile = "";
 };
 
 #endif /* !HITFINDER1_H */

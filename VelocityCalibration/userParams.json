@@ -4,6 +4,7 @@
  "SignalFinder_EdgeMaxTime_float":"20000",
  "SignalFinder_LeadTrailMaxTime_float":"300000",
  "HitFinder_TimeWindowWidth_float":"500000",
+ "HitFinder_TOTCalculationType_std::string":"standard",
  "EventFinder_EventTime_float":"5000",
  "DeltaTFinder_numberOfPositions_std::string" : "5",
  "DeltaTFinder_Position_1_std::string":"-200 <fileName>",

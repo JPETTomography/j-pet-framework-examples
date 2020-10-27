@@ -15,6 +15,7 @@
   "HitFinder_VelocityFile_std::string":"dummyCalibration.txt",
   "HitFinder_ABTimeDiff_float":6000.0,
   "HitFinder_RefDetScinID_int":-1,
+  "HitFinder_TOTCalculationType_std::string":"standard",
   "InterThresholdCalibration_TimeConstantsInterThrCalibOutputFile_std::string":"TimeConstantsInterThrCalib.txt",
   "InterThresholdCalibration_Frac_err_double":0.3,
   "InterThresholdCalibration_Min_ev_int":100,

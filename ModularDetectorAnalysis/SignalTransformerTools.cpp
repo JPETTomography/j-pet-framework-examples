@@ -69,14 +69,14 @@ SignalTransformerTools::getRawSigMtxMap(const JPetTimeWindow* timeWindow)
  */
 vector<JPetMatrixSignal> SignalTransformerTools::mergeSignalsAllSiPMs(
    map<int, vector<vector<JPetRawSignal>>>& rawSigMtxMap,
-   double mergingTime, JPetStatistics& stats, bool saveHistos
+   double mergingTime
 ) {
   vector<JPetMatrixSignal> allMtxSignals;
   // Iterating over whole map
   for (auto& rawSigScin : rawSigMtxMap) {
     for (auto& rawSigSide : rawSigScin.second){
       auto mtxSignals = mergeRawSignalsOnSide(
-        rawSigSide, mergingTime, stats, saveHistos
+        rawSigSide, mergingTime
       );
       allMtxSignals.insert(allMtxSignals.end(), mtxSignals.begin(), mtxSignals.end());
     }
@@ -89,8 +89,7 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeSignalsAllSiPMs(
  * matching them into groups on max. 4 as a MatrixSignal
  */
 vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(
-  vector<JPetRawSignal>& rawSigVec, double mergingTime,
-  JPetStatistics& stats, bool saveHistos
+  vector<JPetRawSignal>& rawSigVec, double mergingTime
 ) {
   vector<JPetMatrixSignal> mtxSigVec;
   sortByTime(rawSigVec);

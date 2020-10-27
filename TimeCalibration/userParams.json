@@ -8,6 +8,7 @@
     "SignalFinder_LeadTrailMaxTime_float":"300000.0",
     "HitFinder_ABTimeDiff_float":"500000.0",
     "HitFinder_RefDetScinID_int":"193",
+    "HitFinder_TOTCalculationType_std::string":"standard",
     "TimeCalibration_PMIdRef_int":"385",
     "TimeCalibration_TOTCutLow_float":"-300000000.",
     "TimeCalibration_TOTCutHigh_float":"300000000."
