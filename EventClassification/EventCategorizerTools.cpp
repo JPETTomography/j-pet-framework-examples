@@ -66,9 +66,9 @@ void EventCategorizerTools::selectForCalibration(
       auto dScinID = deexHit.getScin().getID();
 
       // Filling histograms for specific scintillators
-      if(saveHistos){
+      if(saveHistos) {
         stats.getHisto1D(Form("tdiff_a_d_scin_%d", aScinID))->Fill(tDiff_A_D);
-        stats.getHisto1D(Form("tdiff_a_d_scin_%d", dScinID))->Fill(tDiff_D_A);
+        stats.getHisto1D(Form("tdiff_d_a_scin_%d", dScinID))->Fill(tDiff_D_A);
       }
     }
   }
@@ -118,10 +118,10 @@ bool EventCategorizerTools::checkFor2Gamma(
           stats.getHisto1D("2g_hit_tdiff")->Fill(secondHit.getTimeDiff());
 
           if(tot1 > anihTOTCutMin && tot1 < anihTOTCutMax){
-            stats.getHisto1D("2g_hit_tdiff_cut_tot")->Fill(tot1);
+            stats.getHisto1D("2g_hit_tdiff_cut_tot")->Fill(firstHit.getTimeDiff());
           }
           if(tot2 > anihTOTCutMin && tot2 < anihTOTCutMax){
-            stats.getHisto1D("2g_hit_tdiff_cut_tot")->Fill(tot2);
+            stats.getHisto1D("2g_hit_tdiff_cut_tot")->Fill(secondHit.getTimeDiff());
           }
         }
         return true;

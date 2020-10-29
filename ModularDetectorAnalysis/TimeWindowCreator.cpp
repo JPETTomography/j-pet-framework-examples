@@ -220,7 +220,7 @@ void TimeWindowCreator::initialiseHistograms(){
   getStatistics().getHisto1D("filter_LT_tdiff")->GetYaxis()->SetTitle("Number of LT pairs");
 
   getStatistics().createHistogram(new TH1F(
-    "filter_LL_PM", "Number of LL found on PMs", 111, 399.5, 510.5
+    "filter_LL_PM", "Number of LL found on PMs", maxPMID-minPMID+1, minPMID-0.5, maxPMID+0.5
   ));
   getStatistics().getHisto1D("filter_LL_PM")->GetXaxis()->SetTitle("PM ID");
   getStatistics().getHisto1D("filter_LL_PM")->GetYaxis()->SetTitle("Number of LL pairs");
