@@ -35,67 +35,59 @@ bool EventFinder::init()
 
   // Reading values from the user options if available
   // Getting bool for using corrupted hits
-  if (isOptionSet(fParams.getOptions(), kUseCorruptedHitsParamKey)) {
-    fUseCorruptedHits = getOptionAsBool(fParams.getOptions(), kUseCorruptedHitsParamKey);
-    if(fUseCorruptedHits){
-      WARNING("Event Finder is using Corrupted Hits, as set by the user");
-    } else{
-      WARNING("Event Finder is NOT using Corrupted Hits, as set by the user");
-    }
-  } else {
-    WARNING("Event Finder is not using Corrupted Hits (default option)");
-  }
+  // if (isOptionSet(fParams.getOptions(), kUseCorruptedHitsParamKey)) {
+  //   fUseCorruptedHits = getOptionAsBool(fParams.getOptions(), kUseCorruptedHitsParamKey);
+  //   if(fUseCorruptedHits){
+  //     WARNING("Event Finder is using Corrupted Hits, as set by the user");
+  //   } else{
+  //     WARNING("Event Finder is NOT using Corrupted Hits, as set by the user");
+  //   }
+  // } else {
+  //   WARNING("Event Finder is not using Corrupted Hits (default option)");
+  // }
 
   // Event time window
   if (isOptionSet(fParams.getOptions(), kEventTimeParamKey)) {
     fEventTimeWindow = getOptionAsDouble(fParams.getOptions(), kEventTimeParamKey);
   }
 
-  // Main and ref scin IDs
-  if (isOptionSet(fParams.getOptions(), kMainScinIDParamKey)) {
-    fMainScinID = getOptionAsInt(fParams.getOptions(), kMainScinIDParamKey);
-  }
-  if (isOptionSet(fParams.getOptions(), kRefScinIDParamKey)) {
-    fRefScinID = getOptionAsInt(fParams.getOptions(), kRefScinIDParamKey);
-  }
+  // // Time walk corrections
+  // if (isOptionSet(fParams.getOptions(), kTimeWalkCorrAParamKey)) {
+  //   fTimeWalkAParam = getOptionAsDouble(fParams.getOptions(), kTimeWalkCorrAParamKey);
+  // }
+  // if (isOptionSet(fParams.getOptions(), kTimeWalkCorrBParamKey)) {
+  //   fTimeWalkBParam = getOptionAsDouble(fParams.getOptions(), kTimeWalkCorrBParamKey);
+  // }
 
-  // Time walk corrections
-  if (isOptionSet(fParams.getOptions(), kTimeWalkCorrAParamKey)) {
-    fTimeWalkAParam = getOptionAsDouble(fParams.getOptions(), kTimeWalkCorrAParamKey);
-  }
-  if (isOptionSet(fParams.getOptions(), kTimeWalkCorrBParamKey)) {
-    fTimeWalkBParam = getOptionAsDouble(fParams.getOptions(), kTimeWalkCorrBParamKey);
-  }
+  // // Limits of histograms
+  // if (isOptionSet(fParams.getOptions(), kHistoTDiffMinParamKey)) {
+  //   fHistoTDiffMin = getOptionAsDouble(fParams.getOptions(), kHistoTDiffMinParamKey);
+  // }
+  // if (isOptionSet(fParams.getOptions(), kHistoTDiffMaxParamKey)) {
+  //   fHistoTDiffMax = getOptionAsDouble(fParams.getOptions(), kHistoTDiffMaxParamKey);
+  // }
 
-  // Limits of histograms
-  if (isOptionSet(fParams.getOptions(), kHistoTDiffMinParamKey)) {
-    fHistoTDiffMin = getOptionAsDouble(fParams.getOptions(), kHistoTDiffMinParamKey);
-  }
-  if (isOptionSet(fParams.getOptions(), kHistoTDiffMaxParamKey)) {
-    fHistoTDiffMax = getOptionAsDouble(fParams.getOptions(), kHistoTDiffMaxParamKey);
-  }
-
-  if (isOptionSet(fParams.getOptions(), kHistoTOTMinParamKey)) {
-    fHistoTOTMin = getOptionAsDouble(fParams.getOptions(), kHistoTOTMinParamKey);
-  }
-  if (isOptionSet(fParams.getOptions(), kHistoTOTMaxParamKey)) {
-    fHistoTOTMax = getOptionAsDouble(fParams.getOptions(), kHistoTOTMaxParamKey);
-  }
+  // if (isOptionSet(fParams.getOptions(), kHistoTOTMinParamKey)) {
+  //   fHistoTOTMin = getOptionAsDouble(fParams.getOptions(), kHistoTOTMinParamKey);
+  // }
+  // if (isOptionSet(fParams.getOptions(), kHistoTOTMaxParamKey)) {
+  //   fHistoTOTMax = getOptionAsDouble(fParams.getOptions(), kHistoTOTMaxParamKey);
+  // }
 
   // Limits of zoomed histograms
-  if (isOptionSet(fParams.getOptions(), kZoomTDiffMinParamKey)) {
-    fZoomTDiffMin = getOptionAsDouble(fParams.getOptions(), kZoomTDiffMinParamKey);
-  }
-  if (isOptionSet(fParams.getOptions(), kZoomTDiffMaxParamKey)) {
-    fZoomTDiffMax = getOptionAsDouble(fParams.getOptions(), kZoomTDiffMaxParamKey);
-  }
-
-  if (isOptionSet(fParams.getOptions(), kZoomTOTMinParamKey)) {
-    fZoomTOTMin = getOptionAsDouble(fParams.getOptions(), kZoomTOTMinParamKey);
-  }
-  if (isOptionSet(fParams.getOptions(), kZoomTOTMaxParamKey)) {
-    fZoomTOTMax = getOptionAsDouble(fParams.getOptions(), kZoomTOTMaxParamKey);
-  }
+  // if (isOptionSet(fParams.getOptions(), kZoomTDiffMinParamKey)) {
+  //   fZoomTDiffMin = getOptionAsDouble(fParams.getOptions(), kZoomTDiffMinParamKey);
+  // }
+  // if (isOptionSet(fParams.getOptions(), kZoomTDiffMaxParamKey)) {
+  //   fZoomTDiffMax = getOptionAsDouble(fParams.getOptions(), kZoomTDiffMaxParamKey);
+  // }
+  //
+  // if (isOptionSet(fParams.getOptions(), kZoomTOTMinParamKey)) {
+  //   fZoomTOTMin = getOptionAsDouble(fParams.getOptions(), kZoomTOTMinParamKey);
+  // }
+  // if (isOptionSet(fParams.getOptions(), kZoomTOTMaxParamKey)) {
+  //   fZoomTOTMax = getOptionAsDouble(fParams.getOptions(), kZoomTOTMaxParamKey);
+  // }
 
   // Minimum number of hits in an event to save an event
   if (isOptionSet(fParams.getOptions(), kEventMinMultiplicity)) {
@@ -108,9 +100,9 @@ bool EventFinder::init()
   }
 
   // Signal merging time parameter
-  if (isOptionSet(fParams.getOptions(), kMergeSignalsTimeParamKey)) {
-    fMergingTime = getOptionAsDouble(fParams.getOptions(), kMergeSignalsTimeParamKey);
-  }
+  // if (isOptionSet(fParams.getOptions(), kMergeSignalsTimeParamKey)) {
+  //   fMergingTime = getOptionAsDouble(fParams.getOptions(), kMergeSignalsTimeParamKey);
+  // }
 
   // Getting bool for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey)){
@@ -164,100 +156,55 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
       continue;
     }
 
-    // Checking, if following hits meets selection conditions
-    // if not, moving interator
+    // Creating new event with the first hit
+    JPetEvent event;
+    event.setEventType(JPetEventType::kUnknown);
+    event.addHit(hit);
+    if(hit.getRecoFlag() == JPetHit::Good) {
+      event.setRecoFlag(JPetEvent::Good);
+    } else if(hit.getRecoFlag() == JPetHit::Corrupted){
+      event.setRecoFlag(JPetEvent::Corrupted);
+    }
+
+    // Checking, if following hits fulfill time window condition,
+    // then moving interator
     unsigned int nextCount = 1;
     while(count+nextCount < nHits) {
 
       auto nextHit = dynamic_cast<const JPetHit&>(timeWindow.operator[](count+nextCount));
-
-      // coincidence condition
-      if (fabs(nextHit.getTime() - hit.getTime()) < fEventTimeWindow) {
-        auto hitID = hit.getScin().getID();
-        auto nextHitID = hit.getScin().getID();
-        // different scin IDs condition
-        if( !((hitID>=201 && hitID<=213 && nextHitID>=227 && nextHitID<252)
-          || (hitID>=227 && hitID<=252 && nextHitID>=201 && nextHitID<213))
-        ) {
-          nextCount++;
-          continue;
+      auto tDiff = fabs(nextHit.getTime() - hit.getTime());
+      if (tDiff < fEventTimeWindow) {
+        if(nextHit.getRecoFlag() == JPetHit::Corrupted) {
+          event.setRecoFlag(JPetEvent::Corrupted);
         }
-
-        // Proper coincidence found - assigning main scin hit and ref scin hit
-        auto hitStats = getStats(hit);
-        auto nextHitStats = getStats(nextHit);
-
-        getStatistics().getHisto2D("coin_tdiff_per_scin")->Fill(get<1>(hitStats), hitID);
-        getStatistics().getHisto2D("coin_tot_per_scin")->Fill(get<2>(hitStats), hitID);
-        getStatistics().getHisto2D("coin_tdiff_per_scin")->Fill(get<1>(nextHitStats), nextHitID);
-        getStatistics().getHisto2D("coin_tot_per_scin")->Fill(get<2>(nextHitStats), nextHitID);
-
-        // JPetHit mainHit, refHit;
-        // if(hit.getScin().getID() == kMainScinIDParamKey) {
-        //   mainHit = hit;
-        //   refHit = nextHit;
-        // } else {
-        //   mainHit = nextHit;
-        //   refHit = hit;
-        // }
-
-        // auto hitStats = getStats(mainHit);
-        // auto multi = get<0>(hitStats);
-        // auto tdiff = get<1>(hitStats);
-        // auto tot = get<2>(hitStats);
-        // auto revToT = get<3>(hitStats);
-
-        // getStatistics().getHisto1D("coin_tot")->Fill(tot);
-
-        // Checking multi cut and ToT cut
-        // if(multi == 16) {
-          // Good coincidence, creating new event
-          // JPetEvent event;
-          // event.setEventType(JPetEventType::k2Gamma);
-          // event.setRecoFlag(JPetEvent::Good);
-          // event.addHit(hit);
-          // event.addHit(nextHit);
-          // eventVec.push_back(event);
-
-          // if(fSaveControlHistos){
-          //   getStatistics().getHisto2D("tdiff_tot")->Fill(tdiff, revToT);
-          //   getStatistics().getHisto2D("tdiff_tot_zoom")->Fill(tdiff, revToT);
-          //   auto correction = (revToT-fTimeWalkBParam)/fTimeWalkAParam;
-          //   getStatistics().getHisto2D("tdiff_tot_zoom_tw")->Fill(tdiff*fTimeWalkAParam+fTimeWalkBParam, revToT);
-          //
-          //   // Offsets histograms
-          //   plotOffsetHistograms(mainHit.getSignalA(), "A", "main");
-          //   plotOffsetHistograms(mainHit.getSignalB(), "B", "main");
-          //   plotOffsetHistograms(refHit.getSignalA(), "A", "ref");
-          //   plotOffsetHistograms(refHit.getSignalA(), "B", "ref");
-          // }
-        // }
+        event.addHit(nextHit);
+        nextCount++;
       } else {
-        getStatistics().getHisto1D("hits_rejected_tdiff")
-        ->Fill(fabs(nextHit.getTime() - hit.getTime()));
+        if(fSaveControlHistos) {
+          getStatistics().getHisto1D("hits_rejected_tdiff")->Fill(tDiff);
+        }
+        break;
       }
-      break;
     }
-    // moving to next uninvestigated hit
     count+=nextCount;
 
-    // Not needed now
-    // if(fSaveControlHistos) {
-    //   getStatistics().getHisto1D("hits_per_event_all")->Fill(event.getHits().size());
-    //   if(event.getRecoFlag()==JPetEvent::Good){
-    //     getStatistics().getHisto1D("good_vs_bad_events")->Fill(1);
-    //   } else if(event.getRecoFlag()==JPetEvent::Corrupted){
-    //     getStatistics().getHisto1D("good_vs_bad_events")->Fill(2);
-    //   } else {
-    //     getStatistics().getHisto1D("good_vs_bad_events")->Fill(3);
-    //   }
-    // }
-    // if(event.getHits().size() >= fMinMultiplicity){
-    //   eventVec.push_back(event);
-    //   if(fSaveControlHistos) {
-    //     getStatistics().getHisto1D("hits_per_event_selected")->Fill(event.getHits().size());
-    //   }
-    // }
+    if(fSaveControlHistos) {
+      getStatistics().getHisto1D("hits_per_event_all")->Fill(event.getHits().size());
+      if(event.getRecoFlag()==JPetEvent::Good){
+        getStatistics().getHisto1D("good_vs_bad_events")->Fill(1);
+      } else if(event.getRecoFlag()==JPetEvent::Corrupted){
+        getStatistics().getHisto1D("good_vs_bad_events")->Fill(2);
+      } else {
+        getStatistics().getHisto1D("good_vs_bad_events")->Fill(3);
+      }
+    }
+
+    if(event.getHits().size() >= fMinMultiplicity) {
+      eventVec.push_back(event);
+      if(fSaveControlHistos) {
+        getStatistics().getHisto1D("hits_per_event_selected")->Fill(event.getHits().size());
+      }
+    }
   }
   return eventVec;
 }
@@ -299,21 +246,21 @@ void EventFinder::initialiseHistograms(){
   // getStatistics().getHisto1D("coin_tot")->GetXaxis()->SetTitle("Hits in Event");
   // getStatistics().getHisto1D("coin_tot")->GetYaxis()->SetTitle("Number of Hits");
 
-  getStatistics().createHistogram(new TH2F(
-    "coin_tdiff_per_scin", "Time difference of coincidence hits per scintillator",
-    200, -1.1 * 5000.0, 1.1 * 5000.0,
-    52, 201-0.5, 252+0.5
-  ));
-  getStatistics().getHisto2D("coin_tdiff_per_scin")->GetXaxis()->SetTitle("A-B time difference [ps]");
-  getStatistics().getHisto2D("coin_tdiff_per_scin")->GetYaxis()->SetTitle("ID of Scintillator");
+  // getStatistics().createHistogram(new TH2F(
+  //   "coin_tdiff_per_scin", "Time difference of coincidence hits per scintillator",
+  //   200, -1.1 * 5000.0, 1.1 * 5000.0,
+  //   52, 201-0.5, 252+0.5
+  // ));
+  // getStatistics().getHisto2D("coin_tdiff_per_scin")->GetXaxis()->SetTitle("A-B time difference [ps]");
+  // getStatistics().getHisto2D("coin_tdiff_per_scin")->GetYaxis()->SetTitle("ID of Scintillator");
 
-  getStatistics().createHistogram(new TH2F(
-    "coin_tot_per_scin", "ToT of coincidence hits per scintillator",
-    200, 0.0, 150000.0,
-    52, 201-0.5, 252+0.5
-  ));
-  getStatistics().getHisto2D("coin_tot_per_scin")->GetXaxis()->SetTitle("A-B time difference [ps]");
-  getStatistics().getHisto2D("coin_tot_per_scin")->GetYaxis()->SetTitle("ID of Scintillator");
+  // getStatistics().createHistogram(new TH2F(
+  //   "coin_tot_per_scin", "ToT of coincidence hits per scintillator",
+  //   200, 0.0, 150000.0,
+  //   52, 201-0.5, 252+0.5
+  // ));
+  // getStatistics().getHisto2D("coin_tot_per_scin")->GetXaxis()->SetTitle("A-B time difference [ps]");
+  // getStatistics().getHisto2D("coin_tot_per_scin")->GetYaxis()->SetTitle("ID of Scintillator");
 
   // getStatistics().createHistogram(new TH2F(
   //   "tdiff_tot", "TDiff vs. TOT",
@@ -359,82 +306,82 @@ void EventFinder::initialiseHistograms(){
  * Gets stats for THR 1 and 2, returns average
  * @return <multi, tdiff, tot/multi, rev_tot>
  */
-tuple<int, double, double, double> EventFinder::getStats(const JPetHit& hit)
-{
-  auto statsTHR1 = getStatsPerTHR(hit, 1);
-  auto statsTHR2 = getStatsPerTHR(hit, 2);
-
-  auto multi = get<0>(statsTHR1)+get<0>(statsTHR2);
-  auto avTDiff = (get<1>(statsTHR1)+get<1>(statsTHR2))/2.0;
-  auto avToT = (get<2>(statsTHR1)+get<2>(statsTHR2))/((double) get<0>(statsTHR1)+get<0>(statsTHR2));
-  auto avRevToT = (get<3>(statsTHR1)+get<3>(statsTHR2))/2.0;
-
-  return make_tuple(multi, avTDiff, avToT, avRevToT);
-}
+// tuple<int, double, double, double> EventFinder::getStats(const JPetHit& hit)
+// {
+//   auto statsTHR1 = getStatsPerTHR(hit, 1);
+//   auto statsTHR2 = getStatsPerTHR(hit, 2);
+//
+//   auto multi = get<0>(statsTHR1)+get<0>(statsTHR2);
+//   auto avTDiff = (get<1>(statsTHR1)+get<1>(statsTHR2))/2.0;
+//   auto avToT = (get<2>(statsTHR1)+get<2>(statsTHR2))/((double) get<0>(statsTHR1)+get<0>(statsTHR2));
+//   auto avRevToT = (get<3>(statsTHR1)+get<3>(statsTHR2))/2.0;
+//
+//   return make_tuple(multi, avTDiff, avToT, avRevToT);
+// }
 
 /**
  * @return <multi, tdiff, tot, rev_tot>
  */
-tuple<int, double, double, double> EventFinder::getStatsPerTHR(const JPetHit& hit, int thrNum)
-{
-  int multi = 0;
-  double timeA = 0.0;
-  double timeB = 0.0;
-  double totA = 0.0;
-  double totB = 0.0;
-  double revToTA = 0.0;
-  double revToTB = 0.0;
-
-  for(auto signalA : hit.getSignalA().getRawSignals()){
-    auto leads = signalA.second.getTimesVsThresholdNumber(JPetSigCh::Leading);
-    auto trails = signalA.second.getTimesVsThresholdNumber(JPetSigCh::Trailing);
-    if(leads.find(thrNum)!=leads.end() && trails.find(thrNum)!=trails.end()){
-      multi++;
-      timeA += leads.at(thrNum);
-      totA += trails.at(thrNum)-leads.at(thrNum);
-      revToTA += 1.0/(trails.at(thrNum)-leads.at(thrNum));
-    }
-  }
-
-  for(auto signalB : hit.getSignalB().getRawSignals()){
-    auto leads = signalB.second.getTimesVsThresholdNumber(JPetSigCh::Leading);
-    auto trails = signalB.second.getTimesVsThresholdNumber(JPetSigCh::Trailing);
-    if(leads.find(thrNum)!=leads.end() && trails.find(thrNum)!=trails.end()){
-      multi++;
-      timeB += leads.at(thrNum);
-      totB += trails.at(thrNum)-leads.at(thrNum);
-      revToTB += 1.0/(trails.at(thrNum)-leads.at(thrNum));
-    }
-  }
-
-  timeA = timeA/((float) hit.getSignalA().getRawSignals().size());
-  timeB = timeB/((float) hit.getSignalB().getRawSignals().size());
-
-  return make_tuple(multi, timeB-timeA, totB-totA, revToTB-revToTA);
-}
+// tuple<int, double, double, double> EventFinder::getStatsPerTHR(const JPetHit& hit, int thrNum)
+// {
+//   int multi = 0;
+//   double timeA = 0.0;
+//   double timeB = 0.0;
+//   double totA = 0.0;
+//   double totB = 0.0;
+//   double revToTA = 0.0;
+//   double revToTB = 0.0;
+//
+//   for(auto signalA : hit.getSignalA().getRawSignals()){
+//     auto leads = signalA.second.getTimesVsThresholdNumber(JPetSigCh::Leading);
+//     auto trails = signalA.second.getTimesVsThresholdNumber(JPetSigCh::Trailing);
+//     if(leads.find(thrNum)!=leads.end() && trails.find(thrNum)!=trails.end()){
+//       multi++;
+//       timeA += leads.at(thrNum);
+//       totA += trails.at(thrNum)-leads.at(thrNum);
+//       revToTA += 1.0/(trails.at(thrNum)-leads.at(thrNum));
+//     }
+//   }
+//
+//   for(auto signalB : hit.getSignalB().getRawSignals()){
+//     auto leads = signalB.second.getTimesVsThresholdNumber(JPetSigCh::Leading);
+//     auto trails = signalB.second.getTimesVsThresholdNumber(JPetSigCh::Trailing);
+//     if(leads.find(thrNum)!=leads.end() && trails.find(thrNum)!=trails.end()){
+//       multi++;
+//       timeB += leads.at(thrNum);
+//       totB += trails.at(thrNum)-leads.at(thrNum);
+//       revToTB += 1.0/(trails.at(thrNum)-leads.at(thrNum));
+//     }
+//   }
+//
+//   timeA = timeA/((float) hit.getSignalA().getRawSignals().size());
+//   timeB = timeB/((float) hit.getSignalB().getRawSignals().size());
+//
+//   return make_tuple(multi, timeB-timeA, totB-totA, revToTB-revToTA);
+// }
 
 /**
  * Returning time of leading Signal Channel on the first threshold from Raw Signal
  */
-double EventFinder::getRawSigBaseTime(const JPetRawSignal& rawSig)
-{
-  return rawSig.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrValue).at(0).getTime();
-}
+// double EventFinder::getRawSigBaseTime(const JPetRawSignal& rawSig)
+// {
+//   return rawSig.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrValue).at(0).getTime();
+// }
 
-void EventFinder::plotOffsetHistograms(const JPetMatrixSignal& mtxSig, string side, string type)
-{
-  auto rawSigMap = mtxSig.getRawSignals();
-
-  // Looking for first
-  auto search1 = rawSigMap.find(1);
-  if (search1 != rawSigMap.end()) {
-    auto t1 = getRawSigBaseTime(rawSigMap.at(1));
-    for(int i=2;i<5;i++){
-      auto searchI = rawSigMap.find(i);
-      if (searchI != rawSigMap.end()) {
-        auto tI = getRawSigBaseTime(rawSigMap.at(i));
-        getStatistics().getHisto1D(Form("mtx_offsets_%s_%s_1_%d", side.c_str(), type.c_str(), i))->Fill(tI-t1);
-      }
-    }
-  }
-}
+// void EventFinder::plotOffsetHistograms(const JPetMatrixSignal& mtxSig, string side, string type)
+// {
+//   auto rawSigMap = mtxSig.getRawSignals();
+//
+//   // Looking for first
+//   auto search1 = rawSigMap.find(1);
+//   if (search1 != rawSigMap.end()) {
+//     auto t1 = getRawSigBaseTime(rawSigMap.at(1));
+//     for(int i=2;i<5;i++){
+//       auto searchI = rawSigMap.find(i);
+//       if (searchI != rawSigMap.end()) {
+//         auto tI = getRawSigBaseTime(rawSigMap.at(i));
+//         getStatistics().getHisto1D(Form("mtx_offsets_%s_%s_1_%d", side.c_str(), type.c_str(), i))->Fill(tI-t1);
+//       }
+//     }
+//   }
+// }

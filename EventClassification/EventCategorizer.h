@@ -46,20 +46,29 @@ public:
 	virtual bool terminate() override;
 
 protected:
-	const std::string kBack2BackSlotThetaDiffParamKey = "Back2Back_Categorizer_SlotThetaDiff_float";
-	const std::string kScatterTOFTimeDiffParamKey = "Scatter_Categorizer_TOF_TimeDiff_float";
-	const std::string kDeexTOTCutMinParamKey = "Deex_Categorizer_TOT_Cut_Min_float";
-	const std::string kDeexTOTCutMaxParamKey = "Deex_Categorizer_TOT_Cut_Max_float";
-	const std::string kMaxTimeDiffParamKey = "EventCategorizer_MaxTimeDiff_float";
+	const std::string kBack2BackSlotThetaDiffParamKey = "Back2Back_Categorizer_SlotThetaDiff_double";
+	const std::string kScatterTOFTimeDiffParamKey = "Scatter_Categorizer_TOF_TimeDiff_double";
+	const std::string kMaxTimeDiffParamKey = "EventCategorizer_MaxTimeDiff_double";
+
+	const std::string kAnihTOTCutMinParamKey = "Anih_Categorizer_TOT_Cut_Min_double";
+	const std::string kAnihTOTCutMaxParamKey = "Anih_Categorizer_TOT_Cut_Max_double";
+
+	const std::string kDeexTOTCutMinParamKey = "Deex_Categorizer_TOT_Cut_Min_double";
+	const std::string kDeexTOTCutMaxParamKey = "Deex_Categorizer_TOT_Cut_Max_double";
+
 	const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
-	const std::string kRefDetScinIDParamKey = "TimeCalibration_RefDetScinID_int";
+
 	void saveEvents(const std::vector<JPetEvent>& event);
+
 	double fScatterTOFTimeDiff = 2000.0;
 	double fB2BSlotThetaDiff = 3.0;
-	double fDeexTOTCutMin = 30000.0;
-	double fDeexTOTCutMax = 50000.0;
 	double fMaxTimeDiff = 1000.;
-	int fRefDetScinID = -1;
+
+	double fAnihTOTCutMin = 100000.0;
+	double fAnihTOTCutMax = 200000.0;
+	double fDeexTOTCutMin = 250000.0;
+	double fDeexTOTCutMax = 350000.0;
+
 	bool fSaveControlHistos = true;
 	void initialiseHistograms();
 };

@@ -159,8 +159,10 @@ JPetHit HitFinderTools::createHit(
   hit.setQualityOfTime(-1.0);
   hit.setTimeDiff(signalB.getTime() - signalA.getTime());
   hit.setQualityOfTimeDiff(-1.0);
+  // TOT is a sum of over all threshold in all signals on both sides
+  // As an quality of energy we temporaily put multiplicity of signals (2-8)
   hit.setEnergy(signalA.getTOT()+signalB.getTOT());
-  hit.setQualityOfEnergy(-1.0);
+  hit.setQualityOfEnergy(signalA.getRawSignals().size()+signalB.getRawSignals().size());
   hit.setPosX(signalA.getPM().getScin().getCenterX());
   hit.setPosY(signalA.getPM().getScin().getCenterY());
   // Hardcoded velocity = 11 ns/cm

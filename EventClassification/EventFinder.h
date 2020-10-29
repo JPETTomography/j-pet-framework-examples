@@ -49,68 +49,53 @@ public:
 protected:
   std::vector<JPetEvent> buildEvents(const JPetTimeWindow & hits);
   void saveEvents(const std::vector<JPetEvent>& event);
-  std::tuple<int, double, double, double> getStatsPerTHR(const JPetHit& hit, int thrNum);
-  std::tuple<int, double, double, double> getStats(const JPetHit& hit);
-  static double getRawSigBaseTime(const JPetRawSignal& rawSig);
-  void plotOffsetHistograms(const JPetMatrixSignal& mtxSig, std::string side, std::string type);
+  // std::tuple<int, double, double, double> getStatsPerTHR(const JPetHit& hit, int thrNum);
+  // std::tuple<int, double, double, double> getStats(const JPetHit& hit);
+  // static double getRawSigBaseTime(const JPetRawSignal& rawSig);
+  // void plotOffsetHistograms(const JPetMatrixSignal& mtxSig, std::string side, std::string type);
   void initialiseHistograms();
 
   const std::string kUseCorruptedHitsParamKey = "EventFinder_UseCorruptedHits_bool";
   const std::string kEventMinMultiplicity = "EventFinder_MinEventMultiplicity_int";
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
-
-  // scins IDs
-  const std::string kMainScinIDParamKey = "EventFinder_MainScinID_int";
-  const std::string kRefScinIDParamKey = "EventFinder_RefScinID_int";
-
-  // coincidence time cut
   const std::string kEventTimeParamKey = "EventFinder_EventTime_double";
 
   // TOT/multi cut
-  const std::string kToTCutMinParamKey = "EventFinder_ToTCut_Min_double";
-  const std::string kToTCutMaxParamKey = "EventFinder_ToTCut_Max_double";
+  // const std::string kToTCutMinParamKey = "EventFinder_ToTCut_Min_double";
+  // const std::string kToTCutMaxParamKey = "EventFinder_ToTCut_Max_double";
 
   // time walk corrections
-  const std::string kTimeWalkCorrAParamKey = "EventFinder_TimeWalk_A_double";
-  const std::string kTimeWalkCorrBParamKey = "EventFinder_TimeWalk_B_double";
+  // const std::string kTimeWalkCorrAParamKey = "EventFinder_TimeWalk_A_double";
+  // const std::string kTimeWalkCorrBParamKey = "EventFinder_TimeWalk_B_double";
 
   // histogram limits variables
-  const std::string kHistoTDiffMinParamKey = "EventFinder_HistoTDiffMin_double";
-  const std::string kHistoTDiffMaxParamKey = "EventFinder_HistoTDiffMax_double";
-  const std::string kHistoTOTMinParamKey = "EventFinder_HistoTOTOMin_double";
-  const std::string kHistoTOTMaxParamKey = "EventFinder_HistoTOTMax_double";
+  // const std::string kHistoTDiffMinParamKey = "EventFinder_HistoTDiffMin_double";
+  // const std::string kHistoTDiffMaxParamKey = "EventFinder_HistoTDiffMax_double";
+  // const std::string kHistoTOTMinParamKey = "EventFinder_HistoTOTOMin_double";
+  // const std::string kHistoTOTMaxParamKey = "EventFinder_HistoTOTMax_double";
 
-  const std::string kZoomTDiffMinParamKey = "EventFinder_ZoomTDiffMin_double";
-  const std::string kZoomTDiffMaxParamKey = "EventFinder_ZoomTDiffMax_double";
-  const std::string kZoomTOTMinParamKey = "EventFinder_ZoomTOTOMin_double";
-  const std::string kZoomTOTMaxParamKey = "EventFinder_ZoomTOTMax_double";
-  
+  // const std::string kZoomTDiffMinParamKey = "EventFinder_ZoomTDiffMin_double";
+  // const std::string kZoomTDiffMaxParamKey = "EventFinder_ZoomTDiffMax_double";
+  // const std::string kZoomTOTMinParamKey = "EventFinder_ZoomTOTOMin_double";
+  // const std::string kZoomTOTMaxParamKey = "EventFinder_ZoomTOTMax_double";
+
   bool fUseCorruptedHits = false;
   bool fSaveControlHistos = true;
-
-  uint fMainScinID = 213;
-  uint fRefScinID = 201;
-
   double fEventTimeWindow = 5000.0;
 
-  double fTimeWalkAParam = 1.0;
-  double fTimeWalkBParam = 0.0;
+  // double fTimeWalkAParam = 1.0;
+  // double fTimeWalkBParam = 0.0;
+  //
+  // double fHistoTDiffMin = -10000.0;
+  // double fHistoTDiffMax = 10000.0;
+  // double fHistoTOTMin = -0.0002;
+  // double fHistoTOTMax = 0.0002;
+  //
+  // double fZoomTDiffMin = -5000.0;
+  // double fZoomTDiffMax = 5000.0;
+  // double fZoomTOTMin = -0.00001;
+  // double fZoomTOTMax = 0.00001;
 
-  double fHistoTDiffMin = -10000.0;
-  double fHistoTDiffMax = 10000.0;
-  double fHistoTOTMin = -0.0002;
-  double fHistoTOTMax = 0.0002;
-
-  double fZoomTDiffMin = -5000.0;
-  double fZoomTDiffMax = 5000.0;
-  double fZoomTOTMin = -0.00001;
-  double fZoomTOTMax = 0.00001;
-
-  uint fMinMultiplicity = 1;
-
-  // From Signal Transformer
-  const std::string kMergeSignalsTimeParamKey = "SignalTransformer_MergeSignalsTime_double";
-  double fMergingTime = 20000.0;
-
+  unsigned int fMinMultiplicity = 1;
 };
 #endif /* !EVENTFINDER_H */
