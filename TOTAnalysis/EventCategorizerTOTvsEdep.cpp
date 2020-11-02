@@ -15,7 +15,7 @@
 
 #include <JPetAnalysisTools/JPetAnalysisTools.h>
 #include <JPetWriter/JPetWriter.h>
-#include "EventCategorizer.h"
+#include "EventCategorizerTOTvsEdep.h"
 #include <iostream>
 #include <TMath.h>
 #include <fstream>

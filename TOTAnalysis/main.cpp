@@ -19,6 +19,7 @@
 #include "../LargeBarrelAnalysis/SignalFinder.h"
 #include "../LargeBarrelAnalysis/SignalTransformer.h"
 #include "../LargeBarrelAnalysis/TimeWindowCreator.h"
+#include "EventCategorizerTOTvsEdep.h"
 #include <JPetManager/JPetManager.h>
 using namespace std;
 
