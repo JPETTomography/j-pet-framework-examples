@@ -20,6 +20,7 @@ executeCommand "cmake --build ."
 executeCommand "sudo make install"
 executeCommand "cd ../.."
 
+executeCommand "rm -rf build"
 executeCommand "mkdir -p build"
 executeCommand "cd build"
 executeCommand "cmake .."
