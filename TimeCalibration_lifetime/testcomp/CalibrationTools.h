@@ -52,7 +52,8 @@ struct Parameter {
 
 enum Side {
   Right,
-  Left
+  Left,
+  Max
 };
 
 class CalibrationTools {
@@ -72,14 +73,15 @@ public:
   Parameter FindPeak(std::vector<double> Arguments, std::vector<double> Values, unsigned firstPoint, unsigned lastPoint);
   
 private:
-  const std::string kCalibrationOptionKey = "Calibration_option_std::string";
   const std::string kHistoFileSingleKey = "File_with_histos_single_std::string";
   const std::string kHistoFileMultiKey = "File_with_histos_multi_std::string";
   const std::string kHistoOutputFileSingleKey = "File_with_histos_from calibration_single_std::string";
   const std::string kHistoOutputFileMultiKey = "File_with_histos_from calibration_multi_std::string";
   const std::string kConstantsFileSingleKey = "File_with_constants_single_std::string";
+  const std::string kConstantsFileSingleToVelocityKey = "File_with_constants_single_for_velocity_std::string";
   const std::string kConstantsFileMultiKey = "File_with_constants_multi_std::string";
   const std::string kConstantsFileFinalKey = "File_with_constants_final_std::string";
+  const std::string kVelocitiesFileFinalKey = "File_with_velocities_final_std::string";
   const std::string kConstantsOldFileKey = "File_with_old_constants_final_std::string";
   const std::string kHistoNameSingleKey = "Histo_name_pattern_single_std::string";
   const std::string kAnniHistoNameMultiKey = "Annihilation_histo_name_pattern_multi_std::string";
@@ -87,14 +89,17 @@ private:
   const std::string kNumberOfThresholdsKey = "Number_of_thresholds_int";
   const std::string kNumberOfScintillatorsKey = "Number_of_scintillators_int";
   const std::string kNumberOfPointsToFilterKey = "Number_of_points_to_filter_int";
-  const std::string kThresholdForDerivative = "Threshold_for_derivative_int";
+  const std::string kThresholdForDerivativeKey = "Threshold_for_derivative_int";
+  const std::string kEffectiveLengthKey = "Effective_Length_int";
     
   std::string fFileWithParameters = "";
   std::string fCalibrationOption = "";
   std::string fFileWithHistos = "";
   std::string fFileWithHistosOut = "Out.root";
   std::string fFileWithConstants = "";
+  std::string fFileWithVelocities = "";
   std::string fFileWithABParameters = "";
+  std::string fFileWithABParametersToVelocity = "";
   std::string fFileWithPALSParameters = "";
   std::string fOldFileWithConstants = "";
   std::string fHistoNameSingle = "";
@@ -105,11 +110,14 @@ private:
   int fNumberOfPointsToFilter = 6;
   int fThresholdForDerivative = 100;
   int fHalfRangeForExtremumEstimation = 2;
+  int fEffectiveLength = 48; // cm
   std::vector<std::vector<Parameter>> fEdgesA;
   std::vector<std::vector<Parameter>> fEdgesB;
   std::vector<std::vector<Parameter>> fMaxAnnihilation;
   std::vector<std::vector<Parameter>> fMaxDeexcitation;
 };
 
+unsigned FindMaximum(std::vector<double> Values, std::vector<double> Arguments, double minimalArgument, double maximalArgument);
 std::string NumberToChar(double number, int precision);
+std::vector<double> GetParamsFromLine(std::string line);
 #endif /* !CALIBRATIONTOOLS_H */

@@ -15,7 +15,7 @@
 
 #include "CalibrationTools.h"
 
-int main(int argc, char* argv[])
+int main(int argc, char* argv[]) //first argument file with the parameters (default calibParams.json), second calibration option (single, multi or final)
 {
   std::string fileWithParameters = "";
   std::string calibrationOption = "";
@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
   } else {
     // other arguments are obsolete   
   }
-
+  
   CalibrationTools calibTools(fileWithParameters, calibrationOption);
   calibTools.LoadCalibrationParameters();
   calibTools.Calibrate();

@@ -130,9 +130,10 @@ bool CalibrationUnit::init()
   }
   
   double value1, value2, value3, value4;
+  double uncert1, uncert2, uncert3, uncert4;
   std::ifstream TDiffAB_Corr(fABcorrectionFile.c_str());
   if (TDiffAB_Corr.is_open()) {
-    while (TDiffAB_Corr >> value1 >> value2 >> value3 >> value4) {
+    while (TDiffAB_Corr >> value1 >> uncert1 >> value2 >> uncert2 >> value3 >> uncert3 >> value4 >> uncert4) {
       TimeShiftAB_thr1.push_back(value1);
       TimeShiftAB_thr2.push_back(value2);
       TimeShiftAB_thr3.push_back(value3);
@@ -147,8 +148,8 @@ bool CalibrationUnit::init()
   TDiffAB_Corr.close();
   
   std::ifstream PALS_Corr(fPALScorrectionFile.c_str());
-  if (TDiffAB_Corr.is_open()) {
-    while (PALS_Corr >> value1 >> value2 >> value3 >> value4) {
+  if (PALS_Corr.is_open()) {
+    while (PALS_Corr >> value1 >> uncert1 >> value2 >> uncert2 >> value3 >> uncert3 >> value4 >> uncert4) {
       PALSTDiff_thr1.push_back(value1);
       PALSTDiff_thr2.push_back(value2);
       PALSTDiff_thr3.push_back(value3);
