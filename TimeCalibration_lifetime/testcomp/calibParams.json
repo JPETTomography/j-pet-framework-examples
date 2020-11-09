@@ -12,6 +12,7 @@
  "Histo_name_pattern_single_std::string":"TDiff_AB_vs_ID_thr",
  "Annihilation_histo_name_pattern_multi_std::string":"PALS_vs_AnnihilationID_thr",
  "Deexcitation_histo_name_pattern_multi_std::string":"PALS_vs_DeexcitationID_thr",
+ "Save_derivatives_bool":true,
  "Number_of_thresholds_int":"4",
  "Number_of_scintillators_int":"192",
  "Number_of_points_to_filter_int":"6",

@@ -47,6 +47,8 @@ void CalibrationTools::LoadCalibrationParameters()
         fFileWithABParametersToVelocity = temp.get_value<std::string>();
         temp = loadPtreeRoot.get_child(kHistoNameSingleKey);
         fHistoNameSingle = temp.get_value<std::string>();
+        temp = loadPtreeRoot.get_child(kSaveDerivativesKey);
+        fSaveDerivatives = temp.get_value<bool>();
         temp = loadPtreeRoot.get_child(kNumberOfThresholdsKey);
         fNumberOfThresholds = temp.get_value<int>();
         temp = loadPtreeRoot.get_child(kNumberOfScintillatorsKey);
@@ -66,6 +68,8 @@ void CalibrationTools::LoadCalibrationParameters()
         fAnniHistoNameMulti = temp.get_value<std::string>();
         temp = loadPtreeRoot.get_child(kDeexHistoNameMultiKey);
         fDeexHistoNameMulti = temp.get_value<std::string>();
+        temp = loadPtreeRoot.get_child(kSaveDerivativesKey);
+        fSaveDerivatives = temp.get_value<bool>();
         temp = loadPtreeRoot.get_child(kNumberOfThresholdsKey);
         fNumberOfThresholds = temp.get_value<int>();
         temp = loadPtreeRoot.get_child(kNumberOfScintillatorsKey);
@@ -156,10 +160,12 @@ void CalibrationTools::CalibrateSingleModule()
       for (int j=2; j<2+fNumberOfScintillators; j++) {
         iterator++;
         projection_copy = Histos[i]->ProjectionX("_px", j,j);
+        titleOfHistogram = "thr" + std::to_string(i+1) + "_ID_nr" + std::to_string(j-1);
+        
         meanTemp = projection_copy->GetMean(1);
-
-        middleLeft = FindMiddle(projection_copy, meanTemp - 15, meanTemp - 1, iterator, Side::Left);
-        middleRight = FindMiddle(projection_copy, meanTemp + 1, meanTemp + 15, iterator, Side::Right);
+        double maxCounts = projection_copy->GetMaximum();
+        middleLeft = FindMiddle(fileOut, projection_copy, meanTemp - 15, meanTemp - 1, iterator, Side::Left, titleOfHistogram);
+        middleRight = FindMiddle(fileOut, projection_copy, meanTemp + 1, meanTemp + 15, iterator, Side::Right, titleOfHistogram);
 
         tempContainerA.push_back(middleLeft);
         tempContainerB.push_back(middleRight);
@@ -176,7 +182,21 @@ void CalibrationTools::CalibrateSingleModule()
         lat2.SetTextAngle(270.);
         lat2.DrawLatex(middleRight.Value, 1, Form("( %g )", middleRight.Value));
 
-        titleOfHistogram = "thr" + std::to_string(i+1) + "_ID_nr" + std::to_string(j-1);
+        double minArgument = middleLeft.Value;
+        double maxArgument = middleRight.Value;
+        c1 -> Range(minArgument - 5, -0.1*maxCounts, maxArgument + 5, maxCounts + 0.1*maxCounts);
+        TLine* line1 = new TLine(middleLeft.Value, -0.1*maxCounts, middleLeft.Value, maxCounts + 0.1*maxCounts);
+        line1 -> SetLineColor(kBlue);
+        line1 -> SetLineWidth(1);
+        line1 -> SetLineStyle(kDashed);
+        line1 -> Draw();
+        
+        TLine* line2 = new TLine(middleRight.Value, -0.1*maxCounts, middleRight.Value, maxCounts + 0.1*maxCounts);
+        line2 -> SetLineColor(kBlue);
+        line2 -> SetLineWidth(1);
+        line2-> SetLineStyle(kDashed);
+        line2 -> Draw();
+        
         c1 -> Write( titleOfHistogram.c_str() );
       }
       fEdgesA.push_back(tempContainerA);
@@ -260,15 +280,19 @@ void CalibrationTools::CalibrateBetweenModules()
         iterator++;
         projection_copy1 = Histos[i]->ProjectionX("_px", j,j);
         projection_copy2 = Histos[i+1]->ProjectionX("_px", j,j);
+        titleOfHistogram = "thr" + std::to_string(i+1) + "_ID_nr" + std::to_string(j-1);
+
         meanTemp = projection_copy1->GetMean(1);
-        middleAnni = FindMiddle(projection_copy1, meanTemp - 5, meanTemp +5, iterator, Side::Max);
+        middleAnni = FindMiddle(fileOut, projection_copy1, meanTemp - 5, meanTemp + 5, iterator, Side::MaxAnni, titleOfHistogram);
         meanTemp = projection_copy2->GetMean(1);
-        middleDeex = FindMiddle(projection_copy2, meanTemp - 5, meanTemp + 5, iterator, Side::Max);
+        middleDeex = FindMiddle(fileOut, projection_copy2, meanTemp - 5, meanTemp + 5, iterator, Side::MaxDeex, titleOfHistogram);
 
         tempContainerA.push_back(middleAnni);
         tempContainerB.push_back(middleDeex);
 
+        double maxCounts = projection_copy1->GetMaximum();
         if (projection_copy1->GetMaximum() < projection_copy2->GetMaximum()) {
+            maxCounts = projection_copy2->GetMaximum();
             temp_copy = projection_copy1;
             projection_copy1 = projection_copy2;
             projection_copy2 = temp_copy;
@@ -291,7 +315,21 @@ void CalibrationTools::CalibrateBetweenModules()
         lat2.SetTextAngle(270.);
         lat2.DrawLatex(middleDeex.Value, 1, Form("( %g )", middleDeex.Value));
 
-        titleOfHistogram = "thr" + std::to_string(i+1) + "_ID_nr" + std::to_string(j-1);
+        double minArgument = (middleAnni.Value > middleDeex.Value) ? middleDeex.Value : middleAnni.Value;
+        double maxArgument = (middleAnni.Value > middleDeex.Value) ? middleAnni.Value : middleDeex.Value;
+        c1 -> Range(minArgument - 5, -0.1*maxCounts, maxArgument + 5, maxCounts + 0.1*maxCounts);
+        TLine* line1 = new TLine(middleAnni.Value, -0.1*maxCounts, middleAnni.Value, maxCounts + 0.1*maxCounts);
+        line1 -> SetLineColor(kRed);
+        line1 -> SetLineWidth(1);
+        line1 -> SetLineStyle(kDashed);
+        line1 -> Draw();
+        
+        TLine* line2 = new TLine(middleDeex.Value, -0.1*maxCounts, middleDeex.Value, maxCounts + 0.1*maxCounts);
+        line2 -> SetLineColor(kRed);
+        line2 -> SetLineWidth(1);
+        line2 -> SetLineStyle(kDashed);
+        line2 -> Draw();
+        
         c1 -> Write( titleOfHistogram.c_str() );
       }
       fMaxAnnihilation.push_back(tempContainerA);
@@ -515,7 +553,8 @@ void CalibrationTools::GenerateCalibrationFile()
   CalibrationFileVelocity.close();
 }
 
-Parameter CalibrationTools::FindMiddle(TH1D* histo, double firstBinCenter, double lastBinCenter, unsigned iterator, Side side)
+Parameter CalibrationTools::FindMiddle(TFile* output, TH1D* histo, double firstBinCenter, double lastBinCenter, 
+                                                                    unsigned iterator, Side side, std::string titleOfHistogram)
 {
   int filterHalf = (int)(fNumberOfPointsToFilter/2);
   std::vector<double> Values, Arguments, temp;
@@ -543,11 +582,31 @@ Parameter CalibrationTools::FindMiddle(TH1D* histo, double firstBinCenter, doubl
     FirstDerivative.push_back(Values[i+1] - Values[i]);
   }
   unsigned firstEstimationForExtremumBin;
-  if (side == Side::Max) {
+  if (side == Side::MaxAnni || side == Side::MaxDeex) {
     firstEstimationForExtremumBin = FindMaximum(Values, Arguments, firstBinCenter, lastBinCenter);
+    double argumentShift = Arguments[firstEstimationForExtremumBin+1] - Arguments[firstEstimationForExtremumBin];
     Parameter finalEstimatioOfExtremum = FindPeak(Arguments, FirstDerivative, 
                                              firstEstimationForExtremumBin-5, firstEstimationForExtremumBin+5);
-    finalEstimatioOfExtremum.Value = finalEstimatioOfExtremum.Value;
+    finalEstimatioOfExtremum.Value = finalEstimatioOfExtremum.Value - argumentShift;
+    
+    if (fSaveDerivatives) {
+      std::string sideToTitle = (side == Side::MaxAnni) ? "anni" : "deex";
+      TGraph *firstDerivative = new TGraph(FirstDerivative.size());
+      for (unsigned i=0; i<FirstDerivative.size(); i++) {
+        if ((int)i < 2*filterHalf || (int)i > (int)FirstDerivative.size() - 2*filterHalf - 1) {
+          firstDerivative -> SetPoint(i, Arguments[i] - argumentShift, 0);
+        }
+        else {
+          firstDerivative -> SetPoint(i, Arguments[i] - argumentShift, FirstDerivative[i]);
+        }
+      }
+      firstDerivative -> GetXaxis() -> SetTitle("TDiff_B-A [ns]");
+      firstDerivative -> GetYaxis() -> SetTitle("First Derrivative");
+      firstDerivative -> SetMarkerStyle(20);
+      output -> cd();
+      firstDerivative -> Write((titleOfHistogram + "_firstDerivative_" + sideToTitle).c_str());
+    }
+    
     return finalEstimatioOfExtremum;
   } else {
     firstEstimationForExtremumBin = FindExtremum(FirstDerivative, filterHalf, fNumberOfPointsToFilter, side);
@@ -556,10 +615,37 @@ Parameter CalibrationTools::FindMiddle(TH1D* histo, double firstBinCenter, doubl
     for( unsigned i=0; i<FirstDerivative.size()-1; i++ ) {
       SecondDerivative.push_back(FirstDerivative[i+1] - FirstDerivative[i]);
     }
+    
+    double argumentShift = Arguments[firstEstimationForExtremumBin+1] - Arguments[firstEstimationForExtremumBin];
+
+    if (fSaveDerivatives) {;
+      std::string sideToTitle = (side == Side::Right) ? "right" : "left";
+      TGraph *firstDerivative = new TGraph(FirstDerivative.size());
+      TGraph *secondDerivative = new TGraph(SecondDerivative.size());
+      for (unsigned i=0; i<FirstDerivative.size(); i++) {
+        if ((int)i < 2*filterHalf || (int)i > (int)FirstDerivative.size() - 2*filterHalf - 1) {
+          firstDerivative -> SetPoint(i, Arguments[i] - argumentShift, 0);
+          secondDerivative -> SetPoint(i, Arguments[i] - 2*argumentShift, 0);
+        }
+        else {
+          firstDerivative -> SetPoint(i, Arguments[i] - argumentShift, FirstDerivative[i]);
+          secondDerivative -> SetPoint(i, Arguments[i] - 2*argumentShift, SecondDerivative[i]);
+        }
+      }
+      firstDerivative -> GetXaxis() -> SetTitle("TDiff_B-A [ns]");
+      firstDerivative -> GetYaxis() -> SetTitle("First Derrivative");
+      firstDerivative -> SetMarkerStyle(20);
+      secondDerivative -> GetXaxis() -> SetTitle("TDiff_B-A [ns]");
+      secondDerivative -> GetYaxis() -> SetTitle("Second Derrivative");
+      secondDerivative -> SetMarkerStyle(20);
+      output -> cd();
+      firstDerivative -> Write((titleOfHistogram + "_firstDerivative_" + sideToTitle).c_str());
+      secondDerivative -> Write((titleOfHistogram + "_secondDerivative_" + sideToTitle).c_str());
+    }
+
     Parameter finalEstimatioOfExtremum = FindPeak(Arguments, SecondDerivative, 
                                              firstEstimationForExtremumBin-5, firstEstimationForExtremumBin+5);
-    finalEstimatioOfExtremum.Value = finalEstimatioOfExtremum.Value - 
-                                    2*(Arguments[firstEstimationForExtremumBin+1] - Arguments[firstEstimationForExtremumBin]);
+    finalEstimatioOfExtremum.Value = finalEstimatioOfExtremum.Value - 2*argumentShift;
     return finalEstimatioOfExtremum;
   }
 }
@@ -572,19 +658,20 @@ unsigned CalibrationTools::FindExtremum(std::vector<double> Vector, int filterHa
   while (sideParameter*Vector[firstPoint] < fThresholdForDerivative && firstPoint < Vector.size() && firstPoint > 0) {
     firstPoint += sideParameter;
   }
+  
   double mean = 0, previousMean = 0;;
   for (int i=0; i<(filterHalf<(int)Vector.size() ? filterHalf : (int)Vector.size()); i++) {
     mean += Vector[firstPoint + sideParameter*i];
   }
   previousMean = mean + sideParameter;
-  int iterator = firstPoint + sideParameter*fHalfRangeForExtremumEstimation;
+  int iterator = firstPoint - sideParameter*fHalfRangeForExtremumEstimation;
   while ( ( (mean < previousMean && sideParameter == 1) || (mean > previousMean && sideParameter == -1))
                                         && iterator+fHalfRangeForExtremumEstimation < (int)Vector.size() 
                                                 && iterator > fHalfRangeForExtremumEstimation) {
     previousMean = mean;
     for (int k=1; k<=fHalfRangeForExtremumEstimation; k++) {
-      mean += -1*sideParameter*Vector[iterator-k];
-      mean += sideParameter*Vector[iterator+k];
+      mean += sideParameter*Vector[iterator-k];
+      mean += -1*sideParameter*Vector[iterator+k];
     }
     extremum = iterator;
     iterator += sideParameter*fHalfRangeForExtremumEstimation;
@@ -603,7 +690,6 @@ Parameter CalibrationTools::FindPeak(std::vector<double> Arguments, std::vector<
     X += Arguments[k];
     Y += Values[k];
   }
-
   double a = (size*XY-X*Y) / (size*XX - X*X);
   double b = (Y-a*X)/size;
   Parameter peak = {0., 0.};
@@ -648,6 +734,8 @@ std::vector<double> GetParamsFromLine(std::string line)
 		ParametersLine.push_back(0.);
 	}
 	std::istringstream StringToNumbers(line);
-	StringToNumbers >> ParametersLine.at(0) >> ParametersLine.at(1) >> sideTemp >> ParametersLine.at(2) >> ParametersLine.at(3) >> ParametersLine.at(4) >> ParametersLine.at(5) >> ParametersLine.at(6) >> ParametersLine.at(7) >> ParametersLine.at(8) >> ParametersLine.at(9) >> ParametersLine.at(10);
+	StringToNumbers >> ParametersLine.at(0) >> ParametersLine.at(1) >> sideTemp >> ParametersLine.at(2) >> ParametersLine.at(3) >> 
+                        ParametersLine.at(4) >> ParametersLine.at(5) >> ParametersLine.at(6) >> ParametersLine.at(7) >> 
+                        ParametersLine.at(8) >> ParametersLine.at(9) >> ParametersLine.at(10);
 	return ParametersLine;
 }

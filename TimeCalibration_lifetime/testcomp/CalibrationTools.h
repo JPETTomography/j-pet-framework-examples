@@ -28,6 +28,7 @@
 #include <TROOT.h>
 #include <TAxis.h>
 #include <TFile.h>
+#include <TLine.h>
 #include <TH2F.h>
 #include <TH1F.h>
 #include <TF12.h>
@@ -53,7 +54,8 @@ struct Parameter {
 enum Side {
   Right,
   Left,
-  Max
+  MaxAnni,
+  MaxDeex
 };
 
 class CalibrationTools {
@@ -67,8 +69,8 @@ public:
   void CalibrateBetweenModules();
   void GenerateCalibrationFile();
   
-  Parameter FindMiddle(TH1D* histo, double firstBinCenter, double lastBinCenter, 
-                       unsigned iterator, Side side);
+  Parameter FindMiddle(TFile* output, TH1D* histo, double firstBinCenter, double lastBinCenter, 
+                       unsigned iterator, Side side, std::string titleOfHistogram);
   unsigned FindExtremum(std::vector<double> Vector, int filterHalf, unsigned shiftFromFilterHalf, Side side);
   Parameter FindPeak(std::vector<double> Arguments, std::vector<double> Values, unsigned firstPoint, unsigned lastPoint);
   
@@ -86,6 +88,7 @@ private:
   const std::string kHistoNameSingleKey = "Histo_name_pattern_single_std::string";
   const std::string kAnniHistoNameMultiKey = "Annihilation_histo_name_pattern_multi_std::string";
   const std::string kDeexHistoNameMultiKey = "Deexcitation_histo_name_pattern_multi_std::string";
+  const std::string kSaveDerivativesKey = "Save_derivatives_bool";
   const std::string kNumberOfThresholdsKey = "Number_of_thresholds_int";
   const std::string kNumberOfScintillatorsKey = "Number_of_scintillators_int";
   const std::string kNumberOfPointsToFilterKey = "Number_of_points_to_filter_int";
@@ -105,6 +108,7 @@ private:
   std::string fHistoNameSingle = "";
   std::string fAnniHistoNameMulti = "";
   std::string fDeexHistoNameMulti = "";
+  bool fSaveDerivatives = true;
   int fNumberOfThresholds = 4;
   int fNumberOfScintillators = 192;
   int fNumberOfPointsToFilter = 6;
