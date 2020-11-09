@@ -17,4 +17,13 @@
  "HitFinder_UseCorruptedSignals_bool":true,
  "HitFinder_RefDetScinID_int":"193",
  "HitFinder_TOTCalculationType_std::string":"standard",
+ "CalibrationUnit_Anni_TOT_Cut_Min_float":"23000",
+ "CalibrationUnit_Anni_TOT_Cut_Max_float":"30000",
+ "CalibrationUnit_Deex_TOT_Cut_Min_float":"35000",
+ "CalibrationUnit_Dee_TOT_Cut_Max_float":"50000",
+ "CalibrationUnit_ZpositionCut_float":"23",
+ "CalibrationUnit_EffectiveLength_float":"48",
+ "CalibrationUnit_SourcePosition_std::vector<double>":[0.0, 0.0, 0.0],
+ "CalibrationUnit_AB_Corrections":"AB_Corrections.dat",
+ "CalibrationUnit_PALS_Corrections":"PALS_Corrections.dat"
 }

@@ -43,7 +43,7 @@ SignalFinder_LeadTrailMaxTime_float
 Leading and Trailing edge. Default value: 25 000 ps.
 
 SignalFinder_UseCorruptedSigCh_bool
----Indication if Signal Finder module should use signal channels flagged as Corrupted in the previous task.
+--- Indication if Signal Finder module should use signal channels flagged as Corrupted in the previous task.
 Default value: false
 
 HitFinder_VelocityFile_std::string
@@ -58,6 +58,42 @@ HitFinder_RefDetScinID_int
 --- ID of Reference Detector Scintillator, needed for creating reference hits.
 --- The only value  used so far: 193
 
-HitFinder_UseCorruptedSignals_bool  
+HitFinder_UseCorruptedSignals_bool
 --- Indication if Hit Finder module should use signals flagged as Corrupted in the previous task.
 --- Default value: `false`
+
+CalibrationUnit_Anni_TOT_Cut_Min_float
+--- minimal TOT for the hit that come from the annihilation of the positron-electron
+--- Default value: 23 000 ps
+
+CalibrationUnit_Anni_TOT_Cut_Max_float
+--- maximal TOT for the hit that come from the annihilation of the positron-electron
+--- Default value: 30 000 ps
+
+CalibrationUnit_Deex_TOT_Cut_Min_float
+--- minimal TOT for the hit that come from the deexcitation of the source
+--- Default value: 35 000 ps
+
+CalibrationUnit_Dee_TOT_Cut_Max_float
+--- maximal TOT for the hit that come from the deexcitation of the source
+--- Default value: 35 000 ps
+
+CalibrationUnit_ZpositionCut_float
+--- maximal Z position accepted for a hit
+--- Default value: 23 cm
+
+CalibrationUnit_EffectiveLength_float
+--- effective length assumed for a first threshold
+--- Default value: 48 cm
+
+CalibrationUnit_SourcePosition_TVector3
+--- Assumed position of the source
+--- Default value: 0, 0, 0 cm3
+
+CalibrationUnit_AB_Corrections
+--- File with the time correction spearately for every scintillator. If there is none, no corrections will be applied
+--- Default value: AB_Corrections.dat
+
+CalibrationUnit_PALS_Corrections
+--- File with the time correction between scintillators. If there is none, no corrections will be applied
+--- Default value: PALS_Corrections.dat

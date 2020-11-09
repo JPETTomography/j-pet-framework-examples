@@ -65,9 +65,9 @@ protected:
 	const std::string kDeexTOTCutMaxParamKey = "CalibrationUnit_Dee_TOT_Cut_Max_float";
     const std::string kZpositionCut = "CalibrationUnit_ZpositionCut_float";
     const std::string kEffectiveLength = "CalibrationUnit_EffectiveLength_float";
-    const std::string kSourcePosition = "CalibrationUnit_SourcePosition_TVector3";
-    const std::string kABcorrectionFile = "AB_Corrections";
-    const std::string kPALScorrectionFile = "PALS_Corrections";
+    const std::string kSourcePosition = "CalibrationUnit_SourcePosition_std::vector<double>";
+    const std::string kABcorrectionFile = "CalibrationUnit_AB_Corrections";
+    const std::string kPALScorrectionFile = "CalibrationUnit_PALS_Corrections";
 	void saveEvents(const std::vector<JPetEvent>& event);
 	bool fSaveControlHistos = true;
     std::string fTOTCalculationType = "";
