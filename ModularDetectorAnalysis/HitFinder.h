@@ -16,6 +16,8 @@
 #ifndef HITFINDER1_H
 #define HITFINDER1_H
 
+#include <boost/property_tree/ptree.hpp>
+
 #include <JPetMatrixSignal/JPetMatrixSignal.h>
 #include <JPetUserTask/JPetUserTask.h>
 #include <JPetHit/JPetHit.h>
@@ -48,13 +50,14 @@ protected:
   void saveHits(const std::vector<JPetHit>& hits);
   void initialiseHistograms();
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
+  const std::string kCalibBankFileParamKey = "CalibBank_FileName_std::string";
+  const std::string kSaveCalibHistosParamKey = "Save_Calib_Histograms_bool";
+  const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
   const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_double";
+  boost::property_tree::ptree fConstansTree;
   bool fSaveControlHistos = true;
+  bool fSaveCalibHistos = false;
   double fABTimeDiff = 10000.0;
-  
-  // const std::string kOffestsFileParamKey = "ScinsOffsets_File_std::string";
-  // const std::string kScinCalibFileParamKey = "ScinsCalib_std::string";
-  // std::string fOffsetsFile = "";
 };
 
 #endif /* !HITFINDER1_H */

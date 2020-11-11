@@ -34,21 +34,13 @@ using namespace std;
  */
 vector<JPetSigCh> TimeWindowCreatorTools::buildSigChs(
   TDCChannel* tdcChannel, const JPetChannel& channel, double maxTime, double minTime,
-  boost::property_tree::ptree& siPMCalib, boost::property_tree::ptree& scinCalib
+  boost::property_tree::ptree& calibTree
 ){
   vector<JPetSigCh> allSigChs;
 
-  // Getting offsets for this channel -
+  // Getting offsets for this channel
   // if calibrations are empty then default vaule is 0.0
-  double siPMOffset = siPMCalib.get("sipm_offsets."+to_string(channel.getPM().getID()), 0.0);
-  double scinOffset = scinCalib.get("scin_offsets."+to_string(channel.getPM().getScin().getID()), 0.0);
-
-  double offset = 0.0;
-  if(channel.getPM().getSide()==JPetPM::SideB){
-    offset = siPMOffset+scinOffset;
-  } else {
-    offset = siPMOffset;
-  }
+  double offset = calibTree.get("sipm_offsets."+to_string(channel.getPM().getID()), 0.0);
 
   // Loop over all entries on leading edge in current TDCChannel and create SigCh
   for (int j = 0; j < tdcChannel->GetLeadHitsNum(); j++) {

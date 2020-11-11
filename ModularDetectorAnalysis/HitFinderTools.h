@@ -16,6 +16,8 @@
 #ifndef HITFINDERTOOLS_H
 #define HITFINDERTOOLS_H
 
+#include <boost/property_tree/ptree.hpp>
+
 #include <JPetMatrixSignal/JPetMatrixSignal.h>
 #include <JPetStatistics/JPetStatistics.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
@@ -25,29 +27,31 @@
 /**
  * @brief Tools set fot HitFinder module
  *
- * Tols include methods of signal mapping and matching,
- * helpers of sorting, radian check and methods for reference detecctor
- *
+ * Tols include methods of signal mapping and matching, helpers of sorting
  */
 class HitFinderTools
 {
 public:
   static void sortByTime(std::vector<JPetMatrixSignal>& signals);
-  static std::map<int, std::vector<JPetMatrixSignal>> getSignalsByScin(
-    const JPetTimeWindow* timeWindow
-  );
+
+  static std::map<int, std::vector<JPetMatrixSignal>> getSignalsByScin(const JPetTimeWindow* timeWindow);
+
   static std::vector<JPetHit> matchAllSignals(
     std::map<int, std::vector<JPetMatrixSignal>>& allSignals, double timeDiffAB,
-    int refDetScinID, JPetStatistics& stats, bool saveHistos
+    boost::property_tree::ptree& calibTree, JPetStatistics& stats, bool saveHistos
   );
+
   static std::vector<JPetHit> matchSignals(
     std::vector<JPetMatrixSignal>& scinSignals, double timeDiffAB,
-    JPetStatistics& stats, bool saveHistos
+    boost::property_tree::ptree& calibTree, JPetStatistics& stats, bool saveHistos
   );
+
   static JPetHit createHit(
-    const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2
+    const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2, double velocity, double tofCorrection
   );
-  static JPetHit createDummyRefDetHit(const JPetMatrixSignal& signal);
+
+  static JPetHit createDummyHit(const JPetMatrixSignal& signal);
+
   static double calculateTOT(JPetHit& hit);
 };
 

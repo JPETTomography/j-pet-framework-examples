@@ -65,22 +65,12 @@ map<int, vector<JPetMatrixSignal>> HitFinderTools::getSignalsByScin(
  */
 vector<JPetHit> HitFinderTools::matchAllSignals(
   map<int, vector<JPetMatrixSignal>>& allSignals, double timeDiffAB,
-  int refDetScinID, JPetStatistics& stats, bool saveHistos
+  boost::property_tree::ptree& calibTree, JPetStatistics& stats, bool saveHistos
 ) {
   vector<JPetHit> allHits;
-  vector<JPetHit> refHits;
   for (auto& scinSigals : allSignals) {
-    // Loop for Reference Detector ID
-    if (scinSigals.first == refDetScinID) {
-      for (auto refSignal : scinSigals.second) {
-        auto refHit = createDummyRefDetHit(refSignal);
-        refHits.push_back(refHit);
-      }
-      allHits.insert(allHits.end(), refHits.begin(), refHits.end());
-      continue;
-    }
     // Match signals for scintillators
-    auto scinHits = matchSignals(scinSigals.second, timeDiffAB, stats, saveHistos);
+    auto scinHits = matchSignals(scinSigals.second, timeDiffAB, calibTree, stats, saveHistos);
     allHits.insert(allHits.end(), scinHits.begin(), scinHits.end());
   }
   return allHits;
@@ -90,26 +80,36 @@ vector<JPetHit> HitFinderTools::matchAllSignals(
  * Method matching signals on the same Scintillator
  */
 vector<JPetHit> HitFinderTools::matchSignals(
-  vector<JPetMatrixSignal>& scinSigals, double timeDiffAB,
+  vector<JPetMatrixSignal>& scinSigals, double timeDiffAB, boost::property_tree::ptree& calibTree,
   JPetStatistics& stats, bool saveHistos
 ) {
   vector<JPetHit> scinHits;
   vector<JPetMatrixSignal> remainSignals;
   sortByTime(scinSigals);
+
   while (scinSigals.size() > 0) {
     auto mtxSig = scinSigals.at(0);
     if(scinSigals.size() == 1) {
       remainSignals.push_back(mtxSig);
       break;
     }
+
     for (unsigned int j = 1; j < scinSigals.size(); j++) {
       if (scinSigals.at(j).getTime() - mtxSig.getTime() < timeDiffAB) {
         if (mtxSig.getPM().getSide() != scinSigals.at(j).getPM().getSide()) {
-          auto hit = createHit(mtxSig, scinSigals.at(j));
+
+          // Getting constants for this scintillator
+          // If a calibration is empty, then a constant vaule is 0.0
+          double velocity = calibTree.get("eff_velocity."+to_string(mtxSig.getPM().getScin().getID()), 0.0);
+          double tofCorrection = calibTree.get("tof_correction."+to_string(mtxSig.getPM().getScin().getID()), 0.0);
+
+          auto hit = createHit(mtxSig, scinSigals.at(j), velocity, tofCorrection);
+
           scinHits.push_back(hit);
           scinSigals.erase(scinSigals.begin() + j);
           scinSigals.erase(scinSigals.begin() + 0);
           break;
+
         } else {
           if (j == scinSigals.size() - 1) {
             remainSignals.push_back(mtxSig);
@@ -130,8 +130,7 @@ vector<JPetHit> HitFinderTools::matchSignals(
     }
   }
   if(remainSignals.size()>0 && saveHistos){
-    stats.getHisto1D("remain_signals_scin")
-      ->Fill((double)(remainSignals.at(0).getPM().getScin().getID()), remainSignals.size());
+    stats.getHisto1D("remain_signals_scin")->Fill((double)(remainSignals.at(0).getPM().getScin().getID()), remainSignals.size());
   }
   return scinHits;
 }
@@ -140,7 +139,7 @@ vector<JPetHit> HitFinderTools::matchSignals(
  * Method for Hit creation - setting all fields that make sense here
  */
 JPetHit HitFinderTools::createHit(
-  const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2
+  const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2, double velocity, double tofCorrection
 ) {
   JPetMatrixSignal signalA;
   JPetMatrixSignal signalB;
@@ -155,7 +154,7 @@ JPetHit HitFinderTools::createHit(
 
   JPetHit hit;
   hit.setSignals(signalA, signalB);
-  hit.setTime((signalA.getTime() + signalB.getTime()) / 2.0);
+  hit.setTime(((signalA.getTime() + signalB.getTime()) / 2.0) - tofCorrection);
   hit.setQualityOfTime(-1.0);
   hit.setTimeDiff(signalB.getTime() - signalA.getTime());
   hit.setQualityOfTimeDiff(-1.0);
@@ -165,18 +164,16 @@ JPetHit HitFinderTools::createHit(
   hit.setQualityOfEnergy(signalA.getRawSignals().size()+signalB.getRawSignals().size());
   hit.setPosX(signalA.getPM().getScin().getCenterX());
   hit.setPosY(signalA.getPM().getScin().getCenterY());
-  // Hardcoded velocity = 11 ns/cm
-  hit.setPosZ(11.0 * hit.getTimeDiff() / 2000.0);
+  hit.setPosZ(velocity * hit.getTimeDiff() / 2000.0);
   hit.setScin(signalA.getPM().getScin());
 
   return hit;
 }
 
 /**
- * Method for Hit creation in case of reference detector.
- * Setting only some necessary fields.
+ * Method for a dummy Hit creation, setting only some necessary fields.
  */
-JPetHit HitFinderTools::createDummyRefDetHit(const JPetMatrixSignal& signal)
+JPetHit HitFinderTools::createDummyHit(const JPetMatrixSignal& signal)
 {
   JPetHit hit;
   JPetMatrixSignal dummy;

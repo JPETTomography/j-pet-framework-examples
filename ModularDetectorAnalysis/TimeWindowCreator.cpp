@@ -37,37 +37,27 @@ bool TimeWindowCreator::init()
   fOutputEvents = new JPetTimeWindow("JPetSigCh");
 
   // Reading values from the user options if available
-  // Min allowed signal time
+  // Min and max allowed signal time
   if (isOptionSet(fParams.getOptions(), kMinTimeParamKey)) {
     fMinTime = getOptionAsDouble(fParams.getOptions(), kMinTimeParamKey);
   } else {
-    WARNING(
-      Form("No value of the %s parameter provided by the user. Using default value of %lf.",
-        kMinTimeParamKey.c_str(), fMinTime
-      )
-    );
+    WARNING(Form(
+      "No value of the %s parameter provided by the user. Using default value of %lf.",
+      kMinTimeParamKey.c_str(), fMinTime
+    ));
   }
-  // Max allowed signal time
   if (isOptionSet(fParams.getOptions(), kMaxTimeParamKey)) {
     fMaxTime = getOptionAsDouble(fParams.getOptions(), kMaxTimeParamKey);
   } else {
-    WARNING(
-      Form("No value of the %s parameter provided by the user. Using default value of %lf.",
-        kMaxTimeParamKey.c_str(), fMaxTime
-      )
-    );
+    WARNING(Form(
+      "No value of the %s parameter provided by the user. Using default value of %lf.",
+      kMaxTimeParamKey.c_str(), fMaxTime
+    ));
   }
 
   // Reading file with offsets to property tree - SiPM calibration per matrix
-  if (isOptionSet(fParams.getOptions(), kSiPMCalibFileParamKey)) {
-    auto siPMCalibFileName = getOptionAsString(fParams.getOptions(), kSiPMCalibFileParamKey);
-    pt::read_json(siPMCalibFileName, fSiPMCalibTree);
-  }
-
-  // Reading file with offsets to property tree - synchronization of scintillators
-  if (isOptionSet(fParams.getOptions(), kScinCalibFileParamKey)) {
-    auto scinCalibFileName = getOptionAsString(fParams.getOptions(), kScinCalibFileParamKey);
-    pt::read_json(scinCalibFileName, fScinCalibTree);
+  if (isOptionSet(fParams.getOptions(), kConstantsFileParamKey)) {
+    pt::read_json(getOptionAsString(fParams.getOptions(), kConstantsFileParamKey), fConstansTree);
   }
 
   // Getting bool for saving histograms
@@ -106,9 +96,7 @@ bool TimeWindowCreator::exec()
       auto& channel = getParamBank().getChannel(channelNumber);
 
       // Building Signal Channels for this Channel
-      auto allSigChs = TimeWindowCreatorTools::buildSigChs(
-        tdcChannel, channel, fMaxTime, fMinTime, fSiPMCalibTree, fScinCalibTree
-      );
+      auto allSigChs = TimeWindowCreatorTools::buildSigChs(tdcChannel, channel, fMaxTime, fMinTime, fConstansTree);
 
       // Sort Signal Channels in time
       TimeWindowCreatorTools::sortByTime(allSigChs);
@@ -144,7 +132,6 @@ void TimeWindowCreator::saveSigChs(const vector<JPetSigCh>& sigChVec)
       if(fSaveControlHistos){
         if(gRandom->Uniform()<fScalingFactor){
           getStatistics().getHisto1D("channel_occ")->Fill(sigCh.getChannel().getID());
-          getStatistics().getHisto1D("channel_thrnum")->Fill(sigCh.getChannel().getThresholdNumber());
           if(sigCh.getRecoFlag() == JPetSigCh::Good){
             getStatistics().getHisto1D("filter_sigch")->Fill(1);
           } else if(sigCh.getRecoFlag() == JPetSigCh::Corrupted) {
@@ -197,12 +184,6 @@ void TimeWindowCreator::initialiseHistograms(){
   ));
   getStatistics().getHisto1D("channel_occ")->GetXaxis()->SetTitle("Channel ID");
   getStatistics().getHisto1D("channel_occ")->GetYaxis()->SetTitle("Number of SigCh");
-
-  getStatistics().createHistogram(
-    new TH1F("channel_thrnum", "Channels threshold numbers (downscaled)", 4, 0.5, 4.5)
-  );
-  getStatistics().getHisto1D("channel_thrnum")->GetXaxis()->SetTitle("Channel Threshold Number");
-  getStatistics().getHisto1D("channel_thrnum")->GetYaxis()->SetTitle("Number of SigCh");
 
   // Flagging histograms
   getStatistics().createHistogram(new TH1F(

@@ -68,16 +68,13 @@ SignalTransformerTools::getRawSigMtxMap(const JPetTimeWindow* timeWindow)
  * calling merging procedure for each
  */
 vector<JPetMatrixSignal> SignalTransformerTools::mergeSignalsAllSiPMs(
-   map<int, vector<vector<JPetRawSignal>>>& rawSigMtxMap,
-   double mergingTime
+   map<int, vector<vector<JPetRawSignal>>>& rawSigMtxMap, double mergingTime, boost::property_tree::ptree& calibTree
 ) {
   vector<JPetMatrixSignal> allMtxSignals;
   // Iterating over whole map
   for (auto& rawSigScin : rawSigMtxMap) {
     for (auto& rawSigSide : rawSigScin.second){
-      auto mtxSignals = mergeRawSignalsOnSide(
-        rawSigSide, mergingTime
-      );
+      auto mtxSignals = mergeRawSignalsOnSide(rawSigSide, mergingTime, calibTree);
       allMtxSignals.insert(allMtxSignals.end(), mtxSignals.begin(), mtxSignals.end());
     }
   }
@@ -89,7 +86,7 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeSignalsAllSiPMs(
  * matching them into groups on max. 4 as a MatrixSignal
  */
 vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(
-  vector<JPetRawSignal>& rawSigVec, double mergingTime
+  vector<JPetRawSignal>& rawSigVec, double mergingTime, boost::property_tree::ptree& calibTree
 ) {
   vector<JPetMatrixSignal> mtxSigVec;
   sortByTime(rawSigVec);
@@ -128,7 +125,15 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(
         break;
       }
     }
-    mtxSig.setTime(calculateAverageTime(mtxSig));
+
+    // Getting offsets for this scintillator - applying only to Side B signals
+    // If signal is from Side A or calibration is empty, then a correction vaule is 0.0
+    double correction = 0.0;
+    if(mtxSig.getPM().getSide()==JPetPM::SideB){
+      correction = calibTree.get("ab_corrections."+to_string(mtxSig.getPM().getScin().getID()), 0.0);
+    }
+
+    mtxSig.setTime(calculateAverageTime(mtxSig)-correction);
     rawSigVec.erase(rawSigVec.begin());
     mtxSigVec.push_back(mtxSig);
   }

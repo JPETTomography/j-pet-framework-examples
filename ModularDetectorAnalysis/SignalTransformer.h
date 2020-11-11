@@ -16,6 +16,8 @@
 #ifndef SIGNALTRANSFORMER_H
 #define SIGNALTRANSFORMER_H
 
+#include <boost/property_tree/ptree.hpp>
+
 #include "JPetMatrixSignal/JPetMatrixSignal.h"
 #include "JPetUserTask/JPetUserTask.h"
 #include <vector>
@@ -42,14 +44,15 @@ public:
 protected:
 	const std::string kMergeSignalsTimeParamKey = "SignalTransformer_MergeSignalsTime_double";
 	const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
-	// const std::string kOffestsFileParamKey = "SiPMsOffsets_File_std::string";
-	// const std::string kSiPMCalibFileParamKey = "SiPMsCalib_std::string";
-
+	const std::string kCalibBankFileParamKey = "CalibBank_FileName_std::string";
+	const std::string kSaveCalibHistosParamKey = "Save_Calib_Histograms_bool";
+	const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
 	void saveMatrixSignals(const std::vector<JPetMatrixSignal>& mtxSigVec);
+	boost::property_tree::ptree fConstansTree;
 	void initialiseHistograms();
 	bool fSaveControlHistos = true;
+	bool fSaveCalibHistos = false;
 	double fMergingTime = 20000.0;
-	// std::string fOffsetsFile = "";
 };
 
 #endif /* !SIGNALTRANSFORMER_H */

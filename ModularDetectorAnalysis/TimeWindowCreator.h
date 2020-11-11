@@ -56,13 +56,11 @@ protected:
 	const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
 	const std::string kMaxTimeParamKey = "TimeWindowCreator_MaxTime_double";
 	const std::string kMinTimeParamKey = "TimeWindowCreator_MinTime_double";
-	const std::string kSiPMCalibFileParamKey = "SiPMsCalib_std::string";
-	const std::string kScinCalibFileParamKey = "ScinsCalib_std::string";
+	const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
+	boost::property_tree::ptree fConstansTree;
 	bool fSaveControlHistos = true;
 	double fMinTime = 0.0;
 	double fMaxTime = 1.e6;
-	boost::property_tree::ptree fSiPMCalibTree;
-	boost::property_tree::ptree fScinCalibTree;
 	// Number for scaling some histograms, so they are not reaching their memory capacity
 	double fScalingFactor = 0.001;
 

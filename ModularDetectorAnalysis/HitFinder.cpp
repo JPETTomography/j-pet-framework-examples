@@ -13,14 +13,11 @@
  *  @file HitFinder.cpp
  */
 
-using namespace std;
-
 #include <JPetAnalysisTools/JPetAnalysisTools.h>
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include <JPetWriter/JPetWriter.h>
 
 #include <boost/property_tree/json_parser.hpp>
-#include <boost/property_tree/ptree.hpp>
 
 #include "HitFinderTools.h"
 #include "HitFinder.h"
@@ -40,6 +37,19 @@ bool HitFinder::init()
   fOutputEvents = new JPetTimeWindow("JPetHit");
 
   // Reading values from the user options if available
+  // Getting bools for saving control and calibration histograms
+  if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey)) {
+    fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
+  }
+  if (isOptionSet(fParams.getOptions(), kSaveCalibHistosParamKey)) {
+    fSaveCalibHistos = getOptionAsBool(fParams.getOptions(), kSaveCalibHistosParamKey);
+  }
+
+  // Reading file with effective light velocit and TOF synchronization constants to property tree
+  if (isOptionSet(fParams.getOptions(), kConstantsFileParamKey)) {
+    boost::property_tree::read_json(getOptionAsString(fParams.getOptions(), kConstantsFileParamKey), fConstansTree);
+  }
+
   // Allowed time difference between signals on A and B sides
   if (isOptionSet(fParams.getOptions(), kABTimeDiffParamKey)) {
     fABTimeDiff = getOptionAsDouble(fParams.getOptions(), kABTimeDiffParamKey);
@@ -48,10 +58,6 @@ bool HitFinder::init()
       "No value of the %s parameter provided by the user. Using default value of %lf.",
       kABTimeDiffParamKey.c_str(), fABTimeDiff
     ));
-  }
-  // Getting bool for saving histograms
-  if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey)) {
-    fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
   }
 
   // Control histograms
@@ -65,7 +71,7 @@ bool HitFinder::exec()
   if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
     auto signalsBySlot = HitFinderTools::getSignalsByScin(timeWindow);
     auto allHits = HitFinderTools::matchAllSignals(
-      signalsBySlot, fABTimeDiff, -1, getStatistics(), fSaveControlHistos
+      signalsBySlot, fABTimeDiff, fConstansTree, getStatistics(), fSaveControlHistos
     );
     if(allHits.size()>0) { saveHits(allHits); }
   } else return false;
@@ -74,45 +80,19 @@ bool HitFinder::exec()
 
 bool HitFinder::terminate()
 {
-  // if (isOptionSet(fParams.getOptions(), kOffestsFileParamKey) && fSaveControlHistos) {
-  //   INFO("Hit finding - printing out offsets for Scins in matrices");
-  //   fOffsetsFile = getOptionAsString(fParams.getOptions(), kOffestsFileParamKey);
-  //
-  //   namespace pt = boost::property_tree;
-  //   using namespace std;
-  //
-  //   pt::ptree root;
-  //   pt::ptree scin_node;
-  //
-  //   for(int scinID = fMinScinID; scinID<=fMaxScinID; scinID++){
-  //     int bin = scinID-fMinScinID+1;
-  //     auto projX = getStatistics().getHisto2D("time_diff_scin")->ProjectionX("_px", bin, bin+1);
-  //     scin_node.put(to_string(scinID), projX->GetMean());
-  //   }
-  //   root.add_child("scin_offsets", scin_node);
-  //
-  //   // Merging used calibration with new one - iteration alike
-  //   if (isOptionSet(fParams.getOptions(), kScinCalibFileParamKey)) {
-  //     auto scinCalibFileName = getOptionAsString(fParams.getOptions(), kScinCalibFileParamKey);
-  //
-  //     pt::ptree rootOld;
-  //     pt::read_json(scinCalibFileName, rootOld);
-  //
-  //     pt::ptree new_root;
-  //     pt::ptree new_scin_node;
-  //
-  //     for(int scinID = fMinScinID; scinID<=fMaxScinID; scinID++){
-  //       double oldOffset = rootOld.get("scin_offsets."+to_string(scinID), 0.0);
-  //       double newOffset = root.get("scin_offsets."+to_string(scinID), 0.0);
-  //       new_scin_node.put(to_string(scinID), oldOffset+newOffset);
-  //     }
-  //     new_root.add_child("scin_offsets", new_scin_node);
-  //     pt::write_json(fOffsetsFile, new_root);
-  //
-  //   }else{
-  //     pt::write_json(fOffsetsFile, root);
-  //   }
-  // }
+  if(fSaveCalibHistos && isOptionSet(fParams.getOptions(), kCalibBankFileParamKey)) {
+    INFO(Form(
+      "Hit Finder - adding A-B spectra histograms to calibration bank %s",
+      getOptionAsString(fParams.getOptions(), kCalibBankFileParamKey).c_str()
+    ));
+
+    std::vector<TH1F*> histograms;
+    for(auto scin_e : getParamBank().getScins()){
+      TH1F* histo = dynamic_cast<TH1F*>(getStatistics().getHisto1D(Form("ab_tdiff_scin_%d", scin_e.second->getID()))->Clone());
+      histograms.push_back(histo);
+    }
+    CalibrationTools::addHistograms(histograms, getOptionAsString(fParams.getOptions(), kCalibBankFileParamKey));
+  }
 
   INFO("Hit finding ended");
   return true;
@@ -132,16 +112,23 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
       int scinID = hit.getScin().getID();
 
       getStatistics().getHisto2D("hit_pos_XY")->Fill(hit.getPosY(), hit.getPosX());
+      getStatistics().getHisto2D("hit_pos_z")->Fill(scinID, hit.getPosZ());
 
       getStatistics().getHisto1D("hit_multi")->Fill(multi);
-      getStatistics().getHisto2D("hit_multi_scin")->Fill(multi, scinID);
+      getStatistics().getHisto2D("hit_multi_scin")->Fill(scinID, multi);
 
-      getStatistics().getHisto2D("hit_tdiff_scin")->Fill(hit.getTimeDiff(), scinID);
-      getStatistics().getHisto2D(Form("hit_tdiff_scin_m_%d", multi))->Fill(hit.getTimeDiff(), scinID);
+      getStatistics().getHisto2D("hit_tdiff_scin")->Fill(scinID, hit.getTimeDiff());
+      getStatistics().getHisto2D(Form("hit_tdiff_scin_m_%d", multi))->Fill(scinID, hit.getTimeDiff());
 
       if(hit.getEnergy() != 0.0){
         getStatistics().getHisto2D(Form("hit_tot_scin_m_%d", multi))
-        ->Fill(hit.getEnergy()/((double) multi), scinID);
+        ->Fill(scinID, hit.getEnergy()/((double) multi));
+      }
+
+      // Filling calibration histograms, if demanded. For A-B synchronization
+      // only hits with multiplisity larger than 5 are used
+      if(fSaveCalibHistos && multi > 5) {
+        getStatistics().getHisto1D(Form("ab_tdiff_scin_%d", scinID))->Fill(hit.getTimeDiff());
       }
     }
   }
@@ -164,20 +151,20 @@ void HitFinder::initialiseHistograms(){
   getStatistics().getHisto2D("hit_pos_XY")->GetXaxis()->SetTitle("Y [cm]");
   getStatistics().getHisto2D("hit_pos_XY")->GetYaxis()->SetTitle("X [cm]");
 
-  // getStatistics().createHistogram(new TH2F(
-  //   "hit_pos_scin", "Hit Position per Scintillator ID",
-  //   200, -50.0, 50.0, fMaxScinID-fMinScinID+1, fMinScinID-0.5, fMaxScinID+0.5
-  // ));
-  // getStatistics().getHisto2D("hit_pos_scin")->GetXaxis()->SetTitle("Hit z position [cm]");
-  // getStatistics().getHisto2D("hit_pos_scin")->GetYaxis()->SetTitle("ID of Scintillator");
-
   getStatistics().createHistogram(new TH2F(
     "hit_tdiff_scin", "Hit Time Difference per Scintillator ID",
-    200, -1.1 * fABTimeDiff, 1.1 * fABTimeDiff,
-    maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5
+    maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5,
+    201, -1.1 * fABTimeDiff, 1.1 * fABTimeDiff
   ));
-  getStatistics().getHisto2D("hit_tdiff_scin")->GetXaxis()->SetTitle("A-B time difference [ps]");
-  getStatistics().getHisto2D("hit_tdiff_scin")->GetYaxis()->SetTitle("Scintillator ID");
+  getStatistics().getHisto2D("hit_tdiff_scin")->GetXaxis()->SetTitle("Scintillator ID");
+  getStatistics().getHisto2D("hit_tdiff_scin")->GetYaxis()->SetTitle("A-B time difference [ps]");
+
+  getStatistics().createHistogram(new TH2F(
+    "hit_pos_z", "Hit Position per Scintillator ID",
+    maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5, 201, -50.0, 50.0
+  ));
+  getStatistics().getHisto2D("hit_pos_z")->GetXaxis()->SetTitle("Scintillator ID");
+  getStatistics().getHisto2D("hit_pos_z")->GetYaxis()->SetTitle("Hit z-axis position [cm]");
 
   getStatistics().createHistogram(new TH1F(
     "hit_multi", "Number of signals from SiPMs in created hit", 12, -0.5, 11.5
@@ -187,28 +174,28 @@ void HitFinder::initialiseHistograms(){
 
   getStatistics().createHistogram(new TH2F(
     "hit_multi_scin", "Number of signals from SiPMs in created Hit per Scin",
-    12, -0.5, 11.5, maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5
+    maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5, 12, -0.5, 11.5
   ));
-  getStatistics().getHisto2D("hit_multi_scin")->GetXaxis()->SetTitle("A-B time difference [ps]");
-  getStatistics().getHisto2D("hit_multi_scin")->GetYaxis()->SetTitle("Scintillator ID");
+  getStatistics().getHisto2D("hit_multi_scin")->GetXaxis()->SetTitle("Scintillator ID");
+  getStatistics().getHisto2D("hit_multi_scin")->GetYaxis()->SetTitle("Signal multiplicity [ps]");
 
   // Time diff and TOT per multiplicity
   for(int multi = 2; multi <=8; multi++){
     getStatistics().createHistogram(new TH2F(
       Form("hit_tdiff_scin_m_%d", multi),
       Form("Hit time difference per scin, multiplicity %d", multi),
-      200, -1.1 * fABTimeDiff, 1.1 * fABTimeDiff, maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5
+      maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5, 300, -1.1 * fABTimeDiff, 1.1 * fABTimeDiff
     ));
-    getStatistics().getHisto2D(Form("hit_tdiff_scin_m_%d", multi))->GetXaxis()->SetTitle("A-B time difference [ps]");
-    getStatistics().getHisto2D(Form("hit_tdiff_scin_m_%d", multi))->GetYaxis()->SetTitle("Scintillator ID");
+    getStatistics().getHisto2D(Form("hit_tdiff_scin_m_%d", multi))->GetXaxis()->SetTitle("Scintillator ID");
+    getStatistics().getHisto2D(Form("hit_tdiff_scin_m_%d", multi))->GetYaxis()->SetTitle("A-B time difference [ps]");
 
     getStatistics().createHistogram(new TH2F(
       Form("hit_tot_scin_m_%d", multi),
       Form("Hit TOT divided by multiplicity, multiplicity %d", multi),
-      200, 0.0, 400000.0, maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5
+      maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5, 200, 0.0, 400000.0
     ));
-    getStatistics().getHisto2D(Form("hit_tot_scin_m_%d", multi))->GetXaxis()->SetTitle("Time over Threshold [ps]");
-    getStatistics().getHisto2D(Form("hit_tot_scin_m_%d", multi))->GetYaxis()->SetTitle("Scintillator ID");
+    getStatistics().getHisto2D(Form("hit_tot_scin_m_%d", multi))->GetXaxis()->SetTitle("Scintillator ID");
+    getStatistics().getHisto2D(Form("hit_tot_scin_m_%d", multi))->GetYaxis()->SetTitle("Time over Threshold [ps]");
   }
 
   // Unused sigals stats
@@ -216,7 +203,7 @@ void HitFinder::initialiseHistograms(){
     "remain_signals_scin", "Number of Unused Signals in Scintillator",
     maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5
   ));
-  getStatistics().getHisto1D("remain_signals_scin")->GetXaxis()->SetTitle("ID of Scintillator");
+  getStatistics().getHisto1D("remain_signals_scin")->GetXaxis()->SetTitle("Scintillator ID");
   getStatistics().getHisto1D("remain_signals_scin")->GetYaxis()->SetTitle("Number of Unused Signals in Scintillator");
 
   getStatistics().createHistogram(new TH1F(
@@ -225,4 +212,17 @@ void HitFinder::initialiseHistograms(){
   ));
   getStatistics().getHisto1D("remain_signals_tdiff")->GetXaxis()->SetTitle("Time difference [ps]");
   getStatistics().getHisto1D("remain_signals_tdiff")->GetYaxis()->SetTitle("Number of Signals");
+
+  // Calibration histograms, for every scintillator
+  if(fSaveCalibHistos) {
+    for(auto scin_e : getParamBank().getScins()){
+      getStatistics().createHistogram(new TH1F(
+        Form("ab_tdiff_scin_%d", scin_e.second->getID()),
+        Form("Hit time difference, scin %d", scin_e.second->getID()),
+        300, -1.1 * fABTimeDiff, 1.1 * fABTimeDiff
+      ));
+      getStatistics().getHisto1D(Form("ab_tdiff_scin_%d", scin_e.second->getID()))->GetXaxis()->SetTitle("A-B time difference [ps]");
+      getStatistics().getHisto1D(Form("ab_tdiff_scin_%d", scin_e.second->getID()))->GetYaxis()->SetTitle("Number of Hits");
+    }
+  }
 }

@@ -13,39 +13,38 @@
  *  @file SignalTransformerTools.h
  */
 
- #ifndef SIGNALTRANSFORMERTOOLS_H
- #define SIGNALTRANSFORMERTOOLS_H
+#ifndef SIGNALTRANSFORMERTOOLS_H
+#define SIGNALTRANSFORMERTOOLS_H
 
- /**
-  * @brief Set of tools for Signal Transformer task
-  *
-  * Contains methods merging Raw Signals from matrix of SiPMs to a Physical Signal
-  */
+/**
+ * @brief Set of tools for Signal Transformer task
+ *
+ * Contains methods merging Raw Signals from matrix of SiPMs to a Physical Signal
+ */
 
- #include <JPetMatrixSignal/JPetMatrixSignal.h>
- #include <JPetTimeWindow/JPetTimeWindow.h>
- #include <JPetRawSignal/JPetRawSignal.h>
- #include <JPetPM/JPetPM.h>
- #include <utility>
- #include <vector>
+#include <boost/property_tree/ptree.hpp>
 
- class SignalTransformerTools
- {
- public:
-   static const std::map<int, std::vector<std::vector<JPetRawSignal>>> getRawSigMtxMap(const JPetTimeWindow* timeWindow);
+#include <JPetMatrixSignal/JPetMatrixSignal.h>
+#include <JPetTimeWindow/JPetTimeWindow.h>
+#include <JPetRawSignal/JPetRawSignal.h>
+#include <JPetPM/JPetPM.h>
+#include <utility>
+#include <vector>
 
-   static std::vector<JPetMatrixSignal> mergeSignalsAllSiPMs(
-     std::map<int, std::vector<std::vector<JPetRawSignal>>>& rawSigMtxMap,
-     double mergingTime
-   );
+class SignalTransformerTools
+{
+public:
+ static const std::map<int, std::vector<std::vector<JPetRawSignal>>> getRawSigMtxMap(const JPetTimeWindow* timeWindow);
+ static std::vector<JPetMatrixSignal> mergeSignalsAllSiPMs(
+   std::map<int, std::vector<std::vector<JPetRawSignal>>>& rawSigMtxMap, double mergingTime, boost::property_tree::ptree& calibTree
+ );
+ static std::vector<JPetMatrixSignal> mergeRawSignalsOnSide(
+   std::vector<JPetRawSignal>& rawSigVec, double mergingTime, boost::property_tree::ptree& calibTree
+ );
+ static double getRawSigBaseTime(JPetRawSignal& rawSig);
 
-   static std::vector<JPetMatrixSignal> mergeRawSignalsOnSide(
-     std::vector<JPetRawSignal>& rawSigVec, double mergingTime
-   );
-   static double getRawSigBaseTime(JPetRawSignal& rawSig);
-
- private:
-   static double calculateAverageTime(JPetMatrixSignal& mtxSig);
-   static void sortByTime(std::vector<JPetRawSignal>& input);
- };
- #endif /* !SIGNALTRANSFORMERTOOLS_H */
+private:
+  static double calculateAverageTime(JPetMatrixSignal& mtxSig);
+  static void sortByTime(std::vector<JPetRawSignal>& input);
+};
+#endif /* !SIGNALTRANSFORMERTOOLS_H */

@@ -16,7 +16,9 @@
 #include <JPetManager/JPetManager.h>
 #include "TimeWindowCreator.h"
 #include "SignalTransformer.h"
+#include "EventCategorizer.h"
 #include "SignalFinder.h"
+#include "EventFinder.h"
 #include "HitFinder.h"
 using namespace std;
 
@@ -28,11 +30,15 @@ int main(int argc, const char* argv[]) {
     manager.registerTask<SignalFinder>("SignalFinder");
     manager.registerTask<SignalTransformer>("SignalTransformer");
     manager.registerTask<HitFinder>("HitFinder");
+    manager.registerTask<EventFinder>("EventFinder");
+    manager.registerTask<EventCategorizer>("EventCategorizer");
 
     manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
     manager.useTask("SignalFinder", "tslot.raw", "raw.sig");
     manager.useTask("SignalTransformer", "raw.sig", "mtx.sig");
     manager.useTask("HitFinder", "mtx.sig", "hits");
+    manager.useTask("EventFinder", "hits", "unk.evt");
+    manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
 
     manager.run(argc, argv);
   } catch (const std::exception& except) {

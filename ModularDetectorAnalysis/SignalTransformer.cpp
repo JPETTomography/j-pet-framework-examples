@@ -16,9 +16,9 @@
 #include "SignalTransformerTools.h"
 #include "JPetWriter/JPetWriter.h"
 #include "SignalTransformer.h"
+#include "CalibrationTools.h"
 
 #include <boost/property_tree/json_parser.hpp>
-#include <boost/property_tree/ptree.hpp>
 
 using namespace jpet_options_tools;
 
@@ -28,12 +28,20 @@ SignalTransformer::~SignalTransformer() {}
 
 bool SignalTransformer::init()
 {
-  INFO("Signal transforming started: Raw to Matrix Signal");
+  INFO("Signal Transformer started: Raw to Matrix Signal");
   fOutputEvents = new JPetTimeWindow("JPetMatrixSignal");
 
-  // Getting bool for saving histograms
+  // Getting bools for saving control and calibration histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey)) {
     fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
+  }
+  if (isOptionSet(fParams.getOptions(), kSaveCalibHistosParamKey)) {
+    fSaveCalibHistos = getOptionAsBool(fParams.getOptions(), kSaveCalibHistosParamKey);
+  }
+
+  // Reading file with Side B signals correction to property tree
+  if (isOptionSet(fParams.getOptions(), kConstantsFileParamKey)) {
+    boost::property_tree::read_json(getOptionAsString(fParams.getOptions(), kConstantsFileParamKey), fConstansTree);
   }
 
   // Signal merging time parameter
@@ -60,7 +68,7 @@ bool SignalTransformer::exec()
     auto rawSigMtxMap = SignalTransformerTools::getRawSigMtxMap(timeWindow);
 
     // Merging max. 4 Raw Signals into a MatrixSignal
-    auto mergedSignals = SignalTransformerTools::mergeSignalsAllSiPMs(rawSigMtxMap, fMergingTime);
+    auto mergedSignals = SignalTransformerTools::mergeSignalsAllSiPMs(rawSigMtxMap, fMergingTime, fConstansTree);
 
     // Saving method invocation
     if(mergedSignals.size()>0){
@@ -73,48 +81,20 @@ bool SignalTransformer::exec()
 
 bool SignalTransformer::terminate()
 {
-  // if(fSaveControlHistos){
-    // namespace pt = boost::property_tree;
-    // using namespace std;
+  if(fSaveCalibHistos && isOptionSet(fParams.getOptions(), kCalibBankFileParamKey)){
+    INFO(Form(
+      "Signal Transformer - adding offsets histograms to calibration bank %s",
+      getOptionAsString(fParams.getOptions(), kCalibBankFileParamKey).c_str()
+    ));
 
-  //   if (isOptionSet(fParams.getOptions(), kOffestsFileParamKey)) {
-  //     INFO("Signal transforming - printing out offsets for SiPMs in matrices");
-  //     fOffsetsFile = getOptionAsString(fParams.getOptions(), kOffestsFileParamKey);
-  //
-  //     pt::ptree root;
-  //     pt::ptree sipm_node;
-  //
-  //     for(int pmID=fMinPMID; pmID<=fMaxPMID; pmID++){
-  //       auto mean = getStatistics().getHisto1D(Form("offset_sipm_%d", pmID))->GetMean();
-  //       sipm_node.put(to_string(pmID), mean);
-  //     }
-  //     root.add_child("sipm_offsets", sipm_node);
-  //
-  //     // Merging used calibration with new one - iteration alike
-  //     if (isOptionSet(fParams.getOptions(), kSiPMCalibFileParamKey)) {
-  //       auto siPMCalibFileName = getOptionAsString(fParams.getOptions(), kSiPMCalibFileParamKey);
-  //
-  //       pt::ptree rootOld;
-  //       pt::read_json(siPMCalibFileName, rootOld);
-  //
-  //       pt::ptree new_root;
-  //       pt::ptree new_sipm_node;
-  //
-  //       for(int pmID=fMinPMID; pmID<=fMaxPMID; pmID++){
-  //         double oldOffset = rootOld.get("sipm_offsets."+to_string(pmID), 0.0);
-  //         double newOffset = root.get("sipm_offsets."+to_string(pmID), 0.0);
-  //         new_sipm_node.put(to_string(pmID), oldOffset+newOffset);
-  //       }
-  //       new_root.add_child("sipm_offsets", new_sipm_node);
-  //       pt::write_json(fOffsetsFile, new_root);
-  //
-  //     } else {
-  //       pt::write_json(fOffsetsFile, root);
-  //     }
-  //   }
-  // }
-
-  INFO("Signal transforming finished");
+    std::vector<TH1F*> histograms;
+    for(auto pm_e : getParamBank().getPMs()) {
+      TH1F* histo = dynamic_cast<TH1F*>(getStatistics().getHisto1D(Form("offset_%d", pm_e.second->getID()))->Clone());
+      histograms.push_back(histo);
+    }
+    CalibrationTools::addHistograms(histograms, getOptionAsString(fParams.getOptions(), kCalibBankFileParamKey));
+  }
+  INFO("Signal Transformer finished");
   return true;
 }
 
@@ -137,34 +117,22 @@ void SignalTransformer::saveMatrixSignals(const std::vector<JPetMatrixSignal>& m
       } else if(mtxSig.getPM().getSide()==JPetPM::SideB){
         getStatistics().getHisto1D("mtxsig_per_scin_sideB")->Fill(scinID);
       }
-      // auto rawSigVec = mtxSig.getRawSignals();
-      // if(rawSigVec.size() == 4) {
-      //   auto side = rawSigVec.at(1).getPM().getSide();
-      //   auto t1 = SignalTransformerTools::getRawSigBaseTime(rawSigVec.at(1));
-      //   auto t2 = SignalTransformerTools::getRawSigBaseTime(rawSigVec.at(2));
-      //   auto t3 = SignalTransformerTools::getRawSigBaseTime(rawSigVec.at(3));
-      //   auto t4 = SignalTransformerTools::getRawSigBaseTime(rawSigVec.at(4));
-      //
-      //   if(rawSigVec.at(2).getPM().getID()>fMinPMID && rawSigVec.at(2).getPM().getID()<fMaxPMID){
-      //     getStatistics().getHisto1D(Form("offset_sipm_%d", rawSigVec.at(2).getPM().getID()))->Fill(t2-t1);
-      //   }
-      //   if(rawSigVec.at(3).getPM().getID()>fMinPMID && rawSigVec.at(3).getPM().getID()<fMaxPMID){
-      //     getStatistics().getHisto1D(Form("offset_sipm_%d", rawSigVec.at(3).getPM().getID()))->Fill(t3-t1);
-      //   }
-      //   if(rawSigVec.at(4).getPM().getID()>fMinPMID && rawSigVec.at(4).getPM().getID()<fMaxPMID){
-      //     getStatistics().getHisto1D(Form("offset_sipm_%d", rawSigVec.at(4).getPM().getID()))->Fill(t4-t1);
-      //   }
-      //
-      //   if(side==JPetPM::SideA) {
-      //     getStatistics().getHisto1D(Form("tdiff_%d_A_%d_%d", scinID, 2, 1))->Fill(t2-t1);
-      //     getStatistics().getHisto1D(Form("tdiff_%d_A_%d_%d", scinID, 3, 1))->Fill(t3-t1);
-      //     getStatistics().getHisto1D(Form("tdiff_%d_A_%d_%d", scinID, 4, 1))->Fill(t4-t1);
-      //   } else if(side==JPetPM::SideB){
-      //     getStatistics().getHisto1D(Form("tdiff_%d_B_%d_%d", scinID, 2, 1))->Fill(t2-t1);
-      //     getStatistics().getHisto1D(Form("tdiff_%d_B_%d_%d", scinID, 3, 1))->Fill(t3-t1);
-      //     getStatistics().getHisto1D(Form("tdiff_%d_B_%d_%d", scinID, 4, 1))->Fill(t4-t1);
-      //   }
-      // }
+    }
+
+    if(fSaveCalibHistos){
+      if(mtxSig.getRawSignals().size() == 4) {
+        auto pm_2 = mtxSig.getRawSignals().at(2).getPM().getID();
+        auto pm_3 = mtxSig.getRawSignals().at(3).getPM().getID();
+        auto pm_4 = mtxSig.getRawSignals().at(4).getPM().getID();
+        auto t1 = SignalTransformerTools::getRawSigBaseTime(mtxSig.getRawSignals().at(1));
+        auto t2 = SignalTransformerTools::getRawSigBaseTime(mtxSig.getRawSignals().at(2));
+        auto t3 = SignalTransformerTools::getRawSigBaseTime(mtxSig.getRawSignals().at(3));
+        auto t4 = SignalTransformerTools::getRawSigBaseTime(mtxSig.getRawSignals().at(4));
+
+        getStatistics().getHisto1D(Form("offset_%d", pm_2))->Fill(t2-t1);
+        getStatistics().getHisto1D(Form("offset_%d", pm_3))->Fill(t3-t1);
+        getStatistics().getHisto1D(Form("offset_%d", pm_4))->Fill(t4-t1);
+      }
     }
   }
 }
@@ -201,13 +169,17 @@ void SignalTransformer::initialiseHistograms()
   getStatistics().getHisto1D("mtxsig_per_scin_sideB")->GetXaxis()->SetTitle("Scin ID");
   getStatistics().getHisto1D("mtxsig_per_scin_sideB")->GetYaxis()->SetTitle("Number of Matrix Signals");
 
-  // // SiPM offsets
-  // for(int pmID=fMinPMID; pmID<=fMaxPMID; pmID++){
-  //   getStatistics().createHistogram(new TH1F(
-  //     Form("offset_sipm_%d", pmID), Form("Offset for SiPM %d", pmID),
-  //     200, -1.1*fMergingTime, 1.1*fMergingTime
-  //   ));
-  //   getStatistics().getHisto1D(Form("offset_sipm_%d", pmID))->GetXaxis()->SetTitle("Time difference [ps]");
-  //   getStatistics().getHisto1D(Form("offset_sipm_%d", pmID))->GetYaxis()->SetTitle("Number of Raw Signal pairs");
-  // }
+  // SiPM offsets if needed
+  if(fSaveCalibHistos){
+    for(auto pm_e : getParamBank().getPMs()){
+      auto pmID = pm_e.second->getID();
+
+      getStatistics().createHistogram(new TH1F(
+        Form("offset_%d", pmID), Form("Offset for SiPM %d", pmID),
+        200, -1.1*fMergingTime, 1.1*fMergingTime
+      ));
+      getStatistics().getHisto1D(Form("offset_%d", pmID))->GetXaxis()->SetTitle("Time difference [ps]");
+      getStatistics().getHisto1D(Form("offset_%d", pmID))->GetYaxis()->SetTitle("Number of Raw Signal pairs");
+    }
+  }
 }
