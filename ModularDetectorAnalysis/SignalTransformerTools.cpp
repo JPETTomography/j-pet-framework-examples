@@ -130,7 +130,7 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(
     // If signal is from Side A or calibration is empty, then a correction vaule is 0.0
     double correction = 0.0;
     if(mtxSig.getPM().getSide()==JPetPM::SideB){
-      correction = calibTree.get("ab_corrections."+to_string(mtxSig.getPM().getScin().getID()), 0.0);
+      correction = calibTree.get("scin."+to_string(mtxSig.getPM().getScin().getID())+".b_correction", 0.0);
     }
 
     mtxSig.setTime(calculateAverageTime(mtxSig)-correction);

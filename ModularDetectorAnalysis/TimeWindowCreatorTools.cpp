@@ -40,7 +40,8 @@ vector<JPetSigCh> TimeWindowCreatorTools::buildSigChs(
 
   // Getting offsets for this channel
   // if calibrations are empty then default vaule is 0.0
-  double offset = calibTree.get("sipm_offsets."+to_string(channel.getPM().getID()), 0.0);
+  // double offset = calibTree.get("sipm_offsets."+to_string(channel.getPM().getID()), 0.0);
+  double offset = calibTree.get("pm."+to_string(channel.getPM().getID())+".matrix_offset", 0.0);
 
   // Loop over all entries on leading edge in current TDCChannel and create SigCh
   for (int j = 0; j < tdcChannel->GetLeadHitsNum(); j++) {

@@ -100,8 +100,8 @@ vector<JPetHit> HitFinderTools::matchSignals(
 
           // Getting constants for this scintillator
           // If a calibration is empty, then a constant vaule is 0.0
-          double velocity = calibTree.get("eff_velocity."+to_string(mtxSig.getPM().getScin().getID()), 0.0);
-          double tofCorrection = calibTree.get("tof_correction."+to_string(mtxSig.getPM().getScin().getID()), 0.0);
+          double velocity = calibTree.get("scin."+to_string(mtxSig.getPM().getScin().getID())+".eff_velocity", 0.0);
+          double tofCorrection = calibTree.get("scin."+to_string(mtxSig.getPM().getScin().getID())+".tof_correction", 0.0);
 
           auto hit = createHit(mtxSig, scinSigals.at(j), velocity, tofCorrection);
 

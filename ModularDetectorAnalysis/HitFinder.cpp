@@ -19,6 +19,7 @@
 
 #include <boost/property_tree/json_parser.hpp>
 
+#include "CalibrationTools.h"
 #include "HitFinderTools.h"
 #include "HitFinder.h"
 #include <string>
