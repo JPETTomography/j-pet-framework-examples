@@ -120,19 +120,20 @@ void SignalTransformer::saveMatrixSignals(const std::vector<JPetMatrixSignal>& m
     }
 
     if(fSaveCalibHistos){
-      if(mtxSig.getRawSignals().size() > 1 && mtxSig.getRawSignals().find(1)!=mtxSig.getRawSignals().end()) {
+      auto sigMap = mtxSig.getRawSignals();
+      if(sigMap.find(1) != sigMap.end()) {
         auto t1 = SignalTransformerTools::getRawSigBaseTime(mtxSig.getRawSignals().at(1));
-        if(mtxSig.getRawSignals().find(2)!=mtxSig.getRawSignals().end()){
+        if(sigMap.find(2) != sigMap.end()){
           auto pm_2 = mtxSig.getRawSignals().at(2).getPM().getID();
           auto t2 = SignalTransformerTools::getRawSigBaseTime(mtxSig.getRawSignals().at(2));
           getStatistics().getHisto1D(Form("offset_%d", pm_2))->Fill(t2-t1);
         }
-        if(mtxSig.getRawSignals().find(3)!=mtxSig.getRawSignals().end()){
+        if(sigMap.find(3) != sigMap.end()){
           auto pm_3 = mtxSig.getRawSignals().at(3).getPM().getID();
           auto t3 = SignalTransformerTools::getRawSigBaseTime(mtxSig.getRawSignals().at(3));
           getStatistics().getHisto1D(Form("offset_%d", pm_3))->Fill(t3-t1);
         }
-        if(mtxSig.getRawSignals().find(4)!=mtxSig.getRawSignals().end()){
+        if(sigMap.find(4) != sigMap.end()){
           auto pm_4 = mtxSig.getRawSignals().at(4).getPM().getID();
           auto t4 = SignalTransformerTools::getRawSigBaseTime(mtxSig.getRawSignals().at(4));
           getStatistics().getHisto1D(Form("offset_%d", pm_4))->Fill(t4-t1);
