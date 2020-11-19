@@ -120,18 +120,23 @@ void SignalTransformer::saveMatrixSignals(const std::vector<JPetMatrixSignal>& m
     }
 
     if(fSaveCalibHistos){
-      if(mtxSig.getRawSignals().size() == 4) {
-        auto pm_2 = mtxSig.getRawSignals().at(2).getPM().getID();
-        auto pm_3 = mtxSig.getRawSignals().at(3).getPM().getID();
-        auto pm_4 = mtxSig.getRawSignals().at(4).getPM().getID();
+      if(mtxSig.getRawSignals().size() > 1 && mtxSig.getRawSignals().find(1)!=mtxSig.getRawSignals().end()) {
         auto t1 = SignalTransformerTools::getRawSigBaseTime(mtxSig.getRawSignals().at(1));
-        auto t2 = SignalTransformerTools::getRawSigBaseTime(mtxSig.getRawSignals().at(2));
-        auto t3 = SignalTransformerTools::getRawSigBaseTime(mtxSig.getRawSignals().at(3));
-        auto t4 = SignalTransformerTools::getRawSigBaseTime(mtxSig.getRawSignals().at(4));
-
-        getStatistics().getHisto1D(Form("offset_%d", pm_2))->Fill(t2-t1);
-        getStatistics().getHisto1D(Form("offset_%d", pm_3))->Fill(t3-t1);
-        getStatistics().getHisto1D(Form("offset_%d", pm_4))->Fill(t4-t1);
+        if(mtxSig.getRawSignals().find(2)!=mtxSig.getRawSignals().end()){
+          auto pm_2 = mtxSig.getRawSignals().at(2).getPM().getID();
+          auto t2 = SignalTransformerTools::getRawSigBaseTime(mtxSig.getRawSignals().at(2));
+          getStatistics().getHisto1D(Form("offset_%d", pm_2))->Fill(t2-t1);
+        }
+        if(mtxSig.getRawSignals().find(3)!=mtxSig.getRawSignals().end()){
+          auto pm_3 = mtxSig.getRawSignals().at(3).getPM().getID();
+          auto t3 = SignalTransformerTools::getRawSigBaseTime(mtxSig.getRawSignals().at(3));
+          getStatistics().getHisto1D(Form("offset_%d", pm_3))->Fill(t3-t1);
+        }
+        if(mtxSig.getRawSignals().find(4)!=mtxSig.getRawSignals().end()){
+          auto pm_4 = mtxSig.getRawSignals().at(4).getPM().getID();
+          auto t4 = SignalTransformerTools::getRawSigBaseTime(mtxSig.getRawSignals().at(4));
+          getStatistics().getHisto1D(Form("offset_%d", pm_4))->Fill(t4-t1);
+        }
       }
     }
   }
