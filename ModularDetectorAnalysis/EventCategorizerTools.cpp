@@ -98,6 +98,8 @@ bool EventCategorizerTools::checkFor2Gamma(
 
       // Checking for back to back
       double timeDiff = fabs(firstHit.getTime() - secondHit.getTime());
+      int slot1ID = firstHit.getScin().getSlot().getID();
+      int slot2ID = secondHit.getScin().getSlot().getID();
       double theta1 = min(firstHit.getScin().getSlot().getTheta(), secondHit.getScin().getSlot().getTheta());
       double theta2 = max(firstHit.getScin().getSlot().getTheta(), secondHit.getScin().getSlot().getTheta());
       double thetaDiff = min(theta2 - theta1, 360.0 - theta2 + theta1);
@@ -123,22 +125,26 @@ bool EventCategorizerTools::checkFor2Gamma(
           if(tot2 > anihTOTCutMin && tot2 < anihTOTCutMax){
             stats.getHisto1D("2g_hit_tdiff_cut_tot")->Fill(secondHit.getTimeDiff());
           }
+
+          // Calculating annihilation point
+          TVector3 annhilationPoint = calculateAnnihilationPoint(firstHit, secondHit);
+          stats.getHisto1D("ann_point_tof")->Fill(tof);
+          stats.getHisto2D("ann_point_xy")->Fill(annhilationPoint.X(), annhilationPoint.Y());
+          stats.getHisto2D("ann_point_xz")->Fill(annhilationPoint.X(), annhilationPoint.Z());
+          stats.getHisto2D("ann_point_yz")->Fill(annhilationPoint.Y(), annhilationPoint.Z());
+          stats.getHisto2D("ann_point_xy_zoom")->Fill(annhilationPoint.X(), annhilationPoint.Y());
+          stats.getHisto2D("ann_point_xz_zoom")->Fill(annhilationPoint.X(), annhilationPoint.Z());
+          stats.getHisto2D("ann_point_yz_zoom")->Fill(annhilationPoint.Y(), annhilationPoint.Z());
+          // double distance = calculateDistance(secondHit, firstHit);
+          // stats.getHisto1D("2Gamma_Zpos")->Fill(firstHit.getPosZ());
+          // stats.getHisto1D("2Gamma_Zpos")->Fill(secondHit.getPosZ());
+          // stats.getHisto1D("2Gamma_TimeDiff")->Fill(secondHit.getTime() - firstHit.getTime());
+          // stats.getHisto1D("2Gamma_Dist")->Fill(distance);
         }
         return true;
       }
     }
   }
-  // Calculating annihilation point is not yet possible since we do not have z postion of hits
-  // double distance = calculateDistance(secondHit, firstHit);
-  // TVector3 annhilationPoint = calculateAnnihilationPoint(firstHit, secondHit);
-  // stats.getHisto1D("2Gamma_Zpos")->Fill(firstHit.getPosZ());
-  // stats.getHisto1D("2Gamma_Zpos")->Fill(secondHit.getPosZ());
-  // stats.getHisto1D("2Gamma_TimeDiff")->Fill(secondHit.getTime() - firstHit.getTime());
-  // stats.getHisto1D("2Gamma_Dist")->Fill(distance);
-  // stats.getHisto1D("Annih_TOF")->Fill(calculateTOF(firstHit, secondHit));
-  // stats.getHisto2D("AnnihPoint_XY")->Fill(annhilationPoint.X(), annhilationPoint.Y());
-  // stats.getHisto2D("AnnihPoint_XZ")->Fill(annhilationPoint.X(), annhilationPoint.Z());
-  // stats.getHisto2D("AnnihPoint_YZ")->Fill(annhilationPoint.Y(), annhilationPoint.Z());
   return false;
 }
 
@@ -310,7 +316,7 @@ TVector3 EventCategorizerTools::calculateAnnihilationPoint(const JPetHit& hitA, 
 TVector3 EventCategorizerTools::calculateAnnihilationPoint(const TVector3& hitA, const TVector3& hitB, double tof)
 {
   TVector3 middleOfLOR = 0.5 * (hitA + hitB);
-  TVector3 versorOnLOR = (hitB - hitA).Unit()  ;
+  TVector3 versorOnLOR = (hitB - hitA).Unit();
 
   double shift = 0.5 * tof  * kLightVelocity_cm_ps;
   TVector3 annihilationPoint(
