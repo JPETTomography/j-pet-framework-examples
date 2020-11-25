@@ -21,8 +21,9 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-//#include <cmath>
+
 using namespace std;
+using namespace jpet_options_tools;
 
 EventCategorizer::EventCategorizer(const char* name) : JPetUserTask(name) {}
 
@@ -30,6 +31,25 @@ bool EventCategorizer::init()
 {
   INFO("Event categorization started.");
   fOutputEvents = new JPetTimeWindow("JPetEvent");
+
+  if (isOptionSet(fParams.getOptions(), kTOTvsEdepAnniSelUpperParamKey)){
+    fAnniSelUpper = getOptionAsFloat(fParams.getOptions(), kTOTvsEdepAnniSelUpperParamKey);
+  } else {
+    WARNING(Form(
+      "No value of the %s parameter provided by the user. Using default value of %lf.",
+      kTOTvsEdepAnniSelUpperParamKey.c_str(), fAnniSelUpper
+    ));
+  }
+
+  if (isOptionSet(fParams.getOptions(), kTOTvsEdepDeexSelUpperParamKey)){
+    fDeexSelUpper = getOptionAsFloat(fParams.getOptions(), kTOTvsEdepDeexSelUpperParamKey);
+  } else {
+    WARNING(Form(
+      "No value of the %s parameter provided by the user. Using default value of %lf.",
+      kTOTvsEdepDeexSelUpperParamKey.c_str(), fDeexSelUpper
+    ));
+  }
+  
   if (fSaveControlHistos)
   {
     initialiseHistograms();
@@ -153,7 +173,7 @@ void EventCategorizer::deexcitationSelection(const vector<double>& angles, const
     // Only upper limit was applied on TOT values for the selection of prompt and annihilation photons fixed in EventCategorizationTOTvsEdep.h
 
     // Make it sure the first hit is from center
-    if (time_diff_check > TimeDiff_From && time_diff_check < TimeDiff_To && deex_selection < DeexSel_upper &&
+    if (time_diff_check > TimeDiff_From && time_diff_check < TimeDiff_To && deex_selection < fDeexSelUpper &&
         TMath::Abs(firstHit2.getPosZ()) < 23.0 && TMath::Abs(secondHit2.getPosZ()) < 23.0 && TMath::Abs(thirdHit2.getPosZ()) < 23.0 &&
         firstHitScinID != secondHitScinID && firstHitScinID != thirdHitScinID && secondHitScinID != thirdHitScinID)
     {
@@ -187,8 +207,8 @@ void EventCategorizer::annihilationSelection(const vector<double>& angles, const
   if ((angles[0] + angles[1]) > 178 && (angles[0] + angles[1]) < 182 &&
       (TMath::Abs(firstHit2.getTime() - secondHit2.getTime()) * kPsToNs) < 0.2 // Time diff. criteria between hits will cut elongation of scatter test
       && TMath::Abs(firstHit2.getPosZ()) < 23.0 && TMath::Abs(secondHit2.getPosZ()) < 23.0 && TMath::Abs(thirdHit2.getPosZ()) < 23.0 &&
-      HitFinderTools::calculateTOT(firstHit2, HitFinderTools::getTOTCalculationType("standard")) * kPsToNs < AnniSel_upper &&
-      HitFinderTools::calculateTOT(secondHit2, HitFinderTools::getTOTCalculationType("standard")) * kPsToNs < AnniSel_upper &&
+      HitFinderTools::calculateTOT(firstHit2, HitFinderTools::getTOTCalculationType("standard")) * kPsToNs < fAnniSelUpper &&
+      HitFinderTools::calculateTOT(secondHit2, HitFinderTools::getTOTCalculationType("standard")) * kPsToNs < fAnniSelUpper &&
       firstHitScinID != secondHitScinID && firstHitScinID != thirdHitScinID && secondHitScinID != thirdHitScinID)
   {
 

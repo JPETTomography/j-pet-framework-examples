@@ -32,12 +32,6 @@ class JPetWriter;
 #define override
 #endif
 
-static const double kLightVelocity_cm_ns = 29.9792458; // cm /ns
-static const double kNsToPs = 1000;                    // nano second to pico second converter
-static const double kPsToNs = 0.001;                   // pico second to nano second converter
-static const double AnniSel_upper = 35.;
-static const double DeexSel_upper = 65.0;
-
 class EventCategorizer : public JPetUserTask
 {
 public:
@@ -48,7 +42,16 @@ public:
   virtual bool terminate() override;
 
 private:
-  // Counters
+  const double kLightVelocity_cm_ns = 29.9792458; // cm /ns
+  const double kNsToPs = 1000;                    // nano second to pico second converter
+  const double kPsToNs = 0.001;                   // pico second to nano second converter
+
+  const std::string kTOTvsEdepAnniSelUpperParamKey = "TOTvsEdep_AnniSelUpper_float";
+  const std::string kTOTvsEdepDeexSelUpperParamKey = "TOTvsEdep_DeexSelUpper_float";
+
+  double fAnniSelUpper = 35.;
+  double fDeexSelUpper = 65.0;  
+  
   int fEventNumber = 0;
   int fTotal3HitEvents = 0;
   double TimeDiff_From = 10; // ns   time diff between Prompt and annihilation photon from o-Ps
