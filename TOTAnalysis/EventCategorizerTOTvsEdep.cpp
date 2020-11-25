@@ -265,7 +265,7 @@ vector<JPetHit> EventCategorizer::reorderHits(vector<JPetHit> hits)
 }
 
 // Scatter Analysis
-vector<double> EventCategorizer::scatterAnalysis(JPetHit primary1, JPetHit scatter, JPetHit primary2, double gamma)
+vector<double> EventCategorizer::scatterAnalysis(const JPetHit& primary1, const JPetHit& scatter, const JPetHit& primary2, double gamma)
 {
   vector<double> values;
   // cm/nsec
@@ -359,12 +359,9 @@ vector<double> EventCategorizer::scatterAnalysis(JPetHit primary1, JPetHit scatt
 }
 
 // ANGLE CALCULATION
-double EventCategorizer::calcAngle(JPetHit primary, JPetHit scatter)
+double EventCategorizer::calcAngle(const JPetHit& primary, const JPetHit& scatter)
 {
-  double scalarProd = primary.getPos() * scatter.getPos();          // Tested, it seems okay
-  double magProd = primary.getPos().Mag() * scatter.getPos().Mag(); // Tested, it seems okay
-
-  return acos(scalarProd / magProd) * 180 / 3.14159265;
+  return TMath::RadToDeg()*primary.getPos().Angle(scatter.getPos());
 }
 
 // Write selected histogram section

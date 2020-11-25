@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2019 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -60,8 +60,8 @@ private:
   void annihilationSelection(const std::vector<double>& angles, const JPetHit& firstHit2, const JPetHit& secondHit2, const JPetHit& thirdHit2);
   std::vector<JPetHit> reorderHits(std::vector<JPetHit> hits);
   std::vector<JPetEvent> analyseThreeHitEvent(const JPetEvent* event);
-  std::vector<double_t> scatterAnalysis(JPetHit orig, JPetHit scatter, JPetHit, double);
-  double calcAngle(JPetHit orig, JPetHit scatter);
+  std::vector<double_t> scatterAnalysis(const JPetHit& orig, const JPetHit& scatter, const JPetHit&, double);
+  double calcAngle(const JPetHit& orig, const JPetHit& scatter);
   void writeSelected(JPetHit orig, JPetHit scatter, std::vector<double_t> values, bool isScatter, double, double, int ScinID);
 };
 
