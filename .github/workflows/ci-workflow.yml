@@ -17,6 +17,14 @@ jobs:
       run: |
        sudo apt-get -qq update
        sudo apt-get install -y git libboost-all-dev libtbb-dev cmake libfftw3-3 libfftw3-dev sshpass
+
+    - name: set branch name
+      run: |
+        echo "GITHUB_REF=${GITHUB_REF}"
+        GITHUB_BRANCH=${GITHUB_REF##*\/}
+        if [ "${GITHUB_BRANCH}" = "master" ]; then echo "BRANCH=master" | tee ${GITHUB_ENV};
+        else echo "BRANCH=develop" | tee ${GITHUB_ENV};
+        fi
       
     - name: download  ROOT (for ubuntu 16.04)
       run: |
@@ -33,7 +41,7 @@ jobs:
     - name: build unpacker 
       run: |
         source root/bin/thisroot.sh
-        git clone https://github.com/JPETTomography/Unpacker2.git --single-branch --branch develop unpacker
+        git clone https://github.com/JPETTomography/Unpacker2.git --single-branch --branch ${BRANCH} unpacker
         mkdir -p unpacker/build
         cd unpacker/build
         cmake ..
@@ -46,7 +54,7 @@ jobs:
         source root/bin/thisroot.sh
         source unpacker/build/bin/thisunpacker.sh
         rm -rf j-pet-framework || true
-        git clone --single-branch --branch develop https://github.com/JPETTomography/j-pet-framework.git
+        git clone --single-branch --branch ${BRANCH} https://github.com/JPETTomography/j-pet-framework.git
         mkdir -p j-pet-framework/build
         cd j-pet-framework/build
         cmake ..
