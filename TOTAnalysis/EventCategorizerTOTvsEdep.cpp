@@ -16,7 +16,6 @@
 #include "EventCategorizerTOTvsEdep.h"
 #include <JPetAnalysisTools/JPetAnalysisTools.h>
 #include <JPetWriter/JPetWriter.h>
-#include <TCutG.h>
 #include <TH3F.h>
 #include <TMath.h>
 #include <fstream>
@@ -85,7 +84,6 @@ vector<JPetEvent> EventCategorizer::analyseThreeHitEvent(const JPetEvent* event)
     {
       for (unsigned int k = j + 1; k < hits.size(); k++)
       {
-
         JPetHit firstHit = event->getHits().at(i);
         JPetHit secondHit = event->getHits().at(j);
         JPetHit thirdHit = event->getHits().at(k);
@@ -222,7 +220,6 @@ void EventCategorizer::annihilationSelection(const vector<double>& angles, const
     double Cut_sca_23 =
         pow((((x + 2.498) * cos(angle) + (y - 0.4124) * sin(angle)) / a), 2) + pow((((x + 2.498) * sin(angle) - (y - 0.4124) * cos(angle)) / b), 2);
 
-    //  if(cutg[0]->IsInside(vec1.at(5), vec2.at(5))) {
     if (Cut_sca_13 < 1)
     {
       writeSelected(firstHit2, thirdHit2, vec1, true, 511, firstHit2.getPosZ(), firstHitScinID);
@@ -230,7 +227,6 @@ void EventCategorizer::annihilationSelection(const vector<double>& angles, const
       getStatistics().fillHistogram("Scatt_ZHit", firstHit2.getPosZ(), vec1.at(2));
       getStatistics().fillHistogram("scatter_angle_sel_511", vec1.at(2));
       getStatistics().fillHistogram("Energy_dep_sel_511", 511 * (1 - (1 / (1 + ((511 / 511) * (1 - cos(vec1.at(2) * TMath::Pi() / 180)))))));
-      // } else if(cutg[1]->IsInside(vec1.at(5), vec2.at(5))) {
     }
     else if (Cut_sca_23 < 1)
     {
