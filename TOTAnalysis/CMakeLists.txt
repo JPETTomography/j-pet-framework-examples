@@ -48,7 +48,7 @@ set(HEADERS ${use_modules_from}/TimeWindowCreator.h
             ${use_modules_from}/EventCategorizerTools.h
             ${use_modules_from}/ToTEnergyConverter.h
             ${use_modules_from}/ToTEnergyConverterFactory.h
-	    EventCategorizerTOTvsEdep.h)
+            EventCategorizerTOTvsEdep.h)
 
 set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
             ${use_modules_from}/TimeWindowCreator.cpp
@@ -60,7 +60,7 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
             ${use_modules_from}/HitFinder.cpp
             ${use_modules_from}/HitFinderTools.cpp
             ${use_modules_from}/EventFinder.cpp
-	    ${use_modules_from}/EventCategorizerTools.cpp
+            ${use_modules_from}/EventCategorizerTools.cpp
             ${use_modules_from}/ToTEnergyConverter.cpp
             ${use_modules_from}/ToTEnergyConverterFactory.cpp
             EventCategorizerTOTvsEdep.cpp)
