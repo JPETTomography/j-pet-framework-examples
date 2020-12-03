@@ -113,11 +113,13 @@ bool EventCategorizer::exec()
         fMaxTimeDiff, fAnihTOTCutMin, fAnihTOTCutMax
       );
 
-      // Some calibration attempts
-      EventCategorizerTools::selectForCalibration(
-        event, getStatistics(), fSaveControlHistos,
-        fAnihTOTCutMin, fAnihTOTCutMax, fDeexTOTCutMin, fDeexTOTCutMax
-      );
+      // Select hits for TOF calibration, if needed
+      if(fSaveCalibHistos){
+        EventCategorizerTools::selectForCalibration(
+          event, getStatistics(), fSaveControlHistos,
+          fAnihTOTCutMin, fAnihTOTCutMax, fDeexTOTCutMin, fDeexTOTCutMax
+        );
+      }
 
       // bool is3Gamma = EventCategorizerTools::checkFor3Gamma(
       //   event, getStatistics(), fSaveControlHistos
@@ -192,24 +194,6 @@ void EventCategorizer::initialiseHistograms(){
   getStatistics().getHisto1D("2g_hit_tdiff_cut_tot")->GetXaxis()->SetTitle("A-B Signal Time Difference [ps]");
   getStatistics().getHisto1D("2g_hit_tdiff_cut_tot")->GetYaxis()->SetTitle("Number of Hit Pairs");
 
-  // Histograms for scintillator synchronization constatns
-  auto minScinID = getParamBank().getScins().begin()->first;
-  auto maxScinID = getParamBank().getScins().rbegin()->first;
-
-  for(int scinID = minScinID; scinID<= maxScinID; scinID++){
-    getStatistics().createHistogram(new TH1F(
-      Form("tdiff_a_d_scin_%d", scinID),
-      Form("TDiff annihilation hit from scin %d and deex hit", scinID),
-      200, -15000.0, 15000.0
-    ));
-
-    getStatistics().createHistogram(new TH1F(
-      Form("tdiff_d_a_scin_%d", scinID),
-      Form("TDiff deex hit from scin %d and annihilation hit", scinID),
-      200, -15000.0, 15000.0
-    ));
-  }
-
   // Histograms for slots
   auto minSlotID = getParamBank().getSlots().begin()->first;
   auto maxSlotID = getParamBank().getSlots().rbegin()->first;
@@ -260,6 +244,25 @@ void EventCategorizer::initialiseHistograms(){
   getStatistics().getHisto2D("ann_point_yz_zoom")->GetXaxis()->SetTitle("Y position [cm]");
   getStatistics().getHisto2D("ann_point_yz_zoom")->GetYaxis()->SetTitle("Z position [cm]");
 
+  // Histograms for scintillator synchronization constatns
+  if(fSaveCalibHistos){
+    auto minScinID = getParamBank().getScins().begin()->first;
+    auto maxScinID = getParamBank().getScins().rbegin()->first;
+
+    for(int scinID = minScinID; scinID<= maxScinID; scinID++){
+      getStatistics().createHistogram(new TH1F(
+        Form("tdiff_a_d_scin_%d", scinID),
+        Form("TDiff annihilation hit from scin %d and deex hit", scinID),
+        200, -15000.0, 15000.0
+      ));
+
+      getStatistics().createHistogram(new TH1F(
+        Form("tdiff_d_a_scin_%d", scinID),
+        Form("TDiff deex hit from scin %d and annihilation hit", scinID),
+        200, -15000.0, 15000.0
+      ));
+    }
+  }
   // General histograms
   // getStatistics().createHistogram(
   //   new TH2F("All_XYpos", "Hits position XY", 222, -50.5, 50.5, 222, -50.5, 50.5));

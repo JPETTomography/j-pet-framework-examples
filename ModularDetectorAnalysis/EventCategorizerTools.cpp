@@ -41,7 +41,7 @@ void EventCategorizerTools::selectForCalibration(
       bool deex1 = false;
       bool deex2 = false;
 
-      // Checking TOT of hits to classify them as annihilation of deexcitation
+      // Checking TOT of hits to classify them as annihilation or deexcitation
       if(tot1 > anihTOTCutMin && tot1 < anihTOTCutMax) { anih1 = true; }
       if(tot2 > anihTOTCutMin && tot2 < anihTOTCutMax) { anih2 = true; }
       if(tot1 > deexTOTCutMin && tot1 < deexTOTCutMax) { deex1 = true; }

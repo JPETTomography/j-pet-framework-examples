@@ -57,6 +57,7 @@ protected:
 	const std::string kDeexTOTCutMaxParamKey = "Deex_Categorizer_TOT_Cut_Max_double";
 
 	const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
+	const std::string kSaveCalibHistosParamKey = "Save_Calib_Histograms_bool";
 
 	void saveEvents(const std::vector<JPetEvent>& event);
 
@@ -69,7 +70,9 @@ protected:
 	double fDeexTOTCutMin = 250000.0;
 	double fDeexTOTCutMax = 350000.0;
 
+
 	bool fSaveControlHistos = true;
+	bool fSaveCalibHistos = false;
 	void initialiseHistograms();
 };
 #endif /* !EVENTCATEGORIZER_H */

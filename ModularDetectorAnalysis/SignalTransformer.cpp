@@ -81,19 +81,19 @@ bool SignalTransformer::exec()
 
 bool SignalTransformer::terminate()
 {
-  if(fSaveCalibHistos && isOptionSet(fParams.getOptions(), kCalibBankFileParamKey)){
-    INFO(Form(
-      "Signal Transformer - adding offsets histograms to calibration bank %s",
-      getOptionAsString(fParams.getOptions(), kCalibBankFileParamKey).c_str()
-    ));
-
-    std::vector<TH1F*> histograms;
-    for(auto pm_e : getParamBank().getPMs()) {
-      TH1F* histo = dynamic_cast<TH1F*>(getStatistics().getHisto1D(Form("offset_%d", pm_e.second->getID()))->Clone());
-      histograms.push_back(histo);
-    }
-    CalibrationTools::addHistograms(histograms, getOptionAsString(fParams.getOptions(), kCalibBankFileParamKey));
-  }
+  // if(fSaveCalibHistos && isOptionSet(fParams.getOptions(), kCalibBankFileParamKey)){
+  //   INFO(Form(
+  //     "Signal Transformer - adding offsets histograms to calibration bank %s",
+  //     getOptionAsString(fParams.getOptions(), kCalibBankFileParamKey).c_str()
+  //   ));
+  //
+  //   std::vector<TH1F*> histograms;
+  //   for(auto pm_e : getParamBank().getPMs()) {
+  //     TH1F* histo = dynamic_cast<TH1F*>(getStatistics().getHisto1D(Form("offset_%d", pm_e.second->getID()))->Clone());
+  //     histograms.push_back(histo);
+  //   }
+  //   CalibrationTools::addHistograms(histograms, getOptionAsString(fParams.getOptions(), kCalibBankFileParamKey));
+  // }
   INFO("Signal Transformer finished");
   return true;
 }

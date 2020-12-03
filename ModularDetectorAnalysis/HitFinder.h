@@ -50,7 +50,6 @@ protected:
   void saveHits(const std::vector<JPetHit>& hits);
   void initialiseHistograms();
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
-  const std::string kCalibBankFileParamKey = "CalibBank_FileName_std::string";
   const std::string kSaveCalibHistosParamKey = "Save_Calib_Histograms_bool";
   const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
   const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_double";

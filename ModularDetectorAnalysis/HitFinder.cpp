@@ -81,19 +81,19 @@ bool HitFinder::exec()
 
 bool HitFinder::terminate()
 {
-  if(fSaveCalibHistos && isOptionSet(fParams.getOptions(), kCalibBankFileParamKey)) {
-    INFO(Form(
-      "Hit Finder - adding A-B spectra histograms to calibration bank %s",
-      getOptionAsString(fParams.getOptions(), kCalibBankFileParamKey).c_str()
-    ));
-
-    std::vector<TH1F*> histograms;
-    for(auto scin_e : getParamBank().getScins()){
-      TH1F* histo = dynamic_cast<TH1F*>(getStatistics().getHisto1D(Form("ab_tdiff_scin_%d", scin_e.second->getID()))->Clone());
-      histograms.push_back(histo);
-    }
-    CalibrationTools::addHistograms(histograms, getOptionAsString(fParams.getOptions(), kCalibBankFileParamKey));
-  }
+  // if(fSaveCalibHistos && isOptionSet(fParams.getOptions(), kCalibBankFileParamKey)) {
+  //   INFO(Form(
+  //     "Hit Finder - adding A-B spectra histograms to calibration bank %s",
+  //     getOptionAsString(fParams.getOptions(), kCalibBankFileParamKey).c_str()
+  //   ));
+  //
+  //   std::vector<TH1F*> histograms;
+  //   for(auto scin_e : getParamBank().getScins()){
+  //     TH1F* histo = dynamic_cast<TH1F*>(getStatistics().getHisto1D(Form("ab_tdiff_scin_%d", scin_e.second->getID()))->Clone());
+  //     histograms.push_back(histo);
+  //   }
+  //   CalibrationTools::addHistograms(histograms, getOptionAsString(fParams.getOptions(), kCalibBankFileParamKey));
+  // }
 
   INFO("Hit finding ended");
   return true;

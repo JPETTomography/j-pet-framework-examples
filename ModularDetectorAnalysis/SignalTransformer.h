@@ -44,7 +44,6 @@ public:
 protected:
 	const std::string kMergeSignalsTimeParamKey = "SignalTransformer_MergeSignalsTime_double";
 	const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
-	const std::string kCalibBankFileParamKey = "CalibBank_FileName_std::string";
 	const std::string kSaveCalibHistosParamKey = "Save_Calib_Histograms_bool";
 	const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
 	void saveMatrixSignals(const std::vector<JPetMatrixSignal>& mtxSigVec);
