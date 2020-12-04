@@ -24,49 +24,61 @@ using namespace std;
 * Selecting pair of hits for calibrations based on TOT and Scin ID
 */
 void EventCategorizerTools::selectForCalibration(
-  const JPetEvent& event, JPetStatistics& stats, bool saveHistos,
-  double deexTOTCutMin, double deexTOTCutMax, double anihTOTCutMin, double anihTOTCutMax
+  const JPetEvent& event, JPetStatistics& stats, bool saveHistos, boost::property_tree::ptree& calibTree
 ) {
+
   if (event.getHits().size() < 2) { return; }
   for (uint i = 0; i < event.getHits().size(); i++) {
     for (uint j = i + 1; j < event.getHits().size(); j++) {
 
-      JPetHit anihHit;
-      JPetHit deexHit;
-
       auto tot1 = calculateTOT(event.getHits().at(i));
       auto tot2 = calculateTOT(event.getHits().at(j));
+      auto scin1ID = event.getHits().at(i).getScin().getID();
+      auto scin2ID = event.getHits().at(j).getScin().getID();
+
+      double s1AnnihMinCut = calibTree.get("scin."+to_string(scin1ID)+".tot_cut_anni_min", 0.0);
+      double s1AnnihMaxCut = calibTree.get("scin."+to_string(scin1ID)+".tot_cut_anni_max", 0.0);
+
+      double s2AnnihMinCut = calibTree.get("scin."+to_string(scin2ID)+".tot_cut_anni_min", 0.0);
+      double s2AnnihMaxCut = calibTree.get("scin."+to_string(scin2ID)+".tot_cut_anni_max", 0.0);
+
+      double s1DeexMinCut = calibTree.get("scin."+to_string(scin1ID)+".tot_cut_deex_min", 0.0);
+      double s1DeexMaxCut = calibTree.get("scin."+to_string(scin1ID)+".tot_cut_deex_max", 0.0);
+
+      double s2DeexMinCut = calibTree.get("scin."+to_string(scin2ID)+".tot_cut_deex_min", 0.0);
+      double s2DeexMaxCut = calibTree.get("scin."+to_string(scin2ID)+".tot_cut_deex_max", 0.0);
+
       bool anih1 = false;
       bool anih2 = false;
       bool deex1 = false;
       bool deex2 = false;
 
       // Checking TOT of hits to classify them as annihilation or deexcitation
-      if(tot1 > anihTOTCutMin && tot1 < anihTOTCutMax) { anih1 = true; }
-      if(tot2 > anihTOTCutMin && tot2 < anihTOTCutMax) { anih2 = true; }
-      if(tot1 > deexTOTCutMin && tot1 < deexTOTCutMax) { deex1 = true; }
-      if(tot2 > deexTOTCutMin && tot2 < deexTOTCutMax) { deex2 = true; }
+      if(tot1 > s1AnnihMinCut && tot1 < s1AnnihMaxCut) { anih1 = true; }
+      if(tot2 > s2AnnihMinCut && tot2 < s2AnnihMaxCut) { anih2 = true; }
+      if(tot1 > s1DeexMinCut && tot1 < s1DeexMaxCut) { deex1 = true; }
+      if(tot2 > s2DeexMinCut && tot2 < s2DeexMaxCut) { deex2 = true; }
+
+      // Time differences and strip ID to be assigned
+      double tDiff_A_D = 0.0, tDiff_D_A = 0.0;
+      int aScinID = -1, dScinID = -1;
 
       if(anih1 && deex2) {
-        anihHit = event.getHits().at(i);
-        deexHit = event.getHits().at(j);
+        tDiff_A_D = event.getHits().at(i).getTime() - event.getHits().at(j).getTime();
+        tDiff_D_A = event.getHits().at(j).getTime() - event.getHits().at(i).getTime();
+        aScinID = event.getHits().at(i).getScin().getID();
+        dScinID = event.getHits().at(j).getScin().getID();
       } else if(anih2 && deex1) {
-        anihHit = event.getHits().at(j);
-        deexHit = event.getHits().at(i);
+        tDiff_A_D = event.getHits().at(j).getTime() - event.getHits().at(i).getTime();
+        tDiff_D_A = event.getHits().at(i).getTime() - event.getHits().at(j).getTime();
+        aScinID = event.getHits().at(j).getScin().getID();
+        dScinID = event.getHits().at(i).getScin().getID();
       } else {
         continue;
       }
 
-      // Time differences
-      auto tDiff_A_D = anihHit.getTime() - deexHit.getTime();
-      auto tDiff_D_A = deexHit.getTime() - anihHit.getTime();
-
-      // Getting IDs of strips
-      auto aScinID = anihHit.getScin().getID();
-      auto dScinID = deexHit.getScin().getID();
-
       // Filling histograms for specific scintillators
-      if(saveHistos) {
+      if(saveHistos && tDiff_A_D!=0.0 && tDiff_D_A!=0.0 && aScinID!=-1 && dScinID!=-1) {
         stats.getHisto1D(Form("tdiff_a_d_scin_%d", aScinID))->Fill(tDiff_A_D);
         stats.getHisto1D(Form("tdiff_d_a_scin_%d", dScinID))->Fill(tDiff_D_A);
       }
@@ -80,7 +92,7 @@ void EventCategorizerTools::selectForCalibration(
 */
 bool EventCategorizerTools::checkFor2Gamma(
   const JPetEvent& event, JPetStatistics& stats, bool saveHistos,
-  double b2bSlotThetaDiff, double b2bTimeDiff, double anihTOTCutMin, double anihTOTCutMax
+  double b2bSlotThetaDiff, double b2bTimeDiff, boost::property_tree::ptree& calibTree
 ) {
   if (event.getHits().size() < 2) { return false; }
 
@@ -104,8 +116,8 @@ bool EventCategorizerTools::checkFor2Gamma(
 
       if (fabs(thetaDiff - 180.0) < b2bSlotThetaDiff && timeDiff < b2bTimeDiff){
         if (saveHistos) {
-          auto tot1 = firstHit.getEnergy()/((double) firstHit.getQualityOfEnergy());
-          auto tot2 = secondHit.getEnergy()/((double) secondHit.getQualityOfEnergy());
+          auto tot1 = calculateTOT(firstHit);
+          auto tot2 = calculateTOT(secondHit);
           auto tof = calculateTOFByConvention(firstHit, secondHit);
 
           stats.getHisto1D("2g_tot")->Fill(tot1);
@@ -123,8 +135,17 @@ bool EventCategorizerTools::checkFor2Gamma(
           stats.getHisto1D("2g_hit_tdiff")->Fill(firstHit.getTimeDiff());
           stats.getHisto1D("2g_hit_tdiff")->Fill(secondHit.getTimeDiff());
 
+          auto scin1ID = firstHit.getScin().getID();
+          auto scin2ID = secondHit.getScin().getID();
+
+          double s1AnnihMinCut = calibTree.get("scin."+to_string(scin1ID)+".tot_cut_anni_min", 0.0);
+          double s1AnnihMaxCut = calibTree.get("scin."+to_string(scin1ID)+".tot_cut_anni_max", 0.0);
+
+          double s2AnnihMinCut = calibTree.get("scin."+to_string(scin2ID)+".tot_cut_anni_min", 0.0);
+          double s2AnnihMaxCut = calibTree.get("scin."+to_string(scin2ID)+".tot_cut_anni_max", 0.0);
+
           // Pairs passing TOT cut are used to calculate annihilation point
-          if(tot1 > anihTOTCutMin && tot1 < anihTOTCutMax && tot2 > anihTOTCutMin && tot2 < anihTOTCutMax){
+          if(tot1 > s1AnnihMinCut && tot1 < s1AnnihMaxCut && tot2 > s2AnnihMinCut && tot2 < s2AnnihMaxCut){
             stats.getHisto1D("2g_hit_tdiff_cut_tot")->Fill(firstHit.getTimeDiff());
             stats.getHisto1D("2g_hit_tdiff_cut_tot")->Fill(secondHit.getTimeDiff());
             TVector3 annhilationPoint = calculateAnnihilationPoint(firstHit, secondHit);

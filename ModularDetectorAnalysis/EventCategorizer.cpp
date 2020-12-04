@@ -13,6 +13,8 @@
  *  @file EventCategorizer.cpp
  */
 
+#include <boost/property_tree/json_parser.hpp>
+
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include <JPetWriter/JPetWriter.h>
 #include "EventCategorizerTools.h"
@@ -49,38 +51,9 @@ bool EventCategorizer::init()
      ));
    }
 
-   // Parameters for annihilation and deexcitation TOT cut
-   if (isOptionSet(fParams.getOptions(), kAnihTOTCutMinParamKey)) {
-     fAnihTOTCutMin = getOptionAsDouble(fParams.getOptions(), kAnihTOTCutMinParamKey);
-   } else {
-     WARNING(Form(
-       "No value of the %s parameter provided by the user. Using default value of %lf.",
-       kAnihTOTCutMinParamKey.c_str(), fAnihTOTCutMin
-     ));
-   }
-   if (isOptionSet(fParams.getOptions(), kAnihTOTCutMaxParamKey)) {
-     fAnihTOTCutMax = getOptionAsDouble(fParams.getOptions(), kAnihTOTCutMaxParamKey);
-   } else {
-     WARNING(Form(
-       "No value of the %s parameter provided by the user. Using default value of %lf.",
-       kAnihTOTCutMaxParamKey.c_str(), fAnihTOTCutMax
-     ));
-   }
-      if (isOptionSet(fParams.getOptions(), kDeexTOTCutMinParamKey)) {
-     fDeexTOTCutMin = getOptionAsDouble(fParams.getOptions(), kDeexTOTCutMinParamKey);
-   } else {
-     WARNING(Form(
-       "No value of the %s parameter provided by the user. Using default value of %lf.",
-       kDeexTOTCutMinParamKey.c_str(), fDeexTOTCutMin
-     ));
-   }
-   if (isOptionSet(fParams.getOptions(), kDeexTOTCutMaxParamKey)) {
-     fDeexTOTCutMax = getOptionAsDouble(fParams.getOptions(), kDeexTOTCutMaxParamKey);
-   } else {
-     WARNING(Form(
-       "No value of the %s parameter provided by the user. Using default value of %lf.",
-       kDeexTOTCutMaxParamKey.c_str(), fDeexTOTCutMax
-     ));
+   // Reading file with effective light velocit and TOF synchronization constants to property tree
+   if (isOptionSet(fParams.getOptions(), kConstantsFileParamKey)) {
+     boost::property_tree::read_json(getOptionAsString(fParams.getOptions(), kConstantsFileParamKey), fConstansTree);
    }
 
    if (isOptionSet(fParams.getOptions(), kMaxTimeDiffParamKey)) {
@@ -91,6 +64,9 @@ bool EventCategorizer::init()
    // Getting bool for saving histograms
    if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey)) {
      fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
+   }
+   if (isOptionSet(fParams.getOptions(), kSaveCalibHistosParamKey)) {
+     fSaveCalibHistos = getOptionAsBool(fParams.getOptions(), kSaveCalibHistosParamKey);
    }
 
    // Input events type
@@ -109,16 +85,12 @@ bool EventCategorizer::exec()
 
       // Check types of current event
       bool is2Gamma = EventCategorizerTools::checkFor2Gamma(
-        event, getStatistics(), fSaveControlHistos, fB2BSlotThetaDiff,
-        fMaxTimeDiff, fAnihTOTCutMin, fAnihTOTCutMax
+        event, getStatistics(), fSaveControlHistos, fB2BSlotThetaDiff, fMaxTimeDiff, fConstansTree
       );
 
-      // Select hits for TOF calibration, if needed
+      // Select hits for TOF calibration, if making calibraiton
       if(fSaveCalibHistos){
-        EventCategorizerTools::selectForCalibration(
-          event, getStatistics(), fSaveControlHistos,
-          fAnihTOTCutMin, fAnihTOTCutMax, fDeexTOTCutMin, fDeexTOTCutMax
-        );
+        EventCategorizerTools::selectForCalibration(event, getStatistics(), fSaveControlHistos, fConstansTree);
       }
 
       // bool is3Gamma = EventCategorizerTools::checkFor3Gamma(

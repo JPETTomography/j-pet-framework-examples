@@ -16,6 +16,8 @@
 #ifndef EVENTCATEGORIZER_H
 #define EVENTCATEGORIZER_H
 
+#include <boost/property_tree/ptree.hpp>
+
 #include <JPetUserTask/JPetUserTask.h>
 #include "EventCategorizerTools.h"
 #include <JPetEvent/JPetEvent.h>
@@ -49,27 +51,16 @@ protected:
 	const std::string kBack2BackSlotThetaDiffParamKey = "Back2Back_Categorizer_SlotThetaDiff_double";
 	const std::string kScatterTOFTimeDiffParamKey = "Scatter_Categorizer_TOF_TimeDiff_double";
 	const std::string kMaxTimeDiffParamKey = "EventCategorizer_MaxTimeDiff_double";
-
-	const std::string kAnihTOTCutMinParamKey = "Anih_Categorizer_TOT_Cut_Min_double";
-	const std::string kAnihTOTCutMaxParamKey = "Anih_Categorizer_TOT_Cut_Max_double";
-
-	const std::string kDeexTOTCutMinParamKey = "Deex_Categorizer_TOT_Cut_Min_double";
-	const std::string kDeexTOTCutMaxParamKey = "Deex_Categorizer_TOT_Cut_Max_double";
-
 	const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
 	const std::string kSaveCalibHistosParamKey = "Save_Calib_Histograms_bool";
+	const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
 
 	void saveEvents(const std::vector<JPetEvent>& event);
 
+	boost::property_tree::ptree fConstansTree;
 	double fScatterTOFTimeDiff = 2000.0;
 	double fB2BSlotThetaDiff = 3.0;
 	double fMaxTimeDiff = 1000.;
-
-	double fAnihTOTCutMin = 100000.0;
-	double fAnihTOTCutMax = 200000.0;
-	double fDeexTOTCutMin = 250000.0;
-	double fDeexTOTCutMax = 350000.0;
-
 
 	bool fSaveControlHistos = true;
 	bool fSaveCalibHistos = false;

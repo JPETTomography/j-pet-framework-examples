@@ -16,6 +16,8 @@
 #ifndef EVENTCATEGORIZERTOOLS_H
 #define EVENTCATEGORIZERTOOLS_H
 
+#include <boost/property_tree/ptree.hpp>
+
 #include <JPetStatistics/JPetStatistics.h>
 #include <JPetEvent/JPetEvent.h>
 #include <JPetHit/JPetHit.h>
@@ -32,12 +34,11 @@ class EventCategorizerTools
 {
 public:
   static void selectForCalibration(
-    const JPetEvent& event, JPetStatistics& stats, bool saveHistos,
-    double anihTOTCutMin, double anihTOTCutMax, double deexTOTCutMin, double deexTOTCutMax
+    const JPetEvent& event, JPetStatistics& stats, bool saveHistos, boost::property_tree::ptree& calibTree
   );
   static bool checkFor2Gamma(
     const JPetEvent& event, JPetStatistics& stats, bool saveHistos,
-    double b2bSlotThetaDiff, double b2bTimeDiff, double anihTOTCutMin, double anihTOTCutMax
+    double b2bSlotThetaDiff, double b2bTimeDiff, boost::property_tree::ptree& calibTree
   );
   static bool checkFor3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos);
   static bool checkForPrompt(
