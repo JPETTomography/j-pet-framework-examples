@@ -52,14 +52,39 @@ bool EventCategorizer::init()
    }
 
    // Reading file with effective light velocit and TOF synchronization constants to property tree
-   if (isOptionSet(fParams.getOptions(), kConstantsFileParamKey)) {
-     boost::property_tree::read_json(getOptionAsString(fParams.getOptions(), kConstantsFileParamKey), fConstansTree);
-   }
+   // if (isOptionSet(fParams.getOptions(), kConstantsFileParamKey)) {
+   //   boost::property_tree::read_json(getOptionAsString(fParams.getOptions(), kConstantsFileParamKey), fConstansTree);
+   // }
 
    if (isOptionSet(fParams.getOptions(), kMaxTimeDiffParamKey)) {
      fMaxTimeDiff = getOptionAsDouble(fParams.getOptions(), kMaxTimeDiffParamKey);
    } else {
      WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMaxTimeDiffParamKey.c_str(), fMaxTimeDiff));
+   }
+
+   // Reading TOT cut values
+   if (isOptionSet(fParams.getOptions(), kTOTCutAnniMinParamKey)) {
+     fTOTCutAnniMin = getOptionAsDouble(fParams.getOptions(), kTOTCutAnniMinParamKey);
+   } else {
+     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kTOTCutAnniMinParamKey.c_str(), fTOTCutAnniMin));
+   }
+
+   if (isOptionSet(fParams.getOptions(), kTOTCutAnniMaxParamKey)) {
+     fTOTCutAnniMax = getOptionAsDouble(fParams.getOptions(), kTOTCutAnniMaxParamKey);
+   } else {
+     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMaxTimeDiffParamKey.c_str(), fTOTCutAnniMax));
+   }
+
+   if (isOptionSet(fParams.getOptions(), kTOTCutDeexMinParamKey)) {
+     fTOTCutDeexMin = getOptionAsDouble(fParams.getOptions(), kTOTCutDeexMinParamKey);
+   } else {
+     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMaxTimeDiffParamKey.c_str(), fTOTCutDeexMin));
+   }
+
+   if (isOptionSet(fParams.getOptions(), kTOTCutDeexMaxParamKey)) {
+     fTOTCutDeexMax = getOptionAsDouble(fParams.getOptions(), kTOTCutDeexMaxParamKey);
+   } else {
+     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMaxTimeDiffParamKey.c_str(), fTOTCutDeexMax));
    }
    // Getting bool for saving histograms
    if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey)) {
@@ -85,19 +110,23 @@ bool EventCategorizer::exec()
 
       // Check types of current event
       bool is2Gamma = EventCategorizerTools::checkFor2Gamma(
-        event, getStatistics(), fSaveControlHistos, fB2BSlotThetaDiff, fMaxTimeDiff, fConstansTree
+        event, getStatistics(), fSaveControlHistos, fB2BSlotThetaDiff,
+        fMaxTimeDiff, fTOTCutAnniMin, fTOTCutAnniMax
       );
 
       // Select hits for TOF calibration, if making calibraiton
       if(fSaveCalibHistos){
-        EventCategorizerTools::selectForCalibration(event, getStatistics(), fSaveControlHistos, fConstansTree);
+        EventCategorizerTools::selectForCalibration(
+          event, getStatistics(), fSaveControlHistos,
+          fTOTCutAnniMin, fTOTCutAnniMax, fTOTCutDeexMin, fTOTCutDeexMax
+        );
       }
 
       // bool is3Gamma = EventCategorizerTools::checkFor3Gamma(
       //   event, getStatistics(), fSaveControlHistos
       // );
       // bool isPrompt = EventCategorizerTools::checkForPrompt(
-      //   event, getStatistics(), fSaveControlHistos, fDeexTOTCutMin, fDeexTOTCutMax
+      //   event, getStatistics(), fSaveControlHistos, fTOTCutDeexMin, fTOTCutDeexMax
       // );
       // bool isScattered = EventCategorizerTools::checkForScatter(
       //   event, getStatistics(), fSaveControlHistos, fScatterTOFTimeDiff

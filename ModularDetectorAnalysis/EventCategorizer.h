@@ -53,14 +53,22 @@ protected:
 	const std::string kMaxTimeDiffParamKey = "EventCategorizer_MaxTimeDiff_double";
 	const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
 	const std::string kSaveCalibHistosParamKey = "Save_Calib_Histograms_bool";
-	const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
+	const std::string kTOTCutAnniMinParamKey = "EventCategorizer_TOT_Cut_Anni_Min_double";
+	const std::string kTOTCutAnniMaxParamKey = "EventCategorizer_TOT_Cut_Anni_Max_double";
+	const std::string kTOTCutDeexMinParamKey = "EventCategorizer_TOT_Cut_Deex_Min_double";
+	const std::string kTOTCutDeexMaxParamKey = "EventCategorizer_TOT_Cut_Deex_Max_double";
+
 
 	void saveEvents(const std::vector<JPetEvent>& event);
 
 	boost::property_tree::ptree fConstansTree;
 	double fScatterTOFTimeDiff = 2000.0;
 	double fB2BSlotThetaDiff = 3.0;
-	double fMaxTimeDiff = 1000.;
+	double fMaxTimeDiff = 1000.0;
+	double fTOTCutAnniMin = 150000.0;
+	double fTOTCutAnniMax = 250000.0;
+	double fTOTCutDeexMin = 270000.0;
+	double fTOTCutDeexMax = 370000.0;
 
 	bool fSaveControlHistos = true;
 	bool fSaveCalibHistos = false;

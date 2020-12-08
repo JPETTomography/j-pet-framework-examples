@@ -47,7 +47,7 @@ public:
   );
 
   static JPetHit createHit(
-    const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2, double velocity, double tofCorrection
+    const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2, boost::property_tree::ptree& calibTree
   );
 
   static JPetHit createDummyHit(const JPetMatrixSignal& signal);

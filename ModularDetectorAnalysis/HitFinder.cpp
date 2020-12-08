@@ -122,8 +122,10 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
       getStatistics().getHisto2D(Form("hit_tdiff_scin_m_%d", multi))->Fill(scinID, hit.getTimeDiff());
 
       if(hit.getEnergy() != 0.0){
-        getStatistics().getHisto2D(Form("hit_tot_scin_m_%d", multi))
-        ->Fill(scinID, hit.getEnergy()/((double) multi));
+        getStatistics().getHisto2D("hit_tot_scin")->Fill(scinID, hit.getQualityOfEnergy());
+        getStatistics().getHisto2D("hit_tot_scin_norm")->Fill(scinID, hit.getEnergy());
+        getStatistics().getHisto2D(Form("hit_tot_scin_m_%d", multi))->Fill(scinID, hit.getQualityOfEnergy());
+        getStatistics().getHisto2D(Form("hit_tot_scin_m_%d_norm", multi))->Fill(scinID, hit.getEnergy());
       }
 
       // Filling calibration histograms, if demanded. For A-B synchronization
@@ -153,14 +155,6 @@ void HitFinder::initialiseHistograms(){
   getStatistics().getHisto2D("hit_pos_XY")->GetYaxis()->SetTitle("X [cm]");
 
   getStatistics().createHistogram(new TH2F(
-    "hit_tdiff_scin", "Hit Time Difference per Scintillator ID",
-    maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5,
-    201, -1.1 * fABTimeDiff, 1.1 * fABTimeDiff
-  ));
-  getStatistics().getHisto2D("hit_tdiff_scin")->GetXaxis()->SetTitle("Scintillator ID");
-  getStatistics().getHisto2D("hit_tdiff_scin")->GetYaxis()->SetTitle("A-B time difference [ps]");
-
-  getStatistics().createHistogram(new TH2F(
     "hit_pos_z", "Hit Position per Scintillator ID",
     maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5, 201, -50.0, 50.0
   ));
@@ -180,6 +174,29 @@ void HitFinder::initialiseHistograms(){
   getStatistics().getHisto2D("hit_multi_scin")->GetXaxis()->SetTitle("Scintillator ID");
   getStatistics().getHisto2D("hit_multi_scin")->GetYaxis()->SetTitle("Signal multiplicity [ps]");
 
+  // Time diff and TOT per scin
+  getStatistics().createHistogram(new TH2F(
+    "hit_tdiff_scin", "Hit Time Difference per Scintillator ID",
+    maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5,
+    201, -1.1 * fABTimeDiff, 1.1 * fABTimeDiff
+  ));
+  getStatistics().getHisto2D("hit_tdiff_scin")->GetXaxis()->SetTitle("Scintillator ID");
+  getStatistics().getHisto2D("hit_tdiff_scin")->GetYaxis()->SetTitle("A-B time difference [ps]");
+
+  getStatistics().createHistogram(new TH2F(
+    "hit_tot_scin", "Hit TOT divided by multiplicity, all hits",
+    maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5, 200, 0.0, 400000.0
+  ));
+  getStatistics().getHisto2D("hit_tot_scin")->GetXaxis()->SetTitle("Scintillator ID");
+  getStatistics().getHisto2D("hit_tot_scin")->GetYaxis()->SetTitle("Time over Threshold [ps]");
+
+  getStatistics().createHistogram(new TH2F(
+    "hit_tot_scin_norm", "Normalized Hit TOT divided by multiplicity, all hits",
+    maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5, 200, 0.0, 400000.0
+  ));
+  getStatistics().getHisto2D("hit_tot_scin_norm")->GetXaxis()->SetTitle("Scintillator ID");
+  getStatistics().getHisto2D("hit_tot_scin_norm")->GetYaxis()->SetTitle("Normalized Time over Threshold [ps]");
+
   // Time diff and TOT per multiplicity
   for(int multi = 2; multi <=8; multi++){
     getStatistics().createHistogram(new TH2F(
@@ -193,6 +210,14 @@ void HitFinder::initialiseHistograms(){
     getStatistics().createHistogram(new TH2F(
       Form("hit_tot_scin_m_%d", multi),
       Form("Hit TOT divided by multiplicity, multiplicity %d", multi),
+      maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5, 200, 0.0, 400000.0
+    ));
+    getStatistics().getHisto2D(Form("hit_tot_scin_m_%d", multi))->GetXaxis()->SetTitle("Scintillator ID");
+    getStatistics().getHisto2D(Form("hit_tot_scin_m_%d", multi))->GetYaxis()->SetTitle("Time over Threshold [ps]");
+
+    getStatistics().createHistogram(new TH2F(
+      Form("hit_tot_scin_m_%d_norm", multi),
+      Form("Normalized Hit TOT divided by multiplicity, multiplicity %d", multi),
       maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5, 200, 0.0, 400000.0
     ));
     getStatistics().getHisto2D(Form("hit_tot_scin_m_%d", multi))->GetXaxis()->SetTitle("Scintillator ID");

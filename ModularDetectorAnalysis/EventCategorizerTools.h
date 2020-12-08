@@ -34,11 +34,12 @@ class EventCategorizerTools
 {
 public:
   static void selectForCalibration(
-    const JPetEvent& event, JPetStatistics& stats, bool saveHistos, boost::property_tree::ptree& calibTree
+    const JPetEvent& event, JPetStatistics& stats, bool saveHistos,
+    double totCutAnniMin, double totCutAnniMax, double totCutDeexMin, double totCutDeexMax
   );
   static bool checkFor2Gamma(
     const JPetEvent& event, JPetStatistics& stats, bool saveHistos,
-    double b2bSlotThetaDiff, double b2bTimeDiff, boost::property_tree::ptree& calibTree
+    double b2bSlotThetaDiff, double b2bTimeDiff, double totCutAnniMin, double totCutAnniMax
   );
   static bool checkFor3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos);
   static bool checkForPrompt(

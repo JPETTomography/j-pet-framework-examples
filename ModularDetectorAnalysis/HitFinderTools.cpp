@@ -98,12 +98,7 @@ vector<JPetHit> HitFinderTools::matchSignals(
       if (scinSigals.at(j).getTime() - mtxSig.getTime() < timeDiffAB) {
         if (mtxSig.getPM().getSide() != scinSigals.at(j).getPM().getSide()) {
 
-          // Getting constants for this scintillator
-          // If a calibration is empty, then a constant vaule is 0.0
-          double velocity = calibTree.get("scin."+to_string(mtxSig.getPM().getScin().getID())+".eff_velocity", 0.0);
-          double tofCorrection = calibTree.get("scin."+to_string(mtxSig.getPM().getScin().getID())+".tof_correction", 0.0);
-
-          auto hit = createHit(mtxSig, scinSigals.at(j), velocity, tofCorrection);
+          auto hit = createHit(mtxSig, scinSigals.at(j), calibTree);
 
           scinHits.push_back(hit);
           scinSigals.erase(scinSigals.begin() + j);
@@ -139,8 +134,10 @@ vector<JPetHit> HitFinderTools::matchSignals(
  * Method for Hit creation - setting all fields that make sense here
  */
 JPetHit HitFinderTools::createHit(
-  const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2, double velocity, double tofCorrection
+  const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2, boost::property_tree::ptree& calibTree
 ) {
+  int scinID = signal1.getPM().getScin().getID();
+
   JPetMatrixSignal signalA;
   JPetMatrixSignal signalB;
 
@@ -152,20 +149,35 @@ JPetHit HitFinderTools::createHit(
     signalB = signal1;
   }
 
+  // Getting constants for this scintillator
+  double velocity = calibTree.get("scin."+to_string(scinID)+".eff_velocity", -999.0);
+  double tofCorrection = calibTree.get("scin."+to_string(scinID)+".tof_correction", 0.0);
+  double totNormA = calibTree.get("scin."+to_string(scinID)+".tot_scaling_factor_a", 1.0);
+  double totNormB = calibTree.get("scin."+to_string(scinID)+".tot_scaling_factor_b", 0.0);
+
   JPetHit hit;
   hit.setSignals(signalA, signalB);
   hit.setTime(((signalA.getTime() + signalB.getTime()) / 2.0) - tofCorrection);
   hit.setQualityOfTime(-1.0);
   hit.setTimeDiff(signalB.getTime() - signalA.getTime());
   hit.setQualityOfTimeDiff(-1.0);
-  // TOT is a sum of over all threshold in all signals on both sides
-  // As an quality of energy we temporaily put multiplicity of signals (2-8)
-  hit.setEnergy(signalA.getTOT()+signalB.getTOT());
-  hit.setQualityOfEnergy(signalA.getRawSignals().size()+signalB.getRawSignals().size());
   hit.setPosX(signalA.getPM().getScin().getCenterX());
   hit.setPosY(signalA.getPM().getScin().getCenterY());
   hit.setPosZ(velocity * hit.getTimeDiff() / 2000.0);
   hit.setScin(signalA.getPM().getScin());
+
+  // TOT of a signal is a sum of over all threshold in a signal
+  // As a TOT of a hit we put avarege of all TOT of SiPM signals constructing this hit
+  // that is sum of TOT divided by multiplicity. TOT value is normalized using
+  // equalization constants from calibration file. We save TOT it temporaily as energy
+  // As an quality of energy we put TOT value before normalization
+  auto tot = signalA.getTOT()+signalB.getTOT();
+  auto multi = signalA.getRawSignals().size()+signalB.getRawSignals().size();
+  auto avToT = tot/((double) multi);
+  auto totNorm = avToT*totNormA + totNormB;
+
+  hit.setEnergy(totNorm);
+  hit.setQualityOfEnergy(avToT);
 
   return hit;
 }
