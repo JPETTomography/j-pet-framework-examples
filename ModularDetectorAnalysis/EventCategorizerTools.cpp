@@ -32,8 +32,8 @@ void EventCategorizerTools::selectForCalibration(
   for (uint i = 0; i < event.getHits().size(); i++) {
     for (uint j = i + 1; j < event.getHits().size(); j++) {
 
-      auto tot1 = calculateTOT(event.getHits().at(i));
-      auto tot2 = calculateTOT(event.getHits().at(j));
+      auto tot1 = event.getHits().at(i).getEnergy();
+      auto tot2 = event.getHits().at(j).getEnergy();
       auto scin1ID = event.getHits().at(i).getScin().getID();
       auto scin2ID = event.getHits().at(j).getScin().getID();
 
@@ -105,8 +105,8 @@ bool EventCategorizerTools::checkFor2Gamma(
 
       if (fabs(thetaDiff - 180.0) < b2bSlotThetaDiff && timeDiff < b2bTimeDiff){
         if (saveHistos) {
-          auto tot1 = calculateTOT(firstHit);
-          auto tot2 = calculateTOT(secondHit);
+          auto tot1 = firstHit.getEnergy();
+          auto tot2 = secondHit.getEnergy();
           auto tof = calculateTOFByConvention(firstHit, secondHit);
 
           stats.getHisto1D("2g_tot")->Fill(tot1);
