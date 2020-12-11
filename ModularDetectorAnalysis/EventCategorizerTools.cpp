@@ -69,7 +69,7 @@ void EventCategorizerTools::selectForCalibration(
       // Filling histograms for specific scintillators
       if(saveHistos && tDiff_A_D!=0.0 && tDiff_D_A!=0.0 && aScinID!=-1 && dScinID!=-1) {
         stats.getHisto1D(Form("tdiff_a_d_scin_%d", aScinID))->Fill(tDiff_A_D);
-        stats.getHisto1D(Form("tdiff_d_a_scin_%d", dScinID))->Fill(tDiff_D_A);
+        stats.getHisto1D(Form("tdiff_d_a_scin_%d", dScinID))->Fill(tDiff_A_D);
       }
     }
   }
