@@ -12,9 +12,16 @@
  *
  *  @file matrix_offests.C
  *
+ *  @brief Script for reading histograms with SiPM offsets and producing calibraiton json file
  *
+ *  This script uses histograms, that are produced by task SignalTransformer.
+ *  More detailed description is being created, so stay tuned.
  *
- *
+ *  Basic usage:
+ *  root> .L matrix_offsets.C
+ *  root> matrix_offests("file_with_calib_histos.root")
+ *  -- this will produce file "calibration_constants.json" with the results. If the
+ *  file exists, the result of this calibration will be appended to the existing tree.
  */
 
 #include <boost/property_tree/json_parser.hpp>
@@ -22,7 +29,6 @@
 
 #include <TDirectory.h>
 #include <TCanvas.h>
-#include <TRandom.h>
 #include <TGraph.h>
 #include <TLine.h>
 #include <TFile.h>
@@ -31,32 +37,60 @@
 #include <TH1D.h>
 
 #include <iostream>
+#include <fstream>
 #include <vector>
 
-const int fMinPMID = 401;
-const int fMaxPMID = 2896;
+namespace bpt = boost::property_tree;
 
-void matrix_offsets(std::string fileName, std::string calibJSONFileName = "calibration_constants.json") {
+void matrix_offsets(
+  std::string fileName, std::string calibJSONFileName = "calibration_constants.json",
+  bool saveResult = false, std::string resultDir = "./", int minPMID = 401, int maxPMID = 2896
+) {
 
   TFile* fileMtxSynchro = new TFile(fileName.c_str(), "READ");
-  boost::property_tree::ptree tree, pms;
+
+  bpt::ptree tree;
+  ifstream file(calibJSONFileName.c_str());
+  if(file.good()){
+    bpt::read_json(calibJSONFileName, tree);
+  }
 
   if(fileMtxSynchro->IsOpen()){
-    for(int pmID = fMinPMID; pmID <= fMaxPMID; ++pmID){
+    for(int pmID = minPMID; pmID <= maxPMID; ++pmID){
 
       TH1F* sipm_offset = dynamic_cast<TH1F*>(fileMtxSynchro->Get(Form("offset_%d", pmID)));
       if(sipm_offset->GetEntries() < 100) { continue; }
 
-      boost::property_tree::ptree pm_node;
-      pm_node.put("matrix_offset", sipm_offset->GetMean());
-      pms.push_back(std::make_pair(to_string(pmID), pm_node));
+      // Calculating limits for gaussian fit
+      auto max = sipm_offset->GetMaximumBin();
+      auto nBins = sipm_offset->GetNbinsX();
+      int binRange = (int)(0.1*nBins);
+      auto low = sipm_offset->GetBinCenter(max-binRange);
+      auto upp = sipm_offset->GetBinCenter(max+binRange);
+
+      sipm_offset->Fit("gaus", "", "", low, upp);
+      auto fitFun = sipm_offset->GetFunction("gaus");
+      fitFun->SetLineColor(2);
+
+      tree.put("pm."+to_string(pmID)+".matrix_offset", fitFun->GetParameter(1));
+
+      if(saveResult){
+        auto name = Form("fit_result_sipm_%d", pmID);
+        TCanvas* can = new TCanvas(name, name, 1200, 800);
+        sipm_offset->Draw();
+
+        auto legend = new TLegend(0.1, 0.7, 0.35, 0.9);
+        legend->AddEntry(sipm_offset, Form("SiPM offset ID %d with fit", pmID), "l");
+        legend->AddEntry((TObject*)0, Form("mean = %f +- %f", fitFun->GetParameter(1), fitFun->GetParError(1)), "");
+        legend->AddEntry((TObject*)0, Form("sigma = %f +- %f", fitFun->GetParameter(2), fitFun->GetParError(2)), "");
+        legend->AddEntry((TObject*)0, Form("Chi2 = %f    ndf = %i", fitFun->GetChisquare(), fitFun->GetNDF()), "");
+        legend->Draw("same");
+
+        can->SaveAs(Form("%s/offset_fit_sipm_%d.png", resultDir.c_str(), pmID));
+      }
     }
   }
 
-  tree.add_child("pm", pms);
-  boost::property_tree::write_json(fOutputFileName, tree);
-
-  // Add part of the code to read existing json file, if exists
-  // and add prepared information, then overwrite
-  // If option not provided or file does not exits, create a new file
+  // Saving tree into json file
+  bpt::write_json(calibJSONFileName, tree);
 }

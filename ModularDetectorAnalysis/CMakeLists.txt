@@ -25,6 +25,10 @@ set(AUXILLIARY_FILES
   README.md
   conf_djpet.xml
   userParamsModular.json
+  calibration_scripts/README.md
+  calibration_scripts/matrix_offests.C
+  calibration_scripts/tof_synchro.C
+  calibration_scripts/hit_tdiff_effvel.C
 )
 
 ################################################################################
