@@ -51,10 +51,10 @@ bool EventCategorizer::init()
      ));
    }
 
-   // Reading file with effective light velocit and TOF synchronization constants to property tree
-   // if (isOptionSet(fParams.getOptions(), kConstantsFileParamKey)) {
-   //   boost::property_tree::read_json(getOptionAsString(fParams.getOptions(), kConstantsFileParamKey), fConstansTree);
-   // }
+   // Reading file with constants to property tree
+   if (isOptionSet(fParams.getOptions(), kConstantsFileParamKey)) {
+     boost::property_tree::read_json(getOptionAsString(fParams.getOptions(), kConstantsFileParamKey), fConstansTree);
+   }
 
    if (isOptionSet(fParams.getOptions(), kMaxTimeDiffParamKey)) {
      fMaxTimeDiff = getOptionAsDouble(fParams.getOptions(), kMaxTimeDiffParamKey);
@@ -110,14 +110,14 @@ bool EventCategorizer::exec()
 
       // Check types of current event
       bool is2Gamma = EventCategorizerTools::checkFor2Gamma(
-        event, getStatistics(), fSaveControlHistos, fB2BSlotThetaDiff,
-        fMaxTimeDiff, fTOTCutAnniMin, fTOTCutAnniMax
+        event, getStatistics(), fSaveControlHistos, fSaveCalibHistos,
+        fB2BSlotThetaDiff, fMaxTimeDiff, fTOTCutAnniMin, fTOTCutAnniMax, fConstansTree
       );
 
       // Select hits for TOF calibration, if making calibraiton
       if(fSaveCalibHistos){
         EventCategorizerTools::selectForCalibration(
-          event, getStatistics(), fSaveControlHistos,
+          event, getStatistics(), fSaveControlHistos, fSaveCalibHistos,
           fTOTCutAnniMin, fTOTCutAnniMax, fTOTCutDeexMin, fTOTCutDeexMax
         );
       }
@@ -161,15 +161,10 @@ void EventCategorizer::saveEvents(const vector<JPetEvent>& events)
   for (const auto& event : events) { fOutputEvents->add<JPetEvent>(event); }
 }
 
-void EventCategorizer::initialiseHistograms(){
+void EventCategorizer::initialiseHistograms()
+{
 
   // Histograms for 2Gamama selection
-  getStatistics().createHistogram(
-    new TH1F("2g_tot", "Opposite module hits TOT div. by multiplicity", 100, 0.0, 400000.0)
-  );
-  getStatistics().getHisto1D("2g_tot")->GetXaxis()->SetTitle("Time over Threshold [ps]");
-  getStatistics().getHisto1D("2g_tot")->GetYaxis()->SetTitle("Number of Hits");
-
   getStatistics().createHistogram(
     new TH1F("2g_tdiff", "Opposite module hits registration time difference", 200, 0.0, 1.1*fMaxTimeDiff)
   );
@@ -177,23 +172,29 @@ void EventCategorizer::initialiseHistograms(){
   getStatistics().getHisto1D("2g_tdiff")->GetYaxis()->SetTitle("Number of Hit Pairs");
 
   getStatistics().createHistogram(
+    new TH1F("2g_tot", "Opposite module hits TOT div. by multiplicity", 100, 0.0, 400000.0)
+  );
+  getStatistics().getHisto1D("2g_tot")->GetXaxis()->SetTitle("Time over Threshold [ps]");
+  getStatistics().getHisto1D("2g_tot")->GetYaxis()->SetTitle("Number of Hits");
+
+  // TOF for hit pairs
+  getStatistics().createHistogram(
     new TH1F("2g_tof", "Opposite module hits TOF", 200, -15000.0, 15000.0)
   );
   getStatistics().getHisto1D("2g_tof")->GetXaxis()->SetTitle("Time of Flight [ps]");
   getStatistics().getHisto1D("2g_tof")->GetYaxis()->SetTitle("Number of Hit Pairs");
 
   getStatistics().createHistogram(
-    new TH1F("2g_hit_tdiff", "Opposite module hits A-B time difference", 100, -15000.0, 15000.0)
+    new TH1F("2g_tof_conv", "Opposite module hits TOF calculated by convention", 200, -15000.0, 15000.0)
   );
-  getStatistics().getHisto1D("2g_hit_tdiff")->GetXaxis()->SetTitle("A-B Signal Time Difference [ps]");
-  getStatistics().getHisto1D("2g_hit_tdiff")->GetYaxis()->SetTitle("Number of Hit Pairs");
+  getStatistics().getHisto1D("2g_tof_conv")->GetXaxis()->SetTitle("Time of Flight [ps]");
+  getStatistics().getHisto1D("2g_tof_conv")->GetYaxis()->SetTitle("Number of Hit Pairs");
 
-  // TDiff anfter TOT cut
   getStatistics().createHistogram(
-    new TH1F("2g_hit_tdiff_cut_tot", "Opposite module hits A-B time difference after TOT cut", 100, -15000.0, 15000.0)
+    new TH1F("2g_tof_corr", "Opposite module hits TOF with corrections", 200, -15000.0, 15000.0)
   );
-  getStatistics().getHisto1D("2g_hit_tdiff_cut_tot")->GetXaxis()->SetTitle("A-B Signal Time Difference [ps]");
-  getStatistics().getHisto1D("2g_hit_tdiff_cut_tot")->GetYaxis()->SetTitle("Number of Hit Pairs");
+  getStatistics().getHisto1D("2g_tof_corr")->GetXaxis()->SetTitle("Time of Flight [ps]");
+  getStatistics().getHisto1D("2g_tof_corr")->GetYaxis()->SetTitle("Number of Hit Pairs");
 
   // Histograms for slots
   auto minSlotID = getParamBank().getSlots().begin()->first;
@@ -207,43 +208,107 @@ void EventCategorizer::initialiseHistograms(){
     );
     getStatistics().getHisto1D(Form("2g_tof_slot_%d", slotID))->GetXaxis()->SetTitle("Time of Flight [ps]");
     getStatistics().getHisto1D(Form("2g_tof_slot_%d", slotID))->GetYaxis()->SetTitle("Number of Hit Pairs");
+
+    getStatistics().createHistogram(new TH1F(
+      Form("2g_tof_conv_slot_%d", slotID),
+      Form("TOF calculated by conventinon of 2 gamma event in Slot %d", slotID),
+      200, -15000.0, 15000.0)
+    );
+    getStatistics().getHisto1D(Form("2g_tof_conv_slot_%d", slotID))->GetXaxis()->SetTitle("Time of Flight [ps]");
+    getStatistics().getHisto1D(Form("2g_tof_conv_slot_%d", slotID))->GetYaxis()->SetTitle("Number of Hit Pairs");
+
+    getStatistics().createHistogram(new TH1F(
+      Form("2g_tof_corr_slot_%d", slotID),
+      Form("TOF corrected of 2 gamma event in Slot %d", slotID),
+      200, -15000.0, 15000.0)
+    );
+    getStatistics().getHisto1D(Form("2g_tof_corr_slot_%d", slotID))->GetXaxis()->SetTitle("Time of Flight [ps]");
+    getStatistics().getHisto1D(Form("2g_tof_corr_slot_%d", slotID))->GetYaxis()->SetTitle("Number of Hit Pairs");
   }
 
-  // Annihilation point histograms
   getStatistics().createHistogram(
-    new TH1F("ann_point_tof", "Annihilation pairs Time of Flight", 200, -15000.0, 15000.0));
-  getStatistics().getHisto1D("ann_point_tof")->GetXaxis()->SetTitle("Time of Flight [ps]");
-  getStatistics().getHisto1D("ann_point_tof")->GetYaxis()->SetTitle("Number of Annihilation Pairs");
+    new TH1F("2g_hit_tdiff", "Opposite module hits A-B time difference", 100, -15000.0, 15000.0)
+  );
+  getStatistics().getHisto1D("2g_hit_tdiff")->GetXaxis()->SetTitle("A-B Signal Time Difference [ps]");
+  getStatistics().getHisto1D("2g_hit_tdiff")->GetYaxis()->SetTitle("Number of Hit Pairs");
+
+  // Events after cut - defined as annihilation event
+  getStatistics().createHistogram(
+    new TH1F("ap_hit_tdiff", "Opposite module hits A-B time difference after TOT cut", 100, -15000.0, 15000.0)
+  );
+  getStatistics().getHisto1D("ap_hit_tdiff")->GetXaxis()->SetTitle("A-B Signal Time Difference [ps]");
+  getStatistics().getHisto1D("ap_hit_tdiff")->GetYaxis()->SetTitle("Number of Hit Pairs");
 
   getStatistics().createHistogram(
-     new TH2F("ann_point_xy", "XY position of annihilation point", 101, -50.5, 50.5, 101, -50.5, 50.5));
-  getStatistics().getHisto2D("ann_point_xy")->GetXaxis()->SetTitle("Y position [cm]");
-  getStatistics().getHisto2D("ann_point_xy")->GetYaxis()->SetTitle("X position [cm]");
+    new TH1F("ap_tof", "Annihilation pairs Time of Flight", 200, -15000.0, 15000.0));
+  getStatistics().getHisto1D("ap_tof")->GetXaxis()->SetTitle("Time of Flight [ps]");
+  getStatistics().getHisto1D("ap_tof")->GetYaxis()->SetTitle("Number of Annihilation Pairs");
 
   getStatistics().createHistogram(
-    new TH2F("ann_point_xz", "XZ position of annihilation point", 101, -50.5, 50.5, 101, -50.5, 50.5));
-  getStatistics().getHisto2D("ann_point_xz")->GetXaxis()->SetTitle("X position [cm]");
-  getStatistics().getHisto2D("ann_point_xz")->GetYaxis()->SetTitle("Z position [cm]");
+    new TH1F("ap_tof_conv", "Annihilation pairs Time of Flight", 200, -15000.0, 15000.0));
+  getStatistics().getHisto1D("ap_tof_conv")->GetXaxis()->SetTitle("Time of Flight [ps]");
+  getStatistics().getHisto1D("ap_tof_conv")->GetYaxis()->SetTitle("Number of Annihilation Pairs");
 
   getStatistics().createHistogram(
-    new TH2F("ann_point_yz", "YZ position of annihilation point", 101, -50.5, 50.5, 101, -50.5, 50.5));
-  getStatistics().getHisto2D("ann_point_yz")->GetXaxis()->SetTitle("Y position [cm]");
-  getStatistics().getHisto2D("ann_point_yz")->GetYaxis()->SetTitle("Z position [cm]");
+    new TH1F("ap_tof_corr", "Annihilation pairs Time of Flight", 200, -15000.0, 15000.0));
+  getStatistics().getHisto1D("ap_tof_corr")->GetXaxis()->SetTitle("Time of Flight [ps]");
+  getStatistics().getHisto1D("ap_tof_corr")->GetYaxis()->SetTitle("Number of Annihilation Pairs");
+
+  for(int slotID = minSlotID; slotID <= maxSlotID; slotID++){
+    getStatistics().createHistogram(new TH1F(
+      Form("ap_tof_slot_%d", slotID),
+      Form("TOF of annihilation event in Slot %d", slotID),
+      200, -15000.0, 15000.0)
+    );
+    getStatistics().getHisto1D(Form("ap_tof_slot_%d", slotID))->GetXaxis()->SetTitle("Time of Flight [ps]");
+    getStatistics().getHisto1D(Form("ap_tof_slot_%d", slotID))->GetYaxis()->SetTitle("Number of Hit Pairs");
+
+    getStatistics().createHistogram(new TH1F(
+      Form("ap_tof_conv_slot_%d", slotID),
+      Form("TOF calculated by conventinon of annihilation event in Slot %d", slotID),
+      200, -15000.0, 15000.0)
+    );
+    getStatistics().getHisto1D(Form("ap_tof_conv_slot_%d", slotID))->GetXaxis()->SetTitle("Time of Flight [ps]");
+    getStatistics().getHisto1D(Form("ap_tof_conv_slot_%d", slotID))->GetYaxis()->SetTitle("Number of Hit Pairs");
+
+    getStatistics().createHistogram(new TH1F(
+      Form("ap_tof_corr_slot_%d", slotID),
+      Form("TOF corrected of annihilation event in Slot %d", slotID),
+      200, -15000.0, 15000.0)
+    );
+    getStatistics().getHisto1D(Form("ap_tof_corr_slot_%d", slotID))->GetXaxis()->SetTitle("Time of Flight [ps]");
+    getStatistics().getHisto1D(Form("ap_tof_corr_slot_%d", slotID))->GetYaxis()->SetTitle("Number of Hit Pairs");
+  }
 
   getStatistics().createHistogram(
-     new TH2F("ann_point_xy_zoom", "XY position of annihilation point", 101, -10.5, 10.5, 101, -10.5, 10.5));
-  getStatistics().getHisto2D("ann_point_xy_zoom")->GetXaxis()->SetTitle("Y position [cm]");
-  getStatistics().getHisto2D("ann_point_xy_zoom")->GetYaxis()->SetTitle("X position [cm]");
+     new TH2F("ap_xy", "XY position of annihilation point", 101, -50.5, 50.5, 101, -50.5, 50.5));
+  getStatistics().getHisto2D("ap_xy")->GetXaxis()->SetTitle("Y position [cm]");
+  getStatistics().getHisto2D("ap_xy")->GetYaxis()->SetTitle("X position [cm]");
 
   getStatistics().createHistogram(
-    new TH2F("ann_point_xz_zoom", "XZ position of annihilation point", 101, -10.5, 10.5, 101, -10.5, 10.5));
-  getStatistics().getHisto2D("ann_point_xz_zoom")->GetXaxis()->SetTitle("X position [cm]");
-  getStatistics().getHisto2D("ann_point_xz_zoom")->GetYaxis()->SetTitle("Z position [cm]");
+    new TH2F("ap_xz", "XZ position of annihilation point", 101, -50.5, 50.5, 101, -50.5, 50.5));
+  getStatistics().getHisto2D("ap_xz")->GetXaxis()->SetTitle("X position [cm]");
+  getStatistics().getHisto2D("ap_xz")->GetYaxis()->SetTitle("Z position [cm]");
 
   getStatistics().createHistogram(
-    new TH2F("ann_point_yz_zoom", "YZ position of annihilation point", 101, -10.5, 10.5, 101, -10.5, 10.5));
-  getStatistics().getHisto2D("ann_point_yz_zoom")->GetXaxis()->SetTitle("Y position [cm]");
-  getStatistics().getHisto2D("ann_point_yz_zoom")->GetYaxis()->SetTitle("Z position [cm]");
+    new TH2F("ap_yz", "YZ position of annihilation point", 101, -50.5, 50.5, 101, -50.5, 50.5));
+  getStatistics().getHisto2D("ap_yz")->GetXaxis()->SetTitle("Y position [cm]");
+  getStatistics().getHisto2D("ap_yz")->GetYaxis()->SetTitle("Z position [cm]");
+
+  getStatistics().createHistogram(
+     new TH2F("ap_xy_zoom", "XY position of annihilation point", 101, -10.5, 10.5, 101, -10.5, 10.5));
+  getStatistics().getHisto2D("ap_xy_zoom")->GetXaxis()->SetTitle("Y position [cm]");
+  getStatistics().getHisto2D("ap_xy_zoom")->GetYaxis()->SetTitle("X position [cm]");
+
+  getStatistics().createHistogram(
+    new TH2F("ap_xz_zoom", "XZ position of annihilation point", 101, -10.5, 10.5, 101, -10.5, 10.5));
+  getStatistics().getHisto2D("ap_xz_zoom")->GetXaxis()->SetTitle("X position [cm]");
+  getStatistics().getHisto2D("ap_xz_zoom")->GetYaxis()->SetTitle("Z position [cm]");
+
+  getStatistics().createHistogram(
+    new TH2F("ap_yz_zoom", "YZ position of annihilation point", 101, -10.5, 10.5, 101, -10.5, 10.5));
+  getStatistics().getHisto2D("ap_yz_zoom")->GetXaxis()->SetTitle("Y position [cm]");
+  getStatistics().getHisto2D("ap_yz_zoom")->GetYaxis()->SetTitle("Z position [cm]");
 
   // Histograms for scintillator synchronization constatns
   if(fSaveCalibHistos){
@@ -252,44 +317,39 @@ void EventCategorizer::initialiseHistograms(){
 
     for(int scinID = minScinID; scinID<= maxScinID; scinID++){
       getStatistics().createHistogram(new TH1F(
-        Form("tdiff_a_d_scin_%d", scinID),
-        Form("TDiff annihilation hit from scin %d and deex hit", scinID),
+        Form("tdiff_annih_scin_%d", scinID),
+        Form("A-D time difference for annihilation hit scin %d", scinID),
         200, -15000.0, 15000.0
       ));
+      getStatistics().getHisto1D(Form("tdiff_annih_scin_%d", scinID))->GetXaxis()->SetTitle("Time diffrence [ps]");
+      getStatistics().getHisto1D(Form("tdiff_annih_scin_%d", scinID))->GetYaxis()->SetTitle("Number of A-D pairs");
 
       getStatistics().createHistogram(new TH1F(
-        Form("tdiff_d_a_scin_%d", scinID),
-        Form("TDiff deex hit from scin %d and annihilation hit", scinID),
+        Form("tdiff_deex_scin_%d", scinID),
+        Form("A-D time difference for deex hit scin %d", scinID),
         200, -15000.0, 15000.0
       ));
+      getStatistics().getHisto1D(Form("tdiff_deex_scin_%d", scinID))->GetXaxis()->SetTitle("Time diffrence [ps]");
+      getStatistics().getHisto1D(Form("tdiff_deex_scin_%d", scinID))->GetYaxis()->SetTitle("Number of A-D pairs");
+
+      getStatistics().createHistogram(new TH1F(
+        Form("ap_tof_scin_%d", scinID),
+        Form("TOF of annihilation event in Slot %d", scinID),
+        200, -15000.0, 15000.0)
+      );
+      getStatistics().getHisto1D(Form("ap_tof_scin_%d", scinID))->GetXaxis()->SetTitle("Time of Flight [ps]");
+      getStatistics().getHisto1D(Form("ap_tof_scin_%d", scinID))->GetYaxis()->SetTitle("Number of Hit Pairs");
+
+      // Time walk histograms
+      getStatistics().createHistogram(new TH2F(
+        Form("time_walk_scin_%d", scinID),
+        Form("Reversed TOT vs. hit time difference for scin %d", scinID),
+        200, -15000.0, 15000.0, 200, 0.000025, 0.000025
+      ));
+      getStatistics().getHisto2D(Form("time_walk_scin_%d", scinID))->GetXaxis()->SetTitle("Time difference [ps]");
+      getStatistics().getHisto2D(Form("time_walk_scin_%d", scinID))->GetYaxis()->SetTitle("Reversed TOT [1/ps]");
     }
   }
-  // General histograms
-  // getStatistics().createHistogram(
-  //   new TH2F("All_XYpos", "Hits position XY", 222, -50.5, 50.5, 222, -50.5, 50.5));
-  // getStatistics().getHisto2D("All_XYpos")->GetXaxis()->SetTitle("Y position [cm]");
-  // getStatistics().getHisto2D("All_XYpos")->GetYaxis()->SetTitle("X position [cm]");
-
-  // Histograms for 2Gamama category
-  // getStatistics().createHistogram(
-  //   new TH2F("2Gamma_XYpos", "2 gamma hits position XY", 222, -50.5, 50.5, 222, -50.5, 50.5));
-  // getStatistics().getHisto2D("All_XYpos")->GetXaxis()->SetTitle("Y position [cm]");
-  // getStatistics().getHisto2D("All_XYpos")->GetYaxis()->SetTitle("X position [cm]");
-
-  // getStatistics().createHistogram(
-  //   new TH1F("2Gamma_Zpos", "B2B hits Z position", 200, -50.0, 50.0));
-  // getStatistics().getHisto1D("2Gamma_Zpos")->GetXaxis()->SetTitle("Z axis position [cm]");
-  // getStatistics().getHisto1D("2Gamma_Zpos")->GetYaxis()->SetTitle("Number of Hits");
-
-  // getStatistics().createHistogram(
-  //   new TH1F("2Gamma_TimeDiff", "B2B hits time difference", 100, -10000.0, 10000.0));
-  // getStatistics().getHisto1D("2Gamma_TimeDiff")->GetXaxis()->SetTitle("Time Difference [ps]");
-  // getStatistics().getHisto1D("2Gamma_TimeDiff")->GetYaxis()->SetTitle("Number of Hit Pairs");
-
-  // getStatistics().createHistogram(
-  //   new TH1F("2Gamma_Dist", "B2B hits distance", 150, 0.0, 150.0));
-  // getStatistics().getHisto1D("2Gamma_Dist")->GetXaxis()->SetTitle("Distance [cm]");
-  // getStatistics().getHisto1D("2Gamma_Dist")->GetYaxis()->SetTitle("Number of Hit Pairs");
 
   // Histograms for 3Gamama category
   // getStatistics().createHistogram(

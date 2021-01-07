@@ -151,7 +151,9 @@ JPetHit HitFinderTools::createHit(
 
   // Getting constants for this scintillator
   double velocity = calibTree.get("scin."+to_string(scinID)+".eff_velocity", -999.0);
-  double tofCorrection = calibTree.get("scin."+to_string(scinID)+".tof_correction", 0.0);
+  // Temporaily not using TOF corrections here
+  double tofCorrection = 0.0;
+  // double tofCorrection = calibTree.get("scin."+to_string(scinID)+".tof_correction", 0.0);
   double totNormA = calibTree.get("scin."+to_string(scinID)+".tot_scaling_factor_a", 1.0);
   double totNormB = calibTree.get("scin."+to_string(scinID)+".tot_scaling_factor_b", 0.0);
 
@@ -174,9 +176,9 @@ JPetHit HitFinderTools::createHit(
   auto tot = signalA.getTOT()+signalB.getTOT();
   auto multi = signalA.getRawSignals().size()+signalB.getRawSignals().size();
   auto avToT = tot/((double) multi);
-  auto totNorm = avToT*totNormA + totNormB;
+  auto normToT = avToT*totNormA + totNormB;
 
-  hit.setEnergy(totNorm);
+  hit.setEnergy(normToT);
   hit.setQualityOfEnergy(avToT);
 
   return hit;

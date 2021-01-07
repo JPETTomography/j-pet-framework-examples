@@ -57,7 +57,7 @@ protected:
 	const std::string kTOTCutAnniMaxParamKey = "EventCategorizer_TOT_Cut_Anni_Max_double";
 	const std::string kTOTCutDeexMinParamKey = "EventCategorizer_TOT_Cut_Deex_Min_double";
 	const std::string kTOTCutDeexMaxParamKey = "EventCategorizer_TOT_Cut_Deex_Max_double";
-
+	const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
 
 	void saveEvents(const std::vector<JPetEvent>& event);
 
