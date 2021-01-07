@@ -130,6 +130,7 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
 
       auto nextHit = dynamic_cast<const JPetHit&>(timeWindow.operator[](count+nextCount));
       auto tDiff = fabs(nextHit.getTime() - hit.getTime());
+      getStatistics().getHisto1D("hits_all_tdiff")->Fill(tDiff);
       if (tDiff < fEventTimeWindow) {
         if(nextHit.getRecoFlag() == JPetHit::Corrupted) {
           event.setRecoFlag(JPetEvent::Corrupted);
@@ -167,6 +168,13 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
 }
 
 void EventFinder::initialiseHistograms(){
+
+  getStatistics().createHistogram(
+    new TH1F("hits_all_tdiff", "Time difference of consecutive hits",
+    200, 0.0, 500000.0)
+  );
+  getStatistics().getHisto1D("hits_all_tdiff")->GetXaxis()->SetTitle("Time difference [ps]");
+  getStatistics().getHisto1D("hits_all_tdiff")->GetYaxis()->SetTitle("Number of Hit Pairs");
 
   getStatistics().createHistogram(
     new TH1F("hits_rejected_tdiff", "Time difference of consecutive unmatched hits",

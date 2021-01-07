@@ -123,18 +123,6 @@ bool EventCategorizerTools::checkFor2Gamma(
         stats.getHisto1D("2g_tot")->Fill(tot1);
         stats.getHisto1D("2g_tot")->Fill(tot2);
 
-        stats.getHisto1D("2g_tof")->Fill(tof);
-        stats.getHisto1D("2g_tof_conv")->Fill(tofConv);
-        stats.getHisto1D("2g_tof_conv_corr")->Fill(tofConvCorr);
-        stats.getHisto1D(Form("2g_tof_slot_%d", slot1ID))->Fill(tof);
-        stats.getHisto1D(Form("2g_tof_slot_%d", slot2ID))->Fill(tof);
-        stats.getHisto1D(Form("2g_tof_conv_slot_%d", slot1ID))->Fill(tofConv);
-        stats.getHisto1D(Form("2g_tof_conv_slot_%d", slot2ID))->Fill(tofConv);
-        stats.getHisto1D(Form("2g_tof_corr_slot_%d", slot1ID))->Fill(tofCorr);
-        stats.getHisto1D(Form("2g_tof_corr_slot_%d", slot2ID))->Fill(tofCorr);
-        stats.getHisto1D(Form("2g_tof_conv_corr_slot_%d", slot1ID))->Fill(tofConvCorr);
-        stats.getHisto1D(Form("2g_tof_conv_corr_slot_%d", slot2ID))->Fill(tofConvCorr);
-
         stats.getHisto1D("2g_hit_tdiff")->Fill(firstHit.getTimeDiff());
         stats.getHisto1D("2g_hit_tdiff")->Fill(secondHit.getTimeDiff());
 
@@ -172,14 +160,17 @@ bool EventCategorizerTools::checkFor2Gamma(
           stats.getHisto1D(Form("ap_tof_conv_corr_slot_%d", slot2ID))->Fill(tofConvCorr);
 
           if(angleCut2 && saveCalibHistos){
-            stats.getHisto1D(Form("ap_tof_scin_%d", scin1ID))->Fill(tof);
-            stats.getHisto1D(Form("ap_tof_scin_%d", scin2ID))->Fill(tof);
-            stats.getHisto1D(Form("ap_tof_conv_scin_%d", scin1ID))->Fill(tofConv);
-            stats.getHisto1D(Form("ap_tof_conv_scin_%d", scin2ID))->Fill(tofConv);
-            stats.getHisto1D(Form("ap_tof_corr_scin_%d", scin1ID))->Fill(tofCorr);
-            stats.getHisto1D(Form("ap_tof_corr_scin_%d", scin2ID))->Fill(tofCorr);
-            stats.getHisto1D(Form("ap_tof_conv_corr_scin_%d", scin1ID))->Fill(tofConvCorr);
-            stats.getHisto1D(Form("ap_tof_conv_corr_scin_%d", scin2ID))->Fill(tofConvCorr);
+            stats.getHisto2D("ap_tof_scin")->Fill(scin1ID, tof);
+            stats.getHisto2D("ap_tof_scin")->Fill(scin2ID, tof);
+
+            stats.getHisto2D("ap_tof_conv_scin")->Fill(scin1ID, tofConv);
+            stats.getHisto2D("ap_tof_conv_scin")->Fill(scin2ID, tofConv);
+
+            stats.getHisto2D("ap_tof_corr_scin")->Fill(scin1ID, tofCorr);
+            stats.getHisto2D("ap_tof_corr_scin")->Fill(scin2ID, tofCorr);
+
+            stats.getHisto2D("ap_tof_conv_corr_scin")->Fill(scin1ID, tofConvCorr);
+            stats.getHisto2D("ap_tof_conv_corr_scin")->Fill(scin2ID, tofConvCorr);
           }
 
           TVector3 annhilationPoint = calculateAnnihilationPoint(firstHit, secondHit);
