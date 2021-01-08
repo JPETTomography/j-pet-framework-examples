@@ -112,6 +112,8 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
       int multi = hit.getSignalA().getRawSignals().size() + hit.getSignalB().getRawSignals().size();
       int scinID = hit.getScin().getID();
 
+      getStatistics().getHisto1D("hits_scin")->Fill(scinID);
+
       getStatistics().getHisto2D("hit_pos_XY")->Fill(hit.getPosY(), hit.getPosX());
       getStatistics().getHisto2D("hit_pos_z")->Fill(scinID, hit.getPosZ());
 
@@ -147,6 +149,12 @@ void HitFinder::initialiseHistograms(){
   ));
   getStatistics().getHisto1D("hits_tslot")->GetXaxis()->SetTitle("Hits in Time Slot");
   getStatistics().getHisto1D("hits_tslot")->GetYaxis()->SetTitle("Number of Time Slots");
+
+  getStatistics().createHistogram(new TH1F(
+    "hits_scin", "Number of Hits in Scintillators",   maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5
+  ));
+  getStatistics().getHisto1D("hits_scin")->GetXaxis()->SetTitle("Hits in Time Slot");
+  getStatistics().getHisto1D("hits_scin")->GetYaxis()->SetTitle("Number of Time Slots");
 
   getStatistics().createHistogram(new TH2F(
     "hit_pos_XY", "Hit Position XY projection", 101, -50.5, 50.5, 101, -50.5, 50.5

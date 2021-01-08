@@ -65,10 +65,10 @@ void EventCategorizerTools::selectForCalibration(
       }
 
       // Filling histograms for specific scintillators
-      // if(saveHistos && saveCalibHistos && tDiff_A_D!=0.0 && aScinID!=-1 && dScinID!=-1) {
-        // stats.getHisto1D(Form("tdiff_annih_scin_%d", aScinID))->Fill(tDiff_A_D);
-        // stats.getHisto1D(Form("tdiff_deex_scin_%d", dScinID))->Fill(tDiff_A_D);
-      // }
+      if(saveHistos && saveCalibHistos && tDiff_A_D!=0.0 && aScinID!=-1 && dScinID!=-1) {
+        stats.getHisto1D(Form("tdiff_annih_scin_%d", aScinID))->Fill(tDiff_A_D);
+        stats.getHisto1D(Form("tdiff_deex_scin_%d", dScinID))->Fill(tDiff_A_D);
+      }
     }
   }
 }
@@ -112,10 +112,10 @@ bool EventCategorizerTools::checkFor2Gamma(
       double tofConv = calculateTOFByConvention(firstHit, secondHit);
       double firstHitTOFCorr = calibTree.get("scin."+to_string(scin1ID)+".tof_correction", 0.0);
       double secondHitTOFCorr = calibTree.get("scin."+to_string(scin2ID)+".tof_correction", 0.0);
-      double tofCorr = tof-firstHitTOFCorr;
+      double tofCorr = tof+firstHitTOFCorr;
       double tofConvCorr = tofConv;
-      if(scin1ID < scin2ID) tofConvCorr -= firstHitTOFCorr;
-      else tofConvCorr += firstHitTOFCorr;
+      if(scin1ID < scin2ID) tofConvCorr += firstHitTOFCorr;
+      else tofConvCorr -= firstHitTOFCorr;
 
       // Pre-cuts histograms
       if(saveHistos){

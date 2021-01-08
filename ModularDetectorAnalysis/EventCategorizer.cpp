@@ -163,6 +163,11 @@ void EventCategorizer::saveEvents(const vector<JPetEvent>& events)
 
 void EventCategorizer::initialiseHistograms()
 {
+  auto minScinID = getParamBank().getScins().begin()->first;
+  auto maxScinID = getParamBank().getScins().rbegin()->first;
+
+  auto minSlotID = getParamBank().getSlots().begin()->first;
+  auto maxSlotID = getParamBank().getSlots().rbegin()->first;
 
   // Histograms for 2Gamama selection
   getStatistics().createHistogram(
@@ -201,10 +206,6 @@ void EventCategorizer::initialiseHistograms()
   );
   getStatistics().getHisto1D("2g_tof_conv_corr")->GetXaxis()->SetTitle("Time of Flight [ps]");
   getStatistics().getHisto1D("2g_tof_conv_corr")->GetYaxis()->SetTitle("Number of Hit Pairs");
-
-  // Histograms for slots
-  auto minSlotID = getParamBank().getSlots().begin()->first;
-  auto maxSlotID = getParamBank().getSlots().rbegin()->first;
 
   getStatistics().createHistogram(
     new TH1F("2g_hit_tdiff", "Opposite module hits A-B time difference", 100, -15000.0, 15000.0)
@@ -303,12 +304,8 @@ void EventCategorizer::initialiseHistograms()
   getStatistics().getHisto2D("ap_yz_zoom")->GetXaxis()->SetTitle("Y position [cm]");
   getStatistics().getHisto2D("ap_yz_zoom")->GetYaxis()->SetTitle("Z position [cm]");
 
-  auto minScinID = getParamBank().getScins().begin()->first;
-  auto maxScinID = getParamBank().getScins().rbegin()->first;
-
   // Histograms for scintillator synchronization constatns
   if(fSaveCalibHistos){
-
     // 2D TOF per Scin
     getStatistics().createHistogram(new TH2F(
       "ap_tof_scin", "TOF of annihilation event per Scin",
@@ -338,22 +335,22 @@ void EventCategorizer::initialiseHistograms()
     getStatistics().getHisto2D("ap_tof_conv_corr_scin")->GetXaxis()->SetTitle("Scintillator ID");
     getStatistics().getHisto2D("ap_tof_conv_corr_scin")->GetYaxis()->SetTitle("Time of Flight [ps]");
 
-    // for(int scinID = minScinID; scinID<= maxScinID; scinID++){
-    //   getStatistics().createHistogram(new TH1F(
-    //     Form("tdiff_annih_scin_%d", scinID),
-    //     Form("A-D time difference for annihilation hit scin %d", scinID),
-    //     200, -15000.0, 15000.0
-    //   ));
-    //   getStatistics().getHisto1D(Form("tdiff_annih_scin_%d", scinID))->GetXaxis()->SetTitle("Time diffrence [ps]");
-    //   getStatistics().getHisto1D(Form("tdiff_annih_scin_%d", scinID))->GetYaxis()->SetTitle("Number of A-D pairs");
-    //
-    //   getStatistics().createHistogram(new TH1F(
-    //     Form("tdiff_deex_scin_%d", scinID),
-    //     Form("A-D time difference for deex hit scin %d", scinID),
-    //     200, -15000.0, 15000.0
-    //   ));
-    //   getStatistics().getHisto1D(Form("tdiff_deex_scin_%d", scinID))->GetXaxis()->SetTitle("Time diffrence [ps]");
-    //   getStatistics().getHisto1D(Form("tdiff_deex_scin_%d", scinID))->GetYaxis()->SetTitle("Number of A-D pairs");
+    for(int scinID = minScinID; scinID<= maxScinID; scinID++){
+      getStatistics().createHistogram(new TH1F(
+        Form("tdiff_annih_scin_%d", scinID),
+        Form("A-D time difference for annihilation hit scin %d", scinID),
+        200, -15000.0, 15000.0
+      ));
+      getStatistics().getHisto1D(Form("tdiff_annih_scin_%d", scinID))->GetXaxis()->SetTitle("Time diffrence [ps]");
+      getStatistics().getHisto1D(Form("tdiff_annih_scin_%d", scinID))->GetYaxis()->SetTitle("Number of A-D pairs");
+
+      getStatistics().createHistogram(new TH1F(
+        Form("tdiff_deex_scin_%d", scinID),
+        Form("A-D time difference for deex hit scin %d", scinID),
+        200, -15000.0, 15000.0
+      ));
+      getStatistics().getHisto1D(Form("tdiff_deex_scin_%d", scinID))->GetXaxis()->SetTitle("Time diffrence [ps]");
+      getStatistics().getHisto1D(Form("tdiff_deex_scin_%d", scinID))->GetYaxis()->SetTitle("Number of A-D pairs");
     //
     //   getStatistics().createHistogram(new TH1F(
     //     Form("ap_tof_scin_%d", scinID),
@@ -395,7 +392,7 @@ void EventCategorizer::initialiseHistograms()
     //   ));
     //   getStatistics().getHisto2D(Form("time_walk_scin_%d", scinID))->GetXaxis()->SetTitle("Time difference [ps]");
     //   getStatistics().getHisto2D(Form("time_walk_scin_%d", scinID))->GetYaxis()->SetTitle("Reversed TOT [1/ps]");
-    // }
+    }
   }
 
   // Histograms for 3Gamama category
