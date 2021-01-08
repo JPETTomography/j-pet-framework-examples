@@ -65,10 +65,10 @@ void EventCategorizerTools::selectForCalibration(
       }
 
       // Filling histograms for specific scintillators
-      if(saveHistos && saveCalibHistos && tDiff_A_D!=0.0 && aScinID!=-1 && dScinID!=-1) {
-        stats.getHisto1D(Form("tdiff_annih_scin_%d", aScinID))->Fill(tDiff_A_D);
-        stats.getHisto1D(Form("tdiff_deex_scin_%d", dScinID))->Fill(tDiff_A_D);
-      }
+      // if(saveHistos && saveCalibHistos && tDiff_A_D!=0.0 && aScinID!=-1 && dScinID!=-1) {
+        // stats.getHisto1D(Form("tdiff_annih_scin_%d", aScinID))->Fill(tDiff_A_D);
+        // stats.getHisto1D(Form("tdiff_deex_scin_%d", dScinID))->Fill(tDiff_A_D);
+      // }
     }
   }
 }
@@ -112,10 +112,10 @@ bool EventCategorizerTools::checkFor2Gamma(
       double tofConv = calculateTOFByConvention(firstHit, secondHit);
       double firstHitTOFCorr = calibTree.get("scin."+to_string(scin1ID)+".tof_correction", 0.0);
       double secondHitTOFCorr = calibTree.get("scin."+to_string(scin2ID)+".tof_correction", 0.0);
-      double tofCorr = calculateTOF(firstHit.getTime()-firstHitTOFCorr, secondHit.getTime()-secondHitTOFCorr);
+      double tofCorr = tof-firstHitTOFCorr;
       double tofConvCorr = tofConv;
-      if(scin1ID < scin2ID) tofConvCorr += secondHitTOFCorr-firstHitTOFCorr;
-      else tofConvCorr += firstHitTOFCorr-secondHitTOFCorr;
+      if(scin1ID < scin2ID) tofConvCorr -= firstHitTOFCorr;
+      else tofConvCorr += firstHitTOFCorr;
 
       // Pre-cuts histograms
       if(saveHistos){
@@ -126,8 +126,8 @@ bool EventCategorizerTools::checkFor2Gamma(
         stats.getHisto1D("2g_hit_tdiff")->Fill(firstHit.getTimeDiff());
         stats.getHisto1D("2g_hit_tdiff")->Fill(secondHit.getTimeDiff());
 
-        stats.getHisto2D(Form("time_walk_scin_%d", scin1ID))->Fill(firstHit.getTimeDiff(), 1/tot1);
-        stats.getHisto2D(Form("time_walk_scin_%d", scin2ID))->Fill(secondHit.getTimeDiff(), 1/tot2);
+        // stats.getHisto2D(Form("time_walk_scin_%d", scin1ID))->Fill(firstHit.getTimeDiff(), 1/tot1);
+        // stats.getHisto2D(Form("time_walk_scin_%d", scin2ID))->Fill(secondHit.getTimeDiff(), 1/tot2);
       }
 
       // Checking selection conditions
@@ -150,25 +150,22 @@ bool EventCategorizerTools::checkFor2Gamma(
           stats.getHisto1D("ap_tof_conv")->Fill(tofConv);
           stats.getHisto1D("ap_tof_corr")->Fill(tofCorr);
           stats.getHisto1D("ap_tof_conv_corr")->Fill(tofConvCorr);
-          stats.getHisto1D(Form("ap_tof_slot_%d", slot1ID))->Fill(tof);
-          stats.getHisto1D(Form("ap_tof_slot_%d", slot2ID))->Fill(tof);
-          stats.getHisto1D(Form("ap_tof_conv_slot_%d", slot1ID))->Fill(tofConv);
-          stats.getHisto1D(Form("ap_tof_conv_slot_%d", slot2ID))->Fill(tofConv);
-          stats.getHisto1D(Form("ap_tof_corr_slot_%d", slot1ID))->Fill(tofCorr);
-          stats.getHisto1D(Form("ap_tof_corr_slot_%d", slot2ID))->Fill(tofCorr);
-          stats.getHisto1D(Form("ap_tof_conv_corr_slot_%d", slot1ID))->Fill(tofConvCorr);
-          stats.getHisto1D(Form("ap_tof_conv_corr_slot_%d", slot2ID))->Fill(tofConvCorr);
+          // stats.getHisto1D(Form("ap_tof_slot_%d", slot1ID))->Fill(tof);
+          // stats.getHisto1D(Form("ap_tof_slot_%d", slot2ID))->Fill(tof);
+          // stats.getHisto1D(Form("ap_tof_conv_slot_%d", slot1ID))->Fill(tofConv);
+          // stats.getHisto1D(Form("ap_tof_conv_slot_%d", slot2ID))->Fill(tofConv);
+          // stats.getHisto1D(Form("ap_tof_corr_slot_%d", slot1ID))->Fill(tofCorr);
+          // stats.getHisto1D(Form("ap_tof_corr_slot_%d", slot2ID))->Fill(tofCorr);
+          // stats.getHisto1D(Form("ap_tof_conv_corr_slot_%d", slot1ID))->Fill(tofConvCorr);
+          // stats.getHisto1D(Form("ap_tof_conv_corr_slot_%d", slot2ID))->Fill(tofConvCorr);
 
           if(angleCut2 && saveCalibHistos){
             stats.getHisto2D("ap_tof_scin")->Fill(scin1ID, tof);
             stats.getHisto2D("ap_tof_scin")->Fill(scin2ID, tof);
-
             stats.getHisto2D("ap_tof_conv_scin")->Fill(scin1ID, tofConv);
             stats.getHisto2D("ap_tof_conv_scin")->Fill(scin2ID, tofConv);
-
             stats.getHisto2D("ap_tof_corr_scin")->Fill(scin1ID, tofCorr);
             stats.getHisto2D("ap_tof_corr_scin")->Fill(scin2ID, tofCorr);
-
             stats.getHisto2D("ap_tof_conv_corr_scin")->Fill(scin1ID, tofConvCorr);
             stats.getHisto2D("ap_tof_conv_corr_scin")->Fill(scin2ID, tofConvCorr);
           }

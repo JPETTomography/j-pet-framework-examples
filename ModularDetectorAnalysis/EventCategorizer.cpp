@@ -239,39 +239,39 @@ void EventCategorizer::initialiseHistograms()
   getStatistics().getHisto1D("ap_tof_conv_corr")->GetXaxis()->SetTitle("Time of Flight [ps]");
   getStatistics().getHisto1D("ap_tof_conv_corr")->GetYaxis()->SetTitle("Number of Annihilation Pairs");
 
-  for(int slotID = minSlotID; slotID <= maxSlotID; slotID++){
-    getStatistics().createHistogram(new TH1F(
-      Form("ap_tof_slot_%d", slotID),
-      Form("TOF of annihilation event in Slot %d", slotID),
-      200, -15000.0, 15000.0)
-    );
-    getStatistics().getHisto1D(Form("ap_tof_slot_%d", slotID))->GetXaxis()->SetTitle("Time of Flight [ps]");
-    getStatistics().getHisto1D(Form("ap_tof_slot_%d", slotID))->GetYaxis()->SetTitle("Number of Hit Pairs");
-
-    getStatistics().createHistogram(new TH1F(
-      Form("ap_tof_conv_slot_%d", slotID),
-      Form("TOF calculated by conventinon of annihilation event in Slot %d", slotID),
-      200, -15000.0, 15000.0)
-    );
-    getStatistics().getHisto1D(Form("ap_tof_conv_slot_%d", slotID))->GetXaxis()->SetTitle("Time of Flight [ps]");
-    getStatistics().getHisto1D(Form("ap_tof_conv_slot_%d", slotID))->GetYaxis()->SetTitle("Number of Hit Pairs");
-
-    getStatistics().createHistogram(new TH1F(
-      Form("ap_tof_corr_slot_%d", slotID),
-      Form("TOF corrected of annihilation event in Slot %d", slotID),
-      200, -15000.0, 15000.0)
-    );
-    getStatistics().getHisto1D(Form("ap_tof_corr_slot_%d", slotID))->GetXaxis()->SetTitle("Time of Flight [ps]");
-    getStatistics().getHisto1D(Form("ap_tof_corr_slot_%d", slotID))->GetYaxis()->SetTitle("Number of Hit Pairs");
-
-    getStatistics().createHistogram(new TH1F(
-      Form("ap_tof_conv_corr_slot_%d", slotID),
-      Form("TOF calculated by conventinon of annihilation event in Slot %d", slotID),
-      200, -15000.0, 15000.0)
-    );
-    getStatistics().getHisto1D(Form("ap_tof_conv_corr_slot_%d", slotID))->GetXaxis()->SetTitle("Time of Flight [ps]");
-    getStatistics().getHisto1D(Form("ap_tof_conv_corr_slot_%d", slotID))->GetYaxis()->SetTitle("Number of Hit Pairs");
-  }
+  // for(int slotID = minSlotID; slotID <= maxSlotID; slotID++){
+  //   getStatistics().createHistogram(new TH1F(
+  //     Form("ap_tof_slot_%d", slotID),
+  //     Form("TOF of annihilation event in Slot %d", slotID),
+  //     200, -15000.0, 15000.0)
+  //   );
+  //   getStatistics().getHisto1D(Form("ap_tof_slot_%d", slotID))->GetXaxis()->SetTitle("Time of Flight [ps]");
+  //   getStatistics().getHisto1D(Form("ap_tof_slot_%d", slotID))->GetYaxis()->SetTitle("Number of Hit Pairs");
+  //
+  //   getStatistics().createHistogram(new TH1F(
+  //     Form("ap_tof_conv_slot_%d", slotID),
+  //     Form("TOF calculated by conventinon of annihilation event in Slot %d", slotID),
+  //     200, -15000.0, 15000.0)
+  //   );
+  //   getStatistics().getHisto1D(Form("ap_tof_conv_slot_%d", slotID))->GetXaxis()->SetTitle("Time of Flight [ps]");
+  //   getStatistics().getHisto1D(Form("ap_tof_conv_slot_%d", slotID))->GetYaxis()->SetTitle("Number of Hit Pairs");
+  //
+  //   getStatistics().createHistogram(new TH1F(
+  //     Form("ap_tof_corr_slot_%d", slotID),
+  //     Form("TOF corrected of annihilation event in Slot %d", slotID),
+  //     200, -15000.0, 15000.0)
+  //   );
+  //   getStatistics().getHisto1D(Form("ap_tof_corr_slot_%d", slotID))->GetXaxis()->SetTitle("Time of Flight [ps]");
+  //   getStatistics().getHisto1D(Form("ap_tof_corr_slot_%d", slotID))->GetYaxis()->SetTitle("Number of Hit Pairs");
+  //
+  //   getStatistics().createHistogram(new TH1F(
+  //     Form("ap_tof_conv_corr_slot_%d", slotID),
+  //     Form("TOF calculated by conventinon of annihilation event in Slot %d", slotID),
+  //     200, -15000.0, 15000.0)
+  //   );
+  //   getStatistics().getHisto1D(Form("ap_tof_conv_corr_slot_%d", slotID))->GetXaxis()->SetTitle("Time of Flight [ps]");
+  //   getStatistics().getHisto1D(Form("ap_tof_conv_corr_slot_%d", slotID))->GetYaxis()->SetTitle("Number of Hit Pairs");
+  // }
 
   getStatistics().createHistogram(
      new TH2F("ap_xy", "XY position of annihilation point", 101, -50.5, 50.5, 101, -50.5, 50.5));
@@ -338,64 +338,64 @@ void EventCategorizer::initialiseHistograms()
     getStatistics().getHisto2D("ap_tof_conv_corr_scin")->GetXaxis()->SetTitle("Scintillator ID");
     getStatistics().getHisto2D("ap_tof_conv_corr_scin")->GetYaxis()->SetTitle("Time of Flight [ps]");
 
-    for(int scinID = minScinID; scinID<= maxScinID; scinID++){
-      getStatistics().createHistogram(new TH1F(
-        Form("tdiff_annih_scin_%d", scinID),
-        Form("A-D time difference for annihilation hit scin %d", scinID),
-        200, -15000.0, 15000.0
-      ));
-      getStatistics().getHisto1D(Form("tdiff_annih_scin_%d", scinID))->GetXaxis()->SetTitle("Time diffrence [ps]");
-      getStatistics().getHisto1D(Form("tdiff_annih_scin_%d", scinID))->GetYaxis()->SetTitle("Number of A-D pairs");
-
-      getStatistics().createHistogram(new TH1F(
-        Form("tdiff_deex_scin_%d", scinID),
-        Form("A-D time difference for deex hit scin %d", scinID),
-        200, -15000.0, 15000.0
-      ));
-      getStatistics().getHisto1D(Form("tdiff_deex_scin_%d", scinID))->GetXaxis()->SetTitle("Time diffrence [ps]");
-      getStatistics().getHisto1D(Form("tdiff_deex_scin_%d", scinID))->GetYaxis()->SetTitle("Number of A-D pairs");
-
-      getStatistics().createHistogram(new TH1F(
-        Form("ap_tof_scin_%d", scinID),
-        Form("TOF of annihilation event in Scin %d", scinID),
-        200, -15000.0, 15000.0
-      ));
-      getStatistics().getHisto1D(Form("ap_tof_scin_%d", scinID))->GetXaxis()->SetTitle("Time of Flight [ps]");
-      getStatistics().getHisto1D(Form("ap_tof_scin_%d", scinID))->GetYaxis()->SetTitle("Number of Hit Pairs");
-
-      getStatistics().createHistogram(new TH1F(
-        Form("ap_tof_conv_scin_%d", scinID),
-        Form("TOF by convention of annihilation event in Scin %d", scinID),
-        200, -15000.0, 15000.0)
-      );
-      getStatistics().getHisto1D(Form("ap_tof_conv_scin_%d", scinID))->GetXaxis()->SetTitle("Time of Flight [ps]");
-      getStatistics().getHisto1D(Form("ap_tof_conv_scin_%d", scinID))->GetYaxis()->SetTitle("Number of Hit Pairs");
-
-      getStatistics().createHistogram(new TH1F(
-        Form("ap_tof_corr_scin_%d", scinID),
-        Form("TOF corrected of annihilation event in Scin %d", scinID),
-        200, -15000.0, 15000.0)
-      );
-      getStatistics().getHisto1D(Form("ap_tof_corr_scin_%d", scinID))->GetXaxis()->SetTitle("Time of Flight [ps]");
-      getStatistics().getHisto1D(Form("ap_tof_corr_scin_%d", scinID))->GetYaxis()->SetTitle("Number of Hit Pairs");
-
-      getStatistics().createHistogram(new TH1F(
-        Form("ap_tof_conv_corr_scin_%d", scinID),
-        Form("TOF by convention and corrected of annihilation event in Scin %d", scinID),
-        200, -15000.0, 15000.0)
-      );
-      getStatistics().getHisto1D(Form("ap_tof_conv_corr_scin_%d", scinID))->GetXaxis()->SetTitle("Time of Flight [ps]");
-      getStatistics().getHisto1D(Form("ap_tof_conv_corr_scin_%d", scinID))->GetYaxis()->SetTitle("Number of Hit Pairs");
-
-      // Time walk histograms
-      getStatistics().createHistogram(new TH2F(
-        Form("time_walk_scin_%d", scinID),
-        Form("Reversed TOT vs. hit time difference for Scin %d", scinID),
-        200, -15000.0, 15000.0, 200, -0.000025, 0.000025
-      ));
-      getStatistics().getHisto2D(Form("time_walk_scin_%d", scinID))->GetXaxis()->SetTitle("Time difference [ps]");
-      getStatistics().getHisto2D(Form("time_walk_scin_%d", scinID))->GetYaxis()->SetTitle("Reversed TOT [1/ps]");
-    }
+    // for(int scinID = minScinID; scinID<= maxScinID; scinID++){
+    //   getStatistics().createHistogram(new TH1F(
+    //     Form("tdiff_annih_scin_%d", scinID),
+    //     Form("A-D time difference for annihilation hit scin %d", scinID),
+    //     200, -15000.0, 15000.0
+    //   ));
+    //   getStatistics().getHisto1D(Form("tdiff_annih_scin_%d", scinID))->GetXaxis()->SetTitle("Time diffrence [ps]");
+    //   getStatistics().getHisto1D(Form("tdiff_annih_scin_%d", scinID))->GetYaxis()->SetTitle("Number of A-D pairs");
+    //
+    //   getStatistics().createHistogram(new TH1F(
+    //     Form("tdiff_deex_scin_%d", scinID),
+    //     Form("A-D time difference for deex hit scin %d", scinID),
+    //     200, -15000.0, 15000.0
+    //   ));
+    //   getStatistics().getHisto1D(Form("tdiff_deex_scin_%d", scinID))->GetXaxis()->SetTitle("Time diffrence [ps]");
+    //   getStatistics().getHisto1D(Form("tdiff_deex_scin_%d", scinID))->GetYaxis()->SetTitle("Number of A-D pairs");
+    //
+    //   getStatistics().createHistogram(new TH1F(
+    //     Form("ap_tof_scin_%d", scinID),
+    //     Form("TOF of annihilation event in Scin %d", scinID),
+    //     200, -15000.0, 15000.0
+    //   ));
+    //   getStatistics().getHisto1D(Form("ap_tof_scin_%d", scinID))->GetXaxis()->SetTitle("Time of Flight [ps]");
+    //   getStatistics().getHisto1D(Form("ap_tof_scin_%d", scinID))->GetYaxis()->SetTitle("Number of Hit Pairs");
+    //
+    //   getStatistics().createHistogram(new TH1F(
+    //     Form("ap_tof_conv_scin_%d", scinID),
+    //     Form("TOF by convention of annihilation event in Scin %d", scinID),
+    //     200, -15000.0, 15000.0)
+    //   );
+    //   getStatistics().getHisto1D(Form("ap_tof_conv_scin_%d", scinID))->GetXaxis()->SetTitle("Time of Flight [ps]");
+    //   getStatistics().getHisto1D(Form("ap_tof_conv_scin_%d", scinID))->GetYaxis()->SetTitle("Number of Hit Pairs");
+    //
+    //   getStatistics().createHistogram(new TH1F(
+    //     Form("ap_tof_corr_scin_%d", scinID),
+    //     Form("TOF corrected of annihilation event in Scin %d", scinID),
+    //     200, -15000.0, 15000.0)
+    //   );
+    //   getStatistics().getHisto1D(Form("ap_tof_corr_scin_%d", scinID))->GetXaxis()->SetTitle("Time of Flight [ps]");
+    //   getStatistics().getHisto1D(Form("ap_tof_corr_scin_%d", scinID))->GetYaxis()->SetTitle("Number of Hit Pairs");
+    //
+    //   getStatistics().createHistogram(new TH1F(
+    //     Form("ap_tof_conv_corr_scin_%d", scinID),
+    //     Form("TOF by convention and corrected of annihilation event in Scin %d", scinID),
+    //     200, -15000.0, 15000.0)
+    //   );
+    //   getStatistics().getHisto1D(Form("ap_tof_conv_corr_scin_%d", scinID))->GetXaxis()->SetTitle("Time of Flight [ps]");
+    //   getStatistics().getHisto1D(Form("ap_tof_conv_corr_scin_%d", scinID))->GetYaxis()->SetTitle("Number of Hit Pairs");
+    //
+    //   // Time walk histograms
+    //   getStatistics().createHistogram(new TH2F(
+    //     Form("time_walk_scin_%d", scinID),
+    //     Form("Reversed TOT vs. hit time difference for Scin %d", scinID),
+    //     200, -15000.0, 15000.0, 200, -0.000025, 0.000025
+    //   ));
+    //   getStatistics().getHisto2D(Form("time_walk_scin_%d", scinID))->GetXaxis()->SetTitle("Time difference [ps]");
+    //   getStatistics().getHisto2D(Form("time_walk_scin_%d", scinID))->GetYaxis()->SetTitle("Reversed TOT [1/ps]");
+    // }
   }
 
   // Histograms for 3Gamama category
