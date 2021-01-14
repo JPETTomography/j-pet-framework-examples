@@ -153,8 +153,8 @@ void HitFinder::initialiseHistograms(){
   getStatistics().createHistogram(new TH1F(
     "hits_scin", "Number of Hits in Scintillators",   maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5
   ));
-  getStatistics().getHisto1D("hits_scin")->GetXaxis()->SetTitle("Hits in Time Slot");
-  getStatistics().getHisto1D("hits_scin")->GetYaxis()->SetTitle("Number of Time Slots");
+  getStatistics().getHisto1D("hits_scin")->GetXaxis()->SetTitle("Scin ID");
+  getStatistics().getHisto1D("hits_scin")->GetYaxis()->SetTitle("Number of Hits");
 
   getStatistics().createHistogram(new TH2F(
     "hit_pos_XY", "Hit Position XY projection", 101, -50.5, 50.5, 101, -50.5, 50.5

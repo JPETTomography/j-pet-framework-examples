@@ -161,6 +161,9 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
       eventVec.push_back(event);
       if(fSaveControlHistos) {
         getStatistics().getHisto1D("hits_per_event_selected")->Fill(event.getHits().size());
+        for(auto& hit : event.getHits()){
+          getStatistics().getHisto1D("hits_scin_selected")->Fill(hit.getScin().getID());
+        }
       }
     }
   }
@@ -195,6 +198,16 @@ void EventFinder::initialiseHistograms(){
   );
   getStatistics().getHisto1D("hits_per_event_selected")->GetXaxis()->SetTitle("Hits in Event");
   getStatistics().getHisto1D("hits_per_event_selected")->GetYaxis()->SetTitle("Number of Hits");
+
+  auto minScinID = getParamBank().getScins().begin()->first;
+  auto maxScinID = getParamBank().getScins().rbegin()->first;
+
+  getStatistics().createHistogram(new TH1F(
+    "hits_scin_selected", "Number of Hits in Scintillators after minimal multiplicity cut",
+    maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5
+  ));
+  getStatistics().getHisto1D("hits_scin")->GetXaxis()->SetTitle("Scin ID");
+  getStatistics().getHisto1D("hits_scin")->GetYaxis()->SetTitle("Number of Hits");
 
   getStatistics().createHistogram(new TH1F(
     "good_vs_bad_events", "Number of good and corrupted Events created", 3, 0.5, 3.5

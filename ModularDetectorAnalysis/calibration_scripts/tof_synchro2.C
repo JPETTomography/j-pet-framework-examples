@@ -50,7 +50,7 @@ void tof_synchro(
 
   if(fileHitsTOF->IsOpen()){
 
-    TH2F *tofPerScin = dynamic_cast<TH2F*>(fileHitsTOF->Get("ap_tof_conv_scin"));
+    TH2F *tofPerScin = dynamic_cast<TH2F*>(fileHitsTOF->Get("ap_tof_conv_corr_scin"));
 
     TGraphErrors* tofMeanGraph = new TGraphErrors();
     tofMeanGraph->SetNameTitle("tof_corr", "TOF correction per Scin (mean from fit)");
@@ -77,7 +77,7 @@ void tof_synchro(
       // Calculating limits for gaussian fit
       auto max = tofHist->GetMaximumBin();
       auto nBins = tofHist->GetNbinsX();
-      int binRange = (int)(0.1*nBins);
+      int binRange = (int)(0.08*nBins);
       auto low = tofHist->GetBinCenter(max-binRange);
       auto upp = tofHist->GetBinCenter(max+binRange);
 
@@ -102,7 +102,7 @@ void tof_synchro(
         TCanvas* can = new TCanvas(name, name, 1200, 800);
         tofHist->Draw();
 
-        auto legend = new TLegend(0.1, 0.7, 0.35, 0.9);
+        auto legend = new TLegend(0.1, 0.6, 0.4, 0.9);
         legend->AddEntry(tofHist, Form("TOF offset Scin ID %d with fit", scinID), "l");
         legend->AddEntry((TObject*)0, Form("mean = %f +- %f", fitFun->GetParameter(1), fitFun->GetParError(1)), "");
         legend->AddEntry((TObject*)0, Form("sigma = %f +- %f", fitFun->GetParameter(2), fitFun->GetParError(2)), "");
