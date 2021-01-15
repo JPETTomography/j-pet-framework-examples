@@ -190,9 +190,9 @@ bool EventCategorizerTools::checkFor2Gamma(
         }
       }
 
-      if(angleCut1 && tDiffCut && totCut){
+      if(angleCut2 && tDiffCut && totCut){
 
-        if(saveHistos){
+        if(saveHistos && saveCalibHistos){
           stats.getHisto1D("ap_hit_tdiff")->Fill(firstHit.getTimeDiff());
           stats.getHisto1D("ap_hit_tdiff")->Fill(secondHit.getTimeDiff());
           stats.getHisto1D("ap_tof")->Fill(tof);
@@ -200,24 +200,20 @@ bool EventCategorizerTools::checkFor2Gamma(
           stats.getHisto1D("ap_tof_corr")->Fill(tofCorr);
           stats.getHisto1D("ap_tof_conv_corr")->Fill(tofConvCorr);
 
-          if(saveCalibHistos){
-            stats.getHisto2D("ap_revtot_scin")->Fill(scin1ID, revTOT1);
-            stats.getHisto2D("ap_revtot_scin")->Fill(scin2ID, revTOT2);
+          stats.getHisto2D("ap_revtot_scin")->Fill(scin1ID, revTOT1);
+          stats.getHisto2D("ap_revtot_scin")->Fill(scin2ID, revTOT2);
 
-            stats.getHisto2D("ap_tof_scin")->Fill(scin1ID, tof);
-            stats.getHisto2D("ap_tof_scin")->Fill(scin2ID, tof);
-            stats.getHisto2D("ap_tof_conv_scin")->Fill(scin1ID, tofConv);
-            stats.getHisto2D("ap_tof_conv_scin")->Fill(scin2ID, tofConv);
-            stats.getHisto2D("ap_tof_corr_scin")->Fill(scin1ID, tofCorr);
-            stats.getHisto2D("ap_tof_corr_scin")->Fill(scin2ID, tofCorr);
-            stats.getHisto2D("ap_tof_conv_corr_scin")->Fill(scin1ID, tofConvCorr);
-            stats.getHisto2D("ap_tof_conv_corr_scin")->Fill(scin2ID, tofConvCorr);
+          stats.getHisto2D("ap_tof_scin")->Fill(scin1ID, tof);
+          stats.getHisto2D("ap_tof_scin")->Fill(scin2ID, tof);
+          stats.getHisto2D("ap_tof_conv_scin")->Fill(scin1ID, tofConv);
+          stats.getHisto2D("ap_tof_conv_scin")->Fill(scin2ID, tofConv);
+          stats.getHisto2D("ap_tof_corr_scin")->Fill(scin1ID, tofCorr);
+          stats.getHisto2D("ap_tof_corr_scin")->Fill(scin2ID, tofCorr);
+          stats.getHisto2D("ap_tof_conv_corr_scin")->Fill(scin1ID, tofConvCorr);
+          stats.getHisto2D("ap_tof_conv_corr_scin")->Fill(scin2ID, tofConvCorr);
 
-            stats.getHisto2D("ap_tof_conv_corr_z")->Fill(firstHit.getPosZ(), tofConvCorr);
-            stats.getHisto2D("ap_tof_conv_corr_z")->Fill(secondHit.getPosZ(), tofConvCorr);
-
-          }
-
+          stats.getHisto2D("ap_tof_conv_corr_z")->Fill(firstHit.getPosZ(), tofConvCorr);
+          stats.getHisto2D("ap_tof_conv_corr_z")->Fill(secondHit.getPosZ(), tofConvCorr);
           TVector3 annhilationPoint = calculateAnnihilationPoint(firstHit, secondHit);
           stats.getHisto2D("ap_xy")->Fill(annhilationPoint.X(), annhilationPoint.Y());
           stats.getHisto2D("ap_xz")->Fill(annhilationPoint.X(), annhilationPoint.Z());
@@ -225,6 +221,35 @@ bool EventCategorizerTools::checkFor2Gamma(
           stats.getHisto2D("ap_xy_zoom")->Fill(annhilationPoint.X(), annhilationPoint.Y());
           stats.getHisto2D("ap_xz_zoom")->Fill(annhilationPoint.X(), annhilationPoint.Z());
           stats.getHisto2D("ap_yz_zoom")->Fill(annhilationPoint.Y(), annhilationPoint.Z());
+
+          for(auto& rawSig : firstHit.getSignalA().getRawSignals()){
+            if(rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).size()==2) {
+              int pmID = rawSig.second.getPM().getID();
+              double thrTimeDiff = rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(1)-rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(0);
+              stats.getHisto2D("ap_sig_thr_tdiff")->Fill(pmID, thrTimeDiff);
+            }
+          }
+          for(auto& rawSig : firstHit.getSignalB().getRawSignals()){
+            if(rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).size()==2) {
+              int pmID = rawSig.second.getPM().getID();
+              double thrTimeDiff = rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(1)-rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(0);
+              stats.getHisto2D("ap_sig_thr_tdiff")->Fill(pmID, thrTimeDiff);
+            }
+          }
+          for(auto& rawSig : secondHit.getSignalA().getRawSignals()){
+            if(rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).size()==2) {
+              int pmID = rawSig.second.getPM().getID();
+              double thrTimeDiff = rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(1)-rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(0);
+              stats.getHisto2D("ap_sig_thr_tdiff")->Fill(pmID, thrTimeDiff);
+            }
+          }
+          for(auto& rawSig : secondHit.getSignalB().getRawSignals()){
+            if(rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).size()==2) {
+              int pmID = rawSig.second.getPM().getID();
+              double thrTimeDiff = rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(1)-rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(0);
+              stats.getHisto2D("ap_sig_thr_tdiff")->Fill(pmID, thrTimeDiff);
+            }
+          }
         }
 
         return true;

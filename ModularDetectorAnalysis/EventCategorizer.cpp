@@ -166,6 +166,9 @@ void EventCategorizer::initialiseHistograms()
   auto minScinID = getParamBank().getScins().begin()->first;
   auto maxScinID = getParamBank().getScins().rbegin()->first;
 
+  auto minSiPMID = getParamBank().getPMs().begin()->first;
+  auto maxSiPMID = getParamBank().getPMs().rbegin()->first;
+
   // Histograms for 2Gamama selection
   getStatistics().createHistogram(
     new TH1F("2g_tdiff", "2 gamma event - registration time difference", 200, 0.0, 1.1*fMaxTimeDiff)
@@ -389,6 +392,14 @@ void EventCategorizer::initialiseHistograms()
       getStatistics().getHisto2D(Form("time_walk_scin_%d", scinID))->GetYaxis()->SetTitle("Reversed TOT [1/ps]");
     }
   }
+
+  // Time difference between SiPM thresholds
+  getStatistics().createHistogram(new TH2F(
+    "ap_sig_thr_tdiff", "Time difference between SiPM thresholds",
+    maxSiPMID-minSiPMID+1, minSiPMID-0.5, maxSiPMID+0.5, 200, -10000.0, 10000.0
+  ));
+  getStatistics().getHisto2D("ap_sig_thr_tdiff")->GetXaxis()->SetTitle("SiPM ID");
+  getStatistics().getHisto2D("ap_sig_thr_tdiff")->GetYaxis()->SetTitle("Time diffrence [ps]");
 
   // Histograms for 3Gamama category
   // getStatistics().createHistogram(
