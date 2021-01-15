@@ -183,15 +183,15 @@ void EventCategorizer::initialiseHistograms()
     "2g_tot_scin", "2 gamma event average TOT scaled per scin",
     maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5, 200, 0.0, 400000.0
   ));
-  getStatistics().getHisto1D("2g_tot_scin")->GetXaxis()->SetTitle("Reversd Time over Threshold [1/ps]");
-  getStatistics().getHisto1D("2g_tot_scin")->GetYaxis()->SetTitle("Number of Hits");
+  getStatistics().getHisto2D("2g_tot_scin")->GetXaxis()->SetTitle("Reversd Time over Threshold [1/ps]");
+  getStatistics().getHisto2D("2g_tot_scin")->GetYaxis()->SetTitle("Number of Hits");
 
   getStatistics().createHistogram(new TH2F(
     "2g_revtot_scin", "2 gamma event reversed TOT per scin",
     maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5, 200, -0.0001, 0.0001
   ));
-  getStatistics().getHisto1D("2g_revtot_scin")->GetXaxis()->SetTitle("Reversd Time over Threshold [1/ps]");
-  getStatistics().getHisto1D("2g_revtot_scin")->GetYaxis()->SetTitle("Number of Hits");
+  getStatistics().getHisto2D("2g_revtot_scin")->GetXaxis()->SetTitle("Reversd Time over Threshold [1/ps]");
+  getStatistics().getHisto2D("2g_revtot_scin")->GetYaxis()->SetTitle("Number of Hits");
 
   // TOF for hit pairs
   getStatistics().createHistogram(
@@ -253,8 +253,8 @@ void EventCategorizer::initialiseHistograms()
     "ap_revtot_scin", "Annihilation pairs reversed TOT per scin",
     maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5, 200, -0.0001, 0.0001
   ));
-  getStatistics().getHisto1D("ap_revtot_scin")->GetXaxis()->SetTitle("Reversd Time over Threshold [1/ps]");
-  getStatistics().getHisto1D("ap_revtot_scin")->GetYaxis()->SetTitle("Number of Hits");
+  getStatistics().getHisto2D("ap_revtot_scin")->GetXaxis()->SetTitle("Reversd Time over Threshold [1/ps]");
+  getStatistics().getHisto2D("ap_revtot_scin")->GetYaxis()->SetTitle("Number of Hits");
 
   getStatistics().createHistogram(
     new TH1F("ap_hit_tdiff", "Annihilation pairs hits A-B time difference after TOT cut", 100, -15000.0, 15000.0)
@@ -372,8 +372,8 @@ void EventCategorizer::initialiseHistograms()
         Form("TOF vs. reversed TOT, time walk effect Scin %d", scinID),
         200, -1000.0, 1000.0, 200, -0.0001, 0.0001
       ));
-      getStatistics().getHisto1D(Form("time_walk_scin_%d", scinID))->GetXaxis()->SetTitle("ToF [ps]");
-      getStatistics().getHisto1D(Form("time_walk_scin_%d", scinID))->GetYaxis()->SetTitle("Reversed TOT [1/ps]");
+      getStatistics().getHisto2D(Form("time_walk_scin_%d", scinID))->GetXaxis()->SetTitle("ToF [ps]");
+      getStatistics().getHisto2D(Form("time_walk_scin_%d", scinID))->GetYaxis()->SetTitle("Reversed TOT [1/ps]");
     }
   }
 
