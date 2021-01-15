@@ -163,7 +163,8 @@ bool EventCategorizerTools::checkFor2Gamma(
           stats.getHisto2D(Form("time_walk_scin_%d", scin2ID))->Fill(tofConvCorr, revTOT2);
         }
       }
-      if(max(scin1ID - scin2ID, scin2ID - scin1ID) == 156) {
+      int idDiff = max(scin1ID - scin2ID, scin2ID - scin1ID);
+      if(idDiff > 153 && idDiff < 159) {
         angleCut2 = true;
         if(saveHistos){
           stats.getHisto1D("cut_stats_a2")->Fill(scin1ID);

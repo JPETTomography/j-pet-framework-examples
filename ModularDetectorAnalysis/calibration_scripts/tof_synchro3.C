@@ -50,30 +50,32 @@ void tof_synchro(
 
   if(fileHitsTOF->IsOpen()){
 
+    TH2F *annhPerScin = dynamic_cast<TH2F*>(fileHitsTOF->Get("tdiff_annih_scin"));
+    TH2F *deexPerScin = dynamic_cast<TH2F*>(fileHitsTOF->Get("tdiff_deex_scin"));
+
     TGraphErrors* tofCorrGraph = new TGraphErrors();
     tofCorrGraph->SetNameTitle("tof_corr", "TOF correction for hits in scintillators");
     tofCorrGraph->GetXaxis()->SetTitle("Scin ID");
     tofCorrGraph->GetYaxis()->SetTitle("correction [ps]");
-
     unsigned graphIt = 0;
 
     for(int scinID = minScinID; scinID <= maxScinID; ++scinID) {
 
-      TH1F* adHist = (TH1F*) fileHitsTOF->Get(Form("tdiff_a_d_scin_%d", scinID));
-      TH1F* daHist = (TH1F*) fileHitsTOF->Get(Form("tdiff_d_a_scin_%d", scinID));
-      adHist->SetLineColor(46);
-      daHist->SetLineColor(36);
-      adHist->SetLineWidth(2);
-      daHist->SetLineWidth(2);
+      TH1D* annhHist = annhPerScin->ProjectionY(Form("anni_scin_%d", scinID), scinID-200, scinID-200);
+      TH1D* deexHist = deexPerScin->ProjectionY(Form("deex_scin_%d", scinID), scinID-200, scinID-200);
+      annhHist->SetLineColor(46);
+      deexHist->SetLineColor(36);
+      annhHist->SetLineWidth(2);
+      deexHist->SetLineWidth(2);
 
-      if(adHist->GetEntries()==0 || daHist->GetEntries()==0) { continue; }
+      if(annhHist->GetEntries() < 100 || deexHist->GetEntries() < 100) { continue; }
 
       // Simplified way of getting correction constant
-      double tof_corr = 0.5*(adHist->GetMean()-daHist->GetMean());
-      double tof_corr_error = 0.5*(adHist->GetMeanError(1)+daHist->GetMeanError(1));
+      double tof_corr = 0.5*(annhHist->GetMean()-deexHist->GetMean());
+      double tof_corr_error = 0.5*(annhHist->GetMeanError(1)+deexHist->GetMeanError(1));
 
       // Writing result to the tree
-      tree.put("scin."+to_string(scinID)+".tof_correction", tof_corr);
+      tree.put("scin."+to_string(scinID)+".test_correction", tof_corr);
 
       // Filling the graph
       tofCorrGraph->SetPoint(graphIt, (double) scinID, tof_corr);
@@ -82,25 +84,28 @@ void tof_synchro(
 
       // Drawing canvases
       if(saveResult){
-        auto maxA = adHist->GetMaximumBin();
-        auto maxD = daHist->GetMaximumBin();
+        auto maxA = annhHist->GetMaximumBin();
+        auto maxD = deexHist->GetMaximumBin();
         auto name = Form("tof_fit_scin_%d", scinID);
         TCanvas* can = new TCanvas(name, name, 1200, 800);
-        if(adHist->GetBinContent(maxA) > daHist->GetBinContent(maxD)){
-          adHist->Draw();
-          daHist->Draw("same");
+        if(annhHist->GetBinContent(maxA) > deexHist->GetBinContent(maxD)){
+          annhHist->Draw();
+          deexHist->Draw("same");
         } else {
-          daHist->Draw();
-          adHist->Draw("same");
+          deexHist->Draw();
+          annhHist->Draw("same");
         }
-        can->SaveAs(Form("%s/tof_fit_scin_%d.png", resultDir.c_str(), scinID));
+        can->SaveAs(Form("%s/tof_corr_scin_%d.png", resultDir.c_str(), scinID));
       }
     }
 
     if(saveResult){
       TCanvas* canTOF = new TCanvas("tof_corr_graph", "tof_corr_graph", 1200, 800);
       tofCorrGraph->Draw("AP*");
-      canTOF->SaveAs(Form("%s/tof_corrections.png", resultDir.c_str()));
+      canTOF->SaveAs(Form("%s/tof_corr_scin.png", resultDir.c_str()));
     }
+
+    // Saving tree into json file
+    bpt::write_json(calibJSONFileName, tree);
   }
 }
