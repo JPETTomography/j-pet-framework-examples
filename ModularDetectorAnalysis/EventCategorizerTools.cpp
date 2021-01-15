@@ -225,28 +225,28 @@ bool EventCategorizerTools::checkFor2Gamma(
           for(auto& rawSig : firstHit.getSignalA().getRawSignals()){
             if(rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).size()==2) {
               int pmID = rawSig.second.getPM().getID();
-              double thrTimeDiff = rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(1)-rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(0);
+              double thrTimeDiff = rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(2)-rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(1);
               stats.getHisto2D("ap_sig_thr_tdiff")->Fill(pmID, thrTimeDiff);
             }
           }
           for(auto& rawSig : firstHit.getSignalB().getRawSignals()){
             if(rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).size()==2) {
               int pmID = rawSig.second.getPM().getID();
-              double thrTimeDiff = rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(1)-rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(0);
+              double thrTimeDiff = rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(2)-rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(1);
               stats.getHisto2D("ap_sig_thr_tdiff")->Fill(pmID, thrTimeDiff);
             }
           }
           for(auto& rawSig : secondHit.getSignalA().getRawSignals()){
             if(rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).size()==2) {
               int pmID = rawSig.second.getPM().getID();
-              double thrTimeDiff = rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(1)-rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(0);
+              double thrTimeDiff = rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(2)-rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(1);
               stats.getHisto2D("ap_sig_thr_tdiff")->Fill(pmID, thrTimeDiff);
             }
           }
           for(auto& rawSig : secondHit.getSignalB().getRawSignals()){
             if(rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).size()==2) {
               int pmID = rawSig.second.getPM().getID();
-              double thrTimeDiff = rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(1)-rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(0);
+              double thrTimeDiff = rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(2)-rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(1);
               stats.getHisto2D("ap_sig_thr_tdiff")->Fill(pmID, thrTimeDiff);
             }
           }
