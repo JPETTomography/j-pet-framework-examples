@@ -118,7 +118,7 @@ bool EventCategorizer::exec()
       if(fSaveCalibHistos){
         EventCategorizerTools::selectForCalibration(
           event, getStatistics(), fSaveControlHistos, fSaveCalibHistos,
-          fTOTCutAnniMin, fTOTCutAnniMax, fTOTCutDeexMin, fTOTCutDeexMax
+          fTOTCutAnniMin, fTOTCutAnniMax, fTOTCutDeexMin, fTOTCutDeexMax, fConstansTree
         );
       }
 
@@ -345,32 +345,45 @@ void EventCategorizer::initialiseHistograms()
 
     getStatistics().createHistogram(new TH2F(
       "ap_tof_conv_corr_z", "Corrected TOF by convention of annihilation event vs. z-position of hits",
-      101, -25.5, 25.5, 200, -15000.0, 15000.0
+      101, -25.5, 25.5, 200, -5000.0, 5000.0
     ));
     getStatistics().getHisto2D("ap_tof_conv_corr_z")->GetXaxis()->SetTitle("z-position of hit [cm]");
     getStatistics().getHisto2D("ap_tof_conv_corr_z")->GetYaxis()->SetTitle("Time of Flight [ps]");
 
+    // Synchronization of TOF with annihilaion-deexcitation pairs
+    getStatistics().createHistogram(new TH2F(
+      "tdiff_annih_scin", "A-D time difference for annihilation hit per scin",
+      maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5, 200, -20000.0, 20000.0
+    ));
+    getStatistics().getHisto2D("tdiff_annih_scin")->GetXaxis()->SetTitle("Time diffrence [ps]");
+    getStatistics().getHisto2D("tdiff_annih_scin")->GetYaxis()->SetTitle("Number of A-D pairs");
+
+    getStatistics().createHistogram(new TH2F(
+      "tdiff_deex_scin", "A-D time difference for deex hit per scin",
+      maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5, 200, -20000.0, 20000.0
+    ));
+    getStatistics().getHisto2D("tdiff_deex_scin")->GetXaxis()->SetTitle("Time diffrence [ps]");
+    getStatistics().getHisto2D("tdiff_deex_scin")->GetYaxis()->SetTitle("Number of A-D pairs");
+
+    getStatistics().createHistogram(new TH2F(
+      "tdiff_annih_scin_corr", "Corrected A-D time difference for annihilation hit per scin",
+      maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5, 200, -20000.0, 20000.0
+    ));
+    getStatistics().getHisto2D("tdiff_annih_scin_corr")->GetXaxis()->SetTitle("Time diffrence [ps]");
+    getStatistics().getHisto2D("tdiff_annih_scin_corr")->GetYaxis()->SetTitle("Number of A-D pairs");
+
+    getStatistics().createHistogram(new TH2F(
+      "tdiff_deex_scin_corr", "Corrected A-D time difference for deex hit per scin",
+      maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5, 200, -20000.0, 20000.0
+    ));
+    getStatistics().getHisto2D("tdiff_deex_scin_corr")->GetXaxis()->SetTitle("Time diffrence [ps]");
+    getStatistics().getHisto2D("tdiff_deex_scin_corr")->GetYaxis()->SetTitle("Number of A-D pairs");
+
     for(int scinID = minScinID; scinID<= maxScinID; scinID++) {
-      getStatistics().createHistogram(new TH1F(
-        Form("tdiff_annih_scin_%d", scinID),
-        Form("A-D time difference for annihilation hit scin %d", scinID),
-        200, -15000.0, 15000.0
-      ));
-      getStatistics().getHisto1D(Form("tdiff_annih_scin_%d", scinID))->GetXaxis()->SetTitle("Time diffrence [ps]");
-      getStatistics().getHisto1D(Form("tdiff_annih_scin_%d", scinID))->GetYaxis()->SetTitle("Number of A-D pairs");
-
-      getStatistics().createHistogram(new TH1F(
-        Form("tdiff_deex_scin_%d", scinID),
-        Form("A-D time difference for deex hit scin %d", scinID),
-        200, -15000.0, 15000.0
-      ));
-      getStatistics().getHisto1D(Form("tdiff_deex_scin_%d", scinID))->GetXaxis()->SetTitle("Time diffrence [ps]");
-      getStatistics().getHisto1D(Form("tdiff_deex_scin_%d", scinID))->GetYaxis()->SetTitle("Number of A-D pairs");
-
       getStatistics().createHistogram(new TH2F(
         Form("time_walk_scin_%d", scinID),
         Form("TOF vs. reversed TOT, time walk effect Scin %d", scinID),
-        200, -1000.0, 1000.0, 200, -0.0001, 0.0001
+        200, -fMaxTimeDiff, fMaxTimeDiff, 200, -0.0005, 0.0005
       ));
       getStatistics().getHisto2D(Form("time_walk_scin_%d", scinID))->GetXaxis()->SetTitle("ToF [ps]");
       getStatistics().getHisto2D(Form("time_walk_scin_%d", scinID))->GetYaxis()->SetTitle("Reversed TOT [1/ps]");

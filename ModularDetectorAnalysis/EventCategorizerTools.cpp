@@ -25,7 +25,8 @@ using namespace std;
 */
 void EventCategorizerTools::selectForCalibration(
   const JPetEvent& event, JPetStatistics& stats, bool saveHistos, bool saveCalibHistos,
-  double totCutAnniMin, double totCutAnniMax, double totCutDeexMin, double totCutDeexMax
+  double totCutAnniMin, double totCutAnniMax, double totCutDeexMin, double totCutDeexMax,
+  boost::property_tree::ptree& calibTree
 ) {
 
   if (event.getHits().size() < 2) { return; }
@@ -49,25 +50,35 @@ void EventCategorizerTools::selectForCalibration(
       if(tot2 > totCutDeexMin && tot2 < totCutDeexMax) { deex2 = true; }
 
       // Time differences and strip ID to be assigned
-      double tDiff_A_D = 0.0;
+      double aTime = 0.0, dTime = 0.0;
       int aScinID = -1, dScinID = -1;
 
       if(anih1 && deex2) {
-        tDiff_A_D = event.getHits().at(i).getTime() - event.getHits().at(j).getTime();
         aScinID = event.getHits().at(i).getScin().getID();
         dScinID = event.getHits().at(j).getScin().getID();
+        aTime = event.getHits().at(i).getTime();
+        dTime = event.getHits().at(j).getTime();
       } else if(anih2 && deex1) {
-        tDiff_A_D = event.getHits().at(j).getTime() - event.getHits().at(i).getTime();
         aScinID = event.getHits().at(j).getScin().getID();
         dScinID = event.getHits().at(i).getScin().getID();
+        aTime = event.getHits().at(j).getTime();
+        dTime = event.getHits().at(i).getTime();
       } else {
         continue;
       }
 
+      double aTOFCorr = calibTree.get("scin."+to_string(aScinID)+".test_correction", 0.0);
+      double dTOFCorr = calibTree.get("scin."+to_string(dScinID)+".test_correction", 0.0);
+
+      double tDiff_A_D = aTime-dTime;
+      double tDiff_A_D_corr = (aTime-aTOFCorr)-(dTime-dTOFCorr);
+
       // Filling histograms for specific scintillators
       if(saveHistos && saveCalibHistos && tDiff_A_D!=0.0 && aScinID!=-1 && dScinID!=-1) {
-        stats.getHisto1D(Form("tdiff_annih_scin_%d", aScinID))->Fill(-tDiff_A_D);
-        stats.getHisto1D(Form("tdiff_deex_scin_%d", dScinID))->Fill(tDiff_A_D);
+        stats.getHisto2D("tdiff_annih_scin")->Fill(aScinID, -tDiff_A_D);
+        stats.getHisto2D("tdiff_deex_scin")->Fill(dScinID, tDiff_A_D);
+        stats.getHisto2D("tdiff_annih_scin_corr")->Fill(aScinID, -tDiff_A_D_corr);
+        stats.getHisto2D("tdiff_deex_scin_corr")->Fill(dScinID, tDiff_A_D_corr);
       }
     }
   }
@@ -148,6 +159,8 @@ bool EventCategorizerTools::checkFor2Gamma(
         if(saveHistos){
           stats.getHisto1D("cut_stats_a1")->Fill(scin1ID);
           stats.getHisto1D("cut_stats_a1")->Fill(scin2ID);
+          stats.getHisto2D(Form("time_walk_scin_%d", scin1ID))->Fill(tofConvCorr, revTOT1);
+          stats.getHisto2D(Form("time_walk_scin_%d", scin2ID))->Fill(tofConvCorr, revTOT2);
         }
       }
       if(max(scin1ID - scin2ID, scin2ID - scin1ID) == 156) {
@@ -186,7 +199,7 @@ bool EventCategorizerTools::checkFor2Gamma(
           stats.getHisto1D("ap_tof_corr")->Fill(tofCorr);
           stats.getHisto1D("ap_tof_conv_corr")->Fill(tofConvCorr);
 
-          if(angleCut2 && saveCalibHistos){
+          if(saveCalibHistos){
             stats.getHisto2D("ap_revtot_scin")->Fill(scin1ID, revTOT1);
             stats.getHisto2D("ap_revtot_scin")->Fill(scin2ID, revTOT2);
 
@@ -202,8 +215,6 @@ bool EventCategorizerTools::checkFor2Gamma(
             stats.getHisto2D("ap_tof_conv_corr_z")->Fill(firstHit.getPosZ(), tofConvCorr);
             stats.getHisto2D("ap_tof_conv_corr_z")->Fill(secondHit.getPosZ(), tofConvCorr);
 
-            stats.getHisto2D(Form("time_walk_scin_%d", scin1ID))->Fill(tofConvCorr, revTOT1);
-            stats.getHisto2D(Form("time_walk_scin_%d", scin2ID))->Fill(tofConvCorr, revTOT2);
           }
 
           TVector3 annhilationPoint = calculateAnnihilationPoint(firstHit, secondHit);

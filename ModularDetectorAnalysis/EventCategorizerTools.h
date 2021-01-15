@@ -35,7 +35,8 @@ class EventCategorizerTools
 public:
   static void selectForCalibration(
     const JPetEvent& event, JPetStatistics& stats, bool saveHistos, bool saveCalibHistos,
-    double totCutAnniMin, double totCutAnniMax, double totCutDeexMin, double totCutDeexMax
+    double totCutAnniMin, double totCutAnniMax, double totCutDeexMin, double totCutDeexMax,
+    boost::property_tree::ptree& calibTree
   );
   static bool checkFor2Gamma(
     const JPetEvent& event, JPetStatistics& stats, bool saveHistos, bool saveCalibHistos,
@@ -51,7 +52,7 @@ public:
   );
   static double calculateTOT(const JPetHit& hit);
   static double calculateReveresedTOT(const JPetHit& hit);
-  
+
   static double calculateDistance(const JPetHit& hit1, const JPetHit& hit2);
   static double calculateScatteringTime(const JPetHit& hit1, const JPetHit& hit2);
   static double calculateScatteringAngle(const JPetHit& hit1, const JPetHit& hit2);
