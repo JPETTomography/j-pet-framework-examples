@@ -164,7 +164,7 @@ bool EventCategorizerTools::checkFor2Gamma(
         }
       }
       int idDiff = max(scin1ID - scin2ID, scin2ID - scin1ID);
-      if(idDiff > 153 && idDiff < 159) {
+      if(idDiff > 154 && idDiff < 158) {
         angleCut2 = true;
         if(saveHistos){
           stats.getHisto1D("cut_stats_a2")->Fill(scin1ID);
