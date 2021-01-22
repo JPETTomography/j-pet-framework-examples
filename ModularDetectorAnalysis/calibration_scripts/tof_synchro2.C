@@ -77,7 +77,7 @@ void tof_synchro(
       // Calculating limits for gaussian fit
       auto max = tofHist->GetMaximumBin();
       auto nBins = tofHist->GetNbinsX();
-      int binRange = (int)(0.08*nBins);
+      int binRange = (int)(0.02*nBins);
       auto low = tofHist->GetBinCenter(max-binRange);
       auto upp = tofHist->GetBinCenter(max+binRange);
 
