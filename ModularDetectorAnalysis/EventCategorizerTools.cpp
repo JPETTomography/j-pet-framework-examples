@@ -258,7 +258,7 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
           stats.getHisto2D("ap_tof_conv_corr_z")->Fill(firstHit.getPosZ(), tofConvCorr);
           stats.getHisto2D("ap_tof_conv_corr_z")->Fill(secondHit.getPosZ(), tofConvCorr);
           TVector3 annhilationPoint = calculateAnnihilationPoint(firstHit, secondHit);
-          stats.getHisto2D("ap_xy")->Fill(annhilationPoint.X(), annhilationPoint.Y());
+          stats.getHisto2D("ap_xy")->Fill(annhilationPoint.Y(), annhilationPoint.X());
           stats.getHisto2D("ap_xz")->Fill(annhilationPoint.X(), annhilationPoint.Z());
           stats.getHisto2D("ap_yz")->Fill(annhilationPoint.Y(), annhilationPoint.Z());
           stats.getHisto2D("ap_xy_zoom")->Fill(annhilationPoint.X(), annhilationPoint.Y());
