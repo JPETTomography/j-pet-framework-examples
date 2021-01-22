@@ -179,7 +179,7 @@ JPetHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const JPetMat
   hit.setQualityOfTimeDiff(-1.0);
   hit.setPosX(signalA.getPM().getScin().getCenterX());
   hit.setPosY(signalA.getPM().getScin().getCenterY());
-  hit.setPosZ(velocity * hit.getTimeDiff());
+  hit.setPosZ(velocity * hit.getTimeDiff() / 2.0);
   hit.setScin(signalA.getPM().getScin());
 
   // TOT of a signal is a sum of over all threshold in a signal
