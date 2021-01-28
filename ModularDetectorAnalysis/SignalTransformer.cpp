@@ -184,7 +184,7 @@ void SignalTransformer::initialiseHistograms()
 
     getStatistics().createHistogram(new TH2F("mtx_offsets_sipm", "Offset of SiPM in Matrix vs. SiPM ID", maxSiPMID - minSiPMID + 1, minSiPMID - 0.5,
                                              maxSiPMID + 0.5, 200, -fMergingTime, fMergingTime));
-    getStatistics().getHisto1D("mtx_offsets_sipm")->GetXaxis()->SetTitle("Scin ID");
-    getStatistics().getHisto1D("mtx_offsets_sipm")->GetYaxis()->SetTitle("SiPM Offset");
+    getStatistics().getHisto2D("mtx_offsets_sipm")->GetXaxis()->SetTitle("Scin ID");
+    getStatistics().getHisto2D("mtx_offsets_sipm")->GetYaxis()->SetTitle("SiPM Offset");
   }
 }
