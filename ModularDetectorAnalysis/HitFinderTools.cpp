@@ -166,8 +166,7 @@ JPetHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const JPetMat
   // Getting constants for this scintillator
   double velocity = calibTree.get("scin." + to_string(scinID) + ".eff_velocity", -999.0);
   // Temporaily not using TOF corrections here
-  double tofCorrection = 0.0;
-  // double tofCorrection = calibTree.get("scin."+to_string(scinID)+".tof_correction", 0.0);
+  double tofCorrection = calibTree.get("scin." + to_string(scinID) + ".tof_correction", 0.0);
   double totNormA = calibTree.get("scin." + to_string(scinID) + ".tot_scaling_factor_a", 1.0);
   double totNormB = calibTree.get("scin." + to_string(scinID) + ".tot_scaling_factor_b", 0.0);
 

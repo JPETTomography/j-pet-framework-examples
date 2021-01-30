@@ -91,20 +91,6 @@ bool HitFinder::exec()
 
 bool HitFinder::terminate()
 {
-  // if(fSaveCalibHistos && isOptionSet(fParams.getOptions(), kCalibBankFileParamKey)) {
-  //   INFO(Form(
-  //     "Hit Finder - adding A-B spectra histograms to calibration bank %s",
-  //     getOptionAsString(fParams.getOptions(), kCalibBankFileParamKey).c_str()
-  //   ));
-  //
-  //   std::vector<TH1F*> histograms;
-  //   for(auto scin_e : getParamBank().getScins()){
-  //     TH1F* histo = dynamic_cast<TH1F*>(getStatistics().getHisto1D(Form("ab_tdiff_scin_%d", scin_e.second->getID()))->Clone());
-  //     histograms.push_back(histo);
-  //   }
-  //   CalibrationTools::addHistograms(histograms, getOptionAsString(fParams.getOptions(), kCalibBankFileParamKey));
-  // }
-
   INFO("Hit finding ended");
   return true;
 }
@@ -144,13 +130,6 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
         getStatistics().getHisto2D("hit_tot_scin_norm")->Fill(scinID, hit.getEnergy());
         getStatistics().getHisto2D(Form("hit_tot_scin_m_%d", multi))->Fill(scinID, hit.getQualityOfEnergy());
         getStatistics().getHisto2D(Form("hit_tot_scin_m_%d_norm", multi))->Fill(scinID, hit.getEnergy());
-      }
-
-      // Filling calibration histograms, if demanded. For A-B synchronization
-      // only hits with multiplisity larger than 5 are used
-      if (fSaveCalibHistos && multi > 5)
-      {
-        getStatistics().getHisto1D(Form("ab_tdiff_scin_%d", scinID))->Fill(hit.getTimeDiff());
       }
     }
   }
@@ -236,17 +215,4 @@ void HitFinder::initialiseHistograms()
       new TH1F("remain_signals_tdiff", "Time Diff of an unused signal and the consecutive one", 200, fABTimeDiff, 5.0 * fABTimeDiff));
   getStatistics().getHisto1D("remain_signals_tdiff")->GetXaxis()->SetTitle("Time difference [ps]");
   getStatistics().getHisto1D("remain_signals_tdiff")->GetYaxis()->SetTitle("Number of Signals");
-
-  // Calibration histograms, for every scintillator
-  if (fSaveCalibHistos)
-  {
-    for (auto scin_e : getParamBank().getScins())
-    {
-      getStatistics().createHistogram(new TH1F(Form("ab_tdiff_scin_%d", scin_e.second->getID()),
-                                               Form("Hit time difference, scin %d", scin_e.second->getID()), 300, -1.1 * fABTimeDiff,
-                                               1.1 * fABTimeDiff));
-      getStatistics().getHisto1D(Form("ab_tdiff_scin_%d", scin_e.second->getID()))->GetXaxis()->SetTitle("A-B time difference [ps]");
-      getStatistics().getHisto1D(Form("ab_tdiff_scin_%d", scin_e.second->getID()))->GetYaxis()->SetTitle("Number of Hits");
-    }
-  }
 }

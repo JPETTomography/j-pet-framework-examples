@@ -49,9 +49,10 @@ typedef std::pair<std::vector<double>, std::vector<double>> Points;
 typedef std::pair<double, double> Point;
 
 const double fScinActiveLenght = 50.0;
-const int fNumberOfPointsToFilter = 6;
-const int fThresholdForDerivative = 80;
+const int fNumberOfPointsToFilter = 8;
+const int fThresholdForDerivative = 50;
 const int fHalfRangeForExtremumEstimation = 2;
+const int fScinOffset = 200;
 
 enum Side
 {
@@ -184,7 +185,7 @@ Edge findEdge(Points points, Side side)
   return edge;
 }
 
-Points getSubset(TH1F* histo, double min, double max)
+Points getSubset(TH1D* histo, double min, double max)
 {
   int filterHalf = (int)(fNumberOfPointsToFilter / 2);
 
@@ -230,6 +231,16 @@ void hit_tdiff_effvel(std::string fileName, std::string calibJSONFileName = "cal
 
   if (fileHitsAB->IsOpen())
   {
+    TH2F* hitTDiffAll = dynamic_cast<TH2F*>(fileHitsAB->Get("hit_tdiff_scin"));
+    TH2F* hitTDiffM5 = dynamic_cast<TH2F*>(fileHitsAB->Get("hit_tdiff_scin_m_5"));
+    TH2F* hitTDiffM6 = dynamic_cast<TH2F*>(fileHitsAB->Get("hit_tdiff_scin_m_6"));
+    TH2F* hitTDiffM7 = dynamic_cast<TH2F*>(fileHitsAB->Get("hit_tdiff_scin_m_7"));
+    TH2F* hitTDiffM8 = dynamic_cast<TH2F*>(fileHitsAB->Get("hit_tdiff_scin_m_8"));
+
+    TH2F* hitTDiffSum = dynamic_cast<TH2F*>(hitTDiffM8->Clone("hit_tdiff_scin_sum");
+    hitTDiffSum->Add(hitTDiffM7);
+    hitTDiffSum->Add(hitTDiffM6);
+    hitTDiffSum->Add(hitTDiffM5);
 
     TGraphErrors* bCorrGraph = new TGraphErrors();
     bCorrGraph->SetNameTitle("b_corr", "B side signals correction for scintillators");
@@ -245,8 +256,8 @@ void hit_tdiff_effvel(std::string fileName, std::string calibJSONFileName = "cal
 
     for (int scinID = minScinID; scinID <= maxScinID; ++scinID)
     {
+      TH1D* ab_tdiff = hitTDiffSum->ProjectionY(Form("ab_tdiff_scin_%d", pmID), scinID - fScinOffset, scinID - fScinOffset);
 
-      TH1F* ab_tdiff = dynamic_cast<TH1F*>(fileHitsAB->Get(Form("ab_tdiff_scin_%d", scinID)));
       ab_tdiff->SetLineColor(kBlue);
       ab_tdiff->SetLineWidth(2);
 

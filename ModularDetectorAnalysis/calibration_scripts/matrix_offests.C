@@ -27,54 +27,63 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 
-#include <TDirectory.h>
 #include <TCanvas.h>
-#include <TGraph.h>
-#include <TLine.h>
+#include <TDirectory.h>
 #include <TFile.h>
-#include <TMath.h>
-#include <TH2D.h>
+#include <TGraph.h>
 #include <TH1D.h>
+#include <TH2D.h>
+#include <TLine.h>
+#include <TMath.h>
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <vector>
 
 namespace bpt = boost::property_tree;
 
-void matrix_offsets(
-  std::string fileName, std::string calibJSONFileName = "calibration_constants.json",
-  bool saveResult = false, std::string resultDir = "./", int minPMID = 401, int maxPMID = 2896
-) {
+void matrix_offsets(std::string fileName, std::string calibJSONFileName = "calibration_constants.json", bool saveResult = false,
+                    std::string resultDir = "./", int minPMID = 401, int maxPMID = 2896)
+{
 
   TFile* fileMtxSynchro = new TFile(fileName.c_str(), "READ");
 
   bpt::ptree tree;
   ifstream file(calibJSONFileName.c_str());
-  if(file.good()){
+  if (file.good())
+  {
     bpt::read_json(calibJSONFileName, tree);
   }
 
-  if(fileMtxSynchro->IsOpen()){
-    for(int pmID = minPMID; pmID <= maxPMID; ++pmID){
+  if (fileMtxSynchro->IsOpen())
+  {
 
-      TH1F* sipm_offset = dynamic_cast<TH1F*>(fileMtxSynchro->Get(Form("offset_%d", pmID)));
-      if(sipm_offset->GetEntries() < 100) { continue; }
+    TH2F* mtxSiPMOffsets = dynamic_cast<TH2F*>(fileMtxSynchro->Get("mtx_offsets_sipm"));
+
+    for (int pmID = minPMID; pmID <= maxPMID; ++pmID)
+    {
+
+      TH1D* sipm_offset = mtxSiPMOffsets->ProjectionY(Form("offset_sipm_%d", pmID), pmID - 400, pmID - 400);
+      if (sipm_offset->GetEntries() < 100)
+      {
+        continue;
+      }
 
       // Calculating limits for gaussian fit
       auto max = sipm_offset->GetMaximumBin();
       auto nBins = sipm_offset->GetNbinsX();
-      int binRange = (int)(0.1*nBins);
-      auto low = sipm_offset->GetBinCenter(max-binRange);
-      auto upp = sipm_offset->GetBinCenter(max+binRange);
+      int binRange = (int)(0.05 * nBins);
+      auto low = sipm_offset->GetBinCenter(max - binRange);
+      auto upp = sipm_offset->GetBinCenter(max + binRange);
 
       sipm_offset->Fit("gaus", "", "", low, upp);
       auto fitFun = sipm_offset->GetFunction("gaus");
       fitFun->SetLineColor(2);
 
-      tree.put("pm."+to_string(pmID)+".matrix_offset", fitFun->GetParameter(1));
+      tree.put("pm." + to_string(pmID) + ".matrix_offset", fitFun->GetParameter(1));
 
-      if(saveResult){
+      if (saveResult)
+      {
         auto name = Form("fit_result_sipm_%d", pmID);
         TCanvas* can = new TCanvas(name, name, 1200, 800);
         sipm_offset->Draw();
