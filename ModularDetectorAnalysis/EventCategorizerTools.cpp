@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -88,19 +88,13 @@ void EventCategorizerTools::selectForCalibration(const JPetEvent& event, JPetSta
         continue;
       }
 
-      double aTOFCorr = calibTree.get("scin." + to_string(aScinID) + ".test_correction", 0.0);
-      double dTOFCorr = calibTree.get("scin." + to_string(dScinID) + ".test_correction", 0.0);
-
       double tDiff_A_D = aTime - dTime;
-      double tDiff_A_D_corr = (aTime - aTOFCorr) - (dTime - dTOFCorr);
 
       // Filling histograms for specific scintillators
       if (saveHistos && saveCalibHistos && tDiff_A_D != 0.0 && aScinID != -1 && dScinID != -1)
       {
-        stats.getHisto2D("tdiff_annih_scin")->Fill(aScinID, -tDiff_A_D);
-        stats.getHisto2D("tdiff_deex_scin")->Fill(dScinID, tDiff_A_D);
-        stats.getHisto2D("tdiff_annih_scin_corr")->Fill(aScinID, -tDiff_A_D_corr);
-        stats.getHisto2D("tdiff_deex_scin_corr")->Fill(dScinID, tDiff_A_D_corr);
+        stats.getHisto2D("tdiff_annih_scin")->Fill(aScinID, tDiff_A_D);
+        stats.getHisto2D("tdiff_deex_scin")->Fill(dScinID, -tDiff_A_D);
       }
     }
   }
@@ -122,7 +116,6 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
   {
     for (uint j = i + 1; j < event.getHits().size(); j++)
     {
-
       JPetHit firstHit, secondHit;
       if (event.getHits().at(i).getTime() < event.getHits().at(j).getTime())
       {
@@ -154,8 +147,8 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
       // TOF calculated in several ways
       double tof = calculateTOF(firstHit.getTime(), secondHit.getTime());
       double tofConv = calculateTOFByConvention(firstHit, secondHit);
-      double firstHitTOFCorr = calibTree.get("scin." + to_string(scin1ID) + ".tof_correction", 0.0);
-      double secondHitTOFCorr = calibTree.get("scin." + to_string(scin2ID) + ".tof_correction", 0.0);
+      double firstHitTOFCorr = calibTree.get("scin." + to_string(scin1ID) + ".test_correction", 0.0);
+      double secondHitTOFCorr = calibTree.get("scin." + to_string(scin2ID) + ".test_correction", 0.0);
       double tofCorr = tof + firstHitTOFCorr;
       double tofConvCorr = tofConv;
       if (scin1ID < scin2ID)
@@ -193,8 +186,8 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
         {
           stats.getHisto1D("cut_stats_a1")->Fill(scin1ID);
           stats.getHisto1D("cut_stats_a1")->Fill(scin2ID);
-          stats.getHisto2D(Form("time_walk_scin_%d", scin1ID))->Fill(tofConvCorr, revTOT1);
-          stats.getHisto2D(Form("time_walk_scin_%d", scin2ID))->Fill(tofConvCorr, revTOT2);
+          // stats.getHisto2D(Form("time_walk_scin_%d", scin1ID))->Fill(tofConvCorr, revTOT1);
+          // stats.getHisto2D(Form("time_walk_scin_%d", scin2ID))->Fill(tofConvCorr, revTOT2);
         }
       }
       int idDiff = max(scin1ID - scin2ID, scin2ID - scin1ID);
@@ -265,46 +258,46 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
           stats.getHisto2D("ap_xz_zoom")->Fill(annhilationPoint.X(), annhilationPoint.Z());
           stats.getHisto2D("ap_yz_zoom")->Fill(annhilationPoint.Y(), annhilationPoint.Z());
 
-          for (auto& rawSig : firstHit.getSignalA().getRawSignals())
-          {
-            if (rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).size() == 2)
-            {
-              int pmID = rawSig.second.getPM().getID();
-              double thrTimeDiff = rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(2) -
-                                   rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(1);
-              stats.getHisto2D("ap_sig_thr_tdiff")->Fill(pmID, thrTimeDiff);
-            }
-          }
-          for (auto& rawSig : firstHit.getSignalB().getRawSignals())
-          {
-            if (rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).size() == 2)
-            {
-              int pmID = rawSig.second.getPM().getID();
-              double thrTimeDiff = rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(2) -
-                                   rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(1);
-              stats.getHisto2D("ap_sig_thr_tdiff")->Fill(pmID, thrTimeDiff);
-            }
-          }
-          for (auto& rawSig : secondHit.getSignalA().getRawSignals())
-          {
-            if (rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).size() == 2)
-            {
-              int pmID = rawSig.second.getPM().getID();
-              double thrTimeDiff = rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(2) -
-                                   rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(1);
-              stats.getHisto2D("ap_sig_thr_tdiff")->Fill(pmID, thrTimeDiff);
-            }
-          }
-          for (auto& rawSig : secondHit.getSignalB().getRawSignals())
-          {
-            if (rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).size() == 2)
-            {
-              int pmID = rawSig.second.getPM().getID();
-              double thrTimeDiff = rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(2) -
-                                   rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(1);
-              stats.getHisto2D("ap_sig_thr_tdiff")->Fill(pmID, thrTimeDiff);
-            }
-          }
+          // for (auto& rawSig : firstHit.getSignalA().getRawSignals())
+          // {
+          //   if (rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).size() == 2)
+          //   {
+          //     int pmID = rawSig.second.getPM().getID();
+          //     double thrTimeDiff = rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(2) -
+          //                          rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(1);
+          //     stats.getHisto2D("ap_sig_thr_tdiff")->Fill(pmID, thrTimeDiff);
+          //   }
+          // }
+          // for (auto& rawSig : firstHit.getSignalB().getRawSignals())
+          // {
+          //   if (rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).size() == 2)
+          //   {
+          //     int pmID = rawSig.second.getPM().getID();
+          //     double thrTimeDiff = rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(2) -
+          //                          rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(1);
+          //     stats.getHisto2D("ap_sig_thr_tdiff")->Fill(pmID, thrTimeDiff);
+          //   }
+          // }
+          // for (auto& rawSig : secondHit.getSignalA().getRawSignals())
+          // {
+          //   if (rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).size() == 2)
+          //   {
+          //     int pmID = rawSig.second.getPM().getID();
+          //     double thrTimeDiff = rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(2) -
+          //                          rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(1);
+          //     stats.getHisto2D("ap_sig_thr_tdiff")->Fill(pmID, thrTimeDiff);
+          //   }
+          // }
+          // for (auto& rawSig : secondHit.getSignalB().getRawSignals())
+          // {
+          //   if (rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).size() == 2)
+          //   {
+          //     int pmID = rawSig.second.getPM().getID();
+          //     double thrTimeDiff = rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(2) -
+          //                          rawSig.second.getTimesVsThresholdNumber(JPetSigCh::Leading).at(1);
+          //     stats.getHisto2D("ap_sig_thr_tdiff")->Fill(pmID, thrTimeDiff);
+          //   }
+          // }
         }
 
         return true;

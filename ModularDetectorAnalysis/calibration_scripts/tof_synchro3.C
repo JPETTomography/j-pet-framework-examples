@@ -58,6 +58,8 @@ void tof_synchro(std::string fileName, std::string calibJSONFileName = "calibrat
     tofCorrGraph->SetNameTitle("tof_corr", "TOF correction for hits in scintillators");
     tofCorrGraph->GetXaxis()->SetTitle("Scin ID");
     tofCorrGraph->GetYaxis()->SetTitle("correction [ps]");
+    tofCorrGraph->SetMinimum(-6000.0);
+    tofCorrGraph->SetMaximum(1000.0);
     unsigned graphIt = 0;
 
     for (int scinID = minScinID; scinID <= maxScinID; ++scinID)
