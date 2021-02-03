@@ -94,7 +94,7 @@ void EventCategorizerTools::selectForCalibration(const JPetEvent& event, JPetSta
       if (saveHistos && saveCalibHistos && tDiff_A_D != 0.0 && aScinID != -1 && dScinID != -1)
       {
         stats.getHisto2D("tdiff_annih_scin")->Fill(aScinID, tDiff_A_D);
-        stats.getHisto2D("tdiff_deex_scin")->Fill(dScinID, -tDiff_A_D);
+        stats.getHisto2D("tdiff_deex_scin")->Fill(dScinID, tDiff_A_D);
       }
     }
   }

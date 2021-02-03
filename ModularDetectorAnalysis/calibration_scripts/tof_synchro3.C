@@ -58,8 +58,8 @@ void tof_synchro(std::string fileName, std::string calibJSONFileName = "calibrat
     tofCorrGraph->SetNameTitle("tof_corr", "TOF correction for hits in scintillators");
     tofCorrGraph->GetXaxis()->SetTitle("Scin ID");
     tofCorrGraph->GetYaxis()->SetTitle("correction [ps]");
-    tofCorrGraph->SetMinimum(-6000.0);
-    tofCorrGraph->SetMaximum(1000.0);
+    // tofCorrGraph->SetMinimum(-5000.0);
+    // tofCorrGraph->SetMaximum(5000.0);
     unsigned graphIt = 0;
 
     for (int scinID = minScinID; scinID <= maxScinID; ++scinID)
@@ -67,8 +67,8 @@ void tof_synchro(std::string fileName, std::string calibJSONFileName = "calibrat
 
       TH1D* annhHist = annhPerScin->ProjectionY(Form("anni_scin_%d", scinID), scinID - 200, scinID - 200);
       TH1D* deexHist = deexPerScin->ProjectionY(Form("deex_scin_%d", scinID), scinID - 200, scinID - 200);
-      annhHist->Rebin(4);
-      deexHist->Rebin(4);
+      annhHist->Rebin(2);
+      deexHist->Rebin(2);
       annhHist->SetLineColor(46);
       deexHist->SetLineColor(38);
       annhHist->SetLineWidth(2);
@@ -81,7 +81,7 @@ void tof_synchro(std::string fileName, std::string calibJSONFileName = "calibrat
 
       // Calculating limits for gaussian fit
       auto nBins = annhHist->GetNbinsX();
-      int binRange = (int)(0.4 * nBins);
+      int binRange = (int)(0.2 * nBins);
 
       auto aMax = annhHist->GetMaximumBin();
       auto aLow = annhHist->GetBinCenter(aMax - binRange);
