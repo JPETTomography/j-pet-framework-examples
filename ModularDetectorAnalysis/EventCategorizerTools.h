@@ -16,11 +16,12 @@
 #ifndef EVENTCATEGORIZERTOOLS_H
 #define EVENTCATEGORIZERTOOLS_H
 
+#include <TVector3.h>
 #include <boost/property_tree/ptree.hpp>
 
-#include <JPetStatistics/JPetStatistics.h>
 #include <JPetEvent/JPetEvent.h>
 #include <JPetHit/JPetHit.h>
+#include <JPetStatistics/JPetStatistics.h>
 
 static const double kLightVelocity_cm_ps = 0.0299792458;
 static const double kUndefinedValue = 999.0;
@@ -29,36 +30,35 @@ static const double kUndefinedValue = 999.0;
  * @brief Tools for Event Categorization
  *
  * Lots of tools in constatnt developement.
-*/
+ */
 class EventCategorizerTools
 {
 public:
-  static void selectForCalibration(
-    const JPetEvent& event, JPetStatistics& stats, bool saveHistos, bool saveCalibHistos,
-    double totCutAnniMin, double totCutAnniMax, double totCutDeexMin, double totCutDeexMax,
-    boost::property_tree::ptree& calibTree
-  );
-  static bool checkFor2Gamma(
-    const JPetEvent& event, JPetStatistics& stats, bool saveHistos, bool saveCalibHistos,
-    double b2bSlotThetaDiff, double b2bTimeDiff, double totCutAnniMin, double totCutAnniMax,
-    boost::property_tree::ptree& calibTree
-  );
+  static void selectForCalibration(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double totCutAnniMin, double totCutAnniMax,
+                                   double totCutDeexMin, double totCutDeexMax, const TVector3& sourcePos);
+
+  static bool checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
+                             double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos);
+
   static bool checkFor3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos);
-  static bool checkForPrompt(
-    const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double deexTOTCutMin, double deexTOTCutMax
-  );
-  static bool checkForScatter(
-    const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double scatterTOFTimeDiff
-  );
+
+  static bool checkForPrompt(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double deexTOTCutMin, double deexTOTCutMax);
+
+  static bool checkForScatter(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double scatterTOFTimeDiff);
+
   static double calculateTOT(const JPetHit& hit);
+
   static double calculateReveresedTOT(const JPetHit& hit);
 
   static double calculateDistance(const JPetHit& hit1, const JPetHit& hit2);
+
   static double calculateScatteringTime(const JPetHit& hit1, const JPetHit& hit2);
+
   static double calculateScatteringAngle(const JPetHit& hit1, const JPetHit& hit2);
 
   /// ToF is calculated as time1-time2.
   static double calculateTOF(const JPetHit& hitA, const JPetHit& hitB);
+
   static double calculateTOF(double time1, double time2);
 
   /// Tof calculated with the ordered hits with respect to scintillator number.
@@ -68,15 +68,15 @@ public:
   static double calculateTOFByConvention(const JPetHit& hitA, const JPetHit& hitB);
 
   static TVector3 calculateAnnihilationPoint(const JPetHit& hitA, const JPetHit& hitB);
+
   static TVector3 calculateAnnihilationPoint(const TVector3& hitA, const TVector3& hitB, double tof);
-  static double calculatePlaneCenterDistance(const JPetHit& firstHit,
-      const JPetHit& secondHit, const JPetHit& thirdHit);
-  static bool stream2Gamma(
-    const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double b2bSlotThetaDiff, double b2bTimeDiff
-  );
-  static bool stream3Gamma(
-    const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double d3SlotThetaMin, double d3TimeDiff, double d3DistanceFromCenter
-  );
+
+  static double calculatePlaneCenterDistance(const JPetHit& firstHit, const JPetHit& secondHit, const JPetHit& thirdHit);
+
+  static bool stream2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double b2bSlotThetaDiff, double b2bTimeDiff);
+
+  static bool stream3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double d3SlotThetaMin, double d3TimeDiff,
+                           double d3DistanceFromCenter);
 };
 
 #endif /* !EVENTCATEGORIZERTOOLS_H */

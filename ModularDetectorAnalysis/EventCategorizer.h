@@ -18,17 +18,18 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include <JPetUserTask/JPetUserTask.h>
 #include "EventCategorizerTools.h"
 #include <JPetEvent/JPetEvent.h>
 #include <JPetHit/JPetHit.h>
-#include <vector>
+#include <JPetUserTask/JPetUserTask.h>
+#include <TVector3.h>
 #include <map>
+#include <vector>
 
 class JPetWriter;
 
 #ifdef __CINT__
-#	define override
+#define override
 #endif
 
 /**
@@ -39,39 +40,53 @@ class JPetWriter;
  * These methods are defined in tools class. More than one type can be added to an event.
  * Set of controll histograms are created, unless the user decides not to produce them.
  */
-class EventCategorizer : public JPetUserTask{
+class EventCategorizer : public JPetUserTask
+{
 public:
-	EventCategorizer(const char * name);
-	virtual ~EventCategorizer();
-	virtual bool init() override;
-	virtual bool exec() override;
-	virtual bool terminate() override;
+  EventCategorizer(const char* name);
+  virtual ~EventCategorizer();
+  virtual bool init() override;
+  virtual bool exec() override;
+  virtual bool terminate() override;
 
 protected:
-	const std::string kBack2BackSlotThetaDiffParamKey = "Back2Back_Categorizer_SlotThetaDiff_double";
-	const std::string kScatterTOFTimeDiffParamKey = "Scatter_Categorizer_TOF_TimeDiff_double";
-	const std::string kMaxTimeDiffParamKey = "EventCategorizer_MaxTimeDiff_double";
-	const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
-	const std::string kSaveCalibHistosParamKey = "Save_Calib_Histograms_bool";
-	const std::string kTOTCutAnniMinParamKey = "EventCategorizer_TOT_Cut_Anni_Min_double";
-	const std::string kTOTCutAnniMaxParamKey = "EventCategorizer_TOT_Cut_Anni_Max_double";
-	const std::string kTOTCutDeexMinParamKey = "EventCategorizer_TOT_Cut_Deex_Min_double";
-	const std::string kTOTCutDeexMaxParamKey = "EventCategorizer_TOT_Cut_Deex_Max_double";
-	const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
+  const std::string k2gThetaDiffParamKey = "EventCategorizer_2gThetaDiff_double";
+  const std::string k2gTimeDiffParamKey = "EventCategorizer_2gTimeDiff_double";
 
-	void saveEvents(const std::vector<JPetEvent>& event);
+  const std::string kTOTCutAnniMinParamKey = "EventCategorizer_TOT_Cut_Anni_Min_double";
+  const std::string kTOTCutAnniMaxParamKey = "EventCategorizer_TOT_Cut_Anni_Max_double";
+  const std::string kTOTCutDeexMinParamKey = "EventCategorizer_TOT_Cut_Deex_Min_double";
+  const std::string kTOTCutDeexMaxParamKey = "EventCategorizer_TOT_Cut_Deex_Max_double";
 
-	boost::property_tree::ptree fConstansTree;
-	double fScatterTOFTimeDiff = 2000.0;
-	double fB2BSlotThetaDiff = 3.0;
-	double fMaxTimeDiff = 1000.0;
-	double fTOTCutAnniMin = 150000.0;
-	double fTOTCutAnniMax = 250000.0;
-	double fTOTCutDeexMin = 270000.0;
-	double fTOTCutDeexMax = 370000.0;
+  const std::string kSourcePosXParamKey = "EventCategorizer_SourcePos_X_double";
+  const std::string kSourcePosYParamKey = "EventCategorizer_SourcePos_Y_double";
+  const std::string kSourcePosZParamKey = "EventCategorizer_SourcePos_Z_double";
 
-	bool fSaveControlHistos = true;
-	bool fSaveCalibHistos = false;
-	void initialiseHistograms();
+  const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
+
+  const std::string kScatterTOFTimeDiffParamKey = "Scatter_Categorizer_TOF_TimeDiff_double";
+  const std::string kMaxTimeDiffParamKey = "EventCategorizer_MaxTimeDiff_double";
+
+  const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
+  const std::string kSaveCalibHistosParamKey = "Save_Calib_Histograms_bool";
+
+  void saveEvents(const std::vector<JPetEvent>& event);
+
+  boost::property_tree::ptree fConstansTree;
+  double fScatterTOFTimeDiff = 2000.0;
+  double fMaxTimeDiff = 15000.0;
+  double f2gThetaDiff = 3.0;
+  double f2gTimeDiff = 2000.0;
+  double fTOTCutAnniMin = 150000.0;
+  double fTOTCutAnniMax = 250000.0;
+  double fTOTCutDeexMin = 270000.0;
+  double fTOTCutDeexMax = 370000.0;
+  TVector3 fSourcePos;
+
+  bool fSaveControlHistos = true;
+  bool fSaveCalibHistos = false;
+
+  void initialiseHistograms();
+  void initialiseCalibrationHistograms();
 };
 #endif /* !EVENTCATEGORIZER_H */
