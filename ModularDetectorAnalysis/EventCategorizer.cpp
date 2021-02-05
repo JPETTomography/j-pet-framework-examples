@@ -367,29 +367,29 @@ void EventCategorizer::initialiseHistograms()
   getStatistics().getHisto2D("ap_angle_scin")->GetXaxis()->SetTitle("Scintillator ID");
   getStatistics().getHisto2D("ap_angle_scin")->GetYaxis()->SetTitle("Angle [degree]");
 
-  getStatistics().createHistogram(new TH2F("ap_xy", "XY position of annihilation point", 101, -50.5, 50.5, 101, -50.5, 50.5));
-  getStatistics().getHisto2D("ap_xy")->GetXaxis()->SetTitle("Y position [cm]");
-  getStatistics().getHisto2D("ap_xy")->GetYaxis()->SetTitle("X position [cm]");
+  getStatistics().createHistogram(new TH2F("ap_yx", "YX position of annihilation point", 101, -50.5, 50.5, 101, -50.5, 50.5));
+  getStatistics().getHisto2D("ap_yx")->GetXaxis()->SetTitle("Y position [cm]");
+  getStatistics().getHisto2D("ap_yx")->GetYaxis()->SetTitle("X position [cm]");
 
-  getStatistics().createHistogram(new TH2F("ap_xz", "XZ position of annihilation point", 101, -50.5, 50.5, 101, -50.5, 50.5));
-  getStatistics().getHisto2D("ap_xz")->GetXaxis()->SetTitle("X position [cm]");
-  getStatistics().getHisto2D("ap_xz")->GetYaxis()->SetTitle("Z position [cm]");
+  getStatistics().createHistogram(new TH2F("ap_zx", "ZX position of annihilation point", 101, -50.5, 50.5, 101, -50.5, 50.5));
+  getStatistics().getHisto2D("ap_zx")->GetXaxis()->SetTitle("Z position [cm]");
+  getStatistics().getHisto2D("ap_zx")->GetYaxis()->SetTitle("X position [cm]");
 
-  getStatistics().createHistogram(new TH2F("ap_yz", "YZ position of annihilation point", 101, -50.5, 50.5, 101, -50.5, 50.5));
-  getStatistics().getHisto2D("ap_yz")->GetXaxis()->SetTitle("Y position [cm]");
-  getStatistics().getHisto2D("ap_yz")->GetYaxis()->SetTitle("Z position [cm]");
+  getStatistics().createHistogram(new TH2F("ap_zy", "ZY position of annihilation point", 101, -50.5, 50.5, 101, -50.5, 50.5));
+  getStatistics().getHisto2D("ap_zy")->GetXaxis()->SetTitle("Z position [cm]");
+  getStatistics().getHisto2D("ap_zy")->GetYaxis()->SetTitle("Y position [cm]");
 
-  getStatistics().createHistogram(new TH2F("ap_xy_zoom", "XY position of annihilation point", 101, -10.5, 10.5, 101, -10.5, 10.5));
-  getStatistics().getHisto2D("ap_xy_zoom")->GetXaxis()->SetTitle("Y position [cm]");
-  getStatistics().getHisto2D("ap_xy_zoom")->GetYaxis()->SetTitle("X position [cm]");
+  getStatistics().createHistogram(new TH2F("ap_yx_zoom", "YX position of annihilation point", 101, -10.5, 10.5, 101, -10.5, 10.5));
+  getStatistics().getHisto2D("ap_yx_zoom")->GetXaxis()->SetTitle("Y position [cm]");
+  getStatistics().getHisto2D("ap_yx_zoom")->GetYaxis()->SetTitle("X position [cm]");
 
-  getStatistics().createHistogram(new TH2F("ap_xz_zoom", "XZ position of annihilation point", 101, -10.5, 10.5, 101, -10.5, 10.5));
-  getStatistics().getHisto2D("ap_xz_zoom")->GetXaxis()->SetTitle("X position [cm]");
-  getStatistics().getHisto2D("ap_xz_zoom")->GetYaxis()->SetTitle("Z position [cm]");
+  getStatistics().createHistogram(new TH2F("ap_zx_zoom", "ZX position of annihilation point", 101, -10.5, 10.5, 101, -10.5, 10.5));
+  getStatistics().getHisto2D("ap_zx_zoom")->GetXaxis()->SetTitle("Z position [cm]");
+  getStatistics().getHisto2D("ap_zx_zoom")->GetYaxis()->SetTitle("X position [cm]");
 
-  getStatistics().createHistogram(new TH2F("ap_yz_zoom", "YZ position of annihilation point", 101, -10.5, 10.5, 101, -10.5, 10.5));
-  getStatistics().getHisto2D("ap_yz_zoom")->GetXaxis()->SetTitle("Y position [cm]");
-  getStatistics().getHisto2D("ap_yz_zoom")->GetYaxis()->SetTitle("Z position [cm]");
+  getStatistics().createHistogram(new TH2F("ap_zy_zoom", "ZY position of annihilation point", 101, -10.5, 10.5, 101, -10.5, 10.5));
+  getStatistics().getHisto2D("ap_zy_zoom")->GetXaxis()->SetTitle("Z position [cm]");
+  getStatistics().getHisto2D("ap_zy_zoom")->GetYaxis()->SetTitle("Y position [cm]");
 
   // Histograms for scattering category
   // getStatistics().createHistogram(

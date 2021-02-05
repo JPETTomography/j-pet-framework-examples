@@ -202,7 +202,7 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
         }
       }
 
-      if (180.0 - angle < maxThetaDiff)
+      if (angle < maxThetaDiff)
       {
         angleCut2 = true;
         if (saveHistos)
@@ -263,12 +263,12 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
 
         stats.getHisto1D("ap_angle")->Fill(angle);
 
-        stats.getHisto2D("ap_xy")->Fill(annhilationPoint.Y(), annhilationPoint.X());
-        stats.getHisto2D("ap_xz")->Fill(annhilationPoint.X(), annhilationPoint.Z());
-        stats.getHisto2D("ap_yz")->Fill(annhilationPoint.Y(), annhilationPoint.Z());
-        stats.getHisto2D("ap_xy_zoom")->Fill(annhilationPoint.X(), annhilationPoint.Y());
-        stats.getHisto2D("ap_xz_zoom")->Fill(annhilationPoint.X(), annhilationPoint.Z());
-        stats.getHisto2D("ap_yz_zoom")->Fill(annhilationPoint.Y(), annhilationPoint.Z());
+        stats.getHisto2D("ap_yx")->Fill(annhilationPoint.Y(), annhilationPoint.X());
+        stats.getHisto2D("ap_zx")->Fill(annhilationPoint.Z(), annhilationPoint.X());
+        stats.getHisto2D("ap_zy")->Fill(annhilationPoint.Z(), annhilationPoint.Y());
+        stats.getHisto2D("ap_yx_zoom")->Fill(annhilationPoint.Y(), annhilationPoint.X());
+        stats.getHisto2D("ap_zx_zoom")->Fill(annhilationPoint.Z(), annhilationPoint.X());
+        stats.getHisto2D("ap_zy_zoom")->Fill(annhilationPoint.Z(), annhilationPoint.Y());
       }
       // Returning event as 2 gamma if meets cut conditions
       if (totCut && tDiffCut && angleCut2)
