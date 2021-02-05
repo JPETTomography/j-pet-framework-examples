@@ -202,7 +202,7 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
         }
       }
 
-      if (angle < maxThetaDiff)
+      if (180.0 - angle < maxThetaDiff)
       {
         angleCut2 = true;
         if (saveHistos)
