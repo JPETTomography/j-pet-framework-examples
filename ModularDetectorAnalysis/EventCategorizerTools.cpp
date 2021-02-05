@@ -138,7 +138,7 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
       double timeDiff = fabs(firstHit.getTime() - secondHit.getTime());
       TVector3 firstVec = firstHit.getPos() - sourcePos;
       TVector3 secondVec = secondHit.getPos() - sourcePos;
-      double angle = firstVec.Angle(secondVec);
+      double angle = TMath::RadToDeg() * firstVec.Angle(secondVec);
 
       // Average TOT is temporaily stored as hit energy
       auto tot1 = firstHit.getEnergy();
