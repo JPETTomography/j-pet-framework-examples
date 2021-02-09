@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2016 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -13,14 +13,14 @@
  *  @file main.cpp
  */
 
-#include "EventFinder.h"
-#include "CalibrationUnit.h"
+#include "PALSCalibrationTask.h"
 #include <JPetManager/JPetManager.h>
 #include "../LargeBarrelAnalysis/TimeWindowCreator.h"
 #include "../LargeBarrelAnalysis/SignalFinder.h"
 #include "../LargeBarrelAnalysis/SignalTransformer.h"
 #include "../LargeBarrelAnalysis/HitFinder.h"
 #include "../LargeBarrelAnalysis/HitFinderTools.h"
+#include "../LargeBarrelAnalysis/EventFinder.h"
 #include "../LargeBarrelAnalysis/EventCategorizerTools.h"
 
 using namespace std;
@@ -28,22 +28,20 @@ using namespace std;
 int main(int argc, const char* argv[])
 {
   try {
-    //
     JPetManager& manager = JPetManager::getManager();
     manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
     manager.registerTask<SignalFinder>("SignalFinder");
     manager.registerTask<SignalTransformer>("SignalTransformer");
     manager.registerTask<HitFinder>("HitFinder");
     manager.registerTask<EventFinder>("EventFinder");
-    manager.registerTask<CalibrationUnit>("CalibrationUnit");
+    manager.registerTask<PALSCalibrationTask>("PALSCalibrationTask");
 
-    //
     manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
     manager.useTask("SignalFinder", "tslot.raw", "raw.sig");
     manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
     manager.useTask("HitFinder", "phys.sig", "hits");
     manager.useTask("EventFinder", "hits", "unk.evt");
-    manager.useTask("CalibrationUnit", "unk.evt", "cal.it");
+    manager.useTask("PALSCalibrationTask", "unk.evt", "cal.it");
     manager.run(argc, argv);
 
   } catch (const std::exception& except) {

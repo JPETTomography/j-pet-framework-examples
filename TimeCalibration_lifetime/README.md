@@ -1,6 +1,7 @@
 Aim
 ---
 This is an example analysis producing J-PET time calibration using data taken for a single source inside the detector. Calibration is divided into two steps: calibration of a single module based on the time difference AB, and calibration between modules based on the lifetime spectra.
+At the end it can be also used to estimate optimal effective length of a scintillator onto different thresholds.
 
 Input Data
 -----------
@@ -14,8 +15,9 @@ JPet.log file appears with the log of the processing and ROOT files with the fol
  *.raw.sig.root
  *.phys.sig.root
  *.hits.root
- *.calib.root
-where "*" stands for the name of the output file (constructed as LayerId_slotId_FileId, e.g. for the first file measured for first scintillator in the first layer: "Layer1_slot01_1")
+ *.unk.evt.root
+ *.cal.it.root
+where "*" stands for the name of file
 
 Description
 --------------
@@ -30,8 +32,12 @@ Calibration between modules is done iteratively. After AB calibration events wit
 
 At the end calibration file is created according to the convention.
 
+When calibration is done for different effective lengths, an optimal value of the effective length can be estimated using EstimateEffectiveLength.exe.  
+
 Additional info
 --------------
+Report is available on petwiki
+petwiki/images/2/2f/Calibration_Report_11_12.pdf
 
 Compiling 
 ------------
@@ -43,17 +49,23 @@ standard running as for the LargeBarrelAnalysis.
 First step of calibration:
 - running analysis till EventFinder
 - hadding unk.evt.root files
-- compiling Calibrate module
+- updating calibration params file with the name of the hadded files and other options
 - running ./Calibrate.exe [file with calibration params (calibParams.json)] single
 
 Second step of calibration:
-- running analysis for CalibrationUnit
-- hadding cat.evt.root files
+- running analysis for PALSCalibrationTaks
+- hadding cal.it.root files
+- updating calibration params file with the name of the hadded files and other options
 - running ./Calibrate.exe [file with calibration params (calibParams.json)] multi
 
 Third step of analysis:
 - repeating the second step until corrections are lower than uncertainities
 - running ./Calibrate.exe [file with calibration params (calibParams.json)] final
+
+Additional step of analysis
+- performing calibration for different values of the effective length paramater in a calibration params file
+- updating effective length params file (default effLenParams.json) with the names of the files with final correction for different effective lengths
+- running ./EstimateEffectiLength.exe [file with effective length params (effLenParams.json)]
 
 Author
 ------------

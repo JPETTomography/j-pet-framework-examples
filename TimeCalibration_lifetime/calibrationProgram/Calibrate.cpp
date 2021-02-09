@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -23,9 +23,11 @@ int main(int argc, char* argv[]) //first argument file with the parameters (defa
     fileWithParameters = argv[1];
     calibrationOption = argv[2];
   } else if (argc < 3) {
-    // No file with parameters or calibration option
+    std::cout << "No file with calibration parameters (default - calibParams.json) as a first argument and/or ";
+    std::cout << "calibration option (single, multi or final) as a second argument" << std::endl;
+    return 0;
   } else {
-    // other arguments are obsolete   
+    std::cout << "Too much arguments given to the program. Using only the first two - file with parameters and calibration option" << std::endl;  
   }
   
   CalibrationTools calibTools(fileWithParameters, calibrationOption);

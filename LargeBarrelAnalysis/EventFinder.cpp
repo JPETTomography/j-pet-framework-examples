@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -66,7 +66,16 @@ bool EventFinder::init()
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey)){
     fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
   }
-
+  // Number of thresholds for which TDiffAB histograms should be filled
+  if (isOptionSet(fParams.getOptions(), kNmbOfThresholdsParamKey)) {
+    fNmbOfThresholds = getOptionAsInt(fParams.getOptions(), kNmbOfThresholdsParamKey);
+  } else {
+    WARNING(Form(
+      "No value of the %s parameter provided by the user. Using default value of %d.",
+      kNmbOfThresholdsParamKey.c_str(), fNmbOfThresholds
+    ));
+  }
+  
   // Initialize histograms
   if (fSaveControlHistos) { initialiseHistograms(); }
   return true;
@@ -117,6 +126,9 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
     } else if(hit.getRecoFlag() == JPetHit::Corrupted){
       event.setRecoFlag(JPetEvent::Corrupted);
     }
+    if (fSaveControlHistos) {
+      PlotTDiffAB(hit);
+    }
     // Checking, if following hits fulfill time window condition,
     // then moving interator 
     unsigned int nextCount = 1;
@@ -127,11 +139,14 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
           event.setRecoFlag(JPetEvent::Corrupted);
         }
         event.addHit(nextHit);
+        if (fSaveControlHistos) {
+          PlotTDiffAB(nextHit);
+        }
         nextCount++;
       } else { break; }
     }
     count+=nextCount;
-if(fSaveControlHistos) {
+    if(fSaveControlHistos) {
       getStatistics().fillHistogram("hits_per_event_all", event.getHits().size());
       if(event.getRecoFlag()==JPetEvent::Good){
         getStatistics().fillHistogram("good_vs_bad_events", 1);
@@ -170,4 +185,31 @@ void EventFinder::initialiseHistograms(){
   binLabels.push_back(std::make_pair(3,"UNKNOWN"));
   getStatistics().setHistogramBinLabel("good_vs_bad_events",
                                        getStatistics().AxisLabel::kXaxis, binLabels);
+  
+  std::map<int, JPetScin*> scinMap = getParamBank().getScintillators();
+  auto minScinID = std::min_element(scinMap.begin(), scinMap.end(), [](const auto& l, const auto& r) { return l.first < r.first; });
+  auto maxScinID = std::max_element(scinMap.begin(), scinMap.end(), [](const auto& l, const auto& r) { return l.first < r.first; });
+//minScinID for LargeBarrel is 1 and max is 193 -> histogram should have range from 0.5 to 192.5 -> 193 bins
+  for (unsigned thrNum=1; thrNum<=fNmbOfThresholds; thrNum++) {
+    getStatistics().createHistogramWithAxes(
+        new TH2D(Form("TDiff_AB_vs_ID_thr%d", thrNum), Form("Time difference AB vs scintillator ID for threshold %d", thrNum), 500, -24750, 24250, maxScinID->first-minScinID->first+1, minScinID->first-0.5, maxScinID->first+0.5), "Time difference AB [ps]", "ID of the scintillator"
+    );
+  }
+}
+
+void EventFinder::PlotTDiffAB(JPetHit Hit)
+{
+  double TDiff_AB = 0.;
+  std::map<int, double> sigALead = Hit.getSignalA().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading);
+  std::map<int, double> sigBLead = Hit.getSignalB().getRecoSignal().getRawSignal().getTimesVsThresholdNumber(JPetSigCh::Leading);
+  unsigned ScintID = Hit.getScintillator().getID();
+
+  if (sigALead.size()>0 && sigBLead.size()>0) {
+    for (unsigned i=1; i<=sigALead.size() && i<=sigBLead.size(); i++) {
+      if (sigBLead.find(i) != sigBLead.end() || sigALead.find(i) != sigALead.end()) {
+        TDiff_AB = (sigBLead.find(i)->second - sigALead.find(i)->second);
+        getStatistics().fillHistogram(Form("TDiff_AB_vs_ID_thr%d", i), TDiff_AB, ScintID);
+      }
+    }
+  }
 }
