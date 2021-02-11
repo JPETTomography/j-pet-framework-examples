@@ -91,8 +91,8 @@ void EventCategorizerTools::selectForCalibration(const JPetEvent& event, JPetSta
         continue;
       }
 
-      double t0_A = aTime - (posA - sourcePos).Mag();
-      double t0_D = dTime - (posD - sourcePos).Mag();
+      double t0_A = aTime - (posA - sourcePos).Mag() / kLightVelocity_cm_ps;
+      double t0_D = dTime - (posD - sourcePos).Mag() / kLightVelocity_cm_ps;
       double tDiff_A_D = t0_A - t0_D;
 
       // Filling histograms for specific scintillators

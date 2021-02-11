@@ -81,6 +81,9 @@ protected:
   double fTOTCutAnniMax = 250000.0;
   double fTOTCutDeexMin = 270000.0;
   double fTOTCutDeexMax = 370000.0;
+  double fLORPosCutMin = -5.0;
+  double fLORPosCutMax = 5.0;
+  double fMaxSourceDist = 5.0;
   TVector3 fSourcePos;
 
   bool fSaveControlHistos = true;
