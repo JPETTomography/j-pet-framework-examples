@@ -108,6 +108,16 @@ bool EventCategorizer::init()
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kSourceDistCutZParamKey.c_str(), fSourceDistZCut));
   }
 
+  // LOR angle cut
+  if (isOptionSet(fParams.getOptions(), kLORAngleCutParamKey))
+  {
+    fLORAngleCut = getOptionAsDouble(fParams.getOptions(), kLORAngleCutParamKey);
+  }
+  else
+  {
+    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kLORAngleCutParamKey.c_str(), fLORAngleCut));
+  }
+
   // Source position
   if (isOptionSet(fParams.getOptions(), kSourcePosXParamKey) && isOptionSet(fParams.getOptions(), kSourcePosYParamKey) &&
       isOptionSet(fParams.getOptions(), kSourcePosZParamKey))
@@ -187,7 +197,7 @@ bool EventCategorizer::exec()
 
       // Check types of current event
       bool is2Gamma = EventCategorizerTools::checkFor2Gamma(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fTOTCutAnniMin,
-                                                            fTOTCutAnniMax, fSourceDistXYCut, fSourceDistXYCut, fSourcePos);
+                                                            fTOTCutAnniMax, fSourceDistXYCut, fSourceDistXYCut, fLORAngleCut, fSourcePos);
 
       // Select hits for TOF calibration, if making calibraiton
       if (fSaveCalibHistos)
@@ -402,11 +412,6 @@ void EventCategorizer::initialiseHistograms()
   getStatistics().getHisto2D("ap_tof_lor_angle")->GetXaxis()->SetTitle("LOR angle [degree]");
   getStatistics().getHisto2D("ap_tof_lor_angle")->GetYaxis()->SetTitle("TOF [ps]");
 
-  getStatistics().createHistogram(
-      new TH2F("ap_z_pos_scin", "Annihilation hit z-position", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 101, -50.5, 50.5));
-  getStatistics().getHisto2D("ap_z_pos_scin")->GetXaxis()->SetTitle("Scintillator ID");
-  getStatistics().getHisto2D("ap_z_pos_scin")->GetYaxis()->SetTitle("Angle [degree]");
-
   getStatistics().createHistogram(new TH2F("ap_yx", "YX position of annihilation point", 101, -50.5, 50.5, 101, -50.5, 50.5));
   getStatistics().getHisto2D("ap_yx")->GetXaxis()->SetTitle("Y position [cm]");
   getStatistics().getHisto2D("ap_yx")->GetYaxis()->SetTitle("X position [cm]");
@@ -419,17 +424,32 @@ void EventCategorizer::initialiseHistograms()
   getStatistics().getHisto2D("ap_zy")->GetXaxis()->SetTitle("Z position [cm]");
   getStatistics().getHisto2D("ap_zy")->GetYaxis()->SetTitle("Y position [cm]");
 
-  getStatistics().createHistogram(new TH2F("ap_yx_zoom", "YX position of annihilation point", 101, -10.5, 10.5, 101, -10.5, 10.5));
+  getStatistics().createHistogram(new TH2F("ap_yx_zoom", "YX position of annihilation point", 84, -10.5, 10.5, 101, -10.5, 10.5));
   getStatistics().getHisto2D("ap_yx_zoom")->GetXaxis()->SetTitle("Y position [cm]");
   getStatistics().getHisto2D("ap_yx_zoom")->GetYaxis()->SetTitle("X position [cm]");
 
-  getStatistics().createHistogram(new TH2F("ap_zx_zoom", "ZX position of annihilation point", 101, -10.5, 10.5, 101, -10.5, 10.5));
+  getStatistics().createHistogram(new TH2F("ap_zx_zoom", "ZX position of annihilation point", 84, -10.5, 10.5, 101, -10.5, 10.5));
   getStatistics().getHisto2D("ap_zx_zoom")->GetXaxis()->SetTitle("Z position [cm]");
   getStatistics().getHisto2D("ap_zx_zoom")->GetYaxis()->SetTitle("X position [cm]");
 
-  getStatistics().createHistogram(new TH2F("ap_zy_zoom", "ZY position of annihilation point", 101, -10.5, 10.5, 101, -10.5, 10.5));
+  getStatistics().createHistogram(new TH2F("ap_zy_zoom", "ZY position of annihilation point", 84, -10.5, 10.5, 101, -10.5, 10.5));
   getStatistics().getHisto2D("ap_zy_zoom")->GetXaxis()->SetTitle("Z position [cm]");
   getStatistics().getHisto2D("ap_zy_zoom")->GetYaxis()->SetTitle("Y position [cm]");
+
+  getStatistics().createHistogram(
+      new TH2F("ap_yx_zoom_lor_cut", "YX position of annihilation point after LOR angle cut", 84, -10.5, 10.5, 101, -10.5, 10.5));
+  getStatistics().getHisto2D("ap_yx_zoom_lor_cut")->GetXaxis()->SetTitle("Y position [cm]");
+  getStatistics().getHisto2D("ap_yx_zoom_lor_cut")->GetYaxis()->SetTitle("X position [cm]");
+
+  getStatistics().createHistogram(
+      new TH2F("ap_zx_zoom_lor_cut", "ZX position of annihilation point after LOR angle cut", 84, -10.5, 10.5, 101, -10.5, 10.5));
+  getStatistics().getHisto2D("ap_zx_zoom_lor_cut")->GetXaxis()->SetTitle("Z position [cm]");
+  getStatistics().getHisto2D("ap_zx_zoom_lor_cut")->GetYaxis()->SetTitle("X position [cm]");
+
+  getStatistics().createHistogram(
+      new TH2F("ap_zy_zoom_lor_cut", "ZY position of annihilation point after LOR angle cut", 84, -10.5, 10.5, 101, -10.5, 10.5));
+  getStatistics().getHisto2D("ap_zy_zoom_lor_cut")->GetXaxis()->SetTitle("Z position [cm]");
+  getStatistics().getHisto2D("ap_zy_zoom_lor_cut")->GetYaxis()->SetTitle("Y position [cm]");
 
   // Histograms for scattering category
   // getStatistics().createHistogram(

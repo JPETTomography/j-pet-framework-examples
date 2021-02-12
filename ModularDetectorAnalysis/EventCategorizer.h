@@ -65,6 +65,8 @@ protected:
   const std::string kSourceDistCutXYParamKey = "EventCategorizer_SourceDist_Cut_XY_double";
   const std::string kSourceDistCutZParamKey = "EventCategorizer_SourceDist_Cut_Z_double";
 
+  const std::string kLORAngleCutParamKey = "EventCategorizer_LORAngle_Cut_double";
+
   const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
 
   const std::string kScatterTOFTimeDiffParamKey = "Scatter_Categorizer_TOF_TimeDiff_double";
@@ -84,6 +86,7 @@ protected:
   double fTOTCutAnniMax = 250000.0;
   double fTOTCutDeexMin = 270000.0;
   double fTOTCutDeexMax = 370000.0;
+  double fLORAngleCut = 5.0;
   double fSourceDistXYCut = 5.0;
   double fSourceDistZCut = 10.0;
   TVector3 fSourcePos;
