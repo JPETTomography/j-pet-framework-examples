@@ -146,13 +146,14 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
       // Calculating reversed TOT for time walk studies
       auto revTOT1 = calculateReveresedTOT(firstHit);
       auto revTOT2 = calculateReveresedTOT(secondHit);
+
       // TOF calculated by convention
       double tof = calculateTOFByConvention(firstHit, secondHit);
+
       TVector3 unitXUp(1.0, 0.0, 0.0);
       TVector3 unitXDn(-1.0, 0.0, 0.0);
-
-      double lorAngle1 = min(TMath::RadToDeg() * unitXUp.Angle(firstVec), TMath::RadToDeg() * unitXDn.Angle(firstVec));
-      double lorAngle2 = min(TMath::RadToDeg() * unitXUp.Angle(secondVec), TMath::RadToDeg() * unitXDn.Angle(secondVec));
+      double lorAngle1 = min(TMath::RadToDeg() * firstVec.Angle(unitXUp), TMath::RadToDeg() * firstVec.Angle(unitXDn));
+      double lorAngle2 = min(TMath::RadToDeg() * secondVec.Angle(unitXUp), TMath::RadToDeg() * secondVec.Angle(unitXDn));
 
       // Pre-cuts histograms
       if (saveHistos)
