@@ -109,7 +109,7 @@ void EventCategorizerTools::selectForCalibration(const JPetEvent& event, JPetSta
  * Method for determining type of event - back to back 2 gamma
  */
 bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
-                                           double totCutAnniMin, double totCutAnniMax, double distXY, double distZ, double lorAngleMax,
+                                           double totCutAnniMin, double totCutAnniMax, double lorAngleMax, double lorPosZMax,
                                            const TVector3& sourcePos)
 {
   if (event.getHits().size() < 2)
@@ -154,8 +154,8 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
       // LOR angle ()
       TVector3 unitXUp(1.0, 0.0, 0.0);
       TVector3 unitXDn(-1.0, 0.0, 0.0);
-      double lorAngle1 = 90.0 - min(TMath::RadToDeg() * firstVec.Angle(unitXUp), TMath::RadToDeg() * firstVec.Angle(unitXDn));
-      double lorAngle2 = 90.0 - min(TMath::RadToDeg() * secondVec.Angle(unitXUp), TMath::RadToDeg() * secondVec.Angle(unitXDn));
+      double lorAngle1 = min(TMath::RadToDeg() * firstVec.Angle(unitXUp), TMath::RadToDeg() * firstVec.Angle(unitXDn));
+      double lorAngle2 = min(TMath::RadToDeg() * secondVec.Angle(unitXUp), TMath::RadToDeg() * secondVec.Angle(unitXDn));
 
       // Pre-cuts histograms
       if (saveHistos)
@@ -280,6 +280,13 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
         stats.getHisto2D("ap_tof_lor_angle")->Fill(lorAngle1, tof);
         stats.getHisto2D("ap_tof_lor_angle")->Fill(lorAngle2, tof);
 
+        stats.getHisto2D("ap_yx")->Fill(annhilationPoint.Y(), annhilationPoint.X());
+        stats.getHisto2D("ap_zx")->Fill(annhilationPoint.Z(), annhilationPoint.X());
+        stats.getHisto2D("ap_zy")->Fill(annhilationPoint.Z(), annhilationPoint.Y());
+        stats.getHisto2D("ap_yx_zoom")->Fill(annhilationPoint.Y(), annhilationPoint.X());
+        stats.getHisto2D("ap_zx_zoom")->Fill(annhilationPoint.Z(), annhilationPoint.X());
+        stats.getHisto2D("ap_zy_zoom")->Fill(annhilationPoint.Z(), annhilationPoint.Y());
+
         if (lorAngle1 < lorAngleMax && lorAngle2 < lorAngleMax)
         {
           stats.getHisto2D("ap_yx_zoom_lor_cut")->Fill(annhilationPoint.Y(), annhilationPoint.X());
@@ -287,12 +294,12 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
           stats.getHisto2D("ap_zy_zoom_lor_cut")->Fill(annhilationPoint.Z(), annhilationPoint.Y());
         }
 
-        stats.getHisto2D("ap_yx")->Fill(annhilationPoint.Y(), annhilationPoint.X());
-        stats.getHisto2D("ap_zx")->Fill(annhilationPoint.Z(), annhilationPoint.X());
-        stats.getHisto2D("ap_zy")->Fill(annhilationPoint.Z(), annhilationPoint.Y());
-        stats.getHisto2D("ap_yx_zoom")->Fill(annhilationPoint.Y(), annhilationPoint.X());
-        stats.getHisto2D("ap_zx_zoom")->Fill(annhilationPoint.Z(), annhilationPoint.X());
-        stats.getHisto2D("ap_zy_zoom")->Fill(annhilationPoint.Z(), annhilationPoint.Y());
+        if (fabs(firstHit.getPosZ()) < lorPosZMax && fabs(secondHit.getPosZ()) < lorPosZMax)
+        {
+          stats.getHisto2D("ap_yx_zoom_z_cut")->Fill(annhilationPoint.Y(), annhilationPoint.X());
+          stats.getHisto2D("ap_zx_zoom_z_cut")->Fill(annhilationPoint.Z(), annhilationPoint.X());
+          stats.getHisto2D("ap_zy_zoom_z_cut")->Fill(annhilationPoint.Z(), annhilationPoint.Y());
+        }
       }
       // Returning event as 2 gamma if meets cut conditions
       if (totCut && tDiffCut && angleCut2)

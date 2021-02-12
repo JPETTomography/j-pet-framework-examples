@@ -38,7 +38,7 @@ public:
                                    double totCutDeexMin, double totCutDeexMax, const TVector3& sourcePos);
 
   static bool checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
-                             double totCutAnniMin, double totCutAnniMax, double distXY, double distZ, double lorAngleMax, const TVector3& sourcePos);
+                             double totCutAnniMin, double totCutAnniMax, double lorAngleMax, double lorPosZMax, const TVector3& sourcePos);
 
   static bool checkFor3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos);
 

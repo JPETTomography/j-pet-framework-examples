@@ -66,6 +66,7 @@ protected:
   const std::string kSourceDistCutZParamKey = "EventCategorizer_SourceDist_Cut_Z_double";
 
   const std::string kLORAngleCutParamKey = "EventCategorizer_LORAngle_Cut_double";
+  const std::string kLORPosZCutParamKey = "EventCategorizer_LORPosZ_Cut_double";
 
   const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
 
@@ -87,6 +88,7 @@ protected:
   double fTOTCutDeexMin = 270000.0;
   double fTOTCutDeexMax = 370000.0;
   double fLORAngleCut = 5.0;
+  double fLORPosZCut = 5.0;
   double fSourceDistXYCut = 5.0;
   double fSourceDistZCut = 10.0;
   TVector3 fSourcePos;
