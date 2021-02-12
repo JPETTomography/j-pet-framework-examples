@@ -76,18 +76,39 @@ bool EventCategorizer::init()
   }
   else
   {
-    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMaxTimeDiffParamKey.c_str(), fTOTCutDeexMin));
+    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kTOTCutDeexMinParamKey.c_str(), fTOTCutDeexMin));
   }
 
-  if (isOptionSet(fParams.getOptions(), kTOTCutDeexMaxParamKey))
+  if (isOptionSet(fParams.getOptions(), kTOTCutAnniMaxParamKey))
   {
-    fTOTCutDeexMax = getOptionAsDouble(fParams.getOptions(), kTOTCutDeexMaxParamKey);
+    fTOTCutDeexMax = getOptionAsDouble(fParams.getOptions(), kTOTCutAnniMaxParamKey);
   }
   else
   {
-    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMaxTimeDiffParamKey.c_str(), fTOTCutDeexMax));
+    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kTOTCutAnniMaxParamKey.c_str(), fTOTCutDeexMax));
   }
 
+  // Cuts around source position
+  if (isOptionSet(fParams.getOptions(), kSourceDistCutXYParamKey))
+  {
+    fSourceDistXYCut = getOptionAsDouble(fParams.getOptions(), kSourceDistCutXYParamKey);
+  }
+  else
+  {
+    WARNING(
+        Form("No value of the %s parameter provided by the user. Using default value of %lf.", kSourceDistCutXYParamKey.c_str(), fSourceDistXYCut));
+  }
+
+  if (isOptionSet(fParams.getOptions(), kSourceDistCutZParamKey))
+  {
+    fSourceDistZCut = getOptionAsDouble(fParams.getOptions(), kSourceDistCutZParamKey);
+  }
+  else
+  {
+    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kSourceDistCutZParamKey.c_str(), fSourceDistZCut));
+  }
+
+  // Source position
   if (isOptionSet(fParams.getOptions(), kSourcePosXParamKey) && isOptionSet(fParams.getOptions(), kSourcePosYParamKey) &&
       isOptionSet(fParams.getOptions(), kSourcePosZParamKey))
   {
@@ -119,6 +140,7 @@ bool EventCategorizer::init()
                  fScatterTOFTimeDiff));
   }
 
+  // Time variable used as +- axis limits for histograms with time spectra
   if (isOptionSet(fParams.getOptions(), kMaxTimeDiffParamKey))
   {
     fMaxTimeDiff = getOptionAsDouble(fParams.getOptions(), kMaxTimeDiffParamKey);
@@ -128,7 +150,7 @@ bool EventCategorizer::init()
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMaxTimeDiffParamKey.c_str(), fMaxTimeDiff));
   }
 
-  // Getting bool for saving histograms
+  // Getting bools for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey))
   {
     fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
@@ -165,7 +187,7 @@ bool EventCategorizer::exec()
 
       // Check types of current event
       bool is2Gamma = EventCategorizerTools::checkFor2Gamma(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fTOTCutAnniMin,
-                                                            fTOTCutAnniMax, fSourcePos);
+                                                            fTOTCutAnniMax, fSourceDistXYCut, fSourceDistXYCut, fSourcePos);
 
       // Select hits for TOF calibration, if making calibraiton
       if (fSaveCalibHistos)
@@ -285,6 +307,10 @@ void EventCategorizer::initialiseHistograms()
   getStatistics().getHisto2D("2g_angle_scin")->GetXaxis()->SetTitle("Scintillator ID");
   getStatistics().getHisto2D("2g_angle_scin")->GetYaxis()->SetTitle("Angle [degree]");
 
+  getStatistics().createHistogram(new TH1F("2g_lor_angle", "2 gamma event - LOR angle", 91, -0.5, 90.5));
+  getStatistics().getHisto1D("2g_lor_angle")->GetXaxis()->SetTitle("LOR angle [degree]");
+  getStatistics().getHisto1D("2g_lor_angle")->GetYaxis()->SetTitle("Number of Hits");
+
   // Cut stats
   getStatistics().createHistogram(
       new TH1F("cut_stats_none", "Hit pairs before cuts - scintillator occupancy", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5));
@@ -366,6 +392,20 @@ void EventCategorizer::initialiseHistograms()
                                            maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 181, -0.5, 180.5));
   getStatistics().getHisto2D("ap_angle_scin")->GetXaxis()->SetTitle("Scintillator ID");
   getStatistics().getHisto2D("ap_angle_scin")->GetYaxis()->SetTitle("Angle [degree]");
+
+  getStatistics().createHistogram(new TH1F("ap_lor_angle", "Annihilation pairs - LOR angle", 91, -0.5, 90.5));
+  getStatistics().getHisto1D("ap_lor_angle")->GetXaxis()->SetTitle("LOR angle [degree]");
+  getStatistics().getHisto1D("ap_lor_angle")->GetYaxis()->SetTitle("Number of Hits");
+
+  getStatistics().createHistogram(
+      new TH2F("ap_tof_lor_angle", "Annihilation point TOF vs. LOR angle", 91, -0.5, 90.5, -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0));
+  getStatistics().getHisto2D("ap_tof_lor_angle")->GetXaxis()->SetTitle("LOR angle [degree]");
+  getStatistics().getHisto2D("ap_tof_lor_angle")->GetYaxis()->SetTitle("TOF [ps]");
+
+  getStatistics().createHistogram(
+      new TH2F("ap_z_pos_scin", "Annihilation hit z-position", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 101, -50.5, 50.5));
+  getStatistics().getHisto2D("ap_z_pos_scin")->GetXaxis()->SetTitle("Scintillator ID");
+  getStatistics().getHisto2D("ap_z_pos_scin")->GetYaxis()->SetTitle("Angle [degree]");
 
   getStatistics().createHistogram(new TH2F("ap_yx", "YX position of annihilation point", 101, -50.5, 50.5, 101, -50.5, 50.5));
   getStatistics().getHisto2D("ap_yx")->GetXaxis()->SetTitle("Y position [cm]");

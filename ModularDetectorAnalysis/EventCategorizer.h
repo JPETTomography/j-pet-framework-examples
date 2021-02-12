@@ -62,6 +62,9 @@ protected:
   const std::string kSourcePosYParamKey = "EventCategorizer_SourcePos_Y_double";
   const std::string kSourcePosZParamKey = "EventCategorizer_SourcePos_Z_double";
 
+  const std::string kSourceDistCutXYParamKey = "EventCategorizer_SourceDist_Cut_XY_double";
+  const std::string kSourceDistCutZParamKey = "EventCategorizer_SourceDist_Cut_Z_double";
+
   const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
 
   const std::string kScatterTOFTimeDiffParamKey = "Scatter_Categorizer_TOF_TimeDiff_double";
@@ -81,9 +84,8 @@ protected:
   double fTOTCutAnniMax = 250000.0;
   double fTOTCutDeexMin = 270000.0;
   double fTOTCutDeexMax = 370000.0;
-  double fLORPosCutMin = -5.0;
-  double fLORPosCutMax = 5.0;
-  double fMaxSourceDist = 5.0;
+  double fSourceDistXYCut = 5.0;
+  double fSourceDistZCut = 10.0;
   TVector3 fSourcePos;
 
   bool fSaveControlHistos = true;

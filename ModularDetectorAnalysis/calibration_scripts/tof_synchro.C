@@ -68,6 +68,13 @@ void tof_synchro(std::string fileName, std::string calibJSONFileName = "calibrat
     peakDiffGraph->SetMinimum(-8000.0);
     peakDiffGraph->SetMaximum(8000.0);
 
+    TGraphErrors* peakDiffGraphZoom = new TGraphErrors();
+    peakDiffGraphZoom->SetNameTitle("peak_diff_graph_zoom", "Difference of peaks means vs. sci ID, smaler scale");
+    peakDiffGraphZoom->GetXaxis()->SetTitle("Scin ID");
+    peakDiffGraphZoom->GetYaxis()->SetTitle("time diff [ps]");
+    peakDiffGraphZoom->SetMinimum(-1000.0);
+    peakDiffGraphZoom->SetMaximum(1000.0);
+
     TGraphErrors* meanGraph = new TGraphErrors();
     meanGraph->SetNameTitle("mean_graph", "Mean of distributions vs. scin ID");
     meanGraph->GetXaxis()->SetTitle("Scin ID");
@@ -120,6 +127,8 @@ void tof_synchro(std::string fileName, std::string calibJSONFileName = "calibrat
 
       peakDiffGraph->SetPoint(graphIt, (double)scinID, tofCorr);
       peakDiffGraph->SetPointError(graphIt, 0.0, tofCorrError);
+      peakDiffGraphZoom->SetPoint(graphIt, (double)scinID, tofCorr);
+      peakDiffGraphZoom->SetPointError(graphIt, 0.0, tofCorrError);
 
       meanGraph->SetPoint(graphIt, (double)scinID, (aFitFun->GetParameter(1) + dFitFun->GetParameter(1)) / 2.0);
       meanGraph->SetPointError(graphIt, 0.0, tofCorrError);
@@ -165,6 +174,10 @@ void tof_synchro(std::string fileName, std::string calibJSONFileName = "calibrat
       TCanvas* canPeakDiff = new TCanvas("peak_diff_graph", "peak_diff_graph", 1200, 800);
       peakDiffGraph->Draw("AP*");
       canPeakDiff->SaveAs(Form("%s/peak_diff_scin.png", resultDir.c_str()));
+
+      TCanvas* canPeakDiffZoom = new TCanvas("peak_diff_scin_zoom", "peak_diff_scin_zoom", 1200, 800);
+      peakDiffGraphZoom->Draw("AP*");
+      canPeakDiffZoom->SaveAs(Form("%s/peak_diff_scin_zoom.png", resultDir.c_str()));
 
       TCanvas* canMean = new TCanvas("mean_graph", "mean_graph", 1200, 800);
       meanGraph->Draw("AP*");

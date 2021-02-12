@@ -109,7 +109,7 @@ void EventCategorizerTools::selectForCalibration(const JPetEvent& event, JPetSta
  * Method for determining type of event - back to back 2 gamma
  */
 bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
-                                           double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos)
+                                           double totCutAnniMin, double totCutAnniMax, double distXY, double distZ, const TVector3& sourcePos)
 {
   if (event.getHits().size() < 2)
   {
@@ -148,6 +148,11 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
       auto revTOT2 = calculateReveresedTOT(secondHit);
       // TOF calculated by convention
       double tof = calculateTOFByConvention(firstHit, secondHit);
+      TVector3 unitXUp(1.0, 0.0, 0.0);
+      TVector3 unitXDn(-1.0, 0.0, 0.0);
+
+      double lorAngle1 = min(TMath::RadToDeg() * unitXUp.Angle(firstVec), TMath::RadToDeg() * unitXDn.Angle(firstVec));
+      double lorAngle2 = min(TMath::RadToDeg() * unitXUp.Angle(secondVec), TMath::RadToDeg() * unitXDn.Angle(secondVec));
 
       // Pre-cuts histograms
       if (saveHistos)
@@ -178,7 +183,10 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
 
         stats.getHisto1D("2g_angle")->Fill(angle);
         stats.getHisto2D("2g_angle_scin")->Fill(scin1ID, angle);
-        stats.getHisto2D("2g_angle_scin")->Fill(scin1ID, angle);
+        stats.getHisto2D("2g_angle_scin")->Fill(scin2ID, angle);
+
+        stats.getHisto1D("2g_lor_angle")->Fill(lorAngle1);
+        stats.getHisto1D("2g_lor_angle")->Fill(lorAngle2);
 
         stats.getHisto1D("cut_stats_none")->Fill(scin1ID);
         stats.getHisto1D("cut_stats_none")->Fill(scin2ID);
@@ -262,6 +270,12 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
         stats.getHisto2D("ap_hit_tdiff_scin")->Fill(scin2ID, secondHit.getTimeDiff());
 
         stats.getHisto1D("ap_angle")->Fill(angle);
+
+        stats.getHisto1D("ap_lor_angle")->Fill(lorAngle1);
+        stats.getHisto1D("ap_lor_angle")->Fill(lorAngle2);
+
+        stats.getHisto2D("ap_lor_angle")->Fill(lorAngle1, tof);
+        stats.getHisto2D("ap_lor_angle")->Fill(lorAngle2, tof);
 
         stats.getHisto2D("ap_yx")->Fill(annhilationPoint.Y(), annhilationPoint.X());
         stats.getHisto2D("ap_zx")->Fill(annhilationPoint.Z(), annhilationPoint.X());
