@@ -398,7 +398,7 @@ void EventCategorizer::initialiseHistograms()
   getStatistics().getHisto1D("ap_lor_angle")->GetYaxis()->SetTitle("Number of Hits");
 
   getStatistics().createHistogram(
-      new TH2F("ap_tof_lor_angle", "Annihilation point TOF vs. LOR angle", 91, -0.5, 90.5, -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0));
+      new TH2F("ap_tof_lor_angle", "Annihilation point TOF vs. LOR angle", 91, -0.5, 90.5, 200, -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0));
   getStatistics().getHisto2D("ap_tof_lor_angle")->GetXaxis()->SetTitle("LOR angle [degree]");
   getStatistics().getHisto2D("ap_tof_lor_angle")->GetYaxis()->SetTitle("TOF [ps]");
 
