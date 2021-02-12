@@ -421,6 +421,11 @@ void EventCategorizer::initialiseHistograms()
   getStatistics().getHisto2D("ap_tof_lor_angle")->GetXaxis()->SetTitle("LOR angle [degree]");
   getStatistics().getHisto2D("ap_tof_lor_angle")->GetYaxis()->SetTitle("TOF [ps]");
 
+  getStatistics().createHistogram(
+      new TH2F("ap_tof_z_pos", "Annihilation point TOF vs. Z position", 84, -10.5, 10.5, 200, -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0));
+  getStatistics().getHisto2D("ap_tof_z_pos")->GetXaxis()->SetTitle("z pos [cm]");
+  getStatistics().getHisto2D("ap_tof_z_pos")->GetYaxis()->SetTitle("TOF [ps]");
+
   getStatistics().createHistogram(new TH2F("ap_yx", "YX position of annihilation point", 101, -50.5, 50.5, 101, -50.5, 50.5));
   getStatistics().getHisto2D("ap_yx")->GetXaxis()->SetTitle("Y position [cm]");
   getStatistics().getHisto2D("ap_yx")->GetYaxis()->SetTitle("X position [cm]");
