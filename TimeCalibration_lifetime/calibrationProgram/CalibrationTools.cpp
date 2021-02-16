@@ -167,7 +167,6 @@ void CalibrationTools::CalibrateBetweenModules()
 
 void CalibrationTools::GenerateCalibrationFile()
 {
-  double value, uncert;
   std::ifstream oldCalib;
 
   oldCalib.open(fOldFileWithConstants.c_str(), std::ifstream::in);
@@ -279,24 +278,23 @@ std::vector<TH2D*> GetHistosFromFile(TFile* fileIn, int numberOfThresholds, std:
   }
   if (!dir) {
     std::cerr << "No directory EventFinder or PALSCalibrationTask in a given file or wrong calibration option (single or multi)" << std::endl;
-    return Histos;
-  }
-  
-  TH2D* tempHisto;
-  for (int i=1; i<=numberOfThresholds; i++) {
-    tempHisto = dynamic_cast<TH2D*>(dir->Get((histoName + std::to_string(i)).c_str()));
-    if (tempHisto)
-      Histos.push_back(tempHisto);
-    else
-      std::cerr << "Error retrieving histogram with name " << histoName + std::to_string(i) << std::endl;
-  }
-  if (calibrationOption == "multi") {
+  } else {
+    TH2D* tempHisto;
     for (int i=1; i<=numberOfThresholds; i++) {
-      tempHisto = dynamic_cast<TH2D*>(dir->Get((histoName2 + std::to_string(i)).c_str()));
+      tempHisto = dynamic_cast<TH2D*>(dir->Get((histoName + std::to_string(i)).c_str()));
       if (tempHisto)
         Histos.push_back(tempHisto);
       else
-        std::cerr << "Error retrieving histogram with name " << histoName2 + std::to_string(i) << std::endl;
+        std::cerr << "Error retrieving histogram with name " << histoName + std::to_string(i) << std::endl;
+    }
+    if (calibrationOption == "multi") {
+      for (int i=1; i<=numberOfThresholds; i++) {
+        tempHisto = dynamic_cast<TH2D*>(dir->Get((histoName2 + std::to_string(i)).c_str()));
+        if (tempHisto)
+          Histos.push_back(tempHisto);
+        else
+          std::cerr << "Error retrieving histogram with name " << histoName2 + std::to_string(i) << std::endl;
+      }
     }
   }
   return Histos;
@@ -330,8 +328,8 @@ void CalibrationTools::FindEdges(std::vector<TH2D*> Histos)
       meanTemp = projection_copy->GetMean(1);
       rangeParameter = 4*projection_copy->GetStdDev();
       if (projection_copy -> GetEntries() > 0) {
-        middleLeft = FindMiddle(fileOut, projection_copy, meanTemp - rangeParameter, meanTemp, iterator, Side::Left, titleOfHistogram);
-        middleRight = FindMiddle(fileOut, projection_copy, meanTemp, meanTemp + rangeParameter, iterator, Side::Right, titleOfHistogram);
+        middleLeft = FindMiddle(projection_copy, meanTemp - rangeParameter, meanTemp, Side::Left, titleOfHistogram);
+        middleRight = FindMiddle(projection_copy, meanTemp, meanTemp + rangeParameter, Side::Right, titleOfHistogram);
 
         tempContainerA.push_back(middleLeft);
         tempContainerB.push_back(middleRight);
@@ -353,7 +351,7 @@ void CalibrationTools::FindEdges(std::vector<TH2D*> Histos)
 
 void CalibrationTools::FindPeaks(std::vector<TH2D*> Histos)
 {
-  TH1D *projection_copy1, *projection_copy2, *temp_copy;
+  TH1D *projection_copy1, *projection_copy2;
   Parameter middleAnni, middleDeex;
   double meanTemp, rangeParameter;
   unsigned iterator = 0;
@@ -380,10 +378,10 @@ void CalibrationTools::FindPeaks(std::vector<TH2D*> Histos)
       if (projection_copy1 -> GetEntries() > 0 && projection_copy2 -> GetEntries() > 0) {
         meanTemp = projection_copy1->GetMean(1);
         rangeParameter = 4*projection_copy1->GetStdDev();
-        middleAnni = FindMiddle(fileOut, projection_copy1, meanTemp - rangeParameter, meanTemp + rangeParameter, iterator, Side::MaxAnni, titleOfHistogram);
+        middleAnni = FindMiddle(projection_copy1, meanTemp - rangeParameter, meanTemp + rangeParameter, Side::MaxAnni, titleOfHistogram);
         meanTemp = projection_copy2->GetMean(1);
         rangeParameter = 4*projection_copy2->GetStdDev();
-        middleDeex = FindMiddle(fileOut, projection_copy2, meanTemp - rangeParameter, meanTemp + rangeParameter, iterator, Side::MaxDeex, titleOfHistogram);
+        middleDeex = FindMiddle(projection_copy2, meanTemp - rangeParameter, meanTemp + rangeParameter, Side::MaxDeex, titleOfHistogram);
 
         tempContainerA.push_back(middleAnni);
         tempContainerB.push_back(middleDeex);
@@ -408,8 +406,7 @@ void CalibrationTools::FindPeaks(std::vector<TH2D*> Histos)
   delete fileOut;
 }
 
-Parameter CalibrationTools::FindMiddle(TFile* output, TH1D* histo, double firstBinCenter, double lastBinCenter, 
-                                                                    unsigned iterator, Side side, std::string titleOfHistogram)
+Parameter CalibrationTools::FindMiddle(TH1D* histo, double firstBinCenter, double lastBinCenter, Side side, std::string titleOfHistogram)
 {
   Parameter finalEstimatioOfExtremum;
   int filterHalf = (int)(fNumberOfPointsToFilter/2);
@@ -601,7 +598,7 @@ void EffLengthTools::LoadCalibrationParameters()
         std::string keyForFileName, keyForLength;
         std::string fileNameTemp;
         int lengthTemp;
-        for (unsigned i=1; i<=fNmbOfFiles; i++) {
+        for (int i=1; i<=fNmbOfFiles; i++) {
           keyForFileName = kFileNamePattern1Key;
           keyForFileName.insert(fIteratorToNumberInFileName, std::to_string(i));
           keyForLength = kLengthPattern1Key;
@@ -631,12 +628,12 @@ void EffLengthTools::CalculateEffectiveLength()
 {
   std::vector<std::vector<double>> meanDifferenceBetewenParams;
   fCorrDiff_vs_Length = LoadParametersFromFiles(fFileNames);
-  if (fCorrDiff_vs_Length.size() > 2 || fCorrDiff_vs_Length.size() >= fReferenceFileID) {
+  if (fCorrDiff_vs_Length.size() > 2 || (int)fCorrDiff_vs_Length.size() >= fReferenceFileID) {
     std::vector<double> tempVector;
     for (unsigned i=0; i<fCorrDiff_vs_Length.size(); i++) {
       tempVector.clear();
       for (unsigned j=0; j<fCorrDiff_vs_Length.at(0).size(); j++ ) {
-        if (i == fReferenceFileID-1)
+        if ((int)i == fReferenceFileID-1)
           tempVector.push_back(0);
         else
           tempVector.push_back(CalcMeanDiff(fCorrDiff_vs_Length.at(i).at(j), fCorrDiff_vs_Length.at(fReferenceFileID-1).at(j)));
@@ -987,7 +984,7 @@ std::vector<double> SmoothByLinearFilter(std::vector<double> values, int filterH
 std::vector<double> ReduceBoundaryEffect(std::vector<double> values, int filterHalf)
 {
   std::vector<double> reduced;
-  if (values.size() < 2*filterHalf+1) {
+  if ((int)values.size() < 2*filterHalf+1) {
     std::cout << "Could not reduce the boundaries effect after smoothing. Vector is too small to proceed" << std::endl;
     reduced = values;
   } else {
@@ -1084,7 +1081,7 @@ void SaveABEdgesResults(std::string oldFileWithConstants, std::string fileWithCo
     if (side == 'A' || side == 'B') {
       results << NumberToChar(oldParams.at(i).at(0), 0) << "\t" << NumberToChar(oldParams.at(i).at(1), 0) << "\t"
                                                                   << side <<"\t" << NumberToChar(threshold+1, 0) << "\t";
-      if (threshold<edgesB.size() && side == 'B') {
+      if (threshold<(int)edgesB.size() && side == 'B') {
         if (iterator<edgesB.at(threshold).size() && threshold >= 0) {
           results << NumberToChar((edgesB.at(threshold).at(iterator).Value + edgesA.at(threshold).at(iterator).Value)/2, 6) << "\t";
           results << NumberToChar(sqrt(pow(edgesB.at(threshold).at(iterator).Uncertainty, 2) + pow(edgesA.at(threshold).at(iterator).Uncertainty, 2))/2, 6) << "\t";
@@ -1130,7 +1127,7 @@ void SaveABEdgesResults(std::string oldFileWithConstants, std::string fileWithCo
     if (side == 'A' || side == 'B') {
       results << NumberToChar(oldParams.at(i).at(0), 0) << "\t" << NumberToChar(oldParams.at(i).at(1), 0) << "\t"
                                                                   << side << "\t" << NumberToChar(threshold+1, 0) << "\t";
-      if (threshold<edgesB.size()) {
+      if (threshold<(int)edgesB.size()) {
         if (iterator<edgesB.at(threshold).size() && threshold >= 0) {
           results << NumberToChar(2*effectiveLength/(edgesB.at(threshold).at(iterator).Value - edgesA.at(threshold).at(iterator).Value), 6) << "\t";
           double Uncertainty = 2*effectiveLength/pow(edgesB.at(threshold).at(iterator).Value - edgesA.at(threshold).at(iterator).Value, 2);
@@ -1218,7 +1215,7 @@ void SavePALSPeakResults(std::string oldFileWithConstants, std::string fileWithC
       if (side == 'A' || side == 'B') {
         results << NumberToChar(oldParams.at(i).at(0), 0) << "\t" << NumberToChar(oldParams.at(i).at(1), 0) << "\t"
                                                                   << side <<"\t" << NumberToChar(threshold+1, 0) << "\t";
-        if (threshold<peakAnni.size()) {
+        if (threshold<(int)peakAnni.size()) {
           if (iterator<peakAnni.at(threshold).size() && threshold >= 0) {
             if (isnan(peakAnni.at(threshold).at(iterator).Value) || isnan(peakDeex.at(threshold).at(iterator).Value) 
                                             || isnan(peakAnni.at(threshold).at(iterator).Uncertainty) || isnan(peakAnni.at(threshold).at(iterator).Uncertainty)) {
@@ -1266,7 +1263,7 @@ void SavePALSPeakResults(std::string oldFileWithConstants, std::string fileWithC
       if (side == 'A' || side == 'B') {
         results << NumberToChar(oldParams.at(i).at(0), 0) << "\t" << NumberToChar(oldParams.at(i).at(1), 0) << "\t"
                                                                   << side <<"\t" << NumberToChar(threshold+1, 0) << "\t";
-        if (threshold<peakAnni.size()) {
+        if (threshold<(int)peakAnni.size()) {
           if (iterator<peakAnni.at(threshold).size() && threshold >= 0) {
             if (isnan(peakAnni.at(threshold).at(iterator).Value) || isnan(peakDeex.at(threshold).at(iterator).Value) 
                                             || isnan(peakAnni.at(threshold).at(iterator).Uncertainty) || isnan(peakAnni.at(threshold).at(iterator).Uncertainty)) {

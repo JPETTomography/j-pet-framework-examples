@@ -99,3 +99,11 @@ add_custom_target(clean_data_${projectName}
 ################################################################################
 ## Copy the auxiliary files
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/${AUXILIARY_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+
+################################################################################
+## Unit tests
+option(PACKAGE_TESTS "Build the tests" ON)
+if(PACKAGE_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()

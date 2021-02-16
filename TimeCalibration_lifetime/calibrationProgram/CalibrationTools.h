@@ -61,8 +61,8 @@ public:
   
   void FindEdges(std::vector<TH2D*> Histos);
   void FindPeaks(std::vector<TH2D*> Histos);
-  Parameter FindMiddle(TFile* output, TH1D* histo, double firstBinCenter, double lastBinCenter, 
-                       unsigned iterator, Side side, std::string titleOfHistogram);
+  Parameter FindMiddle(TH1D* histo, double firstBinCenter, double lastBinCenter, 
+                                                            Side side, std::string titleOfHistogram);
   unsigned EstimateExtremumBin(const std::vector<double> vector, int filterHalf, unsigned shiftFromFilterHalf, Side side);
   Parameter FindPeak(const std::vector<double> arguments, const std::vector<double> values, unsigned firstPoint, unsigned lastPoint);
   
@@ -100,7 +100,7 @@ private:
   std::string fHistoNameSingle = "";
   std::string fAnniHistoNameMulti = "";
   std::string fDeexHistoNameMulti = "";
-  bool fSaveDerivatives = true;
+  bool fSaveDerivatives = false;
   int fNumberOfThresholds = 4;
   int fMinScintillatorID = 1;
   int fMaxScintillatorID = 192;
