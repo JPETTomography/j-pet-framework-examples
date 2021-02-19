@@ -284,6 +284,8 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
 
         stats.getHisto2D("ap_tof_lor_angle")->Fill(lorAngle1, tof);
         stats.getHisto2D("ap_tof_lor_angle")->Fill(lorAngle2, tof);
+        stats.getHisto2D("ap_tof_lor_angle_zoom")->Fill(lorAngle1, tof);
+        stats.getHisto2D("ap_tof_lor_angle_zoom")->Fill(lorAngle2, tof);
 
         stats.getHisto2D("ap_tof_z_pos")->Fill(firstHit.getPosZ(), tof);
         stats.getHisto2D("ap_tof_z_pos")->Fill(secondHit.getPosZ(), tof);
