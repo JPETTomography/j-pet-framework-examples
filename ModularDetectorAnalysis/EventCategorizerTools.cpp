@@ -151,11 +151,14 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
       // TOF calculated by convention
       double tof = calculateTOFByConvention(firstHit, secondHit);
 
-      // LOR angle ()
-      TVector3 unitXUp(1.0, 0.0, 0.0);
-      TVector3 unitXDn(-1.0, 0.0, 0.0);
-      double lorAngle1 = min(TMath::RadToDeg() * firstVec.Angle(unitXUp), TMath::RadToDeg() * firstVec.Angle(unitXDn));
-      double lorAngle2 = min(TMath::RadToDeg() * secondVec.Angle(unitXUp), TMath::RadToDeg() * secondVec.Angle(unitXDn));
+      // LOR angle
+      TVector3 vecHit1_2D(firstHit.getPosX() - sourcePos.X(), 0.0, firstHit.getPosZ() - sourcePos.Z());
+      TVector3 vecHit2_2D(secondHit.getPosX() - sourcePos.X(), 0.0, secondHit.getPosZ() - sourcePos.Z());
+      TVector3 vecHit1_1D(firstHit.getPosX() - sourcePos.X(), 0.0, 0.0);
+      TVector3 vecHit2_1D(secondHit.getPosX() - sourcePos.X(), 0.0, 0.0);
+
+      double lorAngle1 = TMath::RadToDeg() * vecHit1_2D.Angle(vecHit1_1D);
+      double lorAngle2 = TMath::RadToDeg() * vecHit2_2D.Angle(vecHit2_2D);
 
       // Pre-cuts histograms
       if (saveHistos)
@@ -273,6 +276,8 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
         stats.getHisto2D("ap_hit_tdiff_scin")->Fill(scin2ID, secondHit.getTimeDiff());
 
         stats.getHisto1D("ap_angle")->Fill(angle);
+        stats.getHisto2D("ap_angle_scin")->Fill(scin1ID, angle);
+        stats.getHisto2D("ap_angle_scin")->Fill(scin2ID, angle);
 
         stats.getHisto1D("ap_lor_angle")->Fill(lorAngle1);
         stats.getHisto1D("ap_lor_angle")->Fill(lorAngle2);

@@ -307,8 +307,7 @@ void EventCategorizer::initialiseHistograms()
   getStatistics().getHisto2D("2g_tof_scin")->GetXaxis()->SetTitle("Scintillator ID");
   getStatistics().getHisto2D("2g_tof_scin")->GetYaxis()->SetTitle("Time of Flight [ps]");
 
-  getStatistics().createHistogram(
-      new TH1F("2g_hit_tdiff", "2 gamma event - hits A-B time difference per scintillator", 200, -fMaxTimeDiff, fMaxTimeDiff));
+  getStatistics().createHistogram(new TH1F("2g_hit_tdiff", "2 gamma event - hits A-B time difference", 200, -fMaxTimeDiff, fMaxTimeDiff));
   getStatistics().getHisto1D("2g_hit_tdiff")->GetXaxis()->SetTitle("A-B Signal Time Difference [ps]");
   getStatistics().getHisto1D("2g_hit_tdiff")->GetYaxis()->SetTitle("Number of Hit Pairs");
 
