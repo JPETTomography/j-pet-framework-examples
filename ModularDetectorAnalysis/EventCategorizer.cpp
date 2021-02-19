@@ -397,6 +397,11 @@ void EventCategorizer::initialiseHistograms()
   getStatistics().getHisto1D("ap_tof")->GetXaxis()->SetTitle("Time of Flight [ps]");
   getStatistics().getHisto1D("ap_tof")->GetYaxis()->SetTitle("Number of Annihilation Pairs");
 
+  getStatistics().createHistogram(
+      new TH1F("ap_tof_lor_cut", "Annihilation pairs Time of Flight after LOR angle cut", 200, -fMaxTimeDiff, fMaxTimeDiff));
+  getStatistics().getHisto1D("ap_tof_lor_cut")->GetXaxis()->SetTitle("Time of Flight [ps]");
+  getStatistics().getHisto1D("ap_tof_lor_cut")->GetYaxis()->SetTitle("Number of Annihilation Pairs");
+
   getStatistics().createHistogram(new TH2F("ap_tof_scin", "Annihilation pairs Time of Flight per scintillator", maxScinID - minScinID + 1,
                                            minScinID - 0.5, maxScinID + 0.5, 200, -fMaxTimeDiff, fMaxTimeDiff));
   getStatistics().getHisto2D("ap_tof_scin")->GetXaxis()->SetTitle("Scintillator ID");

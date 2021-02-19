@@ -302,6 +302,7 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
           stats.getHisto2D("ap_yx_zoom_lor_cut")->Fill(annhilationPoint.Y(), annhilationPoint.X());
           stats.getHisto2D("ap_zx_zoom_lor_cut")->Fill(annhilationPoint.Z(), annhilationPoint.X());
           stats.getHisto2D("ap_zy_zoom_lor_cut")->Fill(annhilationPoint.Z(), annhilationPoint.Y());
+          stats.getHisto1D("ap_tof_lor_cut")->Fill(tof);
         }
 
         if (fabs(firstHit.getPosZ()) < lorPosZMax && fabs(secondHit.getPosZ()) < lorPosZMax)
