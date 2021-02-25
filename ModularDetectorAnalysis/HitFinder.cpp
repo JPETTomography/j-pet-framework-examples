@@ -138,27 +138,27 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
         auto searchA = hit.getSignalA().getRawSignals().find(mtxPos);
         auto searchB = hit.getSignalB().getRawSignals().find(mtxPos);
 
-        // if (searchA != hit.getSignalA().getRawSignals().end() && searchB != hit.getSignalB().getRawSignals().end())
-        // {
-        //   auto leadsA = searchA->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-        //   auto trailsA = searchA->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-        //   auto leadsB = searchB->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-        //   auto trailsB = searchA->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-        //
-        //   double totSum = 0.0;
-        //
-        //   for (int thr = 0; thr < leadsA.size() && thr < leadsB.size(); ++thr)
-        //   {
-        //     double tDiff = leadsB.at(thr).getTime() - leadsA.at(thr).getTime();
-        //     double totA = trailsA.at(thr).getTime() - leadsA.at(thr).getTime();
-        //     double totB = trailsB.at(thr).getTime() - leadsB.at(thr).getTime();
-        //     totSum += totA + totB;
-        //     getStatistics().getHisto2D(Form("hit_tdiff_thr%d_scin_mtx_pos_%d", thr + 1, mtxPos))->Fill(scinID, tDiff);
-        //     getStatistics().getHisto2D(Form("hit_tot_thr%d_scin_mtx_pos_%d", thr + 1, mtxPos))->Fill(scinID, totA + totB);
-        //   }
-        //
-        //   getStatistics().getHisto2D(Form("hit_tot_sum_scin_mtx_pos_%d", mtxPos))->Fill(scinID, totSum);
-        // }
+        if (searchA != hit.getSignalA().getRawSignals().end() && searchB != hit.getSignalB().getRawSignals().end())
+        {
+          auto leadsA = searchA->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+          auto trailsA = searchA->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+          auto leadsB = searchB->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+          auto trailsB = searchA->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+
+          double totSum = 0.0;
+          //
+          //   for (int thr = 0; thr < leadsA.size() && thr < leadsB.size(); ++thr)
+          //   {
+          //     double tDiff = leadsB.at(thr).getTime() - leadsA.at(thr).getTime();
+          //     double totA = trailsA.at(thr).getTime() - leadsA.at(thr).getTime();
+          //     double totB = trailsB.at(thr).getTime() - leadsB.at(thr).getTime();
+          //     totSum += totA + totB;
+          //     getStatistics().getHisto2D(Form("hit_tdiff_thr%d_scin_mtx_pos_%d", thr + 1, mtxPos))->Fill(scinID, tDiff);
+          //     getStatistics().getHisto2D(Form("hit_tot_thr%d_scin_mtx_pos_%d", thr + 1, mtxPos))->Fill(scinID, totA + totB);
+          //   }
+          //
+          //   getStatistics().getHisto2D(Form("hit_tot_sum_scin_mtx_pos_%d", mtxPos))->Fill(scinID, totSum);
+        }
       }
     }
   }
