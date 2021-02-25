@@ -159,7 +159,7 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
             getStatistics().getHisto2D(Form("hit_tot_thr%d_scin_mtx_pos_%d", thr + 1, mtxPos))->Fill(scinID, totA + totB);
           }
 
-          getStatistics().getHisto2D(Form("hit_tot_sum_scin_mtx_pos_%d", mtxPos))->Fill(scinID, totSum);
+          getStatistics().getHisto2D(Form("hit_tot_sum_scin_mtx_pos_%d", mtxPos))->Fill(scinID, totSum / 2.0);
         }
       }
     }

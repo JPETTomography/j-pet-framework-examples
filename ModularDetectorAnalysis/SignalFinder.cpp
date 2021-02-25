@@ -169,14 +169,14 @@ void SignalFinder::initialiseHistograms()
   getStatistics().getHisto1D("rawsig_multi")->GetXaxis()->SetTitle("Total number of SigChs in RawSig");
   getStatistics().getHisto1D("rawsig_multi")->GetYaxis()->SetTitle("Number of Signal Channels");
 
-  getStatistics().createHistogram(new TH1F("rawsig_tslot", "Number of Raw Signals in Time Window", 200, 0.5, 200.5));
+  getStatistics().createHistogram(new TH1F("rawsig_tslot", "Number of Raw Signals in Time Window", 200, 0.5, 400.5));
   getStatistics().getHisto1D("rawsig_tslot")->GetXaxis()->SetTitle("Number of Raw Signal in Time Window");
   getStatistics().getHisto1D("rawsig_tslot")->GetYaxis()->SetTitle("Number of Time Windows");
 
   for (int thr = 0; thr < kNumOfThresholds; ++thr)
   {
     getStatistics().createHistogram(new TH2F(Form("tot_sipm_id_thr%d", thr + 1), Form("SiPM Signal Time over Threshold per SiPM ID for THR %d", thr),
-                                             maxPMID - minPMID + 1, minPMID - 0.5, maxPMID + 0.5, 200, 0.5, 200.5));
+                                             maxPMID - minPMID + 1, minPMID - 0.5, maxPMID + 0.5, 200, 0.0, 400000.0));
     getStatistics().getHisto2D(Form("tot_sipm_id_thr%d", thr + 1))->GetXaxis()->SetTitle("SiPM ID");
     getStatistics().getHisto2D(Form("tot_sipm_id_thr%d", thr + 1))->GetYaxis()->SetTitle("TOT [ps]");
   }
