@@ -115,7 +115,7 @@ void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& rawSigVec)
     auto trails = rawSig.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrValue);
 
     // Saving only signals with lead-trail pair on threshold
-    if (leads.size() && trails.size())
+    if (leads.size() == trails.size())
     {
       fOutputEvents->add<JPetRawSignal>(rawSig);
 
