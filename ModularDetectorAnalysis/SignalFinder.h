@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -33,7 +33,7 @@ class JPetWriter;
  * Parameters for time window values used in tools can be specified in user options,
  * default are provided.
  */
-class SignalFinder: public JPetUserTask
+class SignalFinder : public JPetUserTask
 {
 public:
   SignalFinder(const char* name);

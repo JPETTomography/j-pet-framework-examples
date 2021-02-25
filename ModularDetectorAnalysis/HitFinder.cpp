@@ -205,6 +205,21 @@ void HitFinder::initialiseHistograms()
     getStatistics().getHisto2D(Form("hit_tot_scin_m_%d", multi))->GetYaxis()->SetTitle("Time over Threshold [ps]");
   }
 
+  // Time diff and TOT per SiPM position in matrix
+  for (int mtxPos = 1; mtxPos <= 4; mtxPos++)
+  {
+    getStatistics().createHistogram(
+        new TH2F(Form("hit_tdiff_scin_mtx_pos_%d", mtxPos), Form("Hit time difference per scin for SiPMs with matrix position %d", mtxPos),
+                 maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 300, -1.1 * fABTimeDiff, 1.1 * fABTimeDiff));
+    getStatistics().getHisto2D(Form("hit_tdiff_scin_mtx_pos_%d", mtxPos))->GetXaxis()->SetTitle("Scintillator ID");
+    getStatistics().getHisto2D(Form("hit_tdiff_scin_mtx_pos_%d", mtxPos))->GetYaxis()->SetTitle("A-B time difference [ps]");
+
+    getStatistics().createHistogram(new TH2F(Form("hit_tot_scin_mtx_pos_%d", mtxPos), Form("Hit TOT of SiPM signals on matrix position %d", mtxPos),
+                                             maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 200, 0.0, 400000.0));
+    getStatistics().getHisto2D(Form("hit_tot_scin_mtx_pos_%d", mtxPos))->GetXaxis()->SetTitle("Scintillator ID");
+    getStatistics().getHisto2D(Form("hit_tot_scin_mtx_pos_%d", mtxPos))->GetYaxis()->SetTitle("Time over Threshold [ps]");
+  }
+
   // Unused sigals stats
   getStatistics().createHistogram(
       new TH1F("remain_signals_scin", "Number of Unused Signals in Scintillator", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5));
