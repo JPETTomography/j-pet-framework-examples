@@ -149,12 +149,12 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
 
           for (int thr = 0; thr < leadsA.size() && thr < leadsB.size(); ++thr)
           {
-            double tDiff = leadsB.at(thr).getTime() - leadsA.at(thr).getTime();
-            double totA = trailsA.at(thr).getTime() - leadsA.at(thr).getTime();
-            double totB = trailsB.at(thr).getTime() - leadsB.at(thr).getTime();
-            totSum += totA + totB;
-            getStatistics().getHisto2D(Form("hit_tdiff_thr%d_scin_mtx_pos_%d", thr + 1, mtxPos))->Fill(scinID, tDiff);
-            getStatistics().getHisto2D(Form("hit_tot_thr%d_scin_mtx_pos_%d", thr + 1, mtxPos))->Fill(scinID, totA + totB);
+            // double tDiff = leadsB.at(thr).getTime() - leadsA.at(thr).getTime();
+            // double totA = trailsA.at(thr).getTime() - leadsA.at(thr).getTime();
+            // double totB = trailsB.at(thr).getTime() - leadsB.at(thr).getTime();
+            // totSum += totA + totB;
+            // getStatistics().getHisto2D(Form("hit_tdiff_thr%d_scin_mtx_pos_%d", thr + 1, mtxPos))->Fill(scinID, tDiff);
+            // getStatistics().getHisto2D(Form("hit_tot_thr%d_scin_mtx_pos_%d", thr + 1, mtxPos))->Fill(scinID, totA + totB);
           }
 
           getStatistics().getHisto2D(Form("hit_tot_sum_scin_mtx_pos_%d", mtxPos))->Fill(scinID, totSum);
