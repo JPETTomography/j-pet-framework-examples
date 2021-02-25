@@ -133,17 +133,19 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
       }
 
       // Checking tDiff and TOT per SiPM mtx position
-      for (int mtxPos = 1; mtxPos <= 4; ++mtxPos)
+      for (int mtxPos = 1; mtxPos <= 4; mtxPos++)
       {
-        auto searchA = hit.getSignalA().getRawSignals().find(mtxPos);
-        auto searchB = hit.getSignalB().getRawSignals().find(mtxPos);
+        auto signalsMapA = hit.getSignalA().getRawSignals();
+        auto signalsMapB = hit.getSignalB().getRawSignals();
+        auto searchA = signalsMapA.find(mtxPos);
+        auto searchB = signalsMapB.find(mtxPos);
 
-        if (searchA != hit.getSignalA().getRawSignals().end() && searchB != hit.getSignalB().getRawSignals().end())
+        if (searchA != signalsMapA.end() && searchB != signalsMapB.end())
         {
           auto leadsA = searchA->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
           auto trailsA = searchA->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
           auto leadsB = searchB->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-          auto trailsB = searchA->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+          auto trailsB = searchB->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
 
           double totSum = 0.0;
           //
