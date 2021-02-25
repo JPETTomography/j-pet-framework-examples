@@ -140,10 +140,10 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
 
         if (searchA != hit.getSignalA().getRawSignals().end() && searchB != hit.getSignalB().getRawSignals().end())
         {
-          auto leadsA = hit.getSignalA().getRawSignals().at(mtxPos).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrValue);
-          auto trailsA = hit.getSignalA().getRawSignals().at(mtxPos).getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrValue);
-          auto leadsB = hit.getSignalB().getRawSignals().at(mtxPos).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrValue);
-          auto trailsB = hit.getSignalB().getRawSignals().at(mtxPos).getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrValue);
+          auto leadsA = hit.getSignalA().getRawSignals().at(mtxPos).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+          auto trailsA = hit.getSignalA().getRawSignals().at(mtxPos).getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+          auto leadsB = hit.getSignalB().getRawSignals().at(mtxPos).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+          auto trailsB = hit.getSignalB().getRawSignals().at(mtxPos).getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
 
           double totSum = 0.0;
 
