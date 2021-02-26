@@ -40,6 +40,9 @@ public:
   static bool checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
                              double totCutAnniMin, double totCutAnniMax, double lorAngleMax, double lorPosZMax, const TVector3& sourcePos);
 
+  static bool collimator2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
+                               double totCutAnniMin, double totCutAnniMax, double lorAngleMax, double lorPosZMax, const TVector3& sourcePos);
+
   static bool checkFor3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos);
 
   static bool checkForPrompt(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double deexTOTCutMin, double deexTOTCutMax);

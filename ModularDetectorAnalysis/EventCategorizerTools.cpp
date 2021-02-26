@@ -105,6 +105,108 @@ void EventCategorizerTools::selectForCalibration(const JPetEvent& event, JPetSta
   }
 }
 
+bool EventCategorizerTools::collimator2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
+                                             double totCutAnniMin, double totCutAnniMax, double lorAngleMax, double lorPosZMax,
+                                             const TVector3& sourcePos)
+{
+  if (event.getHits().size() < 2)
+  {
+    return false;
+  }
+
+  for (uint i = 0; i < event.getHits().size(); i++)
+  {
+    for (uint j = i + 1; j < event.getHits().size(); j++)
+    {
+      JPetHit firstHit, secondHit;
+      if (event.getHits().at(i).getTime() < event.getHits().at(j).getTime())
+      {
+        firstHit = event.getHits().at(i);
+        secondHit = event.getHits().at(j);
+      }
+      else
+      {
+        firstHit = event.getHits().at(j);
+        secondHit = event.getHits().at(i);
+      }
+
+      int scin1ID = firstHit.getScin().getID();
+      int scin2ID = secondHit.getScin().getID();
+
+      int slot1ID = firstHit.getScin().getSlot().getID();
+      int slot2ID = secondHit.getScin().getSlot().getID();
+
+      if (max(slot1ID, slot2ID) - min(slot1ID, slot2ID) == 12)
+      {
+        if (saveHistos)
+        {
+          // Checking tDiff and TOT per SiPM mtx position
+          for (int mtxPos = 1; mtxPos <= 4; mtxPos++)
+          {
+            auto hit1sigMapA = firstHit.getSignalA().getRawSignals();
+            auto hit1sigMapB = firstHit.getSignalB().getRawSignals();
+
+            auto hit2sigMapA = secondHit.getSignalA().getRawSignals();
+            auto hit2sigMapB = secondHit.getSignalB().getRawSignals();
+
+            auto search1A = hit1sigMapA.find(mtxPos);
+            auto search1B = hit1sigMapB.find(mtxPos);
+
+            auto search2A = hit2sigMapA.find(mtxPos);
+            auto search2B = hit2sigMapB.find(mtxPos);
+
+            if (search1A != hit1sigMapA.end() && search1B != hit1sigMapB.end())
+            {
+              auto leadsA = search1A->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+              auto trailsA = search1A->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+              auto leadsB = search1B->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+              auto trailsB = search1B->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+
+              double totSum = 0.0;
+
+              for (int thr = 0; thr < leadsA.size() && thr < leadsB.size(); ++thr)
+              {
+                double tDiff = leadsB.at(thr).getTime() - leadsA.at(thr).getTime();
+                double totA = trailsA.at(thr).getTime() - leadsA.at(thr).getTime();
+                double totB = trailsB.at(thr).getTime() - leadsB.at(thr).getTime();
+                totSum += totA + totB;
+                stats.getHisto2D(Form("hit_tdiff_thr%d_scin_mtx_pos_%d", thr + 1, mtxPos))->Fill(scin1ID, tDiff);
+                stats.getHisto2D(Form("hit_tot_thr%d_scin_mtx_pos_%d", thr + 1, mtxPos))->Fill(scin1ID, totA + totB);
+              }
+
+              stats.getHisto2D(Form("hit_tot_sum_scin_mtx_pos_%d", mtxPos))->Fill(scin1ID, totSum / 2.0);
+            }
+
+            if (search2A != hit2sigMapA.end() && search2B != hit2sigMapB.end())
+            {
+              auto leadsA = search2A->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+              auto trailsA = search2A->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+              auto leadsB = search2B->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+              auto trailsB = search2B->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+
+              double totSum = 0.0;
+
+              for (int thr = 0; thr < leadsA.size() && thr < leadsB.size(); ++thr)
+              {
+                double tDiff = leadsB.at(thr).getTime() - leadsA.at(thr).getTime();
+                double totA = trailsA.at(thr).getTime() - leadsA.at(thr).getTime();
+                double totB = trailsB.at(thr).getTime() - leadsB.at(thr).getTime();
+                totSum += totA + totB;
+                stats.getHisto2D(Form("hit_tdiff_thr%d_scin_mtx_pos_%d", thr + 1, mtxPos))->Fill(scin2ID, tDiff);
+                stats.getHisto2D(Form("hit_tot_thr%d_scin_mtx_pos_%d", thr + 1, mtxPos))->Fill(scin2ID, totA + totB);
+              }
+
+              stats.getHisto2D(Form("hit_tot_sum_scin_mtx_pos_%d", mtxPos))->Fill(scin2ID, totSum / 2.0);
+            }
+          }
+        }
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 /**
  * Method for determining type of event - back to back 2 gamma
  */
