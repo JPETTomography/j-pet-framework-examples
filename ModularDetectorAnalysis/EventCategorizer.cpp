@@ -583,7 +583,7 @@ void EventCategorizer::initialiseCalibrationHistograms()
 
     getStatistics().createHistogram(new TH2F(Form("hit_tot_weigh_scin_mtx_pos_%d", mtxPos),
                                              Form("Hit TOT with threshold weight of SiPM signals on matrix position %d", mtxPos),
-                                             maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 200, 0.0, 400000.0));
+                                             maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 200, 0.0, 1000000.0));
     getStatistics().getHisto2D(Form("hit_tot_weigh_scin_mtx_pos_%d", mtxPos))->GetXaxis()->SetTitle("Scintillator ID");
     getStatistics().getHisto2D(Form("hit_tot_weigh_scin_mtx_pos_%d", mtxPos))->GetYaxis()->SetTitle("Time over Threshold [ps]");
   }

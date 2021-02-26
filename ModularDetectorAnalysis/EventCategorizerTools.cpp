@@ -203,7 +203,7 @@ bool EventCategorizerTools::collimator2Gamma(const JPetEvent& event, JPetStatist
               }
 
               stats.getHisto2D(Form("hit_tot_sum_scin_mtx_pos_%d", mtxPos))->Fill(scin1ID, totSum / 2.0);
-              stats.getHisto2D(Form("hit_tot_weigh_scin_mtx_pos_%d", mtxPos))->Fill(scin1ID, totSumWeight / 2.0);
+              stats.getHisto2D(Form("hit_tot_weigh_scin_mtx_pos_%d", mtxPos))->Fill(scin1ID, totSumWeight / (2.0 * 3.0));
             }
 
             if (search2A != hit2sigMapA.end() && search2B != hit2sigMapB.end())
@@ -253,7 +253,7 @@ bool EventCategorizerTools::collimator2Gamma(const JPetEvent& event, JPetStatist
               }
 
               stats.getHisto2D(Form("hit_tot_sum_scin_mtx_pos_%d", mtxPos))->Fill(scin2ID, totSum / 2.0);
-              stats.getHisto2D(Form("hit_tot_weigh_scin_mtx_pos_%d", mtxPos))->Fill(scin1ID, totSumWeight / 2.0 * 3.0);
+              stats.getHisto2D(Form("hit_tot_weigh_scin_mtx_pos_%d", mtxPos))->Fill(scin1ID, totSumWeight / (2.0 * 3.0));
             }
           }
         }
