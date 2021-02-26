@@ -107,7 +107,7 @@ void EventCategorizerTools::selectForCalibration(const JPetEvent& event, JPetSta
 
 bool EventCategorizerTools::collimator2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
                                              double totCutAnniMin, double totCutAnniMax, double lorAngleMax, double lorPosZMax,
-                                             const TVector3& sourcePos)
+                                             const TVector3& sourcePos, boost::property_tree::ptree& calibTree)
 {
   if (event.getHits().size() < 2)
   {
@@ -163,18 +163,47 @@ bool EventCategorizerTools::collimator2Gamma(const JPetEvent& event, JPetStatist
               auto trailsB = search1B->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
 
               double totSum = 0.0;
+              double totSumWeight = 0.0;
 
               for (int thr = 0; thr < leadsA.size() && thr < leadsB.size(); ++thr)
               {
                 double tDiff = leadsB.at(thr).getTime() - leadsA.at(thr).getTime();
                 double totA = trailsA.at(thr).getTime() - leadsA.at(thr).getTime();
                 double totB = trailsB.at(thr).getTime() - leadsB.at(thr).getTime();
+
                 totSum += totA + totB;
-                stats.getHisto2D(Form("hit_tdiff_thr%d_scin_mtx_pos_%d", thr + 1, mtxPos))->Fill(scin1ID, tDiff);
                 stats.getHisto2D(Form("hit_tot_thr%d_scin_mtx_pos_%d", thr + 1, mtxPos))->Fill(scin1ID, totA + totB);
+
+                double weight = 1.0;
+                if (thr + 1 == 1)
+                {
+                  weight = 3.0;
+                }
+                else if (mtxPos == 1)
+                {
+                  weight = 4.5 - 3.0;
+                }
+                else if (mtxPos == 2)
+                {
+                  weight = 6.0 - 3.0;
+                }
+                else if (mtxPos == 3)
+                {
+                  weight = 7.5 - 3.0;
+                }
+                else if (mtxPos == 4)
+                {
+                  weight = 9.0 - 3.0;
+                }
+                totSumWeight += weight * (totA + totB);
+
+                auto nameTDiff = Form("hit_tdiff_thr%d_scin_mtx_pos_%d", thr + 1, mtxPos);
+                double tDiffCorr = calibTree.get("scin." + to_string(scin1ID) + "." + nameTDiff, 0.0);
+                stats.getHisto2D(nameTDiff)->Fill(scin1ID, tDiff - tDiffCorr);
               }
 
               stats.getHisto2D(Form("hit_tot_sum_scin_mtx_pos_%d", mtxPos))->Fill(scin1ID, totSum / 2.0);
+              stats.getHisto2D(Form("hit_tot_weigh_scin_mtx_pos_%d", mtxPos))->Fill(scin1ID, totSumWeight / 2.0);
             }
 
             if (search2A != hit2sigMapA.end() && search2B != hit2sigMapB.end())
@@ -185,6 +214,7 @@ bool EventCategorizerTools::collimator2Gamma(const JPetEvent& event, JPetStatist
               auto trailsB = search2B->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
 
               double totSum = 0.0;
+              double totSumWeight = 0.0;
 
               for (int thr = 0; thr < leadsA.size() && thr < leadsB.size(); ++thr)
               {
@@ -192,11 +222,38 @@ bool EventCategorizerTools::collimator2Gamma(const JPetEvent& event, JPetStatist
                 double totA = trailsA.at(thr).getTime() - leadsA.at(thr).getTime();
                 double totB = trailsB.at(thr).getTime() - leadsB.at(thr).getTime();
                 totSum += totA + totB;
-                stats.getHisto2D(Form("hit_tdiff_thr%d_scin_mtx_pos_%d", thr + 1, mtxPos))->Fill(scin2ID, tDiff);
                 stats.getHisto2D(Form("hit_tot_thr%d_scin_mtx_pos_%d", thr + 1, mtxPos))->Fill(scin2ID, totA + totB);
+
+                double weight = 1.0;
+                if (thr + 1 == 1)
+                {
+                  weight = 3.0;
+                }
+                else if (mtxPos == 1)
+                {
+                  weight = 4.5 - 3.0;
+                }
+                else if (mtxPos == 2)
+                {
+                  weight = 6.0 - 3.0;
+                }
+                else if (mtxPos == 3)
+                {
+                  weight = 7.5 - 3.0;
+                }
+                else if (mtxPos == 4)
+                {
+                  weight = 9.0 - 3.0;
+                }
+                totSumWeight += weight * (totA + totB);
+
+                auto nameTDiff = Form("hit_tdiff_thr%d_scin_mtx_pos_%d", thr + 1, mtxPos);
+                double tDiffCorr = calibTree.get("scin." + to_string(scin2ID) + "." + nameTDiff, 0.0);
+                stats.getHisto2D(nameTDiff)->Fill(scin2ID, tDiff - tDiffCorr);
               }
 
               stats.getHisto2D(Form("hit_tot_sum_scin_mtx_pos_%d", mtxPos))->Fill(scin2ID, totSum / 2.0);
+              stats.getHisto2D(Form("hit_tot_weigh_scin_mtx_pos_%d", mtxPos))->Fill(scin1ID, totSumWeight / 2.0);
             }
           }
         }
