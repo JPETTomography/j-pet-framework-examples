@@ -231,19 +231,19 @@ bool EventCategorizerTools::collimator2Gamma(const JPetEvent& event, JPetStatist
                 }
                 else if (mtxPos == 1)
                 {
-                  weight = 4.5 - 3.0;
+                  weight = (4.5 - 3.0) / 3.0;
                 }
                 else if (mtxPos == 2)
                 {
-                  weight = 6.0 - 3.0;
+                  weight = (6.0 - 3.0) / 3.0;
                 }
                 else if (mtxPos == 3)
                 {
-                  weight = 7.5 - 3.0;
+                  weight = (7.5 - 3.0) / 3.0;
                 }
                 else if (mtxPos == 4)
                 {
-                  weight = 9.0 - 3.0;
+                  weight = (9.0 - 3.0) / 3.0;
                 }
                 totSumWeight += weight * (totA + totB);
 
@@ -253,7 +253,7 @@ bool EventCategorizerTools::collimator2Gamma(const JPetEvent& event, JPetStatist
               }
 
               stats.getHisto2D(Form("hit_tot_sum_scin_mtx_pos_%d", mtxPos))->Fill(scin2ID, totSum / 2.0);
-              stats.getHisto2D(Form("hit_tot_weigh_scin_mtx_pos_%d", mtxPos))->Fill(scin1ID, totSumWeight / 2.0);
+              stats.getHisto2D(Form("hit_tot_weigh_scin_mtx_pos_%d", mtxPos))->Fill(scin1ID, totSumWeight / 2.0 * 3.0);
             }
           }
         }
