@@ -1225,8 +1225,8 @@ void SavePALSPeakResults(std::string oldFileWithConstants, std::string fileWithC
                                                                   << side <<"\t" << NumberToChar(threshold+1, 0) << "\t";
         if (threshold<(int)peakAnni.size()) {
           if (iterator<peakAnni.at(threshold).size() && threshold >= 0) {
-            if (isnan(peakAnni.at(threshold).at(iterator).Value) || isnan(peakDeex.at(threshold).at(iterator).Value) 
-                                            || isnan(peakAnni.at(threshold).at(iterator).Uncertainty) || isnan(peakAnni.at(threshold).at(iterator).Uncertainty)) {
+            if (std::isnan(peakAnni.at(threshold).at(iterator).Value) || std::isnan(peakDeex.at(threshold).at(iterator).Value) 
+                                            || std::isnan(peakAnni.at(threshold).at(iterator).Uncertainty) || std::isnan(peakAnni.at(threshold).at(iterator).Uncertainty)) {
               results << NumberToChar(oldPALSParameters.at(i).at(4), 6) << "\t" << NumberToChar(oldPALSParameters.at(i).at(5), 6) << "\t";
               results << NumberToChar(oldPALSParameters.at(i).at(6), 6) << "\t" << NumberToChar(oldPALSParameters.at(i).at(7), 6) << "\t";
             } else {
@@ -1273,8 +1273,8 @@ void SavePALSPeakResults(std::string oldFileWithConstants, std::string fileWithC
                                                                   << side <<"\t" << NumberToChar(threshold+1, 0) << "\t";
         if (threshold<(int)peakAnni.size()) {
           if (iterator<peakAnni.at(threshold).size() && threshold >= 0) {
-            if (isnan(peakAnni.at(threshold).at(iterator).Value) || isnan(peakDeex.at(threshold).at(iterator).Value) 
-                                            || isnan(peakAnni.at(threshold).at(iterator).Uncertainty) || isnan(peakAnni.at(threshold).at(iterator).Uncertainty)) {
+            if (std::isnan(peakAnni.at(threshold).at(iterator).Value) || std::isnan(peakDeex.at(threshold).at(iterator).Value) 
+                                            || std::isnan(peakAnni.at(threshold).at(iterator).Uncertainty) || std::isnan(peakAnni.at(threshold).at(iterator).Uncertainty)) {
               results << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t";
             } else {
               results << NumberToChar((peakAnni.at(threshold).at(iterator).Value - peakDeex.at(threshold).at(iterator).Value)/2, 6) << "\t";
