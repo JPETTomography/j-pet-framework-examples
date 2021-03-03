@@ -28,10 +28,18 @@
 #include <TLine.h>
 #include <cstdlib>
 
+CalibrationTools::CalibrationTools()
+{
+  fFileWithParameters = "";
+  fCalibrationOption = "";
+  fThresholdForDerivative = 10;
+  fNumberOfPointsToFilter = 2;
+}
+
 CalibrationTools::CalibrationTools(std::string fileWithParameters, std::string calibrationOption) 
 {
-      fFileWithParameters = fileWithParameters;
-      fCalibrationOption = calibrationOption;
+  fFileWithParameters = fileWithParameters;
+  fCalibrationOption = calibrationOption;
 };
 
 CalibrationTools::~CalibrationTools() {}
@@ -270,7 +278,7 @@ void CalibrationTools::GenerateCalibrationFile()
 std::vector<TH2D*> GetHistosFromFile(TFile* fileIn, int numberOfThresholds, std::string calibrationOption, std::string histoName, std::string histoName2)
 {
   std::vector<TH2D*> Histos;
-  TDirectory *dir;
+  TDirectory *dir = gDirectory;
   if (calibrationOption == "single") {
     fileIn->GetObject("EventFinder subtask 0 stats", dir);
   } else if (calibrationOption == "multi") {
@@ -484,7 +492,7 @@ unsigned FindMaximum(std::vector<double> Values, std::vector<double> Arguments, 
 unsigned CalibrationTools::EstimateExtremumBin(std::vector<double> vector, int filterHalf, unsigned shiftFromFilterHalf, Side side)
 {
   unsigned extremum = 0;
-  unsigned firstPoint = (side == Side::Right) ? vector.size() - shiftFromFilterHalf : shiftFromFilterHalf;
+  unsigned firstPoint = (side == Side::Right) ? vector.size() - shiftFromFilterHalf - 1 : shiftFromFilterHalf;
 //Side parameter allows to define one function for both edges. In case of the Right edge order of indicator increment
 //should be descending (-1) where for the Left it should be increasing (+1)
   int sideParameter = (side == Side::Right) ? -1 : 1;
@@ -985,7 +993,7 @@ std::vector<double> ReduceBoundaryEffect(std::vector<double> values, int filterH
 {
   std::vector<double> reduced;
   if ((int)values.size() < 2*filterHalf+1) {
-    std::cout << "Could not reduce the boundaries effect after smoothing. Vector is too small to proceed" << std::endl;
+    std::cout << "Could not reduce the boundaries effect after smoothing. Vector is too small to proceed. Vector size: " << values.size() << std::endl;
     reduced = values;
   } else {
     for (unsigned i=filterHalf; i<=values.size()-filterHalf-1; i++) {
