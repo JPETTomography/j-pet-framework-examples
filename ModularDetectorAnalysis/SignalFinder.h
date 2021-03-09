@@ -18,6 +18,7 @@
 
 #include <JPetRawSignal/JPetRawSignal.h>
 #include <JPetUserTask/JPetUserTask.h>
+#include <boost/property_tree/ptree.hpp>
 #include <vector>
 
 class JPetWriter;
@@ -47,6 +48,8 @@ protected:
   const std::string kLeadTrailMaxTimeParamKey = "SignalFinder_LeadTrailMaxTime_double";
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kEdgeMaxTimeParamKey = "SignalFinder_EdgeMaxTime_double";
+  const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
+  boost::property_tree::ptree fConstansTree;
   const int kNumOfThresholds = 2;
   double fSigChLeadTrailMaxTime = 23000.0;
   double fSigChEdgeMaxTime = 5000.0;

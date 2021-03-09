@@ -125,7 +125,7 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(vector<JP
       }
 
       // signal matching condidion
-      if (fabs(getRawSigBaseTime(rawSigVec.at(nextIndex)) - getRawSigBaseTime(rawSigVec.at(0))) < mergingTime)
+      if (fabs(rawSigVec.at(nextIndex).getTime() - rawSigVec.at(0).getTime()) < mergingTime)
       {
         // mathing signal found
         if (mtxSig.addRawSignal(rawSigVec.at(nextIndex)))
@@ -153,8 +153,8 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(vector<JP
     {
       correction = calibTree.get("scin." + to_string(mtxSig.getPM().getScin().getID()) + ".b_correction", 0.0);
     }
-    // mtxSig.setTime(calculateAverageTime(mtxSig) - correction);
-    mtxSig.setTime(getRawSigBaseTime(rawSigVec.at(0)) - correction);
+    mtxSig.setTime(calculateAverageTime(mtxSig) - correction);
+    mtxSig.setTOT(calculateAverageTOT(mtxSig));
     rawSigVec.erase(rawSigVec.begin());
     mtxSigVec.push_back(mtxSig);
   }
@@ -162,26 +162,49 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(vector<JP
 }
 
 /**
- * Returning time of leading Signal Channel on the first threshold from Raw Signal
- */
-double SignalTransformerTools::getRawSigBaseTime(JPetRawSignal& rawSig)
-{
-  return rawSig.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrValue).at(0).getTime();
-}
-
-/**
- * Calculating average time of Matrix Signal based on times of contained Raw Signals
+ * Calculating time of Matrix Signal as an average of all leading edge times contained in all RawSignals
  */
 double SignalTransformerTools::calculateAverageTime(JPetMatrixSignal& mtxSig)
 {
   double averageTime = 0.0;
   auto rawSignals = mtxSig.getRawSignals();
+  int multiplicity = 0;
   for (auto rawSig : rawSignals)
   {
-    averageTime += getRawSigBaseTime(rawSig.second);
+    auto leads = rawSig.second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+    for (auto leadSigCh : leads)
+    {
+      averageTime += leadSigCh.getTime();
+      multiplicity++;
+    }
   }
-  averageTime = averageTime / ((double)rawSignals.size());
+  if (multiplicity != 0)
+  {
+    averageTime = averageTime / ((double)multiplicity);
+  }
   return averageTime;
+}
+
+/**
+ * Calculating average TOT of Matrix Signal
+ */
+double SignalTransformerTools::calculateAverageTOT(JPetMatrixSignal& mtxSig)
+{
+  double tot = 0.0;
+  auto rawSignals = mtxSig.getRawSignals();
+  for (auto element : rawSignals)
+  {
+    auto leads = element.second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+    auto trails = element.second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+    if (leads.size() == trails.size())
+    {
+      for (uint i = 0; i < leads.size(); i++)
+      {
+        tot += trails.at(i).getTime() - leads.at(i).getTime();
+      }
+    }
+  }
+  return tot;
 }
 
 /**
@@ -189,6 +212,5 @@ double SignalTransformerTools::calculateAverageTime(JPetMatrixSignal& mtxSig)
  */
 void SignalTransformerTools::sortByTime(vector<JPetRawSignal>& input)
 {
-  std::sort(input.begin(), input.end(),
-            [](JPetRawSignal rawSig1, JPetRawSignal rawSig2) { return getRawSigBaseTime(rawSig1) < getRawSigBaseTime(rawSig2); });
+  std::sort(input.begin(), input.end(), [](JPetRawSignal rawSig1, JPetRawSignal rawSig2) { return rawSig1.getTime() < rawSig2.getTime(); });
 }

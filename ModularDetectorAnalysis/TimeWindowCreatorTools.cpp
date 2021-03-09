@@ -20,46 +20,44 @@ using namespace std;
 /**
  * Sorting method for Signal Channels by time
  */
- void TimeWindowCreatorTools::sortByTime(vector<JPetSigCh>& input)
- {
-   std::sort(input.begin(), input.end(),
-     [] (JPetSigCh sigCh1, JPetSigCh sigCh2) {
-       return sigCh1.getTime() < sigCh2.getTime();
-     }
-   );
- }
+void TimeWindowCreatorTools::sortByTime(vector<JPetSigCh>& input)
+{
+  std::sort(input.begin(), input.end(), [](JPetSigCh sigCh1, JPetSigCh sigCh2) { return sigCh1.getTime() < sigCh2.getTime(); });
+}
 
 /**
  * Building all Signal Chnnels from one TDC
  */
-vector<JPetSigCh> TimeWindowCreatorTools::buildSigChs(
-  TDCChannel* tdcChannel, const JPetChannel& channel, double maxTime, double minTime,
-  boost::property_tree::ptree& calibTree
-){
+vector<JPetSigCh> TimeWindowCreatorTools::buildSigChs(TDCChannel* tdcChannel, const JPetChannel& channel, double maxTime, double minTime,
+                                                      boost::property_tree::ptree& calibTree)
+{
   vector<JPetSigCh> allSigChs;
 
   // Getting offsets for this channel
   // if calibrations are empty then default vaule is 0.0
-  // double offset = calibTree.get("sipm_offsets."+to_string(channel.getPM().getID()), 0.0);
-  double offset = calibTree.get("pm."+to_string(channel.getPM().getID())+".matrix_offset", 0.0);
+  double offset = calibTree.get("channel." + to_string(channel.getID()) + ".offset", 0.0);
 
   // Loop over all entries on leading edge in current TDCChannel and create SigCh
-  for (int j = 0; j < tdcChannel->GetLeadHitsNum(); j++) {
+  for (int j = 0; j < tdcChannel->GetLeadHitsNum(); j++)
+  {
     auto leadTime = tdcChannel->GetLeadTime(j);
-    if (leadTime > maxTime || leadTime < minTime ) { continue; }
-    auto leadSigCh = generateSigCh(
-      leadTime, channel, JPetSigCh::Leading, offset
-    );
+    if (leadTime > maxTime || leadTime < minTime)
+    {
+      continue;
+    }
+    auto leadSigCh = generateSigCh(leadTime, channel, JPetSigCh::Leading, offset);
     allSigChs.push_back(leadSigCh);
   }
 
   // Loop over all entries on trailing edge in current TDCChannel and create SigCh
-  for (int j = 0; j < tdcChannel->GetTrailHitsNum(); j++) {
+  for (int j = 0; j < tdcChannel->GetTrailHitsNum(); j++)
+  {
     auto trailTime = tdcChannel->GetTrailTime(j);
-    if (trailTime > maxTime || trailTime < minTime ) { continue; }
-    auto trailSigCh = generateSigCh(
-      trailTime, channel, JPetSigCh::Trailing, offset
-    );
+    if (trailTime > maxTime || trailTime < minTime)
+    {
+      continue;
+    }
+    auto trailSigCh = generateSigCh(trailTime, channel, JPetSigCh::Trailing, offset);
     allSigChs.push_back(trailSigCh);
   }
 
@@ -74,57 +72,68 @@ vector<JPetSigCh> TimeWindowCreatorTools::buildSigChs(
  * edge type -> LTLTLT  LLT  LLTT  LLLLTTTT  LLTTLTLTTTLLLLTT
  * flag      -> GGGGGG  CGG  CGGC  CCCGGCCC  CGGCGGGGCCCCCGGC
  */
-void TimeWindowCreatorTools::flagSigChs(
-  vector<JPetSigCh>& inputSigChs, JPetStatistics& stats, bool saveHistos
-) {
-  for(unsigned int i=0; i<inputSigChs.size(); i++) {
-    if(i == inputSigChs.size()-1) {
+void TimeWindowCreatorTools::flagSigChs(vector<JPetSigCh>& inputSigChs, JPetStatistics& stats, bool saveHistos)
+{
+  for (unsigned int i = 0; i < inputSigChs.size(); i++)
+  {
+    if (i == inputSigChs.size() - 1)
+    {
       inputSigChs.at(i).setRecoFlag(JPetSigCh::Good);
       break;
     }
     auto& sigCh1 = inputSigChs.at(i);
-    auto& sigCh2 = inputSigChs.at(i+1);
+    auto& sigCh2 = inputSigChs.at(i + 1);
     // Explicit check for repeated edges
-    if((sigCh1.getType() == JPetSigCh::Leading && sigCh2.getType() == JPetSigCh::Trailing)){
+    if ((sigCh1.getType() == JPetSigCh::Leading && sigCh2.getType() == JPetSigCh::Trailing))
+    {
       sigCh1.setRecoFlag(JPetSigCh::Good);
       sigCh2.setRecoFlag(JPetSigCh::Good);
-      if(saveHistos) {
-        stats.getHisto1D("filter_LT_tdiff")->Fill(sigCh2.getTime()-sigCh1.getTime());
+      if (saveHistos)
+      {
+        stats.getHisto1D("filter_LT_tdiff")->Fill(sigCh2.getTime() - sigCh1.getTime());
       }
-    } else if (sigCh1.getType() == JPetSigCh::Trailing && sigCh2.getType() == JPetSigCh::Leading) {
-      if(sigCh1.getRecoFlag() == JPetSigCh::Unknown){
+    }
+    else if (sigCh1.getType() == JPetSigCh::Trailing && sigCh2.getType() == JPetSigCh::Leading)
+    {
+      if (sigCh1.getRecoFlag() == JPetSigCh::Unknown)
+      {
         sigCh1.setRecoFlag(JPetSigCh::Good);
       }
-    } else if (sigCh1.getType() == JPetSigCh::Leading && sigCh2.getType() == JPetSigCh::Leading) {
+    }
+    else if (sigCh1.getType() == JPetSigCh::Leading && sigCh2.getType() == JPetSigCh::Leading)
+    {
       sigCh1.setRecoFlag(JPetSigCh::Corrupted);
-      if(saveHistos){
+      if (saveHistos)
+      {
         stats.getHisto1D("filter_LL_PM")->Fill(sigCh1.getChannel().getPM().getID());
         stats.getHisto1D("filter_LL_THR")->Fill(sigCh1.getChannel().getThresholdNumber());
-        stats.getHisto1D("filter_LL_tdiff")->Fill(sigCh2.getTime()-sigCh1.getTime());
+        stats.getHisto1D("filter_LL_tdiff")->Fill(sigCh2.getTime() - sigCh1.getTime());
       }
-    } else if (sigCh1.getType() == JPetSigCh::Trailing && sigCh2.getType() == JPetSigCh::Trailing){
-      if(sigCh1.getRecoFlag() == JPetSigCh::Unknown) {
+    }
+    else if (sigCh1.getType() == JPetSigCh::Trailing && sigCh2.getType() == JPetSigCh::Trailing)
+    {
+      if (sigCh1.getRecoFlag() == JPetSigCh::Unknown)
+      {
         sigCh1.setRecoFlag(JPetSigCh::Corrupted);
       }
       sigCh2.setRecoFlag(JPetSigCh::Corrupted);
-      if(saveHistos){
+      if (saveHistos)
+      {
         stats.getHisto1D("filter_TT_PM")->Fill(sigCh1.getChannel().getPM().getID());
         stats.getHisto1D("filter_TT_THR")->Fill(sigCh1.getChannel().getThresholdNumber());
-        stats.getHisto1D("filter_TT_tdiff")->Fill(sigCh2.getTime()-sigCh1.getTime());
+        stats.getHisto1D("filter_TT_tdiff")->Fill(sigCh2.getTime() - sigCh1.getTime());
       }
     }
   }
 }
 
 /**
-* Sets up Signal Channel fields
-*/
-JPetSigCh TimeWindowCreatorTools::generateSigCh(
-  double tdcChannelTime, const JPetChannel& channel,
-  JPetSigCh::EdgeType edge, double offset
-) {
+ * Sets up Signal Channel fields
+ */
+JPetSigCh TimeWindowCreatorTools::generateSigCh(double tdcChannelTime, const JPetChannel& channel, JPetSigCh::EdgeType edge, double offset)
+{
   JPetSigCh sigCh;
-  sigCh.setTime(1000.0*tdcChannelTime-offset);
+  sigCh.setTime(1000.0 * tdcChannelTime - offset);
   sigCh.setType(edge);
   sigCh.setChannel(channel);
   sigCh.setRecoFlag(JPetSigCh::Unknown);

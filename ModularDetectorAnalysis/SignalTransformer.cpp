@@ -125,29 +125,65 @@ void SignalTransformer::saveMatrixSignals(const std::vector<JPetMatrixSignal>& m
 
     if (fSaveCalibHistos)
     {
+      // Filling histograms gor each channel in Matrix SiPMs to produce
+      // channel offsets with the respect to channel on 1st THR of SiPM mtx pos 1
       auto sigMap = mtxSig.getRawSignals();
       if (sigMap.find(1) != sigMap.end())
       {
-        auto t1 = SignalTransformerTools::getRawSigBaseTime(mtxSig.getRawSignals().at(1));
-        if (sigMap.find(2) != sigMap.end())
+        auto t_1_1 = sigMap.at(1).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum).at(1).getTime();
+        for (auto rawSig : sigMap)
         {
-          auto pm2ID = mtxSig.getRawSignals().at(2).getPM().getID();
-          auto t2 = SignalTransformerTools::getRawSigBaseTime(mtxSig.getRawSignals().at(2));
-          getStatistics().getHisto2D("mtx_offsets_sipm")->Fill(pm2ID, t2 - t1);
-        }
-        if (sigMap.find(3) != sigMap.end())
-        {
-          auto pm3ID = mtxSig.getRawSignals().at(3).getPM().getID();
-          auto t3 = SignalTransformerTools::getRawSigBaseTime(mtxSig.getRawSignals().at(3));
-          getStatistics().getHisto2D("mtx_offsets_sipm")->Fill(pm3ID, t3 - t1);
-        }
-        if (sigMap.find(4) != sigMap.end())
-        {
-          auto pm4ID = mtxSig.getRawSignals().at(4).getPM().getID();
-          auto t4 = SignalTransformerTools::getRawSigBaseTime(mtxSig.getRawSignals().at(4));
-          getStatistics().getHisto2D("mtx_offsets_sipm")->Fill(pm4ID, t4 - t1);
+          auto leads = rawSig.second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+          for (auto chSig : leads)
+          {
+            auto t_ch_i = chSig.getTime();
+            auto channelID = chSig.getChannel().getID();
+            if (t_1_1 == t_ch_i)
+            {
+              continue;
+            }
+            getStatistics().getHisto2D("mtx_offsets_channel")->Fill(channelID, t_ch_i - t_1_1);
+          }
         }
       }
+
+      // if (sigMap.find(1) != sigMap.end())
+      // {
+      //   if (leads_SiPM1.size() == 2)
+      //   {
+      //     auto time_SiPM1THR2 = leads_SiPM1.at(2).getTime();
+      //     auto channelID_SiPM1THR2 = leads_SiPM1.at(2).getChannel().getID();
+      //     getStatistics().getHisto2D("mtx_offsets_channel")->Fill(channelID_SiPM1THR2, time_SiPM1THR2 - time_SiPM1THR1);
+      //   }
+      //
+      //   if (sigMap.find(2) != sigMap.end())
+      //   {
+      //     auto leads_SiPM2 = sigMap.at(2).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+      //     auto time_SiPM2THR1 = leadsSiPM2.at(1).getTime();
+      //     auto channelID_SiPM2THR1 = leads_SiPM2.at(1).getChannel().getID();
+      //     getStatistics().getHisto2D("mtx_offsets_channel")->Fill(channelID_SiPM2THR1, time_SiPM2THR1 - time_SiPM1THR1);
+      //
+      //     if (leads_SiPM1.size() == 2)
+      //     {
+      //       auto time_SiPM2THR2 = leadsSiPM2.at(2).getTime();
+      //       auto channelID_SiPM2THR2 = leads_SiPM2.at(2).getChannel().getID();
+      //       getStatistics().getHisto2D("mtx_offsets_channel")->Fill(channelID_SiPM1THR2, timeSiPM1THR2 - time_SiPM1THR1);
+      //     }
+      //   }
+      //
+      //   if (sigMap.find(3) != sigMap.end())
+      //   {
+      //     auto pm3ID = sigMap.at(3).getPM().getID();
+      //     auto t3 = SignalTransformerTools::getRawSigBaseTime(sigMap.at(3));
+      //     getStatistics().getHisto2D("mtx_offsets_sipm")->Fill(pm3ID, t3 - t1);
+      //   }
+      //   if (sigMap.find(4) != sigMap.end())
+      //   {
+      //     auto pm4ID = sigMap.at(4).getPM().getID();
+      //     auto t4 = SignalTransformerTools::getRawSigBaseTime(sigMap.at(4));
+      //     getStatistics().getHisto2D("mtx_offsets_sipm")->Fill(pm4ID, t4 - t1);
+      //   }
+      // }
     }
   }
 }
@@ -179,12 +215,20 @@ void SignalTransformer::initialiseHistograms()
   // SiPM offsets if needed
   if (fSaveCalibHistos)
   {
-    auto minSiPMID = getParamBank().getPMs().begin()->first;
-    auto maxSiPMID = getParamBank().getPMs().rbegin()->first;
+    // auto minSiPMID = getParamBank().getPMs().begin()->first;
+    // auto maxSiPMID = getParamBank().getPMs().rbegin()->first;
 
-    getStatistics().createHistogram(new TH2F("mtx_offsets_sipm", "Offset of SiPM in Matrix vs. SiPM ID", maxSiPMID - minSiPMID + 1, minSiPMID - 0.5,
-                                             maxSiPMID + 0.5, 200, -fMergingTime, fMergingTime));
-    getStatistics().getHisto2D("mtx_offsets_sipm")->GetXaxis()->SetTitle("Scin ID");
-    getStatistics().getHisto2D("mtx_offsets_sipm")->GetYaxis()->SetTitle("SiPM Offset");
+    auto minChannelID = getParamBank().getChannels().begin()->first;
+    auto maxChannelID = getParamBank().getChannels().rbegin()->first;
+
+    // getStatistics().createHistogram(new TH2F("mtx_offsets_sipm", "Offset of SiPM in Matrix vs. SiPM ID", maxSiPMID - minSiPMID + 1, minSiPMID -
+    // 0.5, maxSiPMID + 0.5, 200, -fMergingTime, fMergingTime));
+    // getStatistics().getHisto2D("mtx_offsets_sipm")->GetXaxis()->SetTitle("SiPM ID");
+    // getStatistics().getHisto2D("mtx_offsets_sipm")->GetYaxis()->SetTitle("Offset");
+
+    getStatistics().createHistogram(new TH2F("mtx_offsets_channel", "Offset of Channel in Matrix vs. Channel ID", maxChannelID - minChannelID + 1,
+                                             minChannelID - 0.5, maxChannelID + 0.5, 200, -fMergingTime, fMergingTime));
+    getStatistics().getHisto2D("mtx_offsets_channel")->GetXaxis()->SetTitle("Channel ID");
+    getStatistics().getHisto2D("mtx_offsets_channel")->GetYaxis()->SetTitle("Offset");
   }
 }

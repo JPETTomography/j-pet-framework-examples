@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -22,37 +22,27 @@
  * Contains methods building Raw Signals from Signal Channels
  */
 
+#include <boost/property_tree/ptree.hpp>
+
+#include <JPetParamBank/JPetParamBank.h>
+#include <JPetRawSignal/JPetRawSignal.h>
+#include <JPetSigCh/JPetSigCh.h>
 #include <JPetStatistics/JPetStatistics.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
-#include <JPetRawSignal/JPetRawSignal.h>
-#include <JPetParamBank/JPetParamBank.h>
-#include <JPetSigCh/JPetSigCh.h>
+
 #include <utility>
 #include <vector>
 
 class SignalFinderTools
 {
 public:
-  static const std::map<int, std::vector<JPetSigCh>> getSigChByPM(
-     const JPetTimeWindow* timeWindow
-  );
-  static std::vector<JPetRawSignal> buildAllSignals(
-    const std::map<int, std::vector<JPetSigCh>>& sigChByPM,
-    double sigChEdgeMaxTime, double sigChLeadTrailMaxTime,
-    int numberOfThrs, JPetStatistics& stats, bool saveHistos
-  );
-  static std::vector<JPetRawSignal> buildRawSignals(
-    const std::vector<JPetSigCh>& sigChByPM,
-    double sigChEdgeMaxTime, double sigChLeadTrailMaxTime,
-    int numberOfThrs, JPetStatistics& stats, bool saveHistos
-  );
-  static int findSigChOnNextThr(
-    double sigChValue, double sigChEdgeMaxTime,
-    const std::vector<JPetSigCh>& sigChVec
-  );
-  static int findTrailingSigCh(
-    const JPetSigCh& leadingSigCh,double sigChLeadTrailMaxTime,
-    const std::vector<JPetSigCh>& trailingSigChVec
-  );
+  static const std::map<int, std::vector<JPetSigCh>> getSigChByPM(const JPetTimeWindow* timeWindow);
+  static std::vector<JPetRawSignal> buildAllSignals(const std::map<int, std::vector<JPetSigCh>>& sigChByPM, double sigChEdgeMaxTime,
+                                                    double sigChLeadTrailMaxTime, int numberOfThrs, JPetStatistics& stats, bool saveHistos,
+                                                    boost::property_tree::ptree& calibTree);
+  static std::vector<JPetRawSignal> buildRawSignals(const std::vector<JPetSigCh>& sigChByPM, double sigChEdgeMaxTime, double sigChLeadTrailMaxTime,
+                                                    int numberOfThrs, JPetStatistics& stats, bool saveHistos, boost::property_tree::ptree& calibTree);
+  static int findSigChOnNextThr(double sigChValue, double sigChEdgeMaxTime, const std::vector<JPetSigCh>& sigChVec);
+  static int findTrailingSigCh(const JPetSigCh& leadingSigCh, double sigChLeadTrailMaxTime, const std::vector<JPetSigCh>& trailingSigChVec);
 };
 #endif /* !SIGNALFINDERTOOLS_H */

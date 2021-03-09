@@ -13,19 +13,24 @@
  *  @file SignalFinder.cpp
  */
 
-using namespace std;
-
 #include "SignalFinder.h"
 #include "SignalFinderTools.h"
+
+#include <boost/property_tree/json_parser.hpp>
+
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
 #include <JPetWriter/JPetWriter.h>
+
 #include <TRandom.h>
+
 #include <string>
 #include <utility>
 #include <vector>
 
+using namespace std;
 using namespace jpet_options_tools;
+namespace pt = boost::property_tree;
 
 SignalFinder::SignalFinder(const char* name) : JPetUserTask(name) {}
 
@@ -64,6 +69,12 @@ bool SignalFinder::init()
     fSaveControlHistos = getOptionAsBool(fParams.getOptions(), kSaveControlHistosParamKey);
   }
 
+  // Reading file with offsets to property tree - SiPM calibration per matrix
+  if (isOptionSet(fParams.getOptions(), kConstantsFileParamKey))
+  {
+    pt::read_json(getOptionAsString(fParams.getOptions(), kConstantsFileParamKey), fConstansTree);
+  }
+
   // Creating control histograms
   if (fSaveControlHistos)
   {
@@ -81,7 +92,7 @@ bool SignalFinder::exec()
     auto& sigChByPM = SignalFinderTools::getSigChByPM(timeWindow);
     // Building signals
     auto allSignals = SignalFinderTools::buildAllSignals(sigChByPM, fSigChEdgeMaxTime, fSigChLeadTrailMaxTime, kNumOfThresholds, getStatistics(),
-                                                         fSaveControlHistos);
+                                                         fSaveControlHistos, fConstansTree);
     // Saving method invocation
     saveRawSignals(allSignals);
   }
@@ -122,10 +133,16 @@ void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& rawSigVec)
       auto scinID = rawSig.getPM().getScin().getID();
       auto pmID = rawSig.getPM().getID();
 
+      double totSum = 0.0;
       for (int thr = 0; thr < leads.size(); ++thr)
       {
-        double tot_thr = trails.at(thr).getTime() - leads.at(thr).getTime();
-        getStatistics().getHisto2D(Form("tot_sipm_id_thr%d", thr + 1))->Fill(pmID, tot_thr);
+        double totTHR = trails.at(thr).getTime() - leads.at(thr).getTime();
+        totSum += totTHR;
+        getStatistics().getHisto2D(Form("tot_sipm_id_thr%d", thr + 1))->Fill(pmID, totTHR);
+      }
+      if (totSum != 0.0)
+      {
+        getStatistics().getHisto2D("tot_sipm_id")->Fill(pmID, totSum);
       }
 
       if (fSaveControlHistos)
@@ -175,9 +192,20 @@ void SignalFinder::initialiseHistograms()
 
   for (int thr = 0; thr < kNumOfThresholds; ++thr)
   {
-    getStatistics().createHistogram(new TH2F(Form("tot_sipm_id_thr%d", thr + 1), Form("SiPM Signal Time over Threshold per SiPM ID for THR %d", thr),
-                                             maxPMID - minPMID + 1, minPMID - 0.5, maxPMID + 0.5, 200, 0.0, 400000.0));
+    getStatistics().createHistogram(new TH2F(Form("tot_sipm_id_thr%d", thr + 1),
+                                             Form("SiPM Signal Time over Threshold per SiPM ID for THR %d", thr + 1), maxPMID - minPMID + 1,
+                                             minPMID - 0.5, maxPMID + 0.5, 200, 0.0, 400000.0));
     getStatistics().getHisto2D(Form("tot_sipm_id_thr%d", thr + 1))->GetXaxis()->SetTitle("SiPM ID");
     getStatistics().getHisto2D(Form("tot_sipm_id_thr%d", thr + 1))->GetYaxis()->SetTitle("TOT [ps]");
   }
+
+  getStatistics().createHistogram(new TH2F("tot_sipm_id", "SiPM Signal Time over Threshold per SiPM ID", maxPMID - minPMID + 1, minPMID - 0.5,
+                                           maxPMID + 0.5, 200, 0.0, 400000.0));
+  getStatistics().getHisto2D("tot_sipm_id")->GetXaxis()->SetTitle("SiPM ID");
+  getStatistics().getHisto2D("tot_sipm_id")->GetYaxis()->SetTitle("TOT [ps]");
+
+  getStatistics().createHistogram(new TH2F("tot_sipm_id_norm", "Normalised SiPM Signal Time over Threshold per SiPM ID", maxPMID - minPMID + 1,
+                                           minPMID - 0.5, maxPMID + 0.5, 200, 0.0, 400000.0));
+  getStatistics().getHisto2D("tot_sipm_id_norm")->GetXaxis()->SetTitle("SiPM ID");
+  getStatistics().getHisto2D("tot_sipm_id_norm")->GetYaxis()->SetTitle("TOT [ps]");
 }

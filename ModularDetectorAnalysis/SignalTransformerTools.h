@@ -25,26 +25,24 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include <JPetMatrixSignal/JPetMatrixSignal.h>
-#include <JPetTimeWindow/JPetTimeWindow.h>
-#include <JPetRawSignal/JPetRawSignal.h>
 #include <JPetPM/JPetPM.h>
+#include <JPetRawSignal/JPetRawSignal.h>
+#include <JPetTimeWindow/JPetTimeWindow.h>
 #include <utility>
 #include <vector>
 
 class SignalTransformerTools
 {
 public:
- static const std::map<int, std::vector<std::vector<JPetRawSignal>>> getRawSigMtxMap(const JPetTimeWindow* timeWindow);
- static std::vector<JPetMatrixSignal> mergeSignalsAllSiPMs(
-   std::map<int, std::vector<std::vector<JPetRawSignal>>>& rawSigMtxMap, double mergingTime, boost::property_tree::ptree& calibTree
- );
- static std::vector<JPetMatrixSignal> mergeRawSignalsOnSide(
-   std::vector<JPetRawSignal>& rawSigVec, double mergingTime, boost::property_tree::ptree& calibTree
- );
- static double getRawSigBaseTime(JPetRawSignal& rawSig);
+  static const std::map<int, std::vector<std::vector<JPetRawSignal>>> getRawSigMtxMap(const JPetTimeWindow* timeWindow);
+  static std::vector<JPetMatrixSignal> mergeSignalsAllSiPMs(std::map<int, std::vector<std::vector<JPetRawSignal>>>& rawSigMtxMap, double mergingTime,
+                                                            boost::property_tree::ptree& calibTree);
+  static std::vector<JPetMatrixSignal> mergeRawSignalsOnSide(std::vector<JPetRawSignal>& rawSigVec, double mergingTime,
+                                                             boost::property_tree::ptree& calibTree);
 
 private:
   static double calculateAverageTime(JPetMatrixSignal& mtxSig);
+  static double calculateAverageTOT(JPetMatrixSignal& mtxSig);
   static void sortByTime(std::vector<JPetRawSignal>& input);
 };
 #endif /* !SIGNALTRANSFORMERTOOLS_H */
