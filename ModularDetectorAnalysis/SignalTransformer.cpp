@@ -130,7 +130,7 @@ void SignalTransformer::saveMatrixSignals(const std::vector<JPetMatrixSignal>& m
       auto sigMap = mtxSig.getRawSignals();
       if (sigMap.find(1) != sigMap.end())
       {
-        auto t_1_1 = sigMap.at(1).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum).at(1).getTime();
+        auto t_1_1 = sigMap.at(1).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum).at(0).getTime();
         for (auto rawSig : sigMap)
         {
           auto leads = rawSig.second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
