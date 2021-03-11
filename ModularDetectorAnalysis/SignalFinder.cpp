@@ -130,28 +130,11 @@ void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& rawSigVec)
     {
       fOutputEvents->add<JPetRawSignal>(rawSig);
 
-      auto scinID = rawSig.getPM().getScin().getID();
-      auto pmID = rawSig.getPM().getID();
-
-      double totSum = 0.0;
-      for (int thr = 0; thr < leads.size(); ++thr)
+      if (fSaveControlHistos && gRandom->Uniform() < fScalingFactor)
       {
-        double totTHR = trails.at(thr).getTime() - leads.at(thr).getTime();
-        totSum += totTHR;
-        getStatistics().getHisto2D(Form("tot_sipm_id_thr%d", thr + 1))->Fill(pmID, totTHR);
-      }
-      if (totSum != 0.0)
-      {
-        getStatistics().getHisto2D("tot_sipm_id")->Fill(pmID, totSum);
-      }
-
-      if (fSaveControlHistos)
-      {
-        if (gRandom->Uniform() < fScalingFactor)
-        {
-          getStatistics().getHisto1D("rawsig_pm")->Fill(pmID);
-          getStatistics().getHisto1D("rawsig_multi")->Fill(leads.size() + trails.size());
-        }
+        auto pmID = rawSig.getPM().getID();
+        getStatistics().getHisto1D("rawsig_pm")->Fill(pmID);
+        getStatistics().getHisto1D("rawsig_multi")->Fill(leads.size() + trails.size());
       }
     }
   }
@@ -199,13 +182,8 @@ void SignalFinder::initialiseHistograms()
     getStatistics().getHisto2D(Form("tot_sipm_id_thr%d", thr + 1))->GetYaxis()->SetTitle("TOT [ps]");
   }
 
-  getStatistics().createHistogram(new TH2F("tot_sipm_id", "SiPM Signal Time over Threshold per SiPM ID", maxPMID - minPMID + 1, minPMID - 0.5,
+  getStatistics().createHistogram(new TH2F("tot_sipm_id_sum", "SiPM Signal Time over Threshold per SiPM ID", maxPMID - minPMID + 1, minPMID - 0.5,
                                            maxPMID + 0.5, 200, 0.0, kNumOfThresholds * fSigChLeadTrailMaxTime));
-  getStatistics().getHisto2D("tot_sipm_id")->GetXaxis()->SetTitle("SiPM ID");
-  getStatistics().getHisto2D("tot_sipm_id")->GetYaxis()->SetTitle("TOT [ps]");
-
-  getStatistics().createHistogram(new TH2F("tot_sipm_id_norm", "Normalised SiPM Signal Time over Threshold per SiPM ID", maxPMID - minPMID + 1,
-                                           minPMID - 0.5, maxPMID + 0.5, 200, 0.0, kNumOfThresholds * fSigChLeadTrailMaxTime));
-  getStatistics().getHisto2D("tot_sipm_id_norm")->GetXaxis()->SetTitle("SiPM ID");
-  getStatistics().getHisto2D("tot_sipm_id_norm")->GetYaxis()->SetTitle("TOT [ps]");
+  getStatistics().getHisto2D("tot_sipm_id_sum")->GetXaxis()->SetTitle("SiPM ID");
+  getStatistics().getHisto2D("tot_sipm_id_sum")->GetYaxis()->SetTitle("TOT [ps]");
 }

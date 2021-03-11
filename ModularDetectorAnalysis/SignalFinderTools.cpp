@@ -100,7 +100,7 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(const vector<JPetSigCh>
   {
     JPetRawSignal rawSig;
     rawSig.setPM(thrLeadingSigCh.at(0).at(0).getChannel().getPM());
-    double tot = 0.0;
+    double totTHR1 = 0.0, totTHR2 = 0.0;
 
     // First THR leading added by default
     rawSig.addPoint(thrLeadingSigCh.at(0).at(0));
@@ -111,7 +111,7 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(const vector<JPetSigCh>
     if (closestTrailingSigCh != -1)
     {
       rawSig.addPoint(thrTrailingSigCh.at(0).at(closestTrailingSigCh));
-      tot += thrTrailingSigCh.at(0).at(closestTrailingSigCh).getTime() - thrLeadingSigCh.at(0).at(0).getTime();
+      totTHR1 = thrTrailingSigCh.at(0).at(closestTrailingSigCh).getTime() - thrLeadingSigCh.at(0).at(0).getTime();
       thrTrailingSigCh.at(0).erase(thrTrailingSigCh.at(0).begin() + closestTrailingSigCh);
     }
 
@@ -123,7 +123,7 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(const vector<JPetSigCh>
       if (closestTrailingSigCh != -1)
       {
         rawSig.addPoint(thrTrailingSigCh.at(1).at(closestTrailingSigCh));
-        tot += thrTrailingSigCh.at(1).at(closestTrailingSigCh).getTime() - thrLeadingSigCh.at(1).at(nextThrSigChIndex).getTime();
+        totTHR2 = thrTrailingSigCh.at(1).at(closestTrailingSigCh).getTime() - thrLeadingSigCh.at(1).at(nextThrSigChIndex).getTime();
         thrTrailingSigCh.at(1).erase(thrTrailingSigCh.at(1).begin() + closestTrailingSigCh);
       }
       rawSig.addPoint(thrLeadingSigCh.at(1).at(nextThrSigChIndex));
@@ -131,13 +131,22 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(const vector<JPetSigCh>
     }
 
     // Adding created Raw Signal to vector
-    double normA = calibTree.get("sipm." + to_string(rawSig.getPM().getID()) + ".tot_norm_a", 1.0);
-    double normB = calibTree.get("sipm." + to_string(rawSig.getPM().getID()) + ".tot_norm_b", 0.0);
+    double thr1A = calibTree.get("sipm." + to_string(rawSig.getPM().getID()) + ".tot_factor_thr1_a", 1.0);
+    double thr1B = calibTree.get("sipm." + to_string(rawSig.getPM().getID()) + ".tot_factor_thr1_b", 0.0);
+    double thr2A = calibTree.get("sipm." + to_string(rawSig.getPM().getID()) + ".tot_factor_thr2_a", 1.0);
+    double thr2B = calibTree.get("sipm." + to_string(rawSig.getPM().getID()) + ".tot_factor_thr2_b", 0.0);
 
-    stats.getHisto2D("tot_sipm_id_norm")->Fill(rawSig.getPM().getID(), normA * tot + normB);
-    stats.getHisto2D("tot_sipm_id")->Fill(rawSig.getPM().getID(), tot);
+    totTHR1 = thr1A * totTHR1 + thr1B;
+    totTHR2 = thr2A * totTHR2 + thr2B;
 
-    rawSig.setTOT(normA * tot + normB);
+    if (saveHistos)
+    {
+      stats.getHisto2D("tot_sipm_id_thr1")->Fill(rawSig.getPM().getID(), totTHR1);
+      stats.getHisto2D("tot_sipm_id_thr2")->Fill(rawSig.getPM().getID(), totTHR2);
+      stats.getHisto2D("tot_sipm_id_sum")->Fill(rawSig.getPM().getID(), totTHR1 + totTHR2);
+    }
+
+    rawSig.setTOT(totTHR1 + totTHR2);
     rawSigVec.push_back(rawSig);
     thrLeadingSigCh.at(0).erase(thrLeadingSigCh.at(0).begin());
   }

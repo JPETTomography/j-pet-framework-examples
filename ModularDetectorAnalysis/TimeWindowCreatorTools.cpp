@@ -35,7 +35,7 @@ vector<JPetSigCh> TimeWindowCreatorTools::buildSigChs(TDCChannel* tdcChannel, co
 
   // Getting offsets for this channel
   // if calibrations are empty then default vaule is 0.0
-  double offset = calibTree.get("channel." + to_string(channel.getID()) + ".offset", 0.0);
+  double offset = calibTree.get("channel_offests." + to_string(channel.getID()), 0.0);
 
   // Loop over all entries on leading edge in current TDCChannel and create SigCh
   for (int j = 0; j < tdcChannel->GetLeadHitsNum(); j++)
