@@ -152,10 +152,10 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(vector<JP
     if (mtxSig.getPM().getSide() == JPetPM::SideB)
     {
       // correction = calibTree.get("scin." + to_string(mtxSig.getPM().getScin().getID()) + ".b_correction", 0.0);
-      corrPos1 = calibTree.get("scin." + to_string(mtxSig.getPM().getScin().getID()) + ".hit_tdiff_thr1_scin_mtx_pos_1", 0.0);
-      corrPos2 = calibTree.get("scin." + to_string(mtxSig.getPM().getScin().getID()) + ".hit_tdiff_thr1_scin_mtx_pos_2", 0.0);
-      corrPos3 = calibTree.get("scin." + to_string(mtxSig.getPM().getScin().getID()) + ".hit_tdiff_thr1_scin_mtx_pos_3", 0.0);
-      corrPos4 = calibTree.get("scin." + to_string(mtxSig.getPM().getScin().getID()) + ".hit_tdiff_thr1_scin_mtx_pos_4", 0.0);
+      double corrPos1 = calibTree.get("scin." + to_string(mtxSig.getPM().getScin().getID()) + ".hit_tdiff_thr1_scin_mtx_pos_1", 0.0);
+      double corrPos2 = calibTree.get("scin." + to_string(mtxSig.getPM().getScin().getID()) + ".hit_tdiff_thr1_scin_mtx_pos_2", 0.0);
+      double corrPos3 = calibTree.get("scin." + to_string(mtxSig.getPM().getScin().getID()) + ".hit_tdiff_thr1_scin_mtx_pos_3", 0.0);
+      double corrPos4 = calibTree.get("scin." + to_string(mtxSig.getPM().getScin().getID()) + ".hit_tdiff_thr1_scin_mtx_pos_4", 0.0);
 
       int nonZeros = 0;
       if (corrPos1 != 0.0)
