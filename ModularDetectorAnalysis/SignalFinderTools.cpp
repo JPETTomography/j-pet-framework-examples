@@ -136,10 +136,25 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(const vector<JPetSigCh>
     double thr2A = calibTree.get("sipm." + to_string(rawSig.getPM().getID()) + ".tot_factor_thr2_a", 1.0);
     double thr2B = calibTree.get("sipm." + to_string(rawSig.getPM().getID()) + ".tot_factor_thr2_b", 0.0);
 
-    totTHR1 = thr1A * totTHR1 + thr1B;
-    totTHR2 = thr2A * totTHR2 + thr2B;
+    if (totTHR1 > 5000.0)
+    {
+      totTHR1 = thr1A * totTHR1 + thr1B;
+    }
+    else
+    {
+      totTHR2 = 0.0;
+    }
 
-    if (saveHistos)
+    if (totTHR1 > 5000.0)
+    {
+      totTHR2 = thr2A * totTHR2 + thr2B;
+    }
+    else
+    {
+      totTHR2 = 0.0;
+    }
+
+    if (saveHistos && totTHR1 != 0.0 && totTHR2 != 0.0)
     {
       stats.getHisto2D("tot_sipm_id_thr1")->Fill(rawSig.getPM().getID(), totTHR1);
       stats.getHisto2D("tot_sipm_id_thr2")->Fill(rawSig.getPM().getID(), totTHR2);

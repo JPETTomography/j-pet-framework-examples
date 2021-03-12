@@ -177,13 +177,13 @@ void SignalFinder::initialiseHistograms()
   {
     getStatistics().createHistogram(new TH2F(Form("tot_sipm_id_thr%d", thr + 1),
                                              Form("SiPM Signal Time over Threshold per SiPM ID for THR %d", thr + 1), maxPMID - minPMID + 1,
-                                             minPMID - 0.5, maxPMID + 0.5, 200, 0.0, fSigChLeadTrailMaxTime));
+                                             minPMID - 0.5, maxPMID + 0.5, 200, 0.0, 1.5 * fSigChLeadTrailMaxTime));
     getStatistics().getHisto2D(Form("tot_sipm_id_thr%d", thr + 1))->GetXaxis()->SetTitle("SiPM ID");
     getStatistics().getHisto2D(Form("tot_sipm_id_thr%d", thr + 1))->GetYaxis()->SetTitle("TOT [ps]");
   }
 
   getStatistics().createHistogram(new TH2F("tot_sipm_id_sum", "SiPM Signal Time over Threshold per SiPM ID", maxPMID - minPMID + 1, minPMID - 0.5,
-                                           maxPMID + 0.5, 200, 0.0, kNumOfThresholds * fSigChLeadTrailMaxTime));
+                                           maxPMID + 0.5, 200, 0.0, 1.5 * kNumOfThresholds * fSigChLeadTrailMaxTime));
   getStatistics().getHisto2D("tot_sipm_id_sum")->GetXaxis()->SetTitle("SiPM ID");
   getStatistics().getHisto2D("tot_sipm_id_sum")->GetYaxis()->SetTitle("TOT [ps]");
 }
