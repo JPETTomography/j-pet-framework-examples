@@ -541,19 +541,19 @@ void EventCategorizer::initialiseCalibrationHistograms()
   {
     getStatistics().createHistogram(new TH2F(Form("time_walk_thr1_mtx_%d", sipmPos),
                                              Form("THR1 TDiff vs. reversed TOT, time walk effect for SiPM pos %d", sipmPos), 200, -fMaxTimeDiff,
-                                             fMaxTimeDiff, 200, -0.0005, 0.0005));
+                                             fMaxTimeDiff, 200, -0.00005, 0.00005));
     getStatistics().getHisto2D(Form("time_walk_thr1_mtx_%d", sipmPos))->GetXaxis()->SetTitle("Hit Time Difference [ps]");
     getStatistics().getHisto2D(Form("time_walk_thr1_mtx_%d", sipmPos))->GetYaxis()->SetTitle("Reversed TOT [1/ps]");
 
     getStatistics().createHistogram(new TH2F(Form("time_walk_thr2_mtx_%d", sipmPos),
                                              Form("THR2 TDiff vs. reversed TOT, time walk effect for SiPM pos %d", sipmPos), 200, -fMaxTimeDiff,
-                                             fMaxTimeDiff, 200, -0.0005, 0.0005));
+                                             fMaxTimeDiff, 200, -0.00005, 0.00005));
     getStatistics().getHisto2D(Form("time_walk_thr2_mtx_%d", sipmPos))->GetXaxis()->SetTitle("Hit Time Difference [ps]");
     getStatistics().getHisto2D(Form("time_walk_thr2_mtx_%d", sipmPos))->GetYaxis()->SetTitle("Reversed TOT [1/ps]");
 
     getStatistics().createHistogram(new TH2F(Form("time_walk_sum_mtx_%d", sipmPos),
                                              Form("Sum TDiff vs. reversed TOT, time walk effect for SiPM pos %d", sipmPos), 200, -fMaxTimeDiff,
-                                             fMaxTimeDiff, 200, -0.0005, 0.0005));
+                                             fMaxTimeDiff, 200, -0.00005, 0.00005));
     getStatistics().getHisto2D(Form("time_walk_sum_mtx_%d", sipmPos))->GetXaxis()->SetTitle("Hit Time Difference [ps]");
     getStatistics().getHisto2D(Form("time_walk_sum_mtx_%d", sipmPos))->GetYaxis()->SetTitle("Reversed TOT [1/ps]");
   }

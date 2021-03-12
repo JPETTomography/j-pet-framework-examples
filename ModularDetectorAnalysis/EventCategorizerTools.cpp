@@ -155,6 +155,10 @@ bool EventCategorizerTools::collimator2Gamma(const JPetEvent& event, JPetStatist
 
           if (search1A != hit1sigMapA.end() && search1B != hit1sigMapB.end())
           {
+            int scinID = search1A->second.getPM().getScin().getID();
+            int pmAID = search1A->second.getPM().getID();
+            int pmBID = search1B->second.getPM().getID();
+
             auto leadsA = search1A->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
             auto trailsA = search1A->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
             auto leadsB = search1B->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
@@ -163,12 +167,25 @@ bool EventCategorizerTools::collimator2Gamma(const JPetEvent& event, JPetStatist
             // Checking time walk effect only for SiPM signals with both thresholds
             if (leadsA.size() == 2 && leadsB.size() == 2 && trailsA.size() == 2 && trailsB.size() == 2)
             {
-              double tDiffTHR1 = leadsB.at(0).getTime() - leadsA.at(0).getTime();
-              double tDiffTHR2 = leadsB.at(1).getTime() - leadsA.at(1).getTime();
-              double totATHR1 = trailsA.at(0).getTime() - leadsA.at(0).getTime();
-              double totATHR2 = trailsA.at(1).getTime() - leadsA.at(1).getTime();
-              double totBTHR1 = trailsB.at(0).getTime() - leadsB.at(0).getTime();
-              double totBTHR2 = trailsB.at(1).getTime() - leadsB.at(1).getTime();
+              double c_tDiffThr1 = calibTree.get(Form("%s.%d.%s%d", "scin", scinID, "hit_tdiff_thr1_scin_mtx_pos_", mtxPos), 0.0);
+              double c_tDiffThr2 = calibTree.get(Form("%s.%d.%s%d", "scin", scinID, "hit_tdiff_thr2_scin_mtx_pos_", mtxPos), 0.0);
+
+              double c_totThr1A_a = calibTree.get("sipm." + to_string(pmAID) + ".tot_factor_thr1_a", 1.0);
+              double c_totThr1A_b = calibTree.get("sipm." + to_string(pmAID) + ".tot_factor_thr1_b", 0.0);
+              double c_totThr2A_a = calibTree.get("sipm." + to_string(pmAID) + ".tot_factor_thr2_a", 1.0);
+              double c_totThr2A_b = calibTree.get("sipm." + to_string(pmAID) + ".tot_factor_thr2_b", 0.0);
+
+              double c_totThr1B_a = calibTree.get("sipm." + to_string(pmBID) + ".tot_factor_thr1_a", 1.0);
+              double c_totThr1B_b = calibTree.get("sipm." + to_string(pmBID) + ".tot_factor_thr1_b", 0.0);
+              double c_totThr2B_a = calibTree.get("sipm." + to_string(pmBID) + ".tot_factor_thr2_a", 1.0);
+              double c_totThr2B_b = calibTree.get("sipm." + to_string(pmBID) + ".tot_factor_thr2_b", 0.0);
+
+              double tDiffTHR1 = leadsB.at(0).getTime() - leadsA.at(0).getTime() - c_tDiffThr1;
+              double tDiffTHR2 = leadsB.at(1).getTime() - leadsA.at(1).getTime() - c_tDiffThr2;
+              double totATHR1 = c_totThr1A_a * (trailsA.at(0).getTime() - leadsA.at(0).getTime()) + c_totThr1A_b;
+              double totATHR2 = c_totThr2A_a * (trailsA.at(1).getTime() - leadsA.at(1).getTime()) + c_totThr2A_b;
+              double totBTHR1 = c_totThr1B_a * (trailsB.at(0).getTime() - leadsB.at(0).getTime()) + c_totThr1B_b;
+              double totBTHR2 = c_totThr2B_a * (trailsB.at(1).getTime() - leadsB.at(1).getTime()) + c_totThr2B_b;
 
               if (totATHR1 != 0.0 && totATHR2 != 0.0 && totBTHR1 != 0.0 && totBTHR2 != 0.0)
               {
@@ -190,6 +207,10 @@ bool EventCategorizerTools::collimator2Gamma(const JPetEvent& event, JPetStatist
 
           if (search2A != hit2sigMapA.end() && search2B != hit2sigMapB.end())
           {
+            int scinID = search2A->second.getPM().getScin().getID();
+            int pmAID = search2A->second.getPM().getID();
+            int pmBID = search2B->second.getPM().getID();
+
             auto leadsA = search2A->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
             auto trailsA = search2A->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
             auto leadsB = search2B->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
@@ -198,12 +219,25 @@ bool EventCategorizerTools::collimator2Gamma(const JPetEvent& event, JPetStatist
             // Checking time walk effect only for SiPM signals with both thresholds
             if (leadsA.size() == 2 && leadsB.size() == 2 && trailsA.size() == 2 && trailsB.size() == 2)
             {
-              double tDiffTHR1 = leadsB.at(0).getTime() - leadsA.at(0).getTime();
-              double tDiffTHR2 = leadsB.at(1).getTime() - leadsA.at(1).getTime();
-              double totATHR1 = trailsA.at(0).getTime() - leadsA.at(0).getTime();
-              double totATHR2 = trailsA.at(1).getTime() - leadsA.at(1).getTime();
-              double totBTHR1 = trailsB.at(0).getTime() - leadsB.at(0).getTime();
-              double totBTHR2 = trailsB.at(1).getTime() - leadsB.at(1).getTime();
+              double c_tDiffThr1 = calibTree.get(Form("%s.%d.%s%d", "scin", scinID, "hit_tdiff_thr1_scin_mtx_pos_", mtxPos), 0.0);
+              double c_tDiffThr2 = calibTree.get(Form("%s.%d.%s%d", "scin", scinID, "hit_tdiff_thr2_scin_mtx_pos_", mtxPos), 0.0);
+
+              double c_totThr1A_a = calibTree.get("sipm." + to_string(pmAID) + ".tot_factor_thr1_a", 1.0);
+              double c_totThr1A_b = calibTree.get("sipm." + to_string(pmAID) + ".tot_factor_thr1_b", 0.0);
+              double c_totThr2A_a = calibTree.get("sipm." + to_string(pmAID) + ".tot_factor_thr2_a", 1.0);
+              double c_totThr2A_b = calibTree.get("sipm." + to_string(pmAID) + ".tot_factor_thr2_b", 0.0);
+
+              double c_totThr1B_a = calibTree.get("sipm." + to_string(pmBID) + ".tot_factor_thr1_a", 1.0);
+              double c_totThr1B_b = calibTree.get("sipm." + to_string(pmBID) + ".tot_factor_thr1_b", 0.0);
+              double c_totThr2B_a = calibTree.get("sipm." + to_string(pmBID) + ".tot_factor_thr2_a", 1.0);
+              double c_totThr2B_b = calibTree.get("sipm." + to_string(pmBID) + ".tot_factor_thr2_b", 0.0);
+
+              double tDiffTHR1 = leadsB.at(0).getTime() - leadsA.at(0).getTime() - c_tDiffThr1;
+              double tDiffTHR2 = leadsB.at(1).getTime() - leadsA.at(1).getTime() - c_tDiffThr2;
+              double totATHR1 = c_totThr1A_a * (trailsA.at(0).getTime() - leadsA.at(0).getTime()) + c_totThr1A_b;
+              double totATHR2 = c_totThr2A_a * (trailsA.at(1).getTime() - leadsA.at(1).getTime()) + c_totThr2A_b;
+              double totBTHR1 = c_totThr1B_a * (trailsB.at(0).getTime() - leadsB.at(0).getTime()) + c_totThr1B_b;
+              double totBTHR2 = c_totThr2B_a * (trailsB.at(1).getTime() - leadsB.at(1).getTime()) + c_totThr2B_b;
 
               if (totATHR1 != 0.0 && totATHR2 != 0.0 && totBTHR1 != 0.0 && totBTHR2 != 0.0)
               {
