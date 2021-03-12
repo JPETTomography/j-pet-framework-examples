@@ -136,129 +136,95 @@ bool EventCategorizerTools::collimator2Gamma(const JPetEvent& event, JPetStatist
       int slot1ID = firstHit.getScin().getSlot().getID();
       int slot2ID = secondHit.getScin().getSlot().getID();
 
-      if (max(slot1ID, slot2ID) - min(slot1ID, slot2ID) == 12)
+      if (max(slot1ID, slot2ID) - min(slot1ID, slot2ID) == 12 && fabs(firstHit.getTime() - secondHit.getTime()) < maxTimeDiff)
       {
-        if (saveHistos)
+        // Checking tDiff and TOT per SiPM mtx position
+        for (int mtxPos = 1; mtxPos <= 4; mtxPos++)
         {
-          // Checking tDiff and TOT per SiPM mtx position
-          for (int mtxPos = 1; mtxPos <= 4; mtxPos++)
+          auto hit1sigMapA = firstHit.getSignalA().getRawSignals();
+          auto hit1sigMapB = firstHit.getSignalB().getRawSignals();
+
+          auto hit2sigMapA = secondHit.getSignalA().getRawSignals();
+          auto hit2sigMapB = secondHit.getSignalB().getRawSignals();
+
+          auto search1A = hit1sigMapA.find(mtxPos);
+          auto search1B = hit1sigMapB.find(mtxPos);
+
+          auto search2A = hit2sigMapA.find(mtxPos);
+          auto search2B = hit2sigMapB.find(mtxPos);
+
+          if (search1A != hit1sigMapA.end() && search1B != hit1sigMapB.end())
           {
-            auto hit1sigMapA = firstHit.getSignalA().getRawSignals();
-            auto hit1sigMapB = firstHit.getSignalB().getRawSignals();
+            auto leadsA = search1A->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+            auto trailsA = search1A->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+            auto leadsB = search1B->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+            auto trailsB = search1B->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
 
-            auto hit2sigMapA = secondHit.getSignalA().getRawSignals();
-            auto hit2sigMapB = secondHit.getSignalB().getRawSignals();
-
-            auto search1A = hit1sigMapA.find(mtxPos);
-            auto search1B = hit1sigMapB.find(mtxPos);
-
-            auto search2A = hit2sigMapA.find(mtxPos);
-            auto search2B = hit2sigMapB.find(mtxPos);
-
-            if (search1A != hit1sigMapA.end() && search1B != hit1sigMapB.end())
+            // Checking time walk effect only for SiPM signals with both thresholds
+            if (leadsA.size() == 2 && leadsB.size() == 2 && trailsA.size() == 2 && trailsB.size() == 2)
             {
-              auto leadsA = search1A->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-              auto trailsA = search1A->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-              auto leadsB = search1B->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-              auto trailsB = search1B->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+              double tDiffTHR1 = leadsB.at(0).getTime() - leadsA.at(0).getTime();
+              double tDiffTHR2 = leadsB.at(1).getTime() - leadsA.at(1).getTime();
+              double totATHR1 = trailsA.at(0).getTime() - leadsA.at(0).getTime();
+              double totATHR2 = trailsA.at(1).getTime() - leadsA.at(1).getTime();
+              double totBTHR1 = trailsB.at(0).getTime() - leadsB.at(0).getTime();
+              double totBTHR2 = trailsB.at(1).getTime() - leadsB.at(1).getTime();
 
-              double totSum = 0.0;
-              double totSumWeight = 0.0;
-
-              for (int thr = 0; thr < leadsA.size() && thr < leadsB.size(); ++thr)
+              if (totATHR1 != 0.0 && totATHR2 != 0.0 && totBTHR1 != 0.0 && totBTHR2 != 0.0)
               {
-                double tDiff = leadsB.at(thr).getTime() - leadsA.at(thr).getTime();
-                double totA = trailsA.at(thr).getTime() - leadsA.at(thr).getTime();
-                double totB = trailsB.at(thr).getTime() - leadsB.at(thr).getTime();
+                double totASum = totATHR1 + totATHR2;
+                double totBSum = totBTHR1 + totBTHR2;
+                double revTOTTHR1 = 1.0 / totBTHR1 - 1.0 / totATHR1;
+                double revTOTTHR2 = 1.0 / totBTHR2 - 1.0 / totATHR2;
+                double revTOTSum = 1.0 / totBSum - 1.0 / totASum;
 
-                totSum += totA + totB;
-                stats.getHisto2D(Form("hit_tot_thr%d_scin_mtx_pos_%d", thr + 1, mtxPos))->Fill(scin1ID, totA + totB);
-
-                double weight = 1.0;
-                if (thr + 1 == 1)
+                if (saveHistos)
                 {
-                  weight = 3.0;
+                  stats.getHisto2D(Form("time_walk_thr1_mtx_%d", mtxPos))->Fill(tDiffTHR1, revTOTTHR1);
+                  stats.getHisto2D(Form("time_walk_thr2_mtx_%d", mtxPos))->Fill(tDiffTHR2, revTOTTHR2);
+                  stats.getHisto2D(Form("time_walk_sum_mtx_%d", mtxPos))->Fill((tDiffTHR1 + tDiffTHR2) / 2.0, revTOTSum);
                 }
-                else if (mtxPos == 1)
-                {
-                  weight = 4.5 - 3.0;
-                }
-                else if (mtxPos == 2)
-                {
-                  weight = 6.0 - 3.0;
-                }
-                else if (mtxPos == 3)
-                {
-                  weight = 7.5 - 3.0;
-                }
-                else if (mtxPos == 4)
-                {
-                  weight = 9.0 - 3.0;
-                }
-                totSumWeight += weight * (totA + totB);
-
-                auto nameTDiff = Form("hit_tdiff_thr%d_scin_mtx_pos_%d", thr + 1, mtxPos);
-                double tDiffCorr = calibTree.get("scin." + to_string(scin1ID) + "." + nameTDiff, 0.0);
-                stats.getHisto2D(nameTDiff)->Fill(scin1ID, tDiff - tDiffCorr);
               }
-
-              stats.getHisto2D(Form("hit_tot_sum_scin_mtx_pos_%d", mtxPos))->Fill(scin1ID, totSum / 2.0);
-              stats.getHisto2D(Form("hit_tot_weigh_scin_mtx_pos_%d", mtxPos))->Fill(scin1ID, totSumWeight / (2.0 * 3.0));
             }
+          }
 
-            if (search2A != hit2sigMapA.end() && search2B != hit2sigMapB.end())
+          if (search2A != hit2sigMapA.end() && search2B != hit2sigMapB.end())
+          {
+            auto leadsA = search2A->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+            auto trailsA = search2A->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+            auto leadsB = search2B->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+            auto trailsB = search2B->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+
+            // Checking time walk effect only for SiPM signals with both thresholds
+            if (leadsA.size() == 2 && leadsB.size() == 2 && trailsA.size() == 2 && trailsB.size() == 2)
             {
-              auto leadsA = search2A->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-              auto trailsA = search2A->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-              auto leadsB = search2B->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-              auto trailsB = search2B->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+              double tDiffTHR1 = leadsB.at(0).getTime() - leadsA.at(0).getTime();
+              double tDiffTHR2 = leadsB.at(1).getTime() - leadsA.at(1).getTime();
+              double totATHR1 = trailsA.at(0).getTime() - leadsA.at(0).getTime();
+              double totATHR2 = trailsA.at(1).getTime() - leadsA.at(1).getTime();
+              double totBTHR1 = trailsB.at(0).getTime() - leadsB.at(0).getTime();
+              double totBTHR2 = trailsB.at(1).getTime() - leadsB.at(1).getTime();
 
-              double totSum = 0.0;
-              double totSumWeight = 0.0;
-
-              for (int thr = 0; thr < leadsA.size() && thr < leadsB.size(); ++thr)
+              if (totATHR1 != 0.0 && totATHR2 != 0.0 && totBTHR1 != 0.0 && totBTHR2 != 0.0)
               {
-                double tDiff = leadsB.at(thr).getTime() - leadsA.at(thr).getTime();
-                double totA = trailsA.at(thr).getTime() - leadsA.at(thr).getTime();
-                double totB = trailsB.at(thr).getTime() - leadsB.at(thr).getTime();
-                totSum += totA + totB;
-                stats.getHisto2D(Form("hit_tot_thr%d_scin_mtx_pos_%d", thr + 1, mtxPos))->Fill(scin2ID, totA + totB);
+                double totASum = totATHR1 + totATHR2;
+                double totBSum = totBTHR1 + totBTHR2;
+                double revTOTTHR1 = 1.0 / totBTHR1 - 1.0 / totATHR1;
+                double revTOTTHR2 = 1.0 / totBTHR2 - 1.0 / totATHR2;
+                double revTOTSum = 1.0 / totBSum - 1.0 / totASum;
 
-                double weight = 1.0;
-                if (thr + 1 == 1)
+                if (saveHistos)
                 {
-                  weight = 3.0;
+                  stats.getHisto2D(Form("time_walk_thr1_mtx_%d", mtxPos))->Fill(tDiffTHR1, revTOTTHR1);
+                  stats.getHisto2D(Form("time_walk_thr2_mtx_%d", mtxPos))->Fill(tDiffTHR2, revTOTTHR2);
+                  stats.getHisto2D(Form("time_walk_sum_mtx_%d", mtxPos))->Fill((tDiffTHR1 + tDiffTHR2) / 2.0, revTOTSum);
                 }
-                else if (mtxPos == 1)
-                {
-                  weight = (4.5 - 3.0) / 3.0;
-                }
-                else if (mtxPos == 2)
-                {
-                  weight = (6.0 - 3.0) / 3.0;
-                }
-                else if (mtxPos == 3)
-                {
-                  weight = (7.5 - 3.0) / 3.0;
-                }
-                else if (mtxPos == 4)
-                {
-                  weight = (9.0 - 3.0) / 3.0;
-                }
-                totSumWeight += weight * (totA + totB);
-
-                auto nameTDiff = Form("hit_tdiff_thr%d_scin_mtx_pos_%d", thr + 1, mtxPos);
-                double tDiffCorr = calibTree.get("scin." + to_string(scin2ID) + "." + nameTDiff, 0.0);
-                stats.getHisto2D(nameTDiff)->Fill(scin2ID, tDiff - tDiffCorr);
               }
-
-              stats.getHisto2D(Form("hit_tot_sum_scin_mtx_pos_%d", mtxPos))->Fill(scin2ID, totSum / 2.0);
-              stats.getHisto2D(Form("hit_tot_weigh_scin_mtx_pos_%d", mtxPos))->Fill(scin1ID, totSumWeight / (2.0 * 3.0));
             }
           }
         }
-        return true;
       }
+      return true;
     }
   }
   return false;

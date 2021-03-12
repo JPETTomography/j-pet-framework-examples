@@ -537,54 +537,66 @@ void EventCategorizer::initialiseCalibrationHistograms()
   getStatistics().getHisto2D("tdiff_deex_scin")->GetYaxis()->SetTitle("Number of A-D pairs");
 
   // Time walk histograms
-  // for (int scinID = minScinID; scinID <= maxScinID; scinID++)
-  // {
-  //   getStatistics().createHistogram(new TH2F(Form("time_walk_scin_%d", scinID), Form("TDiff vs. reversed TOT, time walk effect Scin %d", scinID),
-  //   200,
-  //                                            -fMaxTimeDiff, fMaxTimeDiff, 200, -0.0005, 0.0005));
-  //   getStatistics().getHisto2D(Form("time_walk_scin_%d", scinID))->GetXaxis()->SetTitle("TDiff [ps]");
-  //   getStatistics().getHisto2D(Form("time_walk_scin_%d", scinID))->GetYaxis()->SetTitle("Reversed TOT [1/ps]");
-  // }
+  for (int sipmPos = 1; sipmPos <= 4; sipmPos++)
+  {
+    getStatistics().createHistogram(new TH2F(Form("time_walk_thr1_mtx_%d", sipmPos),
+                                             Form("THR1 TDiff vs. reversed TOT, time walk effect for SiPM pos %d", sipmPos), 200, -fMaxTimeDiff,
+                                             fMaxTimeDiff, 200, -0.0005, 0.0005));
+    getStatistics().getHisto2D(Form("time_walk_thr1_mtx_%d", sipmPos))->GetXaxis()->SetTitle("Hit Time Difference [ps]");
+    getStatistics().getHisto2D(Form("time_walk_thr1_mtx_%d", sipmPos))->GetYaxis()->SetTitle("Reversed TOT [1/ps]");
+
+    getStatistics().createHistogram(new TH2F(Form("time_walk_thr2_mtx_%d", sipmPos),
+                                             Form("THR2 TDiff vs. reversed TOT, time walk effect for SiPM pos %d", sipmPos), 200, -fMaxTimeDiff,
+                                             fMaxTimeDiff, 200, -0.0005, 0.0005));
+    getStatistics().getHisto2D(Form("time_walk_thr2_mtx_%d", sipmPos))->GetXaxis()->SetTitle("Hit Time Difference [ps]");
+    getStatistics().getHisto2D(Form("time_walk_thr2_mtx_%d", sipmPos))->GetYaxis()->SetTitle("Reversed TOT [1/ps]");
+
+    getStatistics().createHistogram(new TH2F(Form("time_walk_sum_mtx_%d", sipmPos),
+                                             Form("Sum TDiff vs. reversed TOT, time walk effect for SiPM pos %d", sipmPos), 200, -fMaxTimeDiff,
+                                             fMaxTimeDiff, 200, -0.0005, 0.0005));
+    getStatistics().getHisto2D(Form("time_walk_sum_mtx_%d", sipmPos))->GetXaxis()->SetTitle("Hit Time Difference [ps]");
+    getStatistics().getHisto2D(Form("time_walk_sum_mtx_%d", sipmPos))->GetYaxis()->SetTitle("Reversed TOT [1/ps]");
+  }
 
   // Time diff and TOT per SiPM position in matrix
-  for (int mtxPos = 1; mtxPos <= 4; mtxPos++)
-  {
-    getStatistics().createHistogram(new TH2F(Form("hit_tdiff_thr1_scin_mtx_pos_%d", mtxPos),
-                                             Form("Hit time difference of times at THR2 per scin for SiPMs with matrix position %d", mtxPos),
-                                             maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 300, -1.1 * fMaxTimeDiff,
-                                             1.1 * fMaxTimeDiff));
-    getStatistics().getHisto2D(Form("hit_tdiff_thr1_scin_mtx_pos_%d", mtxPos))->GetXaxis()->SetTitle("Scintillator ID");
-    getStatistics().getHisto2D(Form("hit_tdiff_thr1_scin_mtx_pos_%d", mtxPos))->GetYaxis()->SetTitle("A-B time difference [ps]");
-
-    getStatistics().createHistogram(new TH2F(Form("hit_tdiff_thr2_scin_mtx_pos_%d", mtxPos),
-                                             Form("Hit time difference of times at THR2 per scin for SiPMs with matrix position %d", mtxPos),
-                                             maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 300, -1.1 * fMaxTimeDiff,
-                                             1.1 * fMaxTimeDiff));
-    getStatistics().getHisto2D(Form("hit_tdiff_thr2_scin_mtx_pos_%d", mtxPos))->GetXaxis()->SetTitle("Scintillator ID");
-    getStatistics().getHisto2D(Form("hit_tdiff_thr2_scin_mtx_pos_%d", mtxPos))->GetYaxis()->SetTitle("A-B time difference [ps]");
-
-    getStatistics().createHistogram(new TH2F(Form("hit_tot_thr1_scin_mtx_pos_%d", mtxPos),
-                                             Form("Hit TOT for times at THR1 of SiPM signals on matrix position %d", mtxPos),
-                                             maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 200, 0.0, 400000.0));
-    getStatistics().getHisto2D(Form("hit_tot_thr1_scin_mtx_pos_%d", mtxPos))->GetXaxis()->SetTitle("Scintillator ID");
-    getStatistics().getHisto2D(Form("hit_tot_thr1_scin_mtx_pos_%d", mtxPos))->GetYaxis()->SetTitle("Time over Threshold [ps]");
-
-    getStatistics().createHistogram(new TH2F(Form("hit_tot_thr2_scin_mtx_pos_%d", mtxPos),
-                                             Form("Hit TOT for times at THR2 of SiPM signals on matrix position %d", mtxPos),
-                                             maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 200, 0.0, 400000.0));
-    getStatistics().getHisto2D(Form("hit_tot_thr2_scin_mtx_pos_%d", mtxPos))->GetXaxis()->SetTitle("Scintillator ID");
-    getStatistics().getHisto2D(Form("hit_tot_thr2_scin_mtx_pos_%d", mtxPos))->GetYaxis()->SetTitle("Time over Threshold [ps]");
-
-    getStatistics().createHistogram(new TH2F(Form("hit_tot_sum_scin_mtx_pos_%d", mtxPos),
-                                             Form("Hit TOT for times at both thresholds of SiPM signals on matrix position %d", mtxPos),
-                                             maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 200, 0.0, 400000.0));
-    getStatistics().getHisto2D(Form("hit_tot_sum_scin_mtx_pos_%d", mtxPos))->GetXaxis()->SetTitle("Scintillator ID");
-    getStatistics().getHisto2D(Form("hit_tot_sum_scin_mtx_pos_%d", mtxPos))->GetYaxis()->SetTitle("Time over Threshold [ps]");
-
-    getStatistics().createHistogram(new TH2F(Form("hit_tot_weigh_scin_mtx_pos_%d", mtxPos),
-                                             Form("Hit TOT with threshold weight of SiPM signals on matrix position %d", mtxPos),
-                                             maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 200, 0.0, 1000000.0));
-    getStatistics().getHisto2D(Form("hit_tot_weigh_scin_mtx_pos_%d", mtxPos))->GetXaxis()->SetTitle("Scintillator ID");
-    getStatistics().getHisto2D(Form("hit_tot_weigh_scin_mtx_pos_%d", mtxPos))->GetYaxis()->SetTitle("Time over Threshold [ps]");
-  }
+  // for (int mtxPos = 1; mtxPos <= 4; mtxPos++)
+  // {
+  //   getStatistics().createHistogram(new TH2F(Form("hit_tdiff_thr1_scin_mtx_pos_%d", mtxPos),
+  //                                            Form("Hit time difference of times at THR2 per scin for SiPMs with matrix position %d", mtxPos),
+  //                                            maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 300, -1.1 * fMaxTimeDiff,
+  //                                            1.1 * fMaxTimeDiff));
+  //   getStatistics().getHisto2D(Form("hit_tdiff_thr1_scin_mtx_pos_%d", mtxPos))->GetXaxis()->SetTitle("Scintillator ID");
+  //   getStatistics().getHisto2D(Form("hit_tdiff_thr1_scin_mtx_pos_%d", mtxPos))->GetYaxis()->SetTitle("A-B time difference [ps]");
+  //
+  //   getStatistics().createHistogram(new TH2F(Form("hit_tdiff_thr2_scin_mtx_pos_%d", mtxPos),
+  //                                            Form("Hit time difference of times at THR2 per scin for SiPMs with matrix position %d", mtxPos),
+  //                                            maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 300, -1.1 * fMaxTimeDiff,
+  //                                            1.1 * fMaxTimeDiff));
+  //   getStatistics().getHisto2D(Form("hit_tdiff_thr2_scin_mtx_pos_%d", mtxPos))->GetXaxis()->SetTitle("Scintillator ID");
+  //   getStatistics().getHisto2D(Form("hit_tdiff_thr2_scin_mtx_pos_%d", mtxPos))->GetYaxis()->SetTitle("A-B time difference [ps]");
+  //
+  //   getStatistics().createHistogram(new TH2F(Form("hit_tot_thr1_scin_mtx_pos_%d", mtxPos),
+  //                                            Form("Hit TOT for times at THR1 of SiPM signals on matrix position %d", mtxPos),
+  //                                            maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 200, 0.0, 400000.0));
+  //   getStatistics().getHisto2D(Form("hit_tot_thr1_scin_mtx_pos_%d", mtxPos))->GetXaxis()->SetTitle("Scintillator ID");
+  //   getStatistics().getHisto2D(Form("hit_tot_thr1_scin_mtx_pos_%d", mtxPos))->GetYaxis()->SetTitle("Time over Threshold [ps]");
+  //
+  //   getStatistics().createHistogram(new TH2F(Form("hit_tot_thr2_scin_mtx_pos_%d", mtxPos),
+  //                                            Form("Hit TOT for times at THR2 of SiPM signals on matrix position %d", mtxPos),
+  //                                            maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 200, 0.0, 400000.0));
+  //   getStatistics().getHisto2D(Form("hit_tot_thr2_scin_mtx_pos_%d", mtxPos))->GetXaxis()->SetTitle("Scintillator ID");
+  //   getStatistics().getHisto2D(Form("hit_tot_thr2_scin_mtx_pos_%d", mtxPos))->GetYaxis()->SetTitle("Time over Threshold [ps]");
+  //
+  //   getStatistics().createHistogram(new TH2F(Form("hit_tot_sum_scin_mtx_pos_%d", mtxPos),
+  //                                            Form("Hit TOT for times at both thresholds of SiPM signals on matrix position %d", mtxPos),
+  //                                            maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 200, 0.0, 400000.0));
+  //   getStatistics().getHisto2D(Form("hit_tot_sum_scin_mtx_pos_%d", mtxPos))->GetXaxis()->SetTitle("Scintillator ID");
+  //   getStatistics().getHisto2D(Form("hit_tot_sum_scin_mtx_pos_%d", mtxPos))->GetYaxis()->SetTitle("Time over Threshold [ps]");
+  //
+  //   getStatistics().createHistogram(new TH2F(Form("hit_tot_weigh_scin_mtx_pos_%d", mtxPos),
+  //                                            Form("Hit TOT with threshold weight of SiPM signals on matrix position %d", mtxPos),
+  //                                            maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 200, 0.0, 1000000.0));
+  //   getStatistics().getHisto2D(Form("hit_tot_weigh_scin_mtx_pos_%d", mtxPos))->GetXaxis()->SetTitle("Scintillator ID");
+  //   getStatistics().getHisto2D(Form("hit_tot_weigh_scin_mtx_pos_%d", mtxPos))->GetYaxis()->SetTitle("Time over Threshold [ps]");
+  // }
 }

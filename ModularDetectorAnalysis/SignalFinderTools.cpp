@@ -142,10 +142,10 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(const vector<JPetSigCh>
     }
     else
     {
-      totTHR2 = 0.0;
+      totTHR1 = 0.0;
     }
 
-    if (totTHR1 > 5000.0)
+    if (totTHR2 > 5000.0)
     {
       totTHR2 = thr2A * totTHR2 + thr2B;
     }

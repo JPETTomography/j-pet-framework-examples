@@ -151,23 +151,7 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(vector<JP
     double correction = 0.0;
     if (mtxSig.getPM().getSide() == JPetPM::SideB)
     {
-      // correction = calibTree.get("scin." + to_string(mtxSig.getPM().getScin().getID()) + ".b_correction", 0.0);
-      double corrPos1 = calibTree.get("scin." + to_string(mtxSig.getPM().getScin().getID()) + ".hit_tdiff_thr1_scin_mtx_pos_1", 0.0);
-      double corrPos2 = calibTree.get("scin." + to_string(mtxSig.getPM().getScin().getID()) + ".hit_tdiff_thr1_scin_mtx_pos_2", 0.0);
-      double corrPos3 = calibTree.get("scin." + to_string(mtxSig.getPM().getScin().getID()) + ".hit_tdiff_thr1_scin_mtx_pos_3", 0.0);
-      double corrPos4 = calibTree.get("scin." + to_string(mtxSig.getPM().getScin().getID()) + ".hit_tdiff_thr1_scin_mtx_pos_4", 0.0);
-
-      int nonZeros = 0;
-      if (corrPos1 != 0.0)
-        nonZeros++;
-      if (corrPos2 != 0.0)
-        nonZeros++;
-      if (corrPos3 != 0.0)
-        nonZeros++;
-      if (corrPos4 != 0.0)
-        nonZeros++;
-
-      correction = (corrPos1 + corrPos2 + corrPos3 + corrPos4) / ((double)nonZeros);
+      correction = calibTree.get("scin." + to_string(mtxSig.getPM().getScin().getID()) + ".b_correction", 0.0);
     }
 
     mtxSig.setTime(calculateAverageTime(mtxSig) - correction);
