@@ -138,6 +138,7 @@ bool EventCategorizerTools::collimator2Gamma(const JPetEvent& event, JPetStatist
 
       if (max(slot1ID, slot2ID) - min(slot1ID, slot2ID) == 12 && fabs(firstHit.getTime() - secondHit.getTime()) < maxTimeDiff)
       {
+
         // Checking tDiff and TOT per SiPM mtx position
         for (int mtxPos = 1; mtxPos <= 4; mtxPos++)
         {
@@ -248,8 +249,16 @@ bool EventCategorizerTools::collimator2Gamma(const JPetEvent& event, JPetStatist
               double c_totThr2B_a = calibTree.get("sipm." + to_string(pmBID) + ".tot_factor_thr2_a", 1.0);
               double c_totThr2B_b = calibTree.get("sipm." + to_string(pmBID) + ".tot_factor_thr2_b", 0.0);
 
+              double c_twThr1_a = calibTree.get("time_walk.thr1_mtx" + to_string(mtxPos) + ".param_a", 1.0);
+              double c_twThr1_b = calibTree.get("time_walk.thr1_mtx" + to_string(mtxPos) + ".param_b", 0.0);
+              double c_twThr2_a = calibTree.get("time_walk.thr2_mtx" + to_string(mtxPos) + ".param_a", 1.0);
+              double c_twThr2_b = calibTree.get("time_walk.thr2_mtx" + to_string(mtxPos) + ".param_b", 0.0);
+              double c_twSum_a = calibTree.get("time_walk.sum_mtx" + to_string(mtxPos) + ".param_a", 1.0);
+              double c_twSum_b = calibTree.get("time_walk.sum_mtx" + to_string(mtxPos) + ".param_b", 0.0);
+
               double tDiffTHR1 = leadsB.at(0).getTime() - leadsA.at(0).getTime() - c_tDiffThr1;
               double tDiffTHR2 = leadsB.at(1).getTime() - leadsA.at(1).getTime() - c_tDiffThr2;
+
               double totATHR1 = c_totThr1A_a * (trailsA.at(0).getTime() - leadsA.at(0).getTime()) + c_totThr1A_b;
               double totATHR2 = c_totThr2A_a * (trailsA.at(1).getTime() - leadsA.at(1).getTime()) + c_totThr2A_b;
               double totBTHR1 = c_totThr1B_a * (trailsB.at(0).getTime() - leadsB.at(0).getTime()) + c_totThr1B_b;
@@ -263,15 +272,15 @@ bool EventCategorizerTools::collimator2Gamma(const JPetEvent& event, JPetStatist
                 double revTOTTHR2 = 1.0 / totBTHR2 - 1.0 / totATHR2;
                 double revTOTSum = 1.0 / totBSum - 1.0 / totASum;
 
+                double tDiffTHR1_corr = tDiffTHR1 - (revTOTTHR1 * c_twThr1_a + c_twThr1_b);
+                double tDiffTHR2_corr = tDiffTHR2 - (revTOTTHR2 * c_twThr2_a + c_twThr2_b);
+                double tDiffSum_corr = ((tDiffTHR1 + tDiffTHR2) / 2.0) - (revTOTSum * c_twSum_a + c_twSum_b);
+
                 if (saveHistos)
                 {
                   stats.getHisto2D(Form("time_walk_thr1_mtx_%d", mtxPos))->Fill(tDiffTHR1, revTOTTHR1);
                   stats.getHisto2D(Form("time_walk_thr2_mtx_%d", mtxPos))->Fill(tDiffTHR2, revTOTTHR2);
                   stats.getHisto2D(Form("time_walk_sum_mtx_%d", mtxPos))->Fill((tDiffTHR1 + tDiffTHR2) / 2.0, revTOTSum);
-
-                  double tDiffTHR1_corr = revTOTTHR1 * tw_thr1_a.at(mtxPos - 1) + tw_thr1_b.at(mtxPos - 1);
-                  double tDiffTHR2_corr = revTOTTHR2 * tw_thr2_a.at(mtxPos - 1) + tw_thr2_b.at(mtxPos - 1);
-                  double tDiffSum_corr = revTOTSum * tw_sum_a.at(mtxPos - 1) + tw_sum_a.at(mtxPos - 1);
 
                   stats.getHisto2D(Form("time_walk_thr1_mtx_%d_corr", mtxPos))->Fill(tDiffTHR1_corr, revTOTTHR1);
                   stats.getHisto2D(Form("time_walk_thr2_mtx_%d_corr", mtxPos))->Fill(tDiffTHR2_corr, revTOTTHR2);
