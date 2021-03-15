@@ -29,7 +29,7 @@ JPetLORevent::JPetLORevent(const std::vector<JPetHit> &hits,
 }
 
 void JPetLORevent::Clear(Option_t *) {
-  fType = kUnknown;
+  fType = JPetEventType::kUnknown;
   fHits.clear();
 }
 
