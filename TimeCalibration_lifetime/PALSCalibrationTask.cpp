@@ -164,10 +164,8 @@ bool PALSCalibrationTask::init()
 bool PALSCalibrationTask::exec()
 {
   if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent)) {
-  //  vector<JPetEvent> events;
     for (uint i = 0; i < timeWindow->getNumberOfEvents(); i++) {
       const auto& event = dynamic_cast<const JPetEvent&>(timeWindow->operator[](i));
-   //   JPetEvent newEvent = event;
       vector<JPetHit> AnnihilationCandidates, DeexcitationCandidates;
       for (auto hit : event.getHits()) {
         int ScintID = hit.getScintillator().getID();
@@ -195,10 +193,7 @@ bool PALSCalibrationTask::exec()
           getStatistics().fillHistogram("Z_2Annihilation", RecoPosition(2));
         }
       }
-      
-    //  events.push_back(newEvent);
     }
- //   saveEvents(events);
   } else { return false; }
   return true;
 }
@@ -222,16 +217,15 @@ void PALSCalibrationTask::initialiseHistograms(){
     "Hit X position [cm]", "Hit Y position [cm]"
   );
   
-  std::map<int, JPetScin*> scinMap = getParamBank().getScintillators();
-  auto minScinID = std::min_element(scinMap.begin(), scinMap.end(), [](const auto& l, const auto& r) { return l.first < r.first; });
-  auto maxScinID = std::max_element(scinMap.begin(), scinMap.end(), [](const auto& l, const auto& r) { return l.first < r.first; });
+  auto minScinID = getParamBank().getScintillators().begin()->first;
+  auto maxScinID = getParamBank().getScintillators().rbegin()->first;
   
   getStatistics().createHistogramWithAxes(
-    new TH2D("TOT_vs_ID_matched", "TOT of the hit vs scintillator ID", 1200, -19500, 100500, maxScinID->first-minScinID->first+1, minScinID->first-0.5, maxScinID->first+0.5),
+    new TH2D("TOT_vs_ID_matched", "TOT of the hit vs scintillator ID", 1200, -19500, 100500, maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5),
     "TOT of the hit [ps]", "Scintillator ID"
   );
   getStatistics().createHistogramWithAxes(
-    new TH2D("Z_vs_ID", "Z position of the hit vs scintillator ID", 1000, -49.55, 50.45, maxScinID->first-minScinID->first+1, minScinID->first-0.5, maxScinID->first+0.5),
+    new TH2D("Z_vs_ID", "Z position of the hit vs scintillator ID", 1000, -49.55, 50.45, maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5),
     "Z position [cm]", "Scintillator ID"
   );
   
@@ -239,33 +233,33 @@ void PALSCalibrationTask::initialiseHistograms(){
   for (unsigned thrNum=1; thrNum<=fNmbOfThresholds; thrNum++) {
     getStatistics().createHistogramWithAxes(
         new TH2D(Form("TDiff_AB_vs_ID_thr%d_calibrated", thrNum), Form("Time difference AB vs scintillator ID for threshold %d after calibration", thrNum), 
-                                                500, -24750, 24250, maxScinID->first-minScinID->first+1, minScinID->first-0.5, maxScinID->first+0.5), 
+                                                500, -24750, 24250, maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5),
                                                 "Time difference AB [ps]", "ID of the scintillator"
     );
     getStatistics().createHistogramWithAxes(
         new TH2D(Form("PALS_vs_AnnihilationID_thr%d", thrNum), Form("Positron Lifetime spectrum for a given Annihilation Hit ID for threshold %d", thrNum), 
                                                 2*fEventTimeWindow/100, -fEventTimeWindow + 50, fEventTimeWindow + 50, //Bin size wil be always 0.1 ns
-                                                maxScinID->first-minScinID->first+1, minScinID->first-0.5, maxScinID->first+0.5), 
+                                                maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5),
                                                 "Positron lifetime [ps]", "Annihilation Hit ID of the scintillator"
     );
     getStatistics().createHistogramWithAxes(
         new TH2D(Form("PALS_vs_DeexcitationID_thr%d", thrNum), Form("Positron Lifetime spectrum for a given Deexcitation Hit ID for threshold %d", thrNum), 
                                                 2*fEventTimeWindow/100, -fEventTimeWindow + 50, fEventTimeWindow + 50, //Bin size wil be always 0.1 ns
-                                                maxScinID->first-minScinID->first+1, minScinID->first-0.5, maxScinID->first+0.5), 
+                                                maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5),
                                                 "Positron lifetime [ps]", "Deexcitation Hit ID of the scintillator"
     );
     getStatistics().createHistogramWithAxes(
         new TH2D(Form("Corrected_PALS_vs_AnnihilationID_thr%d", thrNum), 
                                                 Form("Positron Lifetime spectrum for a given Annihilation Hit ID for threshold %d after correction", thrNum), 
                                                 2*fEventTimeWindow/100, -fEventTimeWindow + 50, fEventTimeWindow + 50, //Bin size wil be always 0.1 ns
-                                                maxScinID->first-minScinID->first+1, minScinID->first-0.5, maxScinID->first+0.5), 
+                                                maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5),
                                                 "Positron lifetime [ps]", "Annihilation Hit ID of the scintillator"
     );
     getStatistics().createHistogramWithAxes(
         new TH2D(Form("Corrected_PALS_vs_DeexcitationID_thr%d", thrNum), 
                                                 Form("Positron Lifetime spectrum for a given Deexcitation Hit ID for threshold %d after correction", thrNum), 
                                                 2*fEventTimeWindow/100, -fEventTimeWindow + 50, fEventTimeWindow + 50, //Bin size wil be always 0.1 ns
-                                                maxScinID->first-minScinID->first+1, minScinID->first-0.5, maxScinID->first+0.5), 
+                                                maxScinID-minScinID+1, minScinID-0.5, maxScinID+0.5),
                                                 "Positron lifetime [ps]", "Deexcitation Hit ID of the scintillator"
     );
   }

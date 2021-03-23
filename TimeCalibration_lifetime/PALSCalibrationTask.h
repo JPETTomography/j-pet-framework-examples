@@ -29,12 +29,11 @@ class JPetWriter;
 #endif
 
 /**
- * @brief User Task categorizing Events
+ * @brief User Task for time calibration by matchin lifetime spectra
  *
- * Task attempts to add types of events to each event. Each category/type
- * has separate method for checking, if current event fulfills set of conditions.
- * These methods are defined in tools class. More than one type can be added to an event.
- * Set of controll histograms are created, unless the user decides not to produce them.
+ * Task is preparing proper histograms for calibration. Calculation of the calibration
+ * constants are by calibrtion tools defined in tools class. Task is designed to run
+ * it more than once in order to obtain the best constants by iterations.
  */
 class PALSCalibrationTask : public JPetUserTask{
 public:

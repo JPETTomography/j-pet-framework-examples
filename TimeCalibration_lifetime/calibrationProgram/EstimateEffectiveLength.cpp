@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file Calibrate.cpp
+ *  @file EstimateEffectiveLength.cpp
  */
 
 #include "CalibrationTools.h"
@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) //first argument file with the parameters (defa
     std::cout << "No file with calibration parameters (default - calibParams.json) as a first argument" << std::endl;
     return 0;
   } else {
-    std::cout << "Too much arguments given to the program. Using only the first - file with parameters" << std::endl;  
+    std::cout << "Too many arguments given to the program. Using only the first - file with parameters" << std::endl;  
   }
   
   EffLengthTools effLenTools(fileWithParameters);

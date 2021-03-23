@@ -322,7 +322,7 @@ void CalibrationTools::FindEdges(std::vector<TH2D*> Histos)
   for (unsigned i=0; i<Histos.size(); i++) {
     tempContainerA.clear();
     tempContainerB.clear();
-//Loop starts from the first bin - zero bin is underflow bin
+    //Loop starts from the first bin - zero bin is underflow bin
     for (int j=1; j<=fMaxScintillatorID - fMinScintillatorID + 1; j++) {
       iterator++;
       projection_copy = Histos.at(i)->ProjectionX("_px", j, j);
@@ -371,7 +371,7 @@ void CalibrationTools::FindPeaks(std::vector<TH2D*> Histos)
   for (unsigned i=0; i<Histos.size()/2; i++) {
     tempContainerA.clear();
     tempContainerB.clear();
-//Loop starts from the first bin - zero bin is underflow bin
+    //Loop starts from the first bin - zero bin is underflow bin
     for (int j=1; j<=fMaxScintillatorID - fMinScintillatorID + 1; j++) {
       iterator++;
       projection_copy1 = Histos.at(i)->ProjectionX("_px", j, j);
@@ -425,7 +425,7 @@ Parameter CalibrationTools::FindMiddle(TH1D* histo, double firstBinCenter, doubl
       Arguments.push_back( histo->GetBinCenter(i) );
     }
   }
-//Smoothing of distribution to decrease influence of statistical fluctuations
+  //Smoothing of distribution to decrease influence of statistical fluctuations
   Values = SmoothByLinearFilter(Values, filterHalf);
   Values = ReduceBoundaryEffect(Values, filterHalf);
   Arguments = ReduceBoundaryEffect(Arguments, filterHalf);
@@ -436,24 +436,24 @@ Parameter CalibrationTools::FindMiddle(TH1D* histo, double firstBinCenter, doubl
 
   unsigned firstEstimationForExtremumBin;
   if (side == Side::MaxAnni || side == Side::MaxDeex) {
-//Maximum estiamted as just a point with maximal value in some range (firstBinCenter, lastBinCenter)
+    //Maximum estiamted as just a point with maximal value in some range (firstBinCenter, lastBinCenter)
     firstEstimationForExtremumBin = FindMaximum(Values, Arguments, firstBinCenter, lastBinCenter);
-//For calculations of derivative argument should be a mean of two arguments between which derivative is calculated
-//In order to not to creat additional argument vector for derivative, one can just apply argument shift coming from
-//calculations of the derivative
+    //For calculations of derivative argument should be a mean of two arguments between which derivative is calculated
+    //In order not to create additional argument vector for derivative, one can just apply argument shift coming from
+    //calculations of the derivative
     double argumentShift = Arguments.at(firstEstimationForExtremumBin+1) - Arguments.at(firstEstimationForExtremumBin);
-//Peak estimated as a "zero" of the first derivative. Zero is esitmated from a linear fit in close range of the firstEstimationForExtremumBin
+    //Peak estimated as a "zero" of the first derivative. Zero is esitmated from a linear fit in close range of the firstEstimationForExtremumBin
     finalEstimatioOfExtremum = FindPeak(Arguments, FirstDerivative, 
-                                             firstEstimationForExtremumBin-5, firstEstimationForExtremumBin+5);
+                                             firstEstimationForExtremumBin-binRangeForLinearFitting, firstEstimationForExtremumBin+binRangeForLinearFitting);
     finalEstimatioOfExtremum.Value = finalEstimatioOfExtremum.Value - argumentShift;
     
     if (fSaveDerivatives) {
       DrawDerivatives(titleOfHistogram, side, filterHalf, Arguments, FirstDerivative, temp);
     }
   } else {
-//In case of the TDiff BA distributions maximum of the derivative corresponding to the edge on a given side is very sensitive
-//to any fluctuations. Therefore maximum is estimated as a first point after which moving average is changing trend. 
-//Change of the trend and direction of the changing the iterator depends on the side on which we want to estimate and edge
+    //In case of the TDiff BA distributions maximum of the derivative corresponding to the edge on a given side is very sensitive
+    //to any fluctuations. Therefore maximum is estimated as a first point after which moving average is changing trend. 
+    //Change of the trend and direction of the changing the iterator depends on the side on which we want to estimate and edge
     firstEstimationForExtremumBin = EstimateExtremumBin(FirstDerivative, filterHalf, fNumberOfPointsToFilter, side);
 
     SecondDerivative = CalculateDerivative(FirstDerivative);
@@ -466,7 +466,7 @@ Parameter CalibrationTools::FindMiddle(TH1D* histo, double firstBinCenter, doubl
     }
 
     finalEstimatioOfExtremum = FindPeak(Arguments, SecondDerivative, 
-                                             firstEstimationForExtremumBin-5, firstEstimationForExtremumBin+5);
+                                             firstEstimationForExtremumBin-binRangeForLinearFitting, firstEstimationForExtremumBin+binRangeForLinearFitting);
     finalEstimatioOfExtremum.Value = finalEstimatioOfExtremum.Value - 2*argumentShift;
 
   }
@@ -493,8 +493,8 @@ unsigned CalibrationTools::EstimateExtremumBin(std::vector<double> vector, int f
 {
   unsigned extremum = 0;
   unsigned firstPoint = (side == Side::Right) ? vector.size() - shiftFromFilterHalf - 1 : shiftFromFilterHalf;
-//Side parameter allows to define one function for both edges. In case of the Right edge order of indicator increment
-//should be descending (-1) where for the Left it should be increasing (+1)
+  //Side parameter allows to define one function for both edges. In case of the Right edge order of indicator increment
+  //should be descending (-1) where for the Left it should be increasing (+1)
   int sideParameter = (side == Side::Right) ? -1 : 1;
   
   while (sideParameter*vector.at(firstPoint) < fThresholdForDerivative && firstPoint < vector.size()-1 && firstPoint > 0) {
@@ -516,10 +516,10 @@ unsigned CalibrationTools::EstimateExtremumBin(std::vector<double> vector, int f
                                         && iterator+fHalfRangeForExtremumEstimation < (int)vector.size() 
                                                 && iterator > fHalfRangeForExtremumEstimation) {
     previousMean = mean;
-//Moving average loop. For side Left mean should go from left to right, for side Right from right to left
-//It is like that because in many cases distribution of the derivative of the TDiff BA distribution is disturbed between the real edge
-//of the strip and middle of the scintillator (because of the cos^2 distribution of the irradiation, statistical fluctuations and some
-//electronic noise)
+    //Moving average loop. For side Left mean should go from left to right, for side Right from right to left
+    //It is like that because in many cases distribution of the derivative of the TDiff BA distribution is disturbed between the real edge
+    //of the strip and middle of the scintillator (because of the cos^2 distribution of the irradiation, statistical fluctuations and some
+    //electronic noise)
     for (int k=1; k<=fHalfRangeForExtremumEstimation; k++) {
       mean += -1*sideParameter*vector.at(iterator-k);
       mean += sideParameter*vector.at(iterator+k);
@@ -749,8 +749,8 @@ void DrawEdgesOnHistogram(TH1D *projection_copy, Parameter middleLeft, Parameter
   lat1.SetTextSize(0.020);
   lat1.SetTextAngle(270.);
   lat1.DrawLatex(middleLeft.Value - distributionWidth/2.5, maxCounts/2, Form("( %g )", middleLeft.Value));
-// It has a bigger shift from the value middleLeft.Value than the below for middleRight.Value
-// in order to draw at more or less the same distance from the line. It is because drawLatex is not so well designed
+  // It has a bigger shift from the value middleLeft.Value than the below for middleRight.Value
+  // in order to draw at more or less the same distance from the line. It is because drawLatex is not so well designed
   lat2.SetTextSize(0.020);
   lat2.SetTextAngle(270.);
   lat2.DrawLatex(middleRight.Value + distributionWidth/4, maxCounts/2, Form("( %g )", middleRight.Value));
@@ -1099,7 +1099,7 @@ void SaveABEdgesResults(std::string oldFileWithConstants, std::string fileWithCo
           results << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t";
       } else
         results << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t";
-// Zeros are filled to fit the old type of the calibration which required a lot of fitting and therefore more parameters were included
+      // Zeros are filled to fit the old type of the calibration which required a lot of fitting and therefore more parameters were included
       results << NumberToChar(0, 0) << "\t" << NumberToChar(0, 0) << "\t" << NumberToChar(0, 0) << "\t" << NumberToChar(0, 0) << std::endl;
     } else {
       std::cerr << "Side of the scintillator read from the old file with constants was not one of the default (A or B)" << std::endl;
@@ -1147,9 +1147,8 @@ void SaveABEdgesResults(std::string oldFileWithConstants, std::string fileWithCo
           results << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t";
       } else
         results << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t";
-// Zeros are filled to fit the old type of the calibration which required a lot of fitting and therefore more parameters were included
+      // Zeros are filled to fit the old type of the calibration which required a lot of fitting and therefore more parameters were included
       results << NumberToChar(0, 0) << "\t" << NumberToChar(0, 0) << "\t" << NumberToChar(0, 0) << "\t" << NumberToChar(0, 0) << std::endl;
-// Zeros are filled to fit the old type of the calibration which required a lot of fitting and therefore more parameters were included
     } else {
       std::cerr << "Side of the scintillator read from the old file with constants was not one of the default (A or B)" << std::endl;
     }
@@ -1239,7 +1238,7 @@ void SavePALSPeakResults(std::string oldFileWithConstants, std::string fileWithC
             results << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t";
         } else
           results << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t";
-    // Zeros are filled to fit the old type of the calibration which required a lot of fitting and therefore more parameters were included
+        // Zeros are filled to fit the old type of the calibration which required a lot of fitting and therefore more parameters were included
         results << NumberToChar(0, 0) << "\t" << NumberToChar(0, 0) << "\t" << NumberToChar(0, 0) << "\t" << NumberToChar(0, 0) << std::endl;
       } else {
         std::cerr << "Side of the scintillator read from the old file with constants was not one of the default (A or B)" << std::endl;
@@ -1286,7 +1285,7 @@ void SavePALSPeakResults(std::string oldFileWithConstants, std::string fileWithC
             results << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t";
         } else
           results << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t" << NumberToChar(0, 6) << "\t";
-    // Zeros are filled to fit the old type of the calibration which required a lot of fitting and therefore more parameters were included
+        // Zeros are filled to fit the old type of the calibration which required a lot of fitting and therefore more parameters were included
         results << NumberToChar(0, 0) << "\t" << NumberToChar(0, 0) << "\t" << NumberToChar(0, 0) << "\t" << NumberToChar(0, 0) << std::endl;
       } else {
         std::cerr << "Side of the scintillator read from the old file with constants was not one of the default (A or B)" << std::endl;

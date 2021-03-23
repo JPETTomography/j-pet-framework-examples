@@ -108,6 +108,7 @@ private:
   int fThresholdForDerivative = 100;
   int fHalfRangeForExtremumEstimation = 2;
   float fEffectiveLength = 48; // cm
+  unsigned binRangeForLinearFitting = 5;
   std::vector<std::vector<Parameter>> fEdgesA;
   std::vector<std::vector<Parameter>> fEdgesB;
   std::vector<std::vector<Parameter>> fMaxAnnihilation;

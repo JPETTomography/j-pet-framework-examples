@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) //first argument file with the parameters (defa
     std::cout << "calibration option (single, multi or final) as a second argument" << std::endl;
     return 0;
   } else {
-    std::cout << "Too much arguments given to the program. Using only the first two - file with parameters and calibration option" << std::endl;  
+    std::cout << "Too many arguments given to the program. Using only the first two - file with parameters and calibration option" << std::endl;  
   }
   
   CalibrationTools calibTools(fileWithParameters, calibrationOption);

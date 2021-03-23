@@ -1,5 +1,5 @@
 Description of available parameters in TimeCalibration example.
-Note that configuration/calibration filed can be obtained from PetWiki:
+Note that configuration/calibration files can be obtained from PetWiki:
 http://koza.if.uj.edu.pl/petwiki/index.php/Default_settings_and_parameters_used_in_the_analyses
 --------
 

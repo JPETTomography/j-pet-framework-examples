@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -10,7 +10,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- *  @file EventCategorizerToolsTest.cpp
+ *  @file CalibrationToolsTest.cpp
  */
 
 #define BOOST_TEST_DYN_LINK
@@ -24,7 +24,6 @@
 
 /// Accuracy for BOOST_REQUIRE_CLOSE comparisons
 const double kEpsilon = 0.01;
-const double kEpsilonIterator = 2;
 
 BOOST_AUTO_TEST_SUITE(CalibrationProgramCheckSuite)
 
@@ -45,23 +44,14 @@ BOOST_AUTO_TEST_CASE(checkEstimateExtremumBin) {
   }
   unsigned extremumLeft = calibTools.EstimateExtremumBin(values, 0, 1, Side::Left);
   unsigned extremumRight = calibTools.EstimateExtremumBin(values, 0, 1, Side::Right);
-  BOOST_REQUIRE_CLOSE((float)extremumLeft, 31, kEpsilonIterator);
-  BOOST_REQUIRE_CLOSE((float)extremumRight, 69, kEpsilonIterator);
+  BOOST_REQUIRE_EQUAL((float)extremumLeft, 31);
+  BOOST_REQUIRE_EQUAL((float)extremumRight, 69);
 }
 
 BOOST_AUTO_TEST_CASE(checkFindingPeak) {
   CalibrationTools calibTools;
-  std::vector<double> values, arguments;
-  values.push_back(-2);
-  values.push_back(-1);
-  values.push_back(0);
-  values.push_back(1);
-  values.push_back(2);
-  arguments.push_back(0);
-  arguments.push_back(1);
-  arguments.push_back(2);
-  arguments.push_back(3);
-  arguments.push_back(4);
+  std::vector<double> values = {-2, -1, 0, 1, 2};
+  std::vector<double> arguments = {0, 1, 2, 3, 4};
   Parameter result = calibTools.FindPeak(arguments, values, 0, 4);
   BOOST_REQUIRE_CLOSE(result.Value, 2, kEpsilon);
 }
@@ -128,6 +118,41 @@ BOOST_AUTO_TEST_CASE(checkFindingMiddlePALS) {
   BOOST_REQUIRE_CLOSE(results.Value, acceptedValue, acceptedRange);
   
   delete histo;
+}
+
+BOOST_AUTO_TEST_CASE(checkFindingMaximum) {
+  std::vector<double> values = {1, 2, 3, 2, 1, 4, 5, 4, 3, 2, 1};
+  std::vector<double> arguments = {-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5};
+  unsigned maximum = FindMaximum(values, arguments, -3, 3);
+  BOOST_REQUIRE_EQUAL(maximum, 6);
+
+  unsigned maximum2 = FindMaximum(values, arguments, -6, -1);
+  BOOST_REQUIRE_EQUAL(maximum2, 2);
+}
+
+BOOST_AUTO_TEST_CASE(checkCalculationsMeanDifference) {
+  std::vector<double> vector1 = {1, 2, 3, 2, 1, 4, 5, 4, 3, 2, 1};
+  double diff = CalcMeanDiff(vector1, vector1);
+  BOOST_REQUIRE_CLOSE(diff, 0, kEpsilon);
+  
+  std::vector<double> vector2 = {0, 1, 2, 1, 0, 3, 4, 3, 2, 1, 0};
+  diff = CalcMeanDiff(vector1, vector2);
+  BOOST_REQUIRE_CLOSE(diff, 1, kEpsilon);
+}
+
+BOOST_AUTO_TEST_CASE(checkCalculationsMeanCorrection) {
+  Parameter par1, par2;
+  par1.Value = 2;
+  par2.Value = 1;
+  std::vector<Parameter> vector1 = {par1, par1, par1, par1, par1};
+  std::vector<std::vector<Parameter>> vector1_2 = {vector1, vector1, vector1};
+  Parameter diff = CalculateMeanCorrection(vector1_2, vector1_2);
+  BOOST_REQUIRE_CLOSE(diff.Value, 0, kEpsilon);
+  
+  std::vector<Parameter> vector2 = {par2, par2, par2, par2, par2};
+  std::vector<std::vector<Parameter>> vector2_2 = {vector2, vector2, vector2};
+  diff = CalculateMeanCorrection(vector1_2, vector2_2);
+  BOOST_REQUIRE_CLOSE(diff.Value, 1, kEpsilon);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
