@@ -44,6 +44,8 @@ public:
                                double totCutAnniMin, double totCutAnniMax, double lorAngleMax, double lorPosZMax, const TVector3& sourcePos,
                                boost::property_tree::ptree& calibTree);
 
+  static void timeWalkStuff(const JPetHit& hit, JPetStatistics& stats, bool saveHistos, boost::property_tree::ptree& calibTree);
+
   static bool checkFor3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos);
 
   static bool checkForPrompt(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double deexTOTCutMin, double deexTOTCutMax);

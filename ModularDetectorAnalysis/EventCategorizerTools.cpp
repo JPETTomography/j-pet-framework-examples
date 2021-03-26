@@ -136,165 +136,135 @@ bool EventCategorizerTools::collimator2Gamma(const JPetEvent& event, JPetStatist
       int slot1ID = firstHit.getScin().getSlot().getID();
       int slot2ID = secondHit.getScin().getSlot().getID();
 
-      if (max(slot1ID, slot2ID) - min(slot1ID, slot2ID) == 12 && fabs(firstHit.getTime() - secondHit.getTime()) < maxTimeDiff)
+      if (max(slot1ID, slot2ID) - min(slot1ID, slot2ID) == 12 && fabs(firstHit.getTime() - secondHit.getTime()) < maxTimeDiff &&
+          firstHit.getSignalA().getRawSignals().size() == 4 && firstHit.getSignalB().getRawSignals().size() == 4 &&
+          secondHit.getSignalA().getRawSignals().size() == 4 && secondHit.getSignalB().getRawSignals().size() == 4)
       {
-
-        // Checking tDiff and TOT per SiPM mtx position
-        for (int mtxPos = 1; mtxPos <= 4; mtxPos++)
-        {
-          auto hit1sigMapA = firstHit.getSignalA().getRawSignals();
-          auto hit1sigMapB = firstHit.getSignalB().getRawSignals();
-
-          auto hit2sigMapA = secondHit.getSignalA().getRawSignals();
-          auto hit2sigMapB = secondHit.getSignalB().getRawSignals();
-
-          auto search1A = hit1sigMapA.find(mtxPos);
-          auto search1B = hit1sigMapB.find(mtxPos);
-
-          auto search2A = hit2sigMapA.find(mtxPos);
-          auto search2B = hit2sigMapB.find(mtxPos);
-
-          if (search1A != hit1sigMapA.end() && search1B != hit1sigMapB.end())
-          {
-            int scinID = search1A->second.getPM().getScin().getID();
-            int pmAID = search1A->second.getPM().getID();
-            int pmBID = search1B->second.getPM().getID();
-
-            auto leadsA = search1A->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-            auto trailsA = search1A->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-            auto leadsB = search1B->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-            auto trailsB = search1B->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-
-            // Checking time walk effect only for SiPM signals with both thresholds
-            if (leadsA.size() == 2 && leadsB.size() == 2 && trailsA.size() == 2 && trailsB.size() == 2)
-            {
-              double c_tDiffThr1 = calibTree.get(Form("%s.%d.%s%d", "scin", scinID, "hit_tdiff_thr1_scin_mtx_pos_", mtxPos), 0.0);
-              double c_tDiffThr2 = calibTree.get(Form("%s.%d.%s%d", "scin", scinID, "hit_tdiff_thr2_scin_mtx_pos_", mtxPos), 0.0);
-
-              double c_totThr1A_a = calibTree.get("sipm." + to_string(pmAID) + ".tot_factor_thr1_a", 1.0);
-              double c_totThr1A_b = calibTree.get("sipm." + to_string(pmAID) + ".tot_factor_thr1_b", 0.0);
-              double c_totThr2A_a = calibTree.get("sipm." + to_string(pmAID) + ".tot_factor_thr2_a", 1.0);
-              double c_totThr2A_b = calibTree.get("sipm." + to_string(pmAID) + ".tot_factor_thr2_b", 0.0);
-
-              double c_totThr1B_a = calibTree.get("sipm." + to_string(pmBID) + ".tot_factor_thr1_a", 1.0);
-              double c_totThr1B_b = calibTree.get("sipm." + to_string(pmBID) + ".tot_factor_thr1_b", 0.0);
-              double c_totThr2B_a = calibTree.get("sipm." + to_string(pmBID) + ".tot_factor_thr2_a", 1.0);
-              double c_totThr2B_b = calibTree.get("sipm." + to_string(pmBID) + ".tot_factor_thr2_b", 0.0);
-
-              double c_twThr1_a = calibTree.get("time_walk.thr1_mtx" + to_string(mtxPos) + ".param_a", 1.0);
-              double c_twThr1_b = calibTree.get("time_walk.thr1_mtx" + to_string(mtxPos) + ".param_b", 0.0);
-              double c_twThr2_a = calibTree.get("time_walk.thr2_mtx" + to_string(mtxPos) + ".param_a", 1.0);
-              double c_twThr2_b = calibTree.get("time_walk.thr2_mtx" + to_string(mtxPos) + ".param_b", 0.0);
-              double c_twSum_a = calibTree.get("time_walk.sum_mtx" + to_string(mtxPos) + ".param_a", 1.0);
-              double c_twSum_b = calibTree.get("time_walk.sum_mtx" + to_string(mtxPos) + ".param_b", 0.0);
-
-              double tDiffTHR1 = leadsB.at(0).getTime() - leadsA.at(0).getTime() - c_tDiffThr1;
-              double tDiffTHR2 = leadsB.at(1).getTime() - leadsA.at(1).getTime() - c_tDiffThr2;
-
-              double totATHR1 = c_totThr1A_a * (trailsA.at(0).getTime() - leadsA.at(0).getTime()) + c_totThr1A_b;
-              double totATHR2 = c_totThr2A_a * (trailsA.at(1).getTime() - leadsA.at(1).getTime()) + c_totThr2A_b;
-              double totBTHR1 = c_totThr1B_a * (trailsB.at(0).getTime() - leadsB.at(0).getTime()) + c_totThr1B_b;
-              double totBTHR2 = c_totThr2B_a * (trailsB.at(1).getTime() - leadsB.at(1).getTime()) + c_totThr2B_b;
-
-              if (totATHR1 != 0.0 && totATHR2 != 0.0 && totBTHR1 != 0.0 && totBTHR2 != 0.0)
-              {
-                double totASum = totATHR1 + totATHR2;
-                double totBSum = totBTHR1 + totBTHR2;
-                double revTOTTHR1 = 1.0 / totBTHR1 - 1.0 / totATHR1;
-                double revTOTTHR2 = 1.0 / totBTHR2 - 1.0 / totATHR2;
-                double revTOTSum = 1.0 / totBSum - 1.0 / totASum;
-
-                double tDiffTHR1_corr = tDiffTHR1 - (revTOTTHR1 * c_twThr1_a + c_twThr1_b);
-                double tDiffTHR2_corr = tDiffTHR2 - (revTOTTHR2 * c_twThr2_a + c_twThr2_b);
-                double tDiffSum_corr = ((tDiffTHR1 + tDiffTHR2) / 2.0) - (revTOTSum * c_twSum_a + c_twSum_b);
-
-                if (saveHistos)
-                {
-                  stats.getHisto2D(Form("time_walk_thr1_mtx_%d", mtxPos))->Fill(tDiffTHR1, revTOTTHR1);
-                  stats.getHisto2D(Form("time_walk_thr2_mtx_%d", mtxPos))->Fill(tDiffTHR2, revTOTTHR2);
-                  stats.getHisto2D(Form("time_walk_sum_mtx_%d", mtxPos))->Fill((tDiffTHR1 + tDiffTHR2) / 2.0, revTOTSum);
-
-                  stats.getHisto2D(Form("time_walk_thr1_mtx_%d_corr", mtxPos))->Fill(tDiffTHR1_corr, revTOTTHR1);
-                  stats.getHisto2D(Form("time_walk_thr2_mtx_%d_corr", mtxPos))->Fill(tDiffTHR2_corr, revTOTTHR2);
-                  stats.getHisto2D(Form("time_walk_sum_mtx_%d_corr", mtxPos))->Fill(tDiffSum_corr, revTOTSum);
-                }
-              }
-            }
-          }
-
-          if (search2A != hit2sigMapA.end() && search2B != hit2sigMapB.end())
-          {
-            int scinID = search2A->second.getPM().getScin().getID();
-            int pmAID = search2A->second.getPM().getID();
-            int pmBID = search2B->second.getPM().getID();
-
-            auto leadsA = search2A->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-            auto trailsA = search2A->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-            auto leadsB = search2B->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-            auto trailsB = search2B->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-
-            // Checking time walk effect only for SiPM signals with both thresholds
-            if (leadsA.size() == 2 && leadsB.size() == 2 && trailsA.size() == 2 && trailsB.size() == 2)
-            {
-              double c_tDiffThr1 = calibTree.get(Form("%s.%d.%s%d", "scin", scinID, "hit_tdiff_thr1_scin_mtx_pos_", mtxPos), 0.0);
-              double c_tDiffThr2 = calibTree.get(Form("%s.%d.%s%d", "scin", scinID, "hit_tdiff_thr2_scin_mtx_pos_", mtxPos), 0.0);
-
-              double c_totThr1A_a = calibTree.get("sipm." + to_string(pmAID) + ".tot_factor_thr1_a", 1.0);
-              double c_totThr1A_b = calibTree.get("sipm." + to_string(pmAID) + ".tot_factor_thr1_b", 0.0);
-              double c_totThr2A_a = calibTree.get("sipm." + to_string(pmAID) + ".tot_factor_thr2_a", 1.0);
-              double c_totThr2A_b = calibTree.get("sipm." + to_string(pmAID) + ".tot_factor_thr2_b", 0.0);
-
-              double c_totThr1B_a = calibTree.get("sipm." + to_string(pmBID) + ".tot_factor_thr1_a", 1.0);
-              double c_totThr1B_b = calibTree.get("sipm." + to_string(pmBID) + ".tot_factor_thr1_b", 0.0);
-              double c_totThr2B_a = calibTree.get("sipm." + to_string(pmBID) + ".tot_factor_thr2_a", 1.0);
-              double c_totThr2B_b = calibTree.get("sipm." + to_string(pmBID) + ".tot_factor_thr2_b", 0.0);
-
-              double c_twThr1_a = calibTree.get("time_walk.thr1_mtx" + to_string(mtxPos) + ".param_a", 1.0);
-              double c_twThr1_b = calibTree.get("time_walk.thr1_mtx" + to_string(mtxPos) + ".param_b", 0.0);
-              double c_twThr2_a = calibTree.get("time_walk.thr2_mtx" + to_string(mtxPos) + ".param_a", 1.0);
-              double c_twThr2_b = calibTree.get("time_walk.thr2_mtx" + to_string(mtxPos) + ".param_b", 0.0);
-              double c_twSum_a = calibTree.get("time_walk.sum_mtx" + to_string(mtxPos) + ".param_a", 1.0);
-              double c_twSum_b = calibTree.get("time_walk.sum_mtx" + to_string(mtxPos) + ".param_b", 0.0);
-
-              double tDiffTHR1 = leadsB.at(0).getTime() - leadsA.at(0).getTime() - c_tDiffThr1;
-              double tDiffTHR2 = leadsB.at(1).getTime() - leadsA.at(1).getTime() - c_tDiffThr2;
-
-              double totATHR1 = c_totThr1A_a * (trailsA.at(0).getTime() - leadsA.at(0).getTime()) + c_totThr1A_b;
-              double totATHR2 = c_totThr2A_a * (trailsA.at(1).getTime() - leadsA.at(1).getTime()) + c_totThr2A_b;
-              double totBTHR1 = c_totThr1B_a * (trailsB.at(0).getTime() - leadsB.at(0).getTime()) + c_totThr1B_b;
-              double totBTHR2 = c_totThr2B_a * (trailsB.at(1).getTime() - leadsB.at(1).getTime()) + c_totThr2B_b;
-
-              if (totATHR1 != 0.0 && totATHR2 != 0.0 && totBTHR1 != 0.0 && totBTHR2 != 0.0)
-              {
-                double totASum = totATHR1 + totATHR2;
-                double totBSum = totBTHR1 + totBTHR2;
-                double revTOTTHR1 = 1.0 / totBTHR1 - 1.0 / totATHR1;
-                double revTOTTHR2 = 1.0 / totBTHR2 - 1.0 / totATHR2;
-                double revTOTSum = 1.0 / totBSum - 1.0 / totASum;
-
-                double tDiffTHR1_corr = tDiffTHR1 - (revTOTTHR1 * c_twThr1_a + c_twThr1_b);
-                double tDiffTHR2_corr = tDiffTHR2 - (revTOTTHR2 * c_twThr2_a + c_twThr2_b);
-                double tDiffSum_corr = ((tDiffTHR1 + tDiffTHR2) / 2.0) - (revTOTSum * c_twSum_a + c_twSum_b);
-
-                if (saveHistos)
-                {
-                  stats.getHisto2D(Form("time_walk_thr1_mtx_%d", mtxPos))->Fill(tDiffTHR1, revTOTTHR1);
-                  stats.getHisto2D(Form("time_walk_thr2_mtx_%d", mtxPos))->Fill(tDiffTHR2, revTOTTHR2);
-                  stats.getHisto2D(Form("time_walk_sum_mtx_%d", mtxPos))->Fill((tDiffTHR1 + tDiffTHR2) / 2.0, revTOTSum);
-
-                  stats.getHisto2D(Form("time_walk_thr1_mtx_%d_corr", mtxPos))->Fill(tDiffTHR1_corr, revTOTTHR1);
-                  stats.getHisto2D(Form("time_walk_thr2_mtx_%d_corr", mtxPos))->Fill(tDiffTHR2_corr, revTOTTHR2);
-                  stats.getHisto2D(Form("time_walk_sum_mtx_%d_corr", mtxPos))->Fill(tDiffSum_corr, revTOTSum);
-                }
-              }
-            }
-          }
-        }
+        timeWalkStuff(firstHit, stats, saveHistos, calibTree);
+        timeWalkStuff(secondHit, stats, saveHistos, calibTree);
       }
       return true;
     }
   }
   return false;
+}
+
+void EventCategorizerTools::timeWalkStuff(const JPetHit& hit, JPetStatistics& stats, bool saveHistos, boost::property_tree::ptree& calibTree)
+{
+  int scinID = hit.getScin().getID();
+  int pmAID = hit.getSignalA().getPM().getID();
+  int pmBID = hit.getSignalA().getPM().getID();
+  auto sigMapA = hit.getSignalA().getRawSignals();
+  auto sigMapB = hit.getSignalB().getRawSignals();
+
+  double tDiffAvTHR1 = 0.0, tDiffAvAll = 0.0;
+  int avCountTHR1 = 0, acCountAll = 0;
+
+  // First calculate average timeDiff for THR1, THR2 and all
+  for (int mtxPos = 1; mtxPos <= 4; mtxPos++)
+  {
+    auto leadsA = sigMapA.at(mtxPos).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+    auto trailsA = sigMapA.at(mtxPos).getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+    auto leadsB = sigMapB.at(mtxPos).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+    auto trailsB = sigMapB.at(mtxPos).getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+
+    if (leadsA.size() == 2 && leadsB.size() == 2 && trailsA.size() == 2 && trailsB.size() == 2)
+    {
+      // Constants for scin synchronization
+      double c_tDiffTHR1 = calibTree.get(Form("%s.%d.%s%d", "scin", scinID, "hit_tdiff_thr1_scin_mtx_pos_", mtxPos), 0.0);
+      double c_tDiffTHR2 = calibTree.get(Form("%s.%d.%s%d", "scin", scinID, "hit_tdiff_thr2_scin_mtx_pos_", mtxPos), 0.0);
+
+      double tDiffTHR1 = leadsB.at(0).getTime() - leadsA.at(0).getTime() - c_tDiffTHR1;
+      double tDiffTHR2 = leadsB.at(1).getTime() - leadsA.at(1).getTime() - c_tDiffTHR2;
+
+      // Calculating averages
+      tDiffAvTHR1 += tDiffTHR1;
+      avCountTHR1++;
+      tDiffAvAll += tDiffTHR1;
+      tDiffAvAll += tDiffTHR2;
+      acCountAll++;
+      acCountAll++;
+    }
+  }
+
+  // Final averages
+  tDiffAvTHR1 = tDiffAvTHR1 / ((double)avCountTHR1);
+  tDiffAvAll = tDiffAvAll / ((double)acCountAll);
+
+  // Average reversed TOT - for all SiPMs
+  double revTOTAll = 0.0;
+  int revTOTCount = 0;
+
+  // Calculating reversed TOT per SiPM mtx position and filling histograms
+  for (int mtxPos = 1; mtxPos <= 4; mtxPos++)
+  {
+    auto leadsA = sigMapA.at(mtxPos).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+    auto trailsA = sigMapA.at(mtxPos).getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+    auto leadsB = sigMapB.at(mtxPos).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+    auto trailsB = sigMapB.at(mtxPos).getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+
+    // Checking time walk effect only for SiPM signals with both thresholds
+    if (leadsA.size() == 2 && leadsB.size() == 2 && trailsA.size() == 2 && trailsB.size() == 2)
+    {
+      double c_totTHR1A_a = calibTree.get("sipm." + to_string(pmAID) + ".tot_factor_thr1_a", 1.0);
+      double c_totTHR1A_b = calibTree.get("sipm." + to_string(pmAID) + ".tot_factor_thr1_b", 0.0);
+      double c_totTHR2A_a = calibTree.get("sipm." + to_string(pmAID) + ".tot_factor_thr2_a", 1.0);
+      double c_totTHR2A_b = calibTree.get("sipm." + to_string(pmAID) + ".tot_factor_thr2_b", 0.0);
+
+      double c_totTHR1B_a = calibTree.get("sipm." + to_string(pmBID) + ".tot_factor_thr1_a", 1.0);
+      double c_totTHR1B_b = calibTree.get("sipm." + to_string(pmBID) + ".tot_factor_thr1_b", 0.0);
+      double c_totTHR2B_a = calibTree.get("sipm." + to_string(pmBID) + ".tot_factor_thr2_a", 1.0);
+      double c_totTHR2B_b = calibTree.get("sipm." + to_string(pmBID) + ".tot_factor_thr2_b", 0.0);
+
+      double totATHR1 = c_totTHR1A_a * (trailsA.at(0).getTime() - leadsA.at(0).getTime()) + c_totTHR1A_b;
+      double totATHR2 = c_totTHR2A_a * (trailsA.at(1).getTime() - leadsA.at(1).getTime()) + c_totTHR2A_b;
+      double totBTHR1 = c_totTHR1B_a * (trailsB.at(0).getTime() - leadsB.at(0).getTime()) + c_totTHR1B_b;
+      double totBTHR2 = c_totTHR2B_a * (trailsB.at(1).getTime() - leadsB.at(1).getTime()) + c_totTHR2B_b;
+
+      if (totATHR1 != 0.0 && totATHR2 != 0.0 && totBTHR1 != 0.0 && totBTHR2 != 0.0)
+      {
+        double revTOTSum = (1.0 / totBTHR1 + 1.0 / totBTHR2) - (1.0 / totATHR1 + 1.0 / totATHR2);
+        revTOTAll += revTOTSum;
+        revTOTCount++;
+
+        // Filling histograms before application of corrections
+        if (saveHistos)
+        {
+          stats.getHisto2D(Form("time_walk_thr1_mtx_%d", mtxPos))->Fill(tDiffAvTHR1, revTOTSum);
+          stats.getHisto2D(Form("time_walk_thr2_mtx_%d", mtxPos))->Fill(tDiffAvAll, revTOTSum);
+        }
+
+        // Using corrections
+        double c_twTHR1_a = calibTree.get("time_walk.thr1_mtx" + to_string(mtxPos) + ".param_a", 1.0);
+        double c_twTHR1_b = calibTree.get("time_walk.thr1_mtx" + to_string(mtxPos) + ".param_b", 0.0);
+        double c_twTHR2_a = calibTree.get("time_walk.thr2_mtx" + to_string(mtxPos) + ".param_a", 1.0);
+        double c_twTHR2_b = calibTree.get("time_walk.thr2_mtx" + to_string(mtxPos) + ".param_b", 0.0);
+
+        double tDiffTHR1_corr = tDiffAvTHR1 - (revTOTSum * c_twTHR1_a + c_twTHR1_b);
+        double tDiffTHR2_corr = tDiffAvAll - (revTOTSum * c_twTHR2_a + c_twTHR2_b);
+
+        if (saveHistos)
+        {
+          stats.getHisto2D(Form("time_walk_thr1_mtx_%d_corr", mtxPos))->Fill(tDiffTHR1_corr, revTOTSum);
+          stats.getHisto2D(Form("time_walk_thr2_mtx_%d_corr", mtxPos))->Fill(tDiffTHR2_corr, revTOTSum);
+        }
+      }
+    }
+  }
+
+  // Reversed TOT average
+  revTOTAll = revTOTAll / ((double)revTOTCount);
+  if (saveHistos)
+  {
+    int mtxPos = 1;
+    // Before correction
+    stats.getHisto2D(Form("time_walk_sum_mtx_%d", mtxPos))->Fill(tDiffAvAll, revTOTAll);
+    // Corrected
+    double c_twSum_a = calibTree.get("time_walk.sum_mtx" + to_string(mtxPos) + ".param_a", 1.0);
+    double c_twSum_b = calibTree.get("time_walk.sum_mtx" + to_string(mtxPos) + ".param_b", 0.0);
+    double tDiffAvAll_corr = tDiffAvAll - (revTOTAll * c_twSum_a + c_twSum_b);
+    stats.getHisto2D(Form("time_walk_sum_mtx_%d_corr", mtxPos))->Fill(tDiffAvAll_corr, revTOTAll);
+  }
 }
 
 /**
