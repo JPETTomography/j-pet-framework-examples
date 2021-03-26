@@ -43,7 +43,7 @@
 namespace bpt = boost::property_tree;
 
 int fStep = 4;
-bool fIgnoreFirst = false;
+bool fIgnoreFirst = true;
 
 void time_walks(std::string fileName, std::string calibJSONFileName = "calibration_constants.json", bool saveResult = false,
                 std::string resultDir = "./")
@@ -77,6 +77,8 @@ void time_walks(std::string fileName, std::string calibJSONFileName = "calibrati
 
     for (auto elem : histoMap)
     {
+      bool ignoreFirst = fIgnoreFirst;
+
       auto name = elem.first;
       auto hist = elem.second;
 
@@ -88,9 +90,9 @@ void time_walks(std::string fileName, std::string calibJSONFileName = "calibrati
         auto projX = hist->ProjectionX("_px", bin - fStep, bin);
         if (projX->GetEntries() > 100)
         {
-          if (fIgnoreFirst)
+          if (ignoreFirst)
           {
-            fIgnoreFirst = false;
+            ignoreFirst = false;
             continue;
           }
 

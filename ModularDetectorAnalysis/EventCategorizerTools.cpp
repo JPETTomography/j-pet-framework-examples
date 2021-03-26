@@ -136,7 +136,10 @@ bool EventCategorizerTools::collimator2Gamma(const JPetEvent& event, JPetStatist
       int slot1ID = firstHit.getScin().getSlot().getID();
       int slot2ID = secondHit.getScin().getSlot().getID();
 
-      if (max(slot1ID, slot2ID) - min(slot1ID, slot2ID) == 12 && fabs(firstHit.getTime() - secondHit.getTime()) < maxTimeDiff)
+      int idDiff = max(scin1ID, scin2ID) - min(scin1ID, scin2ID);
+
+      // if (max(slot1ID, slot2ID) - min(slot1ID, slot2ID) == 12 && fabs(firstHit.getTime() - secondHit.getTime()) < maxTimeDiff)
+      if (idDiff > 154 && idDiff < 158 && fabs(firstHit.getTime() - secondHit.getTime()) < maxTimeDiff)
       {
         timeWalkStuff(firstHit, stats, saveHistos, calibTree);
         timeWalkStuff(secondHit, stats, saveHistos, calibTree);
