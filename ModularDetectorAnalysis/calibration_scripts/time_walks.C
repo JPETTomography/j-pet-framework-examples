@@ -71,9 +71,9 @@ void time_walks(std::string fileName, std::string calibJSONFileName = "calibrati
     histoMap["thr2_mtx3"] = dynamic_cast<TH2F*>(fileTimeWalk->Get("time_walk_thr2_mtx_3"));
     histoMap["thr2_mtx4"] = dynamic_cast<TH2F*>(fileTimeWalk->Get("time_walk_thr2_mtx_4"));
     histoMap["sum_mtx1"] = dynamic_cast<TH2F*>(fileTimeWalk->Get("time_walk_sum_mtx_1"));
-    histoMap["sum_mtx2"] = dynamic_cast<TH2F*>(fileTimeWalk->Get("time_walk_sum_mtx_2"));
-    histoMap["sum_mtx3"] = dynamic_cast<TH2F*>(fileTimeWalk->Get("time_walk_sum_mtx_3"));
-    histoMap["sum_mtx4"] = dynamic_cast<TH2F*>(fileTimeWalk->Get("time_walk_sum_mtx_4"));
+    // histoMap["sum_mtx2"] = dynamic_cast<TH2F*>(fileTimeWalk->Get("time_walk_sum_mtx_2"));
+    // histoMap["sum_mtx3"] = dynamic_cast<TH2F*>(fileTimeWalk->Get("time_walk_sum_mtx_3"));
+    // histoMap["sum_mtx4"] = dynamic_cast<TH2F*>(fileTimeWalk->Get("time_walk_sum_mtx_4"));
 
     for (auto elem : histoMap)
     {
@@ -86,7 +86,7 @@ void time_walks(std::string fileName, std::string calibJSONFileName = "calibrati
       for (int bin = fStep; bin < hist->GetNbinsY(); bin += fStep)
       {
         auto projX = hist->ProjectionX("_px", bin - fStep, bin);
-        if (projX->GetEntries() > 1500)
+        if (projX->GetEntries() > 100)
         {
           if (fIgnoreFirst)
           {

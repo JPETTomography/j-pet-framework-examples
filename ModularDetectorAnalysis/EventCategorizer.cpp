@@ -265,7 +265,7 @@ void EventCategorizer::saveEvents(const vector<JPetEvent>& events)
 {
   for (const auto& event : events)
   {
-    // fOutputEvents->add<JPetEvent>(event);
+    fOutputEvents->add<JPetEvent>(event);
   }
 }
 

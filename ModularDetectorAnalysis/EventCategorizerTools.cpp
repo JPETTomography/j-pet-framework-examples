@@ -136,9 +136,7 @@ bool EventCategorizerTools::collimator2Gamma(const JPetEvent& event, JPetStatist
       int slot1ID = firstHit.getScin().getSlot().getID();
       int slot2ID = secondHit.getScin().getSlot().getID();
 
-      if (max(slot1ID, slot2ID) - min(slot1ID, slot2ID) == 12 && fabs(firstHit.getTime() - secondHit.getTime()) < maxTimeDiff &&
-          firstHit.getSignalA().getRawSignals().size() == 4 && firstHit.getSignalB().getRawSignals().size() == 4 &&
-          secondHit.getSignalA().getRawSignals().size() == 4 && secondHit.getSignalB().getRawSignals().size() == 4)
+      if (max(slot1ID, slot2ID) - min(slot1ID, slot2ID) == 12 && fabs(firstHit.getTime() - secondHit.getTime()) < maxTimeDiff)
       {
         timeWalkStuff(firstHit, stats, saveHistos, calibTree);
         timeWalkStuff(secondHit, stats, saveHistos, calibTree);
@@ -163,6 +161,13 @@ void EventCategorizerTools::timeWalkStuff(const JPetHit& hit, JPetStatistics& st
   // First calculate average timeDiff for THR1, THR2 and all
   for (int mtxPos = 1; mtxPos <= 4; mtxPos++)
   {
+    auto searchA = sigMapA.find(mtxPos);
+    auto searchB = sigMapB.find(mtxPos);
+    if (searchA == sigMapA.end() || searchB == sigMapB.end())
+    {
+      continue;
+    }
+
     auto leadsA = sigMapA.at(mtxPos).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
     auto trailsA = sigMapA.at(mtxPos).getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
     auto leadsB = sigMapB.at(mtxPos).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
@@ -198,6 +203,13 @@ void EventCategorizerTools::timeWalkStuff(const JPetHit& hit, JPetStatistics& st
   // Calculating reversed TOT per SiPM mtx position and filling histograms
   for (int mtxPos = 1; mtxPos <= 4; mtxPos++)
   {
+    auto searchA = sigMapA.find(mtxPos);
+    auto searchB = sigMapB.find(mtxPos);
+    if (searchA == sigMapA.end() || searchB == sigMapB.end())
+    {
+      continue;
+    }
+
     auto leadsA = sigMapA.at(mtxPos).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
     auto trailsA = sigMapA.at(mtxPos).getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
     auto leadsB = sigMapB.at(mtxPos).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
