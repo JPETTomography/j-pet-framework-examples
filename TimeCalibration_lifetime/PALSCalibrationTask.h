@@ -29,10 +29,10 @@ class JPetWriter;
 #endif
 
 /**
- * @brief User Task for time calibration by matchin lifetime spectra
+ * @brief User Task for time calibration by matching lifetime spectra
  *
  * Task is preparing proper histograms for calibration. Calculation of the calibration
- * constants are by calibrtion tools defined in tools class. Task is designed to run
+ * constants are by calibration tools defined in tools class. Task is designed to run
  * it more than once in order to obtain the best constants by iterations.
  */
 class PALSCalibrationTask : public JPetUserTask{

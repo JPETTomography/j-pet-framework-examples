@@ -15,6 +15,16 @@
 
 #include "CalibrationTools.h"
 
+/**
+ * @brief Module to find an optimal effective length
+ *
+ * Files with calibration constants are needed for a given run
+ * where the calibration with different effective length assumed was performed.
+ * Optimal constant is estimated based on the quadratic fit to the relative differences
+ * of the calibration constants
+ *
+ */
+
 int main(int argc, char* argv[]) //first argument file with the parameters (default effLenParams.json)
 {
   std::string fileWithParameters = "";

@@ -15,6 +15,25 @@
 
 #include "CalibrationTools.h"
 
+/**
+ * @brief Module to find calibration constants 
+ *
+ * It works on three surfaces of analysis
+ * First: Calibration of sides AB
+ * - Working after the EventFinder files level
+ * - Finding correction to side B as a sum of the edges of the TDiffBA distribution (side A reference)
+ * - Creating appropriate file with AB corrections for every scintillator
+ * Second: Calibration of the scintillators betweeen themselves (iterative)
+ * - Working after the PALSCalibrationTask files level
+ * - Finding correction to scintillator based on the difference of the PAL distributions 
+ * for annihilation and deexcitation hit in a given scintillator
+ * - Creating appropriate file with corrections for every scintillator
+ * Third: Combining two sets of calibration files to one (AB and PAL)
+ * - Working only on the files created in previous steps
+ * - Creating one file with the final time corrections for a given run
+ *
+ */
+
 int main(int argc, char* argv[]) //first argument file with the parameters (default calibParams.json), second calibration option (single, multi or final)
 {
   std::string fileWithParameters = "";
