@@ -101,7 +101,7 @@ bool SignalTransformer::terminate()
  */
 void SignalTransformer::saveMatrixSignals(const std::vector<JPetMatrixSignal>& mtxSigVec)
 {
-  if (fSaveControlHistos)
+  if (mtxSigVec.size() > 0 && fSaveControlHistos)
   {
     getStatistics().getHisto1D("mtxsig_tslot")->Fill(mtxSigVec.size());
   }
@@ -146,44 +146,6 @@ void SignalTransformer::saveMatrixSignals(const std::vector<JPetMatrixSignal>& m
           }
         }
       }
-
-      // if (sigMap.find(1) != sigMap.end())
-      // {
-      //   if (leads_SiPM1.size() == 2)
-      //   {
-      //     auto time_SiPM1THR2 = leads_SiPM1.at(2).getTime();
-      //     auto channelID_SiPM1THR2 = leads_SiPM1.at(2).getChannel().getID();
-      //     getStatistics().getHisto2D("mtx_offsets_channel")->Fill(channelID_SiPM1THR2, time_SiPM1THR2 - time_SiPM1THR1);
-      //   }
-      //
-      //   if (sigMap.find(2) != sigMap.end())
-      //   {
-      //     auto leads_SiPM2 = sigMap.at(2).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-      //     auto time_SiPM2THR1 = leadsSiPM2.at(1).getTime();
-      //     auto channelID_SiPM2THR1 = leads_SiPM2.at(1).getChannel().getID();
-      //     getStatistics().getHisto2D("mtx_offsets_channel")->Fill(channelID_SiPM2THR1, time_SiPM2THR1 - time_SiPM1THR1);
-      //
-      //     if (leads_SiPM1.size() == 2)
-      //     {
-      //       auto time_SiPM2THR2 = leadsSiPM2.at(2).getTime();
-      //       auto channelID_SiPM2THR2 = leads_SiPM2.at(2).getChannel().getID();
-      //       getStatistics().getHisto2D("mtx_offsets_channel")->Fill(channelID_SiPM1THR2, timeSiPM1THR2 - time_SiPM1THR1);
-      //     }
-      //   }
-      //
-      //   if (sigMap.find(3) != sigMap.end())
-      //   {
-      //     auto pm3ID = sigMap.at(3).getPM().getID();
-      //     auto t3 = SignalTransformerTools::getRawSigBaseTime(sigMap.at(3));
-      //     getStatistics().getHisto2D("mtx_offsets_sipm")->Fill(pm3ID, t3 - t1);
-      //   }
-      //   if (sigMap.find(4) != sigMap.end())
-      //   {
-      //     auto pm4ID = sigMap.at(4).getPM().getID();
-      //     auto t4 = SignalTransformerTools::getRawSigBaseTime(sigMap.at(4));
-      //     getStatistics().getHisto2D("mtx_offsets_sipm")->Fill(pm4ID, t4 - t1);
-      //   }
-      // }
     }
   }
 }
@@ -198,7 +160,7 @@ void SignalTransformer::initialiseHistograms()
   getStatistics().getHisto1D("mtxsig_multi")->GetXaxis()->SetTitle("Number of Raw Signals in Matrix Signal");
   getStatistics().getHisto1D("mtxsig_multi")->GetYaxis()->SetTitle("Number of Matrix Signals");
 
-  getStatistics().createHistogram(new TH1F("mtxsig_tslot", "Number of Matrix Signals in Time Window", 100, 0.5, 100.5));
+  getStatistics().createHistogram(new TH1F("mtxsig_tslot", "Number of Matrix Signals in Time Window", 150, 0.5, 150.5));
   getStatistics().getHisto1D("mtxsig_tslot")->GetXaxis()->SetTitle("Number of Matrix Signal in Time Window");
   getStatistics().getHisto1D("mtxsig_tslot")->GetYaxis()->SetTitle("Number of Time Windows");
 
@@ -215,16 +177,8 @@ void SignalTransformer::initialiseHistograms()
   // SiPM offsets if needed
   if (fSaveCalibHistos)
   {
-    // auto minSiPMID = getParamBank().getPMs().begin()->first;
-    // auto maxSiPMID = getParamBank().getPMs().rbegin()->first;
-
     auto minChannelID = getParamBank().getChannels().begin()->first;
     auto maxChannelID = getParamBank().getChannels().rbegin()->first;
-
-    // getStatistics().createHistogram(new TH2F("mtx_offsets_sipm", "Offset of SiPM in Matrix vs. SiPM ID", maxSiPMID - minSiPMID + 1, minSiPMID -
-    // 0.5, maxSiPMID + 0.5, 200, -fMergingTime, fMergingTime));
-    // getStatistics().getHisto2D("mtx_offsets_sipm")->GetXaxis()->SetTitle("SiPM ID");
-    // getStatistics().getHisto2D("mtx_offsets_sipm")->GetYaxis()->SetTitle("Offset");
 
     getStatistics().createHistogram(new TH2F("mtx_offsets_channel", "Offset of Channel in Matrix vs. Channel ID", maxChannelID - minChannelID + 1,
                                              minChannelID - 0.5, maxChannelID + 0.5, 200, -fMergingTime, fMergingTime));

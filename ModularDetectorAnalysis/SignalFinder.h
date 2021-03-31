@@ -46,6 +46,7 @@ public:
 protected:
   void saveRawSignals(const std::vector<JPetRawSignal>& sigChVec);
   const std::string kLeadTrailMaxTimeParamKey = "SignalFinder_LeadTrailMaxTime_double";
+  const std::string kUseCorruptedSigChParamKey = "SignalFinder_UseCorruptedSigCh_bool";
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kEdgeMaxTimeParamKey = "SignalFinder_EdgeMaxTime_double";
   const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
@@ -53,6 +54,7 @@ protected:
   const int kNumOfThresholds = 2;
   double fSigChLeadTrailMaxTime = 23000.0;
   double fSigChEdgeMaxTime = 5000.0;
+  bool fUseCorruptedSigCh = false;
   bool fSaveControlHistos = true;
   double fScalingFactor = 0.001;
 

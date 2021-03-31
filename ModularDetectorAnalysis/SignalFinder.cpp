@@ -63,6 +63,24 @@ bool SignalFinder::init()
                  fSigChLeadTrailMaxTime));
   }
 
+  // Get bool for using corrupted Signal Channels
+  if (isOptionSet(fParams.getOptions(), kUseCorruptedSigChParamKey))
+  {
+    fUseCorruptedSigCh = getOptionAsBool(fParams.getOptions(), kUseCorruptedSigChParamKey);
+    if (fUseCorruptedSigCh)
+    {
+      WARNING("Signal Finder is using Corrupted Signal Channels, as set by the user");
+    }
+    else
+    {
+      WARNING("Signal Finder is NOT using Corrupted Signal Channels, as set by the user");
+    }
+  }
+  else
+  {
+    WARNING("Signal Finder is not using Corrupted Signal Channels (default option)");
+  }
+
   // Getting bool for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey))
   {
@@ -89,7 +107,7 @@ bool SignalFinder::exec()
   if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent))
   {
     // Distribute signal channels by PM IDs
-    auto& sigChByPM = SignalFinderTools::getSigChByPM(timeWindow);
+    auto& sigChByPM = SignalFinderTools::getSigChByPM(timeWindow, fUseCorruptedSigCh);
     // Building signals
     auto allSignals = SignalFinderTools::buildAllSignals(sigChByPM, fSigChEdgeMaxTime, fSigChLeadTrailMaxTime, kNumOfThresholds, getStatistics(),
                                                          fSaveControlHistos, fConstansTree);
@@ -115,7 +133,7 @@ bool SignalFinder::terminate()
  */
 void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& rawSigVec)
 {
-  if (fSaveControlHistos)
+  if (rawSigVec.size() > 0 && fSaveControlHistos)
   {
     getStatistics().getHisto1D("rawsig_tslot")->Fill(rawSigVec.size());
   }
@@ -169,7 +187,7 @@ void SignalFinder::initialiseHistograms()
   getStatistics().getHisto1D("rawsig_multi")->GetXaxis()->SetTitle("Total number of SigChs in RawSig");
   getStatistics().getHisto1D("rawsig_multi")->GetYaxis()->SetTitle("Number of Signal Channels");
 
-  getStatistics().createHistogram(new TH1F("rawsig_tslot", "Number of Raw Signals in Time Window", 200, 0.5, 400.5));
+  getStatistics().createHistogram(new TH1F("rawsig_tslot", "Number of Raw Signals in Time Window", 500, 0.5, 500.5));
   getStatistics().getHisto1D("rawsig_tslot")->GetXaxis()->SetTitle("Number of Raw Signal in Time Window");
   getStatistics().getHisto1D("rawsig_tslot")->GetYaxis()->SetTitle("Number of Time Windows");
 

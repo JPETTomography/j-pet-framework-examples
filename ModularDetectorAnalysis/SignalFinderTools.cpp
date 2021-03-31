@@ -21,7 +21,7 @@ using namespace std;
 /**
  * Method returns a map of vectors of JPetSigCh ordered by photomultiplier ID
  */
-const map<int, vector<JPetSigCh>> SignalFinderTools::getSigChByPM(const JPetTimeWindow* timeWindow)
+const map<int, vector<JPetSigCh>> SignalFinderTools::getSigChByPM(const JPetTimeWindow* timeWindow, bool useCorruptedSigCh)
 {
   map<int, vector<JPetSigCh>> sigChsPMMap;
   if (!timeWindow)
@@ -34,6 +34,10 @@ const map<int, vector<JPetSigCh>> SignalFinderTools::getSigChByPM(const JPetTime
   for (unsigned int i = 0; i < nSigChs; i++)
   {
     auto sigCh = dynamic_cast<const JPetSigCh&>(timeWindow->operator[](i));
+    if (!useCorruptedSigCh && sigCh.getRecoFlag() == JPetSigCh::Corrupted)
+    {
+      continue;
+    }
     auto pmtID = sigCh.getChannel().getPM().getID();
     auto search = sigChsPMMap.find(pmtID);
     if (search == sigChsPMMap.end())
