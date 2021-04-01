@@ -208,17 +208,18 @@ JPetHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const JPetMat
   }
 
   // TOT of a signal is a sum of over all threshold in a signal
+  auto tot = signalA.getTOT() + signalB.getTOT();
+  hit.setEnergy(tot);
+
   // As a TOT of a hit we put avarege of all TOT of SiPM signals constructing this hit
   // that is sum of TOT divided by multiplicity. TOT value is normalized using
   // equalization constants from calibration file. We save TOT it temporaily as energy
   // As an quality of energy we put TOT value before normalization
-  auto tot = signalA.getTOT() + signalB.getTOT();
-  auto multi = signalA.getRawSignals().size() + signalB.getRawSignals().size();
-  auto avToT = tot / ((double)multi);
-  auto normToT = avToT * totNormA + totNormB;
-
-  hit.setEnergy(normToT);
-  hit.setQualityOfEnergy(avToT);
+  // auto multi = signalA.getRawSignals().size() + signalB.getRawSignals().size();
+  // auto avToT = tot / ((double)multi);
+  // auto normToT = avToT * totNormA + totNormB;
+  // hit.setEnergy(normToT);
+  // hit.setQualityOfEnergy(avToT);
 
   return hit;
 }
