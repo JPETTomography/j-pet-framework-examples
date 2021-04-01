@@ -52,7 +52,6 @@ const double fScinActiveLenght = 50.0;
 const int fNumberOfPointsToFilter = 8;
 const int fThresholdForDerivative = 50;
 const int fHalfRangeForExtremumEstimation = 2;
-const int fScinOffset = 200;
 
 enum Side
 {
@@ -231,101 +230,99 @@ void hit_tdiff_effvel(std::string fileName, std::string calibJSONFileName = "cal
 
   if (fileHitsAB->IsOpen())
   {
-    TH2F* hitTDiffAll = dynamic_cast<TH2F*>(fileHitsAB->Get("hit_tdiff_scin"));
-    TH2F* hitTDiffM5 = dynamic_cast<TH2F*>(fileHitsAB->Get("hit_tdiff_scin_m_5"));
-    TH2F* hitTDiffM6 = dynamic_cast<TH2F*>(fileHitsAB->Get("hit_tdiff_scin_m_6"));
-    TH2F* hitTDiffM7 = dynamic_cast<TH2F*>(fileHitsAB->Get("hit_tdiff_scin_m_7"));
-    TH2F* hitTDiffM8 = dynamic_cast<TH2F*>(fileHitsAB->Get("hit_tdiff_scin_m_8"));
 
-    TH2F* hitTDiffSum = dynamic_cast<TH2F*>(hitTDiffM8->Clone("hit_tdiff_scin_sum"));
-    hitTDiffSum->Add(hitTDiffM7);
-    hitTDiffSum->Add(hitTDiffM6);
-    hitTDiffSum->Add(hitTDiffM5);
+    vector<string> histoNames = {"hit_tdiff_thr1_scin_mtx_pos_1", "hit_tdiff_thr1_scin_mtx_pos_2", "hit_tdiff_thr1_scin_mtx_pos_3",
+                                 "hit_tdiff_thr1_scin_mtx_pos_4", "hit_tdiff_thr2_scin_mtx_pos_1", "hit_tdiff_thr2_scin_mtx_pos_2",
+                                 "hit_tdiff_thr2_scin_mtx_pos_3", "hit_tdiff_thr2_scin_mtx_pos_4"};
+    int nameCounter = 0;
 
-    TGraphErrors* bCorrGraph = new TGraphErrors();
-    bCorrGraph->SetNameTitle("b_corr", "B side signals correction for scintillators");
-    bCorrGraph->GetXaxis()->SetTitle("Scin ID");
-    bCorrGraph->GetYaxis()->SetTitle("correction [ps]");
+    // TGraphErrors* bCorrGraph = new TGraphErrors();
+    // bCorrGraph->SetNameTitle("b_corr", "B side signals correction for scintillators");
+    // bCorrGraph->GetXaxis()->SetTitle("Scin ID");
+    // bCorrGraph->GetYaxis()->SetTitle("correction [ps]");
 
-    TGraphErrors* effVelGraph = new TGraphErrors();
-    effVelGraph->SetNameTitle("eff_vel", "Effective light velocity in scintillators");
-    effVelGraph->GetXaxis()->SetTitle("Scin ID");
-    effVelGraph->GetYaxis()->SetTitle("velocity [cm/ps]");
+    // TGraphErrors* effVelGraph = new TGraphErrors();
+    // effVelGraph->SetNameTitle("eff_vel", "Effective light velocity in scintillators");
+    // effVelGraph->GetXaxis()->SetTitle("Scin ID");
+    // effVelGraph->GetYaxis()->SetTitle("velocity [cm/ps]");
 
     unsigned graphIt = 0;
 
-    for (int scinID = minScinID; scinID <= maxScinID; ++scinID)
+    for (auto histoName : histoNames)
     {
-      TH1D* ab_tdiff = hitTDiffSum->ProjectionY(Form("ab_tdiff_scin_%d", scinID), scinID - fScinOffset, scinID - fScinOffset);
+      TH2F* hitTDiff = dynamic_cast<TH2F*>(fileHitsAB->Get(histoName.c_str()));
 
-      ab_tdiff->SetLineColor(kBlue);
-      ab_tdiff->SetLineWidth(2);
-
-      if (ab_tdiff->GetEntries() < 1000)
+      for (int scinID = minScinID; scinID <= maxScinID; ++scinID)
       {
-        continue;
-      }
+        TH1D* ab_tdiff = hitTDiff->ProjectionY(Form("n_%d_%d", nameCounter, scinID), scinID - minScinID + 1, scinID - minScinID + 1);
+        ab_tdiff->SetLineColor(kBlue);
+        ab_tdiff->SetLineWidth(2);
 
-      double mean = ab_tdiff->GetMean();
+        if (ab_tdiff->GetEntries() < 1000)
+        {
+          continue;
+        }
 
-      auto leftSide = getSubset(ab_tdiff, mean - 8000, mean - 2000);
-      auto rightSide = getSubset(ab_tdiff, mean + 2000, mean + 8000);
+        double mean = ab_tdiff->GetMean();
 
-      auto leftEdge = findEdge(leftSide, Side::Left);
-      auto rightEdge = findEdge(rightSide, Side::Right);
+        auto leftSide = getSubset(ab_tdiff, mean - 8000, mean - 2000);
+        auto rightSide = getSubset(ab_tdiff, mean + 2000, mean + 8000);
 
-      auto leftLine = new TLine(leftEdge.extremum.first, ab_tdiff->GetMinimum(), leftEdge.extremum.first, ab_tdiff->GetMaximum());
-      leftLine->SetLineColor(kRed);
-      leftLine->SetLineWidth(2);
-      auto rightLine = new TLine(rightEdge.extremum.first, ab_tdiff->GetMinimum(), rightEdge.extremum.first, ab_tdiff->GetMaximum());
-      rightLine->SetLineColor(kRed);
-      rightLine->SetLineWidth(2);
+        auto leftEdge = findEdge(leftSide, Side::Left);
+        auto rightEdge = findEdge(rightSide, Side::Right);
 
-      // B side correction in [ps] and effective velocity in [cm/ps]
-      double b_corr = 0.5 * (leftEdge.extremum.first + rightEdge.extremum.first);
-      double b_corr_error = 0.5 * (leftEdge.extremum.second + rightEdge.extremum.second);
-      double eff_vel = 2.0 * fScinActiveLenght / (fabs(rightEdge.extremum.first - leftEdge.extremum.first));
-      double eff_vel_error = 2.0 * fScinActiveLenght * (leftEdge.extremum.second - rightEdge.extremum.second) /
-                             pow((rightEdge.extremum.first - leftEdge.extremum.first), 2);
+        auto leftLine = new TLine(leftEdge.extremum.first, ab_tdiff->GetMinimum(), leftEdge.extremum.first, ab_tdiff->GetMaximum());
+        leftLine->SetLineColor(kRed);
+        leftLine->SetLineWidth(2);
+        auto rightLine = new TLine(rightEdge.extremum.first, ab_tdiff->GetMinimum(), rightEdge.extremum.first, ab_tdiff->GetMaximum());
+        rightLine->SetLineColor(kRed);
+        rightLine->SetLineWidth(2);
 
-      tree.put("scin." + to_string(scinID) + ".b_correction", b_corr);
-      tree.put("scin." + to_string(scinID) + ".eff_velocity", eff_vel);
+        // B side correction in [ps] and effective velocity in [cm/ps]
+        double b_corr = 0.5 * (leftEdge.extremum.first + rightEdge.extremum.first);
+        double b_corr_error = 0.5 * (leftEdge.extremum.second + rightEdge.extremum.second);
+        double eff_vel = 2.0 * fScinActiveLenght / (fabs(rightEdge.extremum.first - leftEdge.extremum.first));
+        double eff_vel_error = 2.0 * fScinActiveLenght * (leftEdge.extremum.second - rightEdge.extremum.second) /
+                               pow((rightEdge.extremum.first - leftEdge.extremum.first), 2);
 
-      // Filling the graph
-      bCorrGraph->SetPoint(graphIt, (double)scinID, b_corr);
-      bCorrGraph->SetPointError(graphIt, 0.0, 0.0);
-      effVelGraph->SetPoint(graphIt, (double)scinID, eff_vel);
-      effVelGraph->SetPointError(graphIt, 0.0, 0.0);
-      graphIt++;
+        tree.put("scin." + to_string(scinID) + "." + histoName + ".b_correction", b_corr);
+        tree.put("scin." + to_string(scinID) + "." + histoName + ".eff_velocity", eff_vel);
 
-      if (saveResult)
-      {
-        // Drawing canvas with spectra, derivatives and extremums marked with lines
-        auto name = Form("edges_scin_%d", scinID);
-        TCanvas* can = new TCanvas(name, name, 1200, 800);
-        ab_tdiff->SetMinimum(-1000.0);
-        ab_tdiff->Draw();
-        leftEdge.firstDevGraph->Draw("LPsame");
-        leftEdge.secondDevGraph->Draw("LPsame");
-        rightEdge.firstDevGraph->Draw("LPsame");
-        rightEdge.secondDevGraph->Draw("LPsame");
-        leftLine->Draw("same");
-        rightLine->Draw("same");
-        // Saving canvas in the specified directory
-        can->SaveAs(Form("%s/edges_scin_%d.png", resultDir.c_str(), scinID));
+        // Filling the graph
+        // bCorrGraph->SetPoint(graphIt, (double)scinID, b_corr);
+        // bCorrGraph->SetPointError(graphIt, 0.0, 0.0);
+        // effVelGraph->SetPoint(graphIt, (double)scinID, eff_vel);
+        // effVelGraph->SetPointError(graphIt, 0.0, 0.0);
+        graphIt++;
+
+        if (saveResult)
+        {
+          // Drawing canvas with spectra, derivatives and extremums marked with lines
+          auto name = Form("scin_%d_%s", scinID, histoName.c_str());
+          TCanvas* can = new TCanvas(name, name, 1200, 800);
+          ab_tdiff->SetMinimum(-1000.0);
+          ab_tdiff->Draw();
+          leftEdge.firstDevGraph->Draw("LPsame");
+          leftEdge.secondDevGraph->Draw("LPsame");
+          rightEdge.firstDevGraph->Draw("LPsame");
+          rightEdge.secondDevGraph->Draw("LPsame");
+          leftLine->Draw("same");
+          rightLine->Draw("same");
+          // Saving canvas in the specified directory
+          can->SaveAs(Form("%s/edges_%s.png", resultDir.c_str(), name));
+        }
       }
     }
-
-    if (saveResult)
-    {
-      TCanvas* canBcorr = new TCanvas("b_corr_graph", "b_corr_graph", 1200, 800);
-      bCorrGraph->Draw("AP*");
-      canBcorr->SaveAs(Form("%s/b_corrections.png", resultDir.c_str()));
-
-      TCanvas* canEffVel = new TCanvas("eff_vel_graph", "eff_vel_graph", 1200, 800);
-      effVelGraph->Draw("AP*");
-      canEffVel->SaveAs(Form("%s/eff_velocity.png", resultDir.c_str()));
-    }
+    // if (saveResult)
+    // {
+    //   TCanvas* canBcorr = new TCanvas("b_corr_graph", "b_corr_graph", 1200, 800);
+    //   bCorrGraph->Draw("AP*");
+    //   canBcorr->SaveAs(Form("%s/b_corrections.png", resultDir.c_str()));
+    //
+    //   TCanvas* canEffVel = new TCanvas("eff_vel_graph", "eff_vel_graph", 1200, 800);
+    //   effVelGraph->Draw("AP*");
+    //   canEffVel->SaveAs(Form("%s/eff_velocity.png", resultDir.c_str()));
+    // }
   }
 
   // Saving tree into json file

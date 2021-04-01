@@ -148,13 +148,16 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(vector<JP
 
     // Getting offsets for this scintillator - applying only to Side B signals
     // If signal is from Side A or calibration is empty, then a correction vaule is 0.0
-    double correction = 0.0;
-    if (mtxSig.getPM().getSide() == JPetPM::SideB)
-    {
-      correction = calibTree.get("scin." + to_string(mtxSig.getPM().getScin().getID()) + ".b_correction", 0.0);
-    }
+    // double correction = 0.0;
+    // if (mtxSig.getPM().getSide() == JPetPM::SideB)
+    // {
+    //   double c_tDiffTHR1 = calibTree.get(Form("%s.%d.%s%d", "scin", scinID, "hit_tdiff_thr1_scin_mtx_pos_", mtxPos), 0.0);
+    //
+    //   correction = calibTree.get("scin." + to_string(mtxSig.getPM().getScin().getID()) + ".b_correction", 0.0);
+    // }
+    // mtxSig.setTime(calculateAverageTime(mtxSig) - correction);
 
-    mtxSig.setTime(calculateAverageTime(mtxSig) - correction);
+    mtxSig.setTime(calculateAverageTime(mtxSig, calibTree));
     mtxSig.setTOT(calculateAverageTOT(mtxSig));
     rawSigVec.erase(rawSigVec.begin());
     mtxSigVec.push_back(mtxSig);
@@ -165,7 +168,7 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(vector<JP
 /**
  * Calculating time of Matrix Signal as an average of all leading edge times contained in all RawSignals
  */
-double SignalTransformerTools::calculateAverageTime(JPetMatrixSignal& mtxSig)
+double SignalTransformerTools::calculateAverageTime(JPetMatrixSignal& mtxSig, boost::property_tree::ptree& calibTree)
 {
   double averageTime = 0.0;
   auto rawSignals = mtxSig.getRawSignals();
@@ -175,7 +178,16 @@ double SignalTransformerTools::calculateAverageTime(JPetMatrixSignal& mtxSig)
     auto leads = rawSig.second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
     for (auto leadSigCh : leads)
     {
-      averageTime += leadSigCh.getTime();
+      double correction = 0.0;
+      if (leadSigCh.getChannel().getPM().getSide() == JPetPM::SideB)
+      {
+        auto thr = leadSigCh.getChannel().getThresholdNumber();
+        auto mtxPos = leadSigCh.getChannel().getPM().getMatrixPosition();
+        auto scinID = leadSigCh.getChannel().getPM().getScin().getID();
+        auto param = Form("%s.%d.%s%d%s%d.%s", "scin", scinID, "hit_tdiff_thr", thr, "_scin_mtx_pos_", mtxPos, "b_correction");
+        correction = calibTree.get(param, 0.0);
+      }
+      averageTime += leadSigCh.getTime() - correction;
       multiplicity++;
     }
   }

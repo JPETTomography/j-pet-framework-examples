@@ -41,7 +41,7 @@ public:
                                                              boost::property_tree::ptree& calibTree);
 
 private:
-  static double calculateAverageTime(JPetMatrixSignal& mtxSig);
+  static double calculateAverageTime(JPetMatrixSignal& mtxSig, boost::property_tree::ptree& calibTree);
   static double calculateAverageTOT(JPetMatrixSignal& mtxSig);
   static void sortByTime(std::vector<JPetRawSignal>& input);
 };
