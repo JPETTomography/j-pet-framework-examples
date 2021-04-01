@@ -79,13 +79,13 @@ bool EventCategorizer::init()
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kTOTCutDeexMinParamKey.c_str(), fTOTCutDeexMin));
   }
 
-  if (isOptionSet(fParams.getOptions(), kTOTCutAnniMaxParamKey))
+  if (isOptionSet(fParams.getOptions(), kTOTCutDeexMaxParamKey))
   {
-    fTOTCutDeexMax = getOptionAsDouble(fParams.getOptions(), kTOTCutAnniMaxParamKey);
+    fTOTCutDeexMax = getOptionAsDouble(fParams.getOptions(), kTOTCutDeexMaxParamKey);
   }
   else
   {
-    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kTOTCutAnniMaxParamKey.c_str(), fTOTCutDeexMax));
+    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kTOTCutDeexMaxParamKey.c_str(), fTOTCutDeexMax));
   }
 
   // Cuts around source position

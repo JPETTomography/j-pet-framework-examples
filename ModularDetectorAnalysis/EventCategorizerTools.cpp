@@ -45,9 +45,6 @@ void EventCategorizerTools::selectForCalibration(const JPetEvent& event, JPetSta
       bool deex1 = false;
       bool deex2 = false;
 
-      INFO(Form("TOF candidates, scin ID %d %d tot %f %f", scin1ID, scin2ID, tot1, tot2));
-      INFO(Form("TOT cuts %f %f %f %f", totCutAnniMin, totCutAnniMax, totCutDeexMin, totCutDeexMax));
-
       // Checking TOT of hits to classify them as annihilation or deexcitation
       if (tot1 > totCutAnniMin && tot1 < totCutAnniMax)
       {
@@ -94,8 +91,6 @@ void EventCategorizerTools::selectForCalibration(const JPetEvent& event, JPetSta
         continue;
       }
 
-      INFO(Form("TOF pair found, scin ID %d %d", aScinID, dScinID));
-
       double t0_A = aTime - (posA - sourcePos).Mag() / kLightVelocity_cm_ps;
       double t0_D = dTime - (posD - sourcePos).Mag() / kLightVelocity_cm_ps;
       double tDiff_A_D = t0_A - t0_D;
@@ -103,8 +98,6 @@ void EventCategorizerTools::selectForCalibration(const JPetEvent& event, JPetSta
       // Filling histograms for specific scintillators
       if (saveCalibHistos && aScinID != -1 && dScinID != -1)
       {
-        INFO("TOF filling histograms.");
-
         stats.getHisto2D("tdiff_annih_scin")->Fill(aScinID, tDiff_A_D);
         stats.getHisto2D("tdiff_deex_scin")->Fill(dScinID, tDiff_A_D);
       }
