@@ -26,6 +26,7 @@ using namespace std;
 void EventCategorizerTools::selectForCalibration(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double totCutAnniMin,
                                                  double totCutAnniMax, double totCutDeexMin, double totCutDeexMax, const TVector3& sourcePos)
 {
+  INFO("TOF selection called.");
   if (event.getHits().size() < 2)
   {
     return;
@@ -91,6 +92,8 @@ void EventCategorizerTools::selectForCalibration(const JPetEvent& event, JPetSta
         continue;
       }
 
+      INFO(Form("TOF pair found, scin ID %d %d", aScinID, dScinID));
+
       double t0_A = aTime - (posA - sourcePos).Mag() / kLightVelocity_cm_ps;
       double t0_D = dTime - (posD - sourcePos).Mag() / kLightVelocity_cm_ps;
       double tDiff_A_D = t0_A - t0_D;
@@ -98,6 +101,8 @@ void EventCategorizerTools::selectForCalibration(const JPetEvent& event, JPetSta
       // Filling histograms for specific scintillators
       if (saveCalibHistos && aScinID != -1 && dScinID != -1)
       {
+        INFO("TOF filling histograms.");
+
         stats.getHisto2D("tdiff_annih_scin")->Fill(aScinID, tDiff_A_D);
         stats.getHisto2D("tdiff_deex_scin")->Fill(dScinID, tDiff_A_D);
       }
