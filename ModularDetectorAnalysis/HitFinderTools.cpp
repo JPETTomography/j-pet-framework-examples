@@ -207,9 +207,9 @@ JPetHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const JPetMat
     hit.setPosZ(-999.9);
   }
 
-  // TOT of a signal is a sum of over all threshold in a signal
+  // TOT of a signal is a average of TOT of AB signals
   auto tot = signalA.getTOT() + signalB.getTOT();
-  hit.setEnergy(tot);
+  hit.setEnergy(tot / 2.0);
 
   // As a TOT of a hit we put avarege of all TOT of SiPM signals constructing this hit
   // that is sum of TOT divided by multiplicity. TOT value is normalized using

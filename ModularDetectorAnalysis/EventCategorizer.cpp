@@ -213,11 +213,11 @@ bool EventCategorizer::exec()
       {
         EventCategorizerTools::selectForCalibration(event, getStatistics(), fSaveCalibHistos, fTOTCutAnniMin, fTOTCutAnniMax, fTOTCutDeexMin,
                                                     fTOTCutDeexMax, fSourcePos);
-      }
 
-      bool isCollimator =
-          EventCategorizerTools::collimator2Gamma(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fTOTCutAnniMin,
-                                                  fTOTCutAnniMax, fLORAngleCut, fLORPosZCut, fSourcePos, fConstansTree);
+        bool isCollimator =
+            EventCategorizerTools::collimator2Gamma(event, getStatistics(), fSaveCalibHistos, f2gThetaDiff, f2gTimeDiff, fTOTCutAnniMin,
+                                                    fTOTCutAnniMax, fLORAngleCut, fLORPosZCut, fSourcePos, fConstansTree);
+      }
 
       // Selection of other type of events is currently not used
       // bool is3Gamma = EventCategorizerTools::checkFor3Gamma(
@@ -231,9 +231,10 @@ bool EventCategorizer::exec()
       // );
 
       JPetEvent newEvent = event;
-      if (isCollimator)
+      if (is2Gamma)
       {
         newEvent.addEventType(JPetEventType::k2Gamma);
+        events.push_back(newEvent);
       }
       // if(is3Gamma) newEvent.addEventType(JPetEventType::k3Gamma);
       // if(isPrompt) newEvent.addEventType(JPetEventType::kPrompt);
@@ -244,7 +245,6 @@ bool EventCategorizer::exec()
       //     getStatistics().getHisto2D("All_XYpos")->Fill(hit.getPosX(), hit.getPosY());
       //   }
       // }
-      events.push_back(newEvent);
     }
     saveEvents(events);
   }
@@ -527,14 +527,14 @@ void EventCategorizer::initialiseCalibrationHistograms()
 
   // Synchronization of TOF with annihilaion-deexcitation pairs
   getStatistics().createHistogram(new TH2F("tdiff_annih_scin", "A-D time difference for annihilation hit per scin", maxScinID - minScinID + 1,
-                                           minScinID - 0.5, maxScinID + 0.5, 200, -20000.0, 20000.0));
-  getStatistics().getHisto2D("tdiff_annih_scin")->GetXaxis()->SetTitle("Time diffrence [ps]");
-  getStatistics().getHisto2D("tdiff_annih_scin")->GetYaxis()->SetTitle("Number of A-D pairs");
+                                           minScinID - 0.5, maxScinID + 0.5, 200, -fMaxTimeDiff, fMaxTimeDiff));
+  getStatistics().getHisto2D("tdiff_annih_scin")->GetXaxis()->SetTitle("");
+  getStatistics().getHisto2D("tdiff_annih_scin")->GetYaxis()->SetTitle("Time diffrence [ps]");
 
   getStatistics().createHistogram(new TH2F("tdiff_deex_scin", "A-D time difference for deex hit per scin", maxScinID - minScinID + 1, minScinID - 0.5,
-                                           maxScinID + 0.5, 200, -20000.0, 20000.0));
-  getStatistics().getHisto2D("tdiff_deex_scin")->GetXaxis()->SetTitle("Time diffrence [ps]");
-  getStatistics().getHisto2D("tdiff_deex_scin")->GetYaxis()->SetTitle("Number of A-D pairs");
+                                           maxScinID + 0.5, 200, -fMaxTimeDiff, fMaxTimeDiff));
+  getStatistics().getHisto2D("tdiff_deex_scin")->GetXaxis()->SetTitle("Scin ID");
+  getStatistics().getHisto2D("tdiff_deex_scin")->GetYaxis()->SetTitle("Time diffrence [ps]");
 
   // Time walk histograms
   for (int sipmPos = 1; sipmPos <= 4; sipmPos++)
