@@ -26,7 +26,6 @@ using namespace std;
 void EventCategorizerTools::selectForCalibration(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double totCutAnniMin,
                                                  double totCutAnniMax, double totCutDeexMin, double totCutDeexMax, const TVector3& sourcePos)
 {
-  INFO("TOF selection called.");
   if (event.getHits().size() < 2)
   {
     return;
@@ -45,6 +44,9 @@ void EventCategorizerTools::selectForCalibration(const JPetEvent& event, JPetSta
       bool anih2 = false;
       bool deex1 = false;
       bool deex2 = false;
+
+      INFO(Form("TOF candidates, scin ID %d %d tot %f %f", scin1ID, scin2ID, tot1, tot2));
+      INFO(Form("TOT cuts %f %f %f %f", totCutAnniMin, totCutAnniMax, totCutDeexMin, totCutDeexMax));
 
       // Checking TOT of hits to classify them as annihilation or deexcitation
       if (tot1 > totCutAnniMin && tot1 < totCutAnniMax)
