@@ -205,19 +205,21 @@ double SignalTransformerTools::calculateAverageTOT(JPetMatrixSignal& mtxSig)
 {
   double tot = 0.0;
   auto rawSignals = mtxSig.getRawSignals();
-  for (auto element : rawSignals)
+  for (auto rawSig : rawSignals)
   {
-    auto leads = element.second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-    auto trails = element.second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-    if (leads.size() == trails.size())
-    {
-      for (uint i = 0; i < leads.size(); i++)
-      {
-        tot += trails.at(i).getTime() - leads.at(i).getTime();
-      }
-    }
+    tot += rawSig.second.getTOT();
+
+    // auto leads = element.second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
+    // auto trails = element.second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
+    // if (leads.size() == trails.size())
+    // {
+    // for (uint i = 0; i < leads.size(); i++)
+    // {
+    // tot += trails.at(i).getTime() - leads.at(i).getTime();
+    // }
+    // }
   }
-  return tot;
+  return tot / ((double)mtxSig.getRawSignals().size());
 }
 
 /**
