@@ -40,6 +40,13 @@ public:
   static bool checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
                              double totCutAnniMin, double totCutAnniMax, double lorAngleMax, double lorPosZMax, const TVector3& sourcePos);
 
+  static bool checkFor2Gamma(const JPetHit& firstHit, const JPetHit& secondHit, JPetStatistics& stats, bool saveHistos, double maxThetaDiff,
+                             double maxTimeDiff, double totCutAnniMin, double totCutAnniMax, double lorAngleMax, double lorPosZMax,
+                             const TVector3& sourcePos);
+
+  static std::vector<JPetEvent> getLORs(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
+                                        double totCutAnniMin, double totCutAnniMax, double lorAngleMax, double lorPosZMax, const TVector3& sourcePos);
+
   static bool collimator2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
                                double totCutAnniMin, double totCutAnniMax, double lorAngleMax, double lorPosZMax, const TVector3& sourcePos,
                                boost::property_tree::ptree& calibTree);

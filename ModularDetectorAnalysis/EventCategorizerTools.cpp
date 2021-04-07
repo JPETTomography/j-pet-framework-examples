@@ -243,11 +243,11 @@ void EventCategorizerTools::timeWalkStuff(const JPetHit& hit, JPetStatistics& st
         revTOTCount++;
 
         // Filling histograms before application of corrections
-        if (saveHistos)
-        {
-          stats.getHisto2D(Form("time_walk_thr1_mtx_%d", mtxPos))->Fill(tDiffAvTHR1, revTOTSum);
-          stats.getHisto2D(Form("time_walk_thr2_mtx_%d", mtxPos))->Fill(tDiffAvAll, revTOTSum);
-        }
+        // if (saveHistos)
+        // {
+        //   stats.getHisto2D(Form("time_walk_thr1_mtx_%d", mtxPos))->Fill(tDiffAvTHR1, revTOTSum);
+        //   stats.getHisto2D(Form("time_walk_thr2_mtx_%d", mtxPos))->Fill(tDiffAvAll, revTOTSum);
+        // }
 
         // Using corrections
         double c_twTHR1_a = calibTree.get("time_walk.thr1_mtx" + to_string(mtxPos) + ".param_a", 1.0);
@@ -258,11 +258,11 @@ void EventCategorizerTools::timeWalkStuff(const JPetHit& hit, JPetStatistics& st
         double tDiffTHR1_corr = tDiffAvTHR1 - (revTOTSum * c_twTHR1_a + c_twTHR1_b);
         double tDiffTHR2_corr = tDiffAvAll - (revTOTSum * c_twTHR2_a + c_twTHR2_b);
 
-        if (saveHistos)
-        {
-          stats.getHisto2D(Form("time_walk_thr1_mtx_%d_corr", mtxPos))->Fill(tDiffTHR1_corr, revTOTSum);
-          stats.getHisto2D(Form("time_walk_thr2_mtx_%d_corr", mtxPos))->Fill(tDiffTHR2_corr, revTOTSum);
-        }
+        // if (saveHistos)
+        // {
+        //   stats.getHisto2D(Form("time_walk_thr1_mtx_%d_corr", mtxPos))->Fill(tDiffTHR1_corr, revTOTSum);
+        //   stats.getHisto2D(Form("time_walk_thr2_mtx_%d_corr", mtxPos))->Fill(tDiffTHR2_corr, revTOTSum);
+        // }
       }
     }
   }
@@ -273,12 +273,12 @@ void EventCategorizerTools::timeWalkStuff(const JPetHit& hit, JPetStatistics& st
   {
     int mtxPos = 1;
     // Before correction
-    stats.getHisto2D(Form("time_walk_sum_mtx_%d", mtxPos))->Fill(tDiffAvAll, revTOTAll);
+    // stats.getHisto2D(Form("time_walk_sum_mtx_%d", mtxPos))->Fill(tDiffAvAll, revTOTAll);
     // Corrected
     double c_twSum_a = calibTree.get("time_walk.sum_mtx" + to_string(mtxPos) + ".param_a", 1.0);
     double c_twSum_b = calibTree.get("time_walk.sum_mtx" + to_string(mtxPos) + ".param_b", 0.0);
     double tDiffAvAll_corr = tDiffAvAll - (revTOTAll * c_twSum_a + c_twSum_b);
-    stats.getHisto2D(Form("time_walk_sum_mtx_%d_corr", mtxPos))->Fill(tDiffAvAll_corr, revTOTAll);
+    // stats.getHisto2D(Form("time_walk_sum_mtx_%d_corr", mtxPos))->Fill(tDiffAvAll_corr, revTOTAll);
   }
 }
 
@@ -292,6 +292,47 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
   if (event.getHits().size() < 2)
   {
     return false;
+  }
+
+  bool isEvent2Gamma = false;
+
+  for (uint i = 0; i < event.getHits().size(); i++)
+  {
+    for (uint j = i + 1; j < event.getHits().size(); j++)
+    {
+      JPetHit firstHit, secondHit;
+      if (event.getHits().at(i).getTime() < event.getHits().at(j).getTime())
+      {
+        firstHit = event.getHits().at(i);
+        secondHit = event.getHits().at(j);
+      }
+      else
+      {
+        firstHit = event.getHits().at(j);
+        secondHit = event.getHits().at(i);
+      }
+
+      if (checkFor2Gamma(firstHit, secondHit, stats, saveHistos, maxThetaDiff, maxTimeDiff, totCutAnniMin, totCutAnniMax, lorAngleMax, lorPosZMax,
+                         sourcePos))
+      {
+        isEvent2Gamma = true;
+      }
+    }
+  }
+  return isEvent2Gamma;
+}
+
+/**
+ * Method for selecting pairs of annihilation hits
+ */
+vector<JPetEvent> EventCategorizerTools::getLORs(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff,
+                                                 double maxTimeDiff, double totCutAnniMin, double totCutAnniMax, double lorAngleMax,
+                                                 double lorPosZMax, const TVector3& sourcePos)
+{
+  vector<JPetEvent> lors;
+  if (event.getHits().size() < 2)
+  {
+    return lors;
   }
 
   for (uint i = 0; i < event.getHits().size(); i++)
@@ -310,191 +351,219 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
         secondHit = event.getHits().at(i);
       }
 
-      int scin1ID = firstHit.getScin().getID();
-      int scin2ID = secondHit.getScin().getID();
-
-      double timeDiff = fabs(firstHit.getTime() - secondHit.getTime());
-      TVector3 firstVec = firstHit.getPos() - sourcePos;
-      TVector3 secondVec = secondHit.getPos() - sourcePos;
-      double angle = TMath::RadToDeg() * firstVec.Angle(secondVec);
-
-      // Average TOT is temporaily stored as hit energy
-      auto tot1 = firstHit.getEnergy();
-      auto tot2 = secondHit.getEnergy();
-      // Calculating reversed TOT for time walk studies
-      auto revTOT1 = calculateReveresedTOT(firstHit);
-      auto revTOT2 = calculateReveresedTOT(secondHit);
-
-      // TOF calculated by convention
-      double tof = calculateTOFByConvention(firstHit, secondHit);
-
-      // LOR angle
-      TVector3 vecHit1_2D(firstHit.getPosX() - sourcePos.X(), 0.0, firstHit.getPosZ() - sourcePos.Z());
-      TVector3 vecHit2_2D(secondHit.getPosX() - sourcePos.X(), 0.0, secondHit.getPosZ() - sourcePos.Z());
-      TVector3 vecHit1_1D(firstHit.getPosX() - sourcePos.X(), 0.0, 0.0);
-      TVector3 vecHit2_1D(secondHit.getPosX() - sourcePos.X(), 0.0, 0.0);
-
-      double lorAngle1 = TMath::RadToDeg() * vecHit1_2D.Angle(vecHit1_1D);
-      double lorAngle2 = TMath::RadToDeg() * vecHit2_2D.Angle(vecHit2_2D);
-
-      // Pre-cuts histograms
-      if (saveHistos)
+      if (checkFor2Gamma(firstHit, secondHit, stats, saveHistos, maxThetaDiff, maxTimeDiff, totCutAnniMin, totCutAnniMax, lorAngleMax, lorPosZMax,
+                         sourcePos))
       {
-        stats.getHisto1D("2g_tdiff")->Fill(timeDiff);
-        stats.getHisto2D("2g_tdiff_scin")->Fill(scin1ID, timeDiff);
-        stats.getHisto2D("2g_tdiff_scin")->Fill(scin2ID, timeDiff);
-
-        stats.getHisto1D("2g_tot")->Fill(tot1);
-        stats.getHisto1D("2g_tot")->Fill(tot2);
-        stats.getHisto2D("2g_tot_scin")->Fill(scin1ID, tot1);
-        stats.getHisto2D("2g_tot_scin")->Fill(scin2ID, tot2);
-
-        stats.getHisto1D("2g_revtot")->Fill(revTOT1);
-        stats.getHisto1D("2g_revtot")->Fill(revTOT2);
-        stats.getHisto2D("2g_revtot_scin")->Fill(scin1ID, revTOT1);
-        stats.getHisto2D("2g_revtot_scin")->Fill(scin2ID, revTOT2);
-
-        stats.getHisto1D("2g_tof")->Fill(tof);
-        stats.getHisto2D("2g_tof_scin")->Fill(scin1ID, tof);
-        stats.getHisto2D("2g_tof_scin")->Fill(scin1ID, tof);
-
-        stats.getHisto1D("2g_hit_tdiff")->Fill(firstHit.getTimeDiff());
-        stats.getHisto1D("2g_hit_tdiff")->Fill(secondHit.getTimeDiff());
-
-        stats.getHisto2D("2g_hit_tdiff_scin")->Fill(scin1ID, firstHit.getTimeDiff());
-        stats.getHisto2D("2g_hit_tdiff_scin")->Fill(scin1ID, secondHit.getTimeDiff());
-
-        stats.getHisto1D("2g_angle")->Fill(angle);
-        stats.getHisto2D("2g_angle_scin")->Fill(scin1ID, angle);
-        stats.getHisto2D("2g_angle_scin")->Fill(scin2ID, angle);
-
-        stats.getHisto1D("2g_lor_angle")->Fill(lorAngle1);
-        stats.getHisto1D("2g_lor_angle")->Fill(lorAngle2);
-
-        stats.getHisto1D("cut_stats_none")->Fill(scin1ID);
-        stats.getHisto1D("cut_stats_none")->Fill(scin2ID);
-      }
-
-      // Checking selection conditions
-      bool angleCut1 = false, angleCut2 = false, tDiffCut = false, totCut = false;
-      // Angular cut is performed to select hits in opposite modules
-      // Can be done in a precise way (vector theta diff around 180 degree angle)
-      // or exactly opposite slot, based on ID difference (equal to 12)
-      int slot1ID = firstHit.getScin().getSlot().getID();
-      int slot2ID = secondHit.getScin().getSlot().getID();
-      int slotIDDiff = max(slot1ID - slot2ID, slot2ID - slot1ID);
-      if (slotIDDiff == 12)
-      {
-        angleCut1 = true;
-        if (saveHistos)
-        {
-          stats.getHisto1D("cut_stats_a1")->Fill(scin1ID);
-          stats.getHisto1D("cut_stats_a1")->Fill(scin2ID);
-        }
-      }
-
-      if (180.0 - angle < maxThetaDiff)
-      {
-        angleCut2 = true;
-        if (saveHistos)
-        {
-          stats.getHisto1D("cut_stats_a2")->Fill(scin1ID);
-          stats.getHisto1D("cut_stats_a2")->Fill(scin2ID);
-        }
-      }
-
-      // Time difference cut
-      if (timeDiff < maxTimeDiff)
-      {
-        tDiffCut = true;
-        if (saveHistos)
-        {
-          stats.getHisto1D("cut_stats_tdiff")->Fill(scin1ID);
-          stats.getHisto1D("cut_stats_tdiff")->Fill(scin2ID);
-        }
-      }
-
-      // TOT cut
-      if (tot1 > totCutAnniMin && tot1 < totCutAnniMax && tot2 > totCutAnniMin && tot2 < totCutAnniMax)
-      {
-        totCut = true;
-        if (saveHistos)
-        {
-          stats.getHisto1D("cut_stats_tot")->Fill(scin1ID);
-          stats.getHisto1D("cut_stats_tot")->Fill(scin2ID);
-        }
-      }
-
-      if (saveHistos && totCut && tDiffCut && angleCut2)
-      {
-        TVector3 annhilationPoint = calculateAnnihilationPoint(firstHit, secondHit);
-
-        stats.getHisto1D("ap_tdiff")->Fill(timeDiff);
-        stats.getHisto2D("ap_tdiff_scin")->Fill(scin1ID, timeDiff);
-        stats.getHisto2D("ap_tdiff_scin")->Fill(scin2ID, timeDiff);
-
-        stats.getHisto1D("ap_tot")->Fill(tot1);
-        stats.getHisto1D("ap_tot")->Fill(tot2);
-        stats.getHisto2D("ap_tot_scin")->Fill(scin1ID, tot1);
-        stats.getHisto2D("ap_tot_scin")->Fill(scin2ID, tot2);
-
-        stats.getHisto1D("ap_revtot")->Fill(revTOT1);
-        stats.getHisto1D("ap_revtot")->Fill(revTOT2);
-        stats.getHisto2D("ap_revtot_scin")->Fill(scin1ID, revTOT1);
-        stats.getHisto2D("ap_revtot_scin")->Fill(scin2ID, revTOT2);
-
-        stats.getHisto1D("ap_tof")->Fill(tof);
-        stats.getHisto2D("ap_tof_scin")->Fill(scin1ID, tof);
-        stats.getHisto2D("ap_tof_scin")->Fill(scin2ID, tof);
-
-        stats.getHisto1D("ap_hit_tdiff")->Fill(firstHit.getTimeDiff());
-        stats.getHisto1D("ap_hit_tdiff")->Fill(secondHit.getTimeDiff());
-        stats.getHisto2D("ap_hit_tdiff_scin")->Fill(scin1ID, firstHit.getTimeDiff());
-        stats.getHisto2D("ap_hit_tdiff_scin")->Fill(scin2ID, secondHit.getTimeDiff());
-
-        stats.getHisto1D("ap_angle")->Fill(angle);
-        stats.getHisto2D("ap_angle_scin")->Fill(scin1ID, angle);
-        stats.getHisto2D("ap_angle_scin")->Fill(scin2ID, angle);
-
-        stats.getHisto1D("ap_lor_angle")->Fill(lorAngle1);
-        stats.getHisto1D("ap_lor_angle")->Fill(lorAngle2);
-
-        stats.getHisto2D("ap_tof_lor_angle")->Fill(lorAngle1, tof);
-        stats.getHisto2D("ap_tof_lor_angle")->Fill(lorAngle2, tof);
-        stats.getHisto2D("ap_tof_lor_angle_zoom")->Fill(lorAngle1, tof);
-        stats.getHisto2D("ap_tof_lor_angle_zoom")->Fill(lorAngle2, tof);
-
-        stats.getHisto2D("ap_tof_z_pos")->Fill(firstHit.getPosZ(), tof);
-        stats.getHisto2D("ap_tof_z_pos")->Fill(secondHit.getPosZ(), tof);
-
-        stats.getHisto2D("ap_yx")->Fill(annhilationPoint.Y(), annhilationPoint.X());
-        stats.getHisto2D("ap_zx")->Fill(annhilationPoint.Z(), annhilationPoint.X());
-        stats.getHisto2D("ap_zy")->Fill(annhilationPoint.Z(), annhilationPoint.Y());
-        stats.getHisto2D("ap_yx_zoom")->Fill(annhilationPoint.Y(), annhilationPoint.X());
-        stats.getHisto2D("ap_zx_zoom")->Fill(annhilationPoint.Z(), annhilationPoint.X());
-        stats.getHisto2D("ap_zy_zoom")->Fill(annhilationPoint.Z(), annhilationPoint.Y());
-
-        if (lorAngle1 < lorAngleMax && lorAngle2 < lorAngleMax)
-        {
-          stats.getHisto2D("ap_yx_zoom_lor_cut")->Fill(annhilationPoint.Y(), annhilationPoint.X());
-          stats.getHisto2D("ap_zx_zoom_lor_cut")->Fill(annhilationPoint.Z(), annhilationPoint.X());
-          stats.getHisto2D("ap_zy_zoom_lor_cut")->Fill(annhilationPoint.Z(), annhilationPoint.Y());
-          stats.getHisto1D("ap_tof_lor_cut")->Fill(tof);
-        }
-
-        if (fabs(firstHit.getPosZ()) < lorPosZMax && fabs(secondHit.getPosZ()) < lorPosZMax)
-        {
-          stats.getHisto2D("ap_yx_zoom_z_cut")->Fill(annhilationPoint.Y(), annhilationPoint.X());
-          stats.getHisto2D("ap_zx_zoom_z_cut")->Fill(annhilationPoint.Z(), annhilationPoint.X());
-          stats.getHisto2D("ap_zy_zoom_z_cut")->Fill(annhilationPoint.Z(), annhilationPoint.Y());
-        }
-      }
-      // Returning event as 2 gamma if meets cut conditions
-      if (totCut && tDiffCut && angleCut2)
-      {
-        return true;
+        JPetEvent lor;
+        lor.addHit(firstHit);
+        lor.addHit(secondHit);
+        lor.addEventType(JPetEventType::k2Gamma);
+        lors.push_back(lor);
       }
     }
+  }
+  return lors;
+}
+
+/**
+ * Method for determining type of two hits - back to back 2 gamma
+ */
+bool EventCategorizerTools::checkFor2Gamma(const JPetHit& firstHit, const JPetHit& secondHit, JPetStatistics& stats, bool saveHistos,
+                                           double maxThetaDiff, double maxTimeDiff, double totCutAnniMin, double totCutAnniMax, double lorAngleMax,
+                                           double lorPosZMax, const TVector3& sourcePos)
+{
+  int scin1ID = firstHit.getScin().getID();
+  int scin2ID = secondHit.getScin().getID();
+
+  TVector3 firstVec = firstHit.getPos() - sourcePos;
+  TVector3 secondVec = secondHit.getPos() - sourcePos;
+  double theta = TMath::RadToDeg() * firstVec.Angle(secondVec);
+
+  // Registration time difference, always positive
+  double timeDiff = fabs(firstHit.getTime() - secondHit.getTime());
+
+  // Average TOT is temporaily stored as hit energy
+  auto tot1 = firstHit.getEnergy();
+  auto tot2 = secondHit.getEnergy();
+
+  // Calculating reversed TOT for time walk studies
+  auto revTOT1 = calculateReveresedTOT(firstHit);
+  auto revTOT2 = calculateReveresedTOT(secondHit);
+
+  // TOF calculated by convention
+  double tof = calculateTOFByConvention(firstHit, secondHit);
+
+  // LOR angle
+  TVector3 vecHit1_2D(firstHit.getPosX() - sourcePos.X(), 0.0, firstHit.getPosZ() - sourcePos.Z());
+  TVector3 vecHit2_2D(secondHit.getPosX() - sourcePos.X(), 0.0, secondHit.getPosZ() - sourcePos.Z());
+  TVector3 vecHit1_1D(firstHit.getPosX() - sourcePos.X(), 0.0, 0.0);
+  TVector3 vecHit2_1D(secondHit.getPosX() - sourcePos.X(), 0.0, 0.0);
+
+  double lorAngle1 = TMath::RadToDeg() * vecHit1_2D.Angle(vecHit1_1D);
+  double lorAngle2 = TMath::RadToDeg() * vecHit2_2D.Angle(vecHit2_2D);
+
+  // Pre-cuts histograms
+  if (saveHistos)
+  {
+    stats.getHisto1D("2g_tot")->Fill(tot1);
+    stats.getHisto1D("2g_tot")->Fill(tot2);
+    stats.getHisto2D("2g_tot_z_pos")->Fill(firstHit.getPosZ(), tot1);
+    stats.getHisto2D("2g_tot_z_pos")->Fill(secondHit.getPosZ(), tot2);
+    stats.getHisto2D("2g_tot_scin")->Fill(scin1ID, tot1);
+    stats.getHisto2D("2g_tot_scin")->Fill(scin2ID, tot2);
+
+    stats.getHisto1D("2g_revtot")->Fill(revTOT1);
+    stats.getHisto1D("2g_revtot")->Fill(revTOT2);
+    stats.getHisto2D("2g_revtot_scin")->Fill(scin1ID, revTOT1);
+    stats.getHisto2D("2g_revtot_scin")->Fill(scin2ID, revTOT2);
+    stats.getHisto2D("2g_revtot_z_pos")->Fill(firstHit.getPosZ(), revTOT1);
+    stats.getHisto2D("2g_revtot_z_pos")->Fill(secondHit.getPosZ(), revTOT2);
+
+    stats.getHisto1D("2g_tof")->Fill(tof);
+    stats.getHisto2D("2g_tof_scin")->Fill(scin1ID, tof);
+    stats.getHisto2D("2g_tof_scin")->Fill(scin1ID, tof);
+    stats.getHisto2D("2g_tof_z_pos")->Fill(firstHit.getPosZ(), tof);
+    stats.getHisto2D("2g_tof_z_pos")->Fill(secondHit.getPosZ(), tof);
+
+    stats.getHisto1D("2g_hit_tdiff")->Fill(firstHit.getTimeDiff());
+    stats.getHisto1D("2g_hit_tdiff")->Fill(secondHit.getTimeDiff());
+    stats.getHisto2D("2g_hit_tdiff_scin")->Fill(scin1ID, firstHit.getTimeDiff());
+    stats.getHisto2D("2g_hit_tdiff_scin")->Fill(scin1ID, secondHit.getTimeDiff());
+    stats.getHisto2D("2g_hit_tdiff_z_pos")->Fill(firstHit.getPosZ(), firstHit.getTimeDiff());
+    stats.getHisto2D("2g_hit_tdiff_z_pos")->Fill(secondHit.getPosZ(), secondHit.getTimeDiff());
+
+    stats.getHisto1D("2g_theta")->Fill(theta);
+    stats.getHisto2D("2g_theta_scin")->Fill(scin1ID, theta);
+    stats.getHisto2D("2g_theta_scin")->Fill(scin2ID, theta);
+    stats.getHisto2D("2g_theta_z_pos")->Fill(firstHit.getPosZ(), theta);
+    stats.getHisto2D("2g_theta_z_pos")->Fill(secondHit.getPosZ(), theta);
+
+    stats.getHisto1D("cut_stats_none")->Fill(scin1ID);
+    stats.getHisto1D("cut_stats_none")->Fill(scin2ID);
+  }
+
+  // Checking selection conditions
+  bool thetaCut1 = false, thetaCut2 = false, tDiffCut = false, totCut = false;
+  // Angular cut is performed to select hits in opposite modules
+  // Can be done in a precise way (vector theta diff around 180 degree theta)
+  // or exactly opposite slot, based on ID difference (equal to 12)
+  int slot1ID = firstHit.getScin().getSlot().getID();
+  int slot2ID = secondHit.getScin().getSlot().getID();
+  int slotIDDiff = max(slot1ID - slot2ID, slot2ID - slot1ID);
+  if (slotIDDiff == 12)
+  {
+    thetaCut1 = true;
+    if (saveHistos)
+    {
+      stats.getHisto1D("cut_stats_a1")->Fill(scin1ID);
+      stats.getHisto1D("cut_stats_a1")->Fill(scin2ID);
+    }
+  }
+
+  if (180.0 - theta < maxThetaDiff)
+  {
+    thetaCut2 = true;
+    if (saveHistos)
+    {
+      stats.getHisto1D("cut_stats_a2")->Fill(scin1ID);
+      stats.getHisto1D("cut_stats_a2")->Fill(scin2ID);
+      stats.getHisto1D("theta_cut_tof")->Fill(tof);
+      stats.getHisto1D("theta_cut_tot")->Fill(tot1);
+      stats.getHisto1D("theta_cut_tot")->Fill(tot2);
+      stats.getHisto1D("theta_cut_hit_tdiff")->Fill(firstHit.getTimeDiff());
+      stats.getHisto1D("theta_cut_hit_tdiff")->Fill(secondHit.getTimeDiff());
+    }
+  }
+
+  // Time difference cut
+  if (timeDiff < maxTimeDiff)
+  {
+    tDiffCut = true;
+    if (saveHistos)
+    {
+      stats.getHisto1D("cut_stats_tdiff")->Fill(scin1ID);
+      stats.getHisto1D("cut_stats_tdiff")->Fill(scin2ID);
+      stats.getHisto1D("tof_cut_tot")->Fill(tot1);
+      stats.getHisto1D("tof_cut_tot")->Fill(tot2);
+      stats.getHisto1D("tof_cut_hit_tdiff")->Fill(firstHit.getTimeDiff());
+      stats.getHisto1D("tof_cut_hit_tdiff")->Fill(secondHit.getTimeDiff());
+      stats.getHisto1D("tof_cut_theta")->Fill(theta);
+    }
+  }
+
+  // TOT cut
+  if (tot1 > totCutAnniMin && tot1 < totCutAnniMax && tot2 > totCutAnniMin && tot2 < totCutAnniMax)
+  {
+    totCut = true;
+    if (saveHistos)
+    {
+      stats.getHisto1D("cut_stats_tot")->Fill(scin1ID);
+      stats.getHisto1D("cut_stats_tot")->Fill(scin2ID);
+      stats.getHisto1D("tot_cut_tof")->Fill(tof);
+      stats.getHisto1D("tot_cut_hit_tdiff")->Fill(firstHit.getTimeDiff());
+      stats.getHisto1D("tot_cut_hit_tdiff")->Fill(secondHit.getTimeDiff());
+      stats.getHisto1D("tot_cut_theta")->Fill(theta);
+    }
+  }
+
+  // Pair of hits that meet cut conditions are treated as coming from annihilation point
+  if (saveHistos && tDiffCut && thetaCut2)
+  {
+    TVector3 annhilationPoint = calculateAnnihilationPoint(firstHit, secondHit);
+
+    stats.getHisto1D("ap_tot")->Fill(tot1);
+    stats.getHisto1D("ap_tot")->Fill(tot2);
+    stats.getHisto2D("ap_tot_scin")->Fill(scin1ID, tot1);
+    stats.getHisto2D("ap_tot_scin")->Fill(scin2ID, tot2);
+    stats.getHisto2D("ap_tot_z_pos")->Fill(firstHit.getPosZ(), tot1);
+    stats.getHisto2D("ap_tot_z_pos")->Fill(secondHit.getPosZ(), tot2);
+
+    stats.getHisto1D("ap_revtot")->Fill(revTOT1);
+    stats.getHisto1D("ap_revtot")->Fill(revTOT2);
+    stats.getHisto2D("ap_revtot_scin")->Fill(scin1ID, revTOT1);
+    stats.getHisto2D("ap_revtot_scin")->Fill(scin2ID, revTOT2);
+    stats.getHisto2D("ap_revtot_z_pos")->Fill(firstHit.getPosZ(), revTOT1);
+    stats.getHisto2D("ap_revtot_z_pos")->Fill(secondHit.getPosZ(), revTOT2);
+
+    stats.getHisto1D("ap_hit_tdiff")->Fill(firstHit.getTimeDiff());
+    stats.getHisto1D("ap_hit_tdiff")->Fill(secondHit.getTimeDiff());
+    stats.getHisto2D("ap_hit_tdiff_scin")->Fill(scin1ID, firstHit.getTimeDiff());
+    stats.getHisto2D("ap_hit_tdiff_scin")->Fill(scin2ID, secondHit.getTimeDiff());
+    stats.getHisto2D("ap_hit_tdiff_z_pos")->Fill(firstHit.getPosZ(), firstHit.getTimeDiff());
+    stats.getHisto2D("ap_hit_tdiff_z_pos")->Fill(secondHit.getPosZ(), secondHit.getTimeDiff());
+
+    stats.getHisto1D("ap_tof")->Fill(tof);
+    stats.getHisto2D("ap_tof_scin")->Fill(scin1ID, tof);
+    stats.getHisto2D("ap_tof_scin")->Fill(scin2ID, tof);
+    stats.getHisto2D("ap_tof_z_pos")->Fill(firstHit.getPosZ(), tof);
+    stats.getHisto2D("ap_tof_z_pos")->Fill(secondHit.getPosZ(), tof);
+
+    stats.getHisto2D("ap_yx")->Fill(annhilationPoint.Y(), annhilationPoint.X());
+    stats.getHisto2D("ap_zx")->Fill(annhilationPoint.Z(), annhilationPoint.X());
+    stats.getHisto2D("ap_zy")->Fill(annhilationPoint.Z(), annhilationPoint.Y());
+    stats.getHisto2D("ap_yx_zoom")->Fill(annhilationPoint.Y(), annhilationPoint.X());
+    stats.getHisto2D("ap_zx_zoom")->Fill(annhilationPoint.Z(), annhilationPoint.X());
+    stats.getHisto2D("ap_zy_zoom")->Fill(annhilationPoint.Z(), annhilationPoint.Y());
+
+    if (lorAngle1 < lorAngleMax && lorAngle2 < lorAngleMax)
+    {
+      stats.getHisto2D("ap_yx_zoom_lor_cut")->Fill(annhilationPoint.Y(), annhilationPoint.X());
+      stats.getHisto2D("ap_zx_zoom_lor_cut")->Fill(annhilationPoint.Z(), annhilationPoint.X());
+      stats.getHisto2D("ap_zy_zoom_lor_cut")->Fill(annhilationPoint.Z(), annhilationPoint.Y());
+      stats.getHisto1D("ap_tof_lor_cut")->Fill(tof);
+    }
+
+    if (fabs(firstHit.getPosZ()) < lorPosZMax && fabs(secondHit.getPosZ()) < lorPosZMax)
+    {
+      stats.getHisto2D("ap_yx_zoom_z_cut")->Fill(annhilationPoint.Y(), annhilationPoint.X());
+      stats.getHisto2D("ap_zx_zoom_z_cut")->Fill(annhilationPoint.Z(), annhilationPoint.X());
+      stats.getHisto2D("ap_zy_zoom_z_cut")->Fill(annhilationPoint.Z(), annhilationPoint.Y());
+    }
+  }
+  // Returning event as 2 gamma if meets cut conditions
+  if (totCut && tDiffCut && thetaCut2)
+  {
+    return true;
   }
   return false;
 }
