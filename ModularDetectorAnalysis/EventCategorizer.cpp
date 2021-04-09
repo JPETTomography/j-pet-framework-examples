@@ -505,7 +505,7 @@ void EventCategorizer::initialiseHistograms()
   getStatistics().getHisto2D("ap_zx_zoom")->GetXaxis()->SetTitle("Z position [cm]");
   getStatistics().getHisto2D("ap_zx_zoom")->GetYaxis()->SetTitle("X position [cm]");
 
-  getStatistics().createHistogram(new TH2F("ap_zy_zoom", "ZY position of annihilation point (bin 0.5 cm)", 121, -10.5, 10.5, 121, -15.5, 15.5));
+  getStatistics().createHistogram(new TH2F("ap_zy_zoom", "ZY position of annihilation point (bin 0.5 cm)", 121, -15.5, 15.5, 121, -15.5, 15.5));
   getStatistics().getHisto2D("ap_zy_zoom")->GetXaxis()->SetTitle("Z position [cm]");
   getStatistics().getHisto2D("ap_zy_zoom")->GetYaxis()->SetTitle("Y position [cm]");
 
