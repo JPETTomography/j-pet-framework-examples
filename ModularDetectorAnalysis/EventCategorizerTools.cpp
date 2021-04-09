@@ -481,8 +481,6 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetHit& firstHit, const JPetHi
     tDiffCut = true;
     if (saveHistos)
     {
-      stats.getHisto1D("cut_stats_tdiff")->Fill(scin1ID);
-      stats.getHisto1D("cut_stats_tdiff")->Fill(scin2ID);
       stats.getHisto1D("tof_cut_tot")->Fill(tot1);
       stats.getHisto1D("tof_cut_tot")->Fill(tot2);
       stats.getHisto1D("tof_cut_hit_tdiff")->Fill(firstHit.getTimeDiff());
