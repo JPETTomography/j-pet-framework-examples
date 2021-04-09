@@ -341,14 +341,6 @@ vector<JPetEvent> EventCategorizerTools::getLORs(const JPetEvent& event, JPetSta
     {
       JPetHit firstHit, secondHit;
 
-      auto multi1 = firstHit.getSignalA().getRawSignals().size() + firstHit.getSignalB().getRawSignals().size();
-      auto multi2 = secondHit.getSignalA().getRawSignals().size() + secondHit.getSignalB().getRawSignals().size();
-
-      if (multi1 + multi2 < 8)
-      {
-        continue;
-      }
-
       if (event.getHits().at(i).getTime() < event.getHits().at(j).getTime())
       {
         firstHit = event.getHits().at(i);
