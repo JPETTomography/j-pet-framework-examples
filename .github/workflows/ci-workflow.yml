@@ -64,6 +64,14 @@ jobs:
         make
         make tests_largebarrel
         make tests_imagereconstruction
+        make tests_calibProg
+
+    - name: run lifetime calibration test
+      run: |
+        source root/bin/thisroot.sh
+        source unpacker/build/bin/thisunpacker.sh
+        cd build/TimeCalibration_lifetime
+        ctest -j6 -C Debug -T test --output-on-failure
 
     - name: run image reconstruction test       
       run: |
