@@ -19,10 +19,6 @@
 #include "JPetRecoSignal/JPetRecoSignal.h"
 #include "JPetUserTask/JPetUserTask.h"
 
-#ifdef __CINT__
-#define override
-#endif
-
 class JPetWriter;
 
 /**

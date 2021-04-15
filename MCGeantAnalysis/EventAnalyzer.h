@@ -21,10 +21,6 @@
 #include <JPetUserTask/JPetUserTask.h>
 #include "../LargeBarrelAnalysis/EventCategorizerTools.h"
 
-#ifdef __CINT__
-#define override
-#endif
-
 class EventAnalyzer : public JPetUserTask {
 public:
   EventAnalyzer(const char *name);

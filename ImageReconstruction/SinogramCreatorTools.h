@@ -16,12 +16,6 @@
 #ifndef SINOGRAMCREATORTOOLS_H
 #define SINOGRAMCREATORTOOLS_H
 
-#ifdef __CINT__
-// when cint is used instead of compiler, override word is not recognized
-// nevertheless it's needed for checking if the structure of project is correct
-#define override
-#endif
-
 #include <cmath>
 #include <tuple>
 #include <utility>

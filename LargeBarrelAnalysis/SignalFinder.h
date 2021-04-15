@@ -23,10 +23,6 @@
 
 class JPetWriter;
 
-#ifdef __CINT__
-#define override
-#endif
-
 /**
  * @brief User Task: method organizing Signal Channels to Raw Signals
  *
