@@ -69,4 +69,4 @@ target_include_directories(${projectName} PUBLIC
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${projectName}>
                            $<BUILD_INTERFACE:${FFTW_INCLUDE_DIRS}>)
-target_link_libraries(${projectName} PRIVATE JPetFramework::JPetFramework ${FFTW_LIBRARIES})
+target_link_libraries(${projectName} PRIVATE JPetFramework::JPetFramework FFTW::Double)
