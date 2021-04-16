@@ -26,10 +26,6 @@
 
 class JPetWriter;
 
-#ifdef __CINT__
-#	define override
-#endif
-
 class EventCategorizerPhysics : public JPetUserTask{
 public:
 	EventCategorizerPhysics(const char * name);

@@ -25,10 +25,6 @@
 
 class JPetWriter;
 
-#ifdef __CINT__
-#	define override
-#endif
-
 /**
  * @brief User Task categorizing Events
  *

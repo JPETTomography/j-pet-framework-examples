@@ -25,11 +25,6 @@
 #include <memory>
 #include <vector>
 #include <string>
-#ifdef __CINT__
-//when cint is used instead of compiler, override word is not recognized
-//nevertheless it's needed for checking if the structure of project is correct
-#	define override
-#endif
 class TimeCalibration: public JPetUserTask
 {
 public:

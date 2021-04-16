@@ -16,12 +16,6 @@
 #ifndef SINOGRAMCREATOR_H
 #define SINOGRAMCREATOR_H
 
-#ifdef __CINT__
-// when cint is used instead of compiler, override word is not recognized
-// nevertheless it's needed for checking if the structure of project is correct
-#define override
-#endif
-
 #include "JPetGeomMapping/JPetGeomMapping.h"
 #include "JPetHit/JPetHit.h"
 #include "JPetUserTask/JPetUserTask.h"
