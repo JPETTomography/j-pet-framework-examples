@@ -26,8 +26,13 @@ executeCommand "cmake .."
 executeCommand "make"
 executeCommand "make tests_largebarrel"
 executeCommand "make tests_imagereconstruction"
+executeCommand "make tests_calibProg"
 
 executeCommand "cd ImageReconstruction"
+executeCommand "ctest -j6 -C Debug -T test --output-on-failure"
+executeCommand "cd .."
+
+executeCommand "cd TimeCalibration_lifetime"
 executeCommand "ctest -j6 -C Debug -T test --output-on-failure"
 executeCommand "cd .."
 

@@ -17,6 +17,7 @@
 #define CALIBRATIONTOOLS_H
 
 #include <TH2D.h>
+#include <TFile.h>
 #include <TH1F.h>
 #include <TF12.h>
 #include <TF1.h>
