@@ -14,7 +14,6 @@
  */
 
 #include "SignalTransformer.h"
-#include "CalibrationTools.h"
 #include "JPetWriter/JPetWriter.h"
 #include "SignalTransformerTools.h"
 
@@ -57,6 +56,13 @@ bool SignalTransformer::init()
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMergeSignalsTimeParamKey.c_str(), fMergingTime));
   }
 
+  // Select only SiPM signals from one position in matrix
+  if (isOptionSet(fParams.getOptions(), kSelectMatrixPosParamKey))
+  {
+    fMatrixPos = getOptionAsInt(fParams.getOptions(), kSelectMatrixPosParamKey);
+    INFO(Form("Using signals only from SiPMs with position %d in matrices", fMatrixPos));
+  }
+
   // Control histograms
   if (fSaveControlHistos)
   {
@@ -72,7 +78,7 @@ bool SignalTransformer::exec()
   {
 
     // Distribute Raw Signals per Matrices
-    auto rawSigMtxMap = SignalTransformerTools::getRawSigMtxMap(timeWindow);
+    auto rawSigMtxMap = SignalTransformerTools::getRawSigMtxMap(timeWindow, fMatrixPos);
 
     // Merging max. 4 Raw Signals into a MatrixSignal
     auto mergedSignals = SignalTransformerTools::mergeSignalsAllSiPMs(rawSigMtxMap, fMergingTime, fConstansTree);

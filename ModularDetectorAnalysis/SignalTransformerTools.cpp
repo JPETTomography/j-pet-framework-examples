@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -22,7 +22,7 @@ using namespace std;
  * Returns map< scin ID, side < signals >>.
  * Side A is the first element int he vector, Side B is the second one.
  */
-const map<int, vector<vector<JPetRawSignal>>> SignalTransformerTools::getRawSigMtxMap(const JPetTimeWindow* timeWindow)
+const map<int, vector<vector<JPetRawSignal>>> SignalTransformerTools::getRawSigMtxMap(const JPetTimeWindow* timeWindow, int selectMatrixPos)
 {
   map<int, vector<vector<JPetRawSignal>>> rawSigMtxMap;
 
@@ -39,7 +39,13 @@ const map<int, vector<vector<JPetRawSignal>>> SignalTransformerTools::getRawSigM
 
     auto scinID = rawSig.getPM().getScin().getID();
     auto pmSide = rawSig.getPM().getSide();
+    auto pmMtxPos = rawSig.getPM().getMatrixPosition();
     auto search = rawSigMtxMap.find(scinID);
+
+    if (pmMtxPos != -1 && pmMtxPos != selectMatrixPos)
+    {
+      continue;
+    }
 
     if (search == rawSigMtxMap.end())
     {
@@ -146,17 +152,6 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(vector<JP
       }
     }
 
-    // Getting offsets for this scintillator - applying only to Side B signals
-    // If signal is from Side A or calibration is empty, then a correction vaule is 0.0
-    // double correction = 0.0;
-    // if (mtxSig.getPM().getSide() == JPetPM::SideB)
-    // {
-    //   double c_tDiffTHR1 = calibTree.get(Form("%s.%d.%s%d", "scin", scinID, "hit_tdiff_thr1_scin_mtx_pos_", mtxPos), 0.0);
-    //
-    //   correction = calibTree.get("scin." + to_string(mtxSig.getPM().getScin().getID()) + ".b_correction", 0.0);
-    // }
-    // mtxSig.setTime(calculateAverageTime(mtxSig) - correction);
-
     mtxSig.setTime(calculateAverageTime(mtxSig, calibTree));
     mtxSig.setTOT(calculateAverageTOT(mtxSig));
     rawSigVec.erase(rawSigVec.begin());
@@ -204,12 +199,17 @@ double SignalTransformerTools::calculateAverageTime(JPetMatrixSignal& mtxSig, bo
 double SignalTransformerTools::calculateAverageTOT(JPetMatrixSignal& mtxSig)
 {
   double tot = 0.0;
+  int multiplicity = 0;
   auto rawSignals = mtxSig.getRawSignals();
   for (auto rawSig : rawSignals)
   {
-    tot += rawSig.second.getTOT();
+    if (rawSig.second.getTOT() > 0.0)
+    {
+      tot += rawSig.second.getTOT();
+      multiplicity++;
+    }
   }
-  return tot / ((double)mtxSig.getRawSignals().size());
+  return tot / ((double)multiplicity);
 }
 
 /**

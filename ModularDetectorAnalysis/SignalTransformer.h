@@ -22,36 +22,34 @@
 #include "JPetUserTask/JPetUserTask.h"
 #include <vector>
 
-#ifdef __CINT__
-#define override
-#endif
-
 class JPetWriter;
 
 /**
  * @brief User Task: method rewriting Raw Signals to Reco and Matrix Signals.
  *
  */
-class SignalTransformer: public JPetUserTask
+class SignalTransformer : public JPetUserTask
 {
 public:
-	SignalTransformer(const char* name);
-	virtual ~SignalTransformer();
-	virtual bool init() override;
-	virtual bool exec() override;
-	virtual bool terminate() override;
+  SignalTransformer(const char* name);
+  virtual ~SignalTransformer();
+  virtual bool init() override;
+  virtual bool exec() override;
+  virtual bool terminate() override;
 
 protected:
-	const std::string kMergeSignalsTimeParamKey = "SignalTransformer_MergeSignalsTime_double";
-	const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
-	const std::string kSaveCalibHistosParamKey = "Save_Calib_Histograms_bool";
-	const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
-	void saveMatrixSignals(const std::vector<JPetMatrixSignal>& mtxSigVec);
-	boost::property_tree::ptree fConstansTree;
-	void initialiseHistograms();
-	bool fSaveControlHistos = true;
-	bool fSaveCalibHistos = false;
-	double fMergingTime = 20000.0;
+  const std::string kMergeSignalsTimeParamKey = "SignalTransformer_MergeSignalsTime_double";
+  const std::string kSelectMatrixPosParamKey = "SignalTrasformer_SelectMatrixPos_int";
+  const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
+  const std::string kSaveCalibHistosParamKey = "Save_Calib_Histograms_bool";
+  const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
+  void saveMatrixSignals(const std::vector<JPetMatrixSignal>& mtxSigVec);
+  boost::property_tree::ptree fConstansTree;
+  void initialiseHistograms();
+  int fMatrixPos = -1;
+  bool fSaveControlHistos = true;
+  bool fSaveCalibHistos = false;
+  double fMergingTime = 20000.0;
 };
 
 #endif /* !SIGNALTRANSFORMER_H */

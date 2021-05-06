@@ -10,11 +10,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- *  @file SignalFinderTools.h
+ *  @file SiPMSignalFinderTools.h
  */
 
-#ifndef SIGNALFINDERTOOLS_H
-#define SIGNALFINDERTOOLS_H
+#ifndef SIPMSIGNALFINDERTOOLS_H
+#define SIPMSIGNALFINDERTOOLS_H
 
 /**
  * @brief Set of tools for Signal Finder task
@@ -33,7 +33,7 @@
 #include <utility>
 #include <vector>
 
-class SignalFinderTools
+class SiPMSignalFinderTools
 {
 public:
   static const std::map<int, std::vector<JPetSigCh>> getSigChByPM(const JPetTimeWindow* timeWindow, bool useCorruptedSigCh);
@@ -44,7 +44,5 @@ public:
                                                     int numberOfThrs, JPetStatistics& stats, bool saveHistos, boost::property_tree::ptree& calibTree);
   static int findSigChOnNextThr(double sigChValue, double sigChEdgeMaxTime, const std::vector<JPetSigCh>& sigChVec);
   static int findTrailingSigCh(const JPetSigCh& leadingSigCh, double sigChLeadTrailMaxTime, const std::vector<JPetSigCh>& trailingSigChVec);
-  static double calculateRawSignalTOT(int pmID, double totTHR1, double totTHR2, double thr1Val, double thr2Val, JPetStatistics& stats,
-                                      bool saveHistos, boost::property_tree::ptree& calibTree);
 };
-#endif /* !SIGNALFINDERTOOLS_H */
+#endif /* !SIPMSIGNALFINDERTOOLS_H */

@@ -34,7 +34,7 @@
 class SignalTransformerTools
 {
 public:
-  static const std::map<int, std::vector<std::vector<JPetRawSignal>>> getRawSigMtxMap(const JPetTimeWindow* timeWindow);
+  static const std::map<int, std::vector<std::vector<JPetRawSignal>>> getRawSigMtxMap(const JPetTimeWindow* timeWindow, int selectMatrixPos);
   static std::vector<JPetMatrixSignal> mergeSignalsAllSiPMs(std::map<int, std::vector<std::vector<JPetRawSignal>>>& rawSigMtxMap, double mergingTime,
                                                             boost::property_tree::ptree& calibTree);
   static std::vector<JPetMatrixSignal> mergeRawSignalsOnSide(std::vector<JPetRawSignal>& rawSigVec, double mergingTime,

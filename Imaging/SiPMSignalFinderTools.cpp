@@ -10,10 +10,10 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- *  @file SignalFinderTools.cpp
+ *  @file SiPMSignalFinderTools.cpp
  */
 
-#include "SignalFinderTools.h"
+#include "SiPMSignalFinderTools.h"
 #include <TRandom.h>
 
 using namespace std;
@@ -21,7 +21,7 @@ using namespace std;
 /**
  * Method returns a map of vectors of JPetSigCh ordered by photomultiplier ID
  */
-const map<int, vector<JPetSigCh>> SignalFinderTools::getSigChByPM(const JPetTimeWindow* timeWindow, bool useCorruptedSigCh)
+const map<int, vector<JPetSigCh>> SiPMSignalFinderTools::getSigChByPM(const JPetTimeWindow* timeWindow, bool useCorruptedSigCh)
 {
   map<int, vector<JPetSigCh>> sigChsPMMap;
   if (!timeWindow)
@@ -57,7 +57,7 @@ const map<int, vector<JPetSigCh>> SignalFinderTools::getSigChByPM(const JPetTime
 /**
  * Method invoking Raw Signal building method for each PM separately
  */
-vector<JPetRawSignal> SignalFinderTools::buildAllSignals(const map<int, vector<JPetSigCh>>& sigChByPM, double sigChEdgeMaxTime,
+vector<JPetRawSignal> SiPMSignalFinderTools::buildAllSignals(const map<int, vector<JPetSigCh>>& sigChByPM, double sigChEdgeMaxTime,
                                                          double sigChLeadTrailMaxTime, int numberOfThrs, JPetStatistics& stats, bool saveHistos,
                                                          boost::property_tree::ptree& calibTree)
 {
@@ -77,7 +77,7 @@ vector<JPetRawSignal> SignalFinderTools::buildAllSignals(const map<int, vector<J
  * time window (sigChEdgeMaxTime parameter) and all Trailing SigChs that conform
  * to second time window (sigChLeadTrailMaxTime parameter).
  */
-vector<JPetRawSignal> SignalFinderTools::buildRawSignals(const vector<JPetSigCh>& sigChByPM, double sigChEdgeMaxTime, double sigChLeadTrailMaxTime,
+vector<JPetRawSignal> SiPMSignalFinderTools::buildRawSignals(const vector<JPetSigCh>& sigChByPM, double sigChEdgeMaxTime, double sigChLeadTrailMaxTime,
                                                          int numberOfThrs, JPetStatistics& stats, bool saveHistos,
                                                          boost::property_tree::ptree& calibTree)
 {
@@ -104,12 +104,11 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(const vector<JPetSigCh>
   {
     JPetRawSignal rawSig;
     rawSig.setPM(thrLeadingSigCh.at(0).at(0).getChannel().getPM());
-    double totTHR1 = 0.0, totTHR2 = 0.0, thr1Val = 0.0, thr2Val = 0.0;
+    double totTHR1 = 0.0, totTHR2 = 0.0;
 
     // First THR leading added by default
     rawSig.addPoint(thrLeadingSigCh.at(0).at(0));
     rawSig.setTime(thrLeadingSigCh.at(0).at(0).getTime());
-    thr1Val = thrLeadingSigCh.at(0).at(0).getChannel().getThresholdValue();
 
     // Searching for matching trailing on THR 1
     int closestTrailingSigCh = findTrailingSigCh(thrLeadingSigCh.at(0).at(0), sigChLeadTrailMaxTime, thrTrailingSigCh.at(0));
@@ -132,14 +131,26 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(const vector<JPetSigCh>
         thrTrailingSigCh.at(1).erase(thrTrailingSigCh.at(1).begin() + closestTrailingSigCh);
       }
       rawSig.addPoint(thrLeadingSigCh.at(1).at(nextThrSigChIndex));
-      thr2Val = thrLeadingSigCh.at(1).at(nextThrSigChIndex).getChannel().getThresholdValue();
       thrLeadingSigCh.at(1).erase(thrLeadingSigCh.at(1).begin() + nextThrSigChIndex);
     }
 
-    auto tot = calculateRawSignalTOT(rawSig.getPM().getID(), totTHR1, totTHR2, thr1Val, thr2Val, stats, saveHistos, calibTree);
-
     // Adding created Raw Signal to vector
-    rawSig.setTOT(tot);
+    double thr1A = calibTree.get("sipm." + to_string(rawSig.getPM().getID()) + ".tot_factor_thr1_a", 0.0);
+    double thr1B = calibTree.get("sipm." + to_string(rawSig.getPM().getID()) + ".tot_factor_thr1_b", 0.0);
+    double thr2A = calibTree.get("sipm." + to_string(rawSig.getPM().getID()) + ".tot_factor_thr2_a", 0.0);
+    double thr2B = calibTree.get("sipm." + to_string(rawSig.getPM().getID()) + ".tot_factor_thr2_b", 0.0);
+
+    totTHR1 = thr1A * totTHR1 + thr1B;
+    totTHR2 = thr2A * totTHR2 + thr2B;
+
+    if (saveHistos && totTHR1 != 0.0 && totTHR2 != 0.0)
+    {
+      stats.getHisto2D("tot_sipm_id_thr1")->Fill(rawSig.getPM().getID(), totTHR1);
+      stats.getHisto2D("tot_sipm_id_thr2")->Fill(rawSig.getPM().getID(), totTHR2);
+      stats.getHisto2D("tot_sipm_id_sum")->Fill(rawSig.getPM().getID(), totTHR1 + totTHR2);
+    }
+
+    rawSig.setTOT(totTHR1 + totTHR2);
     rawSigVec.push_back(rawSig);
     thrLeadingSigCh.at(0).erase(thrLeadingSigCh.at(0).begin());
   }
@@ -167,7 +178,7 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(const vector<JPetSigCh>
 /**
  * Method finds Signal Channels that belong to the same leading edge
  */
-int SignalFinderTools::findSigChOnNextThr(double sigChValue, double sigChEdgeMaxTime, const vector<JPetSigCh>& sigChVec)
+int SiPMSignalFinderTools::findSigChOnNextThr(double sigChValue, double sigChEdgeMaxTime, const vector<JPetSigCh>& sigChVec)
 {
   for (size_t i = 0; i < sigChVec.size(); i++)
   {
@@ -185,7 +196,7 @@ int SignalFinderTools::findSigChOnNextThr(double sigChValue, double sigChEdgeMax
  * returning the one with the smallest index, that is equivalent of SigCh
  * earliest in time
  */
-int SignalFinderTools::findTrailingSigCh(const JPetSigCh& leadingSigCh, double sigChLeadTrailMaxTime, const vector<JPetSigCh>& trailingSigChVec)
+int SiPMSignalFinderTools::findTrailingSigCh(const JPetSigCh& leadingSigCh, double sigChLeadTrailMaxTime, const vector<JPetSigCh>& trailingSigChVec)
 {
   vector<int> trailingFoundIdices;
   for (size_t i = 0; i < trailingSigChVec.size(); i++)
@@ -202,38 +213,4 @@ int SignalFinderTools::findTrailingSigCh(const JPetSigCh& leadingSigCh, double s
   }
   sort(trailingFoundIdices.begin(), trailingFoundIdices.end());
   return trailingFoundIdices.at(0);
-}
-
-double SignalFinderTools::calculateRawSignalTOT(int pmID, double totTHR1, double totTHR2, double thr1Val, double thr2Val, JPetStatistics& stats,
-                                                bool saveHistos, boost::property_tree::ptree& calibTree)
-{
-  double tot = 0.0;
-
-  double totNormA = calibTree.get("sipm." + to_string(pmID) + ".tot_factor_a", 1.0);
-  double totNormB = calibTree.get("sipm." + to_string(pmID) + ".tot_factor_b", 0.0);
-
-  // If threshold values are set then calculating with rectangular method
-  if (thr1Val != 0.0 && thr2Val != 0.0)
-  {
-    double totRec = totTHR1 * thr1Val + totTHR2 * thr2Val;
-    tot = totRec * totNormA + totNormB;
-    if (saveHistos)
-    {
-      stats.getHisto2D("tot_rec_sipm_id")->Fill(pmID, totRec);
-      stats.getHisto2D("tot_rec_sipm_id_norm")->Fill(pmID, tot);
-    }
-  }
-  // If not, as a simple sum
-  else
-  {
-    double totSum = totTHR1 + totTHR2;
-    tot = totSum * totNormA + totNormB;
-    if (saveHistos)
-    {
-      stats.getHisto2D("tot_sum_sipm_id")->Fill(pmID, totSum);
-      stats.getHisto2D("tot_sum_sipm_id_norm")->Fill(pmID, tot);
-    }
-  }
-
-  return tot;
 }

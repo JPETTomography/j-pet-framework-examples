@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -16,10 +16,10 @@
 #ifndef TIMEWINDOWCREATOR_H
 #define TIMEWINDOWCREATOR_H
 
-#include <JPetTimeWindow/JPetTimeWindow.h>
-#include <JPetUserTask/JPetUserTask.h>
 #include <JPetChannel/JPetChannel.h>
 #include <JPetSigCh/JPetSigCh.h>
+#include <JPetTimeWindow/JPetTimeWindow.h>
+#include <JPetUserTask/JPetUserTask.h>
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -27,10 +27,6 @@
 #include <set>
 
 class JPetWriter;
-
-#ifdef __CINT__
-#define override
-#endif
 
 /**
  * @brief User Task: translate Unpacker EventIII data to JPetTimeWindow
@@ -41,29 +37,28 @@ class JPetWriter;
  * performed, if ASCII files of standard format were provided. In case of errors,
  * creation of Time Windows continues without this additional information.
  */
-class TimeWindowCreator: public JPetUserTask
+class TimeWindowCreator : public JPetUserTask
 {
 public:
-	TimeWindowCreator(const char* name);
-	virtual ~TimeWindowCreator();
-	virtual bool init() override;
-	virtual bool exec() override;
-	virtual bool terminate() override;
+  TimeWindowCreator(const char* name);
+  virtual ~TimeWindowCreator();
+  virtual bool init() override;
+  virtual bool exec() override;
+  virtual bool terminate() override;
 
 protected:
-	void saveSigChs(const std::vector<JPetSigCh>& sigChVec);
-	void initialiseHistograms();
-	const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
-	const std::string kMaxTimeParamKey = "TimeWindowCreator_MaxTime_double";
-	const std::string kMinTimeParamKey = "TimeWindowCreator_MinTime_double";
-	const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
-	boost::property_tree::ptree fConstansTree;
-	bool fSaveControlHistos = true;
-	double fMinTime = 0.0;
-	double fMaxTime = 1.e6;
-	// Number for scaling some histograms, so they are not reaching their memory capacity
-	double fScalingFactor = 0.001;
-
+  void saveSigChs(const std::vector<JPetSigCh>& sigChVec);
+  void initialiseHistograms();
+  const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
+  const std::string kMaxTimeParamKey = "TimeWindowCreator_MaxTime_double";
+  const std::string kMinTimeParamKey = "TimeWindowCreator_MinTime_double";
+  const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
+  boost::property_tree::ptree fConstansTree;
+  bool fSaveControlHistos = true;
+  double fMinTime = 0.0;
+  double fMaxTime = 1.e6;
+  // Number for scaling some histograms, so they are not reaching their memory capacity
+  double fScalingFactor = 0.001;
 };
 
 #endif /* !TIMEWINDOWCREATOR_H */

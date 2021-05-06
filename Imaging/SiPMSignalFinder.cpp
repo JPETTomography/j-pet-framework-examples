@@ -10,13 +10,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file SignalFinder.cpp
+ *  @file SiPMSignalFinder.cpp
  */
 
-#include "SignalFinder.h"
-#include "SignalFinderTools.h"
-
 #include <boost/property_tree/json_parser.hpp>
+
+#include "SiPMSignalFinder.h"
+#include "SiPMSignalFinderTools.h"
 
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
@@ -32,11 +32,11 @@ using namespace std;
 using namespace jpet_options_tools;
 namespace pt = boost::property_tree;
 
-SignalFinder::SignalFinder(const char* name) : JPetUserTask(name) {}
+SiPMSignalFinder::SiPMSignalFinder(const char* name) : JPetUserTask(name) {}
 
-SignalFinder::~SignalFinder() {}
+SiPMSignalFinder::~SiPMSignalFinder() {}
 
-bool SignalFinder::init()
+bool SiPMSignalFinder::init()
 {
   INFO("Signal finding started.");
   fOutputEvents = new JPetTimeWindow("JPetRawSignal");
@@ -101,16 +101,16 @@ bool SignalFinder::init()
   return true;
 }
 
-bool SignalFinder::exec()
+bool SiPMSignalFinder::exec()
 {
   // Getting the data from event in an apropriate format
   if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent))
   {
     // Distribute signal channels by PM IDs
-    auto& sigChByPM = SignalFinderTools::getSigChByPM(timeWindow, fUseCorruptedSigCh);
+    auto& sigChByPM = SiPMSignalFinderTools::getSigChByPM(timeWindow, fUseCorruptedSigCh);
     // Building signals
-    auto allSignals = SignalFinderTools::buildAllSignals(sigChByPM, fSigChEdgeMaxTime, fSigChLeadTrailMaxTime, kNumOfThresholds, getStatistics(),
-                                                         fSaveControlHistos, fConstansTree);
+    auto allSignals = SiPMSignalFinderTools::buildAllSignals(sigChByPM, fSigChEdgeMaxTime, fSigChLeadTrailMaxTime, kNumOfThresholds, getStatistics(),
+                                                             fSaveControlHistos, fConstansTree);
     // Saving method invocation
     saveRawSignals(allSignals);
   }
@@ -121,7 +121,7 @@ bool SignalFinder::exec()
   return true;
 }
 
-bool SignalFinder::terminate()
+bool SiPMSignalFinder::terminate()
 {
   INFO("Signal finding ended.");
   return true;
@@ -131,7 +131,7 @@ bool SignalFinder::terminate()
  * Saving Raw Signals that have leading-trailing pairs,
  * otherwise filling histogram with incomplete signals
  */
-void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& rawSigVec)
+void SiPMSignalFinder::saveRawSignals(const vector<JPetRawSignal>& rawSigVec)
 {
   if (rawSigVec.size() > 0 && fSaveControlHistos)
   {
@@ -158,7 +158,7 @@ void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& rawSigVec)
   }
 }
 
-void SignalFinder::initialiseHistograms()
+void SiPMSignalFinder::initialiseHistograms()
 {
 
   auto minPMID = getParamBank().getPMs().begin()->first;
@@ -191,23 +191,17 @@ void SignalFinder::initialiseHistograms()
   getStatistics().getHisto1D("rawsig_tslot")->GetXaxis()->SetTitle("Number of Raw Signal in Time Window");
   getStatistics().getHisto1D("rawsig_tslot")->GetYaxis()->SetTitle("Number of Time Windows");
 
-  getStatistics().createHistogram(new TH2F("tot_sum_sipm_id", "SiPM Signal Time over Threshold per SiPM ID", maxPMID - minPMID + 1, minPMID - 0.5,
+  for (int thr = 0; thr < kNumOfThresholds; ++thr)
+  {
+    getStatistics().createHistogram(new TH2F(Form("tot_sipm_id_thr%d", thr + 1),
+                                             Form("SiPM Signal Time over Threshold per SiPM ID for THR %d", thr + 1), maxPMID - minPMID + 1,
+                                             minPMID - 0.5, maxPMID + 0.5, 200, 0.0, 1.5 * fSigChLeadTrailMaxTime));
+    getStatistics().getHisto2D(Form("tot_sipm_id_thr%d", thr + 1))->GetXaxis()->SetTitle("SiPM ID");
+    getStatistics().getHisto2D(Form("tot_sipm_id_thr%d", thr + 1))->GetYaxis()->SetTitle("TOT [ps]");
+  }
+
+  getStatistics().createHistogram(new TH2F("tot_sipm_id_sum", "SiPM Signal Time over Threshold per SiPM ID", maxPMID - minPMID + 1, minPMID - 0.5,
                                            maxPMID + 0.5, 200, 0.0, 1.5 * kNumOfThresholds * fSigChLeadTrailMaxTime));
-  getStatistics().getHisto2D("tot_sum_sipm_id")->GetXaxis()->SetTitle("SiPM ID");
-  getStatistics().getHisto2D("tot_sum_sipm_id")->GetYaxis()->SetTitle("TOT [ps]");
-
-  getStatistics().createHistogram(new TH2F("tot_sum_sipm_id_norm", "SiPM Signal Time over Threshold per SiPM ID normalised", maxPMID - minPMID + 1,
-                                           minPMID - 0.5, maxPMID + 0.5, 200, 0.0, 1.5 * kNumOfThresholds * fSigChLeadTrailMaxTime));
-  getStatistics().getHisto2D("tot_sum_sipm_id_norm")->GetXaxis()->SetTitle("SiPM ID");
-  getStatistics().getHisto2D("tot_sum_sipm_id_norm")->GetYaxis()->SetTitle("TOT [ps]");
-
-  getStatistics().createHistogram(new TH2F("tot_rec_sipm_id", "SiPM Signal Time over Threshold per SiPM ID", maxPMID - minPMID + 1, minPMID - 0.5,
-                                           maxPMID + 0.5, 200, 0.0, 12.0 * kNumOfThresholds * fSigChLeadTrailMaxTime));
-  getStatistics().getHisto2D("tot_rec_sipm_id")->GetXaxis()->SetTitle("SiPM ID");
-  getStatistics().getHisto2D("tot_rec_sipm_id")->GetYaxis()->SetTitle("TOT [ps]");
-
-  getStatistics().createHistogram(new TH2F("tot_rec_sipm_id_norm", "SiPM Signal Time over Threshold per SiPM ID normalised", maxPMID - minPMID + 1,
-                                           minPMID - 0.5, maxPMID + 0.5, 200, 0.0, 12.0 * kNumOfThresholds * fSigChLeadTrailMaxTime));
-  getStatistics().getHisto2D("tot_rec_sipm_id_norm")->GetXaxis()->SetTitle("SiPM ID");
-  getStatistics().getHisto2D("tot_rec_sipm_id_norm")->GetYaxis()->SetTitle("TOT [ps]");
+  getStatistics().getHisto2D("tot_sipm_id_sum")->GetXaxis()->SetTitle("SiPM ID");
+  getStatistics().getHisto2D("tot_sipm_id_sum")->GetYaxis()->SetTitle("TOT [ps]");
 }

@@ -180,7 +180,39 @@ Edge findEdge(Points points, Side side)
   Points peakPoints = std::make_pair(subArgs, subValues);
   auto extremum = findPeak(peakPoints);
   double corrExtr = extremum.first - 2 * (points.first.at(extremumBin + 1) - points.first.at(extremumBin));
-  Edge edge = {make_pair(corrExtr, extremum.second), firstDevGraph, secondDevGraph};
+
+  double xMax = 0.0, yMax = 0.0;
+  if (side == Side::Left)
+  {
+    yMax = -99999.9;
+  }
+  else if (side == Side::Right)
+  {
+    yMax = 99999.9;
+  }
+
+  for (int i = 3; i < firstDerivative.size() - 3; ++i)
+  {
+    if (side == Side::Left)
+    {
+      if (firstDerivative.at(i) > yMax)
+      {
+        yMax = firstDerivative.at(i);
+        xMax = points.first.at(i);
+      }
+    }
+    else if (side == Side::Right)
+    {
+      if (firstDerivative.at(i) < yMax)
+      {
+        yMax = firstDerivative.at(i);
+        xMax = points.first.at(i);
+      }
+    }
+  }
+
+  // Edge edge = {make_pair(corrExtr, extremum.second), firstDevGraph, secondDevGraph};
+  Edge edge = {make_pair(xMax, yMax), firstDevGraph, secondDevGraph};
   return edge;
 }
 
@@ -265,8 +297,8 @@ void hit_tdiff_effvel(std::string fileName, std::string calibJSONFileName = "cal
 
         double mean = ab_tdiff->GetMean();
 
-        auto leftSide = getSubset(ab_tdiff, mean - 8000, mean - 2000);
-        auto rightSide = getSubset(ab_tdiff, mean + 2000, mean + 8000);
+        auto leftSide = getSubset(ab_tdiff, mean - 6000, mean - 2000);
+        auto rightSide = getSubset(ab_tdiff, mean + 2000, mean + 6000);
 
         auto leftEdge = findEdge(leftSide, Side::Left);
         auto rightEdge = findEdge(rightSide, Side::Right);
