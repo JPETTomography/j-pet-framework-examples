@@ -40,13 +40,13 @@ const map<int, vector<vector<JPetRawSignal>>> SignalTransformerTools::getRawSigM
     auto scinID = rawSig.getPM().getScin().getID();
     auto pmSide = rawSig.getPM().getSide();
     auto pmMtxPos = rawSig.getPM().getMatrixPosition();
-    auto search = rawSigMtxMap.find(scinID);
 
-    if (pmMtxPos != -1 && pmMtxPos != selectMatrixPos)
+    if (selectMatrixPos != -1 && pmMtxPos != selectMatrixPos)
     {
       continue;
     }
 
+    auto search = rawSigMtxMap.find(scinID);
     if (search == rawSigMtxMap.end())
     {
       // There is no element with searched scin ID in this map, adding new one
