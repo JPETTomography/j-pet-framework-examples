@@ -169,9 +169,6 @@ JPetHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const JPetMat
   double tot_norm_a = calibTree.get("scin." + to_string(scinID) + ".tot_factor_a", 1.0);
   double tot_norm_b = calibTree.get("scin." + to_string(scinID) + ".tot_factor_b", 0.0);
 
-  // TOT of a signal is a average of TOT of AB signals
-  // auto tot = (signalA.getTOT() + signalB.getTOT()) / 2.0;
-
   JPetHit hit;
   hit.setSignals(signalA, signalB);
   hit.setTime(((signalA.getTime() + signalB.getTime()) / 2.0) - tofCorrection);
@@ -182,8 +179,11 @@ JPetHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const JPetMat
   hit.setPosY(signalA.getPM().getScin().getCenterY());
   hit.setScin(signalA.getPM().getScin());
 
-  auto tot = calculateTOT(hit);
-  hit.setEnergy(tot_norm_a * tot + tot_norm_b);
+  // Calculate TOT from the beggininig and use normalization
+  // double tot = tot_norm_a * calculateTOT(hit) + tot_norm_b;
+  // TOT of a signal is a average of TOT of AB signals
+  double tot = (signalA.getTOT() + signalB.getTOT()) / 2.0;
+  hit.setEnergy(tot);
 
   if (velocity != 0.0)
   {
