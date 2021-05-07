@@ -37,6 +37,15 @@ const map<int, vector<vector<JPetRawSignal>>> SignalTransformerTools::getRawSigM
   {
     auto rawSig = dynamic_cast<const JPetRawSignal&>(timeWindow->operator[](i));
 
+    auto leads = rawSig.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrValue);
+    auto trails = rawSig.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrValue);
+
+    // Saving only signals with lead-trail pair on threshold
+    if (leads.size() != 2 && trails.size() != 2)
+    {
+      continue;
+    }
+
     auto scinID = rawSig.getPM().getScin().getID();
     auto pmSide = rawSig.getPM().getSide();
     auto pmMtxPos = rawSig.getPM().getMatrixPosition();
