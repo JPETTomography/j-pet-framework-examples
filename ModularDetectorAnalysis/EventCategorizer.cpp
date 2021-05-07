@@ -587,15 +587,17 @@ void EventCategorizer::initialiseCalibrationHistograms()
   getStatistics().getHisto2D("tdiff_deex_scin")->GetYaxis()->SetTitle("Time diffrence [ps]");
 
   // Time walk histograms
+  double twLimits = 0.000000000001;
+
   getStatistics().createHistogram(
-      new TH2F("time_walk", "Hit TDiff vs. reversed TOT", 200, -fMaxTimeDiff, fMaxTimeDiff, 200, -0.000000001, 0.000000001));
+      new TH2F("time_walk", "Hit TDiff vs. reversed TOT", 200, -fMaxTimeDiff, fMaxTimeDiff, 200, -1.0 * twLimits, twLimits));
   getStatistics().getHisto2D("time_walk")->GetXaxis()->SetTitle("Hit Time Difference [ps]");
   getStatistics().getHisto2D("time_walk")->GetYaxis()->SetTitle("Reversed TOT [1/ps]");
 
   for (int scinID = minScinID; scinID <= maxScinID; ++scinID)
   {
     getStatistics().createHistogram(new TH2F(Form("time_walk_scin%d", scinID), Form("Hit TDiff vs. reversed TOT Scin %d", scinID), 200, -fMaxTimeDiff,
-                                             fMaxTimeDiff, 200, -0.000000001, 0.000000001));
+                                             fMaxTimeDiff, 200, -1.0 * twLimits, twLimits));
     getStatistics().getHisto2D(Form("time_walk_scin%d", scinID))->GetXaxis()->SetTitle("Hit Time Difference [ps]");
     getStatistics().getHisto2D(Form("time_walk_scin%d", scinID))->GetYaxis()->SetTitle("Reversed TOT [1/ps]");
   }
