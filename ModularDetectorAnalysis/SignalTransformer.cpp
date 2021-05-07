@@ -122,12 +122,12 @@ void SignalTransformer::saveMatrixSignals(const std::vector<JPetMatrixSignal>& m
       if (mtxSig.getPM().getSide() == JPetPM::SideA)
       {
         getStatistics().getHisto1D("mtxsig_scin_sideA")->Fill(scinID);
-        getStatistics().getHisto1D("tot_scin_sideA_id")->Fill(scinID, mtxSig.getTOT());
+        getStatistics().getHisto2D("tot_scin_sideA_id")->Fill(scinID, mtxSig.getTOT());
       }
       else if (mtxSig.getPM().getSide() == JPetPM::SideB)
       {
         getStatistics().getHisto1D("mtxsig_scin_sideB")->Fill(scinID);
-        getStatistics().getHisto1D("tot_scin_sideB_id")->Fill(scinID, mtxSig.getTOT());
+        getStatistics().getHisto2D("tot_scin_sideB_id")->Fill(scinID, mtxSig.getTOT());
       }
     }
 
