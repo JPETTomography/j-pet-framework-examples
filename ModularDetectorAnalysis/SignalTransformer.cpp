@@ -182,7 +182,7 @@ void SignalTransformer::initialiseHistograms()
   getStatistics().getHisto1D("mtxsig_scin_sideB")->GetXaxis()->SetTitle("Scin ID");
   getStatistics().getHisto1D("mtxsig_scin_sideB")->GetYaxis()->SetTitle("Number of Matrix Signals");
 
-  double totUppLimit = 50.0 * kNumOfThresholds * fSigChLeadTrailMaxTime; // 20000000.0;
+  double totUppLimit = 20000000.0;
   getStatistics().createHistogram(new TH2F("tot_scin_sideA_id", "Matrix Signal ToT - Side A Scin ID", maxScinID - minScinID + 1, minScinID - 0.5,
                                            maxScinID + 0.5, 200, 0.0, totUppLimit));
   getStatistics().getHisto2D("tot_scin_sideA_id")->GetXaxis()->SetTitle("SiPM ID");
