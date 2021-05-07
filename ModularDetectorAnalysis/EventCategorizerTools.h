@@ -34,8 +34,11 @@ static const double kUndefinedValue = 999.0;
 class EventCategorizerTools
 {
 public:
-  static void selectForCalibration(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double totCutAnniMin, double totCutAnniMax,
-                                   double totCutDeexMin, double totCutDeexMax, const TVector3& sourcePos);
+  static void selectForTOF(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double totCutAnniMin, double totCutAnniMax,
+                           double totCutDeexMin, double totCutDeexMax, const TVector3& sourcePos);
+
+  static void selectForTimeWalk(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double maxThetaDiff, double maxTimeDiff,
+                                double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos);
 
   static bool checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
                              double totCutAnniMin, double totCutAnniMax, double lorAngleMax, double lorPosZMax, const TVector3& sourcePos);

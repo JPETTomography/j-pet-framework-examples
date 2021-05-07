@@ -23,8 +23,8 @@ using namespace std;
 /**
  * Selecting pair of hits for calibrations based on TOT and Scin ID
  */
-void EventCategorizerTools::selectForCalibration(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double totCutAnniMin,
-                                                 double totCutAnniMax, double totCutDeexMin, double totCutDeexMax, const TVector3& sourcePos)
+void EventCategorizerTools::selectForTOF(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double totCutAnniMin,
+                                         double totCutAnniMax, double totCutDeexMin, double totCutDeexMax, const TVector3& sourcePos)
 {
   if (event.getHits().size() < 2)
   {
@@ -100,6 +100,50 @@ void EventCategorizerTools::selectForCalibration(const JPetEvent& event, JPetSta
       {
         stats.getHisto2D("tdiff_annih_scin")->Fill(aScinID, tDiff_A_D);
         stats.getHisto2D("tdiff_deex_scin")->Fill(dScinID, tDiff_A_D);
+      }
+    }
+  }
+}
+
+void EventCategorizerTools::selectForTimeWalk(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double maxThetaDiff,
+                                              double maxTimeDiff, double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos)
+{
+  if (event.getHits().size() < 2)
+  {
+    return;
+  }
+
+  for (uint i = 0; i < event.getHits().size(); i++)
+  {
+    for (uint j = i + 1; j < event.getHits().size(); j++)
+    {
+      JPetHit firstHit, secondHit;
+
+      if (event.getHits().at(i).getTime() < event.getHits().at(j).getTime())
+      {
+        firstHit = event.getHits().at(i);
+        secondHit = event.getHits().at(j);
+      }
+      else
+      {
+        firstHit = event.getHits().at(j);
+        secondHit = event.getHits().at(i);
+      }
+
+      if (checkFor2Gamma(firstHit, secondHit, stats, false, maxThetaDiff, maxTimeDiff, totCutAnniMin, totCutAnniMax, 0.0, 0.0, sourcePos))
+      {
+        // Calculating reversed TOT for time walk studies
+        auto revTOT1 = calculateReveresedTOT(firstHit);
+        auto revTOT2 = calculateReveresedTOT(secondHit);
+
+        int scin1ID = firstHit.getScin().getID();
+        int scin2ID = secondHit.getScin().getID();
+
+        stats.getHisto2D("time_walk")->Fill(firstHit.getTimeDiff(), revTOT1);
+        stats.getHisto2D("time_walk")->Fill(secondHit.getTimeDiff(), revTOT2);
+
+        stats.getHisto2D(Form("time_walk_scin%d", scin1ID))->Fill(firstHit.getTimeDiff(), revTOT1);
+        stats.getHisto2D(Form("time_walk_scin%d", scin2ID))->Fill(secondHit.getTimeDiff(), revTOT2);
       }
     }
   }
@@ -429,7 +473,7 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetHit& firstHit, const JPetHi
     stats.getHisto1D("2g_hit_tdiff")->Fill(firstHit.getTimeDiff());
     stats.getHisto1D("2g_hit_tdiff")->Fill(secondHit.getTimeDiff());
     stats.getHisto2D("2g_hit_tdiff_scin")->Fill(scin1ID, firstHit.getTimeDiff());
-    stats.getHisto2D("2g_hit_tdiff_scin")->Fill(scin1ID, secondHit.getTimeDiff());
+    stats.getHisto2D("2g_hit_tdiff_scin")->Fill(scin2ID, secondHit.getTimeDiff());
     stats.getHisto2D("2g_hit_tdiff_z_pos")->Fill(firstHit.getPosZ(), firstHit.getTimeDiff());
     stats.getHisto2D("2g_hit_tdiff_z_pos")->Fill(secondHit.getPosZ(), secondHit.getTimeDiff());
 
@@ -693,30 +737,37 @@ double EventCategorizerTools::calculateTOT(const JPetHit& hit)
  */
 double EventCategorizerTools::calculateReveresedTOT(const JPetHit& hit)
 {
-  double revTOT_sigA = 0.0, revTOT_sigB = 0.0;
-  for (auto& rawSig : hit.getSignalA().getRawSignals())
+  if (hit.getSignalA().getTOT() != 0.0 && hit.getSignalB().getTOT() != 0.0)
   {
-    for (auto& thrTOT : rawSig.second.getTOTsVsThresholdNumber())
-    {
-      if (thrTOT.second != 0.0)
-      {
-        revTOT_sigA += 1.0 / thrTOT.second;
-      }
-    }
+    return (1.0 / hit.getSignalA().getTOT()) - (1.0 / hit.getSignalA().getTOT());
   }
-
-  for (auto& rawSig : hit.getSignalB().getRawSignals())
+  else
   {
-    for (auto& thrTOT : rawSig.second.getTOTsVsThresholdNumber())
-    {
-      if (thrTOT.second != 0.0)
-      {
-        revTOT_sigB += 1.0 / thrTOT.second;
-      }
-    }
+    return 0.0;
   }
-
-  return revTOT_sigB - revTOT_sigA;
+  // double revTOT_sigA = 0.0, revTOT_sigB = 0.0;
+  // for (auto& rawSig : hit.getSignalA().getRawSignals())
+  // {
+  //   for (auto& thrTOT : rawSig.second.getTOTsVsThresholdNumber())
+  //   {
+  //     if (thrTOT.second != 0.0)
+  //     {
+  //       revTOT_sigA += 1.0 / thrTOT.second;
+  //     }
+  //   }
+  // }
+  //
+  // for (auto& rawSig : hit.getSignalB().getRawSignals())
+  // {
+  //   for (auto& thrTOT : rawSig.second.getTOTsVsThresholdNumber())
+  //   {
+  //     if (thrTOT.second != 0.0)
+  //     {
+  //       revTOT_sigB += 1.0 / thrTOT.second;
+  //     }
+  //   }
+  // }
+  // return revTOT_sigB - revTOT_sigA;
 }
 
 /**
