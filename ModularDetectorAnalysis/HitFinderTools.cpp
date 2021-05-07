@@ -166,6 +166,11 @@ JPetHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const JPetMat
   // Getting constants for this scintillator
   double tofCorrection = calibTree.get("scin." + to_string(scinID) + ".tof_correction", 0.0);
   double velocity = calibTree.get("scin." + to_string(scinID) + ".eff_velocity", 0.0);
+  double tot_norm_a = calibTree.get("scin." + to_string(scinID) + ".tot_factor_a", 1.0);
+  double tot_norm_b = calibTree.get("scin." + to_string(scinID) + ".tot_factor_b", 0.0);
+
+  // TOT of a signal is a average of TOT of AB signals
+  // auto tot = (signalA.getTOT() + signalB.getTOT()) / 2.0;
 
   JPetHit hit;
   hit.setSignals(signalA, signalB);
@@ -177,6 +182,9 @@ JPetHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const JPetMat
   hit.setPosY(signalA.getPM().getScin().getCenterY());
   hit.setScin(signalA.getPM().getScin());
 
+  auto tot = calculateTOT(hit);
+  hit.setEnergy(tot_norm_a * tot + tot_norm_b);
+
   if (velocity != 0.0)
   {
     hit.setPosZ(velocity * hit.getTimeDiff() / 2.0);
@@ -185,10 +193,6 @@ JPetHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const JPetMat
   {
     hit.setPosZ(-999.9);
   }
-
-  // TOT of a signal is a average of TOT of AB signals
-  auto tot = (signalA.getTOT() + signalB.getTOT()) / 2.0;
-  hit.setEnergy(tot);
 
   return hit;
 }
@@ -234,7 +238,12 @@ double HitFinderTools::calculateTOT(JPetHit& hit)
     {
       for (unsigned i = 0; i < sigALead.size() && i < sigATrail.size(); i++)
       {
-        tot += (sigATrail.at(i).getTime() - sigALead.at(i).getTime());
+        double weight = sigALead.at(i).getChannel().getThresholdValue();
+        if (weight == 0.0)
+        {
+          weight = 1.0;
+        }
+        tot += weight * (sigATrail.at(i).getTime() - sigALead.at(i).getTime());
       }
     }
   }
@@ -247,7 +256,12 @@ double HitFinderTools::calculateTOT(JPetHit& hit)
     {
       for (unsigned i = 0; i < sigBLead.size() && i < sigBTrail.size(); i++)
       {
-        tot += (sigBTrail.at(i).getTime() - sigBLead.at(i).getTime());
+        double weight = sigBLead.at(i).getChannel().getThresholdValue();
+        if (weight == 0.0)
+        {
+          weight = 1.0;
+        }
+        tot += weight * (sigBTrail.at(i).getTime() - sigBLead.at(i).getTime());
       }
     }
   }
