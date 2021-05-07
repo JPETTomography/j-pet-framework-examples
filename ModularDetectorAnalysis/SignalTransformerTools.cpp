@@ -173,16 +173,6 @@ double SignalTransformerTools::calculateAverageTime(JPetMatrixSignal& mtxSig, bo
     auto leads = rawSig.second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
     for (auto leadSigCh : leads)
     {
-      // double correction = 0.0;
-      // if (leadSigCh.getChannel().getPM().getSide() == JPetPM::SideB)
-      // {
-      //   auto thr = leadSigCh.getChannel().getThresholdNumber();
-      //   auto mtxPos = leadSigCh.getChannel().getPM().getMatrixPosition();
-      //   auto scinID = leadSigCh.getChannel().getPM().getScin().getID();
-      //   auto param = Form("%s.%d.%s%d%s%d.%s", "scin", scinID, "hit_tdiff_thr", thr, "_scin_mtx_pos_", mtxPos, "b_correction");
-      //   correction = calibTree.get(param, 0.0);
-      // }
-      // averageTime += leadSigCh.getTime() - correction;
       averageTime += leadSigCh.getTime();
       multiplicity++;
     }

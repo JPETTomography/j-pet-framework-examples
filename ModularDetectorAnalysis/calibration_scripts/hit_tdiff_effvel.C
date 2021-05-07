@@ -288,8 +288,12 @@ void hit_tdiff_effvel(std::string fileName, std::string calibJSONFileName = "cal
       double eff_vel_error = 2.0 * fScinActiveLenght * (leftEdge.extremum.second - rightEdge.extremum.second) /
                              pow((rightEdge.extremum.first - leftEdge.extremum.first), 2);
 
-      tree.put("scin." + to_string(scinID) + ".b_correction", b_corr);
+      // Writing the result of velosity estimation
       tree.put("scin." + to_string(scinID) + ".eff_velocity", eff_vel);
+
+      // If a constatnt for B side signal rrection already exists in the tree, adding to new one
+      b_corr += tree.get("scin." + to_string(scinID) + ".b_correction", 0.0);
+      tree.put("scin." + to_string(scinID) + ".b_correction", b_corr);
 
       // Filling the graph
       bCorrGraph->SetPoint(graphIt, (double)scinID, b_corr);

@@ -164,29 +164,8 @@ JPetHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const JPetMat
   }
 
   // Getting constants for this scintillator
-  int velCounter = 0;
-  double avVelocity = 0.0;
-  for (int thr = 1; thr <= 2; ++thr)
-  {
-    for (int mtx = 1; mtx <= 4; mtx++)
-    {
-      auto param = Form("%s.%d.%s%d%s%d.%s", "scin", scinID, "hit_tdiff_thr", thr, "_scin_mtx_pos_", mtx, "eff_velocity");
-      double vel = calibTree.get(param, -999.9);
-      if (vel != -999.9)
-      {
-        avVelocity += vel;
-        velCounter++;
-      }
-    }
-  }
-  if (velCounter > 0)
-  {
-    avVelocity = avVelocity / ((double)velCounter);
-  }
-
   double tofCorrection = calibTree.get("scin." + to_string(scinID) + ".tof_correction", 0.0);
-  double totNormA = calibTree.get("scin." + to_string(scinID) + ".tot_scaling_factor_a", 1.0);
-  double totNormB = calibTree.get("scin." + to_string(scinID) + ".tot_scaling_factor_b", 0.0);
+  double velocity = calibTree.get("scin." + to_string(scinID) + ".eff_velocity", 0.0);
 
   JPetHit hit;
   hit.setSignals(signalA, signalB);
@@ -198,9 +177,9 @@ JPetHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const JPetMat
   hit.setPosY(signalA.getPM().getScin().getCenterY());
   hit.setScin(signalA.getPM().getScin());
 
-  if (avVelocity != 0.0)
+  if (velocity != 0.0)
   {
-    hit.setPosZ(avVelocity * hit.getTimeDiff() / 2.0);
+    hit.setPosZ(velocity * hit.getTimeDiff() / 2.0);
   }
   else
   {
@@ -209,17 +188,7 @@ JPetHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const JPetMat
 
   // TOT of a signal is a average of TOT of AB signals
   auto tot = signalA.getTOT() + signalB.getTOT();
-  hit.setEnergy(tot / 2.0);
-
-  // As a TOT of a hit we put avarege of all TOT of SiPM signals constructing this hit
-  // that is sum of TOT divided by multiplicity. TOT value is normalized using
-  // equalization constants from calibration file. We save TOT it temporaily as energy
-  // As an quality of energy we put TOT value before normalization
-  // auto multi = signalA.getRawSignals().size() + signalB.getRawSignals().size();
-  // auto avToT = tot / ((double)multi);
-  // auto normToT = avToT * totNormA + totNormB;
-  // hit.setEnergy(normToT);
-  // hit.setQualityOfEnergy(avToT);
+  hit.setEnergy(tot);
 
   return hit;
 }

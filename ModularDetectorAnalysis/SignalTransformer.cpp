@@ -121,11 +121,13 @@ void SignalTransformer::saveMatrixSignals(const std::vector<JPetMatrixSignal>& m
       getStatistics().getHisto1D("mtxsig_multi")->Fill(mtxSig.getRawSignals().size());
       if (mtxSig.getPM().getSide() == JPetPM::SideA)
       {
-        getStatistics().getHisto1D("mtxsig_per_scin_sideA")->Fill(scinID);
+        getStatistics().getHisto1D("mtxsig_scin_sideA")->Fill(scinID);
+        getStatistics().getHisto1D("tot_scin_sideA_id")->Fill(scinID, mtxSig.getTOT());
       }
       else if (mtxSig.getPM().getSide() == JPetPM::SideB)
       {
-        getStatistics().getHisto1D("mtxsig_per_scin_sideB")->Fill(scinID);
+        getStatistics().getHisto1D("mtxsig_scin_sideB")->Fill(scinID);
+        getStatistics().getHisto1D("tot_scin_sideB_id")->Fill(scinID, mtxSig.getTOT());
       }
     }
 
@@ -170,15 +172,26 @@ void SignalTransformer::initialiseHistograms()
   getStatistics().getHisto1D("mtxsig_tslot")->GetXaxis()->SetTitle("Number of Matrix Signal in Time Window");
   getStatistics().getHisto1D("mtxsig_tslot")->GetYaxis()->SetTitle("Number of Time Windows");
 
-  getStatistics().createHistogram(new TH1F("mtxsig_per_scin_sideA", "Number of MatrixSignals per scintillator side A", maxScinID - minScinID + 1,
-                                           minScinID - 0.5, maxScinID + 0.5));
-  getStatistics().getHisto1D("mtxsig_per_scin_sideA")->GetXaxis()->SetTitle("Scin ID");
-  getStatistics().getHisto1D("mtxsig_per_scin_sideA")->GetYaxis()->SetTitle("Number of Matrix Signals");
+  getStatistics().createHistogram(
+      new TH1F("mtxsig_scin_sideA", "Number of MatrixSignals per scintillator side A", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5));
+  getStatistics().getHisto1D("mtxsig_scin_sideA")->GetXaxis()->SetTitle("Scin ID");
+  getStatistics().getHisto1D("mtxsig_scin_sideA")->GetYaxis()->SetTitle("Number of Matrix Signals");
 
-  getStatistics().createHistogram(new TH1F("mtxsig_per_scin_sideB", "Number of MatrixSignals per scintillator side B", maxScinID - minScinID + 1,
-                                           minScinID - 0.5, maxScinID + 0.5));
-  getStatistics().getHisto1D("mtxsig_per_scin_sideB")->GetXaxis()->SetTitle("Scin ID");
-  getStatistics().getHisto1D("mtxsig_per_scin_sideB")->GetYaxis()->SetTitle("Number of Matrix Signals");
+  getStatistics().createHistogram(
+      new TH1F("mtxsig_scin_sideB", "Number of MatrixSignals per scintillator side B", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5));
+  getStatistics().getHisto1D("mtxsig_scin_sideB")->GetXaxis()->SetTitle("Scin ID");
+  getStatistics().getHisto1D("mtxsig_scin_sideB")->GetYaxis()->SetTitle("Number of Matrix Signals");
+
+  double totUppLimit = 50.0 * kNumOfThresholds * fSigChLeadTrailMaxTime; // 20000000.0;
+  getStatistics().createHistogram(new TH2F("tot_scin_sideA_id", "Matrix Signal ToT - Side A Scin ID", maxScinID - minScinID + 1, minScinID - 0.5,
+                                           maxScinID + 0.5, 200, 0.0, totUppLimit));
+  getStatistics().getHisto2D("tot_scin_sideA_id")->GetXaxis()->SetTitle("SiPM ID");
+  getStatistics().getHisto2D("tot_scin_sideA_id")->GetYaxis()->SetTitle("TOT [ps]");
+
+  getStatistics().createHistogram(new TH2F("tot_scin_sideB_id", "Matrix Signal ToT - Side B Scin ID", maxScinID - minScinID + 1, minScinID - 0.5,
+                                           maxScinID + 0.5, 200, 0.0, totUppLimit));
+  getStatistics().getHisto2D("tot_scin_sideB_id")->GetXaxis()->SetTitle("SiPM ID");
+  getStatistics().getHisto2D("tot_scin_sideB_id")->GetYaxis()->SetTitle("TOT [ps]");
 
   // SiPM offsets if needed
   if (fSaveCalibHistos)

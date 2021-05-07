@@ -217,7 +217,7 @@ double SignalFinderTools::calculateRawSignalTOT(int pmID, double totTHR1, double
   {
     double totRec = totTHR1 * thr1Val + totTHR2 * thr2Val;
     tot = totRec * totNormA + totNormB;
-    if (saveHistos)
+    if (saveHistos && tot != 0.0 && totRec != 0.0)
     {
       stats.getHisto2D("tot_rec_sipm_id")->Fill(pmID, totRec);
       stats.getHisto2D("tot_rec_sipm_id_norm")->Fill(pmID, tot);
@@ -228,7 +228,7 @@ double SignalFinderTools::calculateRawSignalTOT(int pmID, double totTHR1, double
   {
     double totSum = totTHR1 + totTHR2;
     tot = totSum * totNormA + totNormB;
-    if (saveHistos)
+    if (saveHistos && tot != 0.0 && totSum != 0.0)
     {
       stats.getHisto2D("tot_sum_sipm_id")->Fill(pmID, totSum);
       stats.getHisto2D("tot_sum_sipm_id_norm")->Fill(pmID, tot);
