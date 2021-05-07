@@ -587,7 +587,7 @@ void EventCategorizer::initialiseCalibrationHistograms()
   getStatistics().getHisto2D("tdiff_deex_scin")->GetYaxis()->SetTitle("Time diffrence [ps]");
 
   // Time walk histograms
-  double twLimits = 0.000000000001;
+  double twLimits = 0.000003;
 
   getStatistics().createHistogram(
       new TH2F("time_walk", "Hit TDiff vs. reversed TOT", 200, -fMaxTimeDiff, fMaxTimeDiff, 200, -1.0 * twLimits, twLimits));

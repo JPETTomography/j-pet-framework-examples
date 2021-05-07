@@ -737,37 +737,37 @@ double EventCategorizerTools::calculateTOT(const JPetHit& hit)
  */
 double EventCategorizerTools::calculateReveresedTOT(const JPetHit& hit)
 {
-  if (hit.getSignalA().getTOT() != 0.0 && hit.getSignalB().getTOT() != 0.0)
-  {
-    return (1.0 / hit.getSignalA().getTOT()) - (1.0 / hit.getSignalA().getTOT());
-  }
-  else
-  {
-    return 0.0;
-  }
-  // double revTOT_sigA = 0.0, revTOT_sigB = 0.0;
-  // for (auto& rawSig : hit.getSignalA().getRawSignals())
+  // if (hit.getSignalA().getTOT() != 0.0 && hit.getSignalB().getTOT() != 0.0)
   // {
-  //   for (auto& thrTOT : rawSig.second.getTOTsVsThresholdNumber())
-  //   {
-  //     if (thrTOT.second != 0.0)
-  //     {
-  //       revTOT_sigA += 1.0 / thrTOT.second;
-  //     }
-  //   }
+  //   return (1.0 / hit.getSignalA().getTOT()) - (1.0 / hit.getSignalA().getTOT());
   // }
-  //
-  // for (auto& rawSig : hit.getSignalB().getRawSignals())
+  // else
   // {
-  //   for (auto& thrTOT : rawSig.second.getTOTsVsThresholdNumber())
-  //   {
-  //     if (thrTOT.second != 0.0)
-  //     {
-  //       revTOT_sigB += 1.0 / thrTOT.second;
-  //     }
-  //   }
+  //   return 0.0;
   // }
-  // return revTOT_sigB - revTOT_sigA;
+  double revTOT_sigA = 0.0, revTOT_sigB = 0.0;
+  for (auto& rawSig : hit.getSignalA().getRawSignals())
+  {
+    for (auto& thrTOT : rawSig.second.getTOTsVsThresholdNumber())
+    {
+      if (thrTOT.second != 0.0)
+      {
+        revTOT_sigA += 1.0 / thrTOT.second;
+      }
+    }
+  }
+
+  for (auto& rawSig : hit.getSignalB().getRawSignals())
+  {
+    for (auto& thrTOT : rawSig.second.getTOTsVsThresholdNumber())
+    {
+      if (thrTOT.second != 0.0)
+      {
+        revTOT_sigB += 1.0 / thrTOT.second;
+      }
+    }
+  }
+  return revTOT_sigB - revTOT_sigA;
 }
 
 /**
