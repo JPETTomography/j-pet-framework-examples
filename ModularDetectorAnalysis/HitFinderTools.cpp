@@ -187,7 +187,7 @@ JPetHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const JPetMat
   }
 
   // TOT of a signal is a average of TOT of AB signals
-  auto tot = signalA.getTOT() + signalB.getTOT();
+  auto tot = (signalA.getTOT() + signalB.getTOT()) / 2.0;
   hit.setEnergy(tot);
 
   return hit;

@@ -201,7 +201,7 @@ void SignalFinder::initialiseHistograms()
   getStatistics().getHisto2D("tot_sum_sipm_id_norm")->GetXaxis()->SetTitle("SiPM ID");
   getStatistics().getHisto2D("tot_sum_sipm_id_norm")->GetYaxis()->SetTitle("TOT [ps]");
 
-  double totUppLimit = 50.0 * kNumOfThresholds * fSigChLeadTrailMaxTime; // 20000000.0;
+  double totUppLimit = 60.0 * kNumOfThresholds * fSigChLeadTrailMaxTime; // 24000000.0;
   getStatistics().createHistogram(new TH2F("tot_rec_sipm_id", "SiPM Signal Time over Threshold per SiPM ID", maxPMID - minPMID + 1, minPMID - 0.5,
                                            maxPMID + 0.5, 200, 0.0, totUppLimit));
   getStatistics().getHisto2D("tot_rec_sipm_id")->GetXaxis()->SetTitle("SiPM ID");
