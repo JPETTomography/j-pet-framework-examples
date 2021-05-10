@@ -649,19 +649,37 @@ void EffLengthTools::CalculateEffectiveLength()
       meanDifferenceBetewenParams.push_back(tempVector);
     }
     double length = 0;
+    int ifAftertheReferenceLength = 0;
     std::vector<TGraph*> graphs;
+    std::vector<TGraph*> graphsForDerivatives;
     if (meanDifferenceBetewenParams.size() > 0) {
       for (unsigned i=0; i<meanDifferenceBetewenParams.at(0).size(); i++) {
-        graphs.push_back(new TGraph(meanDifferenceBetewenParams.size()));
+        graphs.push_back(new TGraph(meanDifferenceBetewenParams.size()-1)); // To avoid filling the reference point
+        graphsForDerivatives.push_back(new TGraph(meanDifferenceBetewenParams.size()-2));
       }
+      double lengthForDerivative = 0;
+      double differenceForDerivative = 0;
+      int previousLengthID = 0;
       for (unsigned i=0; i<meanDifferenceBetewenParams.size(); i++) {
+        if (i == fReferenceFileID-1) { // Skipping filling the effective length for reference length
+          i++;
+          ifAftertheReferenceLength = 1;
+        }
+        if (i >= meanDifferenceBetewenParams.size())
+          continue;
         if (i < fLengths.size())
           length = fLengths.at(i);
         else
           length = 0;
         for (unsigned j=0; j<meanDifferenceBetewenParams.at(0).size(); j++) {
-          graphs.at(j) -> SetPoint(i, length, meanDifferenceBetewenParams.at(i).at(j));
+          graphs.at(j) -> SetPoint(i-ifAftertheReferenceLength, length, meanDifferenceBetewenParams.at(i).at(j));
+          if (i>0) {
+            lengthForDerivative = (fLengths.at(i) + fLengths.at(previousLengthID))/2;
+            differenceForDerivative = meanDifferenceBetewenParams.at(i).at(j) - meanDifferenceBetewenParams.at(i-1).at(j);
+            graphsForDerivatives.at(j) -> SetPoint(i-ifAftertheReferenceLength-1, lengthForDerivative, differenceForDerivative);
+          }
         }
+        previousLengthID = i;
       }
       std::string titleOfGraph;
       TF1 *fitFunction = new TF1("quadraticFunction", "[0]*(x - [1])*(x - [1]) + [2]");
@@ -673,9 +691,17 @@ void EffLengthTools::CalculateEffectiveLength()
         graphs.at(i) -> GetXaxis() -> SetTitle("Effective length [cm]");
         graphs.at(i) -> GetYaxis() -> SetTitle("Relative correction");
         graphs.at(i) -> SetMarkerStyle(20);
+        fitFunction -> SetParameter(0, 1);
+        fitFunction -> SetParameter(1, 50);
+        fitFunction -> SetParameter(3, 1);
         graphs.at(i) -> Fit(fitFunction, "Q");
         graphs.at(i) -> Write(titleOfGraph.c_str());
         std::cout << fitFunction -> GetParameter(1) << "\t goodness of fit (Chisquared): " << fitFunction -> GetChisquare() << std::endl;
+        titleOfGraph = "Derivative_Length_vs_Correction_for_threshold_" + NumberToChar(i+1, 0);
+        graphsForDerivatives.at(i) -> GetXaxis() -> SetTitle("Effective length [cm]");
+        graphsForDerivatives.at(i) -> GetYaxis() -> SetTitle("Relative correction difference");
+        graphsForDerivatives.at(i) -> SetMarkerStyle(20);
+        graphsForDerivatives.at(i) -> Write(titleOfGraph.c_str());
       }
       fileInRoot -> Close();
       delete fileInRoot;
@@ -1031,7 +1057,7 @@ double CalcMeanDiff(std::vector<double> vector1, std::vector<double> vector2)
   double mean = 0;
   for (unsigned i=0; i<vector1.size() && i<vector2.size(); i++) {
     size++;
-    mean += vector1.at(i) - vector2.at(i);
+    mean += sqrt(pow(vector1.at(i) - vector2.at(i), 2));
   }
   if (size != 0)
     return mean/size;
