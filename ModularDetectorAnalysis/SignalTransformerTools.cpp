@@ -161,8 +161,8 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(vector<JP
       }
     }
 
-    mtxSig.setTime(calculateAverageTime(mtxSig, calibTree));
     mtxSig.setTOT(calculateAverageTOT(mtxSig));
+    mtxSig.setTime(calculateAverageTime(mtxSig, calibTree));
     rawSigVec.erase(rawSigVec.begin());
     mtxSigVec.push_back(mtxSig);
   }
@@ -191,30 +191,22 @@ double SignalTransformerTools::calculateAverageTime(JPetMatrixSignal& mtxSig, bo
     averageTime = averageTime / ((double)multiplicity);
   }
 
+  // Applying b-side correction for A-B time difference synchronization
   double bCorrection = 0.0;
   if (mtxSig.getPM().getSide() == JPetPM::SideB)
   {
     auto scinID = mtxSig.getPM().getScin().getID();
     bCorrection = calibTree.get("scin." + to_string(scinID) + ".b_correction", 0.0);
   }
-
   double sigTimeBCrrected = averageTime - bCorrection;
 
-  double revTOT = 0.0;
-  for (auto& rawSig : mtxSig.getRawSignals())
+  // Applying time walk correction
+  double timeWalkCorrection = 0.0;
+  if (mtxSig.getTOT() != 0.0)
   {
-    for (auto& thrTOT : rawSig.second.getTOTsVsThresholdNumber())
-    {
-      if (thrTOT.second != 0.0)
-      {
-        revTOT += 1.0 / thrTOT.second;
-      }
-    }
+    double twParamA = calibTree.get("time_walk.param_a", 0.0);
+    timeWalkCorrection = twParamA / mtxSig.getTOT();
   }
-
-  double twParamA = calibTree.get("time_walk.param_a", 0.0);
-  double twParamB = calibTree.get("time_walk.param_b", 0.0);
-  double timeWalkCorrection = revTOT * twParamA + twParamB;
 
   return sigTimeBCrrected - timeWalkCorrection;
 }

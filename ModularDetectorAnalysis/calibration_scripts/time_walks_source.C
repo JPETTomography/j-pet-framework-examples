@@ -42,7 +42,7 @@
 
 namespace bpt = boost::property_tree;
 
-int fStep = 10;
+int fStep = 4;
 bool fIgnoreFirst = true;
 
 void time_walks(std::string fileName, std::string calibJSONFileName = "calibration_constants.json", bool saveResult = false,
@@ -90,7 +90,7 @@ void time_walks(std::string fileName, std::string calibJSONFileName = "calibrati
         // fitGaus->SetLineColor(kGreen);
         // fitGaus->SetLineWidth(2);
 
-        gr1->SetPoint(graphIt, projX->GetYaxis()->GetBinCenter(bin - ((int)fStep / 2)), projX->GetMean());
+        gr1->SetPoint(graphIt, histo->GetYaxis()->GetBinCenter(bin - ((int)fStep / 2)), projX->GetMean());
         gr1->SetPointError(graphIt, 0.0, projX->GetMeanError());
         graphIt++;
       }

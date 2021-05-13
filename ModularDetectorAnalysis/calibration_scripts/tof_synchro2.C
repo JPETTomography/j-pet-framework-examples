@@ -81,11 +81,16 @@ void tof_synchro(std::string fileName, std::string calibJSONFileName = "calibrat
       // double tofCorr = (fitFun->GetParameter(1) - fitFun->GetParameter(1)) / 2.0;
       // double tofCorrError = (fitFun->GetParError(1) + fitFun->GetParError(1)) / 2.0;
 
-      // If a constatnt for TOF correction already exists in the tree, adding to new one
-      // tofCorr += tree.get("scin." + to_string(scinID) + ".tof_correction_2", 0.0);
-
       // Writing result to the tree
-      tree.put("scin." + to_string(scinID) + ".tof_correction_2", fitFun->GetParameter(1));
+      double corr = fitFun->GetParameter(1) / 2.0;
+      if (scinID > 356)
+      {
+        corr = -1.0 * fitFun->GetParameter(1) / 2.0;
+      }
+
+      // If a constatnt for TOF correction already exists in the tree, adding to new one
+      corr += tree.get("scin." + to_string(scinID) + ".tof_correction_2", 0.0);
+      tree.put("scin." + to_string(scinID) + ".tof_correction_2", corr);
 
       // Drawing canvases
       if (saveResult)

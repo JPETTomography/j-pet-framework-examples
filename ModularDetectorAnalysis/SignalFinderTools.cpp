@@ -137,6 +137,7 @@ vector<JPetRawSignal> SignalFinderTools::buildRawSignals(const vector<JPetSigCh>
     }
 
     auto tot = calculateRawSignalTOT(rawSig.getPM().getID(), totTHR1, totTHR2, thr1Val, thr2Val, stats, saveHistos, calibTree);
+    // double tot = totTHR1 + totTHR2;
 
     // Adding created Raw Signal to vector
     rawSig.setTOT(tot);
@@ -215,7 +216,7 @@ double SignalFinderTools::calculateRawSignalTOT(int pmID, double totTHR1, double
   // If threshold values are set then calculating with rectangular method
   if (thr1Val != 0.0 && thr2Val != 0.0)
   {
-    double totRec = totTHR1 * thr1Val + totTHR2 * thr2Val;
+    double totRec = totTHR1 * thr1Val + totTHR2 * (thr2Val - thr1Val);
     tot = totRec * totNormA + totNormB;
     if (saveHistos && tot != 0.0 && totRec != 0.0)
     {

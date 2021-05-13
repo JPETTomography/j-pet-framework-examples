@@ -142,17 +142,19 @@ void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& rawSigVec)
   {
     auto leads = rawSig.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrValue);
     auto trails = rawSig.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrValue);
+    if (fSaveControlHistos && gRandom->Uniform() < fScalingFactor)
+    {
+      getStatistics().getHisto1D("rawsig_multi")->Fill(leads.size() + trails.size());
+    }
 
     // Saving only signals with lead-trail pair on threshold
-    if (leads.size() == trails.size())
+    if (leads.size() == kNumOfThresholds && trails.size() == kNumOfThresholds)
     {
       fOutputEvents->add<JPetRawSignal>(rawSig);
-
       if (fSaveControlHistos && gRandom->Uniform() < fScalingFactor)
       {
         auto pmID = rawSig.getPM().getID();
         getStatistics().getHisto1D("rawsig_pm")->Fill(pmID);
-        getStatistics().getHisto1D("rawsig_multi")->Fill(leads.size() + trails.size());
       }
     }
   }
