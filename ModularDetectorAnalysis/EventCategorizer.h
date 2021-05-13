@@ -94,7 +94,7 @@ protected:
   TVector3 fSourcePos;
 
   bool fSaveControlHistos = true;
-  bool fSaveCalibHistos = false;
+  bool fSaveCalibHistos = true;
 
   void initialiseHistograms();
   void initialiseCalibrationHistograms();

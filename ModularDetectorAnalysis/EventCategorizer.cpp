@@ -188,7 +188,7 @@ bool EventCategorizer::init()
     initialiseHistograms();
   }
 
-  if (fSaveCalibHistos)
+  if (fSaveControlHistos)
   {
     initialiseCalibrationHistograms();
   }
@@ -215,18 +215,18 @@ bool EventCategorizer::exec()
       //                                                       fTOTCutAnniMax, fLORAngleCut, fLORPosZCut, fSourcePos);
 
       // Select hits for TOF calibration, if making calibraiton
-      if (fSaveCalibHistos)
-      {
-        EventCategorizerTools::selectForTOF(event, getStatistics(), fSaveCalibHistos, fTOTCutAnniMin, fTOTCutAnniMax, fTOTCutDeexMin, fTOTCutDeexMax,
-                                            fSourcePos);
+      // if (fSaveCalibHistos)
+      // {
+      EventCategorizerTools::selectForTOF(event, getStatistics(), fSaveControlHistos, fTOTCutAnniMin, fTOTCutAnniMax, fTOTCutDeexMin, fTOTCutDeexMax,
+                                          fSourcePos);
 
-        EventCategorizerTools::selectForTimeWalk(event, getStatistics(), fSaveCalibHistos, f2gThetaDiff, f2gTimeDiff, fTOTCutAnniMin, fTOTCutAnniMax,
-                                                 fSourcePos);
+      EventCategorizerTools::selectForTimeWalk(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fTOTCutAnniMin, fTOTCutAnniMax,
+                                               fSourcePos);
 
-        bool isCollimator =
-            EventCategorizerTools::collimator2Gamma(event, getStatistics(), fSaveCalibHistos, f2gThetaDiff, f2gTimeDiff, fTOTCutAnniMin,
-                                                    fTOTCutAnniMax, fLORAngleCut, fLORPosZCut, fSourcePos, fConstansTree);
-      }
+      bool isCollimator =
+          EventCategorizerTools::collimator2Gamma(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fTOTCutAnniMin,
+                                                  fTOTCutAnniMax, fLORAngleCut, fLORPosZCut, fSourcePos, fConstansTree);
+      // }
 
       // Selection of other type of events is currently not used
       // bool is3Gamma = EventCategorizerTools::checkFor3Gamma(
@@ -299,17 +299,19 @@ void EventCategorizer::initialiseHistograms()
   getStatistics().getHisto2D("2g_tot_z_pos")->GetXaxis()->SetTitle("Hit z position [cm]");
   getStatistics().getHisto2D("2g_tot_z_pos")->GetYaxis()->SetTitle("Time over Threshold [ps]");
 
-  getStatistics().createHistogram(new TH1F("2g_revtot", "2 gamma event - reversed TOT", 200, -0.0001, 0.0001));
+  double revTOTLimit = 0.0000001;
+
+  getStatistics().createHistogram(new TH1F("2g_revtot", "2 gamma event - reversed TOT", 200, -revTOTLimit, revTOTLimit));
   getStatistics().getHisto1D("2g_revtot")->GetXaxis()->SetTitle("Reversd Time over Threshold [1/ps]");
   getStatistics().getHisto1D("2g_revtot")->GetYaxis()->SetTitle("Number of Hits");
 
   getStatistics().createHistogram(new TH2F("2g_revtot_scin", "2 gamma event - reversed TOT per scintillator", maxScinID - minScinID + 1,
-                                           minScinID - 0.5, maxScinID + 0.5, 200, -0.0001, 0.0001));
+                                           minScinID - 0.5, maxScinID + 0.5, 200, -revTOTLimit, revTOTLimit));
   getStatistics().getHisto2D("2g_revtot_scin")->GetXaxis()->SetTitle("Scintillator ID");
   getStatistics().getHisto2D("2g_revtot_scin")->GetYaxis()->SetTitle("Reversd Time over Threshold [1/ps]");
 
   getStatistics().createHistogram(
-      new TH2F("2g_revtot_z_pos", "2 gamma event - reversed TOT vs. hit z position", 101, -25.5, 25.5, 200, -0.0001, 0.0001));
+      new TH2F("2g_revtot_z_pos", "2 gamma event - reversed TOT vs. hit z position", 101, -25.5, 25.5, 200, -revTOTLimit, revTOTLimit));
   getStatistics().getHisto2D("2g_revtot_z_pos")->GetXaxis()->SetTitle("Hit z position [cm]");
   getStatistics().getHisto2D("2g_revtot_z_pos")->GetYaxis()->SetTitle("Reversd Time over Threshold [1/ps]");
 
@@ -441,17 +443,17 @@ void EventCategorizer::initialiseHistograms()
   getStatistics().getHisto2D("ap_tot_z_pos")->GetXaxis()->SetTitle("Hit z position [cm]");
   getStatistics().getHisto2D("ap_tot_z_pos")->GetYaxis()->SetTitle("Time over Threshold [ps]");
 
-  getStatistics().createHistogram(new TH1F("ap_revtot", "Annihilation pairs reversed TOT", 200, -0.0001, 0.0001));
+  getStatistics().createHistogram(new TH1F("ap_revtot", "Annihilation pairs reversed TOT", 200, -revTOTLimit, revTOTLimit));
   getStatistics().getHisto1D("ap_revtot")->GetXaxis()->SetTitle("Reversd Time over Threshold [1/ps]");
   getStatistics().getHisto1D("ap_revtot")->GetYaxis()->SetTitle("Number of Hits");
 
   getStatistics().createHistogram(new TH2F("ap_revtot_scin", "Annihilation pairs reversed TOT per scin", maxScinID - minScinID + 1, minScinID - 0.5,
-                                           maxScinID + 0.5, 200, -0.0001, 0.0001));
+                                           maxScinID + 0.5, 200, -revTOTLimit, revTOTLimit));
   getStatistics().getHisto2D("ap_revtot_scin")->GetXaxis()->SetTitle("Scintillator ID");
   getStatistics().getHisto2D("ap_revtot_scin")->GetYaxis()->SetTitle("Reversd Time over Threshold [1/ps]");
 
   getStatistics().createHistogram(
-      new TH2F("ap_revtot_z_pos", "Annihilation pairs reversed TOT vs. hit z position", 101, -25.5, 25.5, 200, -0.0001, 0.0001));
+      new TH2F("ap_revtot_z_pos", "Annihilation pairs reversed TOT vs. hit z position", 101, -25.5, 25.5, 200, -revTOTLimit, revTOTLimit));
   getStatistics().getHisto2D("ap_revtot_z_pos")->GetXaxis()->SetTitle("Hit z position [cm]");
   getStatistics().getHisto2D("ap_revtot_z_pos")->GetYaxis()->SetTitle("Reversd Time over Threshold [1/ps]");
 
@@ -578,7 +580,7 @@ void EventCategorizer::initialiseCalibrationHistograms()
   // Synchronization of TOF with annihilaion-deexcitation pairs
   getStatistics().createHistogram(new TH2F("tdiff_annih_scin", "A-D time difference for annihilation hit per scin", maxScinID - minScinID + 1,
                                            minScinID - 0.5, maxScinID + 0.5, 200, -fMaxTimeDiff, fMaxTimeDiff));
-  getStatistics().getHisto2D("tdiff_annih_scin")->GetXaxis()->SetTitle("");
+  getStatistics().getHisto2D("tdiff_annih_scin")->GetXaxis()->SetTitle("Scin ID");
   getStatistics().getHisto2D("tdiff_annih_scin")->GetYaxis()->SetTitle("Time diffrence [ps]");
 
   getStatistics().createHistogram(new TH2F("tdiff_deex_scin", "A-D time difference for deex hit per scin", maxScinID - minScinID + 1, minScinID - 0.5,

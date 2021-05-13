@@ -232,15 +232,15 @@ void hit_tdiff_effvel(std::string fileName, std::string calibJSONFileName = "cal
   if (fileHitsAB->IsOpen())
   {
     TH2F* hitTDiffAll = dynamic_cast<TH2F*>(fileHitsAB->Get("hit_tdiff_scin"));
-    TH2F* hitTDiffM5 = dynamic_cast<TH2F*>(fileHitsAB->Get("hit_tdiff_scin_m_5"));
-    TH2F* hitTDiffM6 = dynamic_cast<TH2F*>(fileHitsAB->Get("hit_tdiff_scin_m_6"));
-    TH2F* hitTDiffM7 = dynamic_cast<TH2F*>(fileHitsAB->Get("hit_tdiff_scin_m_7"));
-    TH2F* hitTDiffM8 = dynamic_cast<TH2F*>(fileHitsAB->Get("hit_tdiff_scin_m_8"));
+    // TH2F* hitTDiffM5 = dynamic_cast<TH2F*>(fileHitsAB->Get("hit_tdiff_scin_m_5"));
+    // TH2F* hitTDiffM6 = dynamic_cast<TH2F*>(fileHitsAB->Get("hit_tdiff_scin_m_6"));
+    // TH2F* hitTDiffM7 = dynamic_cast<TH2F*>(fileHitsAB->Get("hit_tdiff_scin_m_7"));
+    // TH2F* hitTDiffM8 = dynamic_cast<TH2F*>(fileHitsAB->Get("hit_tdiff_scin_m_8"));
 
-    TH2F* hitTDiffSum = dynamic_cast<TH2F*>(hitTDiffM8->Clone("hit_tdiff_scin_sum"));
-    hitTDiffSum->Add(hitTDiffM7);
-    hitTDiffSum->Add(hitTDiffM6);
-    hitTDiffSum->Add(hitTDiffM5);
+    // TH2F* hitTDiffSum = dynamic_cast<TH2F*>(hitTDiffM8->Clone("hit_tdiff_scin_sum"));
+    // hitTDiffSum->Add(hitTDiffM7);
+    // hitTDiffSum->Add(hitTDiffM6);
+    // hitTDiffSum->Add(hitTDiffM5);
 
     TGraphErrors* bCorrGraph = new TGraphErrors();
     bCorrGraph->SetNameTitle("b_corr", "B side signals correction for scintillators");
@@ -256,7 +256,8 @@ void hit_tdiff_effvel(std::string fileName, std::string calibJSONFileName = "cal
 
     for (int scinID = minScinID; scinID <= maxScinID; ++scinID)
     {
-      TH1D* ab_tdiff = hitTDiffSum->ProjectionY(Form("ab_tdiff_scin_%d", scinID), scinID - fScinOffset, scinID - fScinOffset);
+      TH1D* ab_tdiff = hitTDiffAll->ProjectionY(Form("ab_tdiff_scin_%d", scinID), scinID - fScinOffset, scinID - fScinOffset);
+      // TH1D* ab_tdiff = hitTDiffSum->ProjectionY(Form("ab_tdiff_scin_%d", scinID), scinID - fScinOffset, scinID - fScinOffset);
 
       ab_tdiff->SetLineColor(kBlue);
       ab_tdiff->SetLineWidth(2);
@@ -291,15 +292,15 @@ void hit_tdiff_effvel(std::string fileName, std::string calibJSONFileName = "cal
       // Writing the result of velosity estimation
       tree.put("scin." + to_string(scinID) + ".eff_velocity", eff_vel);
 
-      // If a constatnt for B side signal rrection already exists in the tree, adding to new one
-      b_corr += tree.get("scin." + to_string(scinID) + ".b_correction", 0.0);
+      // If a constatnt for B side signal correction already exists in the tree, adding to new one
+      // b_corr += tree.get("scin." + to_string(scinID) + ".b_correction", 0.0);
       tree.put("scin." + to_string(scinID) + ".b_correction", b_corr);
 
       // Filling the graph
       bCorrGraph->SetPoint(graphIt, (double)scinID, b_corr);
-      bCorrGraph->SetPointError(graphIt, 0.0, 0.0);
+      bCorrGraph->SetPointError(graphIt, 0.0, b_corr_error);
       effVelGraph->SetPoint(graphIt, (double)scinID, eff_vel);
-      effVelGraph->SetPointError(graphIt, 0.0, 0.0);
+      effVelGraph->SetPointError(graphIt, 0.0, eff_vel_error);
       graphIt++;
 
       if (saveResult)
@@ -314,7 +315,7 @@ void hit_tdiff_effvel(std::string fileName, std::string calibJSONFileName = "cal
         rightEdge.firstDevGraph->Draw("LPsame");
         rightEdge.secondDevGraph->Draw("LPsame");
         leftLine->Draw("same");
-        rightLine->Draw("same");
+        // rightLine->Draw("same");
         // Saving canvas in the specified directory
         can->SaveAs(Form("%s/edges_scin_%d.png", resultDir.c_str(), scinID));
       }
