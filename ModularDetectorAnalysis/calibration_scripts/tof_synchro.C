@@ -161,7 +161,7 @@ void tof_synchro(std::string fileName, std::string calibJSONFileName = "calibrat
           deexHist->Draw();
           annhHist->Draw("same");
         }
-        can->SaveAs(Form("%s/tof_corr_scin_%d.png", resultDir.c_str(), scinID));
+        // can->SaveAs(Form("%s/tof_corr_scin_%d.png", resultDir.c_str(), scinID));
       }
     }
 

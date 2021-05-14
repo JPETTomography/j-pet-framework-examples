@@ -53,6 +53,15 @@ void tof_synchro(std::string fileName, std::string calibJSONFileName = "calibrat
 
     TH2F* tof2Hist = dynamic_cast<TH2F*>(fileHitsTOF->Get("ap_tof_scin"));
 
+    TGraphErrors* tofCorrGraph = new TGraphErrors();
+    tofCorrGraph->SetNameTitle("tof_corr", "Secondary TOF correction for hits in scintillators");
+    tofCorrGraph->GetXaxis()->SetTitle("Scin ID");
+    tofCorrGraph->GetYaxis()->SetTitle("correction [ps]");
+    tofCorrGraph->SetMinimum(-15000.0);
+    tofCorrGraph->SetMaximum(15000.0);
+
+    unsigned graphIt = 0;
+
     for (int scinID = minScinID; scinID <= maxScinID; ++scinID)
     {
       TH1D* proj = tof2Hist->ProjectionY(Form("tof2_%d", scinID), scinID - 200, scinID - 200);
@@ -82,15 +91,21 @@ void tof_synchro(std::string fileName, std::string calibJSONFileName = "calibrat
       // double tofCorrError = (fitFun->GetParError(1) + fitFun->GetParError(1)) / 2.0;
 
       // Writing result to the tree
-      double corr = fitFun->GetParameter(1) / 2.0;
+      double tofCorr = fitFun->GetParameter(1) / 2.0;
       if (scinID > 356)
       {
-        corr = -1.0 * fitFun->GetParameter(1) / 2.0;
+        tofCorr = -1.0 * fitFun->GetParameter(1) / 2.0;
       }
 
       // If a constatnt for TOF correction already exists in the tree, adding to new one
-      corr += tree.get("scin." + to_string(scinID) + ".tof_correction_2", 0.0);
-      tree.put("scin." + to_string(scinID) + ".tof_correction_2", corr);
+      tofCorr += tree.get("scin." + to_string(scinID) + ".tof_correction_2", 0.0);
+      tree.put("scin." + to_string(scinID) + ".tof_correction_2", tofCorr);
+
+      double tofCorrError = fitFun->GetParError(1) / 2.0;
+      tofCorrGraph->SetPoint(graphIt, (double)scinID, tofCorr);
+      tofCorrGraph->SetPointError(graphIt, 0.0, tofCorrError);
+
+      graphIt++;
 
       // Drawing canvases
       if (saveResult)
@@ -98,8 +113,15 @@ void tof_synchro(std::string fileName, std::string calibJSONFileName = "calibrat
         auto name = Form("tof2_fit_scin_%d", scinID);
         TCanvas* can = new TCanvas(name, name, 1200, 800);
         proj->Draw();
-        can->SaveAs(Form("%s/tof2_corr_scin_%d.png", resultDir.c_str(), scinID));
+        // can->SaveAs(Form("%s/tof2_corr_scin_%d.png", resultDir.c_str(), scinID));
       }
+    }
+
+    if (saveResult)
+    {
+      TCanvas* canTOF = new TCanvas("tof_corr_graph", "tof_corr_graph", 1200, 800);
+      tofCorrGraph->Draw("AP*");
+      canTOF->SaveAs(Form("%s/tof_corr_scin.png", resultDir.c_str()));
     }
 
     // Saving tree into json file

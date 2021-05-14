@@ -283,6 +283,7 @@ void EventCategorizer::initialiseHistograms()
   auto minScinID = getParamBank().getScins().begin()->first;
   auto maxScinID = getParamBank().getScins().rbegin()->first;
   double totUppLimit = 24000000.0;
+  double revTOTLimit = 0.0000001;
 
   // Histograms for 2 gamama events
   getStatistics().createHistogram(new TH1F("2g_tot", "2 gamma event - average TOT scaled", 200, 0.0, totUppLimit));
@@ -298,8 +299,6 @@ void EventCategorizer::initialiseHistograms()
       new TH2F("2g_tot_z_pos", "2 gamma event - average TOT scaled vs. hit z position", 101, -25.5, 25.5, 200, 0.0, totUppLimit));
   getStatistics().getHisto2D("2g_tot_z_pos")->GetXaxis()->SetTitle("Hit z position [cm]");
   getStatistics().getHisto2D("2g_tot_z_pos")->GetYaxis()->SetTitle("Time over Threshold [ps]");
-
-  double revTOTLimit = 0.0000001;
 
   getStatistics().createHistogram(new TH1F("2g_revtot", "2 gamma event - reversed TOT", 200, -revTOTLimit, revTOTLimit));
   getStatistics().getHisto1D("2g_revtot")->GetXaxis()->SetTitle("Reversd Time over Threshold [1/ps]");
@@ -491,57 +490,57 @@ void EventCategorizer::initialiseHistograms()
   getStatistics().getHisto1D("ap_tof_lor_cut")->GetXaxis()->SetTitle("Time of Flight [ps]");
   getStatistics().getHisto1D("ap_tof_lor_cut")->GetYaxis()->SetTitle("Number of Annihilation Pairs");
 
-  getStatistics().createHistogram(new TH2F("ap_yx", "YX position of annihilation point (bin 1 cm)", 201, -50.5, 50.5, 201, -50.5, 50.5));
+  getStatistics().createHistogram(new TH2F("ap_yx", "YX position of annihilation point (bin 0.5 cm)", 202, -50.5, 50.5, 202, -50.5, 50.5));
   getStatistics().getHisto2D("ap_yx")->GetXaxis()->SetTitle("Y position [cm]");
   getStatistics().getHisto2D("ap_yx")->GetYaxis()->SetTitle("X position [cm]");
 
-  getStatistics().createHistogram(new TH2F("ap_zx", "ZX position of annihilation point (bin 1 cm)", 201, -50.5, 50.5, 201, -50.5, 50.5));
+  getStatistics().createHistogram(new TH2F("ap_zx", "ZX position of annihilation point (bin 0.5 cm)", 202, -50.5, 50.5, 202, -50.5, 50.5));
   getStatistics().getHisto2D("ap_zx")->GetXaxis()->SetTitle("Z position [cm]");
   getStatistics().getHisto2D("ap_zx")->GetYaxis()->SetTitle("X position [cm]");
 
-  getStatistics().createHistogram(new TH2F("ap_zy", "ZY position of annihilation point (bin 1 cm)", 201, -50.5, 50.5, 201, -50.5, 50.5));
+  getStatistics().createHistogram(new TH2F("ap_zy", "ZY position of annihilation point (bin 0.5 cm)", 202, -50.5, 50.5, 202, -50.5, 50.5));
   getStatistics().getHisto2D("ap_zy")->GetXaxis()->SetTitle("Z position [cm]");
   getStatistics().getHisto2D("ap_zy")->GetYaxis()->SetTitle("Y position [cm]");
 
-  getStatistics().createHistogram(new TH2F("ap_yx_zoom", "YX position of annihilation point (bin 0.5 cm)", 121, -15.5, 15.5, 121, -15.5, 15.5));
+  getStatistics().createHistogram(new TH2F("ap_yx_zoom", "YX position of annihilation point (bin 0.25 cm)", 132, -16.5, 16.5, 132, -16.5, 16.5));
   getStatistics().getHisto2D("ap_yx_zoom")->GetXaxis()->SetTitle("Y position [cm]");
   getStatistics().getHisto2D("ap_yx_zoom")->GetYaxis()->SetTitle("X position [cm]");
 
-  getStatistics().createHistogram(new TH2F("ap_zx_zoom", "ZX position of annihilation point (bin 0.5 cm)", 121, -15.5, 15.5, 121, -15.5, 15.5));
+  getStatistics().createHistogram(new TH2F("ap_zx_zoom", "ZX position of annihilation point (bin 0.25 cm)", 132, -16.5, 16.5, 132, -16.5, 16.5));
   getStatistics().getHisto2D("ap_zx_zoom")->GetXaxis()->SetTitle("Z position [cm]");
   getStatistics().getHisto2D("ap_zx_zoom")->GetYaxis()->SetTitle("X position [cm]");
 
-  getStatistics().createHistogram(new TH2F("ap_zy_zoom", "ZY position of annihilation point (bin 0.5 cm)", 121, -15.5, 15.5, 121, -15.5, 15.5));
+  getStatistics().createHistogram(new TH2F("ap_zy_zoom", "ZY position of annihilation point (bin 0.25 cm)", 132, -16.5, 16.5, 132, -16.5, 16.5));
   getStatistics().getHisto2D("ap_zy_zoom")->GetXaxis()->SetTitle("Z position [cm]");
   getStatistics().getHisto2D("ap_zy_zoom")->GetYaxis()->SetTitle("Y position [cm]");
 
   getStatistics().createHistogram(
-      new TH2F("ap_yx_zoom_lor_cut", "YX position of annihilation point after LOR angle cut", 121, -15.5, 15.5, 121, -15.5, 15.5));
+      new TH2F("ap_yx_zoom_lor_cut", "YX position of annihilation point after LOR angle cut", 132, -16.5, 16.5, 132, -16.5, 16.5));
   getStatistics().getHisto2D("ap_yx_zoom_lor_cut")->GetXaxis()->SetTitle("Y position [cm]");
   getStatistics().getHisto2D("ap_yx_zoom_lor_cut")->GetYaxis()->SetTitle("X position [cm]");
 
   getStatistics().createHistogram(
-      new TH2F("ap_zx_zoom_lor_cut", "ZX position of annihilation point after LOR angle cut", 121, -15.5, 15.5, 41, -15.5, 15.5));
+      new TH2F("ap_zx_zoom_lor_cut", "ZX position of annihilation point after LOR angle cut", 132, -16.5, 16.5, 132, -16.5, 16.5));
   getStatistics().getHisto2D("ap_zx_zoom_lor_cut")->GetXaxis()->SetTitle("Z position [cm]");
   getStatistics().getHisto2D("ap_zx_zoom_lor_cut")->GetYaxis()->SetTitle("X position [cm]");
 
   getStatistics().createHistogram(
-      new TH2F("ap_zy_zoom_lor_cut", "ZY position of annihilation point after LOR angle cut", 121, -15.5, 15.5, 121, -15.5, 15.5));
+      new TH2F("ap_zy_zoom_lor_cut", "ZY position of annihilation point after LOR angle cut", 132, -16.5, 16.5, 132, -16.5, 16.5));
   getStatistics().getHisto2D("ap_zy_zoom_lor_cut")->GetXaxis()->SetTitle("Z position [cm]");
   getStatistics().getHisto2D("ap_zy_zoom_lor_cut")->GetYaxis()->SetTitle("Y position [cm]");
 
   getStatistics().createHistogram(
-      new TH2F("ap_yx_zoom_z_cut", "YX position of annihilation point after Z position cut", 121, -15.5, 15.5, 121, -15.5, 15.5));
+      new TH2F("ap_yx_zoom_z_cut", "YX position of annihilation point after Z position cut", 132, -16.5, 16.5, 132, -16.5, 16.5));
   getStatistics().getHisto2D("ap_yx_zoom_z_cut")->GetXaxis()->SetTitle("Y position [cm]");
   getStatistics().getHisto2D("ap_yx_zoom_z_cut")->GetYaxis()->SetTitle("X position [cm]");
 
   getStatistics().createHistogram(
-      new TH2F("ap_zx_zoom_z_cut", "ZX position of annihilation point after Z position cut", 121, -15.5, 15.5, 121, -15.5, 15.5));
+      new TH2F("ap_zx_zoom_z_cut", "ZX position of annihilation point after Z position cut", 132, -16.5, 16.5, 132, -16.5, 16.5));
   getStatistics().getHisto2D("ap_zx_zoom_z_cut")->GetXaxis()->SetTitle("Z position [cm]");
   getStatistics().getHisto2D("ap_zx_zoom_z_cut")->GetYaxis()->SetTitle("X position [cm]");
 
   getStatistics().createHistogram(
-      new TH2F("ap_zy_zoom_z_cut", "ZY position of annihilation point after Z position cut", 121, -15.5, 15.5, 121, -15.5, 15.5));
+      new TH2F("ap_zy_zoom_z_cut", "ZY position of annihilation point after Z position cut", 132, -16.5, 16.5, 132, -16.5, 16.5));
   getStatistics().getHisto2D("ap_zy_zoom_z_cut")->GetXaxis()->SetTitle("Z position [cm]");
   getStatistics().getHisto2D("ap_zy_zoom_z_cut")->GetYaxis()->SetTitle("Y position [cm]");
 
@@ -589,10 +588,10 @@ void EventCategorizer::initialiseCalibrationHistograms()
   getStatistics().getHisto2D("tdiff_deex_scin")->GetYaxis()->SetTitle("Time diffrence [ps]");
 
   // Time walk histograms
-  double twLimits = 0.000003;
+  double revTOTLimit = 0.0000001;
 
   getStatistics().createHistogram(
-      new TH2F("time_walk", "Hit TDiff vs. reversed TOT", 200, -fMaxTimeDiff, fMaxTimeDiff, 200, -1.0 * twLimits, twLimits));
+      new TH2F("time_walk", "Hit TDiff vs. reversed TOT", 200, -fMaxTimeDiff, fMaxTimeDiff, 200, -revTOTLimit, revTOTLimit));
   getStatistics().getHisto2D("time_walk")->GetXaxis()->SetTitle("Hit Time Difference [ps]");
   getStatistics().getHisto2D("time_walk")->GetYaxis()->SetTitle("Reversed TOT [1/ps]");
 
