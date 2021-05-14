@@ -282,7 +282,7 @@ void EventCategorizer::initialiseHistograms()
 {
   auto minScinID = getParamBank().getScins().begin()->first;
   auto maxScinID = getParamBank().getScins().rbegin()->first;
-  double totUppLimit = 20000000.0;
+  double totUppLimit = 24000000.0;
   double revTOTLimit = 0.000000025;
 
   // Histograms for 2 gamama events

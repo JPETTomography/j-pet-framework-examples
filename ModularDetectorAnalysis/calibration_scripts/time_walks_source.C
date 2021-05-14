@@ -65,12 +65,14 @@ void time_walks(std::string fileName, std::string calibJSONFileName = "calibrati
     bool ignoreFirst = fIgnoreFirst;
 
     TGraphErrors* gr1 = new TGraphErrors();
-    int graphIt = 0;
+    TGraphErrors* gr2 = new TGraphErrors();
+    int graphIt1 = 0;
+    int graphIt2 = 0;
 
     for (int bin = fStep; bin < histo->GetNbinsY(); bin += fStep)
     {
       auto projX = histo->ProjectionX("_px", bin - fStep, bin);
-      if (projX->GetEntries() > 100)
+      if (projX->GetEntries() > 5000)
       {
         if (ignoreFirst)
         {
@@ -78,25 +80,40 @@ void time_walks(std::string fileName, std::string calibJSONFileName = "calibrati
           continue;
         }
 
-        // auto nBins = projX->GetNbinsX();
-        // int binRange = (int)(0.2 * nBins);
+        auto nBins = projX->GetNbinsX();
+        int binRange = (int)(0.2 * nBins);
 
-        // auto max = projX->GetMaximumBin();
-        // auto low = projX->GetBinCenter(max - binRange);
-        // auto upp = projX->GetBinCenter(max + binRange);
+        auto max = projX->GetMaximumBin();
+        auto low = projX->GetBinCenter(max - binRange);
+        auto upp = projX->GetBinCenter(max + binRange);
 
-        // projX->Fit("gaus", "", "", low, upp);
-        // auto fitGaus = projX->GetFunction("gaus");
-        // fitGaus->SetLineColor(kGreen);
-        // fitGaus->SetLineWidth(2);
+        projX->Fit("gaus", "", "", low, upp);
+        auto fitGaus = projX->GetFunction("gaus");
+        fitGaus->SetLineColor(kGreen);
+        fitGaus->SetLineWidth(2);
 
-        gr1->SetPoint(graphIt, histo->GetYaxis()->GetBinCenter(bin - ((int)fStep / 2)), projX->GetMean());
-        gr1->SetPointError(graphIt, 0.0, projX->GetMeanError());
-        graphIt++;
+        double x_val = histo->GetYaxis()->GetBinCenter(bin - ((int)fStep / 2));
+        double x_err = (histo->GetYaxis()->GetBinCenter(bin) - histo->GetYaxis()->GetBinCenter(bin - ((int)fStep))) / 2.0;
+        double y_val = fitGaus->GetParameter(1);
+        double y_err = 50.0 * fitGaus->GetParError(1);
+
+        // double y_val = projX->GetMean();
+        // double y_err = projX->GetMeanError();
+
+        gr1->SetPoint(graphIt1, x_val, y_val);
+        // gr1->SetPointError(graphIt1, x_err, y_err);
+        graphIt1++;
+
+        // if (x_val > -0.000000005 && x_val < 0.000000005)
+        // {
+        //   gr2->SetPoint(graphIt2, x_val, y_val);
+        //   gr2->SetPointError(graphIt2, x_err, y_err);
+        //   graphIt2++;
+        // }
       }
     }
 
-    gr1->Fit("pol1");
+    gr1->Fit("pol1", "", "", -0.000000005, 0.000000005);
     auto fun = gr1->GetFunction("pol1");
     auto chi2 = fun->GetChisquare();
     auto ndf = fun->GetNDF();
@@ -110,11 +127,23 @@ void time_walks(std::string fileName, std::string calibJSONFileName = "calibrati
 
     if (saveResult)
     {
+      // Fit result
       TCanvas can(histo->GetName(), histo->GetName(), 1200, 720);
+
       gr1->SetNameTitle("time walk", "time walk");
-      gr1->GetXaxis()->SetTitle("Projection range center [1/ps]");
-      gr1->GetYaxis()->SetTitle("Projection Mean [ps]");
-      gr1->Draw("ap");
+      gr1->GetXaxis()->SetTitle("Reversed TOT projection range center [1/ps]");
+      gr1->GetYaxis()->SetTitle("Projection gauss fit mean [ps]");
+      gr1->Draw("ap*");
+
+      // gr2->SetNameTitle("time walk", "time walk");
+      // gr2->GetXaxis()->SetTitle("Reversed TOT projection range center [1/ps]");
+      // gr2->GetYaxis()->SetTitle("Projection gauss fit mean [ps]");
+      // gr2->Draw("ap");
+
+      // TMultiGraph* mg = new TMultiGraph();
+      // mg->Add(gr1, "ap");
+      // mg->Add(gr2, "ap");
+      // mg->Draw("ap");
 
       auto legend = new TLegend(0.1, 0.7, 0.45, 0.9);
       legend->AddEntry(fun, "fit ax+b", "l");
@@ -125,6 +154,7 @@ void time_walks(std::string fileName, std::string calibJSONFileName = "calibrati
 
       can.SaveAs(Form("%s/fit_%s%s", resultDir.c_str(), "time_walk", ".png"));
 
+      // Correction on source histogram
       TCanvas can2(Form("can_%s%s", "time_walk", ".png"), Form("can_%s%s", "time_walk", ".png"), 1300, 700);
       histo->Draw("colz");
 
