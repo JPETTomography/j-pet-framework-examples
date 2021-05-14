@@ -283,7 +283,7 @@ void EventCategorizer::initialiseHistograms()
   auto minScinID = getParamBank().getScins().begin()->first;
   auto maxScinID = getParamBank().getScins().rbegin()->first;
   double totUppLimit = 20000000.0;
-  double revTOTLimit = 0.00000005;
+  double revTOTLimit = 0.000000025;
 
   // Histograms for 2 gamama events
   getStatistics().createHistogram(new TH1F("2g_tot", "2 gamma event - average TOT scaled", 200, 0.0, totUppLimit));
@@ -588,10 +588,10 @@ void EventCategorizer::initialiseCalibrationHistograms()
   getStatistics().getHisto2D("tdiff_deex_scin")->GetYaxis()->SetTitle("Time diffrence [ps]");
 
   // Time walk histograms
-  double revTOTLimit = 0.00000005;
+  double revTOTLimit = 0.000000025;
 
   getStatistics().createHistogram(
-      new TH2F("time_walk", "Hit TDiff vs. reversed TOT", 200, -fMaxTimeDiff, fMaxTimeDiff, 200, -revTOTLimit, revTOTLimit));
+      new TH2F("time_walk", "Hit TDiff vs. reversed TOT", 200, -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0, 200, -revTOTLimit, revTOTLimit));
   getStatistics().getHisto2D("time_walk")->GetXaxis()->SetTitle("Hit Time Difference [ps]");
   getStatistics().getHisto2D("time_walk")->GetYaxis()->SetTitle("Reversed TOT [1/ps]");
 

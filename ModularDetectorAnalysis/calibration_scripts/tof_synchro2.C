@@ -119,9 +119,9 @@ void tof_synchro(std::string fileName, std::string calibJSONFileName = "calibrat
 
     if (saveResult)
     {
-      TCanvas* canTOF = new TCanvas("tof_corr_graph", "tof_corr_graph", 1200, 800);
+      TCanvas* canTOF = new TCanvas("tof2_corr_graph", "tof_corr_graph", 1200, 800);
       tofCorrGraph->Draw("AP*");
-      canTOF->SaveAs(Form("%s/tof_corr_scin.png", resultDir.c_str()));
+      canTOF->SaveAs(Form("%s/tof2_corr_scin.png", resultDir.c_str()));
     }
 
     // Saving tree into json file
