@@ -17,9 +17,11 @@ set(projectBinary ${projectName}.x)
 project(${projectName} CXX)
 
 set(HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/../ModularDetectorAnalysis/EventCategorizerTools.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/InterfileReconstructionTools.h
             ${CMAKE_CURRENT_SOURCE_DIR}/InterfileMLPReconstruction.h)
 
 set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../ModularDetectorAnalysis/EventCategorizerTools.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/InterfileReconstructionTools.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/InterfileMLPReconstruction.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
 
