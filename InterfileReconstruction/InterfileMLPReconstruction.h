@@ -17,6 +17,14 @@
 #include "JPetUserTask/JPetUserTask.h"
 #include <memory>
 
+/**
+ * @brief User Task reconstructing image using MLP method (naive) and saving result to Interfile format.
+ *
+ * This task is using EventCategorizerTools::calculateAnnihilationPoint method
+ * to calculate annihilation position and then it saves results to both
+ * root TH3D histogram and as Interfile (binary, 3d float array).
+ *
+ */
 class InterfileMLPReconstruction : public JPetUserTask
 {
 
