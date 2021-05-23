@@ -81,7 +81,7 @@ void time_walks(std::string fileName, std::string calibJSONFileName = "calibrati
         }
 
         auto nBins = projX->GetNbinsX();
-        int binRange = (int)(0.2 * nBins);
+        int binRange = (int)(0.08 * nBins);
 
         auto max = projX->GetMaximumBin();
         auto low = projX->GetBinCenter(max - binRange);
@@ -95,13 +95,14 @@ void time_walks(std::string fileName, std::string calibJSONFileName = "calibrati
         double x_val = histo->GetYaxis()->GetBinCenter(bin - ((int)fStep / 2));
         double x_err = (histo->GetYaxis()->GetBinCenter(bin) - histo->GetYaxis()->GetBinCenter(bin - ((int)fStep))) / 2.0;
         double y_val = fitGaus->GetParameter(1);
-        double y_err = 50.0 * fitGaus->GetParError(1);
+        double y_err = fitGaus->GetParameter(2);
+        // double y_err = fitGaus->GetParError(1);
 
         // double y_val = projX->GetMean();
         // double y_err = projX->GetMeanError();
 
         gr1->SetPoint(graphIt1, x_val, y_val);
-        // gr1->SetPointError(graphIt1, x_err, y_err);
+        gr1->SetPointError(graphIt1, x_err, y_err);
         graphIt1++;
 
         // if (x_val > -0.000000005 && x_val < 0.000000005)
@@ -110,20 +111,61 @@ void time_walks(std::string fileName, std::string calibJSONFileName = "calibrati
         //   gr2->SetPointError(graphIt2, x_err, y_err);
         //   graphIt2++;
         // }
+
+        if (saveResult)
+        {
+          TCanvas projCan(projX->GetName(), projX->GetName(), 1200, 720);
+          projX->SetMaximum(1.5 * projX->GetMaximum());
+          projX->Draw();
+
+          auto legend = new TLegend(0.1, 0.7, 0.45, 0.9);
+          legend->AddEntry(fitGaus, "Gaussian fit", "l");
+          legend->AddEntry((TObject*)0, Form("const %f +- %f", fitGaus->GetParameter(0), fitGaus->GetParError(0)), "");
+          legend->AddEntry((TObject*)0, Form("mean %f +- %f", fitGaus->GetParameter(1), fitGaus->GetParError(1)), "");
+          legend->AddEntry((TObject*)0, Form("sigma %f +- %f", fitGaus->GetParameter(2), fitGaus->GetParError(2)), "");
+          legend->Draw();
+
+          projCan.SaveAs(Form("%s/fit_proj_%d%s", resultDir.c_str(), bin, ".png"));
+          projCan.Delete();
+        }
+
+        projX->Delete();
       }
     }
 
-    gr1->Fit("pol1", "", "", -0.000000005, 0.000000005);
-    auto fun = gr1->GetFunction("pol1");
+    TF1* f1 = new TF1("sigmoid", "([0]/(1 + TMath::Exp(-[1]*(x-[2]))))+[3]", -0.000000016, 0.000000016);
+    f1->SetParameters(2.0 * 4100.0, 250000000, 0.0, -4100.0);
+
+    // TF1* f1 = new TF1("atan_1", "[0]*atan([1]*x+[2])+[3]", -0.000000015, 0.000000015);
+    // TF1* f1 = new TF1("sigmoid", "([0]/(1+ TMath::Exp(-[1]*(x-[2]))))", -0.000000015, 0.000000015);
+    // f1->SetParameters();
+
+    gr1->Fit("sigmoid", "", "", -0.000000016, 0.000000016);
+    auto fun = gr1->GetFunction("sigmoid");
     auto chi2 = fun->GetChisquare();
     auto ndf = fun->GetNDF();
     auto p0 = fun->GetParameter(0);
     auto e0 = fun->GetParError(0);
     auto p1 = fun->GetParameter(1);
     auto e1 = fun->GetParError(1);
+    auto p2 = fun->GetParameter(2);
+    auto e2 = fun->GetParError(2);
+    auto p3 = fun->GetParameter(3);
+    auto e3 = fun->GetParError(3);
 
-    tree.put("time_walk.param_a", p1);
-    tree.put("time_walk.param_b", p0);
+    // gr1->Fit("pol1", "", "", -0.000000005, 0.000000005);
+    // auto fun = gr1->GetFunction("pol1");
+    // auto chi2 = fun->GetChisquare();
+    // auto ndf = fun->GetNDF();
+    // auto p0 = fun->GetParameter(0);
+    // auto e0 = fun->GetParError(0);
+    // auto p1 = fun->GetParameter(1);
+    // auto e1 = fun->GetParError(1);
+    //
+    tree.put("time_walk.param_0", p0);
+    tree.put("time_walk.param_1", p1);
+    tree.put("time_walk.param_2", p2);
+    tree.put("time_walk.param_3", p3);
 
     if (saveResult)
     {
@@ -146,10 +188,18 @@ void time_walks(std::string fileName, std::string calibJSONFileName = "calibrati
       // mg->Draw("ap");
 
       auto legend = new TLegend(0.1, 0.7, 0.45, 0.9);
-      legend->AddEntry(fun, "fit ax+b", "l");
-      legend->AddEntry((TObject*)0, Form("a = %f +- %f", p1, e1), "");
-      legend->AddEntry((TObject*)0, Form("b = %f +- %f", p0, e0), "");
-      legend->AddEntry((TObject*)0, Form("Chi2 = %f     ndf = %i", chi2, ndf), "");
+
+      legend->AddEntry(fun, "sigmoid ([0]/(1 + exp(-[1]*(x-[2]))))+[3]", "l");
+      legend->AddEntry((TObject*)0, Form("p3 %f +- %f", p3, e3), "");
+      legend->AddEntry((TObject*)0, Form("p2 %f +- %f", p2, e2), "");
+      legend->AddEntry((TObject*)0, Form("p1 %f +- %f", p1, e1), "");
+      legend->AddEntry((TObject*)0, Form("p0 %f +- %f", p0, e0), "");
+      legend->AddEntry((TObject*)0, Form("Chi^2 = %f     ndf = %i", chi2, ndf), "");
+
+      // legend->AddEntry(fun, "fit ax+b", "l");
+      // legend->AddEntry((TObject*)0, Form("a = %f +- %f [ps^2]", p1, e1), "");
+      // legend->AddEntry((TObject*)0, Form("b = %f +- %f [ps]", p0, e0), "");
+      // legend->AddEntry((TObject*)0, Form("Chi^2 = %f     ndf = %i", chi2, ndf), "");
       legend->Draw();
 
       can.SaveAs(Form("%s/fit_%s%s", resultDir.c_str(), "time_walk", ".png"));
@@ -167,7 +217,7 @@ void time_walks(std::string fileName, std::string calibJSONFileName = "calibrati
       auto line = new TLine(minX, minY, maxX, maxY);
       line->SetLineColor(kRed);
       line->SetLineWidth(2);
-      line->Draw("same");
+      // line->Draw("same");
 
       can2.SaveAs(Form("%s/time_walk.png", resultDir.c_str()));
     }

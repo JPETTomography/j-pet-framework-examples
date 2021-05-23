@@ -139,11 +139,17 @@ void EventCategorizerTools::selectForTimeWalk(const JPetEvent& event, JPetStatis
         int scin1ID = firstHit.getScin().getID();
         int scin2ID = secondHit.getScin().getID();
 
-        stats.getHisto2D("time_walk")->Fill(firstHit.getTimeDiff(), revTOT1);
-        stats.getHisto2D("time_walk")->Fill(secondHit.getTimeDiff(), revTOT2);
+        stats.getHisto2D("time_walk_first_order")->Fill(firstHit.getTimeDiff(), revTOT1);
+        stats.getHisto2D("time_walk_first_order")->Fill(secondHit.getTimeDiff(), revTOT2);
 
-        // stats.getHisto2D(Form("time_walk_scin%d", scin1ID))->Fill(firstHit.getTimeDiff(), revTOT1);
-        // stats.getHisto2D(Form("time_walk_scin%d", scin2ID))->Fill(secondHit.getTimeDiff(), revTOT2);
+        if (firstHit.getScin().getSlot().getTheta() < secondHit.getScin().getSlot().getTheta())
+        {
+          stats.getHisto2D("time_walk_second_order")->Fill(calculateTOF(firstHit, secondHit), revTOT1 - revTOT2);
+        }
+        else
+        {
+          stats.getHisto2D("time_walk_second_order")->Fill(calculateTOF(secondHit, firstHit), revTOT2 - revTOT1);
+        }
       }
     }
   }
@@ -223,8 +229,8 @@ void EventCategorizerTools::timeWalkStuff(const JPetHit& hit, JPetStatistics& st
     if (leadsA.size() == 2 && leadsB.size() == 2 && trailsA.size() == 2 && trailsB.size() == 2)
     {
       // Constants for scin synchronization
-      double c_tDiffTHR1 = calibTree.get(Form("%s.%d.%s%d", "scin", scinID, "hit_tdiff_thr1_scin_mtx_pos_", mtxPos), 0.0);
-      double c_tDiffTHR2 = calibTree.get(Form("%s.%d.%s%d", "scin", scinID, "hit_tdiff_thr2_scin_mtx_pos_", mtxPos), 0.0);
+      double c_tDiffTHR1 = calibTree.get(Form("%s.%d.%s%d", "scin", scinID, "ab_tdiff_thr1_scin_mtx_pos_", mtxPos), 0.0);
+      double c_tDiffTHR2 = calibTree.get(Form("%s.%d.%s%d", "scin", scinID, "ab_tdiff_thr2_scin_mtx_pos_", mtxPos), 0.0);
 
       double tDiffTHR1 = leadsB.at(0).getTime() - leadsA.at(0).getTime() - c_tDiffTHR1;
       double tDiffTHR2 = leadsB.at(1).getTime() - leadsA.at(1).getTime() - c_tDiffTHR2;
@@ -470,12 +476,12 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetHit& firstHit, const JPetHi
     stats.getHisto2D("2g_tof_z_pos")->Fill(firstHit.getPosZ(), tof);
     stats.getHisto2D("2g_tof_z_pos")->Fill(secondHit.getPosZ(), tof);
 
-    stats.getHisto1D("2g_hit_tdiff")->Fill(firstHit.getTimeDiff());
-    stats.getHisto1D("2g_hit_tdiff")->Fill(secondHit.getTimeDiff());
-    stats.getHisto2D("2g_hit_tdiff_scin")->Fill(scin1ID, firstHit.getTimeDiff());
-    stats.getHisto2D("2g_hit_tdiff_scin")->Fill(scin2ID, secondHit.getTimeDiff());
-    stats.getHisto2D("2g_hit_tdiff_z_pos")->Fill(firstHit.getPosZ(), firstHit.getTimeDiff());
-    stats.getHisto2D("2g_hit_tdiff_z_pos")->Fill(secondHit.getPosZ(), secondHit.getTimeDiff());
+    stats.getHisto1D("2g_ab_tdiff")->Fill(firstHit.getTimeDiff());
+    stats.getHisto1D("2g_ab_tdiff")->Fill(secondHit.getTimeDiff());
+    stats.getHisto2D("2g_ab_tdiff_scin")->Fill(scin1ID, firstHit.getTimeDiff());
+    stats.getHisto2D("2g_ab_tdiff_scin")->Fill(scin2ID, secondHit.getTimeDiff());
+    stats.getHisto2D("2g_ab_tdiff_z_pos")->Fill(firstHit.getPosZ(), firstHit.getTimeDiff());
+    stats.getHisto2D("2g_ab_tdiff_z_pos")->Fill(secondHit.getPosZ(), secondHit.getTimeDiff());
 
     stats.getHisto1D("2g_theta")->Fill(theta);
     stats.getHisto2D("2g_theta_scin")->Fill(scin1ID, theta);
@@ -515,8 +521,8 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetHit& firstHit, const JPetHi
       stats.getHisto1D("theta_cut_tof")->Fill(tof);
       stats.getHisto1D("theta_cut_tot")->Fill(tot1);
       stats.getHisto1D("theta_cut_tot")->Fill(tot2);
-      stats.getHisto1D("theta_cut_hit_tdiff")->Fill(firstHit.getTimeDiff());
-      stats.getHisto1D("theta_cut_hit_tdiff")->Fill(secondHit.getTimeDiff());
+      stats.getHisto1D("theta_cut_ab_tdiff")->Fill(firstHit.getTimeDiff());
+      stats.getHisto1D("theta_cut_ab_tdiff")->Fill(secondHit.getTimeDiff());
     }
   }
 
@@ -528,8 +534,8 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetHit& firstHit, const JPetHi
     {
       stats.getHisto1D("tof_cut_tot")->Fill(tot1);
       stats.getHisto1D("tof_cut_tot")->Fill(tot2);
-      stats.getHisto1D("tof_cut_hit_tdiff")->Fill(firstHit.getTimeDiff());
-      stats.getHisto1D("tof_cut_hit_tdiff")->Fill(secondHit.getTimeDiff());
+      stats.getHisto1D("tof_cut_ab_tdiff")->Fill(firstHit.getTimeDiff());
+      stats.getHisto1D("tof_cut_ab_tdiff")->Fill(secondHit.getTimeDiff());
       stats.getHisto1D("tof_cut_theta")->Fill(theta);
     }
   }
@@ -543,8 +549,8 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetHit& firstHit, const JPetHi
       stats.getHisto1D("cut_stats_tot")->Fill(scin1ID);
       stats.getHisto1D("cut_stats_tot")->Fill(scin2ID);
       stats.getHisto1D("tot_cut_tof")->Fill(tof);
-      stats.getHisto1D("tot_cut_hit_tdiff")->Fill(firstHit.getTimeDiff());
-      stats.getHisto1D("tot_cut_hit_tdiff")->Fill(secondHit.getTimeDiff());
+      stats.getHisto1D("tot_cut_ab_tdiff")->Fill(firstHit.getTimeDiff());
+      stats.getHisto1D("tot_cut_ab_tdiff")->Fill(secondHit.getTimeDiff());
       stats.getHisto1D("tot_cut_theta")->Fill(theta);
     }
   }
@@ -568,12 +574,12 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetHit& firstHit, const JPetHi
     stats.getHisto2D("ap_revtot_z_pos")->Fill(firstHit.getPosZ(), revTOT1);
     stats.getHisto2D("ap_revtot_z_pos")->Fill(secondHit.getPosZ(), revTOT2);
 
-    stats.getHisto1D("ap_hit_tdiff")->Fill(firstHit.getTimeDiff());
-    stats.getHisto1D("ap_hit_tdiff")->Fill(secondHit.getTimeDiff());
-    stats.getHisto2D("ap_hit_tdiff_scin")->Fill(scin1ID, firstHit.getTimeDiff());
-    stats.getHisto2D("ap_hit_tdiff_scin")->Fill(scin2ID, secondHit.getTimeDiff());
-    stats.getHisto2D("ap_hit_tdiff_z_pos")->Fill(firstHit.getPosZ(), firstHit.getTimeDiff());
-    stats.getHisto2D("ap_hit_tdiff_z_pos")->Fill(secondHit.getPosZ(), secondHit.getTimeDiff());
+    stats.getHisto1D("ap_ab_tdiff")->Fill(firstHit.getTimeDiff());
+    stats.getHisto1D("ap_ab_tdiff")->Fill(secondHit.getTimeDiff());
+    stats.getHisto2D("ap_ab_tdiff_scin")->Fill(scin1ID, firstHit.getTimeDiff());
+    stats.getHisto2D("ap_ab_tdiff_scin")->Fill(scin2ID, secondHit.getTimeDiff());
+    stats.getHisto2D("ap_ab_tdiff_z_pos")->Fill(firstHit.getPosZ(), firstHit.getTimeDiff());
+    stats.getHisto2D("ap_ab_tdiff_z_pos")->Fill(secondHit.getPosZ(), secondHit.getTimeDiff());
 
     stats.getHisto1D("ap_tof")->Fill(tof);
     stats.getHisto2D("ap_tof_scin")->Fill(scin1ID, tof);
