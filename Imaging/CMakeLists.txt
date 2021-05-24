@@ -41,6 +41,7 @@ set(HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizerImaging.h
             ${use_modules_from}/SignalFinder.h
             ${use_modules_from}/SignalFinderTools.h
             ${use_modules_from}/SignalTransformer.h
+            ${use_modules_from}/SignalTransformerTools.h
             ${use_modules_from}/HitFinder.h
             ${use_modules_from}/HitFinderTools.h
             ${use_modules_from}/EventFinder.h)
@@ -53,6 +54,7 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizerImaging.cpp
             ${use_modules_from}/SignalFinder.cpp
             ${use_modules_from}/SignalFinderTools.cpp
             ${use_modules_from}/SignalTransformer.cpp
+            ${use_modules_from}/SignalTransformerTools.cpp
             ${use_modules_from}/HitFinder.cpp
             ${use_modules_from}/HitFinderTools.cpp
             ${use_modules_from}/EventFinder.cpp)
