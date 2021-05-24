@@ -31,7 +31,7 @@ int main(int argc, const char* argv[])
     JPetManager& manager = JPetManager::getManager();
 
     manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
-    manager.registerTask<SignalFinder>("SiPMSignalFinder");
+    manager.registerTask<SiPMSignalFinder>("SiPMSignalFinder");
     manager.registerTask<SignalTransformer>("SignalTransformer");
     manager.registerTask<HitFinder>("HitFinder");
     manager.registerTask<EventFinder>("EventFinder");
