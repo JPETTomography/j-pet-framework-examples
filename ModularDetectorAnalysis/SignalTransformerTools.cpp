@@ -203,13 +203,15 @@ double SignalTransformerTools::calculateAverageTime(JPetMatrixSignal& mtxSig, bo
   double timeWalkCorrection = 0.0;
   if (mtxSig.getTOT() != 0.0)
   {
-    double p0 = calibTree.get("time_walk.param_0", 0.0);
-    double p1 = calibTree.get("time_walk.param_1", 0.0);
-    double p2 = calibTree.get("time_walk.param_2", 0.0);
-    double p3 = calibTree.get("time_walk.param_3", 0.0);
+    double pA = calibTree.get("time_walk.param_a", 0.0);
+    timeWalkCorrection = pA / mtxSig.getTOT();
 
-    // Calculating sigmoid function
-    timeWalkCorrection = p0 / (1 + exp(-p1 * (1.0 / mtxSig.getTOT() - p2))) + p3;
+    // Attempt with calculating sigmoid function
+    // double p0 = calibTree.get("time_walk.param_0", 0.0);
+    // double p1 = calibTree.get("time_walk.param_1", 0.0);
+    // double p2 = calibTree.get("time_walk.param_2", 0.0);
+    // double p3 = calibTree.get("time_walk.param_3", 0.0);
+    // timeWalkCorrection = p0 / (1 + exp(-p1 * (1.0 / mtxSig.getTOT() - p2))) + p3;
   }
 
   return averageTime - bCorrection - timeWalkCorrection;
