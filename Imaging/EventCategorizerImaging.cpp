@@ -14,7 +14,7 @@
  */
 
 #include "EventCategorizerImaging.h"
-#include "../ModularDetectorAnalysis/EventCategorizerTools.h"
+#include "EventCategorizerTools.h"
 
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include <JPetWriter/JPetWriter.h>

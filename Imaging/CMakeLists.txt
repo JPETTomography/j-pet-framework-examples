@@ -33,31 +33,29 @@ set(projectBinary ${projectName}.x)
 ## Project is using only C++
 project(${projectName} CXX)
 
-set(use_modules_from ../LargeBarrelAnalysis)
+set(use_modules_from ../ModularDetectorAnalysis)
 set(HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizerImaging.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizerTools.h
             ${use_modules_from}/TimeWindowCreator.h
             ${use_modules_from}/TimeWindowCreatorTools.h
-            ${use_modules_from}/UniversalFileLoader.h
             ${use_modules_from}/SignalFinder.h
             ${use_modules_from}/SignalFinderTools.h
             ${use_modules_from}/SignalTransformer.h
             ${use_modules_from}/HitFinder.h
             ${use_modules_from}/HitFinderTools.h
-            ${use_modules_from}/EventFinder.h
-            ${use_modules_from}/EventCategorizerTools.h)
+            ${use_modules_from}/EventFinder.h)
 
 set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizerImaging.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizerTools.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
             ${use_modules_from}/TimeWindowCreator.cpp
             ${use_modules_from}/TimeWindowCreatorTools.cpp
-            ${use_modules_from}/UniversalFileLoader.cpp
             ${use_modules_from}/SignalFinder.cpp
             ${use_modules_from}/SignalFinderTools.cpp
             ${use_modules_from}/SignalTransformer.cpp
             ${use_modules_from}/HitFinder.cpp
             ${use_modules_from}/HitFinderTools.cpp
-            ${use_modules_from}/EventFinder.cpp
-            ${use_modules_from}/EventCategorizerTools.cpp)
+            ${use_modules_from}/EventFinder.cpp)
 
 ################################################################################
 ## Build definitions and libraries linking
@@ -72,3 +70,17 @@ add_custom_target(clean_data_${projectName}
 ################################################################################
 ## Copy the auxiliary files
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/${AUXILIARY_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+
+################################################################################
+### Add new target that depends on copied files
+#add_custom_target(copy_files_${projectName} DEPENDS ${copy_depends})
+### Add dependencies between building project and copy files
+#add_dependencies(${projectBinary} copy_files_${projectName})
+
+################################################################################
+## Unit tests
+#option(PACKAGE_TESTS "Build the tests" ON)
+#if(PACKAGE_TESTS)
+    #enable_testing()
+    #add_subdirectory(tests)
+#endif()
