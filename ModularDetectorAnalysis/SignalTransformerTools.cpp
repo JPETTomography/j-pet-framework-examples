@@ -190,12 +190,12 @@ double SignalTransformerTools::calculateAverageTime(JPetMatrixSignal& mtxSig, bo
   {
     averageTime = averageTime / ((double)multiplicity);
   }
+  auto scinID = mtxSig.getPM().getScin().getID();
 
   // Applying b-side correction for A-B time difference synchronization
   double bCorrection = 0.0;
   if (mtxSig.getPM().getSide() == JPetPM::SideB)
   {
-    auto scinID = mtxSig.getPM().getScin().getID();
     bCorrection = calibTree.get("scin." + to_string(scinID) + ".b_correction", 0.0);
   }
 
@@ -203,15 +203,9 @@ double SignalTransformerTools::calculateAverageTime(JPetMatrixSignal& mtxSig, bo
   double timeWalkCorrection = 0.0;
   if (mtxSig.getTOT() != 0.0)
   {
-    double pA = calibTree.get("time_walk.param_a", 0.0);
-    timeWalkCorrection = pA / mtxSig.getTOT();
-
-    // Attempt with calculating sigmoid function
-    // double p0 = calibTree.get("time_walk.param_0", 0.0);
-    // double p1 = calibTree.get("time_walk.param_1", 0.0);
-    // double p2 = calibTree.get("time_walk.param_2", 0.0);
-    // double p3 = calibTree.get("time_walk.param_3", 0.0);
-    // timeWalkCorrection = p0 / (1 + exp(-p1 * (1.0 / mtxSig.getTOT() - p2))) + p3;
+    double p0 = calibTree.get("scin." + to_string(scinID) + ".time_walk_ab_param_0", 0.0);
+    double p1 = calibTree.get("scin." + to_string(scinID) + ".time_walk_ab_param_1", 0.0);
+    timeWalkCorrection = p1 / mtxSig.getTOT();
   }
 
   return averageTime - bCorrection - timeWalkCorrection;

@@ -139,16 +139,20 @@ void EventCategorizerTools::selectForTimeWalk(const JPetEvent& event, JPetStatis
         int scin1ID = firstHit.getScin().getID();
         int scin2ID = secondHit.getScin().getID();
 
-        stats.getHisto2D("time_walk_first_order")->Fill(firstHit.getTimeDiff(), revTOT1);
-        stats.getHisto2D("time_walk_first_order")->Fill(secondHit.getTimeDiff(), revTOT2);
+        stats.getHisto2D("time_walk_ab_tdiff")->Fill(firstHit.getTimeDiff(), revTOT1);
+        stats.getHisto2D("time_walk_ab_tdiff")->Fill(secondHit.getTimeDiff(), revTOT2);
+        stats.getHisto2D(Form("time_walk_ab_tdiff_scin_%d", scin1ID))->Fill(firstHit.getTimeDiff(), revTOT1);
+        stats.getHisto2D(Form("time_walk_ab_tdiff_scin_%d", scin2ID))->Fill(secondHit.getTimeDiff(), revTOT2);
 
         if (firstHit.getScin().getSlot().getTheta() < secondHit.getScin().getSlot().getTheta())
         {
-          stats.getHisto2D("time_walk_second_order")->Fill(calculateTOF(firstHit, secondHit), revTOT1 - revTOT2);
+          stats.getHisto2D("time_walk_tof")->Fill(calculateTOF(firstHit, secondHit), revTOT1 - revTOT2);
+          stats.getHisto2D(Form("time_walk_tof_scin_%d", scin1ID))->Fill(calculateTOF(firstHit, secondHit), revTOT1 - revTOT2);
         }
         else
         {
-          stats.getHisto2D("time_walk_second_order")->Fill(calculateTOF(secondHit, firstHit), revTOT2 - revTOT1);
+          stats.getHisto2D("time_walk_tof")->Fill(calculateTOF(secondHit, firstHit), revTOT2 - revTOT1);
+          stats.getHisto2D(Form("time_walk_tof_scin_%d", scin2ID))->Fill(calculateTOF(secondHit, firstHit), revTOT2 - revTOT1);
         }
       }
     }
