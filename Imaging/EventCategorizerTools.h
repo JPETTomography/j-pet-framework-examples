@@ -89,10 +89,17 @@ public:
 
   static double calculatePlaneCenterDistance(const JPetHit& firstHit, const JPetHit& secondHit, const JPetHit& thirdHit);
 
-  static bool stream2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double b2bSlotThetaDiff, double b2bTimeDiff);
-
+  static bool stream2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double b2bSlotThetaDiff, double b2bTimeDiff, 
+                           double b2bScattTest);
+  
+  static bool stream2GammaPlus1Prompt(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double b2bSlotThetaDiff, 
+                                                    double b2bSlotThetaDiffPrompt, double b2bTimeDiff, double b2bScattTest, uint promptIndex);
+  
   static bool stream3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double d3SlotThetaMin, double d3TimeDiff,
-                           double d3DistanceFromCenter);
+                           double d3DistanceFromCenter, double d3ScattTest);
+  
+  static double calcAngle2D(JPetHit hit1, JPetHit hit2);
+  static double scatterTest(JPetHit hit1, JPetHit hit2);
 };
 
 #endif /* !EVENTCATEGORIZERTOOLS_H */
