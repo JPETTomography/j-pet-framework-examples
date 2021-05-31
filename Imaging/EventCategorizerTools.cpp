@@ -856,7 +856,8 @@ double EventCategorizerTools::calculatePlaneCenterDistance(const JPetHit& firstH
  * @todo: the selection criteria b2b distance from center needs to be checked
  * and implemented again
  */
-bool EventCategorizerTools::stream2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double b2bSlotThetaDiff, double b2bTimeDiff)
+bool EventCategorizerTools::stream2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double b2bSlotThetaDiff, double b2bTimeDiff, 
+                                         double b2bScattTest)
 {
   if (event.getHits().size() < 2)
   {
@@ -866,40 +867,93 @@ bool EventCategorizerTools::stream2Gamma(const JPetEvent& event, JPetStatistics&
   {
     for (uint j = i + 1; j < event.getHits().size(); j++)
     {
-      JPetHit firstHit, secondHit;
-      if (event.getHits().at(i).getTime() < event.getHits().at(j).getTime())
-      {
-        firstHit = event.getHits().at(i);
-        secondHit = event.getHits().at(j);
-      }
-      else
-      {
-        firstHit = event.getHits().at(j);
-        secondHit = event.getHits().at(i);
-      }
+      JPetHit firstHit = event.getHits().at(i);
+      JPetHit secondHit = event.getHits().at(j);
       // Checking for back to back
       double timeDiff = fabs(firstHit.getTime() - secondHit.getTime());
       double deltaLor = (secondHit.getTime() - firstHit.getTime()) * kLightVelocity_cm_ps / 2.;
-      double theta1 = min(firstHit.getScin().getSlot().getTheta(), secondHit.getScin().getSlot().getTheta());
-      double theta2 = max(firstHit.getScin().getSlot().getTheta(), secondHit.getScin().getSlot().getTheta());
-      /// WK: Is this condition ok for source away from the center? 
-      double thetaDiff = min(theta2 - theta1, 360.0 - theta2 + theta1);
+      double angleDiff2D = calcAngle2D(firstHit, secondHit);
+      double scatterTest = scatterTest(firstHit, secondHit);
       if (saveHistos)
       {
         stats.getHisto1D("2Gamma_TimeDiff")->Fill(timeDiff / 1000.0);
         stats.getHisto1D("2Gamma_DLOR")->Fill(deltaLor);
-        stats.getHisto1D("2Gamma_ThetaDiff")->Fill(thetaDiff);
+        stats.getHisto1D("2Gamma_ThetaDiff")->Fill(angleDiff2D);
+        stats.getHisto1D("2Gamma_ScattTest")->Fill(scatterTest);
       }
-      if (fabs(thetaDiff - 180.0) < b2bSlotThetaDiff && timeDiff < b2bTimeDiff)
+      if (fabs(angleDiff2D - 180.0) < b2bSlotThetaDiff && timeDiff < b2bTimeDiff && scatterTest < b2bScattTest)
       {
         if (saveHistos)
         {
           TVector3 annhilationPoint = calculateAnnihilationPoint(firstHit, secondHit);
-          stats.getHisto1D("2Annih_TimeDiff")->Fill(timeDiff / 1000.0);
-          stats.getHisto1D("2Annih_DLOR")->Fill(deltaLor);
-          stats.getHisto1D("2Annih_ThetaDiff")->Fill(thetaDiff);
-          stats.getHisto2D("2Annih_XY")->Fill(annhilationPoint.X(), annhilationPoint.Y());
-          stats.getHisto1D("2Annih_Z")->Fill(annhilationPoint.Z());
+          stats.getHisto1D("2Anni_TimeDiff")->Fill(timeDiff / 1000.0);
+          stats.getHisto1D("2Anni_DLOR")->Fill(deltaLor);
+          stats.getHisto1D("2Anni_ThetaDiff")->Fill(angleDiff2D);
+          stats.getHisto1D("2Anni_ScattTest")->Fill(scatterTest);
+          stats.getHisto2D("2Anni_XY")->Fill(annhilationPoint.X(), annhilationPoint.Y());
+          stats.getHisto1D("2Anni_Z")->Fill(annhilationPoint.Z());
+        }
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/**
+ * Method for determining type of event for streaming - 2 gamma
+ * @todo: the selection criteria b2b distance from center needs to be checked
+ * and implemented again
+ */
+bool EventCategorizerTools::stream2GammaPlus1Prompt(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double b2bSlotThetaDiff, 
+                                                    double b2bSlotThetaDiffPrompt, double b2bTimeDiff, double b2bScattTest, uint promptIndex)
+{
+  if (event.getHits().size() < 3)
+  {
+    return false;
+  }
+  for (uint i = 0; i < event.getHits().size(); i++)
+  {
+    for (uint j = i + 1; j < event.getHits().size(); j++)
+    {
+      //Check between prompt and the rest is done either way.
+      if (i == promptIndex || j == promptIndex)
+        continue;
+      
+      JPetHit firstHit = event.getHits().at(i);
+      JPetHit secondHit = event.getHits().at(j);
+      // Checking for back to back
+      double timeDiff = fabs(firstHit.getTime() - secondHit.getTime());
+      double deltaLor = (secondHit.getTime() - firstHit.getTime()) * kLightVelocity_cm_ps / 2.;
+      double angleDiff2D = calcAngle2D(firstHit, secondHit);
+      double angleDiff2D_PromptAnni1 = calcAngle2D(firstHit, event.getHits().at(promptIndex));
+      double angleDiff2D_PromptAnni2 = calcAngle2D(secondHit, event.getHits().at(promptIndex));
+      double scatterTest = scatterTest(firstHit, secondHit);
+      if (saveHistos)
+      {
+        stats.getHisto1D("2Gamma1Prompt_TimeDiff")->Fill(timeDiff / 1000.0);
+        stats.getHisto1D("2Gamma1Prompt_DLOR")->Fill(deltaLor);
+        stats.getHisto1D("2Gamma1Prompt_AnniThetaDiff")->Fill(angleDiff2D);
+        stats.getHisto1D("2Gamma1Prompt_AnniPromptThetaDiff")->Fill(angleDiff2D_PromptAnni1);
+        stats.getHisto1D("2Gamma1Prompt_AnniPromptThetaDiff")->Fill(angleDiff2D_PromptAnni2);
+        stats.getHisto1D("2Gamma1Prompt_ScattTest")->Fill(scatterTest);
+      }
+      if (fabs(angleDiff2D - 180.0) < b2bSlotThetaDiff && timeDiff < b2bTimeDiff && scatterTest < b2bScattTest && 
+          angleDiff2D_PromptAnni1 > b2bSlotThetaDiffPrompt && angleDiff2D_PromptAnni2 > b2bSlotThetaDiffPrompt)
+      {
+        if (saveHistos)
+        {
+          TVector3 annhilationPoint = calculateAnnihilationPoint(firstHit, secondHit);
+          double lifetime = 0.5*(firstHit.getTime() + secondHit.getTime()) - event.getHits().at(promptIndex).getTime();
+          stats.getHisto1D("2Anni1Prompt_TimeDiff")->Fill(timeDiff / 1000.0);
+          stats.getHisto1D("2Anni1Prompt_DLOR")->Fill(deltaLor);
+          stats.getHisto1D("2Anni1Prompt_ThetaDiff")->Fill(angleDiff2D);
+          stats.getHisto1D("2Anni1Prompt_AnniPromptThetaDiff")->Fill(angleDiff2D_PromptAnni1);
+          stats.getHisto1D("2Anni1Prompt_AnniPromptThetaDiff")->Fill(angleDiff2D_PromptAnni2);
+          stats.getHisto1D("2Anni1Prompt_ScattTest")->Fill(scatterTest);
+          stats.getHisto2D("2Anni1Prompt_XY")->Fill(annhilationPoint.X(), annhilationPoint.Y());
+          stats.getHisto1D("2Anni1Prompt_Z")->Fill(annhilationPoint.Z());
+          stats.getHisto1D("2Anni1Prompt_Lifetime")->Fill(lifetime/1000);
         }
         return true;
       }
@@ -912,7 +966,7 @@ bool EventCategorizerTools::stream2Gamma(const JPetEvent& event, JPetStatistics&
  * Method for determining type of event for streaming - 3 gamma annihilation
  */
 bool EventCategorizerTools::stream3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double d3SlotThetaMin, double d3TimeDiff,
-                                         double d3PlaneCenterDist)
+                                         double d3PlaneCenterDist, double d3ScattTest)
 {
   if (event.getHits().size() < 3)
   {
@@ -929,33 +983,38 @@ bool EventCategorizerTools::stream3Gamma(const JPetEvent& event, JPetStatistics&
         JPetHit thirdHit = event.getHits().at(k);
 
         vector<double> thetaAngles;
-        thetaAngles.push_back(firstHit.getScin().getSlot().getTheta());
-        thetaAngles.push_back(secondHit.getScin().getSlot().getTheta());
-        thetaAngles.push_back(thirdHit.getScin().getSlot().getTheta());
+        thetaAngles.push_back(calcAngle2D(firstHit, secondHit));
+        thetaAngles.push_back(calcAngle2D(secondHit, thirdHit));
+        thetaAngles.push_back(calcAngle2D(thirdHit, firstHit));
         sort(thetaAngles.begin(), thetaAngles.end());
 
-        vector<double> relativeAngles;
-        relativeAngles.push_back(thetaAngles.at(1) - thetaAngles.at(0));
-        relativeAngles.push_back(thetaAngles.at(2) - thetaAngles.at(1));
-        relativeAngles.push_back(360.0 - thetaAngles.at(2) + thetaAngles.at(0));
-        sort(relativeAngles.begin(), relativeAngles.end());
-
-        double transformedX = relativeAngles.at(1) + relativeAngles.at(0);
-        double transformedY = relativeAngles.at(1) - relativeAngles.at(0);
+        double transformedX = thetaAngles.at(1) + thetaAngles.at(0);
+        double transformedY = thetaAngles.at(1) - thetaAngles.at(0);
+        //For the sake of completness correcting value of the largest angle
+        thetaAngles.at(2) = 360. - transformedX;
+        
         double timeDiff = fabs(thirdHit.getTime() - firstHit.getTime());
         double planeCenterDist = calculatePlaneCenterDistance(firstHit, secondHit, thirdHit);
+        double scattTest12 = scatterTest(firstHit, secondHit);
+        double scattTest23 = scatterTest(secondHit, thirdHit);
         if (saveHistos)
         {
-          stats.getHisto1D("3GammaTimeDiff")->Fill(timeDiff);
-          stats.getHisto2D("3GammaThetas")->Fill(transformedX, transformedY);
-          stats.getHisto1D("3GammaPlaneDist")->Fill(planeCenterDist);
+          stats.getHisto1D("3Gamma_TimeDiff")->Fill(timeDiff);
+          stats.getHisto2D("3Gamma_Thetas")->Fill(transformedX, transformedY);
+          stats.getHisto1D("3Gamma_PlaneDist")->Fill(planeCenterDist);
+          stats.getHisto1D("3Gamma_ScattTest")->Fill(scattTest12);
+          stats.getHisto1D("3Gamma_ScattTest")->Fill(scattTest23);
         }
-        if (transformedX > d3SlotThetaMin && timeDiff < d3TimeDiff && planeCenterDist < d3PlaneCenterDist)
+        if (transformedX > d3SlotThetaMin && timeDiff < d3TimeDiff && planeCenterDist < d3PlaneCenterDist && scattTest12 < d3ScattTest && 
+            scattTest23 < d3ScattTest)
         {
           if (saveHistos)
           {
-            stats.getHisto1D("3AnnihPlaneDist")->Fill(planeCenterDist);
-            stats.getHisto1D("3AnnihTimeDiff")->Fill(timeDiff);
+            stats.getHisto1D("3Anni_TimeDiff")->Fill(timeDiff);
+            stats.getHisto2D("3Anni_Thetas")->Fill(transformedX, transformedY);
+            stats.getHisto1D("3Anni_PlaneDist")->Fill(planeCenterDist);
+            stats.getHisto1D("3Anni_ScattTest")->Fill(scattTest12);
+            stats.getHisto1D("3Anni_ScattTest")->Fill(scattTest23);
           }
           return true;
         }
@@ -963,4 +1022,30 @@ bool EventCategorizerTools::stream3Gamma(const JPetEvent& event, JPetStatistics&
     }
   }
   return false;
+}
+
+/**
+ * Method for calculation angle in 2D - replacement of the old method using getTheta
+ */
+double EventCategorizerTools::calcAngle2D(JPetHit hit1, JPetHit hit2)
+{
+	double scalarProd = hit1.getPosX()*hit2.getPosX() + hit1.getPosY()*hit2.getPosY();
+	double magProd = sqrt( ( pow(hit1.getPosX(),2) + pow(hit1.getPosY(),2) )*
+			       ( pow(hit2.getPosX(),2) + pow(hit2.getPosY(),2) ) );
+	double angle2D = acos( scalarProd/magProd )*180/M_Pi;
+	return angle2D;
+}
+
+/**
+ * Method for calculation scatter test for a given pair in a time domain
+ * It is used as it nicely separates real annihilations from the scatterings and from the
+ * most of the accidental coincidences
+ */
+double EventCategorizerTools::scatterTest(JPetHit hit1, JPetHit hit2)
+{
+	double tDiff = fabs(hit2.getTime() - hit1.getTime());
+	TVector3 vec1( hit2.getPosX() - hit1.getPosX(), hit2.getPosY() - hit1.getPosY(), hit2.getPosZ() - hit1.getPosZ() );
+	double distance = vec1.Mag();
+	double scattTime = distance/kLightVelocity_cm_ps;
+	return tDiff - scattTime;
 }

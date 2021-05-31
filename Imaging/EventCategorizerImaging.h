@@ -46,6 +46,10 @@ protected:
   const std::string kDecayInto3MinAngleParamKey = "EventCategorizer_DecayInto3MinAngle_double";
   const std::string kMinAnnihilationParamKey = "EventCategorizer_MinAnnihilationTOT_double";
   const std::string kMaxAnnihilationParamKey = "EventCategorizer_MaxAnnihilationTOT_double";
+  const std::string kMinAngleWindowValueParamKey = "EventCategorizer_MinAngleWindow_double";
+  const std::string kMaxScattTestValueParamKey = "EventCategorizer_MaxScatterTest_double";
+  const std::string kMinPromptTOTParamKey = "EventCategorizer_MinPromptTOT_double";
+  const std::string kMaxPromptTOTParamKey = "EventCategorizer_MaxPromptTOT_double";
   const std::string kMaxTimeDiffParamKey = "EventCategorizer_MaxTimeDiff_double";
   const std::string kMaxZPosParamKey = "EventCategorizer_MaxHitZPos_double";
   double fMaxDistOfDecayPlaneFromCenter = 5.;
@@ -54,6 +58,10 @@ protected:
   double fScatterTOFTimeDiff = 2000.0;
   double fBackToBackAngleWindow = 3.;
   double fDecayInto3MinAngle = 190.;
+  double fScattTestValue = -500.0;
+  double fMinPromptTOT = 32000.0;
+  double fMaxPromptTOT = 50000.0;
+  double fMinAngleWindow = 15.0;
   double fMaxTimeDiff = 1000.;
   double fMaxZPos = 23.;
   bool fSaveControlHistos = true;
