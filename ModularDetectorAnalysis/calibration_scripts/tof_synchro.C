@@ -102,7 +102,7 @@ void tof_synchro(std::string fileName, std::string calibJSONFileName = "calibrat
 
       // Calculating limits for gaussian fit
       auto nBins = annhHist->GetNbinsX();
-      int binRange = (int)(0.075 * nBins);
+      int binRange = (int)(0.4 * nBins);
 
       auto aMax = annhHist->GetMaximumBin();
       auto aLow = annhHist->GetBinCenter(aMax - binRange);
@@ -138,6 +138,8 @@ void tof_synchro(std::string fileName, std::string calibJSONFileName = "calibrat
 
       // Writing result to the tree
       tree.put("scin." + to_string(scinID) + ".tof_correction", tofCorr);
+      // tree.put("scin." + to_string(scinID) + ".tof_correction", 0.0);
+      // tree.put("scin." + to_string(scinID) + ".tof_correction_2", 0.0);
 
       tofCorrGraph->SetPoint(graphIt, (double)scinID, tofCorr);
       tofCorrGraph->SetPointError(graphIt, 0.0, tofCorrError);
@@ -161,7 +163,7 @@ void tof_synchro(std::string fileName, std::string calibJSONFileName = "calibrat
           deexHist->Draw();
           annhHist->Draw("same");
         }
-        // can->SaveAs(Form("%s/tof_corr_scin_%d.png", resultDir.c_str(), scinID));
+        can->SaveAs(Form("%s/tof_corr_scin_%d.png", resultDir.c_str(), scinID));
       }
     }
 

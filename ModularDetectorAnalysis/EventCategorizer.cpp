@@ -578,12 +578,12 @@ void EventCategorizer::initialiseCalibrationHistograms()
 
   // Synchronization of TOF with annihilaion-deexcitation pairs
   getStatistics().createHistogram(new TH2F("tdiff_annih_scin", "A-D time difference for annihilation hit per scin", maxScinID - minScinID + 1,
-                                           minScinID - 0.5, maxScinID + 0.5, 201, -fMaxTimeDiff, fMaxTimeDiff));
+                                           minScinID - 0.5, maxScinID + 0.5, 200, -fMaxTimeDiff, fMaxTimeDiff));
   getStatistics().getHisto2D("tdiff_annih_scin")->GetXaxis()->SetTitle("Scin ID");
   getStatistics().getHisto2D("tdiff_annih_scin")->GetYaxis()->SetTitle("Time diffrence [ps]");
 
   getStatistics().createHistogram(new TH2F("tdiff_deex_scin", "A-D time difference for deex hit per scin", maxScinID - minScinID + 1, minScinID - 0.5,
-                                           maxScinID + 0.5, 201, -fMaxTimeDiff, fMaxTimeDiff));
+                                           maxScinID + 0.5, 200, -fMaxTimeDiff, fMaxTimeDiff));
   getStatistics().getHisto2D("tdiff_deex_scin")->GetXaxis()->SetTitle("Scin ID");
   getStatistics().getHisto2D("tdiff_deex_scin")->GetYaxis()->SetTitle("Time diffrence [ps]");
 
@@ -591,12 +591,12 @@ void EventCategorizer::initialiseCalibrationHistograms()
   double revTOTLimit = 0.000000025;
 
   getStatistics().createHistogram(
-      new TH2F("time_walk_ab_tdiff", "AB TDiff vs. reversed TOT", 201, -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0, 201, -revTOTLimit, revTOTLimit));
+      new TH2F("time_walk_ab_tdiff", "AB TDiff vs. reversed TOT", 200, -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0, 200, -revTOTLimit, revTOTLimit));
   getStatistics().getHisto2D("time_walk_ab_tdiff")->GetXaxis()->SetTitle("AB Time Difference [ps]");
   getStatistics().getHisto2D("time_walk_ab_tdiff")->GetYaxis()->SetTitle("Reversed TOT [1/ps]");
 
   getStatistics().createHistogram(
-      new TH2F("time_walk_tof", "TOF vs. reversed TOT", 201, -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0, 201, -revTOTLimit, revTOTLimit));
+      new TH2F("time_walk_tof", "TOF vs. reversed TOT", 200, -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0, 200, -revTOTLimit, revTOTLimit));
   getStatistics().getHisto2D("time_walk_tof")->GetXaxis()->SetTitle("Time of Flight [ps]");
   getStatistics().getHisto2D("time_walk_tof")->GetYaxis()->SetTitle("Reversed TOT [1/ps]");
 
