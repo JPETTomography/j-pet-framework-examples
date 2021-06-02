@@ -207,21 +207,21 @@ void HitFinder::initialiseHistograms()
   getStatistics().getHisto2D("hit_tdiff_scin")->GetXaxis()->SetTitle("Scintillator ID");
   getStatistics().getHisto2D("hit_tdiff_scin")->GetYaxis()->SetTitle("A-B time difference [ps]");
 
-  double totUppLimit = 24000000.0;
+  double totUppLimit = 10000000.0;
   getStatistics().createHistogram(new TH2F("hit_tot_scin", "Hit TOT divided by multiplicity, all hits", maxScinID - minScinID + 1, minScinID - 0.5,
                                            maxScinID + 0.5, 200, 0.0, totUppLimit));
   getStatistics().getHisto2D("hit_tot_scin")->GetXaxis()->SetTitle("Scintillator ID");
   getStatistics().getHisto2D("hit_tot_scin")->GetYaxis()->SetTitle("Time over Threshold [ps]");
 
   // Time diff and TOT per multiplicity
-  for (int multi = 2; multi <= 8; multi++)
-  {
-    getStatistics().createHistogram(new TH2F(Form("hit_tdiff_scin_m_%d", multi), Form("Hit time difference per scin, multiplicity %d", multi),
-                                             maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 300, -1.1 * fABTimeDiff,
-                                             1.1 * fABTimeDiff));
-    getStatistics().getHisto2D(Form("hit_tdiff_scin_m_%d", multi))->GetXaxis()->SetTitle("Scintillator ID");
-    getStatistics().getHisto2D(Form("hit_tdiff_scin_m_%d", multi))->GetYaxis()->SetTitle("A-B time difference [ps]");
-  }
+  // for (int multi = 2; multi <= 8; multi++)
+  // {
+  //   getStatistics().createHistogram(new TH2F(Form("hit_tdiff_scin_m_%d", multi), Form("Hit time difference per scin, multiplicity %d", multi),
+  //                                            maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 300, -1.1 * fABTimeDiff,
+  //                                            1.1 * fABTimeDiff));
+  //   getStatistics().getHisto2D(Form("hit_tdiff_scin_m_%d", multi))->GetXaxis()->SetTitle("Scintillator ID");
+  //   getStatistics().getHisto2D(Form("hit_tdiff_scin_m_%d", multi))->GetYaxis()->SetTitle("A-B time difference [ps]");
+  // }
 
   // Unused sigals stats
   getStatistics().createHistogram(

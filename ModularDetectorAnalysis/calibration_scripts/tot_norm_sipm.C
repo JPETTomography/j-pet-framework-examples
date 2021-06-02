@@ -35,8 +35,8 @@
 
 namespace bpt = boost::property_tree;
 
-const double fNominalAnnihilationEdge = 7000000.0;
-const double fNominalDeexcitationEdge = 13000000.0;
+const double fNominalAnnihilationEdge = 2000000.0;
+const double fNominalDeexcitationEdge = 5000000.0;
 
 TGraph* getDerivativeGraph(TH1D* histo)
 {
