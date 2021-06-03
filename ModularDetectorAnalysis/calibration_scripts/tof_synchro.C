@@ -102,7 +102,7 @@ void tof_synchro(std::string fileName, std::string calibJSONFileName = "calibrat
 
       // Calculating limits for gaussian fit
       auto nBins = annhHist->GetNbinsX();
-      int binRange = (int)(0.4 * nBins);
+      int binRange = (int)(0.05 * nBins);
 
       auto aMax = annhHist->GetMaximumBin();
       auto aLow = annhHist->GetBinCenter(aMax - binRange);
