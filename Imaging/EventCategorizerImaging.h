@@ -26,10 +26,6 @@
 
 class JPetWriter;
 
-#ifdef __CINT__
-#define override
-#endif
-
 class EventCategorizerImaging : public JPetUserTask
 {
 public:
@@ -58,6 +54,7 @@ protected:
   double fMaxZPos = 23.;
   bool fSaveControlHistos = true;
   void saveEvents(const std::vector<JPetEvent>& event);
+  void initialiseHistograms();
 };
 
 #endif /* !EVENTCATEGORIZERIMAGING_H */

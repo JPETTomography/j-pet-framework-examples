@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -120,115 +120,69 @@ void SignalFinder::saveRawSignals(const vector<JPetRawSignal>& rawSigVec)
 }
 
 void SignalFinder::initialiseHistograms(){
+  getStatistics().createHistogramWithAxes(
+    new TH1D("unused_sigch_all", "Unused Signal Channels",
+                                            8, 0.5, 8.5), "Signal label", "Number of SigChs");
+  std::vector<std::pair<unsigned, std::string>> binLabels;
+  binLabels.push_back(std::make_pair(1,"THR 1 Lead"));
+  binLabels.push_back(std::make_pair(2,"THR 1 Trail"));
+  binLabels.push_back(std::make_pair(3,"THR 2 Lead"));
+  binLabels.push_back(std::make_pair(4,"THR 2 Trail"));
+  binLabels.push_back(std::make_pair(5,"THR 3 Lead"));
+  binLabels.push_back(std::make_pair(6,"THR 3 Trail"));
+  binLabels.push_back(std::make_pair(7,"THR 4 Lead"));
+  binLabels.push_back(std::make_pair(8,"THR 4 Trail"));
+  getStatistics().setHistogramBinLabel("unused_sigch_all",
+                                       getStatistics().AxisLabel::kXaxis, binLabels);
 
-  getStatistics().createHistogram(new TH1F(
-    "unused_sigch_all", "Unused Signal Channels", 8, 0.5, 8.5
-  ));
-  getStatistics().getHisto1D("unused_sigch_all")->GetXaxis()->SetBinLabel(1,"THR 1 Lead");
-  getStatistics().getHisto1D("unused_sigch_all")->GetXaxis()->SetBinLabel(2,"THR 1 Trail");
-  getStatistics().getHisto1D("unused_sigch_all")->GetXaxis()->SetBinLabel(3,"THR 2 Lead");
-  getStatistics().getHisto1D("unused_sigch_all")->GetXaxis()->SetBinLabel(4,"THR 2 Trail");
-  getStatistics().getHisto1D("unused_sigch_all")->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
-  getStatistics().getHisto1D("unused_sigch_all")->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
-  getStatistics().getHisto1D("unused_sigch_all")->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
-  getStatistics().getHisto1D("unused_sigch_all")->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
-  getStatistics().getHisto1D("unused_sigch_all")->GetYaxis()->SetTitle("Number of SigChs");
+  getStatistics().createHistogramWithAxes(
+    new TH1D("unused_sigch_good", "Unused Signal Channels with GOOD flag",
+                                            8, 0.5, 8.5), "Signal label", "Number of SigChs");
+  getStatistics().setHistogramBinLabel("unused_sigch_good",
+                                       getStatistics().AxisLabel::kXaxis, binLabels);
 
-  getStatistics().createHistogram(new TH1F(
-    "unused_sigch_good", "Unused Signal Channels with GOOD flag", 8, 0.5, 8.5
-  ));
-  getStatistics().getHisto1D("unused_sigch_good")->GetXaxis()->SetBinLabel(1,"THR 1 Lead");
-  getStatistics().getHisto1D("unused_sigch_good")->GetXaxis()->SetBinLabel(2,"THR 1 Trail");
-  getStatistics().getHisto1D("unused_sigch_good")->GetXaxis()->SetBinLabel(3,"THR 2 Lead");
-  getStatistics().getHisto1D("unused_sigch_good")->GetXaxis()->SetBinLabel(4,"THR 2 Trail");
-  getStatistics().getHisto1D("unused_sigch_good")->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
-  getStatistics().getHisto1D("unused_sigch_good")->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
-  getStatistics().getHisto1D("unused_sigch_good")->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
-  getStatistics().getHisto1D("unused_sigch_good")->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
-  getStatistics().getHisto1D("unused_sigch_good")->GetYaxis()->SetTitle("Number of SigChs");
+  getStatistics().createHistogramWithAxes(
+    new TH1D("unused_sigch_corr", "Unused Signal Channels with CORRUPTED flag",
+                                            8, 0.5, 8.5), "Signal label", "Number of SigChs");
+  getStatistics().setHistogramBinLabel("unused_sigch_corr",
+                                       getStatistics().AxisLabel::kXaxis, binLabels);
 
-  getStatistics().createHistogram(new TH1F(
-    "unused_sigch_corr", "Unused Signal Channels with CORRUPTED flag", 8, 0.5, 8.5
-  ));
-  getStatistics().getHisto1D("unused_sigch_corr")->GetXaxis()->SetBinLabel(1,"THR 1 Lead");
-  getStatistics().getHisto1D("unused_sigch_corr")->GetXaxis()->SetBinLabel(2,"THR 1 Trail");
-  getStatistics().getHisto1D("unused_sigch_corr")->GetXaxis()->SetBinLabel(3,"THR 2 Lead");
-  getStatistics().getHisto1D("unused_sigch_corr")->GetXaxis()->SetBinLabel(4,"THR 2 Trail");
-  getStatistics().getHisto1D("unused_sigch_corr")->GetXaxis()->SetBinLabel(5,"THR 3 Lead");
-  getStatistics().getHisto1D("unused_sigch_corr")->GetXaxis()->SetBinLabel(6,"THR 3 Trail");
-  getStatistics().getHisto1D("unused_sigch_corr")->GetXaxis()->SetBinLabel(7,"THR 4 Lead");
-  getStatistics().getHisto1D("unused_sigch_corr")->GetXaxis()->SetBinLabel(8,"THR 4 Trail");
-  getStatistics().getHisto1D("unused_sigch_corr")->GetYaxis()->SetTitle("Number of SigChs");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("lead_thr1_thr2_diff", "Time Difference between leading Signal Channels THR1 and THR2 in found signals",
+                                                    2.0*fSigChEdgeMaxTime/100.0, -fSigChEdgeMaxTime+125.0, fSigChEdgeMaxTime-125.0),
+                                                    "time diff [ps]", "Number of Signal Channels Pairs");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("lead_thr1_thr3_diff", "Time Difference between leading Signal Channels THR1 and THR3 in found signals",
+                                                    2.0*fSigChEdgeMaxTime/100.0, -fSigChEdgeMaxTime+125.0, fSigChEdgeMaxTime-125.0),
+                                                    "time diff [ps]", "Number of Signal Channels Pairs");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("lead_thr1_thr4_diff", "Time Difference between leading Signal Channels THR1 and THR4 in found signals",
+                                                    2.0*fSigChEdgeMaxTime/100.0, -fSigChEdgeMaxTime+125.0, fSigChEdgeMaxTime-125.0),
+                                                    "time diff [ps]", "Number of Signal Channels Pairs");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("lead_trail_thr1_diff", "Time Difference between leading and trailing Signal Channels THR1 in found signals",
+                                                    fSigChLeadTrailMaxTime/100.0, -125.0, fSigChLeadTrailMaxTime-125.0),
+                                                    "time diff [ps]", "Number of Signal Channels Pairs");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("lead_trail_thr2_diff", "Time Difference between leading and trailing Signal Channels THR2 in found signals",
+                                                    fSigChLeadTrailMaxTime/100.0, -125.0, fSigChLeadTrailMaxTime-125.0),
+                                                    "time diff [ps]", "Number of Signal Channels Pairs");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("lead_trail_thr3_diff", "Time Difference between leading and trailing Signal Channels THR3 in found signals",
+                                                    fSigChLeadTrailMaxTime/100.0, -125.0, fSigChLeadTrailMaxTime-125.0),
+                                                    "time diff [ps]", "Number of Signal Channels Pairs");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("lead_trail_thr4_diff", "Time Difference between leading and trailing Signal Channels THR4 in found signals",
+                                                    fSigChLeadTrailMaxTime/100.0, -125.0, fSigChLeadTrailMaxTime-125.0),
+                                                    "time diff [ps]", "Number of Signal Channels Pairs");
 
-  getStatistics().createHistogram(new TH1F(
-    "lead_thr1_thr2_diff", "Time Difference between leading Signal Channels THR1 and THR2 in found signals",
-    200, -fSigChEdgeMaxTime, fSigChEdgeMaxTime)
-  );
-  getStatistics().getHisto1D("lead_thr1_thr2_diff")
-    ->GetXaxis()->SetTitle("time diff [ps]");
-  getStatistics().getHisto1D("lead_thr1_thr2_diff")
-    ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
-
-  getStatistics().createHistogram(new TH1F(
-    "lead_thr1_thr3_diff", "Time Difference between leading Signal Channels THR1 and THR3 in found signals",
-    200, -fSigChEdgeMaxTime, fSigChEdgeMaxTime)
-  );
-  getStatistics().getHisto1D("lead_thr1_thr3_diff")
-    ->GetXaxis()->SetTitle("time diff [ps]");
-  getStatistics().getHisto1D("lead_thr1_thr3_diff")
-    ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
-
-  getStatistics().createHistogram(new TH1F(
-    "lead_thr1_thr4_diff", "Time Difference between leading Signal Channels THR1 and THR4 in found signals",
-    200, -fSigChEdgeMaxTime, fSigChEdgeMaxTime)
-  );
-  getStatistics().getHisto1D("lead_thr1_thr4_diff")
-    ->GetXaxis()->SetTitle("time diff [ps]");
-  getStatistics().getHisto1D("lead_thr1_thr4_diff")
-    ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
-
-  getStatistics().createHistogram(new TH1F(
-    "lead_trail_thr1_diff", "Time Difference between leading and trailing Signal Channels THR1 in found signals",
-    200, 0.0, fSigChLeadTrailMaxTime)
-  );
-  getStatistics().getHisto1D("lead_trail_thr1_diff")
-    ->GetXaxis()->SetTitle("time diff [ps]");
-  getStatistics().getHisto1D("lead_trail_thr1_diff")
-    ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
-
-  getStatistics().createHistogram(new TH1F(
-    "lead_trail_thr2_diff", "Time Difference between leading and trailing Signal Channels THR2 in found signals",
-    200, 0.0, fSigChLeadTrailMaxTime)
-  );
-  getStatistics().getHisto1D("lead_trail_thr2_diff")
-    ->GetXaxis()->SetTitle("time diff [ps]");
-  getStatistics().getHisto1D("lead_trail_thr2_diff")
-    ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
-
-  getStatistics().createHistogram(new TH1F(
-    "lead_trail_thr3_diff", "Time Difference between leading and trailing Signal Channels THR3 in found signals",
-    200, 0.0, fSigChLeadTrailMaxTime)
-  );
-  getStatistics().getHisto1D("lead_trail_thr3_diff")
-    ->GetXaxis()->SetTitle("time diff [ps]");
-  getStatistics().getHisto1D("lead_trail_thr3_diff")
-    ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
-
-  getStatistics().createHistogram(new TH1F(
-    "lead_trail_thr4_diff", "Time Difference between leading and trailing Signal Channels THR4 in found signals",
-    200, 0.0, fSigChLeadTrailMaxTime)
-  );
-  getStatistics().getHisto1D("lead_trail_thr4_diff")
-    ->GetXaxis()->SetTitle("time diff [ps]");
-  getStatistics().getHisto1D("lead_trail_thr4_diff")
-    ->GetYaxis()->SetTitle("Number of Signal Channels Pairs");
-
-  getStatistics().createHistogram(new TH1F(
-    "good_v_bad_raw_sigs", "Number of good and corrupted signals created",
-    3, 0.5, 3.5
-  ));
-  getStatistics().getHisto1D("good_v_bad_raw_sigs")->GetXaxis()->SetBinLabel(1,"GOOD");
-  getStatistics().getHisto1D("good_v_bad_raw_sigs")->GetXaxis()->SetBinLabel(2,"CORRUPTED");
-  getStatistics().getHisto1D("good_v_bad_raw_sigs")->GetXaxis()->SetBinLabel(3,"UNKNOWN");
-  getStatistics().getHisto1D("good_v_bad_raw_sigs")->GetYaxis()->SetTitle("Number of Raw Signals");
+  getStatistics().createHistogramWithAxes(
+    new TH1D("good_v_bad_raw_sigs", "Number of good and corrupted signals created",
+                                            3, 0.5, 3.5), "Quality", "Number of Raw Signals");
+  binLabels.clear();
+  binLabels.push_back(std::make_pair(1,"GOOD"));
+  binLabels.push_back(std::make_pair(2,"CORRUPTED"));
+  binLabels.push_back(std::make_pair(3,"UNKNOWN"));
+  getStatistics().setHistogramBinLabel("good_v_bad_raw_sigs",
+                                       getStatistics().AxisLabel::kXaxis, binLabels);
 }

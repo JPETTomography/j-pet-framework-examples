@@ -24,10 +24,6 @@
 
 class JPetWriter;
 
-#ifdef __CINT__
-#define override
-#endif
-
 class LORFinder : public JPetUserTask {
 
 public:
@@ -39,5 +35,6 @@ public:
 
 protected:
   double fB2BSlotThetaDiff = 15.0;
+  double fMaxTimeDiff = 1000.;
 };
 #endif /*  !LORFINDER_H */

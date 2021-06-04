@@ -1,0 +1,96 @@
+name: j-pet-continuous-integration-tests
+on: [push, pull_request]
+
+jobs:
+  build_and_run_all_tests_on_ubuntu:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-16.04, ubuntu-18.04]
+   
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - name: system update
+      run: |
+       sudo apt-get -qq update
+       sudo apt-get install -y git libboost-all-dev libtbb-dev cmake libfftw3-3 libfftw3-dev sshpass
+
+    - name: set branch name
+      run: |
+        echo "GITHUB_REF=${GITHUB_REF}"
+        GITHUB_BRANCH=${GITHUB_REF##*\/}
+        if [ "${GITHUB_BRANCH}" = "master" ]; then echo "BRANCH=master" | tee ${GITHUB_ENV};
+        else echo "BRANCH=develop" | tee ${GITHUB_ENV};
+        fi
+      
+    - name: download  ROOT (for ubuntu 16.04)
+      run: |
+        wget https://root.cern/download/root_v6.12.06.Linux-ubuntu16-x86_64-gcc5.4.tar.gz
+        tar xzf root_v6.12.06.Linux-ubuntu16-x86_64-gcc5.4.tar.gz
+      if: matrix.os == 'ubuntu-16.04'
+
+    - name: download  ROOT (for ubuntu-18.04)
+      run: |
+        wget http://sphinx.if.uj.edu.pl/framework/root-6-20-06-ubuntu18-jpet.tar.gz 
+        tar xzf root-6-20-06-ubuntu18-jpet.tar.gz
+      if: matrix.os == 'ubuntu-18.04'
+
+    - name: build unpacker 
+      run: |
+        source root/bin/thisroot.sh
+        git clone https://github.com/JPETTomography/Unpacker2.git --single-branch --branch ${BRANCH} unpacker
+        mkdir -p unpacker/build
+        cd unpacker/build
+        cmake ..
+        cmake --build .
+        sudo make install
+        cd ../..
+
+    - name: build j-pet framework
+      run: |
+        source root/bin/thisroot.sh
+        source unpacker/build/bin/thisunpacker.sh
+        rm -rf j-pet-framework || true
+        git clone --single-branch --branch ${BRANCH} https://github.com/JPETTomography/j-pet-framework.git
+        mkdir -p j-pet-framework/build
+        cd j-pet-framework/build
+        cmake ..
+        cmake --build .
+        cd ../..
+
+    - name: build framework examples 
+      run: |
+        source root/bin/thisroot.sh
+        source unpacker/build/bin/thisunpacker.sh
+        source j-pet-framework/build/bin/thisframework.sh
+        mkdir build
+        cd build
+        cmake ..
+        make
+        make tests_largebarrel
+        make tests_imagereconstruction
+
+    - name: run image reconstruction test       
+      run: |
+        source root/bin/thisroot.sh
+        source unpacker/build/bin/thisunpacker.sh
+        cd build/ImageReconstruction
+        ctest -j6 -C Debug -T test --output-on-failure
+
+    - name: run large barrel test       
+      run: |
+        source root/bin/thisroot.sh
+        cd build/LargeBarrelAnalysis
+        ctest -j6 -C Debug -T test --output-on-failure
+        wget http://sphinx.if.uj.edu.pl/~alek/framework_integration_tests/dabc_17025151847.hld
+        wget http://sphinx.if.uj.edu.pl/~alek/framework_integration_tests/setupRun3.json
+        ./LargeBarrelAnalysis.x -t hld -f dabc_17025151847.hld -l setupRun3.json -i 3 -r 0 100
+        mkdir outdir
+        ./LargeBarrelAnalysis.x -t hld -f dabc_17025151847.hld -l setupRun3.json -i 3 -r 0 100 -o outdir
+        ./LargeBarrelAnalysis.x -t root -f dabc_17025151847.hld.root -l setupRun3.json -i 3 -r 0 100
+        sed -i 's/manager.useTask("TimeWindowCreator", "hld", "tslot.calib");//' ../../LargeBarrelAnalysis/main.cpp
+        make LargeBarrelAnalysis.x
+        ./LargeBarrelAnalysis.x -t root -f dabc_17025151847.tslot.calib.root   -r 0 100

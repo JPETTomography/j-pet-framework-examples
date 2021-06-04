@@ -8,14 +8,8 @@ set(UNIT_TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizerToolsTest.cpp
                       ${CMAKE_CURRENT_SOURCE_DIR}/SignalFinderToolsTest.cpp
                       ${CMAKE_CURRENT_SOURCE_DIR}/TimeWindowCreatorToolsTest.cpp
                       ${CMAKE_CURRENT_SOURCE_DIR}/UniversalFileLoaderTest.cpp
-                      ${CMAKE_CURRENT_SOURCE_DIR}/ToTConverterTest.cpp)
-
-set(UNIT_TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizerToolsTest.cpp
-                      ${CMAKE_CURRENT_SOURCE_DIR}/HitFinderToolsTest.cpp
-                      ${CMAKE_CURRENT_SOURCE_DIR}/SignalFinderToolsTest.cpp
-                      ${CMAKE_CURRENT_SOURCE_DIR}/TimeWindowCreatorToolsTest.cpp
-                      ${CMAKE_CURRENT_SOURCE_DIR}/UniversalFileLoaderTest.cpp
-                      ${CMAKE_CURRENT_SOURCE_DIR}/ToTConverterTest.cpp)
+                      ${CMAKE_CURRENT_SOURCE_DIR}/ToTEnergyConverterFactoryTest.cpp
+                      ${CMAKE_CURRENT_SOURCE_DIR}/ToTEnergyConverterTest.cpp)
 
 #Configure Boost
 set(Boost_USE_STATIC_LIBS OFF)
@@ -52,11 +46,19 @@ add_custom_target(link_target_largebarrelanalysis ALL
 
 foreach(test_source IN ITEMS ${UNIT_TEST_SOURCES})
     get_filename_component(test ${test_source} NAME_WE)
-    if(${test} MATCHES TimeWindowCreatorToolsTest|HitFinderToolsTest)
-      package_add_test(${test} ${test_source} ../UniversalFileLoader.cpp) #TimeWindowCreatorToolsTests and HitFinderToolsTest require also UniversalFileLoader
+    if(${test} MATCHES TimeWindowCreatorToolsTest)
+      # TimeWindowCreatorToolsTests requires UniversalFileLoader
+      package_add_test(${test} ${test_source} ../UniversalFileLoader.cpp)
+    elseif(${test} MATCHES HitFinderToolsTest)
+      # HitFinderToolsTest requires UniversalFileLoader and ToTEnergyConverter
+      package_add_test(${test} ${test_source} ../UniversalFileLoader.cpp ../ToTEnergyConverter.cpp)
+    elseif(${test} MATCHES ToTEnergyConverterFactoryTest)
+      package_add_test(${test} ${test_source} ../ToTEnergyConverter.cpp)
+    elseif(${test} MATCHES EventCategorizerToolsTest)
+      package_add_test(${test} ${test_source} ../HitFinderTools.cpp ../UniversalFileLoader.cpp ../ToTEnergyConverter.cpp)
     else()
       package_add_test(${test} ${test_source})
-    endif(${test} MATCHES TimeWindowCreatorToolsTest|HitFinderToolsTest)
+    endif(${test} MATCHES TimeWindowCreatorToolsTest)
     list(APPEND tests_names ${test}.x)
 endforeach()
 

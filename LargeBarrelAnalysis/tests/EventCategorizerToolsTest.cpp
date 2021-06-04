@@ -25,53 +25,29 @@ const double kEpsilon = 0.01;
 BOOST_AUTO_TEST_SUITE(CategoryCheckSuite)
 
 BOOST_AUTO_TEST_CASE(checkFor2GammaTest) {
-  JPetBarrelSlot firstSlot(1, true, "first", 10.0, 1);
-  JPetBarrelSlot secondSlot(2, true, "second", 190.0, 2);
-  JPetBarrelSlot thirdSlot(3, true, "third", 45.5, 3);
-  JPetBarrelSlot fourthSlot(4, true, "fourth", 226.25, 4);
+  JPetBarrelSlot firstSlot(1, true, "first", 1.0, 1);
+  JPetBarrelSlot secondSlot(2, true, "second", 182.0, 2);
 
   JPetHit firstHit;
   JPetHit secondHit;
-  JPetHit thirdHit;
-  JPetHit fourthHit;
 
   firstHit.setBarrelSlot(firstSlot);
   secondHit.setBarrelSlot(secondSlot);
-  thirdHit.setBarrelSlot(thirdSlot);
-  fourthHit.setBarrelSlot(fourthSlot);
+
+  firstHit.setTime(500.0);
+  secondHit.setTime(700.0);
 
   JPetEvent event;
-  event.addHit(thirdHit);
-
-  JPetEvent event0;
-  event0.addHit(firstHit);
-  event0.addHit(secondHit);
-  event0.addHit(thirdHit);
-  event0.addHit(fourthHit);
-
-  JPetEvent event1;
-  event1.addHit(firstHit);
-  event1.addHit(secondHit);
-
-  JPetEvent event2;
-  event2.addHit(thirdHit);
-  event2.addHit(fourthHit);
-
-  JPetEvent event3;
-  event3.addHit(secondHit);
-  event3.addHit(fourthHit);
+  event.addHit(firstHit);
+  event.addHit(secondHit);
 
   JPetStatistics stats;
   BOOST_REQUIRE(
-      !EventCategorizerTools::checkFor2Gamma(event, stats, false, 3.0));
+      EventCategorizerTools::checkFor2Gamma(event, stats, false, 5.0, 1000.0));
   BOOST_REQUIRE(
-      EventCategorizerTools::checkFor2Gamma(event0, stats, false, 3.0));
+      !EventCategorizerTools::checkFor2Gamma(event, stats, false, 1.0, 1000.0));
   BOOST_REQUIRE(
-      EventCategorizerTools::checkFor2Gamma(event1, stats, false, 3.0));
-  BOOST_REQUIRE(
-      EventCategorizerTools::checkFor2Gamma(event2, stats, false, 3.0));
-  BOOST_REQUIRE(
-      !EventCategorizerTools::checkFor2Gamma(event3, stats, false, 3.0));
+      !EventCategorizerTools::checkFor2Gamma(event, stats, false, 5.0, 10.0));
 }
 
 BOOST_AUTO_TEST_CASE(checkFor3GammaTest) {
@@ -115,7 +91,7 @@ BOOST_AUTO_TEST_CASE(checkFor3GammaTest) {
   BOOST_REQUIRE(EventCategorizerTools::checkFor3Gamma(event3, stats, false));
 }
 
-BOOST_AUTO_TEST_CASE(checkForPromptTest_checkTOTCalc) {
+BOOST_AUTO_TEST_CASE(checkForPromptTest) {
   JPetBarrelSlot barrelSlot(666, true, "Some Slot", 66.0, 666);
   JPetPM pmA(1, "A");
   JPetPM pmB(2, "B");
@@ -150,6 +126,15 @@ BOOST_AUTO_TEST_CASE(checkForPromptTest_checkTOTCalc) {
   sigCh6.setThresholdNumber(2);
   sigCh7.setThresholdNumber(3);
   sigCh8.setThresholdNumber(4);
+  
+  sigCh1.setThreshold(80);
+  sigCh2.setThreshold(160);
+  sigCh3.setThreshold(240);
+  sigCh4.setThreshold(320);
+  sigCh5.setThreshold(80);
+  sigCh6.setThreshold(160);
+  sigCh7.setThreshold(240);
+  sigCh8.setThreshold(320);
 
   sigCh1.setValue(10.0);
   sigCh2.setValue(12.0);
@@ -258,12 +243,6 @@ BOOST_AUTO_TEST_CASE(checkForPromptTest_checkTOTCalc) {
   hit2.setSignals(physSignal2A, physSignal2B);
   hit3.setSignals(physSignal3A, physSignal3B);
 
-  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit1), 0.0, kEpsilon);
-  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit2), 56.0,
-                      kEpsilon);
-  BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateTOT(hit3), 560.0,
-                      kEpsilon);
-
   JPetEvent event1;
   JPetEvent event2;
   JPetEvent event3;
@@ -281,17 +260,17 @@ BOOST_AUTO_TEST_CASE(checkForPromptTest_checkTOTCalc) {
   event5.addHit(hit3);
 
   JPetStatistics stats;
-
+  std::string fTOTCalculationType = "standard";
   BOOST_REQUIRE(
-      !EventCategorizerTools::checkForPrompt(event1, stats, false, 40.0, 60.0));
+      !EventCategorizerTools::checkForPrompt(event1, stats, false, 40.0, 60.0, fTOTCalculationType));
   BOOST_REQUIRE(!EventCategorizerTools::checkForPrompt(event2, stats, false,
-                                                       200.0, 400.0));
+                                                       200.0, 400.0, fTOTCalculationType));
   BOOST_REQUIRE(!EventCategorizerTools::checkForPrompt(event3, stats, false,
-                                                       200.0, 400.0));
+                                                       200.0, 400.0, fTOTCalculationType));
   BOOST_REQUIRE(
-      EventCategorizerTools::checkForPrompt(event4, stats, false, 40.0, 600.0));
+      EventCategorizerTools::checkForPrompt(event4, stats, false, 40.0, 600.0, fTOTCalculationType));
   BOOST_REQUIRE(EventCategorizerTools::checkForPrompt(event5, stats, false,
-                                                      500.0, 600.0));
+                                                      500.0, 600.0, fTOTCalculationType));
 }
 
 BOOST_AUTO_TEST_CASE(checkForScatterTest) {
@@ -310,12 +289,13 @@ BOOST_AUTO_TEST_CASE(checkForScatterTest) {
   event1.addHit(firstHit);
 
   JPetStatistics stats;
+  std::string fTOTCalculationType = "standard";
   BOOST_REQUIRE(
-      EventCategorizerTools::checkForScatter(event, stats, false, 2000.0));
+      EventCategorizerTools::checkForScatter(event, stats, false, 2000.0, fTOTCalculationType));
   BOOST_REQUIRE(
-      !EventCategorizerTools::checkForScatter(event, stats, false, 0.000001));
+      !EventCategorizerTools::checkForScatter(event, stats, false, 0.000001, fTOTCalculationType));
   BOOST_REQUIRE(
-      !EventCategorizerTools::checkForScatter(event1, stats, false, 2000.0));
+      !EventCategorizerTools::checkForScatter(event1, stats, false, 2000.0, fTOTCalculationType));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -598,73 +578,6 @@ BOOST_AUTO_TEST_CASE(anotherCheck_Anihilation) {
   BOOST_REQUIRE_CLOSE(point.X(), point2.X(), kEpsilon);
   BOOST_REQUIRE_CLOSE(point.Y(), point2.Y(), kEpsilon);
   BOOST_REQUIRE_CLOSE(point.Z(), point2.Z(), kEpsilon);
-}
-
-BOOST_AUTO_TEST_SUITE_END()
-
-BOOST_AUTO_TEST_SUITE(StreamingToolsSuite)
-
-BOOST_AUTO_TEST_CASE(stream2GammaTest) {
-  JPetBarrelSlot firstSlot(1, true, "first", 1.0, 1);
-  JPetBarrelSlot secondSlot(2, true, "second", 182.0, 2);
-
-  JPetHit firstHit;
-  JPetHit secondHit;
-
-  firstHit.setBarrelSlot(firstSlot);
-  secondHit.setBarrelSlot(secondSlot);
-
-  firstHit.setTime(500.0);
-  secondHit.setTime(700.0);
-
-  JPetEvent event;
-  event.addHit(firstHit);
-  event.addHit(secondHit);
-
-  JPetStatistics stats;
-  BOOST_REQUIRE(
-      EventCategorizerTools::stream2Gamma(event, stats, false, 5.0, 1000.0));
-  BOOST_REQUIRE(
-      !EventCategorizerTools::stream2Gamma(event, stats, false, 1.0, 1000.0));
-  BOOST_REQUIRE(
-      !EventCategorizerTools::stream2Gamma(event, stats, false, 5.0, 10.0));
-}
-
-BOOST_AUTO_TEST_CASE(stream3GammaTest) {
-  JPetBarrelSlot firstSlot(1, true, "first", 10.0, 1);
-  JPetBarrelSlot secondSlot(2, true, "second", 130.0, 2);
-  JPetBarrelSlot thirdSlot(3, true, "third", 250., 3);
-
-  JPetHit firstHit;
-  JPetHit secondHit;
-  JPetHit thirdHit;
-
-  firstHit.setBarrelSlot(firstSlot);
-  secondHit.setBarrelSlot(secondSlot);
-  thirdHit.setBarrelSlot(thirdSlot);
-
-  firstHit.setTime(200.0);
-  secondHit.setTime(500.0);
-  thirdHit.setTime(700.0);
-
-  firstHit.setPos(2.1, 4.1, 5.6);
-  secondHit.setPos(2.8, 8.3, 9.2);
-  thirdHit.setPos(7.3, 5.2, 6.1);
-
-  JPetEvent event;
-  event.addHit(firstHit);
-  event.addHit(secondHit);
-  event.addHit(thirdHit);
-
-  JPetStatistics stats;
-  BOOST_REQUIRE(EventCategorizerTools::stream3Gamma(event, stats, false, 190.0,
-                                                    1000.0, 5.0));
-  BOOST_REQUIRE(!EventCategorizerTools::stream3Gamma(event, stats, false, 300.0,
-                                                     1000.0, 5.0));
-  BOOST_REQUIRE(!EventCategorizerTools::stream3Gamma(event, stats, false, 190.0,
-                                                     10.0, 5.0));
-  BOOST_REQUIRE(!EventCategorizerTools::stream3Gamma(event, stats, false, 190.0,
-                                                     1000.0, 0.1));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

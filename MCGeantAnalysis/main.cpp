@@ -13,25 +13,29 @@
  *  @file main.cpp
  */
 
-#include "../EventClassification/EventCategorizer.h"
-#include "../EventClassification/EventFinder.h"
+#include "../ModularDetectorAnalysis/EventCategorizer.h"
+#include "../ModularDetectorAnalysis/EventFinder.h"
+#include "EventAnalyzer.h"
 #include <JPetManager/JPetManager.h>
 
 using namespace std;
 
 int main(int argc, const char* argv[])
 {
-  try {
+  try
+  {
     JPetManager& manager = JPetManager::getManager();
 
     manager.registerTask<EventFinder>("EventFinder");
-    manager.registerTask<EventCategorizer>("EventCategorizer");
+    manager.registerTask<EventAnalyzer>("EventAnalyzer");
 
-    manager.useTask("EventFinder", "hits", "unk.evt", 1);
-    manager.useTask("EventCategorizer", "unk.evt", "cat.evt", 1);
+    manager.useTask("EventFinder", "hits", "unk.evt");
+    manager.useTask("EventAnalyzer", "unk.evt", "ana.evt");
 
     manager.run(argc, argv);
-  } catch (const std::exception& except) {
+  }
+  catch (const std::exception& except)
+  {
     std::cerr << "Unrecoverable error occured:" << except.what() << "Exiting the program!" << std::endl;
     return EXIT_FAILURE;
   }

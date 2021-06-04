@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -18,6 +18,7 @@
 
 #include <JPetStatistics/JPetStatistics.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
+#include "ToTEnergyConverter.h"
 #include <JPetHit/JPetHit.h>
 #include <vector>
 
@@ -31,6 +32,12 @@
 class HitFinderTools
 {
 public:
+  enum TOTCalculationType
+  {
+    kSimplified,
+    kThresholdRectangular,
+    kThresholdTrapeze
+  };
   static void sortByTime(std::vector<JPetPhysSignal>& signals);
   static std::map<int, std::vector<JPetPhysSignal>> getSignalsBySlot(
     const JPetTimeWindow* timeWindow, bool useCorrupts
@@ -38,22 +45,29 @@ public:
   static std::vector<JPetHit> matchAllSignals(
     std::map<int, std::vector<JPetPhysSignal>>& allSignals,
     const std::map<unsigned int, std::vector<double>>& velocitiesMap,
-    double timeDiffAB, int refDetScinId, JPetStatistics& stats, bool saveHistos
+    double timeDiffAB, int refDetScinId, bool convertToT,
+    const tot_energy_converter::ToTEnergyConverter& totConverter,
+    JPetStatistics& stats, bool saveHistos
   );
   static std::vector<JPetHit> matchSignals(
     std::vector<JPetPhysSignal>& slotSignals,
     const std::map<unsigned int, std::vector<double>>& velocitiesMap,
-    double timeDiffAB, JPetStatistics& stats, bool saveHistos
+    double timeDiffAB, bool convertToT,
+    const tot_energy_converter::ToTEnergyConverter& totConverter,
+    JPetStatistics& stats, bool saveHistos
   );
   static JPetHit createHit(
     const JPetPhysSignal& signal1, const JPetPhysSignal& signal2,
     const std::map<unsigned int, std::vector<double>>& velocitiesMap,
+    bool convertToT, const tot_energy_converter::ToTEnergyConverter& totConverter,
     JPetStatistics& stats, bool saveHistos
   );
   static JPetHit createDummyRefDetHit(const JPetPhysSignal& signal);
   static int getProperChannel(const JPetPhysSignal& signal);
   static void checkTheta(const double& theta);
-  static double calculateTOT(const JPetHit& hit);
+  static TOTCalculationType getTOTCalculationType(const std::string& type);
+  static double calculateTOT(const JPetHit& hit, TOTCalculationType type = kSimplified);
+  static double calculateTOTside(const std::map<int, double> & thrToTOT_side, TOTCalculationType type);
 };
 
 #endif /* !HITFINDERTOOLS_H */

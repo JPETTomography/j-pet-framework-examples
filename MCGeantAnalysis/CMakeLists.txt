@@ -32,24 +32,16 @@ set(projectBinary ${projectName}.x)
 project(${projectName} CXX)
 
 
-set(use_modules_from ../EventClassification)
+set(use_modules_from ../ModularDetectorAnalysis)
 set(HEADERS
-  #${use_modules_from}/HitFinder.h
-  #${use_modules_from}/HitFinderTools.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/EventAnalyzer.h
   ${use_modules_from}/EventFinder.h
-  ${use_modules_from}/EventCategorizer.h
-  ${use_modules_from}/EventCategorizerTools.h
-  #${use_modules_from}/UniversalFileLoader.h
 )
 
 set(SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
-  #${use_modules_from}/HitFinder.cpp
-  #${use_modules_from}/HitFinderTools.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/EventAnalyzer.cpp
   ${use_modules_from}/EventFinder.cpp
-  ${use_modules_from}/EventCategorizer.cpp
-  ${use_modules_from}/EventCategorizerTools.cpp
-  #${use_modules_from}/UniversalFileLoader.cpp
 )
 
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})

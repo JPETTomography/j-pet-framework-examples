@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2018 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -18,15 +18,12 @@
 
 #include <JPetRawSignal/JPetRawSignal.h>
 #include <JPetUserTask/JPetUserTask.h>
+#include "ToTEnergyConverterFactory.h"
 #include <JPetHit/JPetHit.h>
 #include <vector>
 #include <map>
 
 class JPetWriter;
-
-#ifdef __CINT__
-#define override
-#endif
 
 /**
  * @brief User Task creating JPetHit from matched Singlas
@@ -53,10 +50,15 @@ protected:
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kRefDetScinIDParamKey = "HitFinder_RefDetScinID_int";
   const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_float";
+  const std::string kConvertToTParamKey = "HitFinder_ConvertToT_bool";
+  const std::string kTOTCalculationType = "HitFinder_TOTCalculationType_std::string";
+  ToTEnergyConverterFactory fToTConverterFactory;
   bool fUseCorruptedSignals = false;
   bool fSaveControlHistos = true;
+  bool fConvertToT = false;
   double fABTimeDiff = 6000.0;
   int fRefDetScinID = -1;
+  std::string fTOTCalculationType = "";
 };
 
 #endif /* !HITFINDER_H */

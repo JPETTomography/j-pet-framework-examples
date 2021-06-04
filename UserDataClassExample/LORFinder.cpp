@@ -44,7 +44,7 @@ bool LORFinder::exec() {
 
       if (event.getHits().size() == 2 &&
           EventCategorizerTools::checkFor2Gamma(event, getStatistics(), false,
-                                                fB2BSlotThetaDiff)) {
+                                                fB2BSlotThetaDiff, fMaxTimeDiff)) {
 
         // if the event looks like a 2-gamma one,
         // reconstruct the annihilation point on the LOR

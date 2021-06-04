@@ -16,12 +16,6 @@
 #ifndef FILTEREVENTS_H
 #define FILTEREVENTS_H
 
-#ifdef __CINT__
-//when cint is used instead of compiler, override word is not recognized
-//nevertheless it's needed for checking if the structure of project is correct
-#define override
-#endif
-
 #include "JPetUserTask/JPetUserTask.h"
 #include <memory>
 
