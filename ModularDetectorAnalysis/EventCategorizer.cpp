@@ -205,12 +205,12 @@ bool EventCategorizer::exec()
       const auto& event = dynamic_cast<const JPetEvent&>(timeWindow->operator[](i));
 
       // Check types of current event
-      auto lors = EventCategorizerTools::getLORs(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fTOTCutAnniMin,
-                                                 fTOTCutAnniMax, fLORAngleCut, fLORPosZCut, fSourcePos);
-      if (lors.size() > 0)
-      {
-        events.insert(events.end(), lors.begin(), lors.end());
-      }
+      // auto lors = EventCategorizerTools::getLORs(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fTOTCutAnniMin,
+      //                                            fTOTCutAnniMax, fLORAngleCut, fLORPosZCut, fSourcePos);
+      // if (lors.size() > 0)
+      // {
+      //   events.insert(events.end(), lors.begin(), lors.end());
+      // }
       // bool is2Gamma = EventCategorizerTools::checkFor2Gamma(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fTOTCutAnniMin,
       //                                                       fTOTCutAnniMax, fLORAngleCut, fLORPosZCut, fSourcePos);
 

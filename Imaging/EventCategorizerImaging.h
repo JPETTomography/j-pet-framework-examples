@@ -34,25 +34,38 @@ public:
   virtual bool init() override;
   virtual bool exec() override;
   virtual bool terminate() override;
-  JPetEvent imageReconstruction(std::vector<JPetHit> hits);
 
 protected:
-  const std::string kMaxDistOfDecayPlaneFromCenterParamKey = "EventCategorizer_MaxDistOfDecayPlaneFromCenter_double";
-  const std::string kBackToBackAngleWindowParamKey = "EventCategorizer_BackToBackAngleWindow_double";
-  const std::string kDecayInto3MinAngleParamKey = "EventCategorizer_DecayInto3MinAngle_double";
-  const std::string kMinAnnihilationParamKey = "EventCategorizer_MinAnnihilationTOT_double";
-  const std::string kMaxAnnihilationParamKey = "EventCategorizer_MaxAnnihilationTOT_double";
-  const std::string kMaxTimeDiffParamKey = "EventCategorizer_MaxTimeDiff_double";
-  const std::string kMaxZPosParamKey = "EventCategorizer_MaxHitZPos_double";
-  double fMaxDistOfDecayPlaneFromCenter = 5.;
-  double fMinAnnihilationTOT = 10000.0;
-  double fMaxAnnihilationTOT = 25000.0;
-  double fScatterTOFTimeDiff = 2000.0;
-  double fBackToBackAngleWindow = 3.;
-  double fDecayInto3MinAngle = 190.;
-  double fMaxTimeDiff = 1000.;
-  double fMaxZPos = 23.;
-  bool fSaveControlHistos = true;
+  const std::string k2GammaMaxAngleParamKey = "Imaging_2GammaMaxAngle_double";
+  const std::string k3GammaMinAngleParamKey = "Imaging_3GammaMinAngle_double";
+
+  const std::string kMinAnnihTOTParamKey = "Imaging_MinAnnihTOT_double";
+  const std::string kMaxAnnihTOTParamKey = "Imaging_MaxAnnihTOT_double";
+
+  const std::string kScatterTimeDiffParamKey = "Imaging_ScatterTimeDiff_double";
+  const std::string k2GammaMaxTOFParamKey = "Imaging_2GammaMaxTOF_double";
+  const std::string k3GammaMaxTimeDiffParamKey = "Imaging_3GammaMaxTimeDiff_double";
+
+  const std::string kMaxDistOfDecayPlaneFromCenterParamKey = "Imaging_MaxDistOfDecayPlaneFromCenter_double";
+
+  const std::string kSaveLORsOnlyParamKey = "Imaging_SaveLORsOnly_bool";
+  const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
+
+  double f2GammaMaxAngle = 5.0;
+  double f3GammaMinAngle = 180.0;
+
+  double fMinAnnihTOT = 150000.0;
+  double fMaxAnnihTOT = 250000.0;
+
+  double fScatterTOFTimeDiff = 1000.0;
+  double f2GammaMaxTOF = 2000.0;
+  double f3GammaMaxTimeDiff = 2000.0;
+
+  double fDPCenterDist = 5.0;
+
+  bool fSaveHistos = true;
+  bool fSaveLORsOnly = false;
+
   void saveEvents(const std::vector<JPetEvent>& event);
   void initialiseHistograms();
 };

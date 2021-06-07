@@ -159,183 +159,6 @@ void EventCategorizerTools::selectForTimeWalk(const JPetEvent& event, JPetStatis
   }
 }
 
-bool EventCategorizerTools::collimator2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
-                                             double totCutAnniMin, double totCutAnniMax, double lorAngleMax, double lorPosZMax,
-                                             const TVector3& sourcePos, boost::property_tree::ptree& calibTree)
-{
-  if (event.getHits().size() < 2)
-  {
-    return false;
-  }
-
-  for (uint i = 0; i < event.getHits().size(); i++)
-  {
-    for (uint j = i + 1; j < event.getHits().size(); j++)
-    {
-      JPetHit firstHit, secondHit;
-      if (event.getHits().at(i).getTime() < event.getHits().at(j).getTime())
-      {
-        firstHit = event.getHits().at(i);
-        secondHit = event.getHits().at(j);
-      }
-      else
-      {
-        firstHit = event.getHits().at(j);
-        secondHit = event.getHits().at(i);
-      }
-
-      int scin1ID = firstHit.getScin().getID();
-      int scin2ID = secondHit.getScin().getID();
-
-      int slot1ID = firstHit.getScin().getSlot().getID();
-      int slot2ID = secondHit.getScin().getSlot().getID();
-
-      int idDiff = max(scin1ID, scin2ID) - min(scin1ID, scin2ID);
-
-      // if (max(slot1ID, slot2ID) - min(slot1ID, slot2ID) == 12 && fabs(firstHit.getTime() - secondHit.getTime()) < maxTimeDiff)
-      if (idDiff > 154 && idDiff < 158 && fabs(firstHit.getTime() - secondHit.getTime()) < maxTimeDiff)
-      {
-        timeWalkStuff(firstHit, stats, saveHistos, calibTree);
-        timeWalkStuff(secondHit, stats, saveHistos, calibTree);
-      }
-      return true;
-    }
-  }
-  return false;
-}
-
-void EventCategorizerTools::timeWalkStuff(const JPetHit& hit, JPetStatistics& stats, bool saveHistos, boost::property_tree::ptree& calibTree)
-{
-  int scinID = hit.getScin().getID();
-  int pmAID = hit.getSignalA().getPM().getID();
-  int pmBID = hit.getSignalA().getPM().getID();
-  auto sigMapA = hit.getSignalA().getRawSignals();
-  auto sigMapB = hit.getSignalB().getRawSignals();
-
-  double tDiffAvTHR1 = 0.0, tDiffAvAll = 0.0;
-  int avCountTHR1 = 0, acCountAll = 0;
-
-  // First calculate average timeDiff for THR1, THR2 and all
-  for (int mtxPos = 1; mtxPos <= 4; mtxPos++)
-  {
-    auto searchA = sigMapA.find(mtxPos);
-    auto searchB = sigMapB.find(mtxPos);
-    if (searchA == sigMapA.end() || searchB == sigMapB.end())
-    {
-      continue;
-    }
-
-    auto leadsA = sigMapA.at(mtxPos).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-    auto trailsA = sigMapA.at(mtxPos).getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-    auto leadsB = sigMapB.at(mtxPos).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-    auto trailsB = sigMapB.at(mtxPos).getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-
-    if (leadsA.size() == 2 && leadsB.size() == 2 && trailsA.size() == 2 && trailsB.size() == 2)
-    {
-      // Constants for scin synchronization
-      double c_tDiffTHR1 = calibTree.get(Form("%s.%d.%s%d", "scin", scinID, "ab_tdiff_thr1_scin_mtx_pos_", mtxPos), 0.0);
-      double c_tDiffTHR2 = calibTree.get(Form("%s.%d.%s%d", "scin", scinID, "ab_tdiff_thr2_scin_mtx_pos_", mtxPos), 0.0);
-
-      double tDiffTHR1 = leadsB.at(0).getTime() - leadsA.at(0).getTime() - c_tDiffTHR1;
-      double tDiffTHR2 = leadsB.at(1).getTime() - leadsA.at(1).getTime() - c_tDiffTHR2;
-
-      // Calculating averages
-      tDiffAvTHR1 += tDiffTHR1;
-      avCountTHR1++;
-      tDiffAvAll += tDiffTHR1;
-      tDiffAvAll += tDiffTHR2;
-      acCountAll++;
-      acCountAll++;
-    }
-  }
-
-  // Final averages
-  tDiffAvTHR1 = tDiffAvTHR1 / ((double)avCountTHR1);
-  tDiffAvAll = tDiffAvAll / ((double)acCountAll);
-
-  // Average reversed TOT - for all SiPMs
-  double revTOTAll = 0.0;
-  int revTOTCount = 0;
-
-  // Calculating reversed TOT per SiPM mtx position and filling histograms
-  for (int mtxPos = 1; mtxPos <= 4; mtxPos++)
-  {
-    auto searchA = sigMapA.find(mtxPos);
-    auto searchB = sigMapB.find(mtxPos);
-    if (searchA == sigMapA.end() || searchB == sigMapB.end())
-    {
-      continue;
-    }
-
-    auto leadsA = sigMapA.at(mtxPos).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-    auto trailsA = sigMapA.at(mtxPos).getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-    auto leadsB = sigMapB.at(mtxPos).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-    auto trailsB = sigMapB.at(mtxPos).getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-
-    // Checking time walk effect only for SiPM signals with both thresholds
-    if (leadsA.size() == 2 && leadsB.size() == 2 && trailsA.size() == 2 && trailsB.size() == 2)
-    {
-      double c_totTHR1A_a = calibTree.get("sipm." + to_string(pmAID) + ".tot_factor_thr1_a", 1.0);
-      double c_totTHR1A_b = calibTree.get("sipm." + to_string(pmAID) + ".tot_factor_thr1_b", 0.0);
-      double c_totTHR2A_a = calibTree.get("sipm." + to_string(pmAID) + ".tot_factor_thr2_a", 1.0);
-      double c_totTHR2A_b = calibTree.get("sipm." + to_string(pmAID) + ".tot_factor_thr2_b", 0.0);
-
-      double c_totTHR1B_a = calibTree.get("sipm." + to_string(pmBID) + ".tot_factor_thr1_a", 1.0);
-      double c_totTHR1B_b = calibTree.get("sipm." + to_string(pmBID) + ".tot_factor_thr1_b", 0.0);
-      double c_totTHR2B_a = calibTree.get("sipm." + to_string(pmBID) + ".tot_factor_thr2_a", 1.0);
-      double c_totTHR2B_b = calibTree.get("sipm." + to_string(pmBID) + ".tot_factor_thr2_b", 0.0);
-
-      double totATHR1 = c_totTHR1A_a * (trailsA.at(0).getTime() - leadsA.at(0).getTime()) + c_totTHR1A_b;
-      double totATHR2 = c_totTHR2A_a * (trailsA.at(1).getTime() - leadsA.at(1).getTime()) + c_totTHR2A_b;
-      double totBTHR1 = c_totTHR1B_a * (trailsB.at(0).getTime() - leadsB.at(0).getTime()) + c_totTHR1B_b;
-      double totBTHR2 = c_totTHR2B_a * (trailsB.at(1).getTime() - leadsB.at(1).getTime()) + c_totTHR2B_b;
-
-      if (totATHR1 != 0.0 && totATHR2 != 0.0 && totBTHR1 != 0.0 && totBTHR2 != 0.0)
-      {
-        double revTOTSum = (1.0 / totBTHR1 + 1.0 / totBTHR2) - (1.0 / totATHR1 + 1.0 / totATHR2);
-        revTOTAll += revTOTSum;
-        revTOTCount++;
-
-        // Filling histograms before application of corrections
-        // if (saveHistos)
-        // {
-        //   stats.getHisto2D(Form("time_walk_thr1_mtx_%d", mtxPos))->Fill(tDiffAvTHR1, revTOTSum);
-        //   stats.getHisto2D(Form("time_walk_thr2_mtx_%d", mtxPos))->Fill(tDiffAvAll, revTOTSum);
-        // }
-
-        // Using corrections
-        double c_twTHR1_a = calibTree.get("time_walk.thr1_mtx" + to_string(mtxPos) + ".param_a", 1.0);
-        double c_twTHR1_b = calibTree.get("time_walk.thr1_mtx" + to_string(mtxPos) + ".param_b", 0.0);
-        double c_twTHR2_a = calibTree.get("time_walk.thr2_mtx" + to_string(mtxPos) + ".param_a", 1.0);
-        double c_twTHR2_b = calibTree.get("time_walk.thr2_mtx" + to_string(mtxPos) + ".param_b", 0.0);
-
-        double tDiffTHR1_corr = tDiffAvTHR1 - (revTOTSum * c_twTHR1_a + c_twTHR1_b);
-        double tDiffTHR2_corr = tDiffAvAll - (revTOTSum * c_twTHR2_a + c_twTHR2_b);
-
-        // if (saveHistos)
-        // {
-        //   stats.getHisto2D(Form("time_walk_thr1_mtx_%d_corr", mtxPos))->Fill(tDiffTHR1_corr, revTOTSum);
-        //   stats.getHisto2D(Form("time_walk_thr2_mtx_%d_corr", mtxPos))->Fill(tDiffTHR2_corr, revTOTSum);
-        // }
-      }
-    }
-  }
-
-  // Reversed TOT average
-  revTOTAll = revTOTAll / ((double)revTOTCount);
-  if (saveHistos)
-  {
-    int mtxPos = 1;
-    // Before correction
-    // stats.getHisto2D(Form("time_walk_sum_mtx_%d", mtxPos))->Fill(tDiffAvAll, revTOTAll);
-    // Corrected
-    double c_twSum_a = calibTree.get("time_walk.sum_mtx" + to_string(mtxPos) + ".param_a", 1.0);
-    double c_twSum_b = calibTree.get("time_walk.sum_mtx" + to_string(mtxPos) + ".param_b", 0.0);
-    double tDiffAvAll_corr = tDiffAvAll - (revTOTAll * c_twSum_a + c_twSum_b);
-    // stats.getHisto2D(Form("time_walk_sum_mtx_%d_corr", mtxPos))->Fill(tDiffAvAll_corr, revTOTAll);
-  }
-}
-
 /**
  * Method for determining type of event - back to back 2 gamma
  */
@@ -374,50 +197,6 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
     }
   }
   return isEvent2Gamma;
-}
-
-/**
- * Method for selecting pairs of annihilation hits
- */
-vector<JPetEvent> EventCategorizerTools::getLORs(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff,
-                                                 double maxTimeDiff, double totCutAnniMin, double totCutAnniMax, double lorAngleMax,
-                                                 double lorPosZMax, const TVector3& sourcePos)
-{
-  vector<JPetEvent> lors;
-  if (event.getHits().size() < 2)
-  {
-    return lors;
-  }
-
-  for (uint i = 0; i < event.getHits().size(); i++)
-  {
-    for (uint j = i + 1; j < event.getHits().size(); j++)
-    {
-      JPetHit firstHit, secondHit;
-
-      if (event.getHits().at(i).getTime() < event.getHits().at(j).getTime())
-      {
-        firstHit = event.getHits().at(i);
-        secondHit = event.getHits().at(j);
-      }
-      else
-      {
-        firstHit = event.getHits().at(j);
-        secondHit = event.getHits().at(i);
-      }
-
-      if (checkFor2Gamma(firstHit, secondHit, stats, saveHistos, maxThetaDiff, maxTimeDiff, totCutAnniMin, totCutAnniMax, lorAngleMax, lorPosZMax,
-                         sourcePos))
-      {
-        JPetEvent lor;
-        lor.addHit(firstHit);
-        lor.addHit(secondHit);
-        lor.addEventType(JPetEventType::k2Gamma);
-        lors.push_back(lor);
-      }
-    }
-  }
-  return lors;
 }
 
 /**
@@ -622,6 +401,95 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetHit& firstHit, const JPetHi
 }
 
 /**
+ * Checking each pair of hits in the event if meet selection conditions for 2 gamma annihilation.
+ * If yes, the two hits are used to create a new event, that represent Line of Response, and can be used
+ * to calculate annihilation point based on TOF and distance.
+ */
+vector<JPetEvent> EventCategorizerTools::getLORs(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxTOF, double maxScatter,
+                                                 double totCutAnniMin, double totCutAnniMax)
+{
+  vector<JPetEvent> lors;
+  if (event.getHits().size() < 2)
+  {
+    return lors;
+  }
+
+  for (uint i = 0; i < event.getHits().size(); i++)
+  {
+    for (uint j = i + 1; j < event.getHits().size(); j++)
+    {
+      JPetHit firstHit, secondHit;
+
+      if (event.getHits().at(i).getTime() < event.getHits().at(j).getTime())
+      {
+        firstHit = event.getHits().at(i);
+        secondHit = event.getHits().at(j);
+      }
+      else
+      {
+        firstHit = event.getHits().at(j);
+        secondHit = event.getHits().at(i);
+      }
+
+      // The pair of hits is rejected, if they pass scatter test
+      if (checkForScatter(firstHit, secondHit, stats, saveHistos, maxScatter))
+      {
+        continue;
+      }
+
+      // TOF calculated by convention
+      double tof = calculateTOFByConvention(firstHit, secondHit);
+
+      // Average TOT is temporaily stored as hit energy
+      auto tot1 = firstHit.getEnergy();
+      auto tot2 = secondHit.getEnergy();
+
+      // Pre-cut statistics
+      if (saveHistos)
+      {
+        stats.fillHistogram("2g_tot", tot1);
+        stats.fillHistogram("2g_tot", tot2);
+        stats.fillHistogram("2g_tof", tof);
+      }
+
+      // Checking conditions
+      bool tofCutPass = false, totCutPass = false;
+      if (tof < maxTOF)
+      {
+        tofCutPass = true;
+      }
+      if (tot1 > totCutAnniMin && tot1 < totCutAnniMax && tot2 > totCutAnniMin && tot2 < totCutAnniMax)
+      {
+        totCutPass = true;
+      }
+
+      if (tofCutPass && totCutPass)
+      {
+        // Creating LOR
+        JPetEvent lor;
+        lor.addHit(firstHit);
+        lor.addHit(secondHit);
+        lor.addEventType(JPetEventType::k2Gamma);
+        lors.push_back(lor);
+
+        // Pair of hits that meet cut conditions are treated as coming from annihilation point
+        if (saveHistos)
+        {
+          TVector3 ap = calculateAnnihilationPoint(firstHit, secondHit);
+          stats.fillHistogram("ap_yx", ap.Y(), ap.X());
+          stats.fillHistogram("ap_zx", ap.Z(), ap.X());
+          stats.fillHistogram("ap_zy", ap.Z(), ap.Y());
+          stats.fillHistogram("ap_yx_zoom", ap.Y(), ap.X());
+          stats.fillHistogram("ap_zx_zoom", ap.Z(), ap.X());
+          stats.fillHistogram("ap_zy_zoom", ap.Z(), ap.Y());
+        }
+      }
+    }
+  }
+  return lors;
+}
+
+/**
  * Method for determining type of event - 3Gamma
  */
 bool EventCategorizerTools::checkFor3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos)
@@ -669,12 +537,12 @@ bool EventCategorizerTools::checkForPrompt(const JPetEvent& event, JPetStatistic
 {
   for (unsigned i = 0; i < event.getHits().size(); i++)
   {
-    double tot = calculateTOT(event.getHits().at(i));
+    double tot = event.getHits().at(i).getEnergy();
     if (tot > deexTOTCutMin && tot < deexTOTCutMax)
     {
       if (saveHistos)
       {
-        stats.getHisto1D("Deex_TOT_cut")->Fill(tot);
+        stats.fillHistogram("deex_tot_cut_pass", tot);
       }
       return true;
     }
@@ -685,15 +553,16 @@ bool EventCategorizerTools::checkForPrompt(const JPetEvent& event, JPetStatistic
 /**
  * Method for determining type of event - scatter
  */
-bool EventCategorizerTools::checkForScatter(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double scatterTOFTimeDiff)
+bool EventCategorizerTools::checkForScatter(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double scatterTOF)
 {
   if (event.getHits().size() < 2)
   {
     return false;
   }
-  for (uint i = 0; i < event.getHits().size(); i++)
+  bool hasScatteredHits = false;
+  for (uint i = 0; i < event.getHits().size(); ++i)
   {
-    for (uint j = i + 1; j < event.getHits().size(); j++)
+    for (uint j = i + 1; j < event.getHits().size(); ++j)
     {
       JPetHit primaryHit, scatterHit;
       if (event.getHits().at(i).getTime() < event.getHits().at(j).getTime())
@@ -707,27 +576,44 @@ bool EventCategorizerTools::checkForScatter(const JPetEvent& event, JPetStatisti
         scatterHit = event.getHits().at(i);
       }
 
-      double scattAngle = calculateScatteringAngle(primaryHit, scatterHit);
-      double scattTOF = calculateScatteringTime(primaryHit, scatterHit);
-      double timeDiff = scatterHit.getTime() - primaryHit.getTime();
-
-      if (saveHistos)
+      if (checkForScatter(primaryHit, scatterHit, stats, saveHistos, scatterTOF))
       {
-        stats.getHisto1D("ScatterTOF_TimeDiff")->Fill(fabs(scattTOF - timeDiff));
-      }
-
-      if (fabs(scattTOF - timeDiff) < scatterTOFTimeDiff)
-      {
-        if (saveHistos)
-        {
-          stats.getHisto2D("ScatterAngle_PrimaryTOT")->Fill(scattAngle, calculateTOT(primaryHit));
-          stats.getHisto2D("ScatterAngle_ScatterTOT")->Fill(scattAngle, calculateTOT(scatterHit));
-        }
-        return true;
+        hasScatteredHits = true;
       }
     }
   }
-  return false;
+  return hasScatteredHits;
+}
+
+/**
+ * Checking if pair of hits meet scattering condition
+ */
+bool EventCategorizerTools::checkForScatter(const JPetHit& primaryHit, const JPetHit& scatterHit, JPetStatistics& stats, bool saveHistos,
+                                            double scatterTOFTimeDiff)
+{
+  double scattAngle = calculateScatteringAngle(primaryHit, scatterHit);
+  double scattTOF = calculateScatteringTime(primaryHit, scatterHit);
+  double timeDiff = scatterHit.getTime() - primaryHit.getTime();
+
+  double scatterTestTime = fabs(scattTOF - timeDiff);
+  if (scatterTestTime < scatterTOFTimeDiff)
+  {
+    if (saveHistos)
+    {
+      stats.fillHistogram("scatter_test_pass", scatterTestTime);
+      stats.fillHistogram("scatter_angle_tot_primary", scattAngle, primaryHit.getEnergy());
+      stats.fillHistogram("scatter_angle_tot_scatter", scattAngle, scatterHit.getEnergy());
+    }
+    return true;
+  }
+  else
+  {
+    if (saveHistos)
+    {
+      stats.fillHistogram("scatter_test_fail", scatterTestTime);
+    }
+    return false;
+  }
 }
 
 /**

@@ -40,6 +40,9 @@ public:
   static void selectForTimeWalk(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double maxThetaDiff, double maxTimeDiff,
                                 double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos);
 
+  static std::vector<JPetEvent> getLORs(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxTOF, double maxScatter,
+                                        double totCutAnniMin, double totCutAnniMax);
+
   static bool checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
                              double totCutAnniMin, double totCutAnniMax, double lorAngleMax, double lorPosZMax, const TVector3& sourcePos);
 
@@ -47,21 +50,17 @@ public:
                              double maxTimeDiff, double totCutAnniMin, double totCutAnniMax, double lorAngleMax, double lorPosZMax,
                              const TVector3& sourcePos);
 
-  static std::vector<JPetEvent> getLORs(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
-                                        double totCutAnniMin, double totCutAnniMax, double lorAngleMax, double lorPosZMax, const TVector3& sourcePos);
-
-  static bool collimator2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
-                               double totCutAnniMin, double totCutAnniMax, double lorAngleMax, double lorPosZMax, const TVector3& sourcePos,
-                               boost::property_tree::ptree& calibTree);
-
-  static void timeWalkStuff(const JPetHit& hit, JPetStatistics& stats, bool saveHistos, boost::property_tree::ptree& calibTree);
-
   static bool checkFor3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos);
 
   static bool checkForPrompt(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double deexTOTCutMin, double deexTOTCutMax);
 
+  // Scatter test
   static bool checkForScatter(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double scatterTOFTimeDiff);
 
+  static bool checkForScatter(const JPetHit& primaryHit, const JPetHit& scatterHit, JPetStatistics& stats, bool saveHistos,
+                              double scatterTOFTimeDiff);
+
+  // Helper methods - some obsolete in modular approach, TODO check
   static double calculateTOT(const JPetHit& hit);
 
   static double calculateReveresedTOT(const JPetHit& hit);
