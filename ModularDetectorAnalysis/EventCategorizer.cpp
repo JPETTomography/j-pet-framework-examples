@@ -211,8 +211,8 @@ bool EventCategorizer::exec()
       {
         events.insert(events.end(), lors.begin(), lors.end());
       }
-      // bool is2Gamma = EventCategorizerTools::checkFor2Gamma(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fTOTCutAnniMin,
-      //                                                       fTOTCutAnniMax, fLORAngleCut, fLORPosZCut, fSourcePos);
+      bool is2Gamma = EventCategorizerTools::checkFor2Gamma(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fTOTCutAnniMin,
+                                                            fTOTCutAnniMax, fLORAngleCut, fLORPosZCut, fSourcePos);
 
       // Select hits for TOF calibration, if making calibraiton
       if (fSaveCalibHistos)
