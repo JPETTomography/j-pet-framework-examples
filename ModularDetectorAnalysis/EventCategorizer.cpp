@@ -205,12 +205,12 @@ bool EventCategorizer::exec()
       const auto& event = dynamic_cast<const JPetEvent&>(timeWindow->operator[](i));
 
       // Check types of current event
-      // auto lors = EventCategorizerTools::getLORs(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fTOTCutAnniMin,
-      //                                            fTOTCutAnniMax, fLORAngleCut, fLORPosZCut, fSourcePos);
-      // if (lors.size() > 0)
-      // {
-      //   events.insert(events.end(), lors.begin(), lors.end());
-      // }
+      auto lors =
+          EventCategorizerTools::getLORs(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fTOTCutAnniMin, fTOTCutAnniMax);
+      if (lors.size() > 0)
+      {
+        events.insert(events.end(), lors.begin(), lors.end());
+      }
       // bool is2Gamma = EventCategorizerTools::checkFor2Gamma(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fTOTCutAnniMin,
       //                                                       fTOTCutAnniMax, fLORAngleCut, fLORPosZCut, fSourcePos);
 
@@ -600,16 +600,16 @@ void EventCategorizer::initialiseCalibrationHistograms()
   getStatistics().getHisto2D("time_walk_tof")->GetXaxis()->SetTitle("Time of Flight [ps]");
   getStatistics().getHisto2D("time_walk_tof")->GetYaxis()->SetTitle("Reversed TOT [1/ps]");
 
-  for (int scinID = minScinID; scinID <= maxScinID; ++scinID)
-  {
-    getStatistics().createHistogram(new TH2F(Form("time_walk_ab_tdiff_scin_%d", scinID), Form("AB TDiff vs. reversed TOT scin %d", scinID), 201,
-                                             -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0, 201, -revTOTLimit, revTOTLimit));
-    getStatistics().getHisto2D(Form("time_walk_ab_tdiff_scin_%d", scinID))->GetXaxis()->SetTitle("AB Time Difference [ps]");
-    getStatistics().getHisto2D(Form("time_walk_ab_tdiff_scin_%d", scinID))->GetYaxis()->SetTitle("Reversed TOT [1/ps]");
-
-    getStatistics().createHistogram(new TH2F(Form("time_walk_tof_scin_%d", scinID), Form("TOF vs. reversed TOT scin %d", scinID), 201,
-                                             -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0, 201, -revTOTLimit, revTOTLimit));
-    getStatistics().getHisto2D(Form("time_walk_tof_scin_%d", scinID))->GetXaxis()->SetTitle("AB Time Difference [ps]");
-    getStatistics().getHisto2D(Form("time_walk_tof_scin_%d", scinID))->GetYaxis()->SetTitle("Reversed TOT [1/ps]");
-  }
+  // for (int scinID = minScinID; scinID <= maxScinID; ++scinID)
+  // {
+  //   getStatistics().createHistogram(new TH2F(Form("time_walk_ab_tdiff_scin_%d", scinID), Form("AB TDiff vs. reversed TOT scin %d", scinID), 201,
+  //                                            -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0, 201, -revTOTLimit, revTOTLimit));
+  //   getStatistics().getHisto2D(Form("time_walk_ab_tdiff_scin_%d", scinID))->GetXaxis()->SetTitle("AB Time Difference [ps]");
+  //   getStatistics().getHisto2D(Form("time_walk_ab_tdiff_scin_%d", scinID))->GetYaxis()->SetTitle("Reversed TOT [1/ps]");
+  //
+  //   getStatistics().createHistogram(new TH2F(Form("time_walk_tof_scin_%d", scinID), Form("TOF vs. reversed TOT scin %d", scinID), 201,
+  //                                            -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0, 201, -revTOTLimit, revTOTLimit));
+  //   getStatistics().getHisto2D(Form("time_walk_tof_scin_%d", scinID))->GetXaxis()->SetTitle("AB Time Difference [ps]");
+  //   getStatistics().getHisto2D(Form("time_walk_tof_scin_%d", scinID))->GetYaxis()->SetTitle("Reversed TOT [1/ps]");
+  // }
 }
