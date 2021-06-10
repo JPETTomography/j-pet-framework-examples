@@ -339,7 +339,7 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetHit& firstHit, const JPetHi
   }
 
   // Pair of hits that meet cut conditions are treated as coming from annihilation point
-  if (saveHistos && tDiffCut && thetaCut2)
+  if (saveHistos && tDiffCut && thetaCut2 && totCut)
   {
     TVector3 annhilationPoint = calculateAnnihilationPoint(firstHit, secondHit);
 
