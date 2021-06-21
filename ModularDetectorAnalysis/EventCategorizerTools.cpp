@@ -775,26 +775,26 @@ bool EventCategorizerTools::stream2Gamma(const JPetEvent& event, JPetStatistics&
       }
       // Checking for back to back
       double timeDiff = fabs(firstHit.getTime() - secondHit.getTime());
-      double deltaLor = (secondHit.getTime() - firstHit.getTime()) * kLightVelocity_cm_ps / 2.;
-      double theta1 = min(firstHit.getScin().getSlot().getTheta(), secondHit.getScin().getSlot().getTheta());
-      double theta2 = max(firstHit.getScin().getSlot().getTheta(), secondHit.getScin().getSlot().getTheta());
-      double thetaDiff = min(theta2 - theta1, 360.0 - theta2 + theta1);
+      double deltaLor = (secondHit.getTime() - firstHit.getTime()) * kLightVelocity_cm_ps / 2.0;
+
+      double theta = TMath::RadToDeg() * firstHit.getPos().Angle(secondHit.getPos());
       if (saveHistos)
       {
-        stats.getHisto1D("2Gamma_TimeDiff")->Fill(timeDiff / 1000.0);
-        stats.getHisto1D("2Gamma_DLOR")->Fill(deltaLor);
-        stats.getHisto1D("2Gamma_ThetaDiff")->Fill(thetaDiff);
+        stats.fillHistogram("stream2g_tdiff", timeDiff);
+        stats.fillHistogram("stream2g_dlor_dist", deltaLor);
+        stats.fillHistogram("stream2g_theta_diff", theta);
       }
-      if (fabs(thetaDiff - 180.0) < b2bSlotThetaDiff && timeDiff < b2bTimeDiff)
+      if (fabs(theta - 180.0) < b2bSlotThetaDiff && timeDiff < b2bTimeDiff)
       {
         if (saveHistos)
         {
-          TVector3 annhilationPoint = calculateAnnihilationPoint(firstHit, secondHit);
-          stats.getHisto1D("2Annih_TimeDiff")->Fill(timeDiff / 1000.0);
-          stats.getHisto1D("2Annih_DLOR")->Fill(deltaLor);
-          stats.getHisto1D("2Annih_ThetaDiff")->Fill(thetaDiff);
-          stats.getHisto2D("2Annih_XY")->Fill(annhilationPoint.X(), annhilationPoint.Y());
-          stats.getHisto1D("2Annih_Z")->Fill(annhilationPoint.Z());
+          TVector3 ap = calculateAnnihilationPoint(firstHit, secondHit);
+          stats.fillHistogram("ap_yx", ap.Y(), ap.X());
+          stats.fillHistogram("ap_zx", ap.Z(), ap.X());
+          stats.fillHistogram("ap_zy", ap.Z(), ap.Y());
+          stats.fillHistogram("ap_yx_zoom", ap.Y(), ap.X());
+          stats.fillHistogram("ap_zx_zoom", ap.Z(), ap.X());
+          stats.fillHistogram("ap_zy_zoom", ap.Z(), ap.Y());
         }
         return true;
       }
@@ -823,35 +823,25 @@ bool EventCategorizerTools::stream3Gamma(const JPetEvent& event, JPetStatistics&
         JPetHit secondHit = event.getHits().at(j);
         JPetHit thirdHit = event.getHits().at(k);
 
-        vector<double> thetaAngles;
-        thetaAngles.push_back(firstHit.getScin().getSlot().getTheta());
-        thetaAngles.push_back(secondHit.getScin().getSlot().getTheta());
-        thetaAngles.push_back(thirdHit.getScin().getSlot().getTheta());
-        sort(thetaAngles.begin(), thetaAngles.end());
-
         vector<double> relativeAngles;
-        relativeAngles.push_back(thetaAngles.at(1) - thetaAngles.at(0));
-        relativeAngles.push_back(thetaAngles.at(2) - thetaAngles.at(1));
-        relativeAngles.push_back(360.0 - thetaAngles.at(2) + thetaAngles.at(0));
+        relativeAngles.push_back(TMath::RadToDeg() * firstHit.getPos().Angle(secondHit.getPos()));
+        relativeAngles.push_back(TMath::RadToDeg() * secondHit.getPos().Angle(thirdHit.getPos()));
+        relativeAngles.push_back(TMath::RadToDeg() * thirdHit.getPos().Angle(firstHit.getPos()));
         sort(relativeAngles.begin(), relativeAngles.end());
 
         double transformedX = relativeAngles.at(1) + relativeAngles.at(0);
         double transformedY = relativeAngles.at(1) - relativeAngles.at(0);
         double timeDiff = fabs(thirdHit.getTime() - firstHit.getTime());
         double planeCenterDist = calculatePlaneCenterDistance(firstHit, secondHit, thirdHit);
+
         if (saveHistos)
         {
-          stats.getHisto1D("3GammaTimeDiff")->Fill(timeDiff);
-          stats.getHisto2D("3GammaThetas")->Fill(transformedX, transformedY);
-          stats.getHisto1D("3GammaPlaneDist")->Fill(planeCenterDist);
+          stats.fillHistogram("stream3g_thetas", transformedX, transformedY);
+          stats.fillHistogram("stream3g_plane_dist", planeCenterDist);
+          stats.fillHistogram("stream3g_tdiff", timeDiff);
         }
         if (transformedX > d3SlotThetaMin && timeDiff < d3TimeDiff && planeCenterDist < d3PlaneCenterDist)
         {
-          if (saveHistos)
-          {
-            stats.getHisto1D("3AnnihPlaneDist")->Fill(planeCenterDist);
-            stats.getHisto1D("3AnnihTimeDiff")->Fill(timeDiff);
-          }
           return true;
         }
       }

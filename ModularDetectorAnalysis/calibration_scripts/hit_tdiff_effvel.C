@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -33,6 +33,7 @@
 #include <TDirectory.h>
 #include <TFile.h>
 #include <TGraph.h>
+#include <TGraphErrors.h>
 #include <TH1D.h>
 #include <TH2D.h>
 #include <TLine.h>
@@ -283,7 +284,7 @@ void hit_tdiff_effvel(std::string fileName, std::string calibJSONFileName = "cal
       tree.put("scin." + to_string(scinID) + ".eff_velocity", eff_vel);
 
       // If a constatnt for B side signal correction already exists in the tree, adding to new one
-      // b_corr += tree.get("scin." + to_string(scinID) + ".b_correction", 0.0);
+      b_corr += tree.get("scin." + to_string(scinID) + ".b_correction", 0.0);
       tree.put("scin." + to_string(scinID) + ".b_correction", b_corr);
 
       // Filling the graph
