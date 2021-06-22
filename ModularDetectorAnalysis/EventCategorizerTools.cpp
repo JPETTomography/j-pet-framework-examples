@@ -105,7 +105,7 @@ void EventCategorizerTools::selectForTOF(const JPetEvent& event, JPetStatistics&
   }
 }
 
-void EventCategorizerTools::selectForTimeWalk(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double maxThetaDiff,
+void EventCategorizerTools::selectForTimeWalk(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double maxthetaDiff,
                                               double maxTimeDiff, double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos)
 {
   if (event.getHits().size() < 2)
@@ -130,7 +130,7 @@ void EventCategorizerTools::selectForTimeWalk(const JPetEvent& event, JPetStatis
         secondHit = event.getHits().at(i);
       }
 
-      if (checkFor2Gamma(firstHit, secondHit, stats, false, maxThetaDiff, maxTimeDiff, totCutAnniMin, totCutAnniMax, 0.0, 0.0, sourcePos))
+      if (checkFor2Gamma(firstHit, secondHit, stats, false, maxthetaDiff, maxTimeDiff, totCutAnniMin, totCutAnniMax, 0.0, 0.0, sourcePos))
       {
         // Calculating reversed TOT for time walk studies
         auto revTOT1 = calculateReveresedTOT(firstHit);
@@ -162,7 +162,7 @@ void EventCategorizerTools::selectForTimeWalk(const JPetEvent& event, JPetStatis
 /**
  * Method for determining type of event - back to back 2 gamma
  */
-bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
+bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxthetaDiff, double maxTimeDiff,
                                            double totCutAnniMin, double totCutAnniMax, double lorAngleMax, double lorPosZMax,
                                            const TVector3& sourcePos)
 {
@@ -189,7 +189,7 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
         secondHit = event.getHits().at(i);
       }
 
-      if (checkFor2Gamma(firstHit, secondHit, stats, saveHistos, maxThetaDiff, maxTimeDiff, totCutAnniMin, totCutAnniMax, lorAngleMax, lorPosZMax,
+      if (checkFor2Gamma(firstHit, secondHit, stats, saveHistos, maxthetaDiff, maxTimeDiff, totCutAnniMin, totCutAnniMax, lorAngleMax, lorPosZMax,
                          sourcePos))
       {
         isEvent2Gamma = true;
@@ -203,7 +203,7 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
  * Method for determining type of two hits - back to back 2 gamma
  */
 bool EventCategorizerTools::checkFor2Gamma(const JPetHit& firstHit, const JPetHit& secondHit, JPetStatistics& stats, bool saveHistos,
-                                           double maxThetaDiff, double maxTimeDiff, double totCutAnniMin, double totCutAnniMax, double lorAngleMax,
+                                           double maxthetaDiff, double maxTimeDiff, double totCutAnniMin, double totCutAnniMax, double lorAngleMax,
                                            double lorPosZMax, const TVector3& sourcePos)
 {
   int scin1ID = firstHit.getScin().getID();
@@ -228,13 +228,13 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetHit& firstHit, const JPetHi
   double tof = calculateTOFByConvention(firstHit, secondHit);
 
   // LOR angle
-  TVector3 vecHit1_2D(firstHit.getPosX() - sourcePos.X(), 0.0, firstHit.getPosZ() - sourcePos.Z());
-  TVector3 vecHit2_2D(secondHit.getPosX() - sourcePos.X(), 0.0, secondHit.getPosZ() - sourcePos.Z());
-  TVector3 vecHit1_1D(firstHit.getPosX() - sourcePos.X(), 0.0, 0.0);
-  TVector3 vecHit2_1D(secondHit.getPosX() - sourcePos.X(), 0.0, 0.0);
+  TVector3 vechit1_2D(firstHit.getPosX() - sourcePos.X(), 0.0, firstHit.getPosZ() - sourcePos.Z());
+  TVector3 vechit2_2D(secondHit.getPosX() - sourcePos.X(), 0.0, secondHit.getPosZ() - sourcePos.Z());
+  TVector3 vechit1_1D(firstHit.getPosX() - sourcePos.X(), 0.0, 0.0);
+  TVector3 vechit2_1D(secondHit.getPosX() - sourcePos.X(), 0.0, 0.0);
 
-  double lorAngle1 = TMath::RadToDeg() * vecHit1_2D.Angle(vecHit1_1D);
-  double lorAngle2 = TMath::RadToDeg() * vecHit2_2D.Angle(vecHit2_2D);
+  double lorAngle1 = TMath::RadToDeg() * vechit1_2D.Angle(vechit1_1D);
+  double lorAngle2 = TMath::RadToDeg() * vechit2_2D.Angle(vechit2_2D);
 
   // Pre-cuts histograms
   if (saveHistos)
@@ -294,7 +294,7 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetHit& firstHit, const JPetHi
     }
   }
 
-  if (180.0 - theta < maxThetaDiff)
+  if (180.0 - theta < maxthetaDiff)
   {
     thetaCut2 = true;
     if (saveHistos)
@@ -691,22 +691,80 @@ double EventCategorizerTools::calculateScatteringAngle(const JPetHit& hit1, cons
 }
 
 /**
- * Calculation point in 3D, where annihilation occured
+ * @brief Calculation of an annihilation point based on LOR and TOFof two hits.
+ *
+ * Line of Response between two hits is used to estimate annihilation point by calculating its
+ * middle and shifting it along LOR based on Time of Flight value toward one hit or the other.
  */
-TVector3 EventCategorizerTools::calculateAnnihilationPoint(const JPetHit& hitA, const JPetHit& hitB)
+TVector3 EventCategorizerTools::calculateAnnihilationPoint(const JPetHit& hit1, const JPetHit& hit2)
 {
-  double tof = EventCategorizerTools::calculateTOF(hitA, hitB);
-  return calculateAnnihilationPoint(hitA.getPos(), hitB.getPos(), tof);
+  TVector3 middleOfLOR = 0.5 * (hit1.getPos() + hit2.getPos());
+  TVector3 versorOnLOR = (hit2.getPos() - hit1.getPos()).Unit();
+
+  double tof = EventCategorizerTools::calculateTOFByConvention(hit1, hit2);
+  double shift = 0.5 * tof * kLightVelocity_cm_ps;
+
+  TVector3 annihilationPoint;
+  annihilationPoint.SetX(middleOfLOR.X() + shift * versorOnLOR.X());
+  annihilationPoint.SetY(middleOfLOR.Y() + shift * versorOnLOR.Y());
+  annihilationPoint.SetZ(middleOfLOR.Z() + shift * versorOnLOR.Z());
+  return annihilationPoint;
 }
 
-TVector3 EventCategorizerTools::calculateAnnihilationPoint(const TVector3& hitA, const TVector3& hitB, double tof)
+/**
+ * @brief Calculation of an annihilation point based on positions of three hits.
+ */
+TVector3 EventCategorizerTools::calculateAnnihilationPoint(const JPetHit& hit1, const JPetHit& hit2, const JPetHit& hit3)
 {
-  TVector3 middleOfLOR = 0.5 * (hitA + hitB);
-  TVector3 versorOnLOR = (hitB - hitA).Unit();
+  // Calculating norm vector for a surface created by 3 hits (vectors of their positions)
+  TVector3 surfaceVec;
+  surfaceVec.SetX((hit2.getPosY() - hit1.getPosY()) * (hit3.getPosZ() - hit1.getPosZ()) -
+                  (hit2.getPosZ() - hit1.getPosZ()) * (hit3.getPosY() - hit1.getPosY()));
+  surfaceVec.SetY((hit2.getPosZ() - hit1.getPosZ()) * (hit3.getPosX() - hit1.getPosX()) -
+                  (hit2.getPosX() - hit1.getPosX()) * (hit3.getPosZ() - hit1.getPosZ()));
+  surfaceVec.SetZ((hit2.getPosX() - hit1.getPosX()) * (hit3.getPosY() - hit1.getPosY()) -
+                  (hit2.getPosY() - hit1.getPosY()) * (hit3.getPosX() - hit1.getPosX()));
 
-  double shift = 0.5 * tof * kLightVelocity_cm_ps;
-  TVector3 annihilationPoint(middleOfLOR.X() + shift * versorOnLOR.X(), middleOfLOR.Y() + shift * versorOnLOR.Y(),
-                             middleOfLOR.Z() + shift * versorOnLOR.Z());
+  // Unitary perpendicular vector
+  TVector3 perpVec(-surfaceVec.Y(), surfaceVec.X(), 0);
+  perpVec = perpVec.Unit();
+
+  double theta = -acos(surfaceVec.Z() / surfaceVec.Mag());
+
+  // Defining rotation transformation to 2D plane and its reverse
+  TVector3 rotX, rotY, rotZ, rotXr, rotYr, rotZr;
+  rotX.SetX(cos(theta) + perpVec.X() * perpVec.X() * (1 - cos(theta)));
+  rotX.SetY(perpVec.X() * perpVec.Y() * (1 - cos(theta)));
+  rotX.SetZ(perpVec.Y() * sin(theta));
+  rotY.SetX(perpVec.X() * perpVec.Y() * (1 - cos(theta)));
+  rotY.SetY(cos(theta) + perpVec.Y() * perpVec.Y() * (1 - cos(theta)));
+  rotY.SetZ(-perpVec.X() * sin(theta));
+  rotZ.SetX(-perpVec.Y() * sin(theta));
+  rotZ.SetY(perpVec.X() * sin(theta));
+  rotZ.SetZ(cos(theta));
+  rotXr.SetX(cos(-theta) + perpVec.X() * perpVec.X() * (1 - cos(-theta)));
+  rotXr.SetY(perpVec.X() * perpVec.Y() * (1 - cos(-theta)));
+  rotXr.SetZ(perpVec.Y() * sin(-theta));
+  rotYr.SetX(perpVec.X() * perpVec.Y() * (1 - cos(-theta)));
+  rotYr.SetY(cos(-theta) + perpVec.Y() * perpVec.Y() * (1 - cos(-theta)));
+  rotYr.SetZ(-perpVec.X() * sin(-theta));
+  rotZr.SetX(-perpVec.Y() * sin(-theta));
+  rotZr.SetY(perpVec.X() * sin(-theta));
+  rotZr.SetZ(cos(-theta));
+
+  // Centers of circles transformed
+  TVector3 p1(rotX * hit1.getPos(), rotY * hit1.getPos(), rotZ * hit1.getPos());
+  TVector3 p2(rotX * hit2.getPos(), rotY * hit2.getPos(), rotZ * hit2.getPos());
+  TVector3 p3(rotX * hit3.getPos(), rotY * hit3.getPos(), rotZ * hit3.getPos());
+
+  // Time differences of hits registration
+  double tdiff21 = hit2.getTime() - hit1.getTime();
+  double tdiff31 = hit3.getTime() - hit1.getTime();
+
+  TVector3 intersection = findIntersection(p1, p2, p3, tdiff21, tdiff31);
+
+  // Transforming back found intersection by reverse rotation
+  TVector3 annihilationPoint(rotXr * intersection, rotYr * intersection, rotZr * intersection);
   return annihilationPoint;
 }
 
@@ -752,7 +810,7 @@ double EventCategorizerTools::calculatePlaneCenterDistance(const JPetHit& firstH
  * @todo: the selection criteria b2b distance from center needs to be checked
  * and implemented again
  */
-bool EventCategorizerTools::stream2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double b2bSlotThetaDiff, double b2bTimeDiff)
+bool EventCategorizerTools::stream2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double b2bSlotthetaDiff, double b2bTimeDiff)
 {
   if (event.getHits().size() < 2)
   {
@@ -784,7 +842,7 @@ bool EventCategorizerTools::stream2Gamma(const JPetEvent& event, JPetStatistics&
         stats.fillHistogram("stream2g_dlor_dist", deltaLor);
         stats.fillHistogram("stream2g_theta_diff", theta);
       }
-      if (fabs(theta - 180.0) < b2bSlotThetaDiff && timeDiff < b2bTimeDiff)
+      if (fabs(theta - 180.0) < b2bSlotthetaDiff && timeDiff < b2bTimeDiff)
       {
         if (saveHistos)
         {
@@ -806,7 +864,7 @@ bool EventCategorizerTools::stream2Gamma(const JPetEvent& event, JPetStatistics&
 /**
  * Method for determining type of event for streaming - 3 gamma annihilation
  */
-bool EventCategorizerTools::stream3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double d3SlotThetaMin, double d3TimeDiff,
+bool EventCategorizerTools::stream3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double d3SlotthetaMin, double d3TimeDiff,
                                          double d3PlaneCenterDist)
 {
   if (event.getHits().size() < 3)
@@ -840,12 +898,332 @@ bool EventCategorizerTools::stream3Gamma(const JPetEvent& event, JPetStatistics&
           stats.fillHistogram("stream3g_plane_dist", planeCenterDist);
           stats.fillHistogram("stream3g_tdiff", timeDiff);
         }
-        if (transformedX > d3SlotThetaMin && timeDiff < d3TimeDiff && planeCenterDist < d3PlaneCenterDist)
+        if (transformedX > d3SlotthetaMin && timeDiff < d3TimeDiff && planeCenterDist < d3PlaneCenterDist)
         {
+          if (saveHistos)
+          {
+            TVector3 ap = calculateAnnihilationPoint(firstHit, secondHit, thirdHit);
+            stats.fillHistogram("ap_yx", ap.Y(), ap.X());
+            stats.fillHistogram("ap_zx", ap.Z(), ap.X());
+            stats.fillHistogram("ap_zy", ap.Z(), ap.Y());
+            stats.fillHistogram("ap_yx_zoom", ap.Y(), ap.X());
+            stats.fillHistogram("ap_zx_zoom", ap.Z(), ap.X());
+            stats.fillHistogram("ap_zy_zoom", ap.Z(), ap.Y());
+          }
           return true;
         }
       }
     }
   }
   return false;
+}
+
+/**
+ * Helper method for estimating anihilation point
+ */
+TVector3 EventCategorizerTools::findIntersection(TVector3 hit1Pos, TVector3 hit2Pos, TVector3 hit3Pos, double t21, double t31)
+{
+  double R21 = sqrt(pow(hit2Pos(0) - hit1Pos(0), 2) + pow(hit2Pos(1) - hit1Pos(1), 2));
+  double R32 = sqrt(pow(hit3Pos(0) - hit2Pos(0), 2) + pow(hit3Pos(1) - hit2Pos(1), 2));
+  double R13 = sqrt(pow(hit1Pos(0) - hit3Pos(0), 2) + pow(hit1Pos(1) - hit3Pos(1), 2));
+
+  double TDiffTOR1 = 0.0;
+  double TDiffTOR2 = t21;
+  double TDiffTOR3 = t31;
+
+  TDiffTOR2 = kLightVelocity_cm_ps * TDiffTOR2;
+  TDiffTOR3 = kLightVelocity_cm_ps * TDiffTOR3;
+
+  double R0 = 0.0;
+
+  if (R0 < (R21 - TDiffTOR2) / 2.0)
+  {
+    R0 = (R21 - TDiffTOR2) / 2.0;
+  }
+  if (R0 < (R32 - TDiffTOR2 - TDiffTOR3) / 2.0)
+  {
+    R0 = (R32 - TDiffTOR2 - TDiffTOR3) / 2.0;
+  }
+  if (R0 < (R13 - TDiffTOR3) / 2.0)
+  {
+    R0 = (R13 - TDiffTOR3) / 2.0;
+  }
+
+  double R1 = 0.;
+  double R2 = 0.;
+  double R3 = 0.;
+
+  vector<double> temp, temp2;
+  vector<vector<double>> points;
+  temp.push_back(0.0);
+  temp.push_back(0.0);
+
+  points.push_back(temp);
+  points.push_back(temp);
+  points.push_back(temp);
+  points.push_back(temp);
+  points.push_back(temp);
+  points.push_back(temp);
+  temp.clear();
+
+  double Distance = 0.0;
+  double MinDistance = 0.0;
+  double PreviousDistance = 10000000.0;
+
+  int test = 1;
+  while (test)
+  {
+    R1 = TDiffTOR1 + R0 + 1;
+    R2 = TDiffTOR2 + R0 + 1;
+    R3 = TDiffTOR2 + R0 + 1;
+    points = findIntersectiosOfCircles(hit1Pos, hit2Pos, hit3Pos, R1, R2, R3, R13, R21, R32);
+
+    MinDistance = 1000000.0;
+    for (unsigned i = 0; i < 2; i++)
+    {
+      for (unsigned j = 0; j < 2; j++)
+      {
+        for (unsigned k = 0; k < 2; k++)
+        {
+          Distance = sqrt(pow(points[i][0] - points[j + 2][0], 2) + pow(points[i][1] - points[j + 2][1], 2)) +
+                     sqrt(pow(points[i][0] - points[k + 4][0], 2) + pow(points[i][1] - points[k + 4][1], 2)) +
+                     sqrt(pow(points[k + 4][0] - points[j + 2][0], 2) + pow(points[k + 4][1] - points[j + 2][1], 2));
+          if (Distance < MinDistance)
+          {
+            MinDistance = Distance;
+            temp.clear();
+            temp.push_back(points[i][0]);
+            temp.push_back(points[i][1]);
+            temp.push_back(points[2 + j][0]);
+            temp.push_back(points[2 + j][1]);
+            temp.push_back(points[4 + k][0]);
+            temp.push_back(points[4 + k][1]);
+          }
+        }
+      }
+    }
+    test++;
+    if (test % 50 == 0)
+    {
+      if (MinDistance == 1000000.0)
+      {
+        temp.clear();
+        temp.push_back(100.0);
+        temp.push_back(100.0);
+        temp.push_back(100.0);
+        temp.push_back(100.0);
+        temp.push_back(100.0);
+        temp.push_back(100.0);
+        break;
+      }
+    }
+    if (MinDistance > PreviousDistance)
+      test = 0;
+    else
+    {
+      PreviousDistance = MinDistance;
+      temp2 = temp;
+    }
+    R0 += 1;
+  }
+  vector<double> R0s, Distances;
+  if (MinDistance != 1000000.0)
+    test = 1;
+
+  double MinnDistance = 1000000.0;
+  while (test)
+  {
+    R1 = TDiffTOR1 + R0 + 1;
+    R2 = TDiffTOR2 + R0 + 1;
+    R3 = TDiffTOR2 + R0 + 1;
+    points = findIntersectiosOfCircles(hit1Pos, hit2Pos, hit3Pos, R1, R2, R3, R13, R21, R32);
+
+    MinDistance = 1000000.;
+    for (unsigned i = 0; i < 2; i++)
+    {
+      for (unsigned j = 0; j < 2; j++)
+      {
+        for (unsigned k = 0; k < 2; k++)
+        {
+          Distance = sqrt(pow(points[i][0] - points[j + 2][0], 2) + pow(points[i][1] - points[j + 2][1], 2)) +
+                     sqrt(pow(points[i][0] - points[k + 4][0], 2) + pow(points[i][1] - points[k + 4][1], 2)) +
+                     sqrt(pow(points[k + 4][0] - points[j + 2][0], 2) + pow(points[k + 4][1] - points[j + 2][1], 2));
+          if (Distance < MinDistance)
+          {
+            MinDistance = Distance;
+            temp.clear();
+            temp.push_back(points[i][0]);
+            temp.push_back(points[i][1]);
+            temp.push_back(points[2 + j][0]);
+            temp.push_back(points[2 + j][1]);
+            temp.push_back(points[4 + k][0]);
+            temp.push_back(points[4 + k][1]);
+          }
+        }
+      }
+    }
+    if (MinDistance != 1000000.0)
+    {
+      R0s.push_back(R0);
+      Distances.push_back(MinDistance);
+    }
+
+    test++;
+    if (test % 50 == 0)
+    {
+      if (MinDistance == 1000000.0)
+      {
+        temp.clear();
+        temp.push_back(100.0);
+        temp.push_back(100.0);
+        temp.push_back(100.0);
+        temp.push_back(100.0);
+        temp.push_back(100.0);
+        temp.push_back(100.0);
+        break;
+      }
+      test = 0;
+    }
+    if (MinDistance < MinnDistance)
+    {
+      MinnDistance = MinDistance;
+    }
+    PreviousDistance = MinDistance;
+    temp2 = temp;
+    R0 -= 0.1;
+  }
+
+  if (MinnDistance != 1000000.0)
+  {
+    double R0Min;
+    double minEle = *min_element(begin(Distances), end(Distances));
+    if (minEle == Distances[0])
+    {
+      R0Min = R0s[0];
+    }
+    else if (minEle == Distances[Distances.size() - 1])
+    {
+      R0Min = R0s[R0s.size() - 1];
+    }
+    else
+    {
+      R0Min = findMinimumFromDerivative(R0s, Distances);
+    }
+    R1 = TDiffTOR1 + R0Min + 1;
+    R2 = TDiffTOR2 + R0Min + 1;
+    R3 = TDiffTOR2 + R0Min + 1;
+    points = findIntersectiosOfCircles(hit1Pos, hit2Pos, hit3Pos, R1, R2, R3, R13, R21, R32);
+
+    MinDistance = 1000000.0;
+    for (unsigned i = 0; i < 2; i++)
+    {
+      for (unsigned j = 0; j < 2; j++)
+      {
+        for (unsigned k = 0; k < 2; k++)
+        {
+          Distance = sqrt(pow(points[i][0] - points[j + 2][0], 2) + pow(points[i][1] - points[j + 2][1], 2)) +
+                     sqrt(pow(points[i][0] - points[k + 4][0], 2) + pow(points[i][1] - points[k + 4][1], 2)) +
+                     sqrt(pow(points[k + 4][0] - points[j + 2][0], 2) + pow(points[k + 4][1] - points[j + 2][1], 2));
+          if (Distance < MinDistance)
+          {
+            MinDistance = Distance;
+            temp.clear();
+            temp.push_back(points[i][0]);
+            temp.push_back(points[i][1]);
+            temp.push_back(points[2 + j][0]);
+            temp.push_back(points[2 + j][1]);
+            temp.push_back(points[4 + k][0]);
+            temp.push_back(points[4 + k][1]);
+          }
+        }
+      }
+    }
+  }
+
+  TVector3 recoPoint((temp[0] + temp[2] + temp[4]) / 3, (temp[1] + temp[3] + temp[5]) / 3, hit1Pos(2));
+  return recoPoint;
+}
+
+vector<vector<double>> EventCategorizerTools::findIntersectiosOfCircles(TVector3 hit1Pos, TVector3 hit2Pos, TVector3 hit3Pos, double R1, double R2,
+                                                                        double R3, double R13, double R21, double R32)
+{
+  vector<vector<double>> points;
+  vector<double> temp;
+  temp.push_back(0);
+  temp.push_back(0);
+  points.push_back(temp);
+  points.push_back(temp);
+  points.push_back(temp);
+  points.push_back(temp);
+  points.push_back(temp);
+  points.push_back(temp);
+
+  points[0][0] =
+      (hit1Pos(0) + hit2Pos(0)) / 2 + (pow(R1, 2) - pow(R2, 2)) * (hit2Pos(0) - hit1Pos(0)) / 2 / pow(R21, 2) +
+      0.5 * (hit2Pos(1) - hit1Pos(1)) * sqrt(2 * (pow(R1, 2) + pow(R2, 2)) / pow(R21, 2) - pow(pow(R1, 2) - pow(R2, 2), 2) / pow(R21, 4) - 1);
+  points[0][1] =
+      (hit1Pos(1) + hit2Pos(1)) / 2 + (pow(R1, 2) - pow(R2, 2)) * (hit2Pos(1) - hit1Pos(1)) / 2 / pow(R21, 2) +
+      0.5 * (hit1Pos(0) - hit2Pos(0)) * sqrt(2 * (pow(R1, 2) + pow(R2, 2)) / pow(R21, 2) - pow(pow(R1, 2) - pow(R2, 2), 2) / pow(R21, 4) - 1);
+  points[1][0] =
+      (hit1Pos(0) + hit2Pos(0)) / 2 + (pow(R1, 2) - pow(R2, 2)) * (hit2Pos(0) - hit1Pos(0)) / 2 / pow(R21, 2) -
+      0.5 * (hit2Pos(1) - hit1Pos(1)) * sqrt(2 * (pow(R1, 2) + pow(R2, 2)) / pow(R21, 2) - pow(pow(R1, 2) - pow(R2, 2), 2) / pow(R21, 4) - 1);
+  points[1][1] =
+      (hit1Pos(1) + hit2Pos(1)) / 2 + (pow(R1, 2) - pow(R2, 2)) * (hit2Pos(1) - hit1Pos(1)) / 2 / pow(R21, 2) -
+      0.5 * (hit1Pos(0) - hit2Pos(0)) * sqrt(2 * (pow(R1, 2) + pow(R2, 2)) / pow(R21, 2) - pow(pow(R1, 2) - pow(R2, 2), 2) / pow(R21, 4) - 1);
+
+  points[2][0] =
+      (hit2Pos(0) + hit3Pos(0)) / 2 + (pow(R2, 2) - pow(R3, 2)) * (hit3Pos(0) - hit2Pos(0)) / 2 / pow(R32, 2) +
+      0.5 * (hit3Pos(1) - hit2Pos(1)) * sqrt(2 * (pow(R2, 2) + pow(R3, 2)) / pow(R32, 2) - pow(pow(R2, 2) - pow(R3, 2), 2) / pow(R32, 4) - 1);
+  points[2][1] =
+      (hit2Pos(1) + hit3Pos(1)) / 2 + (pow(R2, 2) - pow(R3, 2)) * (hit3Pos(1) - hit2Pos(1)) / 2 / pow(R32, 2) +
+      0.5 * (hit2Pos(0) - hit3Pos(0)) * sqrt(2 * (pow(R2, 2) + pow(R3, 2)) / pow(R32, 2) - pow(pow(R2, 2) - pow(R3, 2), 2) / pow(R32, 4) - 1);
+  points[3][0] =
+      (hit2Pos(0) + hit3Pos(0)) / 2 + (pow(R2, 2) - pow(R3, 2)) * (hit3Pos(0) - hit2Pos(0)) / 2 / pow(R32, 2) -
+      0.5 * (hit3Pos(1) - hit2Pos(1)) * sqrt(2 * (pow(R2, 2) + pow(R3, 2)) / pow(R32, 2) - pow(pow(R2, 2) - pow(R3, 2), 2) / pow(R32, 4) - 1);
+  points[3][1] =
+      (hit2Pos(1) + hit3Pos(1)) / 2 + (pow(R2, 2) - pow(R3, 2)) * (hit3Pos(1) - hit2Pos(1)) / 2 / pow(R32, 2) -
+      0.5 * (hit2Pos(0) - hit3Pos(0)) * sqrt(2 * (pow(R2, 2) + pow(R3, 2)) / pow(R32, 2) - pow(pow(R2, 2) - pow(R3, 2), 2) / pow(R32, 4) - 1);
+
+  points[4][0] =
+      (hit1Pos(0) + hit3Pos(0)) / 2 + (pow(R3, 2) - pow(R1, 2)) * (hit1Pos(0) - hit3Pos(0)) / 2 / pow(R13, 2) +
+      0.5 * (hit1Pos(1) - hit3Pos(1)) * sqrt(2 * (pow(R3, 2) + pow(R1, 2)) / pow(R13, 2) - pow(pow(R3, 2) - pow(R1, 2), 2) / pow(R13, 4) - 1);
+  points[4][1] =
+      (hit1Pos(1) + hit3Pos(1)) / 2 + (pow(R3, 2) - pow(R1, 2)) * (hit1Pos(1) - hit3Pos(1)) / 2 / pow(R13, 2) +
+      0.5 * (hit3Pos(0) - hit1Pos(0)) * sqrt(2 * (pow(R3, 2) + pow(R1, 2)) / pow(R13, 2) - pow(pow(R3, 2) - pow(R1, 2), 2) / pow(R13, 4) - 1);
+  points[5][0] =
+      (hit1Pos(0) + hit3Pos(0)) / 2 + (pow(R3, 2) - pow(R1, 2)) * (hit1Pos(0) - hit3Pos(0)) / 2 / pow(R13, 2) -
+      0.5 * (hit1Pos(1) - hit3Pos(1)) * sqrt(2 * (pow(R3, 2) + pow(R1, 2)) / pow(R13, 2) - pow(pow(R3, 2) - pow(R1, 2), 2) / pow(R13, 4) - 1);
+  points[5][1] =
+      (hit1Pos(1) + hit3Pos(1)) / 2 + (pow(R3, 2) - pow(R1, 2)) * (hit1Pos(1) - hit3Pos(1)) / 2 / pow(R13, 2) -
+      0.5 * (hit3Pos(0) - hit1Pos(0)) * sqrt(2 * (pow(R3, 2) + pow(R1, 2)) / pow(R13, 2) - pow(pow(R3, 2) - pow(R1, 2), 2) / pow(R13, 4) - 1);
+
+  return points;
+}
+
+double EventCategorizerTools::findMinimumFromDerivative(std::vector<double> x_vec, std::vector<double> y_vec)
+{
+  // Checking which element i of y values vecotr is a minimum, smaller than elements i-1 and i+1
+  unsigned minIndex = 0;
+  for (unsigned i = 1; i < y_vec.size() - 1; ++i)
+  {
+    if (y_vec.at(i) < y_vec.at(i - 1) && y_vec.at(i) < y_vec.at(i + 1))
+    {
+      minIndex = i;
+      break;
+    }
+  }
+
+  double a = (y_vec[minIndex + 1] - y_vec[minIndex] - (y_vec[minIndex] - y_vec[minIndex - 1])) /
+             ((x_vec[minIndex + 1] + x_vec[minIndex]) / 2.0 - (x_vec[minIndex] + x_vec[minIndex - 1]) / 2.0);
+
+  double b = y_vec[minIndex + 1] - y_vec[minIndex] - a * (x_vec[minIndex + 1] + x_vec[minIndex]) / 2.0;
+
+  if (a > 0.0)
+  {
+    return -b / a;
+  }
+  else
+  {
+    return 0.0;
+  }
 }

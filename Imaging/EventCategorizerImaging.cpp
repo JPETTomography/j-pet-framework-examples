@@ -148,22 +148,30 @@ bool EventCategorizerImaging::exec()
         if (EventCategorizerTools::stream2Gamma(event, getStatistics(), fSaveHistos, f2GammaMaxAngle, f2GammaMaxTOF))
         {
           categorizedEvent.addEventType(JPetEventType::k2Gamma);
-          if (fSaveHistos)
-          {
-            getStatistics().fillHistogram("event_tags", 2);
-          }
         }
         if (EventCategorizerTools::stream3Gamma(event, getStatistics(), fSaveHistos, f3GammaMinAngle, f3GammaMaxTimeDiff, fDPCenterDist))
         {
           categorizedEvent.addEventType(JPetEventType::k3Gamma);
-          if (fSaveHistos)
-          {
-            getStatistics().fillHistogram("event_tags", 3);
-          }
         }
         if (categorizedEvent.isTypeOf(JPetEventType::k2Gamma) || categorizedEvent.isTypeOf(JPetEventType::k3Gamma))
         {
           events.push_back(categorizedEvent);
+        }
+        // Checking event type for control histograms
+        if (fSaveHistos)
+        {
+          if (categorizedEvent.isTypeOf(JPetEventType::kUnknown))
+          {
+            getStatistics().fillHistogram("event_tags", 1);
+          }
+          if (categorizedEvent.isTypeOf(JPetEventType::k2Gamma))
+          {
+            getStatistics().fillHistogram("event_tags", 2);
+          }
+          if (categorizedEvent.isTypeOf(JPetEventType::k3Gamma))
+          {
+            getStatistics().fillHistogram("event_tags", 3);
+          }
         }
       }
     }
@@ -252,7 +260,7 @@ void EventCategorizerImaging::initialiseHistograms()
   getStatistics().createHistogramWithAxes(new TH1D("stream3g_tdiff", "3 gamma last and first hit time difference", 100, 0.0, 10.0),
                                           "Time Difference [ps]", "Events");
 
-  getStatistics().createHistogramWithAxes(new TH1D("event_tags", "Result of event categorization", 5, 0.5, 8.5), "Signal label", "Number of SigChs");
+  getStatistics().createHistogramWithAxes(new TH1D("event_tags", "Result of event categorization", 5, 0.5, 5.5), "Signal label", "Number of SigChs");
   std::vector<std::pair<unsigned, std::string>> binLabels = {make_pair(1, "Unknown"), make_pair(2, "2 gamma"), make_pair(3, "3 gamma"),
                                                              make_pair(4, "Prompt"), make_pair(5, "Cosmics")};
   getStatistics().setHistogramBinLabel("event_tags", getStatistics().AxisLabel::kXaxis, binLabels);

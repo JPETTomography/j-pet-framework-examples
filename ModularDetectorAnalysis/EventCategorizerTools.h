@@ -82,9 +82,9 @@ public:
   // cppcheck-suppress unusedFunction
   static double calculateTOFByConvention(const JPetHit& hitA, const JPetHit& hitB);
 
-  static TVector3 calculateAnnihilationPoint(const JPetHit& hitA, const JPetHit& hitB);
+  static TVector3 calculateAnnihilationPoint(const JPetHit& hit1, const JPetHit& hit2);
 
-  static TVector3 calculateAnnihilationPoint(const TVector3& hitA, const TVector3& hitB, double tof);
+  static TVector3 calculateAnnihilationPoint(const JPetHit& hit1, const JPetHit& hit2, const JPetHit& hit3);
 
   static double calculatePlaneCenterDistance(const JPetHit& firstHit, const JPetHit& secondHit, const JPetHit& thirdHit);
 
@@ -92,6 +92,13 @@ public:
 
   static bool stream3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double d3SlotThetaMin, double d3TimeDiff,
                            double d3DistanceFromCenter);
+
+  static TVector3 findIntersection(TVector3 hit1Pos, TVector3 hit2Pos, TVector3 hit3Pos, double t21, double t31);
+
+  static std::vector<std::vector<double>> findIntersectiosOfCircles(TVector3 Hit1Pos, TVector3 Hit2Pos, TVector3 Hit3Pos, double R1, double R2,
+                                                                    double R3, double R13, double R21, double R32);
+
+  static double findMinimumFromDerivative(std::vector<double> x_vec, std::vector<double> y_vec);
 };
 
 #endif /* !EVENTCATEGORIZERTOOLS_H */
