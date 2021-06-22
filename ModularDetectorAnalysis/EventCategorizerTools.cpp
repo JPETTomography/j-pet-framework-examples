@@ -906,20 +906,20 @@ bool EventCategorizerTools::stream3Gamma(const JPetEvent& event, JPetStatistics&
           stats.fillHistogram("stream3g_plane_dist", planeCenterDist);
           stats.fillHistogram("stream3g_tdiff", timeDiff);
         }
-        // if (transformedX > d3SlotthetaMin && timeDiff < d3TimeDiff && planeCenterDist < d3PlaneCenterDist)
-        // {
-        if (saveHistos)
+        if (transformedX > d3SlotthetaMin) //&& timeDiff < d3TimeDiff && planeCenterDist < d3PlaneCenterDist)
         {
-          TVector3 ap = calculateAnnihilationPoint(firstHit, secondHit, thirdHit);
-          stats.fillHistogram("ap_yx", ap.Y(), ap.X());
-          stats.fillHistogram("ap_zx", ap.Z(), ap.X());
-          stats.fillHistogram("ap_zy", ap.Z(), ap.Y());
-          stats.fillHistogram("ap_yx_zoom", ap.Y(), ap.X());
-          stats.fillHistogram("ap_zx_zoom", ap.Z(), ap.X());
-          stats.fillHistogram("ap_zy_zoom", ap.Z(), ap.Y());
+          if (saveHistos)
+          {
+            TVector3 ap = calculateAnnihilationPoint(firstHit, secondHit, thirdHit);
+            stats.fillHistogram("ap_yx", ap.Y(), ap.X());
+            stats.fillHistogram("ap_zx", ap.Z(), ap.X());
+            stats.fillHistogram("ap_zy", ap.Z(), ap.Y());
+            stats.fillHistogram("ap_yx_zoom", ap.Y(), ap.X());
+            stats.fillHistogram("ap_zx_zoom", ap.Z(), ap.X());
+            stats.fillHistogram("ap_zy_zoom", ap.Z(), ap.Y());
+          }
+          return true;
         }
-        return true;
-        // }
       }
     }
   }
