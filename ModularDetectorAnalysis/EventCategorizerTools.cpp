@@ -810,7 +810,8 @@ double EventCategorizerTools::calculatePlaneCenterDistance(const JPetHit& firstH
  * @todo: the selection criteria b2b distance from center needs to be checked
  * and implemented again
  */
-bool EventCategorizerTools::stream2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double b2bSlotthetaDiff, double b2bTimeDiff)
+bool EventCategorizerTools::stream2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double b2bSlotthetaDiff, double b2bTimeDiff,
+                                         double maxScatter)
 {
   if (event.getHits().size() < 2)
   {
@@ -831,6 +832,13 @@ bool EventCategorizerTools::stream2Gamma(const JPetEvent& event, JPetStatistics&
         firstHit = event.getHits().at(j);
         secondHit = event.getHits().at(i);
       }
+
+      // Cutting pairs passing scatter test
+      if (checkForScatter(firstHit, secondHit, stats, saveHistos, maxScatter))
+      {
+        continue;
+      }
+
       // Checking for back to back
       double timeDiff = fabs(firstHit.getTime() - secondHit.getTime());
       double deltaLor = (secondHit.getTime() - firstHit.getTime()) * kLightVelocity_cm_ps / 2.0;
@@ -898,20 +906,20 @@ bool EventCategorizerTools::stream3Gamma(const JPetEvent& event, JPetStatistics&
           stats.fillHistogram("stream3g_plane_dist", planeCenterDist);
           stats.fillHistogram("stream3g_tdiff", timeDiff);
         }
-        if (transformedX > d3SlotthetaMin && timeDiff < d3TimeDiff && planeCenterDist < d3PlaneCenterDist)
+        // if (transformedX > d3SlotthetaMin && timeDiff < d3TimeDiff && planeCenterDist < d3PlaneCenterDist)
+        // {
+        if (saveHistos)
         {
-          if (saveHistos)
-          {
-            TVector3 ap = calculateAnnihilationPoint(firstHit, secondHit, thirdHit);
-            stats.fillHistogram("ap_yx", ap.Y(), ap.X());
-            stats.fillHistogram("ap_zx", ap.Z(), ap.X());
-            stats.fillHistogram("ap_zy", ap.Z(), ap.Y());
-            stats.fillHistogram("ap_yx_zoom", ap.Y(), ap.X());
-            stats.fillHistogram("ap_zx_zoom", ap.Z(), ap.X());
-            stats.fillHistogram("ap_zy_zoom", ap.Z(), ap.Y());
-          }
-          return true;
+          TVector3 ap = calculateAnnihilationPoint(firstHit, secondHit, thirdHit);
+          stats.fillHistogram("ap_yx", ap.Y(), ap.X());
+          stats.fillHistogram("ap_zx", ap.Z(), ap.X());
+          stats.fillHistogram("ap_zy", ap.Z(), ap.Y());
+          stats.fillHistogram("ap_yx_zoom", ap.Y(), ap.X());
+          stats.fillHistogram("ap_zx_zoom", ap.Z(), ap.X());
+          stats.fillHistogram("ap_zy_zoom", ap.Z(), ap.Y());
         }
+        return true;
+        // }
       }
     }
   }

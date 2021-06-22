@@ -145,10 +145,10 @@ bool EventCategorizerImaging::exec()
       else
       {
         JPetEvent categorizedEvent(event);
-        if (EventCategorizerTools::stream2Gamma(event, getStatistics(), fSaveHistos, f2GammaMaxAngle, f2GammaMaxTOF))
-        {
-          categorizedEvent.addEventType(JPetEventType::k2Gamma);
-        }
+        // if (EventCategorizerTools::stream2Gamma(event, getStatistics(), fSaveHistos, f2GammaMaxAngle, f2GammaMaxTOF))
+        // {
+        //   categorizedEvent.addEventType(JPetEventType::k2Gamma);
+        // }
         if (EventCategorizerTools::stream3Gamma(event, getStatistics(), fSaveHistos, f3GammaMinAngle, f3GammaMaxTimeDiff, fDPCenterDist))
         {
           categorizedEvent.addEventType(JPetEventType::k3Gamma);
@@ -257,7 +257,7 @@ void EventCategorizerImaging::initialiseHistograms()
   getStatistics().createHistogramWithAxes(new TH1D("stream3g_plane_dist", "3 Gamma Plane Distance to Center", 100, 0.0, 10.0), "Distance [cm]",
                                           "Events");
 
-  getStatistics().createHistogramWithAxes(new TH1D("stream3g_tdiff", "3 gamma last and first hit time difference", 100, 0.0, 10.0),
+  getStatistics().createHistogramWithAxes(new TH1D("stream3g_tdiff", "3 gamma last and first hit time difference", 200, 0.0, 10000.0),
                                           "Time Difference [ps]", "Events");
 
   getStatistics().createHistogramWithAxes(new TH1D("event_tags", "Result of event categorization", 5, 0.5, 5.5), "Signal label", "Number of SigChs");
