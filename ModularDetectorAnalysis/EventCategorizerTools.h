@@ -92,7 +92,7 @@ public:
                            double maxScatter);
 
   static bool stream3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double d3SlotThetaMin, double d3TimeDiff,
-                           double d3DistanceFromCenter);
+                           double d3DistanceFromCenter, double maxScatter);
 
   static TVector3 findIntersection(TVector3 hit1Pos, TVector3 hit2Pos, TVector3 hit3Pos, double t21, double t31);
 

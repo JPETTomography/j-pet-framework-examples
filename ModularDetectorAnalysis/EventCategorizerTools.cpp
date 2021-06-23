@@ -873,7 +873,7 @@ bool EventCategorizerTools::stream2Gamma(const JPetEvent& event, JPetStatistics&
  * Method for determining type of event for streaming - 3 gamma annihilation
  */
 bool EventCategorizerTools::stream3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double d3SlotthetaMin, double d3TimeDiff,
-                                         double d3PlaneCenterDist)
+                                         double d3PlaneCenterDist, double maxScatter)
 {
   if (event.getHits().size() < 3)
   {
@@ -881,13 +881,30 @@ bool EventCategorizerTools::stream3Gamma(const JPetEvent& event, JPetStatistics&
   }
   for (uint i = 0; i < event.getHits().size(); i++)
   {
+    JPetHit firstHit = event.getHits().at(i);
+
     for (uint j = i + 1; j < event.getHits().size(); j++)
     {
+      JPetHit secondHit = event.getHits().at(j);
+
+      if (checkForScatter(firstHit, secondHit, stats, saveHistos, maxScatter))
+      {
+        continue;
+      }
+
       for (uint k = j + 1; k < event.getHits().size(); k++)
       {
-        JPetHit firstHit = event.getHits().at(i);
-        JPetHit secondHit = event.getHits().at(j);
         JPetHit thirdHit = event.getHits().at(k);
+
+        if (checkForScatter(firstHit, thirdHit, stats, saveHistos, maxScatter))
+        {
+          continue;
+        }
+
+        if (checkForScatter(secondHit, thirdHit, stats, saveHistos, maxScatter))
+        {
+          continue;
+        }
 
         vector<double> relativeAngles;
         relativeAngles.push_back(TMath::RadToDeg() * firstHit.getPos().Angle(secondHit.getPos()));

@@ -149,7 +149,8 @@ bool EventCategorizerImaging::exec()
         {
           categorizedEvent.addEventType(JPetEventType::k2Gamma);
         }
-        if (EventCategorizerTools::stream3Gamma(event, getStatistics(), fSaveHistos, f3GammaMinAngle, f3GammaMaxTimeDiff, fDPCenterDist))
+        if (EventCategorizerTools::stream3Gamma(event, getStatistics(), fSaveHistos, f3GammaMinAngle, f3GammaMaxTimeDiff, fDPCenterDist,
+                                                fScatterTOFTimeDiff))
         {
           categorizedEvent.addEventType(JPetEventType::k3Gamma);
         }
@@ -254,8 +255,8 @@ void EventCategorizerImaging::initialiseHistograms()
   getStatistics().createHistogramWithAxes(new TH2D("stream3g_thetas", "3 Gamma Thetas plot", 251, -0.5, 250.5, 201, -0.5, 200.5),
                                           "Transformed thetas 1-2 [deg]", "Transformed thetas 2-3 [deg]");
 
-  getStatistics().createHistogramWithAxes(new TH1D("stream3g_plane_dist", "3 Gamma Plane Distance to Center", 100, 0.0, 10.0), "Distance [cm]",
-                                          "Events");
+  getStatistics().createHistogramWithAxes(new TH1D("stream3g_plane_dist", "3 Gamma Plane Distance to Center", 100, 0.0, 5 * fDPCenterDist),
+                                          "Distance [cm]", "Events");
 
   getStatistics().createHistogramWithAxes(new TH1D("stream3g_tdiff", "3 gamma last and first hit time difference", 200, 0.0, 10000.0),
                                           "Time Difference [ps]", "Events");
