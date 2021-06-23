@@ -145,10 +145,10 @@ bool EventCategorizerImaging::exec()
       else
       {
         JPetEvent categorizedEvent(event);
-        // if (EventCategorizerTools::stream2Gamma(event, getStatistics(), fSaveHistos, f2GammaMaxAngle, f2GammaMaxTOF))
-        // {
-        //   categorizedEvent.addEventType(JPetEventType::k2Gamma);
-        // }
+        if (EventCategorizerTools::stream2Gamma(event, getStatistics(), fSaveHistos, f2GammaMaxAngle, f2GammaMaxTOF, fScatterTOFTimeDiff))
+        {
+          categorizedEvent.addEventType(JPetEventType::k2Gamma);
+        }
         if (EventCategorizerTools::stream3Gamma(event, getStatistics(), fSaveHistos, f3GammaMinAngle, f3GammaMaxTimeDiff, fDPCenterDist))
         {
           categorizedEvent.addEventType(JPetEventType::k3Gamma);

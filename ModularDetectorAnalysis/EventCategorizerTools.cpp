@@ -842,8 +842,8 @@ bool EventCategorizerTools::stream2Gamma(const JPetEvent& event, JPetStatistics&
       // Checking for back to back
       double timeDiff = fabs(firstHit.getTime() - secondHit.getTime());
       double deltaLor = (secondHit.getTime() - firstHit.getTime()) * kLightVelocity_cm_ps / 2.0;
-
       double theta = TMath::RadToDeg() * firstHit.getPos().Angle(secondHit.getPos());
+
       if (saveHistos)
       {
         stats.fillHistogram("stream2g_tdiff", timeDiff);
@@ -906,7 +906,7 @@ bool EventCategorizerTools::stream3Gamma(const JPetEvent& event, JPetStatistics&
           stats.fillHistogram("stream3g_plane_dist", planeCenterDist);
           stats.fillHistogram("stream3g_tdiff", timeDiff);
         }
-        if (transformedX > d3SlotthetaMin) //&& timeDiff < d3TimeDiff && planeCenterDist < d3PlaneCenterDist)
+        if (transformedX > d3SlotthetaMin && timeDiff < d3TimeDiff && planeCenterDist < d3PlaneCenterDist)
         {
           if (saveHistos)
           {
