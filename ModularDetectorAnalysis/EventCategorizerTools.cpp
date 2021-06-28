@@ -589,18 +589,23 @@ bool EventCategorizerTools::checkForScatter(const JPetEvent& event, JPetStatisti
  * Checking if pair of hits meet scattering condition
  */
 bool EventCategorizerTools::checkForScatter(const JPetHit& primaryHit, const JPetHit& scatterHit, JPetStatistics& stats, bool saveHistos,
-                                            double scatterTOFTimeDiff)
+                                            double scatterTestValue)
 {
-  double scattAngle = calculateScatteringAngle(primaryHit, scatterHit);
-  double scattTOF = calculateScatteringTime(primaryHit, scatterHit);
+  double dist = calculateDistance(primaryHit, scatterHit);
   double timeDiff = scatterHit.getTime() - primaryHit.getTime();
 
-  double scatterTestTime = fabs(scattTOF - timeDiff);
-  if (scatterTestTime < scatterTOFTimeDiff)
+  double testDist = fabs(dist - timeDiff * kLightVelocity_cm_ps);
+  double testTime = fabs(timeDiff - dist / kLightVelocity_cm_ps);
+
+  stats.fillHistogram("scatter_test_dist", testDist);
+  stats.fillHistogram("scatter_test_time", testTime);
+
+  if (testTime < scatterTestValue)
   {
     if (saveHistos)
     {
-      stats.fillHistogram("scatter_test_pass", scatterTestTime);
+      double scattAngle = calculateScatteringAngle(primaryHit, scatterHit);
+      stats.fillHistogram("scatter_test_pass", testTime);
       stats.fillHistogram("scatter_angle_tot_primary", scattAngle, primaryHit.getEnergy());
       stats.fillHistogram("scatter_angle_tot_scatter", scattAngle, scatterHit.getEnergy());
     }
@@ -610,7 +615,7 @@ bool EventCategorizerTools::checkForScatter(const JPetHit& primaryHit, const JPe
   {
     if (saveHistos)
     {
-      stats.fillHistogram("scatter_test_fail", scatterTestTime);
+      stats.fillHistogram("scatter_test_fail", testTime);
     }
     return false;
   }

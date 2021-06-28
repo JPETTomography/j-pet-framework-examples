@@ -230,6 +230,12 @@ void EventCategorizerImaging::initialiseHistograms()
       new TH2D("ap_zy_zoom", "ZY position of annihilation point (bin 0.25 cm)", 132, -16.5, 16.5, 132, -16.5, 16.5), "Z position [cm]",
       "Y position [cm]");
 
+  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_dist", "Scatter test calculated by distance", 200, 0.0, 120.0),
+                                          "Difference of Hits Position and (time diff)*c [cm]", "Number of Hits Pairs");
+
+  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_time", "Scatter test calculated by time", 200, 0.0, 10000.0),
+                                          "Difference of Scatter TOF and Hits time difference [ps]", "Number of Hits Pairs");
+
   getStatistics().createHistogramWithAxes(new TH1D("scatter_test_pass", "Scatter test passed by two hits", 200, 0.0, 5.0 * fScatterTOFTimeDiff),
                                           "Difference of Scatter TOF and Hits time difference [ps]", "Number of Hits Pairs");
 
