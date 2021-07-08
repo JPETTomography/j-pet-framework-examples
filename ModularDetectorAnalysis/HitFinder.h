@@ -18,11 +18,11 @@
 
 #include <boost/property_tree/ptree.hpp>
 
+#include <JPetHit/JPetHit.h>
 #include <JPetMatrixSignal/JPetMatrixSignal.h>
 #include <JPetUserTask/JPetUserTask.h>
-#include <JPetHit/JPetHit.h>
-#include <vector>
 #include <map>
+#include <vector>
 
 class JPetWriter;
 
@@ -37,7 +37,8 @@ class JPetWriter;
  * of Signals, time window for hit matching can be specified in user options,
  * default one is provided. Matching method is contained in tools class.
  */
-class HitFinder: public JPetUserTask {
+class HitFinder : public JPetUserTask
+{
 
 public:
   HitFinder(const char* name);
@@ -53,7 +54,9 @@ protected:
   const std::string kSaveCalibHistosParamKey = "Save_Calib_Histograms_bool";
   const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
   const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_double";
+  const std::string kMinHitMultiDiffParamKey = "HitFinder_MinHitMultiplicity_int";
   boost::property_tree::ptree fConstansTree;
+  int fMinHitMultiplicity = -1;
   bool fSaveControlHistos = true;
   bool fSaveCalibHistos = false;
   double fABTimeDiff = 10000.0;

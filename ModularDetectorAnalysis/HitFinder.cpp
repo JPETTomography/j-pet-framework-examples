@@ -54,6 +54,12 @@ bool HitFinder::init()
     boost::property_tree::read_json(getOptionAsString(fParams.getOptions(), kConstantsFileParamKey), fConstansTree);
   }
 
+  if (isOptionSet(fParams.getOptions(), kMinHitMultiDiffParamKey))
+  {
+    fMinHitMultiplicity = getOptionAsInt(fParams.getOptions(), kMinHitMultiDiffParamKey);
+    INFO(Form("Saving only hits with multiplicity %d or grater", fMinHitMultiplicity));
+  }
+
   // Allowed time difference between signals on A and B sides
   if (isOptionSet(fParams.getOptions(), kABTimeDiffParamKey))
   {
@@ -106,64 +112,28 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
 
   for (auto& hit : sortedHits)
   {
-    fOutputEvents->add<JPetHit>(hit);
+    // Checking minimal multiplicity condition
+    int multi = hit.getSignalA().getRawSignals().size() + hit.getSignalB().getRawSignals().size();
+    if (fMinHitMultiplicity != -1 && multi < fMinHitMultiplicity)
+    {
+      continue;
+    }
 
+    fOutputEvents->add<JPetHit>(hit);
     if (fSaveControlHistos)
     {
-      int multi = hit.getSignalA().getRawSignals().size() + hit.getSignalB().getRawSignals().size();
       int scinID = hit.getScin().getID();
-
       getStatistics().getHisto1D("hits_scin")->Fill(scinID);
-
       getStatistics().getHisto2D("hit_pos_XY")->Fill(hit.getPosY(), hit.getPosX());
       getStatistics().getHisto2D("hit_pos_z")->Fill(scinID, hit.getPosZ());
-
       getStatistics().getHisto1D("hit_multi")->Fill(multi);
       getStatistics().getHisto2D("hit_multi_scin")->Fill(scinID, multi);
-
       getStatistics().getHisto2D("hit_tdiff_scin")->Fill(scinID, hit.getTimeDiff());
-      // getStatistics().getHisto2D(Form("hit_tdiff_scin_m_%d", multi))->Fill(scinID, hit.getTimeDiff());
 
       if (hit.getEnergy() != 0.0)
       {
         getStatistics().getHisto2D("hit_tot_scin")->Fill(scinID, hit.getEnergy());
-        // getStatistics().getHisto2D("hit_tot_scin")->Fill(scinID, hit.getQualityOfEnergy());
-        // getStatistics().getHisto2D("hit_tot_scin_norm")->Fill(scinID, hit.getEnergy());
-
-        // getStatistics().getHisto2D(Form("hit_tot_scin_m_%d", multi))->Fill(scinID, hit.getQualityOfEnergy());
-        // getStatistics().getHisto2D(Form("hit_tot_scin_m_%d_norm", multi))->Fill(scinID, hit.getEnergy());
       }
-
-      // Checking tDiff and TOT per SiPM mtx position
-      // for (int mtxPos = 1; mtxPos <= 4; mtxPos++)
-      // {
-      //   auto signalsMapA = hit.getSignalA().getRawSignals();
-      //   auto signalsMapB = hit.getSignalB().getRawSignals();
-      //   aut`o searchA = signalsMapA.find(mtxPos);
-      //   auto searchB = signalsMapB.find(mtxPos);
-      //
-      //   if (searchA != signalsMapA.end() && searchB != signalsMapB.end())
-      //   {
-      //     auto leadsA = searchA->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-      //     auto trailsA = searchA->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-      //     auto leadsB = searchB->second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-      //     auto trailsB = searchB->second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-      //
-      //     double totSum = 0.0;
-      //
-      //     for (int thr = 0; thr < leadsA.size() && thr < leadsB.size(); ++thr)
-      //     {
-      //       double tDiff = leadsB.at(thr).getTime() - leadsA.at(thr).getTime();
-      //       double totA = trailsA.at(thr).getTime() - leadsA.at(thr).getTime();
-      //       double totB = trailsB.at(thr).getTime() - leadsB.at(thr).getTime();
-      //       totSum += totA + totB;
-      //       getStatistics().getHisto2D(Form("hit_tdiff_thr%d_scin_mtx_pos_%d", thr + 1, mtxPos))->Fill(scinID, tDiff);
-      //       getStatistics().getHisto2D(Form("hit_tot_thr%d_scin_mtx_pos_%d", thr + 1, mtxPos))->Fill(scinID, totA + totB);
-      //     }
-      //
-      //     getStatistics().getHisto2D(Form("hit_tot_sum_scin_mtx_pos_%d", mtxPos))->Fill(scinID, totSum / 2.0);
-      //   }
-      // }
     }
   }
 }
