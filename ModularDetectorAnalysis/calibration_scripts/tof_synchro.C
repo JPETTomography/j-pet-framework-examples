@@ -138,8 +138,6 @@ void tof_synchro(std::string fileName, std::string calibJSONFileName = "calibrat
 
       // Writing result to the tree
       tree.put("scin." + to_string(scinID) + ".tof_correction", tofCorr);
-      // tree.put("scin." + to_string(scinID) + ".tof_correction", 0.0);
-      // tree.put("scin." + to_string(scinID) + ".tof_correction_2", 0.0);
 
       tofCorrGraph->SetPoint(graphIt, (double)scinID, tofCorr);
       tofCorrGraph->SetPointError(graphIt, 0.0, tofCorrError);
@@ -173,11 +171,15 @@ void tof_synchro(std::string fileName, std::string calibJSONFileName = "calibrat
       tofCorrGraph->Draw("AP*");
       canTOF->SaveAs(Form("%s/tof_corr_scin.png", resultDir.c_str()));
 
+      string rmsTitle1 = "RMS_Y=" + to_string(peakDiffGraph->GetRMS(2));
       TCanvas* canPeakDiff = new TCanvas("peak_diff_graph", "peak_diff_graph", 1200, 800);
+      peakDiffGraph->SetTitle(rmsTitle1.c_str());
       peakDiffGraph->Draw("AP*");
       canPeakDiff->SaveAs(Form("%s/peak_diff_scin.png", resultDir.c_str()));
 
+      string rmsTitle2 = "RMS_Y=" + to_string(peakDiffGraphZoom->GetRMS(2));
       TCanvas* canPeakDiffZoom = new TCanvas("peak_diff_scin_zoom", "peak_diff_scin_zoom", 1200, 800);
+      peakDiffGraphZoom->SetTitle(rmsTitle2.c_str());
       peakDiffGraphZoom->Draw("AP*");
       canPeakDiffZoom->SaveAs(Form("%s/peak_diff_scin_zoom.png", resultDir.c_str()));
 

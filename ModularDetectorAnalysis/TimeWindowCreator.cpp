@@ -61,6 +61,11 @@ bool TimeWindowCreator::init()
     pt::read_json(getOptionAsString(fParams.getOptions(), kConstantsFileParamKey), fConstansTree);
   }
 
+  if (isOptionSet(fParams.getOptions(), kMaskedChannlesParamKey))
+  {
+    fMaskedChannels = getOptionAsVectorOfInts(fParams.getOptions(), kMaskedChannlesParamKey);
+  }
+
   // Getting bool for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey))
   {
@@ -90,7 +95,15 @@ bool TimeWindowCreator::exec()
 
       // Skip trigger signals - every 105th modulo 104
       if (channelNumber % 105 == 104)
+      {
         continue;
+      }
+
+      // Skip masked channels
+      if (find(fMaskedChannels.begin(), fMaskedChannels.end(), channelNumber) != fMaskedChannels.end())
+      {
+        continue;
+      }
 
       // Check if channel exists in database from loaded local json file
       if (getParamBank().getChannels().count(channelNumber) == 0)

@@ -50,10 +50,12 @@ protected:
   void saveSigChs(const std::vector<JPetSigCh>& sigChVec);
   void initialiseHistograms();
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
+  const std::string kMaskedChannlesParamKey = "TimeWindowCreator_MaskedChannels_std::vector<int>";
   const std::string kMaxTimeParamKey = "TimeWindowCreator_MaxTime_double";
   const std::string kMinTimeParamKey = "TimeWindowCreator_MinTime_double";
   const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
   boost::property_tree::ptree fConstansTree;
+  std::vector<int> fMaskedChannels;
   bool fSaveControlHistos = true;
   double fMinTime = 0.0;
   double fMaxTime = 1.e6;
