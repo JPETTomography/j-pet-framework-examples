@@ -54,11 +54,13 @@ protected:
   const std::string kMaxTimeParamKey = "TimeWindowCreator_MaxTime_double";
   const std::string kMinTimeParamKey = "TimeWindowCreator_MinTime_double";
   const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
+  const std::string kUseOnlyTHRParamKey = "TimeWindowCreator_UseOnlyTHR_int";
   boost::property_tree::ptree fConstansTree;
   std::vector<int> fMaskedChannels;
   bool fSaveControlHistos = true;
   double fMinTime = 0.0;
   double fMaxTime = 1.e6;
+  int fUseTHRNum = -1;
   // Number for scaling some histograms, so they are not reaching their memory capacity
   double fScalingFactor = 0.001;
 };

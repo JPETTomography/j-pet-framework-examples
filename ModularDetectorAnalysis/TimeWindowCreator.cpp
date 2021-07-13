@@ -66,6 +66,11 @@ bool TimeWindowCreator::init()
     fMaskedChannels = getOptionAsVectorOfInts(fParams.getOptions(), kMaskedChannlesParamKey);
   }
 
+  if (isOptionSet(fParams.getOptions(), kUseOnlyTHRParamKey))
+  {
+    fUseTHRNum = getOptionAsInt(fParams.getOptions(), kUseOnlyTHRParamKey);
+  }
+
   // Getting bool for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey))
   {
@@ -159,7 +164,10 @@ void TimeWindowCreator::saveSigChs(const vector<JPetSigCh>& sigChVec)
     {
       if (sigCh.getRecoFlag() == JPetSigCh::Good)
       {
-        fOutputEvents->add<JPetSigCh>(sigCh);
+        if (fUseTHRNum != -1 && sigCh.getChannel().getThresholdNumber() == fUseTHRNum)
+        {
+          fOutputEvents->add<JPetSigCh>(sigCh);
+        }
       }
 
       if (fSaveControlHistos)
