@@ -69,6 +69,7 @@ bool TimeWindowCreator::init()
   if (isOptionSet(fParams.getOptions(), kUseOnlyTHRParamKey))
   {
     fUseTHRNum = getOptionAsInt(fParams.getOptions(), kUseOnlyTHRParamKey);
+    INFO(Form("Savin only channel signals from THR %d", fUseTHRNum));
   }
 
   // Getting bool for saving histograms
