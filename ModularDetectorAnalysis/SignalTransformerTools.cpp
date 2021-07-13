@@ -182,8 +182,11 @@ double SignalTransformerTools::calculateAverageTime(JPetMatrixSignal& mtxSig, bo
     auto leads = rawSig.second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
     for (auto leadSigCh : leads)
     {
-      averageTime += leadSigCh.getTime();
-      multiplicity++;
+      if (leadSigCh.getChannel().getThresholdNumber() == 1)
+      {
+        averageTime += leadSigCh.getTime();
+        multiplicity++;
+      }
     }
   }
   if (multiplicity != 0)
