@@ -93,7 +93,7 @@ const map<int, vector<vector<JPetRawSignal>>> SignalTransformerTools::getRawSigM
  * calling merging procedure for each
  */
 vector<JPetMatrixSignal> SignalTransformerTools::mergeSignalsAllSiPMs(map<int, vector<vector<JPetRawSignal>>>& rawSigMtxMap, double mergingTime,
-                                                                      boost::property_tree::ptree& calibTree)
+                                                                      int thrSelect, boost::property_tree::ptree& calibTree)
 {
   vector<JPetMatrixSignal> allMtxSignals;
   // Iterating over whole map
@@ -101,7 +101,7 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeSignalsAllSiPMs(map<int, v
   {
     for (auto& rawSigSide : rawSigScin.second)
     {
-      auto mtxSignals = mergeRawSignalsOnSide(rawSigSide, mergingTime, calibTree);
+      auto mtxSignals = mergeRawSignalsOnSide(rawSigSide, mergingTime, thrSelect, calibTree);
       allMtxSignals.insert(allMtxSignals.end(), mtxSignals.begin(), mtxSignals.end());
     }
   }
@@ -112,7 +112,7 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeSignalsAllSiPMs(map<int, v
  * Method iterates over all Raw Sigals on some SiPMs on the same matrix,
  * matching them into groups on max. 4 as a MatrixSignal
  */
-vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(vector<JPetRawSignal>& rawSigVec, double mergingTime,
+vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(vector<JPetRawSignal>& rawSigVec, double mergingTime, int thrSelect,
                                                                        boost::property_tree::ptree& calibTree)
 {
   vector<JPetMatrixSignal> mtxSigVec;
@@ -162,7 +162,7 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(vector<JP
     }
 
     mtxSig.setTOT(calculateAverageTOT(mtxSig));
-    mtxSig.setTime(calculateAverageTime(mtxSig, calibTree));
+    mtxSig.setTime(calculateAverageTime(mtxSig, thrSelect, calibTree));
     rawSigVec.erase(rawSigVec.begin());
     mtxSigVec.push_back(mtxSig);
   }
@@ -172,7 +172,7 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(vector<JP
 /**
  * Calculating time of Matrix Signal as an average of all leading edge times contained in all RawSignals
  */
-double SignalTransformerTools::calculateAverageTime(JPetMatrixSignal& mtxSig, boost::property_tree::ptree& calibTree)
+double SignalTransformerTools::calculateAverageTime(JPetMatrixSignal& mtxSig, int thrSelect, boost::property_tree::ptree& calibTree)
 {
   double averageTime = 0.0;
   auto rawSignals = mtxSig.getRawSignals();
@@ -182,7 +182,7 @@ double SignalTransformerTools::calculateAverageTime(JPetMatrixSignal& mtxSig, bo
     auto leads = rawSig.second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
     for (auto leadSigCh : leads)
     {
-      if (leadSigCh.getChannel().getThresholdNumber() == 1)
+      if (thrSelect != -1 && leadSigCh.getChannel().getThresholdNumber() == thrSelect)
       {
         averageTime += leadSigCh.getTime();
         multiplicity++;

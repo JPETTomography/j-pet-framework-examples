@@ -40,6 +40,7 @@ public:
 protected:
   const std::string kMergeSignalsTimeParamKey = "SignalTransformer_MergeSignalsTime_double";
   const std::string kSelectMatrixPosParamKey = "SignalTrasformer_SelectMatrixPos_int";
+  const std::string kSelectTHRSignalsParamKey = "SignalTransformer_SelectTHRSignals_int";
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kSaveCalibHistosParamKey = "Save_Calib_Histograms_bool";
   const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
@@ -47,6 +48,7 @@ protected:
   boost::property_tree::ptree fConstansTree;
   void initialiseHistograms();
   int fMatrixPos = -1;
+  int fTHRSelect = -1;
   bool fSaveControlHistos = true;
   bool fSaveCalibHistos = false;
   double fMergingTime = 20000.0;

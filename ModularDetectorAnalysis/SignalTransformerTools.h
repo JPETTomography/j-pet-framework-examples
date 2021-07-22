@@ -36,12 +36,12 @@ class SignalTransformerTools
 public:
   static const std::map<int, std::vector<std::vector<JPetRawSignal>>> getRawSigMtxMap(const JPetTimeWindow* timeWindow, int selectMatrixPos);
   static std::vector<JPetMatrixSignal> mergeSignalsAllSiPMs(std::map<int, std::vector<std::vector<JPetRawSignal>>>& rawSigMtxMap, double mergingTime,
-                                                            boost::property_tree::ptree& calibTree);
-  static std::vector<JPetMatrixSignal> mergeRawSignalsOnSide(std::vector<JPetRawSignal>& rawSigVec, double mergingTime,
+                                                            int thrSelect, boost::property_tree::ptree& calibTree);
+  static std::vector<JPetMatrixSignal> mergeRawSignalsOnSide(std::vector<JPetRawSignal>& rawSigVec, double mergingTime, int thrSelect,
                                                              boost::property_tree::ptree& calibTree);
 
 private:
-  static double calculateAverageTime(JPetMatrixSignal& mtxSig, boost::property_tree::ptree& calibTree);
+  static double calculateAverageTime(JPetMatrixSignal& mtxSig, int thrSelect, boost::property_tree::ptree& calibTree);
   static double calculateAverageTOT(JPetMatrixSignal& mtxSig);
   static void sortByTime(std::vector<JPetRawSignal>& input);
 };

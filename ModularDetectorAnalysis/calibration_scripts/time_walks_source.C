@@ -160,8 +160,8 @@ void time_walks(std::string fileName, std::string calibJSONFileName = "calibrati
     auto p1 = fun->GetParameter(1);
     auto e1 = fun->GetParError(1);
     //
-    tree.put("time_walk.param_0", p0);
-    tree.put("time_walk.param_1", p1);
+    tree.put("time_walk.param_a", p1);
+    tree.put("time_walk.param_b", p0);
     // tree.put("time_walk.param_2", p2);
     // tree.put("time_walk.param_3", p3);
 

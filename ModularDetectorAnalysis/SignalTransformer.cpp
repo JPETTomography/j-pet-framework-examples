@@ -56,6 +56,12 @@ bool SignalTransformer::init()
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMergeSignalsTimeParamKey.c_str(), fMergingTime));
   }
 
+  if (isOptionSet(fParams.getOptions(), kSelectTHRSignalsParamKey))
+  {
+    fTHRSelect = getOptionAsInt(fParams.getOptions(), kSelectTHRSignalsParamKey);
+    INFO(Form("Using signals only from THR %d for time estimation", fMatrixPos));
+  }
+
   // Select only SiPM signals from one position in matrix
   if (isOptionSet(fParams.getOptions(), kSelectMatrixPosParamKey))
   {
@@ -81,7 +87,7 @@ bool SignalTransformer::exec()
     auto rawSigMtxMap = SignalTransformerTools::getRawSigMtxMap(timeWindow, fMatrixPos);
 
     // Merging max. 4 Raw Signals into a MatrixSignal
-    auto mergedSignals = SignalTransformerTools::mergeSignalsAllSiPMs(rawSigMtxMap, fMergingTime, fConstansTree);
+    auto mergedSignals = SignalTransformerTools::mergeSignalsAllSiPMs(rawSigMtxMap, fMergingTime, fTHRSelect, fConstansTree);
 
     // Saving method invocation
     if (mergedSignals.size() > 0)
