@@ -182,13 +182,16 @@ double SignalTransformerTools::calculateAverageTime(JPetMatrixSignal& mtxSig, in
     auto leads = rawSig.second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
     for (auto leadSigCh : leads)
     {
-      if (thrSelect != -1 && leadSigCh.getChannel().getThresholdNumber() == thrSelect)
+      // Skip if signal not on selected threshold (if option used)
+      if (thrSelect != -1 && leadSigCh.getChannel().getThresholdNumber() != thrSelect)
       {
-        // Time walk correction per threshold
-        double corrTHR = calibTree.get("time_walk.thr" + to_string(leadSigCh.getChannel().getThresholdNumber()) + ".param_a", 0.0);
-        averageTime += (leadSigCh.getTime() - corrTHR / mtxSig.getTOT());
-        multiplicity++;
+        continue;
       }
+
+      // Time walk correction per threshold
+      double corrTHR = calibTree.get("time_walk.thr" + to_string(leadSigCh.getChannel().getThresholdNumber()) + ".param_a", 0.0);
+      averageTime += (leadSigCh.getTime() - corrTHR / mtxSig.getTOT());
+      multiplicity++;
     }
   }
   if (multiplicity != 0)
