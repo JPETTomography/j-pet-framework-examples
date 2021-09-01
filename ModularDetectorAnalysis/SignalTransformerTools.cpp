@@ -18,90 +18,67 @@
 using namespace std;
 
 /**
- * Map Raw Signals from all SiPMs according to matrix and side they belong to.
- * Returns map< scin ID, side < signals >>.
- * Side A is the first element int he vector, Side B is the second one.
+ * Map PM Signals from all SiPMs according to matrix and side they belong to.
+ * Returns map< scin ID, map < side < signals >>>.
+ * Side A is the first element int the vector, Side B is the second one.
  */
-const map<int, vector<vector<JPetRawSignal>>> SignalTransformerTools::getRawSigMtxMap(const JPetTimeWindow* timeWindow, int selectMatrixPos)
+const map<JPetMatrix::Side, map<int, vector<JPetPMSignal>>> SignalTransformerTools::getPMSigMtxMap(const JPetTimeWindow* timeWindow)
 {
-  map<int, vector<vector<JPetRawSignal>>> rawSigMtxMap;
+  map<JPetMatrix::Side, map<int, vector<JPetPMSignal>>> mappedSignals;
+  map<int, vector<JPetPMSignal>> tmpMapA;
+  map<int, vector<JPetPMSignal>> tmpMapB;
+
+  mappedSignals[JPetMatrix::SideA] = tmpMapA;
+  mappedSignals[JPetMatrix::SideB] = tmpMapB;
 
   if (!timeWindow)
   {
     WARNING("Pointer of Time Window object is not set, returning empty map");
-    return rawSigMtxMap;
+    return mappedSignals;
   }
 
-  const unsigned int nRawSigs = timeWindow->getNumberOfEvents();
-  for (unsigned int i = 0; i < nRawSigs; i++)
+  const unsigned int nPMSigs = timeWindow->getNumberOfEvents();
+  for (unsigned int i = 0; i < nPMSigs; i++)
   {
-    auto rawSig = dynamic_cast<const JPetRawSignal&>(timeWindow->operator[](i));
+    auto pmSig = dynamic_cast<const JPetPMSignal&>(timeWindow->operator[](i));
 
-    auto leads = rawSig.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrValue);
-    auto trails = rawSig.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrValue);
+    auto scinID = pmSig.getPM().getMatrix().getScin().getID();
+    auto side = pmSig.getPM().getMatrix().getSide();
+    auto pmMtxPos = pmSig.getPM().getMatrixPosition();
 
-    // Saving only signals with lead-trail pair on threshold
-    if (leads.size() != 2 && trails.size() != 2)
+    if (side != JPetMatrix::SideA || side != JPetMatrix::SideB)
     {
       continue;
     }
 
-    auto scinID = rawSig.getPM().getScin().getID();
-    auto pmSide = rawSig.getPM().getSide();
-    auto pmMtxPos = rawSig.getPM().getMatrixPosition();
-
-    if (selectMatrixPos != -1 && pmMtxPos != selectMatrixPos)
+    auto search = mappedSignals.at(side).find(scinID);
+    if (search == mappedSignals.at(side).end())
     {
-      continue;
-    }
-
-    auto search = rawSigMtxMap.find(scinID);
-    if (search == rawSigMtxMap.end())
-    {
-      // There is no element with searched scin ID in this map, adding new one
-      vector<JPetRawSignal> tmpVec;
-      vector<vector<JPetRawSignal>> tmpVecVec;
-      tmpVecVec.push_back(tmpVec);
-      tmpVecVec.push_back(tmpVec);
-      if (pmSide == JPetPM::SideA)
-      {
-        tmpVecVec.at(0).push_back(rawSig);
-      }
-      else if (pmSide == JPetPM::SideB)
-      {
-        tmpVecVec.at(1).push_back(rawSig);
-      }
-      rawSigMtxMap.insert(pair<int, vector<vector<JPetRawSignal>>>(scinID, tmpVecVec));
+      vector<JPetPMSignal> tmpSigVec;
+      tmpSigVec.push_back(pmSig);
+      mappedSignals.at(side)[scinID] = tmpSigVec;
     }
     else
     {
-      if (pmSide == JPetPM::SideA)
-      {
-        search->second.at(0).push_back(rawSig);
-      }
-      else if (pmSide == JPetPM::SideB)
-      {
-        search->second.at(1).push_back(rawSig);
-      }
+      search->second.push_back(pmSig);
     }
   }
-  return rawSigMtxMap;
+  return pmSigMtxMap;
 }
 
 /**
  * Method iterates over all matrices in the detector with signals,
  * calling merging procedure for each
  */
-vector<JPetMatrixSignal> SignalTransformerTools::mergeSignalsAllSiPMs(map<int, vector<vector<JPetRawSignal>>>& rawSigMtxMap, double mergingTime,
-                                                                      int thrSelect, boost::property_tree::ptree& calibTree)
+vector<JPetMatrixSignal> SignalTransformerTools::mergeSignalsAllSiPMs(map<JPetMatrix::Side, map<int, vector<JPetPMSignal>>>& mappedSignals,
+                                                                      double mergingTime, boost::property_tree::ptree& calibTree)
 {
   vector<JPetMatrixSignal> allMtxSignals;
-  // Iterating over whole map
-  for (auto& rawSigScin : rawSigMtxMap)
+  for (auto& sideSigs : mappedSignals)
   {
-    for (auto& rawSigSide : rawSigScin.second)
+    for (auto& signals : sideSigs.second)
     {
-      auto mtxSignals = mergeRawSignalsOnSide(rawSigSide, mergingTime, thrSelect, calibTree);
+      auto mtxSignals = mergePMSignalsOnSide(signals, mergingTime, calibTree);
       allMtxSignals.insert(allMtxSignals.end(), mtxSignals.begin(), mtxSignals.end());
     }
   }
@@ -109,21 +86,21 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeSignalsAllSiPMs(map<int, v
 }
 
 /**
- * Method iterates over all Raw Sigals on some SiPMs on the same matrix,
+ * Method iterates over all PM Sigals on some SiPMs on the same matrix,
  * matching them into groups on max. 4 as a MatrixSignal
  */
-vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(vector<JPetRawSignal>& rawSigVec, double mergingTime, int thrSelect,
-                                                                       boost::property_tree::ptree& calibTree)
+vector<JPetMatrixSignal> SignalTransformerTools::mergePMSignalsOnSide(vector<JPetPMSignal>& pmSigVec, double mergingTime,
+                                                                      boost::property_tree::ptree& calibTree)
 {
   vector<JPetMatrixSignal> mtxSigVec;
-  sortByTime(rawSigVec);
+  sortByTime(pmSigVec);
 
-  while (rawSigVec.size() > 0)
+  while (pmSigVec.size() > 0)
   {
-    // Create Matrix Signal and add first Raw Signal by default
+    // Create Matrix Signal and add first PM Signal by default
     JPetMatrixSignal mtxSig;
-    mtxSig.setPM(rawSigVec.at(0).getPM());
-    if (!mtxSig.addRawSignal(rawSigVec.at(0)))
+    mtxSig.setPM(pmSigVec.at(0).getPM());
+    if (!mtxSig.addPMSignal(pmSigVec.at(0)))
     {
       ERROR("Problem with adding the first signal to new object.");
       break;
@@ -132,21 +109,20 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(vector<JP
     unsigned int nextIndex = 1;
     while (true)
     {
-
-      if (rawSigVec.size() <= nextIndex)
+      if (pmSigVec.size() <= nextIndex)
       {
         // nothing left to check
         break;
       }
 
       // signal matching condidion
-      if (fabs(rawSigVec.at(nextIndex).getTime() - rawSigVec.at(0).getTime()) < mergingTime)
+      if (fabs(pmSigVec.at(nextIndex).getTime() - pmSigVec.at(0).getTime()) < mergingTime)
       {
         // mathing signal found
-        if (mtxSig.addRawSignal(rawSigVec.at(nextIndex)))
+        if (mtxSig.addPMSignal(pmSigVec.at(nextIndex)))
         {
           // added succesfully
-          rawSigVec.erase(rawSigVec.begin() + nextIndex);
+          pmSigVec.erase(pmSigVec.begin() + nextIndex);
         }
         else
         {
@@ -162,91 +138,72 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeRawSignalsOnSide(vector<JP
     }
 
     mtxSig.setTOT(calculateAverageTOT(mtxSig));
-    mtxSig.setTime(calculateAverageTime(mtxSig, thrSelect, calibTree));
-    rawSigVec.erase(rawSigVec.begin());
+    mtxSig.setTime(calculateAverageTime(mtxSig, calibTree));
+    pmSigVec.erase(pmSigVec.begin());
     mtxSigVec.push_back(mtxSig);
   }
   return mtxSigVec;
 }
 
 /**
- * Calculating time of Matrix Signal as an average of all leading edge times contained in all RawSignals
+ * Calculating time of Matrix Signal as an average of all leading edge times contained in all PMSignals
  */
-double SignalTransformerTools::calculateAverageTime(JPetMatrixSignal& mtxSig, int thrSelect, boost::property_tree::ptree& calibTree)
+double SignalTransformerTools::calculateAverageTime(JPetMatrixSignal& mtxSig, boost::property_tree::ptree& calibTree)
 {
   double averageTime = 0.0;
-  auto rawSignals = mtxSig.getRawSignals();
+  auto pmSignals = mtxSig.getPMSignals();
   int multiplicity = 0;
-  for (auto rawSig : rawSignals)
+  for (auto pmSig : pmSignals)
   {
-    auto leads = rawSig.second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-    for (auto leadSigCh : leads)
-    {
-      // Skip if signal not on selected threshold (if option used)
-      if (thrSelect != -1 && leadSigCh.getChannel().getThresholdNumber() != thrSelect)
-      {
-        continue;
-      }
-
-      // Time walk correction per threshold
-      double corrTHR = calibTree.get("time_walk.thr" + to_string(leadSigCh.getChannel().getThresholdNumber()) + ".param_a", 0.0);
-      averageTime += (leadSigCh.getTime() - corrTHR / mtxSig.getTOT());
-      multiplicity++;
-    }
+    averageTime += pmSig.getTime();
   }
-  if (multiplicity != 0)
+  if (pmSignals.size() != 0)
   {
-    averageTime = averageTime / ((double)multiplicity);
+    averageTime = averageTime / ((double)pmSignals.size());
   }
-  auto scinID = mtxSig.getPM().getScin().getID();
 
   // Applying b-side correction for A-B time difference synchronization
+  auto scinID = mtxSig.getMatrix().getScin().getID();
   double bCorrection = 0.0;
-  if (mtxSig.getPM().getSide() == JPetPM::SideB)
+  if (mtxSig.getMatrix().getSide() == JPetMatrix::SideB)
   {
     bCorrection = calibTree.get("scin." + to_string(scinID) + ".b_correction", 0.0);
   }
 
   // Applying time walk correction
   double timeWalkCorrection = 0.0;
-  if (mtxSig.getTOT() != 0.0)
+  auto tot = (mtxSig.getTOT() != 0.0) ? mtxSig.getTOT() : calculateAverageTOT(mtxSig);
+  if (tot != 0.0)
   {
-    double p0 = calibTree.get("scin." + to_string(scinID) + ".time_walk_ab_param_0", 0.0);
-    double p1 = calibTree.get("scin." + to_string(scinID) + ".time_walk_ab_param_1", 0.0);
-
-    if (p0 == 0.0 && p1 == 0.0)
-    {
-      p1 = calibTree.get("time_walk.param_a", 0.0);
-    }
+    auto p1 = calibTree.get("time_walk.param_a", 0.0);
     timeWalkCorrection = p1 / mtxSig.getTOT();
   }
 
+  // Returning average time corrected by calibration constatns, that can be zero.
   return averageTime - bCorrection - timeWalkCorrection;
 }
 
 /**
- * Calculating average TOT of Matrix Signal
+ * Calculating TOT of Matrix Signal as an average of TOTs of contained PM Signals
  */
 double SignalTransformerTools::calculateAverageTOT(JPetMatrixSignal& mtxSig)
 {
   double tot = 0.0;
-  int multiplicity = 0;
-  auto rawSignals = mtxSig.getRawSignals();
-  for (auto rawSig : rawSignals)
+  auto pmSignals = mtxSig.getPMSignals();
+  for (auto pmSig : pmSignals)
   {
-    if (rawSig.second.getTOT() > 0.0)
+    if (pmSig.second.getTOT() > 0.0)
     {
-      tot += rawSig.second.getTOT();
-      multiplicity++;
+      tot += pmSig.second.getTOT();
     }
   }
-  return tot / ((double)multiplicity);
+  return tot / ((double)pmSignals.size());
 }
 
 /**
- * Sorting method for Raw Signals, based on time of leading THR1 Signal Channel
+ * Sorting method for PM Signals, based on time of leading THR1 Signal Channel
  */
-void SignalTransformerTools::sortByTime(vector<JPetRawSignal>& input)
+void SignalTransformerTools::sortByTime(vector<JPetPMSignal>& input)
 {
-  std::sort(input.begin(), input.end(), [](JPetRawSignal rawSig1, JPetRawSignal rawSig2) { return rawSig1.getTime() < rawSig2.getTime(); });
+  std::sort(input.begin(), input.end(), [](JPetPMSignal pmSig1, JPetPMSignal pmSig2) { return pmSig1.getTime() < pmSig2.getTime(); });
 }

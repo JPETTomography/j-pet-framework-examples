@@ -14,9 +14,7 @@
  */
 
 #include "SignalTransformer.h"
-#include "JPetWriter/JPetWriter.h"
 #include "SignalTransformerTools.h"
-
 #include <boost/property_tree/json_parser.hpp>
 
 using namespace jpet_options_tools;
@@ -27,7 +25,7 @@ SignalTransformer::~SignalTransformer() {}
 
 bool SignalTransformer::init()
 {
-  INFO("Signal Transformer started: Raw to Matrix Signal");
+  INFO("Signal Transformer started: PM to Matrix Signal");
   fOutputEvents = new JPetTimeWindow("JPetMatrixSignal");
 
   // Getting bools for saving control and calibration histograms
@@ -56,19 +54,6 @@ bool SignalTransformer::init()
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMergeSignalsTimeParamKey.c_str(), fMergingTime));
   }
 
-  if (isOptionSet(fParams.getOptions(), kSelectTHRSignalsParamKey))
-  {
-    fTHRSelect = getOptionAsInt(fParams.getOptions(), kSelectTHRSignalsParamKey);
-    INFO(Form("Using signals only from THR %d for time estimation", fMatrixPos));
-  }
-
-  // Select only SiPM signals from one position in matrix
-  if (isOptionSet(fParams.getOptions(), kSelectMatrixPosParamKey))
-  {
-    fMatrixPos = getOptionAsInt(fParams.getOptions(), kSelectMatrixPosParamKey);
-    INFO(Form("Using signals only from SiPMs with position %d in matrices", fMatrixPos));
-  }
-
   // Control histograms
   if (fSaveControlHistos)
   {
@@ -82,12 +67,11 @@ bool SignalTransformer::exec()
   // Getting the data from event in an apropriate format
   if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent))
   {
+    // Distribute PM Signals per Matrices
+    auto pmSigMtxMap = SignalTransformerTools::getPMSigMtxMap(timeWindow);
 
-    // Distribute Raw Signals per Matrices
-    auto rawSigMtxMap = SignalTransformerTools::getRawSigMtxMap(timeWindow, fMatrixPos);
-
-    // Merging max. 4 Raw Signals into a MatrixSignal
-    auto mergedSignals = SignalTransformerTools::mergeSignalsAllSiPMs(rawSigMtxMap, fMergingTime, fTHRSelect, fConstansTree);
+    // Merging max. 4 PM Signals into a MatrixSignal
+    auto mergedSignals = SignalTransformerTools::mergeSignalsAllSiPMs(pmSigMtxMap, fMergingTime, fConstansTree);
 
     // Saving method invocation
     if (mergedSignals.size() > 0)
@@ -115,7 +99,7 @@ void SignalTransformer::saveMatrixSignals(const std::vector<JPetMatrixSignal>& m
 {
   if (mtxSigVec.size() > 0 && fSaveControlHistos)
   {
-    getStatistics().getHisto1D("mtxsig_tslot")->Fill(mtxSigVec.size());
+    getStatistics().fillHistogram("mtxsig_tslot", mtxSigVec.size());
   }
   for (auto& mtxSig : mtxSigVec)
   {
@@ -124,16 +108,16 @@ void SignalTransformer::saveMatrixSignals(const std::vector<JPetMatrixSignal>& m
     if (fSaveControlHistos)
     {
       auto scinID = mtxSig.getPM().getScin().getID();
-      getStatistics().getHisto1D("mtxsig_multi")->Fill(mtxSig.getRawSignals().size());
-      if (mtxSig.getPM().getSide() == JPetPM::SideA)
+      getStatistics().fillHistogram("mtxsig_multi", mtxSigVec.getPMSignals().size());
+      if (mtxSig.getMatrix().getSide() == JPetPM::SideA)
       {
-        getStatistics().getHisto1D("mtxsig_scin_sideA")->Fill(scinID);
-        getStatistics().getHisto2D("tot_scin_sideA_id")->Fill(scinID, mtxSig.getTOT());
+        getStatistics().fillHistogram("mtxsig_scin_sideA", scinID);
+        getStatistics().fillHistogram("mtxsig_sideA_tot", scinID, mtxSig.getTOT());
       }
-      else if (mtxSig.getPM().getSide() == JPetPM::SideB)
+      else if (mtxSig.getMatrix().getSide() == JPetPM::SideB)
       {
-        getStatistics().getHisto1D("mtxsig_scin_sideB")->Fill(scinID);
-        getStatistics().getHisto2D("tot_scin_sideB_id")->Fill(scinID, mtxSig.getTOT());
+        getStatistics().fillHistogram("mtxsig_scin_sideA", scinID);
+        getStatistics().fillHistogram("mtxsig_sideA_tot", scinID, mtxSig.getTOT());
       }
     }
 
@@ -141,22 +125,24 @@ void SignalTransformer::saveMatrixSignals(const std::vector<JPetMatrixSignal>& m
     {
       // Filling histograms gor each channel in Matrix SiPMs to produce
       // channel offsets with the respect to channel on 1st THR of SiPM mtx pos 1
-      auto sigMap = mtxSig.getRawSignals();
+      auto sigMap = mtxSig.getPMSignals();
       if (sigMap.find(1) != sigMap.end())
       {
-        auto t_1_1 = sigMap.at(1).getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum).at(0).getTime();
-        for (auto rawSig : sigMap)
+        // auto t_1_1 = sigMap.at(1).getPoints(JPetSigCh::Leading, JPetPMSignal::ByThrNum).at(0).getTime();
+        auto t_1_1 = sigMap.at(1).getLeadTrailPairs().at(0).first.getTime();
+
+        for (auto pmSig : sigMap)
         {
-          auto leads = rawSig.second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-          for (auto chSig : leads)
+          auto pairs = pmSig.second.getLeadTrailPairs();
+          for (auto pair : pairs)
           {
-            auto t_ch_i = chSig.getTime();
-            auto channelID = chSig.getChannel().getID();
+            auto t_ch_i = pair.first.getTime();
+            auto channelID = pair.first.getChannel().getID();
             if (t_1_1 == t_ch_i)
             {
               continue;
             }
-            getStatistics().getHisto2D("mtx_offsets_channel")->Fill(channelID, t_ch_i - t_1_1);
+            getStatistics().fillHistogram("sf_channel_offsets", channelID, t_ch_i - t_1_1);
           }
         }
       }
@@ -170,34 +156,28 @@ void SignalTransformer::initialiseHistograms()
   auto maxScinID = getParamBank().getScins().rbegin()->first;
 
   // MatrixSignal multiplicity
-  getStatistics().createHistogram(new TH1F("mtxsig_multi", "Multiplicity of matched MatrixSignals", 5, 0.5, 5.5));
-  getStatistics().getHisto1D("mtxsig_multi")->GetXaxis()->SetTitle("Number of Raw Signals in Matrix Signal");
-  getStatistics().getHisto1D("mtxsig_multi")->GetYaxis()->SetTitle("Number of Matrix Signals");
+  getStatistics().createHistogramWithAxes(new TH1D("mtxsig_multi", "Multiplicity of matched MatrixSignals", 5, 0.5, 5.5),
+                                          "Number of PM Signals in Matrix Signal", "Number of Matrix Signals");
 
-  getStatistics().createHistogram(new TH1F("mtxsig_tslot", "Number of Matrix Signals in Time Window", 150, 0.5, 150.5));
-  getStatistics().getHisto1D("mtxsig_tslot")->GetXaxis()->SetTitle("Number of Matrix Signal in Time Window");
-  getStatistics().getHisto1D("mtxsig_tslot")->GetYaxis()->SetTitle("Number of Time Windows");
+  getStatistics().createHistogramWithAxes(new TH1D("mtxsig_tslot", "Number of Matrix Signals in Time Window", 100, 0.5, 100.5),
+                                          "Number of Matrix Signals in Time Window", "Number of Time Windows");
 
-  getStatistics().createHistogram(
-      new TH1F("mtxsig_scin_sideA", "Number of MatrixSignals per scintillator side A", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5));
-  getStatistics().getHisto1D("mtxsig_scin_sideA")->GetXaxis()->SetTitle("Scin ID");
-  getStatistics().getHisto1D("mtxsig_scin_sideA")->GetYaxis()->SetTitle("Number of Matrix Signals");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("mtxsig_scin_sideA", "Number of Matrix Signals per scintillator side A", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5),
+      "Scin ID", "Number of Matrix Signals");
 
-  getStatistics().createHistogram(
-      new TH1F("mtxsig_scin_sideB", "Number of MatrixSignals per scintillator side B", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5));
-  getStatistics().getHisto1D("mtxsig_scin_sideB")->GetXaxis()->SetTitle("Scin ID");
-  getStatistics().getHisto1D("mtxsig_scin_sideB")->GetYaxis()->SetTitle("Number of Matrix Signals");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("mtxsig_scin_sideB", "Number of Matrix Signals per scintillator side B", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5),
+      "Scin ID", "Number of Matrix Signals");
 
   double totUppLimit = 10000000.0;
-  getStatistics().createHistogram(new TH2F("tot_scin_sideA_id", "Matrix Signal ToT - Side A Scin ID", maxScinID - minScinID + 1, minScinID - 0.5,
-                                           maxScinID + 0.5, 200, 0.0, totUppLimit));
-  getStatistics().getHisto2D("tot_scin_sideA_id")->GetXaxis()->SetTitle("SiPM ID");
-  getStatistics().getHisto2D("tot_scin_sideA_id")->GetYaxis()->SetTitle("TOT [ps]");
+  getStatistics().createHistogramWithAxes(new TH2D("mtxsig_sideA_tot", "Matrix Signal ToT - Side A per scintillator", maxScinID - minScinID + 1,
+                                                   minScinID - 0.5, maxScinID + 0.5, 200, 0.0, totUppLimit),
+                                          "Scin ID", "TOT [ps]");
 
-  getStatistics().createHistogram(new TH2F("tot_scin_sideB_id", "Matrix Signal ToT - Side B Scin ID", maxScinID - minScinID + 1, minScinID - 0.5,
-                                           maxScinID + 0.5, 200, 0.0, totUppLimit));
-  getStatistics().getHisto2D("tot_scin_sideB_id")->GetXaxis()->SetTitle("SiPM ID");
-  getStatistics().getHisto2D("tot_scin_sideB_id")->GetYaxis()->SetTitle("TOT [ps]");
+  getStatistics().createHistogramWithAxes(new TH2D("mtxsig_sideB_tot", "Matrix Signal ToT - Side B per scintillator", maxScinID - minScinID + 1,
+                                                   minScinID - 0.5, maxScinID + 0.5, 200, 0.0, totUppLimit),
+                                          "Scin ID", "TOT [ps]");
 
   // SiPM offsets if needed
   if (fSaveCalibHistos)
@@ -205,9 +185,9 @@ void SignalTransformer::initialiseHistograms()
     auto minChannelID = getParamBank().getChannels().begin()->first;
     auto maxChannelID = getParamBank().getChannels().rbegin()->first;
 
-    getStatistics().createHistogram(new TH2F("mtx_offsets_channel", "Offset of Channel in Matrix vs. Channel ID", maxChannelID - minChannelID + 1,
-                                             minChannelID - 0.5, maxChannelID + 0.5, 200, -fMergingTime, fMergingTime));
-    getStatistics().getHisto2D("mtx_offsets_channel")->GetXaxis()->SetTitle("Channel ID");
-    getStatistics().getHisto2D("mtx_offsets_channel")->GetYaxis()->SetTitle("Offset");
+    getStatistics().createHistogramWithAxes(new TH2D("sf_channel_offsets", "Offset of Channel in Matrix vs. Channel ID",
+                                                     maxChannelID - minChannelID + 1, minChannelID - 0.5, maxChannelID + 0.5, 200, -fMergingTime,
+                                                     fMergingTime),
+                                            "Channel ID", "Offset");
   }
 }

@@ -13,15 +13,13 @@
  *  @file TimeWindowCreator.cpp
  */
 
-#include <boost/property_tree/json_parser.hpp>
-
+#include "TimeWindowCreator.h"
+#include "TimeWindowCreatorTools.h"
 #include <EventIII.h>
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include <JPetWriter/JPetWriter.h>
 #include <TRandom.h>
-
-#include "TimeWindowCreator.h"
-#include "TimeWindowCreatorTools.h"
+#include <boost/property_tree/json_parser.hpp>
 
 using namespace jpet_options_tools;
 using namespace std;
@@ -34,7 +32,7 @@ TimeWindowCreator::~TimeWindowCreator() {}
 bool TimeWindowCreator::init()
 {
   INFO("TimeSlot Creation Started");
-  fOutputEvents = new JPetTimeWindow("JPetSigCh");
+  fOutputEvents = new JPetTimeWindow("JPetChannelSignal");
 
   // Reading values from the user options if available
   // Min and max allowed signal time
@@ -59,11 +57,6 @@ bool TimeWindowCreator::init()
   if (isOptionSet(fParams.getOptions(), kConstantsFileParamKey))
   {
     pt::read_json(getOptionAsString(fParams.getOptions(), kConstantsFileParamKey), fConstansTree);
-  }
-
-  if (isOptionSet(fParams.getOptions(), kMaskedChannlesParamKey))
-  {
-    fMaskedChannels = getOptionAsVectorOfInts(fParams.getOptions(), kMaskedChannlesParamKey);
   }
 
   // Getting bool for saving histograms
@@ -99,18 +92,12 @@ bool TimeWindowCreator::exec()
         continue;
       }
 
-      // Skip masked channels
-      if (find(fMaskedChannels.begin(), fMaskedChannels.end(), channelNumber) != fMaskedChannels.end())
-      {
-        continue;
-      }
-
       // Check if channel exists in database from loaded local json file
       if (getParamBank().getChannels().count(channelNumber) == 0)
       {
         if (fSaveControlHistos)
         {
-          getStatistics().getHisto1D("wrong_channel")->Fill(channelNumber);
+          getStatistics().fillHistogram("wrong_channel", channelNumber);
         }
         continue;
       }
@@ -119,16 +106,16 @@ bool TimeWindowCreator::exec()
       auto& channel = getParamBank().getChannel(channelNumber);
 
       // Building Signal Channels for this Channel
-      auto allSigChs = TimeWindowCreatorTools::buildSigChs(tdcChannel, channel, fMaxTime, fMinTime, fConstansTree);
+      auto allChannelSignals = TimeWindowCreatorTools::buildChannelSignals(tdcChannel, channel, fMaxTime, fMinTime, fConstansTree);
 
       // Sort Signal Channels in time
-      TimeWindowCreatorTools::sortByTime(allSigChs);
+      TimeWindowCreatorTools::sortByTime(allChannelSignals);
 
       // Flag with Good or Corrupted
-      TimeWindowCreatorTools::flagSigChs(allSigChs, getStatistics(), fSaveControlHistos);
+      TimeWindowCreatorTools::flagChannelSignals(allChannelSignals, getStatistics(), fSaveControlHistos);
 
       // Save result
-      saveSigChs(allSigChs);
+      saveChannelSignals(allChannelSignals);
     }
   }
   else
@@ -144,66 +131,64 @@ bool TimeWindowCreator::terminate()
   return true;
 }
 
-void TimeWindowCreator::saveSigChs(const vector<JPetSigCh>& sigChVec)
+void TimeWindowCreator::saveChannelSignals(const vector<JPetChannelSignal>& channelSigVec)
 {
-  if (sigChVec.size() > 0)
+  if (channelSigVec.size() > 0)
   {
     if (fSaveControlHistos)
     {
-      getStatistics().getHisto1D("sigch_tslot")->Fill(sigChVec.size());
+      getStatistics().fillHistogram("chsig_tslot", channelSigVec.size());
     }
 
     double lastTime = 0.0;
 
-    for (auto& sigCh : sigChVec)
+    for (auto& channelSig : channelSigVec)
     {
-      if (sigCh.getRecoFlag() == JPetSigCh::Good)
+      if (channelSig.getRecoFlag() == JPetChannelSignal::Good)
       {
-        fOutputEvents->add<JPetSigCh>(sigCh);
+        fOutputEvents->add<JPetChannelSignal>(channelSig);
       }
 
       if (fSaveControlHistos)
       {
         if (gRandom->Uniform() < fScalingFactor)
         {
-          getStatistics().getHisto1D("channel_occ")->Fill(sigCh.getChannel().getID());
-          if (sigCh.getRecoFlag() == JPetSigCh::Good)
+          getStatistics().fillHistogram("occ_channels", channelSig.getChannel().getID());
+
+          if (channelSig.getRecoFlag() == JPetRecoSignal::Good)
           {
-            getStatistics().getHisto1D("filter_sigch")->Fill(1);
+            getStatistics().fillHistogram("good_vs_bad_chsig", 1);
           }
-          else if (sigCh.getRecoFlag() == JPetSigCh::Corrupted)
+          else if (channelSig.getRecoFlag() == JPetRecoSignal::Corrupted)
           {
-            getStatistics().getHisto1D("filter_sigch")->Fill(2);
+            getStatistics().fillHistogram("good_vs_bad_chsig", 2);
           }
-          else if (sigCh.getRecoFlag() == JPetSigCh::Unknown)
+          else if (channelSig.getRecoFlag() == JPetRecoSignal::Unknown)
           {
-            getStatistics().getHisto1D("filter_sigch")->Fill(3);
+            getStatistics().fillHistogram("good_vs_bad_chsig", 3);
           }
         }
 
-        if (sigCh.getType() == JPetSigCh::Leading && sigCh.getChannel().getThresholdNumber() == 1)
+        if (channelSig.getType() == JPetChannelSignal::Leading && channelSig.getChannel().getThresholdNumber() == 1)
         {
           if (lastTime != 0.0)
           {
-            getStatistics().getHisto1D("consec_lead_THR1")->Fill(sigCh.getTime() - lastTime);
+            getStatistics().fillHistogram("consec_lead_THR1", channelSig.getTime() - lastTime);
           }
           else
           {
-            lastTime = sigCh.getTime();
+            lastTime = channelSig.getTime();
           }
         }
       }
-      //
     }
   }
 }
 
 void TimeWindowCreator::initialiseHistograms()
 {
-
-  getStatistics().createHistogram(new TH1F("sigch_tslot", "Signal Channels Per Time Slot", 50, 0.5, 50.5));
-  getStatistics().getHisto1D("sigch_tslot")->GetXaxis()->SetTitle("Signal Channels in Time Slot");
-  getStatistics().getHisto1D("sigch_tslot")->GetYaxis()->SetTitle("Number of Time Slots");
+  getStatistics().createHistogramWithAxes(new TH1D("chsig_tslot", "Signal Channels Per Time Slot", 50, 0.5, 50.5), "Channels Signal in Time Slot",
+                                          "Number of Time Slots");
 
   // Channels and PMs IDs from Param Bank
   auto minChannelID = getParamBank().getChannels().begin()->first;
@@ -213,53 +198,42 @@ void TimeWindowCreator::initialiseHistograms()
   auto maxPMID = getParamBank().getPMs().rbegin()->first;
 
   // Wrong configuration
-  getStatistics().createHistogram(new TH1F("wrong_channel", "Channel IDs not found in the json configuration", maxChannelID - minChannelID + 1,
-                                           minChannelID - 0.5, maxChannelID + 0.5));
-  getStatistics().getHisto1D("wrong_channel")->GetXaxis()->SetTitle("Channel ID");
-  getStatistics().getHisto1D("wrong_channel")->GetYaxis()->SetTitle("Number of SigCh");
+  getStatistics().createHistogramWithAxes(new TH1D("wrong_channels", "Channel IDs not found in the json configuration",
+                                                   maxChannelID - minChannelID + 1, minChannelID - 0.5, maxChannelID + 0.5),
+                                          "Channel ID", "Number of Channel Signals");
 
-  getStatistics().createHistogram(
-      new TH1F("channel_occ", "Channels occupation (downscaled)", maxChannelID - minChannelID + 1, minChannelID - 0.5, maxChannelID + 0.5));
-  getStatistics().getHisto1D("channel_occ")->GetXaxis()->SetTitle("Channel ID");
-  getStatistics().getHisto1D("channel_occ")->GetYaxis()->SetTitle("Number of SigCh");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("occ_channels", "Channels occupation (downscaled)", maxChannelID - minChannelID + 1, minChannelID - 0.5, maxChannelID + 0.5),
+      "Channel ID", "Number of Channel Signals");
+
+  getStatistics().createHistogramWithAxes(new TH1D("good_vs_bad_chsig", "Number of good and corrupted Channel Sigals created", 3, 0.5, 3.5), " ",
+                                          "Number of Channel Signals");
+  vector<pair<unsigned, string>> binLabels = {make_pair(1, "GOOD"), make_pair(2, "CORRUPTED"), make_pair(3, "UNKNOWN")};
+  getStatistics().setHistogramBinLabel("good_vs_bad_chsig", getStatistics().AxisLabel::kXaxis, binLabels);
 
   // Flagging histograms
-  getStatistics().createHistogram(new TH1F("filter_sigch", "Number of good and corrupted SigChs created", 3, 0.5, 3.5));
-  getStatistics().getHisto1D("filter_sigch")->GetXaxis()->SetBinLabel(1, "GOOD");
-  getStatistics().getHisto1D("filter_sigch")->GetXaxis()->SetBinLabel(2, "CORRUPTED");
-  getStatistics().getHisto1D("filter_sigch")->GetXaxis()->SetBinLabel(3, "UNKNOWN");
-  getStatistics().getHisto1D("filter_sigch")->GetYaxis()->SetTitle("Number of SigChs");
+  getStatistics().createHistogramWithAxes(new TH1D("filter_LT_tdiff", "LT time diff", 200, 0.0, 200000.0), "Time Diff [ps]", "Number of LT pairs");
 
-  getStatistics().createHistogram(new TH1F("filter_LT_tdiff", "LT time diff", 200, 0.0, 200000.0));
-  getStatistics().getHisto1D("filter_LT_tdiff")->GetXaxis()->SetTitle("Time Diff [ps]");
-  getStatistics().getHisto1D("filter_LT_tdiff")->GetYaxis()->SetTitle("Number of LT pairs");
+  getStatistics().createHistogramWithAxes(new TH1D("filter_LL_tdiff", "Time diff of LL pairs", 200, 0.0, 5000.0), "Time Diff [ps]",
+                                          "Number of LL pairs");
 
-  getStatistics().createHistogram(new TH1F("filter_LL_PM", "Number of LL found on PMs", maxPMID - minPMID + 1, minPMID - 0.5, maxPMID + 0.5));
-  getStatistics().getHisto1D("filter_LL_PM")->GetXaxis()->SetTitle("PM ID");
-  getStatistics().getHisto1D("filter_LL_PM")->GetYaxis()->SetTitle("Number of LL pairs");
+  getStatistics().createHistogramWithAxes(new TH1D("filter_TT_tdiff", "Time diff of TT pairs", 200, 0.0, 50000.0), "Time Diff [ps]",
+                                          "Number of TT pairs");
 
-  getStatistics().createHistogram(new TH1F("filter_LL_THR", "Number of found LL on Thresolds", 4, 0.5, 4.5));
-  getStatistics().getHisto1D("filter_LL_THR")->GetXaxis()->SetTitle("THR Number");
-  getStatistics().getHisto1D("filter_LL_THR")->GetYaxis()->SetTitle("Number of LL pairs");
+  getStatistics().createHistogramWithAxes(new TH1D("filter_LL_PM", "Number of LL found on PMs", maxPMID - minPMID + 1, minPMID - 0.5, maxPMID + 0.5),
+                                          "PM ID", "Number of LL pairs");
 
-  getStatistics().createHistogram(new TH1F("filter_LL_tdiff", "Time diff of LL pairs", 200, 0.0, 5000.0));
-  getStatistics().getHisto1D("filter_LL_tdiff")->GetXaxis()->SetTitle("Time Diff [ps]");
-  getStatistics().getHisto1D("filter_LL_tdiff")->GetYaxis()->SetTitle("Number of LL pairs");
+  getStatistics().createHistogramWithAxes(new TH1D("filter_TT_PM", "Number of TT found on PMs", maxPMID - minPMID + 1, minPMID - 0.5, maxPMID + 0.5),
+                                          "PM ID", "Number of TT pairs");
 
-  getStatistics().createHistogram(new TH1F("filter_TT_PM", "Number of TT found on PMs", maxPMID - minPMID + 1, minPMID - 0.5, maxPMID + 0.5));
-  getStatistics().getHisto1D("filter_TT_PM")->GetXaxis()->SetTitle("PM ID");
-  getStatistics().getHisto1D("filter_TT_PM")->GetYaxis()->SetTitle("Number of TT pairs");
+  getStatistics().createHistogramWithAxes(new TH1D("filter_LL_THR", "Number of found LL on Thresolds", 4, 0.5, 4.5), "THR Number",
+                                          "Number of LL pairs");
 
-  getStatistics().createHistogram(new TH1F("filter_TT_THR", "Number of found TT on Thresolds", 4, 0.5, 4.5));
-  getStatistics().getHisto1D("filter_TT_THR")->GetXaxis()->SetTitle("THR Number");
-  getStatistics().getHisto1D("filter_TT_THR")->GetYaxis()->SetTitle("Number of TT pairs");
-
-  getStatistics().createHistogram(new TH1F("filter_TT_tdiff", "Time diff of TT pairs", 200, 0.0, 50000.0));
-  getStatistics().getHisto1D("filter_TT_tdiff")->GetXaxis()->SetTitle("Time Diff [ps]");
-  getStatistics().getHisto1D("filter_TT_tdiff")->GetYaxis()->SetTitle("Number of TT pairs");
+  getStatistics().createHistogramWithAxes(new TH1D("filter_TT_THR", "Number of found TT on Thresolds", 4, 0.5, 4.5), "THR Number",
+                                          "Number of TT pairs");
 
   // Time differences of consecutive lead thr1 SigChs after filtering
-  getStatistics().createHistogram(new TH1F("consec_lead_THR1", "Time diff of consecutive leadings THR1", 200, 0.0, 50000.0));
-  getStatistics().getHisto1D("consec_lead_THR1")->GetXaxis()->SetTitle("Time Diff [ps]");
-  getStatistics().getHisto1D("consec_lead_THR1")->GetYaxis()->SetTitle("Number of SigCh pairs");
+
+  getStatistics().createHistogramWithAxes(new TH1D("consec_lead_THR1", "Time diff of consecutive leadings THR1", 200, 0.0, 50000.0), "Time Diff [ps]",
+                                          "Number of channel signal pairs");
 }

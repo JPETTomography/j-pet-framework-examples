@@ -17,12 +17,10 @@
 #define TIMEWINDOWCREATOR_H
 
 #include <JPetChannel/JPetChannel.h>
-#include <JPetSigCh/JPetSigCh.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
 #include <JPetUserTask/JPetUserTask.h>
-
+#include <Signals/JPetChannelSignal/JPetChannelSignal.h>
 #include <boost/property_tree/ptree.hpp>
-
 #include <map>
 #include <set>
 
@@ -34,8 +32,7 @@ class JPetWriter;
  * Task translates data from Unpacker file fomrat - EventIII to JPetTimeWindow.
  * Parameters for start and end time can be specified in user options, default are
  * provided. Moreover time calibration and threshold values injection can be
- * performed, if ASCII files of standard format were provided. In case of errors,
- * creation of Time Windows continues without this additional information.
+ * performed, if JSON file was provided.
  */
 class TimeWindowCreator : public JPetUserTask
 {
@@ -47,20 +44,18 @@ public:
   virtual bool terminate() override;
 
 protected:
-  void saveSigChs(const std::vector<JPetSigCh>& sigChVec);
+  void saveChannelSignals(const std::vector<JPetChannelSignal>& channelSignalVec);
   void initialiseHistograms();
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
-  const std::string kMaskedChannlesParamKey = "TimeWindowCreator_MaskedChannels_std::vector<int>";
   const std::string kMaxTimeParamKey = "TimeWindowCreator_MaxTime_double";
   const std::string kMinTimeParamKey = "TimeWindowCreator_MinTime_double";
   const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
   boost::property_tree::ptree fConstansTree;
-  std::vector<int> fMaskedChannels;
   bool fSaveControlHistos = true;
   double fMinTime = 0.0;
   double fMaxTime = 1.e6;
   // Number for scaling some histograms, so they are not reaching their memory capacity
-  double fScalingFactor = 0.001;
+  double fScalingFactor = 0.0001;
 };
 
 #endif /* !TIMEWINDOWCREATOR_H */

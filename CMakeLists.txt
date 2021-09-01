@@ -175,9 +175,10 @@ endif()
 ################################################################################
 ## Directories with examples
 add_subdirectory(ModularDetectorAnalysis)
-add_subdirectory(MCGeantAnalysis)
-add_subdirectory(Imaging)
-add_subdirectory(InterfileReconstruction)
+
+#add_subdirectory(MCGeantAnalysis)
+#add_subdirectory(Imaging)
+#add_subdirectory(InterfileReconstruction)
 
 #add_subdirectory(EventClassification)
 #add_subdirectory(LargeBarrelAnalysis)

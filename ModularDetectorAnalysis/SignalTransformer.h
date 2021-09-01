@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -16,17 +16,15 @@
 #ifndef SIGNALTRANSFORMER_H
 #define SIGNALTRANSFORMER_H
 
-#include <boost/property_tree/ptree.hpp>
-
 #include "JPetMatrixSignal/JPetMatrixSignal.h"
 #include "JPetUserTask/JPetUserTask.h"
+#include <boost/property_tree/ptree.hpp>
 #include <vector>
 
 class JPetWriter;
 
 /**
- * @brief User Task: method rewriting Raw Signals to Reco and Matrix Signals.
- *
+ * @brief User Task: method merging PM Signals into Matrix Signals.
  */
 class SignalTransformer : public JPetUserTask
 {
@@ -39,16 +37,12 @@ public:
 
 protected:
   const std::string kMergeSignalsTimeParamKey = "SignalTransformer_MergeSignalsTime_double";
-  const std::string kSelectMatrixPosParamKey = "SignalTrasformer_SelectMatrixPos_int";
-  const std::string kSelectTHRSignalsParamKey = "SignalTransformer_SelectTHRSignals_int";
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kSaveCalibHistosParamKey = "Save_Calib_Histograms_bool";
   const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
   void saveMatrixSignals(const std::vector<JPetMatrixSignal>& mtxSigVec);
   boost::property_tree::ptree fConstansTree;
   void initialiseHistograms();
-  int fMatrixPos = -1;
-  int fTHRSelect = -1;
   bool fSaveControlHistos = true;
   bool fSaveCalibHistos = false;
   double fMergingTime = 20000.0;

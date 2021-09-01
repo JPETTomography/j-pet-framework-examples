@@ -16,19 +16,16 @@
 #ifndef SIGNALFINDER_H
 #define SIGNALFINDER_H
 
-#include <JPetRawSignal/JPetRawSignal.h>
+#include "SignalFinderTools.h"
 #include <JPetUserTask/JPetUserTask.h>
+#include <Signals/JPetPMSignal/JPetPMSignal.h>
 #include <boost/property_tree/ptree.hpp>
 #include <vector>
 
 class JPetWriter;
 
-#ifdef __CINT__
-#define override
-#endif
-
 /**
- * @brief User Task: method organizing Signal Channels to Raw Signals
+ * @brief User Task: method organizing Channel Signals to PM Signals
  *
  * Task organizes Signal Channels from every JPetTimeWindow to Raw Signals
  * Parameters for time window values used in tools can be specified in user options,
@@ -44,20 +41,23 @@ public:
   virtual bool terminate() override;
 
 protected:
-  void saveRawSignals(const std::vector<JPetRawSignal>& sigChVec);
+  void saveRawSignals(const std::vector<JPetPMSignal>& sigChVec);
+  const std::string kUseCorruptedChSigParamKey = "SignalFinder_UseCorruptedChSig_bool";
   const std::string kLeadTrailMaxTimeParamKey = "SignalFinder_LeadTrailMaxTime_double";
-  const std::string kUseCorruptedSigChParamKey = "SignalFinder_UseCorruptedSigCh_bool";
-  const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kEdgeMaxTimeParamKey = "SignalFinder_EdgeMaxTime_double";
+  const std::string kTOTCalculationTypeParamKey = "SignalFinder_TOTCalculationType_std::string";
+  const std::string kTOTHistoUpperLimitParamKey = "SignalFinder_TOTHistoUpperLimit_double";
+  const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
-  boost::property_tree::ptree fConstansTree;
   const int kNumOfThresholds = 2;
-  double fSigChLeadTrailMaxTime = 23000.0;
-  double fSigChEdgeMaxTime = 5000.0;
-  bool fUseCorruptedSigCh = false;
+  boost::property_tree::ptree fConstansTree;
+  SignalFinderTools::TOTCalculationType fTOTCalcType = kSimplified;
+  double fTOTHistoUpperLimit = 200000.0;
+  double fChSigLeadTrailMaxTime = 200000.0;
+  double fChSigEdgeMaxTime = 5000.0;
+  bool fUseCorruptedChSig = false;
   bool fSaveControlHistos = true;
-  double fScalingFactor = 0.001;
-
+  double fScalingFactor = 0.0001;
   void initialiseHistograms();
 };
 
