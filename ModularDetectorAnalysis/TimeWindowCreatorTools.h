@@ -16,13 +16,12 @@
 #ifndef TIMEWINDOWCREATORTOOLS_H
 #define TIMEWINDOWCREATORTOOLS_H
 
-#include <boost/property_tree/ptree.hpp>
-
 #include "JPetChannel/JPetChannel.h"
 #include "JPetParamBank/JPetParamBank.h"
 #include "JPetStatistics/JPetStatistics.h"
 #include "Signals/JPetChannelSignal/JPetChannelSignal.h"
 #include "TDCChannel.h"
+#include <boost/property_tree/ptree.hpp>
 #include <vector>
 
 /**

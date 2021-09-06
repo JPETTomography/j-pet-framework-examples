@@ -16,8 +16,8 @@
 #ifndef SIGNALTRANSFORMER_H
 #define SIGNALTRANSFORMER_H
 
-#include "JPetMatrixSignal/JPetMatrixSignal.h"
 #include "JPetUserTask/JPetUserTask.h"
+#include "Signals/JPetMatrixSignal/JPetMatrixSignal.h"
 #include <boost/property_tree/ptree.hpp>
 #include <vector>
 

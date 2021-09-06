@@ -13,15 +13,12 @@
  *  @file HitFinder.cpp
  */
 
+#include "HitFinder.h"
+#include "HitFinderTools.h"
 #include <JPetAnalysisTools/JPetAnalysisTools.h>
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include <JPetWriter/JPetWriter.h>
-
 #include <boost/property_tree/json_parser.hpp>
-
-#include "CalibrationTools.h"
-#include "HitFinder.h"
-#include "HitFinderTools.h"
 #include <map>
 #include <string>
 #include <vector>
@@ -35,7 +32,7 @@ HitFinder::~HitFinder() {}
 bool HitFinder::init()
 {
   INFO("Hit finding Started");
-  fOutputEvents = new JPetTimeWindow("JPetHit");
+  fOutputEvents = new JPetTimeWindow("JPetPhysRecoHit");
 
   // Reading values from the user options if available
   // Getting bools for saving control and calibration histograms
@@ -91,7 +88,9 @@ bool HitFinder::exec()
     }
   }
   else
+  {
     return false;
+  }
   return true;
 }
 
@@ -101,38 +100,38 @@ bool HitFinder::terminate()
   return true;
 }
 
-void HitFinder::saveHits(const std::vector<JPetHit>& hits)
+void HitFinder::saveHits(const std::vector<JPetPhysRecoHit>& hits)
 {
-  auto sortedHits = JPetAnalysisTools::getHitsOrderedByTime(hits);
+  auto sortedHits = hits;
+  HitFinderTools::sortByTime(sortedHits);
 
   if (fSaveControlHistos)
   {
-    getStatistics().getHisto1D("hits_tslot")->Fill(hits.size());
+    getStatistics().fillHistogram("hits_tslot", hits.size());
   }
 
   for (auto& hit : sortedHits)
   {
     // Checking minimal multiplicity condition
-    int multi = hit.getSignalA().getRawSignals().size() + hit.getSignalB().getRawSignals().size();
+    int multi = hit.getSignalA().getPMSignals().size() + hit.getSignalB().getPMSignals().size();
     if (fMinHitMultiplicity != -1 && multi < fMinHitMultiplicity)
     {
       continue;
     }
 
-    fOutputEvents->add<JPetHit>(hit);
+    fOutputEvents->add<JPetPhysRecoHit>(hit);
     if (fSaveControlHistos)
     {
       int scinID = hit.getScin().getID();
-      getStatistics().getHisto1D("hits_scin")->Fill(scinID);
-      getStatistics().getHisto2D("hit_pos_XY")->Fill(hit.getPosY(), hit.getPosX());
-      getStatistics().getHisto2D("hit_pos_z")->Fill(scinID, hit.getPosZ());
-      getStatistics().getHisto1D("hit_multi")->Fill(multi);
-      getStatistics().getHisto2D("hit_multi_scin")->Fill(scinID, multi);
-      getStatistics().getHisto2D("hit_tdiff_scin")->Fill(scinID, hit.getTimeDiff());
+      getStatistics().fillHistogram("hits_scin", hits.size());
+      getStatistics().fillHistogram("hit_pos", hit.getPosZ(), hit.getPosY(), hit.getPosX());
+      getStatistics().fillHistogram("hit_multi", multi);
+      getStatistics().fillHistogram("hit_multi_scin", scinID, multi);
+      getStatistics().fillHistogram("hit_tdiff_scin", scinID, hit.getTimeDiff());
 
       if (hit.getEnergy() != 0.0)
       {
-        getStatistics().getHisto2D("hit_tot_scin")->Fill(scinID, hit.getEnergy());
+        getStatistics().fillHistogram("hit_tot_scin", scinID, hit.getEnergy());
       }
     }
   }
@@ -140,67 +139,42 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
 
 void HitFinder::initialiseHistograms()
 {
-
   auto minScinID = getParamBank().getScins().begin()->first;
   auto maxScinID = getParamBank().getScins().rbegin()->first;
 
-  getStatistics().createHistogram(new TH1F("hits_tslot", "Number of Hits in Time Window", 60, 0.5, 60.5));
-  getStatistics().getHisto1D("hits_tslot")->GetXaxis()->SetTitle("Hits in Time Slot");
-  getStatistics().getHisto1D("hits_tslot")->GetYaxis()->SetTitle("Number of Time Slots");
+  getStatistics().createHistogramWithAxes(new TH1D("hits_tslot", "Number of Hits in Time Window", 60, 0.5, 60.5), "Hits in Time Slot",
+                                          "Number of Time Slots");
 
-  getStatistics().createHistogram(
-      new TH1F("hits_scin", "Number of Hits in Scintillators", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5));
-  getStatistics().getHisto1D("hits_scin")->GetXaxis()->SetTitle("Scin ID");
-  getStatistics().getHisto1D("hits_scin")->GetYaxis()->SetTitle("Number of Hits");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("hits_scin", "Number of Hits per Scintillators", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5), "Scin ID",
+      "Number of Hits");
 
-  getStatistics().createHistogram(new TH2F("hit_pos_XY", "Hit Position XY projection", 101, -50.5, 50.5, 101, -50.5, 50.5));
-  getStatistics().getHisto2D("hit_pos_XY")->GetXaxis()->SetTitle("Y [cm]");
-  getStatistics().getHisto2D("hit_pos_XY")->GetYaxis()->SetTitle("X [cm]");
+  getStatistics().createHistogramWithAxes(new TH3D("hit_pos", "Hit Position", 101, -50.5, 50.5, 101, -50.5, 50.5, 101, -50.5, 50.5), "Z [cm]",
+                                          "X [cm]", "Y [cm]");
 
-  getStatistics().createHistogram(
-      new TH2F("hit_pos_z", "Hit Position per Scintillator ID", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 201, -50.0, 50.0));
-  getStatistics().getHisto2D("hit_pos_z")->GetXaxis()->SetTitle("Scintillator ID");
-  getStatistics().getHisto2D("hit_pos_z")->GetYaxis()->SetTitle("Hit z-axis position [cm]");
+  getStatistics().createHistogramWithAxes(new TH1D("hit_multi", "Number of signals from SiPMs in created hit", 12, -0.5, 11.5), "Number of Signals",
+                                          "Number of Hits");
 
-  getStatistics().createHistogram(new TH1F("hit_multi", "Number of signals from SiPMs in created hit", 12, -0.5, 11.5));
-  getStatistics().getHisto1D("hit_multi")->GetXaxis()->SetTitle("Number of signals");
-  getStatistics().getHisto1D("hit_multi")->GetYaxis()->SetTitle("Number of Hits");
+  getStatistics().createHistogramWithAxes(new TH2D("hit_multi_scin", "Number of signals from SiPMs in created hit per Scin",
+                                                   maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 12, -0.5, 11.5),
+                                          "Scintillator ID", "Signal multiplicity [ps]");
 
-  getStatistics().createHistogram(new TH2F("hit_multi_scin", "Number of signals from SiPMs in created Hit per Scin", maxScinID - minScinID + 1,
-                                           minScinID - 0.5, maxScinID + 0.5, 12, -0.5, 11.5));
-  getStatistics().getHisto2D("hit_multi_scin")->GetXaxis()->SetTitle("Scintillator ID");
-  getStatistics().getHisto2D("hit_multi_scin")->GetYaxis()->SetTitle("Signal multiplicity [ps]");
-
-  // Time diff and TOT per scin
-  getStatistics().createHistogram(new TH2F("hit_tdiff_scin", "Hit Time Difference per Scintillator ID", maxScinID - minScinID + 1, minScinID - 0.5,
-                                           maxScinID + 0.5, 201, -1.1 * fABTimeDiff, 1.1 * fABTimeDiff));
-  getStatistics().getHisto2D("hit_tdiff_scin")->GetXaxis()->SetTitle("Scintillator ID");
-  getStatistics().getHisto2D("hit_tdiff_scin")->GetYaxis()->SetTitle("A-B time difference [ps]");
+  // Time diff and ToT per scin
+  getStatistics().createHistogramWithAxes(new TH2D("hit_tdiff_scin", "Hit Time Difference per Scintillator ID", maxScinID - minScinID + 1,
+                                                   minScinID - 0.5, maxScinID + 0.5, 201, -1.1 * fABTimeDiff, 1.1 * fABTimeDiff),
+                                          "Scintillator ID", "A-B time difference [ps]");
 
   double totUppLimit = 10000000.0;
-  getStatistics().createHistogram(new TH2F("hit_tot_scin", "Hit TOT divided by multiplicity, all hits", maxScinID - minScinID + 1, minScinID - 0.5,
-                                           maxScinID + 0.5, 200, 0.0, totUppLimit));
-  getStatistics().getHisto2D("hit_tot_scin")->GetXaxis()->SetTitle("Scintillator ID");
-  getStatistics().getHisto2D("hit_tot_scin")->GetYaxis()->SetTitle("Time over Threshold [ps]");
-
-  // Time diff and TOT per multiplicity
-  // for (int multi = 2; multi <= 8; multi++)
-  // {
-  //   getStatistics().createHistogram(new TH2F(Form("hit_tdiff_scin_m_%d", multi), Form("Hit time difference per scin, multiplicity %d", multi),
-  //                                            maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 300, -1.1 * fABTimeDiff,
-  //                                            1.1 * fABTimeDiff));
-  //   getStatistics().getHisto2D(Form("hit_tdiff_scin_m_%d", multi))->GetXaxis()->SetTitle("Scintillator ID");
-  //   getStatistics().getHisto2D(Form("hit_tdiff_scin_m_%d", multi))->GetYaxis()->SetTitle("A-B time difference [ps]");
-  // }
+  getStatistics().createHistogramWithAxes(new TH2D("hit_tot_scin", "Hit ToT divided by multiplicity, all hits", maxScinID - minScinID + 1,
+                                                   minScinID - 0.5, maxScinID + 0.5, 200, 0.0, totUppLimit),
+                                          "Scintillator ID", "Time over Threshold [ps]");
 
   // Unused sigals stats
-  getStatistics().createHistogram(
-      new TH1F("remain_signals_scin", "Number of Unused Signals in Scintillator", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5));
-  getStatistics().getHisto1D("remain_signals_scin")->GetXaxis()->SetTitle("Scintillator ID");
-  getStatistics().getHisto1D("remain_signals_scin")->GetYaxis()->SetTitle("Number of Unused Signals in Scintillator");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("remain_signals_scin", "Number of Unused Signals in Scintillator", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5),
+      "Scintillator ID", "Number of Unused Signals in Scintillator");
 
-  getStatistics().createHistogram(
-      new TH1F("remain_signals_tdiff", "Time Diff of an unused signal and the consecutive one", 200, fABTimeDiff, 5.0 * fABTimeDiff));
-  getStatistics().getHisto1D("remain_signals_tdiff")->GetXaxis()->SetTitle("Time difference [ps]");
-  getStatistics().getHisto1D("remain_signals_tdiff")->GetYaxis()->SetTitle("Number of Signals");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("remain_signals_tdiff", "Time Diff of an unused signal and the consecutive one", 200, fABTimeDiff, 5.0 * fABTimeDiff),
+      "Time difference [ps]", "Number of Signals");
 }

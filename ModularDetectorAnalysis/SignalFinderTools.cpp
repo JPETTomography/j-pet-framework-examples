@@ -59,12 +59,12 @@ const map<int, vector<JPetChannelSignal>> SignalFinderTools::getChannelSignalsBy
  */
 vector<JPetPMSignal> SignalFinderTools::buildAllSignals(const map<int, vector<JPetChannelSignal>>& chSigByPM, double chSigEdgeMaxTime,
                                                         double chSigLeadTrailMaxTime, int numberOfThrs, JPetStatistics& stats, bool saveHistos,
-                                                        boost::property_tree::ptree& calibTree)
+                                                        SignalFinderTools::ToTCalculationType type, boost::property_tree::ptree& calibTree)
 {
   vector<JPetPMSignal> allSignals;
   for (auto& chSigPair : chSigByPM)
   {
-    auto signals = buildPMSignals(chSigPair.second, chSigEdgeMaxTime, chSigLeadTrailMaxTime, numberOfThrs, stats, saveHistos, calibTree);
+    auto signals = buildPMSignals(chSigPair.second, chSigEdgeMaxTime, chSigLeadTrailMaxTime, numberOfThrs, stats, saveHistos, type, calibTree);
     allSignals.insert(allSignals.end(), signals.begin(), signals.end());
   }
   return allSignals;
@@ -79,7 +79,7 @@ vector<JPetPMSignal> SignalFinderTools::buildAllSignals(const map<int, vector<JP
  */
 vector<JPetPMSignal> SignalFinderTools::buildPMSignals(const vector<JPetChannelSignal>& chSigByPM, double chSigEdgeMaxTime,
                                                        double chSigLeadTrailMaxTime, int numberOfThrs, JPetStatistics& stats, bool saveHistos,
-                                                       boost::property_tree::ptree& calibTree)
+                                                       SignalFinderTools::ToTCalculationType type, boost::property_tree::ptree& calibTree)
 {
   vector<JPetPMSignal> pmSigVec;
 
@@ -89,11 +89,11 @@ vector<JPetPMSignal> SignalFinderTools::buildPMSignals(const vector<JPetChannelS
 
   for (const JPetChannelSignal& chSig : chSigByPM)
   {
-    if (chSig.getType() == JPetChannelSignal::Leading)
+    if (chSig.getEdgeType() == JPetChannelSignal::Leading)
     {
       thrLeadingChannelSignal.at(chSig.getChannel().getThresholdNumber() - 1).push_back(chSig);
     }
-    else if (chSig.getType() == JPetChannelSignal::Trailing)
+    else if (chSig.getEdgeType() == JPetChannelSignal::Trailing)
     {
       thrTrailingChannelSignal.at(chSig.getChannel().getThresholdNumber() - 1).push_back(chSig);
     }
@@ -102,70 +102,125 @@ vector<JPetPMSignal> SignalFinderTools::buildPMSignals(const vector<JPetChannelS
   assert(thrLeadingChannelSignal.size() > 0);
   while (thrLeadingChannelSignal.at(0).size() > 0)
   {
-    JPetPMSignal pmSig;
-    pmSig.setPM(thrLeadingChannelSignal.at(0).at(0).getChannel().getPM());
-    double totTHR1 = 0.0, totTHR2 = 0.0, thr1Val = 0.0, thr2Val = 0.0;
+    // pmSig.setPM(thrLeadingChannelSignal.at(0).at(0).getChannel().getPM());
+    // double totTHR1 = 0.0, totTHR2 = 0.0, thr1Val = 0.0, thr2Val = 0.0;
 
-    // First THR leading added by default
-    pmSig.addPoint(thrLeadingChannelSignal.at(0).at(0));
-    pmSig.setTime(thrLeadingChannelSignal.at(0).at(0).getTime());
-    thr1Val = thrLeadingChannelSignal.at(0).at(0).getChannel().getThresholdValue();
+    // // First THR leading added by default
+    // pmSig.addPoint(thrLeadingChannelSignal.at(0).at(0));
+    //
+    // addLeadTrailPair
+    //
+    // // Establishing Reco flag same as of the first added Channel Signal
+    // if (thrLeadingChannelSignal.at(0).at(0).getRecoFlag() == JPetRecoSignal::Good)
+    // {
+    //   pmSig.setRecoFlag(JPetRecoSignal::Good);
+    // }
+    // else if (thrLeadingChannelSignal.at(0).at(0).getRecoFlag() == JPetRecoSignal::Corrupted)
+    // {
+    //   pmSig.setRecoFlag(JPetRecoSignal::Corrupted);
+    // }
 
-    // Searching for matching trailing on THR 1
+    // pmSig.setTime(thrLeadingChannelSignal.at(0).at(0).getTime());
+    // thr1Val = thrLeadingChannelSignal.at(0).at(0).getChannel().getThresholdValue();
+
+    // PM Signal is created if the Lead-Trail pair is found at THR 1
     int closestTrailingChannelSignal =
         findTrailingChannelSignal(thrLeadingChannelSignal.at(0).at(0), chSigLeadTrailMaxTime, thrTrailingChannelSignal.at(0));
     if (closestTrailingChannelSignal != -1)
     {
-      pmSig.addPoint(thrTrailingChannelSignal.at(0).at(closestTrailingChannelSignal));
-      totTHR1 = thrTrailingChannelSignal.at(0).at(closestTrailingChannelSignal).getTime() - thrLeadingChannelSignal.at(0).at(0).getTime();
-      thrTrailingChannelSignal.at(0).erase(thrTrailingChannelSignal.at(0).begin() + closestTrailingChannelSignal);
-    }
+      JPetPMSignal pmSig;
+      pmSig.setRecoFlag(JPetRecoSignal::Good);
 
-    // Procedure follows for THR 2
-    int nextThrChannelSignalIndex =
-        findChannelSignalOnNextThr(thrLeadingChannelSignal.at(0).at(0).getTime(), chSigEdgeMaxTime, thrLeadingChannelSignal.at(1));
-    if (nextThrChannelSignalIndex != -1)
-    {
-      closestTrailingChannelSignal =
-          findTrailingChannelSignal(thrLeadingChannelSignal.at(0).at(0), chSigLeadTrailMaxTime, thrTrailingChannelSignal.at(1));
-      if (closestTrailingChannelSignal != -1)
+      // pmSig.addPoint(thrTrailingChannelSignal.at(0).at(closestTrailingChannelSignal));
+      pmSig.addLeadTrailPair(thrLeadingChannelSignal.at(0).at(0), thrTrailingChannelSignal.at(0).at(closestTrailingChannelSignal));
+
+      // Modifying flag if needed
+      if (thrLeadingChannelSignal.at(0).at(0).getRecoFlag() == JPetRecoSignal::Corrupted ||
+          thrTrailingChannelSignal.at(0).at(closestTrailingChannelSignal).getRecoFlag() == JPetRecoSignal::Corrupted)
       {
-        pmSig.addPoint(thrTrailingChannelSignal.at(1).at(closestTrailingChannelSignal));
-        totTHR2 = thrTrailingChannelSignal.at(1).at(closestTrailingChannelSignal).getTime() -
-                  thrLeadingChannelSignal.at(1).at(nextThrChannelSignalIndex).getTime();
-        thrTrailingChannelSignal.at(1).erase(thrTrailingChannelSignal.at(1).begin() + closestTrailingChannelSignal);
+        pmSig.setRecoFlag(JPetRecoSignal::Corrupted);
       }
-      pmSig.addPoint(thrLeadingChannelSignal.at(1).at(nextThrChannelSignalIndex));
-      thr2Val = thrLeadingChannelSignal.at(1).at(nextThrChannelSignalIndex).getChannel().getThresholdValue();
-      thrLeadingChannelSignal.at(1).erase(thrLeadingChannelSignal.at(1).begin() + nextThrChannelSignalIndex);
+
+      // totTHR1 = thrTrailingChannelSignal.at(0).at(closestTrailingChannelSignal).getTime() - thrLeadingChannelSignal.at(0).at(0).getTime();
+      thrTrailingChannelSignal.at(0).erase(thrTrailingChannelSignal.at(0).begin() + closestTrailingChannelSignal);
+
+      // Adding Lead-Trail pair if found on THR 2
+      int nextThrChannelSignalIndex =
+          findChannelSignalOnNextThr(thrLeadingChannelSignal.at(0).at(0).getTime(), chSigEdgeMaxTime, thrLeadingChannelSignal.at(1));
+      if (nextThrChannelSignalIndex != -1)
+      {
+        closestTrailingChannelSignal =
+            findTrailingChannelSignal(thrLeadingChannelSignal.at(0).at(0), chSigLeadTrailMaxTime, thrTrailingChannelSignal.at(1));
+        if (closestTrailingChannelSignal != -1)
+        {
+
+          // pmSig.addPoint(thrTrailingChannelSignal.at(1).at(closestTrailingChannelSignal));
+          pmSig.addLeadTrailPair(thrLeadingChannelSignal.at(1).at(nextThrChannelSignalIndex),
+                                 thrTrailingChannelSignal.at(1).at(closestTrailingChannelSignal));
+
+          // Modifying flag if needed
+          if (thrLeadingChannelSignal.at(1).at(nextThrChannelSignalIndex).getRecoFlag() == JPetRecoSignal::Corrupted ||
+              thrTrailingChannelSignal.at(1).at(closestTrailingChannelSignal).getRecoFlag() == JPetRecoSignal::Corrupted)
+          {
+            pmSig.setRecoFlag(JPetRecoSignal::Corrupted);
+          }
+
+          // totTHR2 = thrTrailingChannelSignal.at(1).at(closestTrailingChannelSignal).getTime() -
+          //           thrLeadingChannelSignal.at(1).at(nextThrChannelSignalIndex).getTime();
+          thrTrailingChannelSignal.at(1).erase(thrTrailingChannelSignal.at(1).begin() + closestTrailingChannelSignal);
+          thrLeadingChannelSignal.at(1).erase(thrLeadingChannelSignal.at(1).begin() + nextThrChannelSignalIndex);
+        }
+
+        // pmSig.addPoint(thrLeadingChannelSignal.at(1).at(nextThrChannelSignalIndex));
+
+        // Modifying flag if needed
+        // if (thrLeadingChannelSignal.at(1).at(nextThrChannelSignalIndex).getRecoFlag() == JPetRecoSignal::Corrupted)
+        // {
+        //   pmSig.setRecoFlag(JPetRecoSignal::Corrupted);
+        // }
+        // thr2Val = thrLeadingChannelSignal.at(1).at(nextThrChannelSignalIndex).getChannel().getThresholdValue();
+      }
+
+      auto tot = calculatePMSignalToT(pmSig, type, calibTree);
+      pmSig.setToT(tot);
+      // Adding created PM Signal to vector
+      pmSigVec.push_back(pmSig);
+
+      // Filling control histograms
+      if (saveHistos && gRandom->Uniform() < 0.001)
+      {
+        if (pmSig.getRecoFlag() == JPetRecoSignal::Good)
+        {
+          stats.fillHistogram("reco_flags_pmsig", 1);
+        }
+        else if (pmSig.getRecoFlag() == JPetRecoSignal::Corrupted)
+        {
+          stats.fillHistogram("reco_flags_pmsig", 2);
+        }
+        else
+        {
+          stats.fillHistogram("reco_flags_pmsig", 3);
+        }
+
+        for (int jj = 0; jj < numberOfThrs; jj++)
+        {
+          for (auto chSig : thrLeadingChannelSignal.at(jj))
+          {
+            stats.fillHistogram("unused_chsig_thr", 2 * chSig.getChannel().getThresholdNumber() - 1);
+            stats.fillHistogram("unused_chsig_sipm", chSig.getChannel().getPM().getID());
+          }
+          for (auto chSig : thrTrailingChannelSignal.at(jj))
+          {
+            stats.fillHistogram("unused_chsig_thr", 2 * chSig.getChannel().getThresholdNumber());
+            stats.fillHistogram("unused_chsig_sipm", chSig.getChannel().getPM().getID());
+          }
+        }
+      }
     }
 
-    auto tot = calculatePMSignalTOT(pmSig.getPM().getID(), totTHR1, totTHR2, thr1Val, thr2Val, stats, saveHistos, calibTree);
-    // double tot = totTHR1 + totTHR2;
-
-    // Adding created PM Signal to vector
-    pmSig.setTOT(tot);
-    pmSigVec.push_back(pmSig);
     thrLeadingChannelSignal.at(0).erase(thrLeadingChannelSignal.at(0).begin());
   }
 
-  // Filling control histograms
-  if (saveHistos && gRandom->Uniform() < 0.001)
-  {
-    for (int jj = 0; jj < numberOfThrs; jj++)
-    {
-      for (auto chSig : thrLeadingChannelSignal.at(jj))
-      {
-        stats.getHisto1D("unused_chsig_thr")->Fill(2 * chSig.getChannel().getThresholdNumber() - 1);
-        stats.getHisto1D("unused_chsig_sipm")->Fill(chSig.getChannel().getPM().getID());
-      }
-      for (auto chSig : thrTrailingChannelSignal.at(jj))
-      {
-        stats.getHisto1D("unused_chsig_thr")->Fill(2 * chSig.getChannel().getThresholdNumber());
-        stats.getHisto1D("unused_chsig_sipm")->Fill(chSig.getChannel().getPM().getID());
-      }
-    }
-  }
   return pmSigVec;
 }
 
@@ -210,23 +265,24 @@ int SignalFinderTools::findTrailingChannelSignal(const JPetChannelSignal& leadin
   return trailingFoundIdices.at(0);
 }
 
-double SignalFinderTools::calculatePMSignalTOT(JPetPMSignal& pmSignal, SignalFinderTools::TOTCalculationType type,
+double SignalFinderTools::calculatePMSignalToT(JPetPMSignal& pmSignal, SignalFinderTools::ToTCalculationType type,
                                                boost::property_tree::ptree& calibTree)
 {
   double tot = 0.0;
+  auto signals = pmSignal.getLeadTrailPairs();
 
-  for (unsigned int thr = 0; thr < pmSignal.getLeadTrailPairs().size(); ++thr)
+  for (unsigned int thr = 0; thr < signals.size(); ++thr)
   {
-    double prevTHR = (thr > 0) ? pmSignal.at(thr - 1).first.getChannel().getThresholdValue() : 0.0;
-    double thisTHR = pmSignal.at(thr).first.getChannel().getThresholdValue();
+    double prevTHR = (thr > 0) ? signals.at(thr - 1).first.getChannel().getThresholdValue() : 0.0;
+    double thisTHR = signals.at(thr).first.getChannel().getThresholdValue();
     double thrDiff = thisTHR - prevTHR;
-    double thisTDiff = pmSignal.at(thr).second.getTime() - pmSignal.at(thr).first.getTime();
-    double prevTDiff = (thr > 0) ? mSignal.at(thr - 1).second.getTime() - pmSignal.at(thr - 1).first.getTime() : thisTDiff;
+    double thisTDiff = signals.at(thr).second.getTime() - signals.at(thr).first.getTime();
+    double prevTDiff = (thr > 0) ? signals.at(thr - 1).second.getTime() - signals.at(thr - 1).first.getTime() : thisTDiff;
 
     switch (type)
     {
     case kSimplified:
-      tot += pmSignal.at(thr).second.getTime() - pmSignal.at(thr).first.getTime();
+      tot += signals.at(thr).second.getTime() - signals.at(thr).first.getTime();
       break;
     case kThresholdRectangular:
       tot += thrDiff * thisTDiff;
@@ -237,8 +293,8 @@ double SignalFinderTools::calculatePMSignalTOT(JPetPMSignal& pmSignal, SignalFin
   }
 
   // Applying ToT normalization constatns
-  double totNormA = calibTree.get("sipm." + to_string(pmID) + ".tot_factor_a", 1.0);
-  double totNormB = calibTree.get("sipm." + to_string(pmID) + ".tot_factor_b", 0.0);
+  double totNormA = calibTree.get("sipm." + to_string(pmSignal.getPM().getID()) + ".tot_factor_a", 1.0);
+  double totNormB = calibTree.get("sipm." + to_string(pmSignal.getPM().getID()) + ".tot_factor_b", 0.0);
   tot = tot * totNormA + totNormB;
   return tot;
 }

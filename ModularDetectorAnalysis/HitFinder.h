@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -16,22 +16,17 @@
 #ifndef HITFINDER1_H
 #define HITFINDER1_H
 
-#include <boost/property_tree/ptree.hpp>
-
-#include <JPetHit/JPetHit.h>
-#include <JPetMatrixSignal/JPetMatrixSignal.h>
+#include <Hits/JPetPhysRecoHit/JPetPhysRecoHit.h>
 #include <JPetUserTask/JPetUserTask.h>
+#include <Signals/JPetMatrixSignal/JPetMatrixSignal.h>
+#include <boost/property_tree/ptree.hpp>
 #include <map>
 #include <vector>
 
 class JPetWriter;
 
-#ifdef __CINT__
-#define override
-#endif
-
 /**
- * @brief User Task creating JPetHit from matched Singlas
+ * @brief User Task creating JPetPhysRecoHit from matched Singlas
  *
  * Task pairs Matrix Signals and creates Hits, based on time comparison
  * of Signals, time window for hit matching can be specified in user options,
@@ -48,7 +43,7 @@ public:
   virtual bool terminate() override;
 
 protected:
-  void saveHits(const std::vector<JPetHit>& hits);
+  void saveHits(const std::vector<JPetPhysRecoHit>& hits);
   void initialiseHistograms();
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kSaveCalibHistosParamKey = "Save_Calib_Histograms_bool";

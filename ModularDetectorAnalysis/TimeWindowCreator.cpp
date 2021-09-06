@@ -157,19 +157,19 @@ void TimeWindowCreator::saveChannelSignals(const vector<JPetChannelSignal>& chan
 
           if (channelSig.getRecoFlag() == JPetRecoSignal::Good)
           {
-            getStatistics().fillHistogram("good_vs_bad_chsig", 1);
+            getStatistics().fillHistogram("reco_flags_chsig", 1);
           }
           else if (channelSig.getRecoFlag() == JPetRecoSignal::Corrupted)
           {
-            getStatistics().fillHistogram("good_vs_bad_chsig", 2);
+            getStatistics().fillHistogram("reco_flags_chsig", 2);
           }
           else if (channelSig.getRecoFlag() == JPetRecoSignal::Unknown)
           {
-            getStatistics().fillHistogram("good_vs_bad_chsig", 3);
+            getStatistics().fillHistogram("reco_flags_chsig", 3);
           }
         }
 
-        if (channelSig.getType() == JPetChannelSignal::Leading && channelSig.getChannel().getThresholdNumber() == 1)
+        if (channelSig.getEdgeType() == JPetChannelSignal::Leading && channelSig.getChannel().getThresholdNumber() == 1)
         {
           if (lastTime != 0.0)
           {
@@ -206,10 +206,10 @@ void TimeWindowCreator::initialiseHistograms()
       new TH1D("occ_channels", "Channels occupation (downscaled)", maxChannelID - minChannelID + 1, minChannelID - 0.5, maxChannelID + 0.5),
       "Channel ID", "Number of Channel Signals");
 
-  getStatistics().createHistogramWithAxes(new TH1D("good_vs_bad_chsig", "Number of good and corrupted Channel Sigals created", 3, 0.5, 3.5), " ",
+  getStatistics().createHistogramWithAxes(new TH1D("reco_flags_chsig", "Number of good and corrupted Channel Sigals created", 4, 0.5, 4.5), " ",
                                           "Number of Channel Signals");
-  vector<pair<unsigned, string>> binLabels = {make_pair(1, "GOOD"), make_pair(2, "CORRUPTED"), make_pair(3, "UNKNOWN")};
-  getStatistics().setHistogramBinLabel("good_vs_bad_chsig", getStatistics().AxisLabel::kXaxis, binLabels);
+  vector<pair<unsigned, string>> binLabels = {make_pair(1, "GOOD"), make_pair(2, "CORRUPTED"), make_pair(3, "UNKNOWN"), make_pair(4, " ")};
+  getStatistics().setHistogramBinLabel("reco_flags_chsig", getStatistics().AxisLabel::kXaxis, binLabels);
 
   // Flagging histograms
   getStatistics().createHistogramWithAxes(new TH1D("filter_LT_tdiff", "LT time diff", 200, 0.0, 200000.0), "Time Diff [ps]", "Number of LT pairs");

@@ -84,23 +84,23 @@ void TimeWindowCreatorTools::flagChannelSignals(vector<JPetChannelSignal>& input
     auto& chSig1 = inputChSigs.at(i);
     auto& chSig2 = inputChSigs.at(i + 1);
     // Explicit check for repeated edges
-    if ((chSig1.getType() == JPetChannelSignal::Leading && chSig2.getType() == JPetChannelSignal::Trailing))
+    if ((chSig1.getEdgeType() == JPetChannelSignal::Leading && chSig2.getEdgeType() == JPetChannelSignal::Trailing))
     {
       chSig1.setRecoFlag(JPetRecoSignal::Good);
       chSig2.setRecoFlag(JPetRecoSignal::Good);
       if (saveHistos)
       {
-        getStatistics().fillHistogram("filter_LT_tdiff", chSig2.getTime() - chSig1.getTime());
+        stats.fillHistogram("filter_LT_tdiff", chSig2.getTime() - chSig1.getTime());
       }
     }
-    else if (chSig1.getType() == JPetChannelSignal::Trailing && chSig2.getType() == JPetChannelSignal::Leading)
+    else if (chSig1.getEdgeType() == JPetChannelSignal::Trailing && chSig2.getEdgeType() == JPetChannelSignal::Leading)
     {
       if (chSig1.getRecoFlag() == JPetRecoSignal::Unknown)
       {
         chSig1.setRecoFlag(JPetRecoSignal::Good);
       }
     }
-    else if (chSig1.getType() == JPetChannelSignal::Leading && chSig2.getType() == JPetChannelSignal::Leading)
+    else if (chSig1.getEdgeType() == JPetChannelSignal::Leading && chSig2.getEdgeType() == JPetChannelSignal::Leading)
     {
       chSig1.setRecoFlag(JPetRecoSignal::Corrupted);
       if (saveHistos)
@@ -110,7 +110,7 @@ void TimeWindowCreatorTools::flagChannelSignals(vector<JPetChannelSignal>& input
         stats.fillHistogram("filter_LL_tdiff", chSig2.getTime() - chSig1.getTime());
       }
     }
-    else if (chSig1.getType() == JPetChannelSignal::Trailing && chSig2.getType() == JPetChannelSignal::Trailing)
+    else if (chSig1.getEdgeType() == JPetChannelSignal::Trailing && chSig2.getEdgeType() == JPetChannelSignal::Trailing)
     {
       if (chSig1.getRecoFlag() == JPetRecoSignal::Unknown)
       {
@@ -130,12 +130,12 @@ void TimeWindowCreatorTools::flagChannelSignals(vector<JPetChannelSignal>& input
 /**
  * Sets up Signal Channel fields
  */
-JPetChannelSignal TimeWindowCreatorTools::generateChSig(double tdcChannelTime, const JPetChannel& channel, JPetChannelSignal::EdgeType edge,
-                                                        double offset)
+JPetChannelSignal TimeWindowCreatorTools::generateChannelSignal(double tdcChannelTime, const JPetChannel& channel, JPetChannelSignal::EdgeType edge,
+                                                                double offset)
 {
   JPetChannelSignal chSig;
   chSig.setTime(1000.0 * tdcChannelTime - offset);
-  chSig.setType(edge);
+  chSig.setEdgeType(edge);
   chSig.setChannel(channel);
   chSig.setRecoFlag(JPetRecoSignal::Unknown);
   return chSig;

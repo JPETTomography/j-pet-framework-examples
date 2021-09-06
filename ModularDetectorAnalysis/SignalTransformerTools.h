@@ -22,9 +22,9 @@
  * Contains methods merging PM Signals from matrix of SiPMs to a Matrix Signal
  */
 
-#include <JPetMatrixSignal/JPetMatrixSignal.h>
-#include <JPetPMSignal/JPetPMSignal.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
+#include <Signals/JPetMatrixSignal/JPetMatrixSignal.h>
+#include <Signals/JPetPMSignal/JPetPMSignal.h>
 #include <boost/property_tree/ptree.hpp>
 #include <utility>
 #include <vector>
@@ -40,7 +40,7 @@ public:
 
 private:
   static double calculateAverageTime(JPetMatrixSignal& mtxSig, boost::property_tree::ptree& calibTree);
-  static double calculateAverageTOT(JPetMatrixSignal& mtxSig);
+  static double calculateAverageToT(JPetMatrixSignal& mtxSig);
   static void sortByTime(std::vector<JPetPMSignal>& input);
 };
 #endif /* !SIGNALTRANSFORMERTOOLS_H */

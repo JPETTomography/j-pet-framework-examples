@@ -41,23 +41,23 @@ public:
   virtual bool terminate() override;
 
 protected:
-  void saveRawSignals(const std::vector<JPetPMSignal>& sigChVec);
+  void savePMSignals(const std::vector<JPetPMSignal>& pmSigVec);
   const std::string kUseCorruptedChSigParamKey = "SignalFinder_UseCorruptedChSig_bool";
-  const std::string kLeadTrailMaxTimeParamKey = "SignalFinder_LeadTrailMaxTime_double";
   const std::string kEdgeMaxTimeParamKey = "SignalFinder_EdgeMaxTime_double";
-  const std::string kTOTCalculationTypeParamKey = "SignalFinder_TOTCalculationType_std::string";
-  const std::string kTOTHistoUpperLimitParamKey = "SignalFinder_TOTHistoUpperLimit_double";
+  const std::string kLeadTrailMaxTimeParamKey = "SignalFinder_LeadTrailMaxTime_double";
+  const std::string kToTCalculationTypeParamKey = "SignalFinder_ToTCalculationType_std::string";
+  const std::string kToTHistoUpperLimitParamKey = "SignalFinder_ToTHistoUpperLimit_double";
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
   const int kNumOfThresholds = 2;
   boost::property_tree::ptree fConstansTree;
-  SignalFinderTools::TOTCalculationType fTOTCalcType = kSimplified;
-  double fTOTHistoUpperLimit = 200000.0;
-  double fChSigLeadTrailMaxTime = 200000.0;
-  double fChSigEdgeMaxTime = 5000.0;
-  bool fUseCorruptedChSig = false;
-  bool fSaveControlHistos = true;
+  SignalFinderTools::ToTCalculationType fToTCalcType = SignalFinderTools::kSimplified;
+  double fToTHistoUpperLimit = 200000.0;
+  double fLeadTrailMaxTime = 200000.0;
+  double fEdgeMaxTime = 5000.0;
   double fScalingFactor = 0.0001;
+  bool fUseCorruptedChannelSignals = false;
+  bool fSaveControlHistos = true;
   void initialiseHistograms();
 };
 

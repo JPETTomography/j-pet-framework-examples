@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -17,7 +17,10 @@ using namespace std;
 
 #include "EventFinder.h"
 #include "EventCategorizerTools.h"
+#include <Hits/JPetMCRecoHit/JPetMCRecoHit.h>
+#include <Hits/JPetRecoHit/JPetRecoHit.h>
 #include <JPetOptionsTools/JPetOptionsTools.h>
+#include <JPetRawMCHit/JPetRawMCHit.h>
 #include <JPetWriter/JPetWriter.h>
 #include <iostream>
 
@@ -122,43 +125,58 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
 
   while (count < nHits)
   {
+    auto hit = dynamic_cast<const JPetBaseHit*>(&timeWindow.operator[](count));
 
-    auto hit = dynamic_cast<const JPetHit&>(timeWindow.operator[](count));
-
-    // Corrupted filter
-    if (!fUseCorruptedHits && hit.getRecoFlag() == JPetHit::Corrupted)
+    // If Event contains hits of reco class, then check corrupted data filter
+    if (dynamic_cast<const JPetRecoHit*>(hit))
     {
-      count++;
-      continue;
+      if (!fUseCorruptedHits && dynamic_cast<const JPetRecoHit*>(hit)->getRecoFlag() == JPetRecoHit::Corrupted)
+      {
+        count++;
+        continue;
+      }
     }
 
     // Creating new event with the first hit
     JPetEvent event;
     event.setEventType(JPetEventType::kUnknown);
     event.addHit(hit);
-    if (hit.getRecoFlag() == JPetHit::Good)
+
+    // If hit is reco class, then check set corrupted data flag approptiately
+    if (dynamic_cast<const JPetRecoHit*>(hit))
     {
-      event.setRecoFlag(JPetEvent::Good);
-    }
-    else if (hit.getRecoFlag() == JPetHit::Corrupted)
-    {
-      event.setRecoFlag(JPetEvent::Corrupted);
+      if (dynamic_cast<const JPetRecoHit*>(hit)->getRecoFlag() == JPetRecoHit::Good)
+      {
+        event.setRecoFlag(JPetEvent::Good);
+      }
+      else if (dynamic_cast<const JPetRecoHit*>(hit)->getRecoFlag() == JPetRecoHit::Corrupted)
+      {
+        event.setRecoFlag(JPetEvent::Corrupted);
+      }
     }
 
-    // Checking, if following hits fulfill time window condition,
-    // then moving interator
+    // If this is a Monte Carlo generated hit, set flag to MC
+    if (dynamic_cast<const JPetMCRecoHit*>(hit) || dynamic_cast<const JPetRawMCHit*>(hit))
+    {
+      event.setRecoFlag(JPetEvent::MC);
+    }
+
+    // Checking, if following hits fulfill time window condition, then moving the interator
     unsigned int nextCount = 1;
     while (count + nextCount < nHits)
     {
-
-      auto nextHit = dynamic_cast<const JPetHit&>(timeWindow.operator[](count + nextCount));
-      auto tDiff = fabs(nextHit.getTime() - hit.getTime());
-      getStatistics().getHisto1D("hits_all_tdiff")->Fill(tDiff);
+      auto nextHit = dynamic_cast<const JPetBaseHit*>(&timeWindow.operator[](count + nextCount));
+      auto tDiff = fabs(nextHit->getTime() - hit->getTime());
+      getStatistics().fillHistogram("event_hits_tdiff_all", tDiff);
       if (tDiff < fEventTimeWindow)
       {
-        if (nextHit.getRecoFlag() == JPetHit::Corrupted)
+        // Reco flag check
+        if (dynamic_cast<const JPetRecoHit*>(nextHit))
         {
-          event.setRecoFlag(JPetEvent::Corrupted);
+          if (dynamic_cast<const JPetRecoHit*>(nextHit)->getRecoFlag() == JPetRecoHit::Corrupted)
+          {
+            event.setRecoFlag(JPetEvent::Corrupted);
+          }
         }
         event.addHit(nextHit);
         nextCount++;
@@ -167,7 +185,7 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
       {
         if (fSaveControlHistos)
         {
-          getStatistics().getHisto1D("hits_rejected_tdiff")->Fill(tDiff);
+          getStatistics().fillHistogram("event_hits_tdiff_rejected", tDiff);
         }
         break;
       }
@@ -175,18 +193,18 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
     count += nextCount;
     if (fSaveControlHistos)
     {
-      getStatistics().fillHistogram("hits_per_event_all", event.getHits().size());
+      getStatistics().fillHistogram("event_multi_all", event.getHits().size());
       if (event.getRecoFlag() == JPetEvent::Good)
       {
-        getStatistics().fillHistogram("good_vs_bad_events", 1);
+        getStatistics().fillHistogram("reco_flags_events", 1);
       }
       else if (event.getRecoFlag() == JPetEvent::Corrupted)
       {
-        getStatistics().fillHistogram("good_vs_bad_events", 2);
+        getStatistics().fillHistogram("reco_flags_events", 2);
       }
       else
       {
-        getStatistics().fillHistogram("good_vs_bad_events", 3);
+        getStatistics().fillHistogram("reco_flags_events", 3);
       }
     }
 
@@ -195,11 +213,7 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
       eventVec.push_back(event);
       if (fSaveControlHistos)
       {
-        getStatistics().getHisto1D("hits_per_event_selected")->Fill(event.getHits().size());
-        for (auto& hit : event.getHits())
-        {
-          getStatistics().getHisto1D("hits_scin_selected")->Fill(hit.getScin().getID());
-        }
+        getStatistics().fillHistogram("event_multi_selected", event.getHits().size());
       }
     }
   }
@@ -208,35 +222,20 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
 
 void EventFinder::initialiseHistograms()
 {
+  getStatistics().createHistogramWithAxes(new TH1D("event_hits_tdiff_all", "Time difference of consecutive hits", 200, 0.0, 200000.0),
+                                          "Time difference [ps]", "Number of Hit Pairs");
 
-  getStatistics().createHistogram(new TH1F("hits_all_tdiff", "Time difference of consecutive hits", 200, 0.0, 500000.0));
-  getStatistics().getHisto1D("hits_all_tdiff")->GetXaxis()->SetTitle("Time difference [ps]");
-  getStatistics().getHisto1D("hits_all_tdiff")->GetYaxis()->SetTitle("Number of Hit Pairs");
+  getStatistics().createHistogramWithAxes(new TH1D("event_hits_tdiff_rejected", "Time difference of consecutive unmatched hits", 200, 0.0, 200000.0),
+                                          "Time difference [ps]", "Number of Hit Pairs");
 
-  getStatistics().createHistogram(new TH1F("hits_rejected_tdiff", "Time difference of consecutive unmatched hits", 200, 0.0, 500000.0));
-  getStatistics().getHisto1D("hits_rejected_tdiff")->GetXaxis()->SetTitle("Time difference [ps]");
-  getStatistics().getHisto1D("hits_rejected_tdiff")->GetYaxis()->SetTitle("Number of Hit Pairs");
+  getStatistics().createHistogramWithAxes(new TH1D("event_multi_all", "Number of Hits in all Events", 20, 0.5, 20.5), "Hits in Event",
+                                          "Number of Hits");
 
-  getStatistics().createHistogram(new TH1F("hits_per_event_all", "Number of Hits in an all Events", 20, 0.5, 20.5));
-  getStatistics().getHisto1D("hits_per_event_all")->GetXaxis()->SetTitle("Hits in Event");
-  getStatistics().getHisto1D("hits_per_event_all")->GetYaxis()->SetTitle("Number of Hits");
+  getStatistics().createHistogramWithAxes(new TH1D("event_multi_selected", "Number of Hits in selected Events", 20, 0.5, 20.5), "Hits in Event",
+                                          "Number of Hits");
 
-  getStatistics().createHistogram(new TH1F("hits_per_event_selected", "Number of Hits in selected Events (min. multiplicity)", 20,
-                                           fMinMultiplicity - 0.5, fMinMultiplicity + 19.5));
-  getStatistics().getHisto1D("hits_per_event_selected")->GetXaxis()->SetTitle("Hits in Event");
-  getStatistics().getHisto1D("hits_per_event_selected")->GetYaxis()->SetTitle("Number of Hits");
-
-  auto minScinID = getParamBank().getScins().begin()->first;
-  auto maxScinID = getParamBank().getScins().rbegin()->first;
-
-  getStatistics().createHistogram(new TH1F("hits_scin_selected", "Number of Hits in Scintillators after minimal multiplicity cut",
-                                           maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5));
-  getStatistics().getHisto1D("hits_scin_selected")->GetXaxis()->SetTitle("Scin ID");
-  getStatistics().getHisto1D("hits_scin_selected")->GetYaxis()->SetTitle("Number of Hits");
-
-  getStatistics().createHistogram(new TH1F("good_vs_bad_events", "Number of good and corrupted Events created", 3, 0.5, 3.5));
-  getStatistics().getHisto1D("good_vs_bad_events")->GetXaxis()->SetBinLabel(1, "GOOD");
-  getStatistics().getHisto1D("good_vs_bad_events")->GetXaxis()->SetBinLabel(2, "CORRUPTED");
-  getStatistics().getHisto1D("good_vs_bad_events")->GetXaxis()->SetBinLabel(3, "UNKNOWN");
-  getStatistics().getHisto1D("good_vs_bad_events")->GetYaxis()->SetTitle("Number of Events");
+  getStatistics().createHistogramWithAxes(new TH1D("reco_flags_events", "Reconstruction flags of created events", 4, 0.5, 4.5), " ",
+                                          "Number of Channel Signals");
+  vector<pair<unsigned, string>> binLabels = {make_pair(1, "GOOD"), make_pair(2, "CORRUPTED"), make_pair(3, "UNKNOWN"), make_pair(4, "")};
+  getStatistics().setHistogramBinLabel("reco_flags_events", getStatistics().AxisLabel::kXaxis, binLabels);
 }

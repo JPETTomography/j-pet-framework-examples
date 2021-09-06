@@ -107,17 +107,17 @@ void SignalTransformer::saveMatrixSignals(const std::vector<JPetMatrixSignal>& m
 
     if (fSaveControlHistos)
     {
-      auto scinID = mtxSig.getPM().getScin().getID();
-      getStatistics().fillHistogram("mtxsig_multi", mtxSigVec.getPMSignals().size());
-      if (mtxSig.getMatrix().getSide() == JPetPM::SideA)
+      auto scinID = mtxSig.getMatrix().getScin().getID();
+      getStatistics().fillHistogram("mtxsig_multi", mtxSig.getPMSignals().size());
+      if (mtxSig.getMatrix().getSide() == JPetMatrix::SideA)
       {
         getStatistics().fillHistogram("mtxsig_scin_sideA", scinID);
-        getStatistics().fillHistogram("mtxsig_sideA_tot", scinID, mtxSig.getTOT());
+        getStatistics().fillHistogram("mtxsig_sideA_tot", scinID, mtxSig.getToT());
       }
-      else if (mtxSig.getMatrix().getSide() == JPetPM::SideB)
+      else if (mtxSig.getMatrix().getSide() == JPetMatrix::SideB)
       {
         getStatistics().fillHistogram("mtxsig_scin_sideA", scinID);
-        getStatistics().fillHistogram("mtxsig_sideA_tot", scinID, mtxSig.getTOT());
+        getStatistics().fillHistogram("mtxsig_sideA_tot", scinID, mtxSig.getToT());
       }
     }
 
@@ -173,11 +173,11 @@ void SignalTransformer::initialiseHistograms()
   double totUppLimit = 10000000.0;
   getStatistics().createHistogramWithAxes(new TH2D("mtxsig_sideA_tot", "Matrix Signal ToT - Side A per scintillator", maxScinID - minScinID + 1,
                                                    minScinID - 0.5, maxScinID + 0.5, 200, 0.0, totUppLimit),
-                                          "Scin ID", "TOT [ps]");
+                                          "Scin ID", "ToT [ps]");
 
   getStatistics().createHistogramWithAxes(new TH2D("mtxsig_sideB_tot", "Matrix Signal ToT - Side B per scintillator", maxScinID - minScinID + 1,
                                                    minScinID - 0.5, maxScinID + 0.5, 200, 0.0, totUppLimit),
-                                          "Scin ID", "TOT [ps]");
+                                          "Scin ID", "ToT [ps]");
 
   // SiPM offsets if needed
   if (fSaveCalibHistos)

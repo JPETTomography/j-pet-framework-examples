@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -16,11 +16,11 @@
 #ifndef EVENTFINDER_H
 #define EVENTFINDER_H
 
-#include <JPetUserTask/JPetUserTask.h>
+#include <Hits/JPetBaseHit/JPetBaseHit.h>
 #include <JPetEvent/JPetEvent.h>
-#include <JPetHit/JPetHit.h>
-#include <vector>
+#include <JPetUserTask/JPetUserTask.h>
 #include <map>
+#include <vector>
 
 class JPetWriter;
 
@@ -33,17 +33,17 @@ class JPetWriter;
  * Also user can require to save only Events of minimum multiplicity
  * and if include Corrupted Hits in the created events.
  */
-class EventFinder: public JPetUserTask
+class EventFinder : public JPetUserTask
 {
 public:
-  EventFinder(const char * name);
+  EventFinder(const char* name);
   virtual ~EventFinder();
   virtual bool init() override;
   virtual bool exec() override;
   virtual bool terminate() override;
 
 protected:
-  std::vector<JPetEvent> buildEvents(const JPetTimeWindow & hits);
+  std::vector<JPetEvent> buildEvents(const JPetTimeWindow& hits);
   void saveEvents(const std::vector<JPetEvent>& event);
   void initialiseHistograms();
 

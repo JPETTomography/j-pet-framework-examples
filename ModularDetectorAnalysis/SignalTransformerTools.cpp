@@ -14,6 +14,7 @@
  */
 
 #include "SignalTransformerTools.h"
+#include "JPetLoggerInclude.h"
 
 using namespace std;
 
@@ -63,7 +64,7 @@ const map<JPetMatrix::Side, map<int, vector<JPetPMSignal>>> SignalTransformerToo
       search->second.push_back(pmSig);
     }
   }
-  return pmSigMtxMap;
+  return mappedSignals;
 }
 
 /**
@@ -78,7 +79,7 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergeSignalsAllSiPMs(map<JPetMa
   {
     for (auto& signals : sideSigs.second)
     {
-      auto mtxSignals = mergePMSignalsOnSide(signals, mergingTime, calibTree);
+      auto mtxSignals = mergePMSignalsOnSide(signals.second, mergingTime, calibTree);
       allMtxSignals.insert(allMtxSignals.end(), mtxSignals.begin(), mtxSignals.end());
     }
   }
@@ -99,7 +100,7 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergePMSignalsOnSide(vector<JPe
   {
     // Create Matrix Signal and add first PM Signal by default
     JPetMatrixSignal mtxSig;
-    mtxSig.setPM(pmSigVec.at(0).getPM());
+    mtxSig.setMatrix(pmSigVec.at(0).getPM().getMatrix());
     if (!mtxSig.addPMSignal(pmSigVec.at(0)))
     {
       ERROR("Problem with adding the first signal to new object.");
@@ -137,7 +138,7 @@ vector<JPetMatrixSignal> SignalTransformerTools::mergePMSignalsOnSide(vector<JPe
       }
     }
 
-    mtxSig.setTOT(calculateAverageTOT(mtxSig));
+    // mtxSig.setToT(calculateAverageToT(mtxSig));
     mtxSig.setTime(calculateAverageTime(mtxSig, calibTree));
     pmSigVec.erase(pmSigVec.begin());
     mtxSigVec.push_back(mtxSig);
@@ -155,7 +156,7 @@ double SignalTransformerTools::calculateAverageTime(JPetMatrixSignal& mtxSig, bo
   int multiplicity = 0;
   for (auto pmSig : pmSignals)
   {
-    averageTime += pmSig.getTime();
+    averageTime += pmSig.second.getTime();
   }
   if (pmSignals.size() != 0)
   {
@@ -172,32 +173,15 @@ double SignalTransformerTools::calculateAverageTime(JPetMatrixSignal& mtxSig, bo
 
   // Applying time walk correction
   double timeWalkCorrection = 0.0;
-  auto tot = (mtxSig.getTOT() != 0.0) ? mtxSig.getTOT() : calculateAverageTOT(mtxSig);
+  auto tot = mtxSig.getToT();
   if (tot != 0.0)
   {
     auto p1 = calibTree.get("time_walk.param_a", 0.0);
-    timeWalkCorrection = p1 / mtxSig.getTOT();
+    timeWalkCorrection = p1 / mtxSig.getToT();
   }
 
   // Returning average time corrected by calibration constatns, that can be zero.
   return averageTime - bCorrection - timeWalkCorrection;
-}
-
-/**
- * Calculating TOT of Matrix Signal as an average of TOTs of contained PM Signals
- */
-double SignalTransformerTools::calculateAverageTOT(JPetMatrixSignal& mtxSig)
-{
-  double tot = 0.0;
-  auto pmSignals = mtxSig.getPMSignals();
-  for (auto pmSig : pmSignals)
-  {
-    if (pmSig.second.getTOT() > 0.0)
-    {
-      tot += pmSig.second.getTOT();
-    }
-  }
-  return tot / ((double)pmSignals.size());
 }
 
 /**

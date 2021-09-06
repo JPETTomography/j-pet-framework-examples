@@ -22,35 +22,40 @@
  * Contains methods building PM Signals from Signal Channels
  */
 
-#include <boost/property_tree/ptree.hpp>
-
-#include <JPetPMSignal/JPetPMSignal.h>
 #include <JPetParamBank/JPetParamBank.h>
-#include <JPetSigCh/JPetSigCh.h>
 #include <JPetStatistics/JPetStatistics.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
-
+#include <Signals/JPetChannelSignal/JPetChannelSignal.h>
+#include <Signals/JPetPMSignal/JPetPMSignal.h>
+#include <boost/property_tree/ptree.hpp>
 #include <utility>
 #include <vector>
 
 class SignalFinderTools
 {
 public:
-  enum TOTCalculationType
+  enum ToTCalculationType
   {
     kSimplified,
     kThresholdRectangular,
     kThresholdTrapeze
   };
-  static const std::map<int, std::vector<JPetSigCh>> getSigChByPM(const JPetTimeWindow* timeWindow, bool useCorruptedSigCh);
-  static std::vector<JPetPMSignal> buildAllSignals(const std::map<int, std::vector<JPetSigCh>>& sigChByPM, double sigChEdgeMaxTime,
-                                                   double sigChLeadTrailMaxTime, int numberOfThrs, JPetStatistics& stats, bool saveHistos,
-                                                   boost::property_tree::ptree& calibTree);
-  static std::vector<JPetPMSignal> buildPMSignals(const std::vector<JPetSigCh>& sigChByPM, double sigChEdgeMaxTime, double sigChLeadTrailMaxTime,
-                                                  int numberOfThrs, JPetStatistics& stats, bool saveHistos, boost::property_tree::ptree& calibTree);
-  static int findSigChOnNextThr(double sigChValue, double sigChEdgeMaxTime, const std::vector<JPetSigCh>& sigChVec);
-  static int findTrailingSigCh(const JPetSigCh& leadingSigCh, double sigChLeadTrailMaxTime, const std::vector<JPetSigCh>& trailingSigChVec);
-  static double calculatePMSignalTOT(int pmID, double totTHR1, double totTHR2, double thr1Val, double thr2Val, JPetStatistics& stats, bool saveHistos,
-                                     boost::property_tree::ptree& calibTree);
+  static const std::map<int, std::vector<JPetChannelSignal>> getChannelSignalsByPM(const JPetTimeWindow* timeWindow, bool useCorruptedSigCh);
+
+  static std::vector<JPetPMSignal> buildAllSignals(const std::map<int, std::vector<JPetChannelSignal>>& chSigByPM, double chSigEdgeMaxTime,
+                                                   double chSigLeadTrailMaxTime, int numberOfThrs, JPetStatistics& stats, bool saveHistos,
+                                                   SignalFinderTools::ToTCalculationType type, boost::property_tree::ptree& calibTree);
+
+  static std::vector<JPetPMSignal> buildPMSignals(const std::vector<JPetChannelSignal>& chSigByPM, double chSigEdgeMaxTime,
+                                                  double chSigLeadTrailMaxTime, int numberOfThrs, JPetStatistics& stats, bool saveHistos,
+                                                  SignalFinderTools::ToTCalculationType type, boost::property_tree::ptree& calibTree);
+
+  static int findChannelSignalOnNextThr(double chSigValue, double chSigEdgeMaxTime, const std::vector<JPetChannelSignal>& chSigVec);
+
+  static int findTrailingChannelSignal(const JPetChannelSignal& leadingSigCh, double chSigLeadTrailMaxTime,
+                                       const std::vector<JPetChannelSignal>& trailingSigChVec);
+
+  static double calculatePMSignalToT(JPetPMSignal& pmSignal, SignalFinderTools::ToTCalculationType type, boost::property_tree::ptree& calibTree);
 };
+
 #endif /* !SIGNALFINDERTOOLS_H */

@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -30,6 +30,14 @@ void HitFinderTools::sortByTime(vector<JPetMatrixSignal>& sigVec)
 }
 
 /**
+ * Helper method for sotring hits in vector
+ */
+void HitFinderTools::sortByTime(std::vector<JPetPhysRecoHit>& hitsVec)
+{
+  sort(hitsVec.begin(), hitsVec.end(), [](const JPetPhysRecoHit& hit1, const JPetPhysRecoHit& hit2) { return hit1.getTime() < hit2.getTime(); });
+}
+
+/**
  * Method distributing Signals according to Scintillator they belong to
  */
 map<int, vector<JPetMatrixSignal>> HitFinderTools::getSignalsByScin(const JPetTimeWindow* timeWindow)
@@ -44,7 +52,7 @@ map<int, vector<JPetMatrixSignal>> HitFinderTools::getSignalsByScin(const JPetTi
   for (unsigned int i = 0; i < nSignals; i++)
   {
     auto mtxSig = dynamic_cast<const JPetMatrixSignal&>(timeWindow->operator[](i));
-    int scinID = mtxSig.getPM().getScin().getID();
+    int scinID = mtxSig.getMatrix().getScin().getID();
     auto search = signalScinMap.find(scinID);
     if (search == signalScinMap.end())
     {
@@ -63,10 +71,10 @@ map<int, vector<JPetMatrixSignal>> HitFinderTools::getSignalsByScin(const JPetTi
 /**
  * Loop over all Scins invoking matching procedure
  */
-vector<JPetHit> HitFinderTools::matchAllSignals(map<int, vector<JPetMatrixSignal>>& allSignals, double timeDiffAB,
-                                                boost::property_tree::ptree& calibTree, JPetStatistics& stats, bool saveHistos)
+vector<JPetPhysRecoHit> HitFinderTools::matchAllSignals(map<int, vector<JPetMatrixSignal>>& allSignals, double timeDiffAB,
+                                                        boost::property_tree::ptree& calibTree, JPetStatistics& stats, bool saveHistos)
 {
-  vector<JPetHit> allHits;
+  vector<JPetPhysRecoHit> allHits;
   for (auto& scinSigals : allSignals)
   {
     // Match signals for scintillators
@@ -79,10 +87,10 @@ vector<JPetHit> HitFinderTools::matchAllSignals(map<int, vector<JPetMatrixSignal
 /**
  * Method matching signals on the same Scintillator
  */
-vector<JPetHit> HitFinderTools::matchSignals(vector<JPetMatrixSignal>& scinSigals, double timeDiffAB, boost::property_tree::ptree& calibTree,
-                                             JPetStatistics& stats, bool saveHistos)
+vector<JPetPhysRecoHit> HitFinderTools::matchSignals(vector<JPetMatrixSignal>& scinSigals, double timeDiffAB, boost::property_tree::ptree& calibTree,
+                                                     JPetStatistics& stats, bool saveHistos)
 {
-  vector<JPetHit> scinHits;
+  vector<JPetPhysRecoHit> scinHits;
   vector<JPetMatrixSignal> remainSignals;
   sortByTime(scinSigals);
 
@@ -99,11 +107,9 @@ vector<JPetHit> HitFinderTools::matchSignals(vector<JPetMatrixSignal>& scinSigal
     {
       if (scinSigals.at(j).getTime() - mtxSig.getTime() < timeDiffAB)
       {
-        if (mtxSig.getPM().getSide() != scinSigals.at(j).getPM().getSide())
+        if (mtxSig.getMatrix().getSide() != scinSigals.at(j).getMatrix().getSide())
         {
-
           auto hit = createHit(mtxSig, scinSigals.at(j), calibTree);
-
           scinHits.push_back(hit);
           scinSigals.erase(scinSigals.begin() + j);
           scinSigals.erase(scinSigals.begin() + 0);
@@ -125,9 +131,9 @@ vector<JPetHit> HitFinderTools::matchSignals(vector<JPetMatrixSignal>& scinSigal
       }
       else
       {
-        if (saveHistos && mtxSig.getPM().getSide() != scinSigals.at(j).getPM().getSide())
+        if (saveHistos && mtxSig.getMatrix().getSide() != scinSigals.at(j).getMatrix().getSide())
         {
-          stats.getHisto1D("remain_signals_tdiff")->Fill(scinSigals.at(j).getTime() - mtxSig.getTime());
+          stats.fillHistogram("remain_signals_tdiff", scinSigals.at(j).getTime() - mtxSig.getTime());
         }
         remainSignals.push_back(mtxSig);
         scinSigals.erase(scinSigals.begin() + 0);
@@ -137,7 +143,7 @@ vector<JPetHit> HitFinderTools::matchSignals(vector<JPetMatrixSignal>& scinSigal
   }
   if (remainSignals.size() > 0 && saveHistos)
   {
-    stats.getHisto1D("remain_signals_scin")->Fill((double)(remainSignals.at(0).getPM().getScin().getID()), remainSignals.size());
+    stats.fillHistogram("remain_signals_scin", (double)(remainSignals.at(0).getMatrix().getScin().getID()), remainSignals.size());
   }
   return scinHits;
 }
@@ -145,14 +151,12 @@ vector<JPetHit> HitFinderTools::matchSignals(vector<JPetMatrixSignal>& scinSigal
 /**
  * Method for Hit creation - setting all fields that make sense here
  */
-JPetHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2, boost::property_tree::ptree& calibTree)
+JPetPhysRecoHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2, boost::property_tree::ptree& calibTree)
 {
-  int scinID = signal1.getPM().getScin().getID();
-
   JPetMatrixSignal signalA;
   JPetMatrixSignal signalB;
 
-  if (signal1.getPM().getSide() == JPetPM::SideA)
+  if (signal1.getMatrix().getSide() == JPetMatrix::SideA)
   {
     signalA = signal1;
     signalB = signal2;
@@ -163,37 +167,38 @@ JPetHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const JPetMat
     signalB = signal1;
   }
 
+  auto& scin = signalA.getMatrix().getScin();
+
   // Getting constants for this scintillator
-  double tofCorrection = calibTree.get("scin." + to_string(scinID) + ".tof_correction", 0.0);
-  double tofCorrection2 = calibTree.get("scin." + to_string(scinID) + ".tof_correction_2", 0.0);
-  double velocity = calibTree.get("scin." + to_string(scinID) + ".eff_velocity", 0.0);
-  double tot_norm_a = calibTree.get("scin." + to_string(scinID) + ".tot_factor_a", 1.0);
-  double tot_norm_b = calibTree.get("scin." + to_string(scinID) + ".tot_factor_b", 0.0);
+  double tofCorrection = calibTree.get("scin." + to_string(scin.getID()) + ".tof_correction", 0.0);
+  double tofCorrection2 = calibTree.get("scin." + to_string(scin.getID()) + ".tof_correction_2", 0.0);
+  double velocity = calibTree.get("scin." + to_string(scin.getID()) + ".eff_velocity", 0.0);
 
-  JPetHit hit;
+  JPetPhysRecoHit hit;
   hit.setSignals(signalA, signalB);
-  hit.setTime(((signalA.getTime() + signalB.getTime()) / 2.0) - tofCorrection - tofCorrection2);
-  hit.setQualityOfTime(-1.0);
-  hit.setTimeDiff(signalB.getTime() - signalA.getTime());
-  hit.setQualityOfTimeDiff(-1.0);
-  hit.setPosX(signalA.getPM().getScin().getCenterX());
-  hit.setPosY(signalA.getPM().getScin().getCenterY());
-  hit.setScin(signalA.getPM().getScin());
+  hit.setScin(scin);
 
-  // Calculate TOT from the beggininig and use normalization
-  // double tot = tot_norm_a * calculateTOT(hit) + tot_norm_b;
-  // TOT of a signal is a average of TOT of AB signals
-  double tot = (signalA.getTOT() + signalB.getTOT()) / 2.0;
+  hit.setTime(((signalA.getTime() + signalB.getTime()) / 2.0) - tofCorrection - tofCorrection2);
+  hit.setTimeDiff(signalB.getTime() - signalA.getTime());
+
+  // ToT of a signal is a average of ToT of AB signals
+  double tot = (signalA.getToT() + signalB.getToT()) / 2.0;
+  hit.setToT(tot);
   hit.setEnergy(tot);
 
-  if (velocity != 0.0)
-  {
-    hit.setPosZ(velocity * hit.getTimeDiff() / 2.0);
-  }
-  else
-  {
-    hit.setPosZ(-999.9);
-  }
+  TVector3 position(scin.getCenterX(), scin.getCenterY(), velocity * hit.getTimeDiff() / 2.0);
+  // Rotation of position vector according to configuration settings
+  position.RotateX(scin.getRotationX());
+  position.RotateY(scin.getRotationY());
+  position.RotateZ(scin.getRotationZ());
+  // Setting position
+  hit.setPos(position);
+
+  // Default quality fields
+  hit.setQualityOfTime(-1.0);
+  hit.setQualityOfTimeDiff(-1.0);
+  hit.setQualityOfEnergy(-1.0);
+  hit.setQualityOfToT(-1.0);
 
   return hit;
 }
@@ -201,71 +206,22 @@ JPetHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const JPetMat
 /**
  * Method for a dummy Hit creation, setting only some necessary fields.
  */
-JPetHit HitFinderTools::createDummyHit(const JPetMatrixSignal& signal)
+JPetPhysRecoHit HitFinderTools::createDummyHit(const JPetMatrixSignal& signal)
 {
-  JPetHit hit;
+  JPetPhysRecoHit hit;
   JPetMatrixSignal dummy;
   hit.setSignalA(dummy);
   hit.setSignalB(signal);
   hit.setTime(signal.getTime());
-  hit.setQualityOfTime(-1.0);
   hit.setTimeDiff(0.0);
-  hit.setQualityOfTimeDiff(-1.0);
-  hit.setEnergy(signal.getTOT());
-  hit.setQualityOfEnergy(-1.0);
-  hit.setPosX(signal.getPM().getScin().getCenterX());
-  hit.setPosY(signal.getPM().getScin().getCenterY());
-  hit.setPosZ(0.0);
-  hit.setScin(signal.getPM().getScin());
+  hit.setEnergy(0.0);
+  hit.setToT(signal.getToT());
+
+  auto& scin = signal.getMatrix().getScin();
+  hit.setPosX(scin.getCenterX());
+  hit.setPosY(scin.getCenterY());
+  hit.setPosZ(scin.getCenterZ());
+  hit.setScin(scin);
+
   return hit;
-}
-
-/**
- * Calculation of the total TOT of the hit - Time over Threshold:
- * the sum of the TOTs on both thresholds and on the both sides (A,B)
- */
-double HitFinderTools::calculateTOT(JPetHit& hit)
-{
-  double tot = 0.0;
-
-  auto rawSignalsA = dynamic_cast<const JPetMatrixSignal&>(hit.getSignalA()).getRawSignals();
-  auto rawSignalsB = dynamic_cast<const JPetMatrixSignal&>(hit.getSignalB()).getRawSignals();
-
-  for (auto rawSig : rawSignalsA)
-  {
-    auto sigALead = rawSig.second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-    auto sigATrail = rawSig.second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-    if (sigALead.size() > 0 && sigATrail.size() > 0)
-    {
-      for (unsigned i = 0; i < sigALead.size() && i < sigATrail.size(); i++)
-      {
-        double weight = sigALead.at(i).getChannel().getThresholdValue();
-        if (weight == 0.0)
-        {
-          weight = 1.0;
-        }
-        tot += weight * (sigATrail.at(i).getTime() - sigALead.at(i).getTime());
-      }
-    }
-  }
-
-  for (auto rawSig : rawSignalsB)
-  {
-    auto sigBLead = rawSig.second.getPoints(JPetSigCh::Leading, JPetRawSignal::ByThrNum);
-    auto sigBTrail = rawSig.second.getPoints(JPetSigCh::Trailing, JPetRawSignal::ByThrNum);
-    if (sigBLead.size() > 0 && sigBTrail.size() > 0)
-    {
-      for (unsigned i = 0; i < sigBLead.size() && i < sigBTrail.size(); i++)
-      {
-        double weight = sigBLead.at(i).getChannel().getThresholdValue();
-        if (weight == 0.0)
-        {
-          weight = 1.0;
-        }
-        tot += weight * (sigBTrail.at(i).getTime() - sigBLead.at(i).getTime());
-      }
-    }
-  }
-
-  return tot;
 }

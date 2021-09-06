@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -16,21 +16,15 @@
 #ifndef EVENTCATEGORIZER_H
 #define EVENTCATEGORIZER_H
 
-#include <boost/property_tree/ptree.hpp>
-
 #include "EventCategorizerTools.h"
 #include <JPetEvent/JPetEvent.h>
-#include <JPetHit/JPetHit.h>
 #include <JPetUserTask/JPetUserTask.h>
 #include <TVector3.h>
+#include <boost/property_tree/ptree.hpp>
 #include <map>
 #include <vector>
 
 class JPetWriter;
-
-#ifdef __CINT__
-#define override
-#endif
 
 /**
  * @brief User Task categorizing Events
@@ -53,10 +47,10 @@ protected:
   const std::string k2gThetaDiffParamKey = "EventCategorizer_2gThetaDiff_double";
   const std::string k2gTimeDiffParamKey = "EventCategorizer_2gTimeDiff_double";
 
-  const std::string kTOTCutAnniMinParamKey = "EventCategorizer_TOT_Cut_Anni_Min_double";
-  const std::string kTOTCutAnniMaxParamKey = "EventCategorizer_TOT_Cut_Anni_Max_double";
-  const std::string kTOTCutDeexMinParamKey = "EventCategorizer_TOT_Cut_Deex_Min_double";
-  const std::string kTOTCutDeexMaxParamKey = "EventCategorizer_TOT_Cut_Deex_Max_double";
+  const std::string kToTCutAnniMinParamKey = "EventCategorizer_ToT_Cut_Anni_Min_double";
+  const std::string kToTCutAnniMaxParamKey = "EventCategorizer_ToT_Cut_Anni_Max_double";
+  const std::string kToTCutDeexMinParamKey = "EventCategorizer_ToT_Cut_Deex_Min_double";
+  const std::string kToTCutDeexMaxParamKey = "EventCategorizer_ToT_Cut_Deex_Max_double";
 
   const std::string kSourcePosXParamKey = "EventCategorizer_SourcePos_X_double";
   const std::string kSourcePosYParamKey = "EventCategorizer_SourcePos_Y_double";
@@ -83,10 +77,10 @@ protected:
   double fMaxTimeDiff = 15000.0;
   double f2gThetaDiff = 3.0;
   double f2gTimeDiff = 2000.0;
-  double fTOTCutAnniMin = 150000.0;
-  double fTOTCutAnniMax = 250000.0;
-  double fTOTCutDeexMin = 270000.0;
-  double fTOTCutDeexMax = 370000.0;
+  double fToTCutAnniMin = 150000.0;
+  double fToTCutAnniMax = 250000.0;
+  double fToTCutDeexMin = 270000.0;
+  double fToTCutDeexMax = 370000.0;
   double fLORAngleCut = 5.0;
   double fLORPosZCut = 5.0;
   double fSourceDistXYCut = 5.0;

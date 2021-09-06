@@ -36,8 +36,8 @@ int main(int argc, const char* argv[])
     manager.registerTask<EventCategorizer>("EventCategorizer");
 
     manager.useTask("TimeWindowCreator", "hld", "tslot");
-    manager.useTask("SignalFinder", "tslot", "raw.sig");
-    manager.useTask("SignalTransformer", "raw.sig", "mtx.sig");
+    manager.useTask("SignalFinder", "tslot", "pm.sig");
+    manager.useTask("SignalTransformer", "pm.sig", "mtx.sig");
     manager.useTask("HitFinder", "mtx.sig", "hits");
     manager.useTask("EventFinder", "hits", "unk.evt");
     manager.useTask("EventCategorizer", "unk.evt", "cat.evt");

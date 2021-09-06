@@ -41,53 +41,55 @@ bool SignalFinder::init()
   // Time window parameter for leading edge
   if (isOptionSet(fParams.getOptions(), kEdgeMaxTimeParamKey))
   {
-    fChSigEdgeMaxTime = getOptionAsDouble(fParams.getOptions(), kEdgeMaxTimeParamKey);
+    fEdgeMaxTime = getOptionAsDouble(fParams.getOptions(), kEdgeMaxTimeParamKey);
   }
   else
   {
-    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kEdgeMaxTimeParamKey.c_str(), fChSigEdgeMaxTime));
+    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kEdgeMaxTimeParamKey.c_str(), fEdgeMaxTime));
   }
 
   // Time window parameter for leading-trailing comparison
   if (isOptionSet(fParams.getOptions(), kLeadTrailMaxTimeParamKey))
   {
-    fChSigLeadTrailMaxTime = getOptionAsDouble(fParams.getOptions(), kLeadTrailMaxTimeParamKey);
+    fLeadTrailMaxTime = getOptionAsDouble(fParams.getOptions(), kLeadTrailMaxTimeParamKey);
   }
   else
   {
-    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kLeadTrailMaxTimeParamKey.c_str(),
-                 fChSigLeadTrailMaxTime));
+    WARNING(
+        Form("No value of the %s parameter provided by the user. Using default value of %lf.", kLeadTrailMaxTimeParamKey.c_str(), fLeadTrailMaxTime));
   }
 
-  // For plotting TOT histograms
-  if (isOptionSet(fParams.getOptions(), kTOTHistoUpperLimitParamKey))
+  // For plotting ToT histograms
+  if (isOptionSet(fParams.getOptions(), kToTHistoUpperLimitParamKey))
   {
-    fTOTHistoUpperLimit = getOptionAsDouble(fParams.getOptions(), kTOTHistoUpperLimitParamKey);
+    fToTHistoUpperLimit = getOptionAsDouble(fParams.getOptions(), kToTHistoUpperLimitParamKey);
   }
 
-  if (isOptionSet(fParams.getOptions(), kTOTCalculationTypeParamKey))
+  if (isOptionSet(fParams.getOptions(), kToTCalculationTypeParamKey))
   {
-    switch ((getOptionAsString(fParams.getOptions(), kTOTCalculationTypeParamKey)) {
-    case "simple":
-      fTOTCalcType = kSimplified;
-      break;
-    case "rectangular":
-      fTOTCalcType = kThresholdRectangular;
-      break;
-    case "trapeze":
-      fTOTCalcType = kThresholdTrapeze;
-      break;
-    default:
-      WARNING("Unrecognized name for method of calculating TOT provided: use simple, rectangular of trapeze.");
-      break;
+    if (getOptionAsString(fParams.getOptions(), kToTCalculationTypeParamKey) == "simple")
+    {
+      fToTCalcType = SignalFinderTools::kSimplified;
     }
+    else if (getOptionAsString(fParams.getOptions(), kToTCalculationTypeParamKey) == "rectangular")
+    {
+      fToTCalcType = SignalFinderTools::kThresholdRectangular;
+    }
+    else if (getOptionAsString(fParams.getOptions(), kToTCalculationTypeParamKey) == "trapeze")
+    {
+      fToTCalcType = SignalFinderTools::kThresholdTrapeze;
+    }
+  }
+  else
+  {
+    WARNING("Unrecognized name for method of calculating ToT provided: use simple, rectangular of trapeze. Using default simplified method.");
   }
 
   // Get bool for using corrupted Signal Channels
   if (isOptionSet(fParams.getOptions(), kUseCorruptedChSigParamKey))
   {
-    fUseCorruptedChSig = getOptionAsBool(fParams.getOptions(), kUseCorruptedChSigParamKey);
-    if (fUseCorruptedChSig)
+    fUseCorruptedChannelSignals = getOptionAsBool(fParams.getOptions(), kUseCorruptedChSigParamKey);
+    if (fUseCorruptedChannelSignals)
     {
       WARNING("Signal Finder is using Corrupted Channel Signals, as set by the user");
     }
@@ -126,12 +128,12 @@ bool SignalFinder::exec()
   // Getting the data from event in an apropriate format
   if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent))
   {
-    // Distribute signal channels by PM IDs
+    // Distribute channel signals by PM IDs
     auto& chSigsByPM = SignalFinderTools::getChannelSignalsByPM(timeWindow, fUseCorruptedChannelSignals);
-    // Building signals
-    auto allSignals = SignalFinderTools::buildAllSignals(chSigsByPM, fChannelSignalsEdgeMaxTime, fChannelSignalsLeadTrailMaxTime, kNumOfThresholds,
-                                                         getStatistics(), fSaveControlHistos, fConstansTree);
-    // Saving method invocation
+    // Building photomultiplier signals
+    auto allSignals = SignalFinderTools::buildAllSignals(chSigsByPM, fEdgeMaxTime, fLeadTrailMaxTime, kNumOfThresholds, getStatistics(),
+                                                         fSaveControlHistos, fToTCalcType, fConstansTree);
+    // Save
     savePMSignals(allSignals);
   }
   else
@@ -160,22 +162,11 @@ void SignalFinder::savePMSignals(const vector<JPetPMSignal>& pmSigVec)
 
   for (auto& pmSig : pmSigVec)
   {
-    auto leads = pmSig.getPoints(JPetChannelSignal::Leading, JPetPMSignal::ByThrValue);
-    auto trails = pmSig.getPoints(JPetChannelSignal::Trailing, JPetPMSignal::ByThrValue);
+    fOutputEvents->add<JPetPMSignal>(pmSig);
     if (fSaveControlHistos && gRandom->Uniform() < fScalingFactor)
     {
-      getStatistics().fillHistogram("pmsig_multi", leads.size() + trails.size());
-    }
-
-    // Saving only signals with lead-trail pair on threshold
-    if (leads.size() == trails.size())
-    {
-      fOutputEvents->add<JPetPMSignal>(pmSig);
-      if (fSaveControlHistos && gRandom->Uniform() < fScalingFactor)
-      {
-        auto pmID = pmSig.getPM().getID();
-        getStatistics().fillHistogram("pmsig_sipm", pmID);
-      }
+      getStatistics().fillHistogram("pmsig_sipm", pmSig.getPM().getID());
+      getStatistics().fillHistogram("pmsig_multi", pmSig.getLeadTrailPairs().size());
     }
   }
 }
@@ -185,11 +176,16 @@ void SignalFinder::initialiseHistograms()
   auto minPMID = getParamBank().getPMs().begin()->first;
   auto maxPMID = getParamBank().getPMs().rbegin()->first;
 
-  vector<pair<unsigned, string>> binLabels = {make_pair(1, "THR 1 Lead"), make_pair(2, "THR 1 Trail"), make_pair(3, "THR 2 Lead"),
-                                              make_pair(4, "THR 2 Trail"), make_pair(5, " ")};
+  getStatistics().createHistogramWithAxes(new TH1D("reco_flags_pmsig", "Number of good and corrupted Channel Sigals created", 4, 0.5, 4.5), " ",
+                                          "Number of Channel Signals");
+  vector<pair<unsigned, string>> binLabels1 = {make_pair(1, "GOOD"), make_pair(2, "CORRUPTED"), make_pair(3, "UNKNOWN"), make_pair(4, " ")};
+  getStatistics().setHistogramBinLabel("reco_flags_pmsig", getStatistics().AxisLabel::kXaxis, binLabels1);
+
+  vector<pair<unsigned, string>> binLabels2 = {make_pair(1, "THR 1 Lead"), make_pair(2, "THR 1 Trail"), make_pair(3, "THR 2 Lead"),
+                                               make_pair(4, "THR 2 Trail"), make_pair(5, " ")};
   getStatistics().createHistogramWithAxes(new TH1D("unused_chsig_thr", "Unused Channel Signals per THR (downscaled)", 5, 0.5, 5.5), " ",
                                           "Number of Channel Signals");
-  getStatistics().setHistogramBinLabel("unused_chsig_thr", getStatistics().AxisLabel::kXaxis, binLabels);
+  getStatistics().setHistogramBinLabel("unused_chsig_thr", getStatistics().AxisLabel::kXaxis, binLabels2);
 
   getStatistics().createHistogramWithAxes(
       new TH1D("unused_chsig_sipm", "Unused Signal Channels per SiPM", maxPMID - minPMID + 1, minPMID - 0.5, maxPMID + 0.5), "SiPM ID",
@@ -208,13 +204,12 @@ void SignalFinder::initialiseHistograms()
   getStatistics().createHistogramWithAxes(new TH1D("pmsig_tslot", "Number of PM Signals in Time Window", 100, 0.5, 100.5),
                                           "Number of PM Signal in Time Window", "Number of Time Windows");
 
-  // TOT of signals
+  // ToT of signals
   getStatistics().createHistogramWithAxes(new TH2D("tot_sipm_id", "SiPM Signal Time over Threshold per SiPM ID", maxPMID - minPMID + 1, minPMID - 0.5,
-                                                   maxPMID + 0.5, 200, 0.0, fTOTHistoUpperLimit),
-                                          "SiPM ID", "TOT [ps]");
+                                                   maxPMID + 0.5, 200, 0.0, fToTHistoUpperLimit),
+                                          "SiPM ID", "ToT [ps]");
 
   getStatistics().createHistogramWithAxes(new TH2D("tot_sipm_id_norm", "SiPM Signal Time over Threshold per SiPM ID normalised",
-                                                   maxPMID - minPMID + 1, minPMID - 0.5, maxPMID + 0.5, 200, 0.0,
-                                                   double totUppLimit = 50.0 * fChSigLeadTrailMaxTime;),
-                                          "SiPM ID", "TOT [ps]");
+                                                   maxPMID - minPMID + 1, minPMID - 0.5, maxPMID + 0.5, 200, 0.0, fToTHistoUpperLimit),
+                                          "SiPM ID", "ToT [ps]");
 }
