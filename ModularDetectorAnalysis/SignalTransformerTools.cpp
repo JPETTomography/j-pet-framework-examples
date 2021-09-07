@@ -29,14 +29,14 @@ const map<JPetMatrix::Side, map<int, vector<JPetPMSignal>>> SignalTransformerToo
   map<int, vector<JPetPMSignal>> tmpMapA;
   map<int, vector<JPetPMSignal>> tmpMapB;
 
-  mappedSignals[JPetMatrix::SideA] = tmpMapA;
-  mappedSignals[JPetMatrix::SideB] = tmpMapB;
-
   if (!timeWindow)
   {
     WARNING("Pointer of Time Window object is not set, returning empty map");
     return mappedSignals;
   }
+
+  mappedSignals[JPetMatrix::SideA] = tmpMapA;
+  mappedSignals[JPetMatrix::SideB] = tmpMapB;
 
   const unsigned int nPMSigs = timeWindow->getNumberOfEvents();
   for (unsigned int i = 0; i < nPMSigs; i++)
@@ -45,12 +45,6 @@ const map<JPetMatrix::Side, map<int, vector<JPetPMSignal>>> SignalTransformerToo
 
     auto scinID = pmSig.getPM().getMatrix().getScin().getID();
     auto side = pmSig.getPM().getMatrix().getSide();
-    auto pmMtxPos = pmSig.getPM().getMatrixPosition();
-
-    if (side != JPetMatrix::SideA || side != JPetMatrix::SideB)
-    {
-      continue;
-    }
 
     auto search = mappedSignals.at(side).find(scinID);
     if (search == mappedSignals.at(side).end())
@@ -153,7 +147,6 @@ double SignalTransformerTools::calculateAverageTime(JPetMatrixSignal& mtxSig, bo
 {
   double averageTime = 0.0;
   auto pmSignals = mtxSig.getPMSignals();
-  int multiplicity = 0;
   for (auto pmSig : pmSignals)
   {
     averageTime += pmSig.second.getTime();

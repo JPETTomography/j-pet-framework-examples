@@ -38,7 +38,6 @@ public:
   static std::vector<JPetMatrixSignal> mergePMSignalsOnSide(std::vector<JPetPMSignal>& pmSigVec, double mergingTime,
                                                             boost::property_tree::ptree& calibTree);
 
-private:
   static double calculateAverageTime(JPetMatrixSignal& mtxSig, boost::property_tree::ptree& calibTree);
   static double calculateAverageToT(JPetMatrixSignal& mtxSig);
   static void sortByTime(std::vector<JPetPMSignal>& input);
