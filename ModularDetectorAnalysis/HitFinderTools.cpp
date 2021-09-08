@@ -75,10 +75,10 @@ vector<JPetPhysRecoHit> HitFinderTools::matchAllSignals(map<int, vector<JPetMatr
                                                         boost::property_tree::ptree& calibTree, JPetStatistics& stats, bool saveHistos)
 {
   vector<JPetPhysRecoHit> allHits;
-  for (auto& scinSigals : allSignals)
+  for (auto& scinSignals : allSignals)
   {
     // Match signals for scintillators
-    auto scinHits = matchSignals(scinSigals.second, timeDiffAB, calibTree, stats, saveHistos);
+    auto scinHits = matchSignals(scinSignals.second, timeDiffAB, calibTree, stats, saveHistos);
     allHits.insert(allHits.end(), scinHits.begin(), scinHits.end());
   }
   return allHits;
@@ -87,40 +87,40 @@ vector<JPetPhysRecoHit> HitFinderTools::matchAllSignals(map<int, vector<JPetMatr
 /**
  * Method matching signals on the same Scintillator
  */
-vector<JPetPhysRecoHit> HitFinderTools::matchSignals(vector<JPetMatrixSignal>& scinSigals, double timeDiffAB, boost::property_tree::ptree& calibTree,
+vector<JPetPhysRecoHit> HitFinderTools::matchSignals(vector<JPetMatrixSignal>& scinSignals, double timeDiffAB, boost::property_tree::ptree& calibTree,
                                                      JPetStatistics& stats, bool saveHistos)
 {
   vector<JPetPhysRecoHit> scinHits;
   vector<JPetMatrixSignal> remainSignals;
-  sortByTime(scinSigals);
+  sortByTime(scinSignals);
 
-  while (scinSigals.size() > 0)
+  while (scinSignals.size() > 0)
   {
-    auto mtxSig = scinSigals.at(0);
-    if (scinSigals.size() == 1)
+    auto mtxSig = scinSignals.at(0);
+    if (scinSignals.size() == 1)
     {
       remainSignals.push_back(mtxSig);
       break;
     }
 
-    for (unsigned int j = 1; j < scinSigals.size(); j++)
+    for (unsigned int j = 1; j < scinSignals.size(); j++)
     {
-      if (scinSigals.at(j).getTime() - mtxSig.getTime() < timeDiffAB)
+      if (scinSignals.at(j).getTime() - mtxSig.getTime() < timeDiffAB)
       {
-        if (mtxSig.getMatrix().getSide() != scinSigals.at(j).getMatrix().getSide())
+        if (mtxSig.getMatrix().getSide() != scinSignals.at(j).getMatrix().getSide())
         {
-          auto hit = createHit(mtxSig, scinSigals.at(j), calibTree);
+          auto hit = createHit(mtxSig, scinSignals.at(j), calibTree);
           scinHits.push_back(hit);
-          scinSigals.erase(scinSigals.begin() + j);
-          scinSigals.erase(scinSigals.begin() + 0);
+          scinSignals.erase(scinSignals.begin() + j);
+          scinSignals.erase(scinSignals.begin() + 0);
           break;
         }
         else
         {
-          if (j == scinSigals.size() - 1)
+          if (j == scinSignals.size() - 1)
           {
             remainSignals.push_back(mtxSig);
-            scinSigals.erase(scinSigals.begin() + 0);
+            scinSignals.erase(scinSignals.begin() + 0);
             break;
           }
           else
@@ -131,12 +131,12 @@ vector<JPetPhysRecoHit> HitFinderTools::matchSignals(vector<JPetMatrixSignal>& s
       }
       else
       {
-        if (saveHistos && mtxSig.getMatrix().getSide() != scinSigals.at(j).getMatrix().getSide())
+        if (saveHistos && mtxSig.getMatrix().getSide() != scinSignals.at(j).getMatrix().getSide())
         {
-          stats.fillHistogram("remain_signals_tdiff", scinSigals.at(j).getTime() - mtxSig.getTime());
+          stats.fillHistogram("remain_signals_tdiff", scinSignals.at(j).getTime() - mtxSig.getTime());
         }
         remainSignals.push_back(mtxSig);
-        scinSigals.erase(scinSigals.begin() + 0);
+        scinSignals.erase(scinSignals.begin() + 0);
         break;
       }
     }
@@ -188,9 +188,11 @@ JPetPhysRecoHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const
 
   TVector3 position(scin.getCenterX(), scin.getCenterY(), velocity * hit.getTimeDiff() / 2.0);
   // Rotation of position vector according to configuration settings
-  position.RotateX(scin.getRotationX());
-  position.RotateY(scin.getRotationY());
-  position.RotateZ(scin.getRotationZ());
+  // Converting value from file in degrees to radians
+  position.RotateX(TMath::DegToRad() * scin.getRotationX());
+  position.RotateY(TMath::DegToRad() * scin.getRotationY());
+  position.RotateZ(TMath::DegToRad() * scin.getRotationZ());
+
   // Setting position
   hit.setPos(position);
 

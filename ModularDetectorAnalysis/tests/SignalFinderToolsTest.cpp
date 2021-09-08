@@ -17,7 +17,6 @@
 #define BOOST_TEST_MODULE SignalFinderToolsTest
 
 #include "../SignalFinderTools.h"
-#include <JPetParamBank/JPetParamBank.h>
 #include <boost/test/unit_test.hpp>
 
 auto epsilon = 0.0001;

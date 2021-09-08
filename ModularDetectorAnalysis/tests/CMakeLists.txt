@@ -8,6 +8,8 @@ set(UNIT_TEST_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/TimeWindowCreatorToolsTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SignalFinderToolsTest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SignalTransformerToolsTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/HitFinderToolsTest.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizerToolsTest.cpp
 )
 
 # Configure Boost
