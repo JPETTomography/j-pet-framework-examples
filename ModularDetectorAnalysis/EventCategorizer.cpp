@@ -605,4 +605,11 @@ void EventCategorizer::initialiseCalibrationHistograms()
   getStatistics().createHistogramWithAxes(
       new TH2D("time_walk_tof", "TOF vs. reversed ToT", 200, -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0, 200, -revToTLimit, revToTLimit),
       "Time of Flight [ps]", "Reversed ToT [1/ps]");
+
+  auto minChannelID = getParamBank().getChannels().begin()->first;
+  auto maxChannelID = getParamBank().getChannels().rbegin()->first;
+
+  getStatistics().createHistogramWithAxes(new TH2D("evtcat_channel_offsets", "Offset of Channel in Matrix vs. Channel ID in annihilation hits",
+                                                   maxChannelID - minChannelID + 1, minChannelID - 0.5, maxChannelID + 0.5, 200, -3000.0, 3000.0),
+                                          "Channel ID", "Offset");
 }

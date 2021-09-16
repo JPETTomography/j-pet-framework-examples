@@ -156,6 +156,35 @@ void CalibrationTools::selectForTimeWalk(const JPetEvent& event, JPetStatistics&
         {
           stats.fillHistogram("time_walk_tof", EventCategorizerTools::calculateTOF(secondHit, firstHit), revToT2 - revToT1);
         }
+
+        vector<JPetMatrixSignal> mtxSigs;
+        mtxSigs.push_back(firstHit->getSignalA());
+        mtxSigs.push_back(firstHit->getSignalB());
+        mtxSigs.push_back(secondHit->getSignalA());
+        mtxSigs.push_back(secondHit->getSignalB());
+
+        for (auto& mtxSig : mtxSigs)
+        {
+          auto sigMap = mtxSig.getPMSignals();
+          if (sigMap.find(1) != sigMap.end())
+          {
+            auto t_1_1 = sigMap.at(1).getLeadTrailPairs().at(0).first.getTime();
+            for (auto pmSig : sigMap)
+            {
+              auto pairs = pmSig.second.getLeadTrailPairs();
+              for (auto pair : pairs)
+              {
+                auto t_ch_i = pair.first.getTime();
+                auto channelID = pair.first.getChannel().getID();
+                if (t_1_1 == t_ch_i)
+                {
+                  continue;
+                }
+                stats.fillHistogram("evtcat_channel_offsets", channelID, t_ch_i - t_1_1);
+              }
+            }
+          }
+        }
       }
     }
   }
