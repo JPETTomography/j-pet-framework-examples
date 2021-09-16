@@ -50,7 +50,7 @@ public:
 
   static bool checkToT(const JPetPhysRecoHit* hit, double minToT, double maxToT);
 
-  static bool checkRelativeAngle(const JPetPhysRecoHit* hit1, const JPetPhysRecoHit* hit2, double maxThetaDiff);
+  static bool checkRelativeAngle(const JPetBaseHit* hit1, const JPetBaseHit* hit2, double maxThetaDiff);
 
   // Scatter test
   static bool checkForScatter(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double scatterTestValue);
