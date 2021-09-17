@@ -97,7 +97,7 @@ bool TimeWindowCreator::exec()
       {
         if (fSaveControlHistos)
         {
-          getStatistics().fillHistogram("wrong_channel", channelNumber);
+          getStatistics().fillHistogram("wrong_channels", channelNumber);
         }
         continue;
       }
