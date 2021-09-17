@@ -30,14 +30,18 @@ void CalibrationTools::selectForTOF(const JPetEvent& event, JPetStatistics& stat
   }
   for (uint i = 0; i < event.getHits().size(); i++)
   {
+    auto hit1 = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(i));
+    if (!hit1)
+    {
+      continue;
+    }
+
     for (uint j = i + 1; j < event.getHits().size(); j++)
     {
-      auto hit1 = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(i));
       auto hit2 = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(j));
-      // Stop if cast hits are null pointer
-      if (hit1 || hit2)
+      if (!hit2)
       {
-        break;
+        continue;
       }
 
       // Skip if scatter
@@ -130,7 +134,7 @@ void CalibrationTools::selectForTimeWalk(const JPetEvent& event, JPetStatistics&
       auto secondHit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(j));
 
       // Stop if cast hits are null pointer
-      if (firstHit || secondHit)
+      if (!firstHit || !secondHit)
       {
         break;
       }

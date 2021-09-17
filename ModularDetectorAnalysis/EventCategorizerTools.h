@@ -33,13 +33,12 @@ static const double kUndefinedValue = 999.0;
 class EventCategorizerTools
 {
 public:
-  // static bool checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
-  //                            double totCutAnniMin, double totCutAnniMax, double lorAngleMax, double lorPosZMax, const TVector3& sourcePos);
+  static bool checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
+                             double totCutAnniMin, double totCutAnniMax, double lorAngleMax, double lorPosZMax, const TVector3& sourcePos);
 
-  // static bool checkFor2Gamma(const JPetBaseHit& firstHit, const JPetBaseHit& secondHit, JPetStatistics& stats, bool saveHistos, double
-  // maxThetaDiff,
-  //                            double maxTimeDiff, double totCutAnniMin, double totCutAnniMax, double lorAngleMax, double lorPosZMax,
-  //                            const TVector3& sourcePos);
+  static bool checkFor2Gamma(const JPetPhysRecoHit* firstHit, const JPetPhysRecoHit* secondHit, JPetStatistics& stats, bool saveHistos,
+                             double maxThetaDiff, double maxTimeDiff, double totCutAnniMin, double totCutAnniMax, double lorAngleMax,
+                             double lorPosZMax, const TVector3& sourcePos);
 
   // static std::vector<JPetEvent> getLORs(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxTOF, double maxScatter,
   //                                       double totCutAnniMin, double totCutAnniMax);
@@ -77,7 +76,7 @@ public:
   // cppcheck-suppress unusedFunction
   static double calculateTOFByConvention(const JPetBaseHit* hitA, const JPetBaseHit* hitB);
 
-  // static TVector3 calculateAnnihilationPoint(const JPetBaseHit& hit1, const JPetBaseHit& hit2);
+  static TVector3 calculateAnnihilationPoint(const JPetBaseHit* hit1, const JPetBaseHit* hit2);
   //
   // static TVector3 calculateAnnihilationPoint(const JPetBaseHit& hit1, const JPetBaseHit& hit2, const JPetBaseHit& hit3);
   //

@@ -232,7 +232,7 @@ void hit_tdiff_effvel(std::string fileName, std::string calibJSONFileName = "cal
 
   if (fileHitsAB->IsOpen())
   {
-    TH2F* hitTDiffAll = dynamic_cast<TH2F*>(fileHitsAB->Get("hit_tdiff_scin"));
+    TH2D* hitTDiffAll = dynamic_cast<TH2D*>(fileHitsAB->Get("hit_tdiff_scin"));
 
     TGraphErrors* bCorrGraph = new TGraphErrors();
     bCorrGraph->SetNameTitle("b_corr", "B side signals correction for scintillators");
