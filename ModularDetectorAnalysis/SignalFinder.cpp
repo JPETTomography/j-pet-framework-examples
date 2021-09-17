@@ -201,9 +201,6 @@ void SignalFinder::initialiseHistograms()
   getStatistics().createHistogramWithAxes(new TH1D("pmsig_tslot", "Number of PM Signals in Time Window", 100, 0.5, 100.5),
                                           "Number of PM Signal in Time Window", "Number of Time Windows");
 
-  getStatistics().createHistogramWithAxes(new TH1D("pmsig_tslot", "Number of PM Signals in Time Window", 100, 0.5, 100.5),
-                                          "Number of PM Signal in Time Window", "Number of Time Windows");
-
   // ToT of signals
   getStatistics().createHistogramWithAxes(new TH2D("tot_sipm_id", "SiPM Signal Time over Threshold per SiPM ID", maxPMID - minPMID + 1, minPMID - 0.5,
                                                    maxPMID + 0.5, 200, 0.0, fToTHistoUpperLimit),

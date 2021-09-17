@@ -103,11 +103,11 @@ vector<JPetPMSignal> SignalFinderTools::buildPMSignals(const vector<JPetChannelS
   assert(leadChSigs.size() > 0);
   while (leadChSigs.at(0).size() > 0)
   {
-    int closestTrailingChannelSignal = findTrailingChannelSignal(leadChSigs.at(0).at(0), chSigLeadTrailMaxTime, trailChSigs.at(0));
+    int closestTrailingChannelSignalTHR1 = findTrailingChannelSignal(leadChSigs.at(0).at(0), chSigLeadTrailMaxTime, trailChSigs.at(0));
 
-    if (closestTrailingChannelSignal == -1)
+    if (closestTrailingChannelSignalTHR1 == -1)
     {
-      // remains unused
+      // Remains unused
       unusedLeads.push_back(leadChSigs.at(0).at(0));
       leadChSigs.at(0).erase(leadChSigs.at(0).begin());
       continue;
@@ -118,9 +118,9 @@ vector<JPetPMSignal> SignalFinderTools::buildPMSignals(const vector<JPetChannelS
     pmSig.setPM(leadChSigs.at(0).at(0).getChannel().getPM());
     pmSig.setRecoFlag(JPetRecoSignal::Good);
 
-    if (!pmSig.addLeadTrailPair(leadChSigs.at(0).at(0), trailChSigs.at(0).at(closestTrailingChannelSignal)))
+    if (!pmSig.addLeadTrailPair(leadChSigs.at(0).at(0), trailChSigs.at(0).at(closestTrailingChannelSignalTHR1)))
     {
-      // remains unused
+      // Remains unused
       unusedLeads.push_back(leadChSigs.at(0).at(0));
       leadChSigs.at(0).erase(leadChSigs.at(0).begin());
       continue;
@@ -128,7 +128,7 @@ vector<JPetPMSignal> SignalFinderTools::buildPMSignals(const vector<JPetChannelS
 
     // Modifying flag if needed
     if (leadChSigs.at(0).at(0).getRecoFlag() == JPetRecoSignal::Corrupted ||
-        trailChSigs.at(0).at(closestTrailingChannelSignal).getRecoFlag() == JPetRecoSignal::Corrupted)
+        trailChSigs.at(0).at(closestTrailingChannelSignalTHR1).getRecoFlag() == JPetRecoSignal::Corrupted)
     {
       pmSig.setRecoFlag(JPetRecoSignal::Corrupted);
     }
@@ -137,19 +137,19 @@ vector<JPetPMSignal> SignalFinderTools::buildPMSignals(const vector<JPetChannelS
     int nextThrChannelSignalIndex = findChannelSignalOnNextThr(leadChSigs.at(0).at(0).getTime(), chSigEdgeMaxTime, leadChSigs.at(1));
     if (nextThrChannelSignalIndex != -1)
     {
-      closestTrailingChannelSignal =
+      int closestTrailingChannelSignalTHR2 =
           findTrailingChannelSignal(leadChSigs.at(1).at(nextThrChannelSignalIndex), chSigLeadTrailMaxTime, trailChSigs.at(1));
-      if (closestTrailingChannelSignal != -1)
+      if (closestTrailingChannelSignalTHR2 != -1)
       {
-        if (pmSig.addLeadTrailPair(leadChSigs.at(1).at(nextThrChannelSignalIndex), trailChSigs.at(1).at(closestTrailingChannelSignal)))
+        if (pmSig.addLeadTrailPair(leadChSigs.at(1).at(nextThrChannelSignalIndex), trailChSigs.at(1).at(closestTrailingChannelSignalTHR2)))
         {
           // Modifying flag if needed
           if (leadChSigs.at(1).at(nextThrChannelSignalIndex).getRecoFlag() == JPetRecoSignal::Corrupted ||
-              trailChSigs.at(1).at(closestTrailingChannelSignal).getRecoFlag() == JPetRecoSignal::Corrupted)
+              trailChSigs.at(1).at(closestTrailingChannelSignalTHR2).getRecoFlag() == JPetRecoSignal::Corrupted)
           {
             pmSig.setRecoFlag(JPetRecoSignal::Corrupted);
           }
-          trailChSigs.at(1).erase(trailChSigs.at(1).begin() + closestTrailingChannelSignal);
+          trailChSigs.at(1).erase(trailChSigs.at(1).begin() + closestTrailingChannelSignalTHR2);
           leadChSigs.at(1).erase(leadChSigs.at(1).begin() + nextThrChannelSignalIndex);
         }
       }
@@ -160,7 +160,7 @@ vector<JPetPMSignal> SignalFinderTools::buildPMSignals(const vector<JPetChannelS
     pmSig.setToT(calculatePMSignalToT(pmSig, type, calibTree));
     pmSigVec.push_back(pmSig);
 
-    trailChSigs.at(0).erase(trailChSigs.at(0).begin() + closestTrailingChannelSignal);
+    trailChSigs.at(0).erase(trailChSigs.at(0).begin() + closestTrailingChannelSignalTHR1);
     leadChSigs.at(0).erase(leadChSigs.at(0).begin());
 
     // Filling control histograms
