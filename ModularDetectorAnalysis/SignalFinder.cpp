@@ -163,8 +163,9 @@ void SignalFinder::savePMSignals(const vector<JPetPMSignal>& pmSigVec)
   for (auto& pmSig : pmSigVec)
   {
     fOutputEvents->add<JPetPMSignal>(pmSig);
-    if (fSaveControlHistos && gRandom->Uniform() < fScalingFactor)
+    if (fSaveControlHistos)
     {
+      getStatistics().fillHistogram("tot_sipm_id", pmSig.getPM().getID(), pmSig.getToT());
       getStatistics().fillHistogram("pmsig_sipm", pmSig.getPM().getID());
       getStatistics().fillHistogram("pmsig_multi", pmSig.getLeadTrailPairs().size());
     }
@@ -204,9 +205,5 @@ void SignalFinder::initialiseHistograms()
   // ToT of signals
   getStatistics().createHistogramWithAxes(new TH2D("tot_sipm_id", "SiPM Signal Time over Threshold per SiPM ID", maxPMID - minPMID + 1, minPMID - 0.5,
                                                    maxPMID + 0.5, 200, 0.0, fToTHistoUpperLimit),
-                                          "SiPM ID", "ToT [ps]");
-
-  getStatistics().createHistogramWithAxes(new TH2D("tot_sipm_id_norm", "SiPM Signal Time over Threshold per SiPM ID normalised",
-                                                   maxPMID - minPMID + 1, minPMID - 0.5, maxPMID + 0.5, 200, 0.0, fToTHistoUpperLimit),
                                           "SiPM ID", "ToT [ps]");
 }

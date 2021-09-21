@@ -37,12 +37,14 @@ public:
 
 protected:
   const std::string kMergeSignalsTimeParamKey = "SignalTransformer_MergeSignalsTime_double";
+  const std::string kToTHistoUpperLimitParamKey = "ToTHisto_UpperLimit_double";
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kSaveCalibHistosParamKey = "Save_Calib_Histograms_bool";
   const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
   void saveMatrixSignals(const std::vector<JPetMatrixSignal>& mtxSigVec);
   boost::property_tree::ptree fConstansTree;
   void initialiseHistograms();
+  double fToTHistoUpperLimit = 200000.0;
   bool fSaveControlHistos = true;
   bool fSaveCalibHistos = false;
   double fMergingTime = 20000.0;

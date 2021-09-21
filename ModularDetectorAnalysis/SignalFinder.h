@@ -46,8 +46,8 @@ protected:
   const std::string kEdgeMaxTimeParamKey = "SignalFinder_EdgeMaxTime_double";
   const std::string kLeadTrailMaxTimeParamKey = "SignalFinder_LeadTrailMaxTime_double";
   const std::string kToTCalculationTypeParamKey = "SignalFinder_ToTCalculationType_std::string";
-  const std::string kToTHistoUpperLimitParamKey = "SignalFinder_ToTHistoUpperLimit_double";
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
+  const std::string kToTHistoUpperLimitParamKey = "ToTHisto_UpperLimit_double";
   const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
   const int kNumOfThresholds = 2;
   boost::property_tree::ptree fConstansTree;

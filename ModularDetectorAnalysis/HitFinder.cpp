@@ -67,6 +67,12 @@ bool HitFinder::init()
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kABTimeDiffParamKey.c_str(), fABTimeDiff));
   }
 
+  // For plotting ToT histograms
+  if (isOptionSet(fParams.getOptions(), kToTHistoUpperLimitParamKey))
+  {
+    fToTHistoUpperLimit = getOptionAsDouble(fParams.getOptions(), kToTHistoUpperLimitParamKey);
+  }
+
   // Control histograms
   if (fSaveControlHistos)
   {
@@ -123,7 +129,7 @@ void HitFinder::saveHits(const std::vector<JPetPhysRecoHit>& hits)
     if (fSaveControlHistos)
     {
       int scinID = hit.getScin().getID();
-      getStatistics().fillHistogram("hits_scin", hits.size());
+      getStatistics().fillHistogram("hits_scin", sortedHits.size());
       getStatistics().fillHistogram("hit_pos", hit.getPosZ(), hit.getPosY(), hit.getPosX());
       getStatistics().fillHistogram("hit_multi", multi);
       getStatistics().fillHistogram("hit_multi_scin", scinID, multi);
@@ -164,9 +170,8 @@ void HitFinder::initialiseHistograms()
                                                    minScinID - 0.5, maxScinID + 0.5, 201, -1.1 * fABTimeDiff, 1.1 * fABTimeDiff),
                                           "Scintillator ID", "A-B time difference [ps]");
 
-  double totUppLimit = 10000000.0;
   getStatistics().createHistogramWithAxes(new TH2D("hit_tot_scin", "Hit ToT divided by multiplicity, all hits", maxScinID - minScinID + 1,
-                                                   minScinID - 0.5, maxScinID + 0.5, 200, 0.0, totUppLimit),
+                                                   minScinID - 0.5, maxScinID + 0.5, 200, 0.0, fToTHistoUpperLimit),
                                           "Scintillator ID", "Time over Threshold [ps]");
 
   // Unused sigals stats

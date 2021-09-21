@@ -54,6 +54,12 @@ bool SignalTransformer::init()
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMergeSignalsTimeParamKey.c_str(), fMergingTime));
   }
 
+  // For plotting ToT histograms
+  if (isOptionSet(fParams.getOptions(), kToTHistoUpperLimitParamKey))
+  {
+    fToTHistoUpperLimit = getOptionAsDouble(fParams.getOptions(), kToTHistoUpperLimitParamKey);
+  }
+
   // Control histograms
   if (fSaveControlHistos)
   {
@@ -116,8 +122,8 @@ void SignalTransformer::saveMatrixSignals(const std::vector<JPetMatrixSignal>& m
       }
       else if (mtxSig.getMatrix().getSide() == JPetMatrix::SideB)
       {
-        getStatistics().fillHistogram("mtxsig_scin_sideA", scinID);
-        getStatistics().fillHistogram("mtxsig_sideA_tot", scinID, mtxSig.getToT());
+        getStatistics().fillHistogram("mtxsig_scin_sideB", scinID);
+        getStatistics().fillHistogram("mtxsig_sideB_tot", scinID, mtxSig.getToT());
       }
     }
 
@@ -142,7 +148,7 @@ void SignalTransformer::saveMatrixSignals(const std::vector<JPetMatrixSignal>& m
             {
               continue;
             }
-            getStatistics().fillHistogram("sf_channel_offsets", channelID, t_ch_i - t_1_1);
+            getStatistics().fillHistogram("mtx_channel_offsets", channelID, t_ch_i - t_1_1);
           }
         }
       }
@@ -170,13 +176,12 @@ void SignalTransformer::initialiseHistograms()
       new TH1D("mtxsig_scin_sideB", "Number of Matrix Signals per scintillator side B", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5),
       "Scin ID", "Number of Matrix Signals");
 
-  double totUppLimit = 10000000.0;
   getStatistics().createHistogramWithAxes(new TH2D("mtxsig_sideA_tot", "Matrix Signal ToT - Side A per scintillator", maxScinID - minScinID + 1,
-                                                   minScinID - 0.5, maxScinID + 0.5, 200, 0.0, totUppLimit),
+                                                   minScinID - 0.5, maxScinID + 0.5, 200, 0.0, fToTHistoUpperLimit),
                                           "Scin ID", "ToT [ps]");
 
   getStatistics().createHistogramWithAxes(new TH2D("mtxsig_sideB_tot", "Matrix Signal ToT - Side B per scintillator", maxScinID - minScinID + 1,
-                                                   minScinID - 0.5, maxScinID + 0.5, 200, 0.0, totUppLimit),
+                                                   minScinID - 0.5, maxScinID + 0.5, 200, 0.0, fToTHistoUpperLimit),
                                           "Scin ID", "ToT [ps]");
 
   // SiPM offsets if needed
@@ -185,7 +190,7 @@ void SignalTransformer::initialiseHistograms()
     auto minChannelID = getParamBank().getChannels().begin()->first;
     auto maxChannelID = getParamBank().getChannels().rbegin()->first;
 
-    getStatistics().createHistogramWithAxes(new TH2D("sf_channel_offsets", "Offset of Channel in Matrix vs. Channel ID",
+    getStatistics().createHistogramWithAxes(new TH2D("mtx_channel_offsets", "Offset of Channel in Matrix vs. Channel ID",
                                                      maxChannelID - minChannelID + 1, minChannelID - 0.5, maxChannelID + 0.5, 200, -fMergingTime,
                                                      fMergingTime),
                                             "Channel ID", "Offset");
