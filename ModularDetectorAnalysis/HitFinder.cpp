@@ -171,7 +171,7 @@ void HitFinder::initialiseHistograms()
                                           "Scintillator ID", "A-B time difference [ps]");
 
   getStatistics().createHistogramWithAxes(new TH2D("hit_tot_scin", "Hit ToT divided by multiplicity, all hits", maxScinID - minScinID + 1,
-                                                   minScinID - 0.5, maxScinID + 0.5, 200, 0.0, fToTHistoUpperLimit),
+                                                   minScinID - 0.5, maxScinID + 0.5, 200, 0.0, 1.2 * fToTHistoUpperLimit),
                                           "Scintillator ID", "Time over Threshold [ps]");
 
   // Unused sigals stats

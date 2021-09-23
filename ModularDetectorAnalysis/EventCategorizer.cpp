@@ -284,8 +284,8 @@ void EventCategorizer::initialiseHistograms()
 {
   auto minScinID = getParamBank().getScins().begin()->first;
   auto maxScinID = getParamBank().getScins().rbegin()->first;
-  double totUppLimit = 10000000.0;
-  double revToTLimit = 0.000000015;
+  double totUppLimit = 500000.0;
+  double revToTLimit = 0.0000005;
 
   // Histograms for 2 gamama events
   getStatistics().createHistogramWithAxes(new TH1D("2g_tot", "2 gamma event - average ToT scaled", 201, 0.0, totUppLimit), "Time over Threshold [ps]",
