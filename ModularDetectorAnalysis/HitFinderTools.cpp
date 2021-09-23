@@ -183,8 +183,10 @@ JPetPhysRecoHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const
 
   // ToT of a signal is a average of ToT of AB signals
   double tot = (signalA.getToT() + signalB.getToT()) / 2.0;
-  hit.setToT(tot);
-  hit.setEnergy(tot);
+  double totNormA = calibTree.get("scin." + to_string(scin.getID()) + ".tot_factor_a", 1.0);
+  double totNormB = calibTree.get("scin." + to_string(scin.getID()) + ".tot_factor_b", 0.0);
+  hit.setToT(tot * totNormA + totNormB);
+  hit.setEnergy(tot * totNormA + totNormB);
 
   TVector3 position(scin.getCenterX(), scin.getCenterY(), velocity * hit.getTimeDiff() / 2.0);
   // Rotation of position vector according to configuration settings

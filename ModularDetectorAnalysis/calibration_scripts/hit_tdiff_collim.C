@@ -72,7 +72,7 @@ void hit_tdiff(std::string fileName, std::string calibJSONFileName = "calibratio
 
   if (fileHitsAB->IsOpen())
   {
-    TH2F* hitTDiffAll = dynamic_cast<TH2F*>(fileHitsAB->Get("hit_tdiff_scin"));
+    TH2D* hitTDiffAll = dynamic_cast<TH2D*>(fileHitsAB->Get("hit_tdiff_scin"));
 
     TGraphErrors* bCorrGraph = new TGraphErrors();
     bCorrGraph->SetNameTitle("b_corr", "B side signals correction for scintillators");
@@ -106,13 +106,16 @@ void hit_tdiff(std::string fileName, std::string calibJSONFileName = "calibratio
       double b_corr = fitFun->GetParameter(1);
       double b_corr_error = fitFun->GetParError(1);
 
+      // If a constatnt for B correction already exists in the tree, adding to new one
+      b_corr += tree.get("scin." + to_string(scinID) + ".b_correction", 0.0);
+
       tree.put("scin." + to_string(scinID) + ".b_correction", b_corr);
       bCorrGraph->SetPoint(graphIt, (double)scinID, b_corr);
       bCorrGraph->SetPointError(graphIt, 0.0, b_corr_error);
       graphIt++;
 
       // copying velocity value read from provided file
-      double velocity = velocityTree.get("scin." + to_string(scinID) + ".eff_velocity", 0.0);
+      double velocity = velocityTree.get("scin." + to_string(scinID) + ".eff_velocity", 0.013);
       tree.put("scin." + to_string(scinID) + ".eff_velocity", velocity);
 
       if (saveResult)

@@ -306,256 +306,151 @@ void EventCategorizer::initialiseHistograms()
                                                    minScinID - 0.5, maxScinID + 0.5, 201, -revToTLimit, revToTLimit),
                                           "Scintillator ID", "Reversd Time over Threshold [1/ps]");
 
-  getStatistics().createHistogram(
-      new TH2F("2g_revtot_z_pos", "2 gamma event - reversed ToT vs. hit z position", 101, -25.5, 25.5, 201, -revToTLimit, revToTLimit));
-  getStatistics().getHisto2D("2g_revtot_z_pos")->GetXaxis()->SetTitle("Hit z position [cm]");
-  getStatistics().getHisto2D("2g_revtot_z_pos")->GetYaxis()->SetTitle("Reversd Time over Threshold [1/ps]");
+  getStatistics().createHistogramWithAxes(new TH1D("2g_tof", "2 gamma event - TOF calculated by convention", 201, -fMaxTimeDiff, fMaxTimeDiff),
+                                          "Time of Flight [ps]", "Number of Hit Pairs");
 
-  getStatistics().createHistogram(new TH1F("2g_tof", "2 gamma event - TOF calculated by convention", 201, -fMaxTimeDiff, fMaxTimeDiff));
-  getStatistics().getHisto1D("2g_tof")->GetXaxis()->SetTitle("Time of Flight [ps]");
-  getStatistics().getHisto1D("2g_tof")->GetYaxis()->SetTitle("Number of Hit Pairs");
+  getStatistics().createHistogramWithAxes(new TH2D("2g_tof_scin", "2 gamma event - TOF calculated by convention per scintillator",
+                                                   maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 201, -fMaxTimeDiff, fMaxTimeDiff),
+                                          "Scintillator ID", "Time of Flight [ps]");
 
-  getStatistics().createHistogram(new TH2F("2g_tof_scin", "2 gamma event - TOF calculated by convention per scintillator", maxScinID - minScinID + 1,
-                                           minScinID - 0.5, maxScinID + 0.5, 201, -fMaxTimeDiff, fMaxTimeDiff));
-  getStatistics().getHisto2D("2g_tof_scin")->GetXaxis()->SetTitle("Scintillator ID");
-  getStatistics().getHisto2D("2g_tof_scin")->GetYaxis()->SetTitle("Time of Flight [ps]");
+  getStatistics().createHistogramWithAxes(new TH1D("2g_ab_tdiff", "2 gamma event - hits A-B time difference", 201, -fMaxTimeDiff, fMaxTimeDiff),
+                                          "A-B Signal Time Difference [ps]", "Number of Hit Pairs");
 
-  getStatistics().createHistogram(new TH2F("2g_tof_z_pos", "2 gamma event - TOF calculated by convention vs. hit z position", 101, -25.5, 25.5, 201,
-                                           -fMaxTimeDiff, fMaxTimeDiff));
-  getStatistics().getHisto2D("2g_tof_z_pos")->GetXaxis()->SetTitle("Hit z position [cm]");
-  getStatistics().getHisto2D("2g_tof_z_pos")->GetYaxis()->SetTitle("Time of Flight [ps]");
+  getStatistics().createHistogramWithAxes(new TH2D("2g_ab_tdiff_scin", "2 gamma event - hits A-B time difference per scintillator",
+                                                   maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 201, -fMaxTimeDiff, fMaxTimeDiff),
+                                          "Scintillator ID", "A-B Signal Time Difference [ps]");
 
-  getStatistics().createHistogram(new TH1F("2g_ab_tdiff", "2 gamma event - hits A-B time difference", 201, -fMaxTimeDiff, fMaxTimeDiff));
-  getStatistics().getHisto1D("2g_ab_tdiff")->GetXaxis()->SetTitle("A-B Signal Time Difference [ps]");
-  getStatistics().getHisto1D("2g_ab_tdiff")->GetYaxis()->SetTitle("Number of Hit Pairs");
+  getStatistics().createHistogramWithAxes(new TH1D("2g_theta", "2 gamma event - flight vectors theta", 181, -0.5, 180.5), "Angle [degree]",
+                                          "Number of Hit Pairs");
 
-  getStatistics().createHistogram(new TH2F("2g_ab_tdiff_scin", "2 gamma event - hits A-B time difference per scintillator", maxScinID - minScinID + 1,
-                                           minScinID - 0.5, maxScinID + 0.5, 201, -fMaxTimeDiff, fMaxTimeDiff));
-  getStatistics().getHisto2D("2g_ab_tdiff_scin")->GetXaxis()->SetTitle("Scintillator ID");
-  getStatistics().getHisto2D("2g_ab_tdiff_scin")->GetYaxis()->SetTitle("A-B Signal Time Difference [ps]");
+  getStatistics().createHistogramWithAxes(new TH2D("2g_theta_scin", "2 gamma event - flight vectors theta per scintillator",
+                                                   maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 181, -0.5, 180.5),
+                                          "Scintillator ID", "Angle [degree]");
 
-  getStatistics().createHistogram(new TH1F("2g_theta", "2 gamma event - flight vectors theta", 181, -0.5, 180.5));
-  getStatistics().getHisto1D("2g_theta")->GetXaxis()->SetTitle("Angle [degree]");
-  getStatistics().getHisto1D("2g_theta")->GetYaxis()->SetTitle("Number of Hit Pairs");
-
-  getStatistics().createHistogram(new TH2F("2g_theta_scin", "2 gamma event - flight vectors theta per scintillator", maxScinID - minScinID + 1,
-                                           minScinID - 0.5, maxScinID + 0.5, 181, -0.5, 180.5));
-  getStatistics().getHisto2D("2g_theta_scin")->GetXaxis()->SetTitle("Scintillator ID");
-  getStatistics().getHisto2D("2g_theta_scin")->GetYaxis()->SetTitle("Angle [degree]");
-
-  getStatistics().createHistogram(
-      new TH2F("2g_theta_z_pos", "2 gamma event - flight vectors theta vs. hit z position", 101, -25.5, 25.5, 181, -0.5, 180.5));
-  getStatistics().getHisto2D("2g_theta_z_pos")->GetXaxis()->SetTitle("Hit z position [cm]");
-  getStatistics().getHisto2D("2g_theta_z_pos")->GetYaxis()->SetTitle("Angle [degree]");
+  getStatistics().createHistogramWithAxes(
+      new TH2D("2g_theta_z_pos", "2 gamma event - flight vectors theta vs. hit z position", 101, -25.5, 25.5, 181, -0.5, 180.5),
+      "Hit z position [cm]", "Angle [degree]");
 
   // Cut stats
-  getStatistics().createHistogram(
-      new TH1F("cut_stats_none", "Hit pairs before cuts - scintillator occupancy", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5));
-  getStatistics().getHisto1D("cut_stats_none")->GetXaxis()->SetTitle("Scintillator ID");
-  getStatistics().getHisto1D("cut_stats_none")->GetYaxis()->SetTitle("Number of Hits");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("cut_stats_none", "Hit pairs before cuts - scintillator occupancy", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5),
+      "Scintillator ID", "Number of Hits");
 
-  getStatistics().createHistogram(
-      new TH1F("cut_stats_a1", "Hits after theta cut - scintillator occupancy", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5));
-  getStatistics().getHisto1D("cut_stats_a1")->GetXaxis()->SetTitle("Scintillator ID");
-  getStatistics().getHisto1D("cut_stats_a1")->GetYaxis()->SetTitle("Number of Hits");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("cut_stats_a1", "Hits after theta cut - scintillator occupancy", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5),
+      "Scintillator ID", "Number of Hits");
 
-  getStatistics().createHistogram(
-      new TH1F("cut_stats_a2", "Hits after theta cut - scintillator occupancy", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5));
-  getStatistics().getHisto1D("cut_stats_a2")->GetXaxis()->SetTitle("Scin ID");
-  getStatistics().getHisto1D("cut_stats_a2")->GetYaxis()->SetTitle("Number of Hits");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("cut_stats_a2", "Hits after theta cut - scintillator occupancy", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5),
+      "Scintillator ID", "Number of Hits");
 
-  getStatistics().createHistogram(new TH1F("cut_stats_tof", "Hits after time difference cut - scintillator occupancy", maxScinID - minScinID + 1,
-                                           minScinID - 0.5, maxScinID + 0.5));
-  getStatistics().getHisto1D("cut_stats_tof")->GetXaxis()->SetTitle("Scin ID");
-  getStatistics().getHisto1D("cut_stats_tof")->GetYaxis()->SetTitle("Number of Hits");
+  getStatistics().createHistogramWithAxes(new TH1D("cut_stats_tof", "Hits after time difference cut - scintillator occupancy",
+                                                   maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5),
+                                          "Scintillator ID", "Number of Hits");
 
-  getStatistics().createHistogram(
-      new TH1F("cut_stats_tot", "Hits after ToT cut - scintillator occupancy", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5));
-  getStatistics().getHisto1D("cut_stats_tot")->GetXaxis()->SetTitle("Scin ID");
-  getStatistics().getHisto1D("cut_stats_tot")->GetYaxis()->SetTitle("Number of Hits");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("cut_stats_tot", "Hits after ToT cut - scintillator occupancy", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5),
+      "Scintillator ID", "Number of Hits");
 
   // Cut result on other observables
   // TOF cut
-  getStatistics().createHistogram(new TH1F("tof_cut_tot", "2 gamma event after TOF cut - average ToT scaled", 201, 0.0, totUppLimit));
-  getStatistics().getHisto1D("tof_cut_tot")->GetXaxis()->SetTitle("Time over Threshold [ps]");
-  getStatistics().getHisto1D("tof_cut_tot")->GetYaxis()->SetTitle("Number of Hits");
+  getStatistics().createHistogramWithAxes(new TH1D("tof_cut_tot", "2 gamma event after TOF cut - average ToT scaled", 201, 0.0, totUppLimit),
+                                          "Time over Threshold [ps]", "Number of Hits");
 
-  getStatistics().createHistogram(
-      new TH1F("tof_cut_ab_tdiff", "2 gamma event after TOF cut - hits A-B time difference", 201, -fMaxTimeDiff, fMaxTimeDiff));
-  getStatistics().getHisto1D("tof_cut_ab_tdiff")->GetXaxis()->SetTitle("A-B Signal Time Difference [ps]");
-  getStatistics().getHisto1D("tof_cut_ab_tdiff")->GetYaxis()->SetTitle("Number of Hit Pairs");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("tof_cut_ab_tdiff", "2 gamma event after TOF cut - hits A-B time difference", 201, -fMaxTimeDiff, fMaxTimeDiff),
+      "A-B Signal Time Difference [ps]", "Number of Hits");
 
-  getStatistics().createHistogram(new TH1F("tof_cut_theta", "2 gamma event after TOF cut - theta between flight vectors", 181, -0.5, 180.5));
-  getStatistics().getHisto1D("tof_cut_theta")->GetXaxis()->SetTitle("Angle [degree]");
-  getStatistics().getHisto1D("tof_cut_theta")->GetYaxis()->SetTitle("Number of Hit Pairs");
+  getStatistics().createHistogramWithAxes(new TH1D("tof_cut_theta", "2 gamma event after TOF cut - theta between flight vectors", 181, -0.5, 180.5),
+                                          "Angle [degree]", "Number of Hit Pairs");
 
   // After theta angle cut - back to back requirement
-  getStatistics().createHistogram(
-      new TH1F("theta_cut_tof", "2 gamma event after theta cut - TOF calculated by convention", 201, -fMaxTimeDiff, fMaxTimeDiff));
-  getStatistics().getHisto1D("theta_cut_tof")->GetXaxis()->SetTitle("Time of Flight [ps]");
-  getStatistics().getHisto1D("theta_cut_tof")->GetYaxis()->SetTitle("Number of Hit Pairs");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("theta_cut_tof", "2 gamma event after theta cut - TOF calculated by convention", 201, -fMaxTimeDiff, fMaxTimeDiff),
+      "Time of Flight [ps]", "Number of Hit Pairs");
 
-  getStatistics().createHistogram(new TH1F("theta_cut_tot", "2 gamma event after theta cut - average ToT scaled", 201, 0.0, totUppLimit));
-  getStatistics().getHisto1D("theta_cut_tot")->GetXaxis()->SetTitle("Time over Threshold [ps]");
-  getStatistics().getHisto1D("theta_cut_tot")->GetYaxis()->SetTitle("Number of Hits");
+  getStatistics().createHistogramWithAxes(new TH1D("theta_cut_tot", "2 gamma event after theta cut - average ToT scaled", 201, 0.0, totUppLimit),
+                                          "Time over Threshold [ps]", "Number of Hit Pairs");
 
-  getStatistics().createHistogram(
-      new TH1F("theta_cut_ab_tdiff", "2 gamma event after theta cut - hits A-B time difference", 201, -fMaxTimeDiff, fMaxTimeDiff));
-  getStatistics().getHisto1D("theta_cut_ab_tdiff")->GetXaxis()->SetTitle("A-B Signal Time Difference [ps]");
-  getStatistics().getHisto1D("theta_cut_ab_tdiff")->GetYaxis()->SetTitle("Number of Hit Pairs");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("theta_cut_ab_tdiff", "2 gamma event after theta cut - hits A-B time difference", 201, -fMaxTimeDiff, fMaxTimeDiff),
+      "A-B Signal Time Difference [ps]", "Number of Hit Pairs");
 
   // After ToT cut
-  getStatistics().createHistogram(
-      new TH1F("tot_cut_tof", "2 gamma event after ToT cut - TOF calculated by convention", 201, -fMaxTimeDiff, fMaxTimeDiff));
-  getStatistics().getHisto1D("theta_cut_tof")->GetXaxis()->SetTitle("Time of Flight [ps]");
-  getStatistics().getHisto1D("theta_cut_tof")->GetYaxis()->SetTitle("Number of Hit Pairs");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("tot_cut_tof", "2 gamma event after ToT cut - TOF calculated by convention", 201, -fMaxTimeDiff, fMaxTimeDiff),
+      "A-B Signal Time Difference [ps]", "Number of Hit Pairs");
 
-  getStatistics().createHistogram(
-      new TH1F("tot_cut_ab_tdiff", "2 gamma event after ToT cut - hits A-B time difference", 201, -fMaxTimeDiff, fMaxTimeDiff));
-  getStatistics().getHisto1D("theta_cut_ab_tdiff")->GetXaxis()->SetTitle("A-B Signal Time Difference [ps]");
-  getStatistics().getHisto1D("theta_cut_ab_tdiff")->GetYaxis()->SetTitle("Number of Hit Pairs");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("tot_cut_ab_tdiff", "2 gamma event after ToT cut - hits A-B time difference", 201, -fMaxTimeDiff, fMaxTimeDiff),
+      "A-B Signal Time Difference [ps]", "Number of Hit Pairs");
 
-  getStatistics().createHistogram(new TH1F("tot_cut_theta", "2 gamma event after ToT cut - theta between flight vectors", 181, -0.5, 180.5));
-  getStatistics().getHisto1D("tot_cut_theta")->GetXaxis()->SetTitle("Angle [degree]");
-  getStatistics().getHisto1D("tot_cut_theta")->GetYaxis()->SetTitle("Number of Hit Pairs");
+  getStatistics().createHistogramWithAxes(new TH1D("tot_cut_theta", "2 gamma event after ToT cut - theta between flight vectors", 181, -0.5, 180.5),
+                                          "Angle [degree]", "Number of Hit Pairs");
 
   // Events after cut - defined as annihilation event
-  getStatistics().createHistogram(new TH1F("ap_tot", "Annihilation pairs average ToT scaled", 201, 0.0, totUppLimit));
-  getStatistics().getHisto1D("ap_tot")->GetXaxis()->SetTitle("Time over Threshold [ps]");
-  getStatistics().getHisto1D("ap_tot")->GetYaxis()->SetTitle("Number of Hits");
+  getStatistics().createHistogramWithAxes(new TH1D("ap_tot", "Annihilation pairs average ToT scaled", 201, 0.0, totUppLimit),
+                                          "Time over Threshold [ps]", "Number of Annihilation Pairs");
 
-  getStatistics().createHistogram(new TH2F("ap_tot_scin", "Annihilation pairs average ToT scaled per scintillator", maxScinID - minScinID + 1,
-                                           minScinID - 0.5, maxScinID + 0.5, 201, 0.0, totUppLimit));
-  getStatistics().getHisto2D("ap_tot_scin")->GetXaxis()->SetTitle("Scintillator ID");
-  getStatistics().getHisto2D("ap_tot_scin")->GetYaxis()->SetTitle("Time over Threshold [ps]");
+  getStatistics().createHistogramWithAxes(new TH2D("ap_tot_scin", "Annihilation pairs average ToT scaled per scintillator", maxScinID - minScinID + 1,
+                                                   minScinID - 0.5, maxScinID + 0.5, 201, 0.0, totUppLimit),
+                                          "Scintillator ID", "Time over Threshold [ps]");
 
-  getStatistics().createHistogram(
-      new TH2F("ap_tot_z_pos", "Annihilation pairs average ToT scaled vs. hit z position", 101, -25.5, 25.5, 201, 0.0, totUppLimit));
-  getStatistics().getHisto2D("ap_tot_z_pos")->GetXaxis()->SetTitle("Hit z position [cm]");
-  getStatistics().getHisto2D("ap_tot_z_pos")->GetYaxis()->SetTitle("Time over Threshold [ps]");
+  getStatistics().createHistogramWithAxes(new TH1D("ap_revtot", "Annihilation pairs reversed ToT", 201, -revToTLimit, revToTLimit),
+                                          "Reversd Time over Threshold [1/ps]", "Number of Annihilation Pairs");
 
-  getStatistics().createHistogram(new TH1F("ap_revtot", "Annihilation pairs reversed ToT", 201, -revToTLimit, revToTLimit));
-  getStatistics().getHisto1D("ap_revtot")->GetXaxis()->SetTitle("Reversd Time over Threshold [1/ps]");
-  getStatistics().getHisto1D("ap_revtot")->GetYaxis()->SetTitle("Number of Hits");
+  getStatistics().createHistogramWithAxes(new TH2D("ap_revtot_scin", "Annihilation pairs reversed ToT per scin", maxScinID - minScinID + 1,
+                                                   minScinID - 0.5, maxScinID + 0.5, 201, -revToTLimit, revToTLimit),
+                                          "Scintillator ID", "Reversd Time over Threshold [1/ps]");
 
-  getStatistics().createHistogram(new TH2F("ap_revtot_scin", "Annihilation pairs reversed ToT per scin", maxScinID - minScinID + 1, minScinID - 0.5,
-                                           maxScinID + 0.5, 201, -revToTLimit, revToTLimit));
-  getStatistics().getHisto2D("ap_revtot_scin")->GetXaxis()->SetTitle("Scintillator ID");
-  getStatistics().getHisto2D("ap_revtot_scin")->GetYaxis()->SetTitle("Reversd Time over Threshold [1/ps]");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("ap_ab_tdiff", "Annihilation pairs hits A-B time difference after ToT cut", 201, -fMaxTimeDiff, fMaxTimeDiff),
+      "A-B Signal Time Difference [ps]", "Number of Annihilation Pairs");
 
-  getStatistics().createHistogram(
-      new TH2F("ap_revtot_z_pos", "Annihilation pairs reversed ToT vs. hit z position", 101, -25.5, 25.5, 201, -revToTLimit, revToTLimit));
-  getStatistics().getHisto2D("ap_revtot_z_pos")->GetXaxis()->SetTitle("Hit z position [cm]");
-  getStatistics().getHisto2D("ap_revtot_z_pos")->GetYaxis()->SetTitle("Reversd Time over Threshold [1/ps]");
+  getStatistics().createHistogramWithAxes(new TH2D("ap_ab_tdiff_scin", "Annihilation pairs hits A-B time difference per scintillator",
+                                                   maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 201, -fMaxTimeDiff, fMaxTimeDiff),
+                                          "Scintillator ID", "A-B Signal Time Difference [ps]");
 
-  getStatistics().createHistogram(
-      new TH1F("ap_ab_tdiff", "Annihilation pairs hits A-B time difference after ToT cut", 201, -fMaxTimeDiff, fMaxTimeDiff));
-  getStatistics().getHisto1D("ap_ab_tdiff")->GetXaxis()->SetTitle("A-B Signal Time Difference [ps]");
-  getStatistics().getHisto1D("ap_ab_tdiff")->GetYaxis()->SetTitle("Number of Hits");
+  getStatistics().createHistogramWithAxes(new TH1D("ap_tof", "Annihilation pairs Time of Flight", 201, -fMaxTimeDiff, fMaxTimeDiff),
+                                          "Time of Flight [ps]", "Number of Annihilation Pairs");
 
-  getStatistics().createHistogram(new TH2F("ap_ab_tdiff_scin", "Annihilation pairs hits A-B time difference per scintillator",
-                                           maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 201, -fMaxTimeDiff, fMaxTimeDiff));
-  getStatistics().getHisto2D("ap_ab_tdiff_scin")->GetXaxis()->SetTitle("Scintillator ID");
-  getStatistics().getHisto2D("ap_ab_tdiff_scin")->GetYaxis()->SetTitle("A-B Signal Time Difference [ps]");
+  getStatistics().createHistogramWithAxes(new TH2D("ap_tof_scin", "Annihilation pairs Time of Flight per scintillator", maxScinID - minScinID + 1,
+                                                   minScinID - 0.5, maxScinID + 0.5, 201, -fMaxTimeDiff, fMaxTimeDiff),
+                                          "Scintillator ID", "Time of Flight [ps]");
 
-  getStatistics().createHistogram(new TH1F("ap_tof", "Annihilation pairs Time of Flight", 201, -fMaxTimeDiff, fMaxTimeDiff));
-  getStatistics().getHisto1D("ap_tof")->GetXaxis()->SetTitle("Time of Flight [ps]");
-  getStatistics().getHisto1D("ap_tof")->GetYaxis()->SetTitle("Number of Annihilation Pairs");
+  getStatistics().createHistogramWithAxes(new TH2D("ap_yx", "YX position of annihilation point (bin 0.5 cm)", 202, -50.5, 50.5, 202, -50.5, 50.5),
+                                          "Y position [cm]", "X position [cm]");
 
-  getStatistics().createHistogram(new TH2F("ap_tof_scin", "Annihilation pairs Time of Flight per scintillator", maxScinID - minScinID + 1,
-                                           minScinID - 0.5, maxScinID + 0.5, 201, -fMaxTimeDiff, fMaxTimeDiff));
-  getStatistics().getHisto2D("ap_tof_scin")->GetXaxis()->SetTitle("Scintillator ID");
-  getStatistics().getHisto2D("ap_tof_scin")->GetYaxis()->SetTitle("Time of Flight [ps]");
+  getStatistics().createHistogramWithAxes(new TH2D("ap_zx", "ZX position of annihilation point (bin 0.5 cm)", 202, -50.5, 50.5, 202, -50.5, 50.5),
+                                          "Z position [cm]", "X position [cm]");
 
-  getStatistics().createHistogram(
-      new TH2F("ap_tof_z_pos", "Annihilation point Time of Flight vs. hit z position", 101, -25.5, 25.5, 201, -fMaxTimeDiff, fMaxTimeDiff));
-  getStatistics().getHisto2D("ap_tof_z_pos")->GetXaxis()->SetTitle("Hit z position [cm]");
-  getStatistics().getHisto2D("ap_tof_z_pos")->GetYaxis()->SetTitle("Time of Flight [ps]");
+  getStatistics().createHistogramWithAxes(new TH2D("ap_zy", "ZY position of annihilation point (bin 0.5 cm)", 202, -50.5, 50.5, 202, -50.5, 50.5),
+                                          "Z position [cm]", "Y position [cm]");
 
-  getStatistics().createHistogram(
-      new TH1F("ap_tof_lor_cut", "Annihilation pairs Time of Flight after LOR angle cut", 201, -fMaxTimeDiff, fMaxTimeDiff));
-  getStatistics().getHisto1D("ap_tof_lor_cut")->GetXaxis()->SetTitle("Time of Flight [ps]");
-  getStatistics().getHisto1D("ap_tof_lor_cut")->GetYaxis()->SetTitle("Number of Annihilation Pairs");
+  getStatistics().createHistogramWithAxes(
+      new TH2D("ap_yx_zoom", "YX position of annihilation point (bin 0.25 cm)", 132, -16.5, 16.5, 132, -16.5, 16.5), "Y position [cm]",
+      "X position [cm]");
 
-  getStatistics().createHistogram(new TH2F("ap_yx", "YX position of annihilation point (bin 0.5 cm)", 202, -50.5, 50.5, 202, -50.5, 50.5));
-  getStatistics().getHisto2D("ap_yx")->GetXaxis()->SetTitle("Y position [cm]");
-  getStatistics().getHisto2D("ap_yx")->GetYaxis()->SetTitle("X position [cm]");
+  getStatistics().createHistogramWithAxes(
+      new TH2D("ap_zx_zoom", "ZX position of annihilation point (bin 0.25 cm)", 132, -16.5, 16.5, 132, -16.5, 16.5), "Z position [cm]",
+      "X position [cm]");
 
-  getStatistics().createHistogram(new TH2F("ap_zx", "ZX position of annihilation point (bin 0.5 cm)", 202, -50.5, 50.5, 202, -50.5, 50.5));
-  getStatistics().getHisto2D("ap_zx")->GetXaxis()->SetTitle("Z position [cm]");
-  getStatistics().getHisto2D("ap_zx")->GetYaxis()->SetTitle("X position [cm]");
-
-  getStatistics().createHistogram(new TH2F("ap_zy", "ZY position of annihilation point (bin 0.5 cm)", 202, -50.5, 50.5, 202, -50.5, 50.5));
-  getStatistics().getHisto2D("ap_zy")->GetXaxis()->SetTitle("Z position [cm]");
-  getStatistics().getHisto2D("ap_zy")->GetYaxis()->SetTitle("Y position [cm]");
-
-  getStatistics().createHistogram(new TH2F("ap_yx_zoom", "YX position of annihilation point (bin 0.25 cm)", 132, -16.5, 16.5, 132, -16.5, 16.5));
-  getStatistics().getHisto2D("ap_yx_zoom")->GetXaxis()->SetTitle("Y position [cm]");
-  getStatistics().getHisto2D("ap_yx_zoom")->GetYaxis()->SetTitle("X position [cm]");
-
-  getStatistics().createHistogram(new TH2F("ap_zx_zoom", "ZX position of annihilation point (bin 0.25 cm)", 132, -16.5, 16.5, 132, -16.5, 16.5));
-  getStatistics().getHisto2D("ap_zx_zoom")->GetXaxis()->SetTitle("Z position [cm]");
-  getStatistics().getHisto2D("ap_zx_zoom")->GetYaxis()->SetTitle("X position [cm]");
-
-  getStatistics().createHistogram(new TH2F("ap_zy_zoom", "ZY position of annihilation point (bin 0.25 cm)", 132, -16.5, 16.5, 132, -16.5, 16.5));
-  getStatistics().getHisto2D("ap_zy_zoom")->GetXaxis()->SetTitle("Z position [cm]");
-  getStatistics().getHisto2D("ap_zy_zoom")->GetYaxis()->SetTitle("Y position [cm]");
-
-  getStatistics().createHistogram(
-      new TH2F("ap_yx_zoom_lor_cut", "YX position of annihilation point after LOR angle cut", 132, -16.5, 16.5, 132, -16.5, 16.5));
-  getStatistics().getHisto2D("ap_yx_zoom_lor_cut")->GetXaxis()->SetTitle("Y position [cm]");
-  getStatistics().getHisto2D("ap_yx_zoom_lor_cut")->GetYaxis()->SetTitle("X position [cm]");
-
-  getStatistics().createHistogram(
-      new TH2F("ap_zx_zoom_lor_cut", "ZX position of annihilation point after LOR angle cut", 132, -16.5, 16.5, 132, -16.5, 16.5));
-  getStatistics().getHisto2D("ap_zx_zoom_lor_cut")->GetXaxis()->SetTitle("Z position [cm]");
-  getStatistics().getHisto2D("ap_zx_zoom_lor_cut")->GetYaxis()->SetTitle("X position [cm]");
-
-  getStatistics().createHistogram(
-      new TH2F("ap_zy_zoom_lor_cut", "ZY position of annihilation point after LOR angle cut", 132, -16.5, 16.5, 132, -16.5, 16.5));
-  getStatistics().getHisto2D("ap_zy_zoom_lor_cut")->GetXaxis()->SetTitle("Z position [cm]");
-  getStatistics().getHisto2D("ap_zy_zoom_lor_cut")->GetYaxis()->SetTitle("Y position [cm]");
-
-  getStatistics().createHistogram(
-      new TH2F("ap_yx_zoom_z_cut", "YX position of annihilation point after Z position cut", 132, -16.5, 16.5, 132, -16.5, 16.5));
-  getStatistics().getHisto2D("ap_yx_zoom_z_cut")->GetXaxis()->SetTitle("Y position [cm]");
-  getStatistics().getHisto2D("ap_yx_zoom_z_cut")->GetYaxis()->SetTitle("X position [cm]");
-
-  getStatistics().createHistogram(
-      new TH2F("ap_zx_zoom_z_cut", "ZX position of annihilation point after Z position cut", 132, -16.5, 16.5, 132, -16.5, 16.5));
-  getStatistics().getHisto2D("ap_zx_zoom_z_cut")->GetXaxis()->SetTitle("Z position [cm]");
-  getStatistics().getHisto2D("ap_zx_zoom_z_cut")->GetYaxis()->SetTitle("X position [cm]");
-
-  getStatistics().createHistogram(
-      new TH2F("ap_zy_zoom_z_cut", "ZY position of annihilation point after Z position cut", 132, -16.5, 16.5, 132, -16.5, 16.5));
-  getStatistics().getHisto2D("ap_zy_zoom_z_cut")->GetXaxis()->SetTitle("Z position [cm]");
-  getStatistics().getHisto2D("ap_zy_zoom_z_cut")->GetYaxis()->SetTitle("Y position [cm]");
+  getStatistics().createHistogramWithAxes(
+      new TH2D("ap_zy_zoom", "ZY position of annihilation point (bin 0.25 cm)", 132, -16.5, 16.5, 132, -16.5, 16.5), "Z position [cm]",
+      "Y position [cm]");
 
   // Histograms for scattering category
-  // getStatistics().createHistogram(
-  //   new TH1F("ScatterTOF_TimeDiff", "Difference of Scatter TOF and hits time difference",
-  //     201, 0.0, 3.0*fScatterTOFTimeDiff));
-  // getStatistics().getHisto1D("ScatterTOF_TimeDiff")->GetXaxis()->SetTitle("Scat_TOF & time diff [ps]");
-  // getStatistics().getHisto1D("ScatterTOF_TimeDiff")->GetYaxis()->SetTitle("Number of Hit Pairs");
+  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_dist", "Scatter Test - Distance Difference", 201, 0.0, 20.0), "Dist Diff [cm]",
+                                          "Number of Hit Pairs");
 
-  // getStatistics().createHistogram(
-  //    new TH2F("ScatterAngle_PrimaryToT", "Angle of scattering vs. ToT of primary hits",
-  //     181, -0.5, 180.5, 201, 0.0, 50000.0));
-  // getStatistics().getHisto2D("ScatterAngle_PrimaryToT")->GetXaxis()->SetTitle("Scattering Angle");
-  // getStatistics().getHisto2D("ScatterAngle_PrimaryToT")->GetYaxis()->SetTitle("ToT of primary hit [ps]");
+  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_time", "Scatter Test - Time Difference", 201, 0.0, 10000.0), "Time Diff [ps]",
+                                          "Number of Hit Pairs");
 
-  // getStatistics().createHistogram(
-  //    new TH2F("ScatterAngle_ScatterToT", "Angle of scattering vs. ToT of scattered hits",
-  //     181, -0.5, 180.5, 201, 0.0, 50000.0));
-  // getStatistics().getHisto2D("ScatterAngle_ScatterToT")->GetXaxis()->SetTitle("Scattering Angle");
-  // getStatistics().getHisto2D("ScatterAngle_ScatterToT")->GetYaxis()->SetTitle("ToT of scattered hit [ps]");
+  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_pass", "Passed Scatter Test - Time Difference", 201, 0.0, 10000.0), "Time Diff [ps]",
+                                          "Number of Hit Pairs");
 
-  // Histograms for deexcitation
-  // getStatistics().createHistogram(
-  //   new TH1F("Deex_ToT_cut", "ToT of all hits with deex cut (30,50) ns",
-  //     201, 25000.0, 55000.0));
-  // getStatistics().getHisto1D("Deex_ToT_cut")->GetXaxis()->SetTitle("ToT [ps]");
-  // getStatistics().getHisto1D("Deex_ToT_cut")->GetYaxis()->SetTitle("Number of Hits");
+  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_fail", "Failed Scatter Test - Time Difference", 201, 0.0, 10000.0), "Time Diff [ps]",
+                                          "Number of Hit Pairs");
 }
 
 void EventCategorizer::initialiseCalibrationHistograms()

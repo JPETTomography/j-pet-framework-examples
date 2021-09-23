@@ -58,7 +58,7 @@ void channel_offsets(std::string fileName, std::string calibJSONFileName = "cali
 
   if (fileMtxSynchro->IsOpen())
   {
-    TH2F* channelOffsets = dynamic_cast<TH2F*>(fileMtxSynchro->Get("mtx_offsets_channel"));
+    TH2D* channelOffsets = dynamic_cast<TH2D*>(fileMtxSynchro->Get("mtx_channel_offsets"));
 
     for (int channelID = minChannelID; channelID <= maxChannelID; ++channelID)
     {

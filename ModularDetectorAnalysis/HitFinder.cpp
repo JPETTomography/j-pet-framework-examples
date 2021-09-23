@@ -129,7 +129,7 @@ void HitFinder::saveHits(const std::vector<JPetPhysRecoHit>& hits)
     if (fSaveControlHistos)
     {
       int scinID = hit.getScin().getID();
-      getStatistics().fillHistogram("hits_scin", sortedHits.size());
+      getStatistics().fillHistogram("hits_scin", scinID, sortedHits.size());
       getStatistics().fillHistogram("hit_pos", hit.getPosZ(), hit.getPosY(), hit.getPosX());
       getStatistics().fillHistogram("hit_multi", multi);
       getStatistics().fillHistogram("hit_multi_scin", scinID, multi);

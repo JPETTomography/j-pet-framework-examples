@@ -116,14 +116,10 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetPhysRecoHit* firstHit, cons
     stats.fillHistogram("2g_revtot", revToT2);
     stats.fillHistogram("2g_revtot_scin", scin1ID, revToT1);
     stats.fillHistogram("2g_revtot_scin", scin2ID, revToT2);
-    stats.fillHistogram("2g_revtot_z_pos", firstHit->getPosZ(), revToT1);
-    stats.fillHistogram("2g_revtot_z_pos", secondHit->getPosZ(), revToT2);
 
     stats.fillHistogram("2g_tof", tof);
     stats.fillHistogram("2g_tof_scin", scin1ID, tof);
-    stats.fillHistogram("2g_tof_scin", scin1ID, tof);
-    stats.fillHistogram("2g_tof_z_pos", firstHit->getPosZ(), tof);
-    stats.fillHistogram("2g_tof_z_pos", secondHit->getPosZ(), tof);
+    stats.fillHistogram("2g_tof_scin", scin2ID, tof);
 
     stats.fillHistogram("2g_ab_tdiff", firstHit->getTimeDiff());
     stats.fillHistogram("2g_ab_tdiff", secondHit->getTimeDiff());
@@ -211,15 +207,11 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetPhysRecoHit* firstHit, cons
     stats.fillHistogram("ap_tot", tot2);
     stats.fillHistogram("ap_tot_scin", scin1ID, tot1);
     stats.fillHistogram("ap_tot_scin", scin2ID, tot2);
-    stats.fillHistogram("ap_tot_z_pos", firstHit->getPosZ(), tot1);
-    stats.fillHistogram("ap_tot_z_pos", secondHit->getPosZ(), tot2);
 
     stats.fillHistogram("ap_revtot", revToT1);
     stats.fillHistogram("ap_revtot", revToT2);
     stats.fillHistogram("ap_revtot_scin", scin1ID, revToT1);
     stats.fillHistogram("ap_revtot_scin", scin2ID, revToT2);
-    stats.fillHistogram("ap_revtot_z_pos", firstHit->getPosZ(), revToT1);
-    stats.fillHistogram("ap_revtot_z_pos", secondHit->getPosZ(), revToT2);
 
     stats.fillHistogram("ap_ab_tdiff", firstHit->getTimeDiff());
     stats.fillHistogram("ap_ab_tdiff", secondHit->getTimeDiff());
@@ -229,8 +221,6 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetPhysRecoHit* firstHit, cons
     stats.fillHistogram("ap_tof", tof);
     stats.fillHistogram("ap_tof_scin", scin1ID, tof);
     stats.fillHistogram("ap_tof_scin", scin2ID, tof);
-    stats.fillHistogram("ap_tof_z_pos", firstHit->getPosZ(), tof);
-    stats.fillHistogram("ap_tof_z_pos", secondHit->getPosZ(), tof);
 
     stats.fillHistogram("ap_yx", annhilationPoint.Y(), annhilationPoint.X());
     stats.fillHistogram("ap_zx", annhilationPoint.Z(), annhilationPoint.X());
@@ -238,21 +228,6 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetPhysRecoHit* firstHit, cons
     stats.fillHistogram("ap_yx_zoom", annhilationPoint.Y(), annhilationPoint.X());
     stats.fillHistogram("ap_zx_zoom", annhilationPoint.Z(), annhilationPoint.X());
     stats.fillHistogram("ap_zy_zoom", annhilationPoint.Z(), annhilationPoint.Y());
-
-    if (lorAngle1 < lorAngleMax && lorAngle2 < lorAngleMax)
-    {
-      stats.fillHistogram("ap_yx_zoom_lor_cut", annhilationPoint.Y(), annhilationPoint.X());
-      stats.fillHistogram("ap_zx_zoom_lor_cut", annhilationPoint.Z(), annhilationPoint.X());
-      stats.fillHistogram("ap_zy_zoom_lor_cut", annhilationPoint.Z(), annhilationPoint.Y());
-      stats.fillHistogram("ap_tof_lor_cut", tof);
-    }
-
-    if (fabs(firstHit->getPosZ()) < lorPosZMax && fabs(secondHit->getPosZ()) < lorPosZMax)
-    {
-      stats.fillHistogram("ap_yx_zoom_z_cut", annhilationPoint.Y(), annhilationPoint.X());
-      stats.fillHistogram("ap_zx_zoom_z_cut", annhilationPoint.Z(), annhilationPoint.X());
-      stats.fillHistogram("ap_zy_zoom_z_cut", annhilationPoint.Z(), annhilationPoint.Y());
-    }
   }
   // Returning event as 2 gamma if meets cut conditions
   if (totCut && tDiffCut && thetaCut2)
