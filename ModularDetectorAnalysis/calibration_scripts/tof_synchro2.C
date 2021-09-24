@@ -51,7 +51,7 @@ void tof_synchro(std::string fileName, std::string calibJSONFileName = "calibrat
   if (fileHitsTOF->IsOpen())
   {
 
-    TH2F* tof2Hist = dynamic_cast<TH2F*>(fileHitsTOF->Get("ap_tof_scin"));
+    TH2D* tof2Hist = dynamic_cast<TH2D*>(fileHitsTOF->Get("ap_tof_scin"));
 
     TGraphErrors* tofCorrGraph = new TGraphErrors();
     tofCorrGraph->SetNameTitle("tof_corr", "Secondary TOF correction for hits in scintillators");
