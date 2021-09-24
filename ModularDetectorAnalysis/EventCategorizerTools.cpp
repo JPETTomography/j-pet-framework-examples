@@ -24,8 +24,7 @@ using namespace std;
  * Method for determining type of event - back to back 2 gamma
  */
 bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
-                                           double totCutAnniMin, double totCutAnniMax, double lorAngleMax, double lorPosZMax,
-                                           const TVector3& sourcePos)
+                                           double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, double scatterTestValue)
 {
   bool isEvent2Gamma = false;
   if (event.getHits().size() < 2)
@@ -55,8 +54,14 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
         secondHit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(i));
       }
 
-      if (checkFor2Gamma(firstHit, secondHit, stats, saveHistos, maxThetaDiff, maxTimeDiff, totCutAnniMin, totCutAnniMax, lorAngleMax, lorPosZMax,
-                         sourcePos))
+      // Skip if scatter
+      if (checkForScatter(firstHit, secondHit, stats, false, scatterTestValue))
+      {
+        continue;
+      }
+
+      if (checkFor2Gamma(firstHit, secondHit, stats, saveHistos, maxThetaDiff, maxTimeDiff, totCutAnniMin, totCutAnniMax, sourcePos,
+                         scatterTestValue))
       {
         isEvent2Gamma = true;
       }
@@ -69,8 +74,8 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
  * Method for determining type of two hits - back to back 2 gamma
  */
 bool EventCategorizerTools::checkFor2Gamma(const JPetPhysRecoHit* firstHit, const JPetPhysRecoHit* secondHit, JPetStatistics& stats, bool saveHistos,
-                                           double maxThetaDiff, double maxTimeDiff, double totCutAnniMin, double totCutAnniMax, double lorAngleMax,
-                                           double lorPosZMax, const TVector3& sourcePos)
+                                           double maxThetaDiff, double maxTimeDiff, double totCutAnniMin, double totCutAnniMax,
+                                           const TVector3& sourcePos, double scatterTestValue)
 {
   int scin1ID = firstHit->getScin().getID();
   int scin2ID = secondHit->getScin().getID();
@@ -98,9 +103,6 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetPhysRecoHit* firstHit, cons
   TVector3 vechit2_2D(secondHit->getPosX() - sourcePos.X(), 0.0, secondHit->getPosZ() - sourcePos.Z());
   TVector3 vechit1_1D(firstHit->getPosX() - sourcePos.X(), 0.0, 0.0);
   TVector3 vechit2_1D(secondHit->getPosX() - sourcePos.X(), 0.0, 0.0);
-
-  double lorAngle1 = TMath::RadToDeg() * vechit1_2D.Angle(vechit1_1D);
-  double lorAngle2 = TMath::RadToDeg() * vechit2_2D.Angle(vechit2_2D);
 
   // Pre-cuts histograms
   if (saveHistos)

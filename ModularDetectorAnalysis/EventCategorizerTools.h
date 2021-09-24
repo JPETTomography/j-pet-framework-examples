@@ -34,11 +34,11 @@ class EventCategorizerTools
 {
 public:
   static bool checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
-                             double totCutAnniMin, double totCutAnniMax, double lorAngleMax, double lorPosZMax, const TVector3& sourcePos);
+                             double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, double scatterTestValue);
 
   static bool checkFor2Gamma(const JPetPhysRecoHit* firstHit, const JPetPhysRecoHit* secondHit, JPetStatistics& stats, bool saveHistos,
-                             double maxThetaDiff, double maxTimeDiff, double totCutAnniMin, double totCutAnniMax, double lorAngleMax,
-                             double lorPosZMax, const TVector3& sourcePos);
+                             double maxThetaDiff, double maxTimeDiff, double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos,
+                             double scatterTestValue);
 
   // static std::vector<JPetEvent> getLORs(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxTOF, double maxScatter,
   //                                       double totCutAnniMin, double totCutAnniMax);
