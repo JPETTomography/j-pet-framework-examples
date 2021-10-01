@@ -13,12 +13,11 @@
  *  @file EventCategorizerImaging.cpp
  */
 
+#include "EventCategorizerImaging.h"
+#include "../ModularDetectorAnalysis/EventCategorizerTools.h"
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include <JPetWriter/JPetWriter.h>
 #include <iostream>
-
-#include "../ModularDetectorAnalysis/EventCategorizerTools.h"
-#include "EventCategorizerImaging.h"
 
 using namespace jpet_options_tools;
 using namespace std;

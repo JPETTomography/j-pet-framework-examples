@@ -61,7 +61,7 @@ void time_walks(std::string fileName, std::string calibJSONFileName = "calibrati
 
   if (fileTimeWalk->IsOpen())
   {
-    auto histo = dynamic_cast<TH2F*>(fileTimeWalk->Get("time_walk_ab_tdiff"));
+    auto histo = dynamic_cast<TH2D*>(fileTimeWalk->Get("time_walk_ab_tdiff"));
     bool ignoreFirst = fIgnoreFirst;
 
     TGraphErrors* gr1 = new TGraphErrors();
@@ -124,12 +124,14 @@ void time_walks(std::string fileName, std::string calibJSONFileName = "calibrati
           legend->Draw();
 
           projCan.SaveAs(Form("%s/fit_proj_%d%s", resultDir.c_str(), bin, ".png"));
-          projCan.Delete();
+          // projCan.Delete();
         }
 
-        projX->Delete();
+        // projX->Delete();
       }
     }
+
+    // gr1->Draw();
 
     // TF1* f1 = new TF1("sigmoid", "([0]/(1 + TMath::Exp(-[1]*(x-[2]))))+[3]", -0.000000016, 0.000000016);
     // f1->SetParameters(2.0 * 4100.0, 250000000, 0.0, -4100.0);
@@ -151,7 +153,8 @@ void time_walks(std::string fileName, std::string calibJSONFileName = "calibrati
     // auto p3 = fun->GetParameter(3);
     // auto e3 = fun->GetParError(3);
 
-    gr1->Fit("pol1", "", "", -0.000000015, 0.000000015);
+    // aha
+    gr1->Fit("pol1", "", "", -0.0000005, 0.0000005);
     auto fun = gr1->GetFunction("pol1");
     auto chi2 = fun->GetChisquare();
     auto ndf = fun->GetNDF();
@@ -159,9 +162,10 @@ void time_walks(std::string fileName, std::string calibJSONFileName = "calibrati
     auto e0 = fun->GetParError(0);
     auto p1 = fun->GetParameter(1);
     auto e1 = fun->GetParError(1);
-    //
+
     tree.put("time_walk.param_a", p1);
     tree.put("time_walk.param_b", p0);
+
     // tree.put("time_walk.param_2", p2);
     // tree.put("time_walk.param_3", p3);
 

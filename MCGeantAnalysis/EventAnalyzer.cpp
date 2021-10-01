@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -15,8 +15,9 @@
 
 #include "EventAnalyzer.h"
 #include "../ModularDetectorAnalysis/EventCategorizerTools.h"
-#include <JPetMCHit/JPetMCHit.h>
+#include <Hits/JPetMCRecoHit/JPetMCRecoHit.h>
 #include <JPetOptionsTools/JPetOptionsTools.h>
+#include <JPetRawMCHit/JPetRawMCHit.h>
 
 using namespace jpet_options_tools;
 using namespace std;
@@ -91,12 +92,15 @@ void EventAnalyzer::fillResolutionHistograms(const JPetEvent& event, const JPetT
   int hits_number = event.getHits().size();
   for (int k = 0; k < hits_number; ++k)
   {
-    const JPetHit& reconstructed_hit = event.getHits().at(k);
-    // for each reconstructed hit, we access the corresponding
-    // "true MC" hit
-    const JPetMCHit& mc_hit = tw->getMCHit<JPetMCHit>(reconstructed_hit.getMCindex());
+    auto reconstructed_hit = dynamic_cast<const JPetMCRecoHit*>(event.getHits().at(k));
+    if (!reconstructed_hit)
+    {
+      continue;
+    }
+    // for each reconstructed hit, we access the corresponding "true MC" hit
+    const JPetRawMCHit& mc_hit = tw->getMCHit<JPetRawMCHit>(reconstructed_hit->getMCindex());
 
-    getStatistics().fillHistogram("z_res", reconstructed_hit.getPos().Z() - mc_hit.getPos().Z());
-    getStatistics().fillHistogram("Edep_res", reconstructed_hit.getEnergy() - mc_hit.getEnergy());
+    getStatistics().fillHistogram("z_res", reconstructed_hit->getPos().Z() - mc_hit.getPos().Z());
+    getStatistics().fillHistogram("Edep_res", reconstructed_hit->getEnergy() - mc_hit.getEnergy());
   }
 }

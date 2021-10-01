@@ -13,11 +13,11 @@
  *  @file main.cpp
  */
 
-#include "../ModularDetectorAnalysis/EventFinder.h"
-#include "../ModularDetectorAnalysis/HitFinder.h"
-#include "../ModularDetectorAnalysis/SignalFinder.h"
-#include "../ModularDetectorAnalysis/SignalTransformer.h"
-#include "../ModularDetectorAnalysis/TimeWindowCreator.h"
+// #include "../ModularDetectorAnalysis/EventFinder.h"
+// #include "../ModularDetectorAnalysis/HitFinder.h"
+// #include "../ModularDetectorAnalysis/SignalFinder.h"
+// #include "../ModularDetectorAnalysis/SignalTransformer.h"
+// #include "../ModularDetectorAnalysis/TimeWindowCreator.h"
 
 #include "EventCategorizerImaging.h"
 #include <JPetManager/JPetManager.h>
@@ -30,19 +30,23 @@ int main(int argc, const char* argv[])
   {
     JPetManager& manager = JPetManager::getManager();
 
-    manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
-    manager.registerTask<SignalFinder>("SignalFinder");
-    manager.registerTask<SignalTransformer>("SignalTransformer");
-    manager.registerTask<HitFinder>("HitFinder");
-    manager.registerTask<EventFinder>("EventFinder");
-    manager.registerTask<EventCategorizerImaging>("EventCategorizerImaging");
+    // TODO make LOR finder task
+    manager.registerTask<LORFinder>("LORFinder");
+    manager.useTask("LORFinder", "cat.evt", "lor");
 
-    manager.useTask("TimeWindowCreator", "hld", "tslot");
-    manager.useTask("SignalFinder", "tslot", "sipm.sig");
-    manager.useTask("SignalTransformer", "sipm.sig", "mtx.sig");
-    manager.useTask("HitFinder", "mtx.sig", "hits");
-    manager.useTask("EventFinder", "hits", "unk.evt");
-    manager.useTask("EventCategorizerImaging", "unk.evt", "cat.evt");
+    // manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
+    // manager.registerTask<SignalFinder>("SignalFinder");
+    // manager.registerTask<SignalTransformer>("SignalTransformer");
+    // manager.registerTask<HitFinder>("HitFinder");
+    // manager.registerTask<EventFinder>("EventFinder");
+    // manager.registerTask<EventCategorizerImaging>("EventCategorizerImaging");
+
+    // manager.useTask("TimeWindowCreator", "hld", "tslot");
+    // manager.useTask("SignalFinder", "tslot", "sipm.sig");
+    // manager.useTask("SignalTransformer", "sipm.sig", "mtx.sig");
+    // manager.useTask("HitFinder", "mtx.sig", "hits");
+    // manager.useTask("EventFinder", "hits", "unk.evt");
+    // manager.useTask("EventCategorizerImaging", "unk.evt", "cat.evt");
 
     manager.run(argc, argv);
   }

@@ -16,9 +16,9 @@
 #ifndef EVENTCATEGORIZERIMAGING_H
 #define EVENTCATEGORIZERIMAGING_H
 
+#include <Hits/JPetBaseHit/JPetBaseHit.h>
 #include <JPetEvent/JPetEvent.h>
 #include <JPetEventType/JPetEventType.h>
-#include <JPetHit/JPetHit.h>
 #include <JPetStatistics/JPetStatistics.h>
 #include <JPetUserTask/JPetUserTask.h>
 #include <map>
