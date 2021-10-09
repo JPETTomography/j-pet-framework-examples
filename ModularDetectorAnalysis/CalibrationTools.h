@@ -16,6 +16,7 @@
 #ifndef CALIBRATIONTOOLS_H
 #define CALIBRATIONTOOLS_H
 
+#include <Hits/JPetPhysRecoHit/JPetPhysRecoHit.h>
 #include <JPetEvent/JPetEvent.h>
 #include <JPetStatistics/JPetStatistics.h>
 #include <TVector3.h>
@@ -28,11 +29,16 @@ class CalibrationTools
 {
 
 public:
-  static void selectForTOF(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double totCutAnniMin, double totCutAnniMax,
-                           double totCutDeexMin, double totCutDeexMax, const TVector3& sourcePos, double scatterTestValue);
+  static void selectForTOF2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double totCutAnniMin, double totCutAnniMax,
+                                 double totCutDeexMin, double totCutDeexMax, double scatterTestValue);
+
+  static void selectForTOF3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double totCutAnniMin, double totCutAnniMax,
+                                 double totCutDeexMin, double totCutDeexMax, double scatterTestValue);
 
   static void selectForTimeWalk(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double maxThetaDiff, double maxTimeDiff,
                                 double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos);
+
+  static double calculateReveresedToT(const JPetPhysRecoHit* hit);
 };
 
 #endif /* !CALIBRATIONTOOLS_H */

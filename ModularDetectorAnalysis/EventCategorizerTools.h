@@ -33,12 +33,35 @@ static const double kUndefinedValue = 999.0;
 class EventCategorizerTools
 {
 public:
-  static bool checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
-                             double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, double scatterTestValue);
+  // Single observable tests
+  static bool checkToT(const JPetPhysRecoHit* hit, double minToT, double maxToT);
 
-  static bool checkFor2Gamma(const JPetPhysRecoHit* firstHit, const JPetPhysRecoHit* secondHit, JPetStatistics& stats, bool saveHistos,
-                             double maxThetaDiff, double maxTimeDiff, double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos,
-                             double scatterTestValue);
+  static bool checkAnnihilationPair(const JPetBaseHit* hit1, const JPetBaseHit* hit2, double minEnergy, double maxEnergy, double minToT,
+                                    double maxToT);
+
+  static bool checkForPrompt(const JPetBaseHit* hit, double minEnergy, double maxEnergy, double minToT, double maxToT);
+
+  static bool checkRelativeAngles(const TVector3& pos1, const TVector3& pos2, double maxThetaDiff);
+
+  // static bool checkRelativeAngles(const TVector3& pos1, const TVector3& pos2, double maxThetaDiff, const TVector3& sourcePos);
+  //
+  // static bool checkRelativeAngles(const TVector3& pos1, const TVector3& pos2, const TVector3& pos3, double minTheta);
+  //
+  // static bool checkRelativeAngles(const TVector3& pos1, const TVector3& pos2, const TVector3& pos3, double minTheta, const TVector3& sourcePos);
+
+  static bool checkForScatter(const JPetBaseHit* primaryHit, const JPetBaseHit* scatterHit, JPetStatistics& stats, bool saveHistos,
+                              double scatterTestValue);
+
+  // Scatter test
+  // static bool checkForScatter(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double scatterTestValue);
+
+  // Categorizing methods
+  // static bool checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
+  //                            double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, double scatterTestValue);
+
+  // static bool checkFor2Gamma(const JPetPhysRecoHit* firstHit, const JPetPhysRecoHit* secondHit, JPetStatistics& stats, bool saveHistos,
+  //                            double maxThetaDiff, double maxTimeDiff, double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos,
+  //                            double scatterTestValue);
 
   // static std::vector<JPetEvent> getLORs(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxTOF, double maxScatter,
   //                                       double totCutAnniMin, double totCutAnniMax);
@@ -46,18 +69,6 @@ public:
   // static bool checkFor3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos);
 
   // static bool checkForPrompt(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double deexToTCutMin, double deexToTCutMax);
-
-  static bool checkToT(const JPetPhysRecoHit* hit, double minToT, double maxToT);
-
-  static bool checkRelativeAngle(const JPetBaseHit* hit1, const JPetBaseHit* hit2, double maxThetaDiff);
-
-  // Scatter test
-  static bool checkForScatter(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double scatterTestValue);
-
-  static bool checkForScatter(const JPetBaseHit* primaryHit, const JPetBaseHit* scatterHit, JPetStatistics& stats, bool saveHistos,
-                              double scatterTestValue);
-
-  static double calculateReveresedToT(const JPetPhysRecoHit* hit);
 
   static double calculateDistance(const JPetBaseHit* hit1, const JPetBaseHit* hit2);
 

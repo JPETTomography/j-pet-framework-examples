@@ -23,8 +23,9 @@ using namespace std;
 /**
  * Method for determining type of event - back to back 2 gamma
  */
-bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
-                                           double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, double scatterTestValue)
+/*bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
+                                           double energyCutAnniMin, double energyCutAnniMax, double totCutAnniMin, double totCutAnniMax,
+                                           const TVector3& sourcePos)
 {
   bool isEvent2Gamma = false;
   if (event.getHits().size() < 2)
@@ -34,46 +35,32 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
 
   for (uint i = 0; i < event.getHits().size(); i++)
   {
-    auto firstHit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(i));
-    if (!firstHit)
-    {
-      continue;
-    }
-
     for (uint j = i + 1; j < event.getHits().size(); j++)
     {
-      auto secondHit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(j));
-      if (!secondHit)
-      {
-        continue;
-      }
+      auto firstHit = event.getHits().at(i);
+      auto secondHit = event.getHits().at(j);
+
+      // Change order or hits, if needed
       if (event.getHits().at(i)->getTime() > event.getHits().at(j)->getTime())
       {
-        // Change order or hits, if needed
-        firstHit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(j));
-        secondHit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(i));
+        firstHit = event.getHits().at(j);
+        secondHit = event.getHits().at(i);
       }
 
-      // Skip if scatter
-      if (checkForScatter(firstHit, secondHit, stats, false, scatterTestValue))
-      {
-        continue;
-      }
-
-      if (checkFor2Gamma(firstHit, secondHit, stats, saveHistos, maxThetaDiff, maxTimeDiff, totCutAnniMin, totCutAnniMax, sourcePos,
-                         scatterTestValue))
+      if (checkFor2Gamma(firstHit, secondHit, stats, saveHistos, maxThetaDiff, maxTimeDiff, energyCutAnniMin, energyCutAnniMax, totCutAnniMin,
+                         totCutAnniMax, sourcePos, scatterTestValue))
       {
         isEvent2Gamma = true;
       }
     }
   }
   return isEvent2Gamma;
-}
+}*/
 
 /**
  * Method for determining type of two hits - back to back 2 gamma
  */
-bool EventCategorizerTools::checkFor2Gamma(const JPetPhysRecoHit* firstHit, const JPetPhysRecoHit* secondHit, JPetStatistics& stats, bool saveHistos,
+/*bool EventCategorizerTools::checkFor2Gamma(const JPetBaseHit* firstHit, const JPetBaseHit* secondHit, JPetStatistics& stats, bool saveHistos,
                                            double maxThetaDiff, double maxTimeDiff, double totCutAnniMin, double totCutAnniMax,
                                            const TVector3& sourcePos, double scatterTestValue)
 {
@@ -237,7 +224,7 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetPhysRecoHit* firstHit, cons
     return true;
   }
   return false;
-}
+}*/
 
 /**
  * Checking each pair of hits in the event if meet selection conditions for 2 gamma annihilation.
@@ -395,16 +382,16 @@ bool EventCategorizerTools::checkToT(const JPetPhysRecoHit* hit, double minToT, 
   return (hit->getToT() > minToT && hit->getToT() < maxToT);
 }
 
-bool EventCategorizerTools::checkRelativeAngle(const JPetBaseHit* firstHit, const JPetBaseHit* secondHit, double maxThetaDiff)
+bool EventCategorizerTools::checkRelativeAngles(const TVector3& pos1, const TVector3& pos2, double maxThetaDiff)
 {
-  double theta = TMath::RadToDeg() * firstHit->getPos().Angle(secondHit->getPos());
+  double theta = TMath::RadToDeg() * pos1.Angle(pos2);
   return (180.0 - theta < maxThetaDiff);
 }
 
 /**
  * Method for determining type of event - scatter
  */
-bool EventCategorizerTools::checkForScatter(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double scatterTestValue)
+/*bool EventCategorizerTools::checkForScatter(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double scatterTestValue)
 {
   if (event.getHits().size() < 2)
   {
@@ -425,7 +412,7 @@ bool EventCategorizerTools::checkForScatter(const JPetEvent& event, JPetStatisti
     }
   }
   return false;
-}
+}*/
 
 /**
  * Checking if pair of hits meet scattering condition
@@ -457,18 +444,6 @@ bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const
       stats.fillHistogram("scatter_test_fail", testTime);
     }
     return false;
-  }
-}
-
-double EventCategorizerTools::calculateReveresedToT(const JPetPhysRecoHit* hit)
-{
-  if (hit->getSignalA().getToT() != 0.0 && hit->getSignalB().getToT() != 0.0)
-  {
-    return (1.0 / hit->getSignalB().getToT()) - (1.0 / hit->getSignalA().getToT());
-  }
-  else
-  {
-    return 0.0;
   }
 }
 

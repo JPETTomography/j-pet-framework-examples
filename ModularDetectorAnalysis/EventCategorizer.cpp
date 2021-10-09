@@ -206,8 +206,11 @@ bool EventCategorizer::exec()
 
       if (fSaveCalibHistos)
       {
-        CalibrationTools::selectForTOF(event, getStatistics(), fSaveControlHistos, fToTCutAnniMin, fToTCutAnniMax, fToTCutDeexMin, fToTCutDeexMax,
-                                       fSourcePos, fScatterTOFTimeDiff);
+        CalibrationTools::selectForTOF2Gamma(event, getStatistics(), fSaveControlHistos, fToTCutAnniMin, fToTCutAnniMax, fToTCutDeexMin,
+                                             fToTCutDeexMax, fScatterTOFTimeDiff);
+
+        CalibrationTools::selectForTOF3Gamma(event, getStatistics(), fSaveControlHistos, fToTCutAnniMin, fToTCutAnniMax, fToTCutDeexMin,
+                                             fToTCutDeexMax, fScatterTOFTimeDiff);
 
         CalibrationTools::selectForTimeWalk(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin, fToTCutAnniMax,
                                             fSourcePos);
@@ -217,16 +220,8 @@ bool EventCategorizer::exec()
         //                                             fToTCutAnniMax, fLORAngleCut, fLORPosZCut, fSourcePos, fConstansTree);
       }
 
-      // Check types of current event
-      // auto lors =
-      //     EventCategorizerTools::getLORs(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin, fToTCutAnniMax);
-      // if (lors.size() > 0)
-      // {
-      //   events.insert(events.end(), lors.begin(), lors.end());
-      // }
-
-      bool is2Gamma = EventCategorizerTools::checkFor2Gamma(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin,
-                                                            fToTCutAnniMax, fSourcePos, fScatterTOFTimeDiff);
+      // bool is2Gamma = EventCategorizerTools::checkFor2Gamma(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin,
+      //                                                       fToTCutAnniMax, fSourcePos, fScatterTOFTimeDiff);
 
       // Select hits for TOF calibration, if making calibraiton
 
@@ -459,7 +454,7 @@ void EventCategorizer::initialiseCalibrationHistograms()
   auto maxScinID = getParamBank().getScins().rbegin()->first;
 
   // Synchronization of TOF with annihilaion-deexcitation pairs
-  getStatistics().createHistogramWithAxes(new TH2D("tdiff_annih_scin", "A-D time difference for annihilation hit per scin", maxScinID - minScinID + 1,
+  getStatistics().createHistogramWithAxes(new TH2D("tdiff_anni_scin", "A-D time difference for annihilation hit per scin", maxScinID - minScinID + 1,
                                                    minScinID - 0.5, maxScinID + 0.5, 200, -fMaxTimeDiff, fMaxTimeDiff),
                                           "Scin ID", "Time diffrence [ps]");
 
@@ -467,8 +462,16 @@ void EventCategorizer::initialiseCalibrationHistograms()
                                                    minScinID - 0.5, maxScinID + 0.5, 200, -fMaxTimeDiff, fMaxTimeDiff),
                                           "Scin ID", "Time diffrence [ps]");
 
+  getStatistics().createHistogramWithAxes(new TH2D("tdiff_anni_scin_3g", "A-D time difference for annihilation hit per scin",
+                                                   maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 200, -fMaxTimeDiff, fMaxTimeDiff),
+                                          "Scin ID", "Time diffrence [ps]");
+
+  getStatistics().createHistogramWithAxes(new TH2D("tdiff_deex_scin_3g", "A-D time difference for deex hit per scin", maxScinID - minScinID + 1,
+                                                   minScinID - 0.5, maxScinID + 0.5, 200, -fMaxTimeDiff, fMaxTimeDiff),
+                                          "Scin ID", "Time diffrence [ps]");
+
   // Time walk histograms
-  double revToTLimit = 0.000001;
+  double revToTLimit = 0.00000001;
 
   getStatistics().createHistogramWithAxes(
       new TH2D("time_walk_ab_tdiff", "AB TDiff vs. reversed ToT", 200, -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0, 200, -revToTLimit, revToTLimit),
