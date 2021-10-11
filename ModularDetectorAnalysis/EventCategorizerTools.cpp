@@ -23,9 +23,8 @@ using namespace std;
 /**
  * Method for determining type of event - back to back 2 gamma
  */
-/*bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
-                                           double energyCutAnniMin, double energyCutAnniMax, double totCutAnniMin, double totCutAnniMax,
-                                           const TVector3& sourcePos)
+bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
+                                           double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, double scatterTestValue)
 {
   bool isEvent2Gamma = false;
   if (event.getHits().size() < 2)
@@ -35,32 +34,41 @@ using namespace std;
 
   for (uint i = 0; i < event.getHits().size(); i++)
   {
+    auto firstHit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(i));
+    if (!firstHit)
+    {
+      continue;
+    }
+
     for (uint j = i + 1; j < event.getHits().size(); j++)
     {
-      auto firstHit = event.getHits().at(i);
-      auto secondHit = event.getHits().at(j);
+      auto secondHit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(j));
+      if (!secondHit)
+      {
+        continue;
+      }
 
       // Change order or hits, if needed
       if (event.getHits().at(i)->getTime() > event.getHits().at(j)->getTime())
       {
-        firstHit = event.getHits().at(j);
-        secondHit = event.getHits().at(i);
+        firstHit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(j));
+        secondHit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(i));
       }
 
-      if (checkFor2Gamma(firstHit, secondHit, stats, saveHistos, maxThetaDiff, maxTimeDiff, energyCutAnniMin, energyCutAnniMax, totCutAnniMin,
-                         totCutAnniMax, sourcePos, scatterTestValue))
+      if (checkFor2Gamma(firstHit, secondHit, stats, saveHistos, maxThetaDiff, maxTimeDiff, totCutAnniMin, totCutAnniMax, sourcePos,
+                         scatterTestValue))
       {
         isEvent2Gamma = true;
       }
     }
   }
   return isEvent2Gamma;
-}*/
+}
 
 /**
  * Method for determining type of two hits - back to back 2 gamma
  */
-/*bool EventCategorizerTools::checkFor2Gamma(const JPetBaseHit* firstHit, const JPetBaseHit* secondHit, JPetStatistics& stats, bool saveHistos,
+bool EventCategorizerTools::checkFor2Gamma(const JPetPhysRecoHit* firstHit, const JPetPhysRecoHit* secondHit, JPetStatistics& stats, bool saveHistos,
                                            double maxThetaDiff, double maxTimeDiff, double totCutAnniMin, double totCutAnniMax,
                                            const TVector3& sourcePos, double scatterTestValue)
 {
@@ -77,10 +85,6 @@ using namespace std;
   // Average ToT is temporaily stored as hit energy
   auto tot1 = firstHit->getEnergy();
   auto tot2 = secondHit->getEnergy();
-
-  // Calculating reversed ToT for time walk studies
-  auto revToT1 = calculateReveresedToT(firstHit);
-  auto revToT2 = calculateReveresedToT(secondHit);
 
   // TOF calculated by convention
   double tof = calculateTOFByConvention(firstHit, secondHit);
@@ -100,11 +104,6 @@ using namespace std;
     stats.fillHistogram("2g_tot_z_pos", secondHit->getPosZ(), tot2);
     stats.fillHistogram("2g_tot_scin", scin1ID, tot1);
     stats.fillHistogram("2g_tot_scin", scin2ID, tot2);
-
-    stats.fillHistogram("2g_revtot", revToT1);
-    stats.fillHistogram("2g_revtot", revToT2);
-    stats.fillHistogram("2g_revtot_scin", scin1ID, revToT1);
-    stats.fillHistogram("2g_revtot_scin", scin2ID, revToT2);
 
     stats.fillHistogram("2g_tof", tof);
     stats.fillHistogram("2g_tof_scin", scin1ID, tof);
@@ -197,11 +196,6 @@ using namespace std;
     stats.fillHistogram("ap_tot_scin", scin1ID, tot1);
     stats.fillHistogram("ap_tot_scin", scin2ID, tot2);
 
-    stats.fillHistogram("ap_revtot", revToT1);
-    stats.fillHistogram("ap_revtot", revToT2);
-    stats.fillHistogram("ap_revtot_scin", scin1ID, revToT1);
-    stats.fillHistogram("ap_revtot_scin", scin2ID, revToT2);
-
     stats.fillHistogram("ap_ab_tdiff", firstHit->getTimeDiff());
     stats.fillHistogram("ap_ab_tdiff", secondHit->getTimeDiff());
     stats.fillHistogram("ap_ab_tdiff_scin", scin1ID, firstHit->getTimeDiff());
@@ -224,7 +218,7 @@ using namespace std;
     return true;
   }
   return false;
-}*/
+}
 
 /**
  * Checking each pair of hits in the event if meet selection conditions for 2 gamma annihilation.
