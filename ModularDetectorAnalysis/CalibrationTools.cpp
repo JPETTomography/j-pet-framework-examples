@@ -46,10 +46,10 @@ void CalibrationTools::selectForTOF2Gamma(const JPetEvent& event, JPetStatistics
       }
 
       // Skip if scatter
-      // if (EventCategorizerTools::checkForScatter(hit1, hit2, stats, true, scatterTestValue))
-      // {
-      //   continue;
-      // }
+      if (EventCategorizerTools::checkForScatter(hit1, hit2, stats, true, scatterTestValue))
+      {
+        continue;
+      }
 
       auto tot1 = hit1->getToT();
       auto tot2 = hit2->getToT();
@@ -92,13 +92,13 @@ void CalibrationTools::selectForTOF2Gamma(const JPetEvent& event, JPetStatistics
       if (saveCalibHistos && aScinID != -1 && dScinID != -1)
       {
         stats.fillHistogram("tdiff_anni_scin", aScinID, aTime - dTime);
-        stats.fillHistogram("tdiff_deex_scin", dScinID, dTime - aTime);
+        stats.fillHistogram("tdiff_deex_scin", dScinID, aTime - dTime);
 
-        if (!EventCategorizerTools::checkForScatter(hit1, hit2, stats, true, scatterTestValue))
-        {
-          stats.fillHistogram("tdiff_anni_scin_scat", aScinID, aTime - dTime);
-          stats.fillHistogram("tdiff_deex_scin_scat", dScinID, dTime - aTime);
-        }
+        // if (!EventCategorizerTools::checkForScatter(hit1, hit2, stats, true, scatterTestValue))
+        // {
+        //   stats.fillHistogram("tdiff_anni_scin_scat", aScinID, aTime - dTime);
+        //   stats.fillHistogram("tdiff_deex_scin_scat", dScinID, aTime - dTime);
+        // }
       }
     }
   }
@@ -211,17 +211,17 @@ void CalibrationTools::selectForTOF3Gamma(const JPetEvent& event, JPetStatistics
         {
           stats.fillHistogram("tdiff_anni_scin_3g", a1ScinID, a1Time - dTime);
           stats.fillHistogram("tdiff_anni_scin_3g", a2ScinID, a2Time - dTime);
-          stats.fillHistogram("tdiff_deex_scin_3g", dScinID, dTime - a1Time);
-          stats.fillHistogram("tdiff_deex_scin_3g", dScinID, dTime - a2Time);
+          stats.fillHistogram("tdiff_deex_scin_3g", dScinID, a1Time - dTime);
+          stats.fillHistogram("tdiff_deex_scin_3g", dScinID, a2Time - dTime);
 
-          if (!EventCategorizerTools::checkForScatter(hit1, hit2, stats, true, scatterTestValue) &&
-              !EventCategorizerTools::checkForScatter(hit2, hit3, stats, true, scatterTestValue) &&
-              !EventCategorizerTools::checkForScatter(hit1, hit3, stats, true, scatterTestValue))
+          if (!EventCategorizerTools::checkForScatter(hit1, hit2, stats, false, scatterTestValue) &&
+              !EventCategorizerTools::checkForScatter(hit2, hit3, stats, false, scatterTestValue) &&
+              !EventCategorizerTools::checkForScatter(hit1, hit3, stats, false, scatterTestValue))
           {
             stats.fillHistogram("tdiff_anni_scin_3g_scat", a1ScinID, a1Time - dTime);
             stats.fillHistogram("tdiff_anni_scin_3g_scat", a2ScinID, a2Time - dTime);
-            stats.fillHistogram("tdiff_deex_scin_3g_scat", dScinID, dTime - a1Time);
-            stats.fillHistogram("tdiff_deex_scin_3g_scat", dScinID, dTime - a2Time);
+            stats.fillHistogram("tdiff_deex_scin_3g_scat", dScinID, a1Time - dTime);
+            stats.fillHistogram("tdiff_deex_scin_3g_scat", dScinID, a2Time - dTime);
           }
         }
       }
