@@ -257,13 +257,26 @@ void CalibrationTools::selectForTimeWalk(const JPetEvent& event, JPetStatistics&
         stats.fillHistogram("time_walk_ab_tdiff", firstHit->getTimeDiff(), revToT1);
         stats.fillHistogram("time_walk_ab_tdiff", secondHit->getTimeDiff(), revToT2);
 
+        if (fabs(firstHit->getPosZ()) < 2.0 && fabs(secondHit->getPosZ()) < 2.0)
+        {
+          stats.fillHistogram("time_walk_ab_tdiff_z_cut", firstHit->getTimeDiff(), revToT1);
+        }
+
         if (firstHit->getScin().getSlot().getTheta() < secondHit->getScin().getSlot().getTheta())
         {
           stats.fillHistogram("time_walk_tof", EventCategorizerTools::calculateTOF(firstHit, secondHit), revToT1 - revToT2);
+          if (fabs(firstHit->getPosZ()) < 2.0 && fabs(secondHit->getPosZ()) < 2.0)
+          {
+            stats.fillHistogram("time_walk_tof_z_cut", EventCategorizerTools::calculateTOF(firstHit, secondHit), revToT1 - revToT2);
+          }
         }
         else
         {
           stats.fillHistogram("time_walk_tof", EventCategorizerTools::calculateTOF(secondHit, firstHit), revToT2 - revToT1);
+          if (fabs(firstHit->getPosZ()) < 2.0 && fabs(secondHit->getPosZ()) < 2.0)
+          {
+            stats.fillHistogram("time_walk_tof_z_cut", EventCategorizerTools::calculateTOF(secondHit, firstHit), revToT2 - revToT1);
+          }
         }
 
         vector<JPetMatrixSignal> mtxSigs;
