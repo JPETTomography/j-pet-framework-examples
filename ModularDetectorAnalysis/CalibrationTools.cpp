@@ -88,15 +88,18 @@ void CalibrationTools::selectForTOF2Gamma(const JPetEvent& event, JPetStatistics
         continue;
       }
 
-      double t0_A = aTime - posA.Mag() / kLightVelocity_cm_ps;
-      double t0_D = dTime - posD.Mag() / kLightVelocity_cm_ps;
-      double tDiff_A_D = t0_A - t0_D;
+      // double t0_A = aTime - posA.Mag() / kLightVelocity_cm_ps;
+      // double t0_D = dTime - posD.Mag() / kLightVelocity_cm_ps;
+      // double tDiff_A_D = t0_A - t0_D;
+      // double tDiff_A_D = t0_A - t0_D;
 
       // Filling histograms for specific scintillators
       if (saveCalibHistos && aScinID != -1 && dScinID != -1)
       {
-        stats.fillHistogram("tdiff_anni_scin", aScinID, tDiff_A_D);
-        stats.fillHistogram("tdiff_deex_scin", dScinID, tDiff_A_D);
+        // stats.fillHistogram("tdiff_anni_scin", aScinID, tDiff_A_D);
+        // stats.fillHistogram("tdiff_deex_scin", dScinID, tDiff_A_D);
+        stats.fillHistogram("tdiff_anni_scin", aScinID, aTime - dTime);
+        stats.fillHistogram("tdiff_deex_scin", dScinID, dTime - aTime);
       }
     }
   }
@@ -204,19 +207,24 @@ void CalibrationTools::selectForTOF3Gamma(const JPetEvent& event, JPetStatistics
           continue;
         }
 
-        double t0_A1 = a1Time - posA1.Mag() / kLightVelocity_cm_ps;
-        double t0_A2 = a2Time - posA2.Mag() / kLightVelocity_cm_ps;
-        double t0_D = dTime - posD.Mag() / kLightVelocity_cm_ps;
-        double tDiff_A1_D = t0_A1 - t0_D;
-        double tDiff_A2_D = t0_A1 - t0_D;
+        // double t0_A1 = a1Time - posA1.Mag() / kLightVelocity_cm_ps;
+        // double t0_A2 = a2Time - posA2.Mag() / kLightVelocity_cm_ps;
+        // double t0_D = dTime - posD.Mag() / kLightVelocity_cm_ps;
+        // double tDiff_A1_D = t0_A1 - t0_D;
+        // double tDiff_A2_D = t0_A1 - t0_D;
 
         // Filling histograms for specific scintillators
         if (saveCalibHistos && a1ScinID != -1 && a2ScinID != -1 && dScinID != -1)
         {
-          stats.fillHistogram("tdiff_anni_scin_3g", a1ScinID, tDiff_A1_D);
-          stats.fillHistogram("tdiff_anni_scin_3g", a2ScinID, tDiff_A2_D);
-          stats.fillHistogram("tdiff_deex_scin_3g", dScinID, tDiff_A1_D);
-          stats.fillHistogram("tdiff_deex_scin_3g", dScinID, tDiff_A2_D);
+          // stats.fillHistogram("tdiff_anni_scin_3g", a1ScinID, tDiff_A1_D);
+          // stats.fillHistogram("tdiff_anni_scin_3g", a2ScinID, tDiff_A2_D);
+          // stats.fillHistogram("tdiff_deex_scin_3g", dScinID, tDiff_A1_D);
+          // stats.fillHistogram("tdiff_deex_scin_3g", dScinID, tDiff_A2_D);
+
+          stats.fillHistogram("tdiff_anni_scin_3g", a1ScinID, a1Time - dTime);
+          stats.fillHistogram("tdiff_anni_scin_3g", a2ScinID, a2Time - dTime);
+          stats.fillHistogram("tdiff_deex_scin_3g", dScinID, dTime - a1Time);
+          stats.fillHistogram("tdiff_deex_scin_3g", dScinID, dTime - a2Time);
         }
       }
     }
