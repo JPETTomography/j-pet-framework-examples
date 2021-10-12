@@ -476,7 +476,7 @@ TVector3 EventCategorizerTools::calculateAnnihilationPoint(const JPetBaseHit* hi
   TVector3 middleOfLOR = 0.5 * (hit1->getPos() + hit2->getPos());
   TVector3 versorOnLOR = (hit2->getPos() - hit1->getPos()).Unit();
 
-  double tof = EventCategorizerTools::calculateTOFByConvention(hit1, hit2);
+  double tof = EventCategorizerTools::calculateTOF(hit1, hit2);
   double shift = 0.5 * tof * kLightVelocity_cm_ps;
 
   TVector3 annihilationPoint;

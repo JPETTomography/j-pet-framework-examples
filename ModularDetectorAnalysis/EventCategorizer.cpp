@@ -88,6 +88,12 @@ bool EventCategorizer::init()
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kToTCutDeexMaxParamKey.c_str(), fToTCutDeexMax));
   }
 
+  // For plotting ToT histograms
+  if (isOptionSet(fParams.getOptions(), kToTHistoUpperLimitParamKey))
+  {
+    fToTHistoUpperLimit = getOptionAsDouble(fParams.getOptions(), kToTHistoUpperLimitParamKey);
+  }
+
   // Cuts around source position
   if (isOptionSet(fParams.getOptions(), kSourceDistCutXYParamKey))
   {
@@ -275,19 +281,17 @@ void EventCategorizer::initialiseHistograms()
 {
   auto minScinID = getParamBank().getScins().begin()->first;
   auto maxScinID = getParamBank().getScins().rbegin()->first;
-  double totUppLimit = 500000.0;
-  double revToTLimit = 0.0000005;
 
   // Histograms for 2 gamama events
-  getStatistics().createHistogramWithAxes(new TH1D("2g_tot", "2 gamma event - average ToT scaled", 201, 0.0, totUppLimit), "Time over Threshold [ps]",
-                                          "Number of Hits");
+  getStatistics().createHistogramWithAxes(new TH1D("2g_tot", "2 gamma event - average ToT scaled", 201, 0.0, fToTHistoUpperLimit),
+                                          "Time over Threshold [ps]", "Number of Hits");
 
   getStatistics().createHistogramWithAxes(new TH2D("2g_tot_scin", "2 gamma event - average ToT scaled per scintillator", maxScinID - minScinID + 1,
-                                                   minScinID - 0.5, maxScinID + 0.5, 201, 0.0, totUppLimit),
+                                                   minScinID - 0.5, maxScinID + 0.5, 201, 0.0, fToTHistoUpperLimit),
                                           "Scintillator ID", "Time over Threshold [ps]");
 
   getStatistics().createHistogramWithAxes(
-      new TH2D("2g_tot_z_pos", "2 gamma event - average ToT scaled vs. hit z position", 101, -25.5, 25.5, 201, 0.0, totUppLimit),
+      new TH2D("2g_tot_z_pos", "2 gamma event - average ToT scaled vs. hit z position", 101, -25.5, 25.5, 201, 0.0, fToTHistoUpperLimit),
       "Hit z position [cm]", "Time over Threshold [ps]");
 
   getStatistics().createHistogramWithAxes(new TH1D("2g_tof", "2 gamma event - TOF calculated by convention", 201, -fMaxTimeDiff, fMaxTimeDiff),
@@ -338,7 +342,7 @@ void EventCategorizer::initialiseHistograms()
 
   // Cut result on other observables
   // TOF cut
-  getStatistics().createHistogramWithAxes(new TH1D("tof_cut_tot", "2 gamma event after TOF cut - average ToT scaled", 201, 0.0, totUppLimit),
+  getStatistics().createHistogramWithAxes(new TH1D("tof_cut_tot", "2 gamma event after TOF cut - average ToT scaled", 201, 0.0, fToTHistoUpperLimit),
                                           "Time over Threshold [ps]", "Number of Hits");
 
   getStatistics().createHistogramWithAxes(
@@ -353,8 +357,9 @@ void EventCategorizer::initialiseHistograms()
       new TH1D("theta_cut_tof", "2 gamma event after theta cut - TOF calculated by convention", 201, -fMaxTimeDiff, fMaxTimeDiff),
       "Time of Flight [ps]", "Number of Hit Pairs");
 
-  getStatistics().createHistogramWithAxes(new TH1D("theta_cut_tot", "2 gamma event after theta cut - average ToT scaled", 201, 0.0, totUppLimit),
-                                          "Time over Threshold [ps]", "Number of Hit Pairs");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("theta_cut_tot", "2 gamma event after theta cut - average ToT scaled", 201, 0.0, fToTHistoUpperLimit), "Time over Threshold [ps]",
+      "Number of Hit Pairs");
 
   getStatistics().createHistogramWithAxes(
       new TH1D("theta_cut_ab_tdiff", "2 gamma event after theta cut - hits A-B time difference", 201, -fMaxTimeDiff, fMaxTimeDiff),
@@ -373,11 +378,11 @@ void EventCategorizer::initialiseHistograms()
                                           "Angle [degree]", "Number of Hit Pairs");
 
   // Events after cut - defined as annihilation event
-  getStatistics().createHistogramWithAxes(new TH1D("ap_tot", "Annihilation pairs average ToT scaled", 201, 0.0, totUppLimit),
+  getStatistics().createHistogramWithAxes(new TH1D("ap_tot", "Annihilation pairs average ToT scaled", 201, 0.0, fToTHistoUpperLimit),
                                           "Time over Threshold [ps]", "Number of Annihilation Pairs");
 
   getStatistics().createHistogramWithAxes(new TH2D("ap_tot_scin", "Annihilation pairs average ToT scaled per scintillator", maxScinID - minScinID + 1,
-                                                   minScinID - 0.5, maxScinID + 0.5, 201, 0.0, totUppLimit),
+                                                   minScinID - 0.5, maxScinID + 0.5, 201, 0.0, fToTHistoUpperLimit),
                                           "Scintillator ID", "Time over Threshold [ps]");
 
   getStatistics().createHistogramWithAxes(
@@ -453,7 +458,7 @@ void EventCategorizer::initialiseCalibrationHistograms()
                                           "Scin ID", "Time diffrence [ps]");
 
   // Time walk histograms
-  double revToTLimit = 0.00000001;
+  double revToTLimit = 0.000000015;
 
   getStatistics().createHistogramWithAxes(
       new TH2D("time_walk_ab_tdiff", "AB TDiff vs. reversed ToT", 200, -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0, 200, -revToTLimit, revToTLimit),

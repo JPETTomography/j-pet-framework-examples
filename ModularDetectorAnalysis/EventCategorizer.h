@@ -52,6 +52,8 @@ protected:
   const std::string kToTCutDeexMinParamKey = "EventCategorizer_ToT_Cut_Deex_Min_double";
   const std::string kToTCutDeexMaxParamKey = "EventCategorizer_ToT_Cut_Deex_Max_double";
 
+  const std::string kToTHistoUpperLimitParamKey = "ToTHisto_UpperLimit_double";
+
   const std::string kSourcePosXParamKey = "EventCategorizer_SourcePos_X_double";
   const std::string kSourcePosYParamKey = "EventCategorizer_SourcePos_Y_double";
   const std::string kSourcePosZParamKey = "EventCategorizer_SourcePos_Z_double";
@@ -81,6 +83,7 @@ protected:
   double fToTCutAnniMax = 250000.0;
   double fToTCutDeexMin = 270000.0;
   double fToTCutDeexMax = 370000.0;
+  double fToTHistoUpperLimit = 200000.0;
   double fLORAngleCut = 5.0;
   double fLORPosZCut = 5.0;
   double fSourceDistXYCut = 5.0;
