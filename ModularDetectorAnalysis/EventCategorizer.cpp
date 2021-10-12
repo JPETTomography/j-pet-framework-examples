@@ -422,7 +422,7 @@ void EventCategorizer::initialiseHistograms()
       "Y position [cm]");
 
   // Histograms for scattering category
-  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_dist", "Scatter Test - Distance Difference", 201, 0.0, 20.0), "Dist Diff [cm]",
+  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_dist", "Scatter Test - Distance Difference", 201, 0.0, 80.0), "Dist Diff [cm]",
                                           "Number of Hit Pairs");
 
   getStatistics().createHistogramWithAxes(new TH1D("scatter_test_time", "Scatter Test - Time Difference", 201, 0.0, 10000.0), "Time Diff [ps]",
@@ -454,6 +454,22 @@ void EventCategorizer::initialiseCalibrationHistograms()
                                           "Scin ID", "Time diffrence [ps]");
 
   getStatistics().createHistogramWithAxes(new TH2D("tdiff_deex_scin_3g", "A-D time difference for deex hit per scin", maxScinID - minScinID + 1,
+                                                   minScinID - 0.5, maxScinID + 0.5, 200, -fMaxTimeDiff, fMaxTimeDiff),
+                                          "Scin ID", "Time diffrence [ps]");
+
+  getStatistics().createHistogramWithAxes(new TH2D("tdiff_anni_scin_scat", "A-D time difference for annihilation hit per scin",
+                                                   maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 200, -fMaxTimeDiff, fMaxTimeDiff),
+                                          "Scin ID", "Time diffrence [ps]");
+
+  getStatistics().createHistogramWithAxes(new TH2D("tdiff_deex_scin_scat", "A-D time difference for deex hit per scin", maxScinID - minScinID + 1,
+                                                   minScinID - 0.5, maxScinID + 0.5, 200, -fMaxTimeDiff, fMaxTimeDiff),
+                                          "Scin ID", "Time diffrence [ps]");
+
+  getStatistics().createHistogramWithAxes(new TH2D("tdiff_anni_scin_3g_scat", "A-D time difference for annihilation hit per scin",
+                                                   maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 200, -fMaxTimeDiff, fMaxTimeDiff),
+                                          "Scin ID", "Time diffrence [ps]");
+
+  getStatistics().createHistogramWithAxes(new TH2D("tdiff_deex_scin_3g_scat", "A-D time difference for deex hit per scin", maxScinID - minScinID + 1,
                                                    minScinID - 0.5, maxScinID + 0.5, 200, -fMaxTimeDiff, fMaxTimeDiff),
                                           "Scin ID", "Time diffrence [ps]");
 
