@@ -92,7 +92,7 @@ void CalibrationTools::selectForTOF(const JPetEvent& event, JPetStatistics& stat
       if (saveCalibHistos && aScinID != -1 && dScinID != -1)
       {
         stats.fillHistogram("tdiff_anni_scin", aScinID, aTime - dTime);
-        stats.fillHistogram("tdiff_deex_scin", dScinID, dTime - aTime);
+        stats.fillHistogram("tdiff_deex_scin", dScinID, aTime - dTime);
       }
     }
   }
