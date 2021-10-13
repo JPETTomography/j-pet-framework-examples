@@ -474,19 +474,20 @@ bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const
 
   if (gRandom->Uniform(lorentz + expo) < lorentz)
   {
-    if (saveHistos)
-    {
-      stats.fillHistogram("scatter_test_pass", testTime);
-    }
-    return true;
-  }
-  else
-  {
+    // not scattered - scatter test fail
     if (saveHistos)
     {
       stats.fillHistogram("scatter_test_fail", testTime);
     }
     return false;
+  }
+  else
+  {
+    if (saveHistos)
+    {
+      stats.fillHistogram("scatter_test_pass", testTime);
+    }
+    return true;
   }
 }
 
