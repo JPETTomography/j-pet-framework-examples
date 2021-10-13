@@ -19,6 +19,86 @@ using namespace std;
 #include "EventCategorizerTools.h"
 
 /**
+ * Selecting pair of hits for calibrations based on ToT and Scin ID with fitted scatter test
+ */
+void CalibrationTools::selectForTOF(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double totCutAnniMin, double totCutAnniMax,
+                                    double totCutDeexMin, double totCutDeexMax, boost::property_tree::ptree& calibTree)
+{
+  if (event.getHits().size() < 2)
+  {
+    return;
+  }
+
+  for (uint i = 0; i < event.getHits().size(); i++)
+  {
+    auto hit1 = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(i));
+    if (!hit1)
+    {
+      continue;
+    }
+
+    for (uint j = i + 1; j < event.getHits().size(); j++)
+    {
+      auto hit2 = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(j));
+      if (!hit2)
+      {
+        continue;
+      }
+
+      // Skip if scatter
+      if (EventCategorizerTools::checkForScatter(hit1, hit2, stats, true, calibTree))
+      {
+        continue;
+      }
+
+      auto tot1 = hit1->getToT();
+      auto tot2 = hit2->getToT();
+
+      // Checking ToT of hits to classify them as annihilation or deexcitation
+      bool anih1 = (tot1 > totCutAnniMin && tot1 < totCutAnniMax);
+      bool anih2 = (tot2 > totCutAnniMin && tot2 < totCutAnniMax);
+      bool deex1 = (tot1 > totCutDeexMin && tot1 < totCutDeexMax);
+      bool deex2 = (tot2 > totCutDeexMin && tot2 < totCutDeexMax);
+
+      // Time differences and strip ID to be assigned
+      double aTime = 0.0, dTime = 0.0;
+      int aScinID = -1, dScinID = -1;
+      TVector3 posA, posD;
+
+      if (anih1 && deex2)
+      {
+        aScinID = hit1->getScin().getID();
+        dScinID = hit2->getScin().getID();
+        aTime = hit1->getTime();
+        dTime = hit2->getTime();
+        posA = hit1->getPos();
+        posD = hit2->getPos();
+      }
+      else if (anih2 && deex1)
+      {
+        aScinID = hit2->getScin().getID();
+        dScinID = hit1->getScin().getID();
+        aTime = hit2->getTime();
+        dTime = hit1->getTime();
+        posA = hit2->getPos();
+        posD = hit1->getPos();
+      }
+      else
+      {
+        continue;
+      }
+
+      // Filling histograms for specific scintillators
+      if (saveCalibHistos && aScinID != -1 && dScinID != -1)
+      {
+        stats.fillHistogram("tdiff_anni_scin", aScinID, aTime - dTime);
+        stats.fillHistogram("tdiff_deex_scin", dScinID, aTime - dTime);
+      }
+    }
+  }
+}
+
+/**
  * Selecting pair of hits for calibrations based on ToT and Scin ID
  */
 void CalibrationTools::selectForTOF2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double totCutAnniMin,

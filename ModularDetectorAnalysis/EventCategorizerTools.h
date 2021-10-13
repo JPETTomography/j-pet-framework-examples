@@ -52,6 +52,9 @@ public:
   static bool checkForScatter(const JPetBaseHit* primaryHit, const JPetBaseHit* scatterHit, JPetStatistics& stats, bool saveHistos,
                               double scatterTestValue);
 
+  static bool checkForScatter(const JPetBaseHit* primaryHit, const JPetBaseHit* scatterHit, JPetStatistics& stats, bool saveHistos,
+                              boost::property_tree::ptree& calibTree);
+
   // Scatter test
   // static bool checkForScatter(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double scatterTestValue);
 

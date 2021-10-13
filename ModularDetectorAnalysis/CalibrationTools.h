@@ -20,6 +20,7 @@
 #include <JPetEvent/JPetEvent.h>
 #include <JPetStatistics/JPetStatistics.h>
 #include <TVector3.h>
+#include <boost/property_tree/ptree.hpp>
 
 /**
  * @brief Tools for managing calibrations
@@ -29,6 +30,9 @@ class CalibrationTools
 {
 
 public:
+  static void selectForTOF(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double totCutAnniMin, double totCutAnniMax,
+                           double totCutDeexMin, double totCutDeexMax, boost::property_tree::ptree& calibTree);
+
   static void selectForTOF2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double totCutAnniMin, double totCutAnniMax,
                                  double totCutDeexMin, double totCutDeexMax, double scatterTestValue);
 

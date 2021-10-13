@@ -16,6 +16,7 @@
 #include "EventCategorizerTools.h"
 #include <Hits/JPetPhysRecoHit/JPetPhysRecoHit.h>
 #include <TMath.h>
+#include <TRandom.h>
 #include <vector>
 
 using namespace std;
@@ -424,6 +425,54 @@ bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const
   stats.fillHistogram("scatter_test_time", testTime);
 
   if (testTime < scatterTestValue)
+  {
+    if (saveHistos)
+    {
+      stats.fillHistogram("scatter_test_pass", testTime);
+    }
+    return true;
+  }
+  else
+  {
+    if (saveHistos)
+    {
+      stats.fillHistogram("scatter_test_fail", testTime);
+    }
+    return false;
+  }
+}
+
+bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const JPetBaseHit* scatterHit, JPetStatistics& stats, bool saveHistos,
+                                            boost::property_tree::ptree& calibTree)
+{
+  // Getting function parameters and time cut value from calibration file
+  double p0 = calibTree.get("scatter_test.lorentz_p0", 0.0);
+  double p1 = calibTree.get("scatter_test.lorentz_p1", 0.0);
+  double p2 = calibTree.get("scatter_test.lorentz_p2", 0.0);
+  double p3 = calibTree.get("scatter_test.exp_p0", 0.0);
+  double p4 = calibTree.get("scatter_test.exp_p1", 0.0);
+  double scatterTestValue = calibTree.get("scatter_test.time_cut", 1500.0);
+
+  // If function parameters are null, fallback to standard scatter test method
+  if (p0 == 0.0 || p1 == 0.0 || p2 == 0.0 || p3 == 0.0 || p4 == 0.0)
+  {
+    return EventCategorizerTools::checkForScatter(primaryHit, scatterHit, stats, true, scatterTestValue);
+  }
+
+  double dist = calculateDistance(primaryHit, scatterHit);
+  double timeDiff = scatterHit->getTime() - primaryHit->getTime();
+  double testTime = fabs(timeDiff - dist / kLightVelocity_cm_ps);
+
+  if (saveHistos)
+  {
+    stats.fillHistogram("scatter_test_time", testTime);
+  }
+
+  // Getting weights for scatter test from fitted functions
+  double lorentz = (p0 / TMath::Pi()) * (pow(p1, 2) / (pow(testTime - p2, 2) + pow(p1, 2)));
+  double expo = exp(p3 + p4 * testTime);
+
+  if (gRandom->Uniform(lorentz + expo) < lorentz)
   {
     if (saveHistos)
     {

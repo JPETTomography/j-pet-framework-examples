@@ -212,11 +212,15 @@ bool EventCategorizer::exec()
 
       if (fSaveCalibHistos)
       {
-        CalibrationTools::selectForTOF2Gamma(event, getStatistics(), fSaveControlHistos, fToTCutAnniMin, fToTCutAnniMax, fToTCutDeexMin,
-                                             fToTCutDeexMax, fScatterTOFTimeDiff);
 
-        CalibrationTools::selectForTOF3Gamma(event, getStatistics(), fSaveControlHistos, fToTCutAnniMin, fToTCutAnniMax, fToTCutDeexMin,
-                                             fToTCutDeexMax, fScatterTOFTimeDiff);
+        CalibrationTools::selectForTOF(event, getStatistics(), fSaveControlHistos, fToTCutAnniMin, fToTCutAnniMax, fToTCutDeexMin, fToTCutDeexMax,
+                                       fConstansTree);
+
+        // CalibrationTools::selectForTOF2Gamma(event, getStatistics(), fSaveControlHistos, fToTCutAnniMin, fToTCutAnniMax, fToTCutDeexMin,
+        //                                      fToTCutDeexMax, fScatterTOFTimeDiff);
+        //
+        // CalibrationTools::selectForTOF3Gamma(event, getStatistics(), fSaveControlHistos, fToTCutAnniMin, fToTCutAnniMax, fToTCutDeexMin,
+        //                                      fToTCutDeexMax, fScatterTOFTimeDiff);
 
         CalibrationTools::selectForTimeWalk(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin, fToTCutAnniMax,
                                             fSourcePos);
