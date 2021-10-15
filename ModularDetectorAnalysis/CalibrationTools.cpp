@@ -88,7 +88,7 @@ void CalibrationTools::selectForTOF(const JPetEvent& event, JPetStatistics& stat
         continue;
       }
 
-      double tdiff = fabs(aTime - dTime);
+      double tdiff = aTime - dTime;
 
       // Filling histograms for specific scintillators
       if (saveCalibHistos && aScinID != -1 && dScinID != -1)

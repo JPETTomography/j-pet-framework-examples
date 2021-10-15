@@ -488,6 +488,8 @@ bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const
     if (saveHistos)
     {
       stats.fillHistogram("scatter_test_pass", testTime);
+      auto scatAngle = primaryHit->getPos().Angle(scatterHit->getPos());
+      stats.fillHistogram("scatter_angle_time", scatterHit->getTime() - primaryHit->getTime(), scatAngle);
     }
     return true;
   }
