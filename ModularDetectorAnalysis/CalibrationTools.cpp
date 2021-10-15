@@ -88,11 +88,20 @@ void CalibrationTools::selectForTOF(const JPetEvent& event, JPetStatistics& stat
         continue;
       }
 
+      double tdiff = fabs(aTime - dTime);
+
       // Filling histograms for specific scintillators
       if (saveCalibHistos && aScinID != -1 && dScinID != -1)
       {
-        stats.fillHistogram("tdiff_anni_scin", aScinID, aTime - dTime);
-        stats.fillHistogram("tdiff_deex_scin", dScinID, aTime - dTime);
+        stats.fillHistogram("tdiff_anni_scin", aScinID, tdiff);
+        stats.fillHistogram("tdiff_deex_scin", dScinID, tdiff);
+
+        double scatterTestValue = calibTree.get("scatter_test.time_cut", 1400.0);
+        if (tdiff < scatterTestValue)
+        {
+          auto scatAngle = hit1->getPos().Angle(hit2->getPos());
+          stats.fillHistogram("scatter_angle_time_cut", tdiff, scatAngle);
+        }
       }
     }
   }

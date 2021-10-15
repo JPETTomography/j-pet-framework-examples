@@ -437,6 +437,10 @@ void EventCategorizer::initialiseHistograms()
 
   getStatistics().createHistogramWithAxes(new TH1D("scatter_test_fail", "Failed Scatter Test - Time Difference", 201, 0.0, 10000.0), "Time Diff [ps]",
                                           "Number of Hit Pairs");
+
+  getStatistics().createHistogramWithAxes(
+      new TH2D("scatter_angle_time", "Scatter angle vs. primary-secondary time difference", 201, 0.0, 2.0 * fScatterTOFTimeDiff, 181, -0.5, 180.5),
+      "Time diffrence [ps]", "Scatter angle");
 }
 
 void EventCategorizer::initialiseCalibrationHistograms()
@@ -502,4 +506,9 @@ void EventCategorizer::initialiseCalibrationHistograms()
   getStatistics().createHistogramWithAxes(new TH2D("evtcat_channel_offsets", "Offset of Channel in Matrix vs. Channel ID in annihilation hits",
                                                    maxChannelID - minChannelID + 1, minChannelID - 0.5, maxChannelID + 0.5, 200, -3000.0, 3000.0),
                                           "Channel ID", "Offset");
+
+  getStatistics().createHistogramWithAxes(new TH2D("scatter_angle_time_cut",
+                                                   "Scatter angle vs. primary-secondary time difference for pairs that were accepted for TOf synchro",
+                                                   201, 0.0, 2.0 * fScatterTOFTimeDiff, 181, -0.5, 180.5),
+                                          "Time diffrence [ps]", "Scatter angle");
 }

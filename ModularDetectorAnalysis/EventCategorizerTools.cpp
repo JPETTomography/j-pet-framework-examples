@@ -429,6 +429,8 @@ bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const
     if (saveHistos)
     {
       stats.fillHistogram("scatter_test_pass", testTime);
+      auto scatAngle = primaryHit->getPos().Angle(scatterHit->getPos());
+      stats.fillHistogram("scatter_angle_time", scatterHit->getTime() - primaryHit->getTime(), scatAngle);
     }
     return true;
   }
@@ -451,7 +453,7 @@ bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const
   double p2 = calibTree.get("scatter_test.lorentz_p2", 0.0);
   double p3 = calibTree.get("scatter_test.exp_p0", 0.0);
   double p4 = calibTree.get("scatter_test.exp_p1", 0.0);
-  double scatterTestValue = calibTree.get("scatter_test.time_cut", 1500.0);
+  double scatterTestValue = calibTree.get("scatter_test.time_cut", 1400.0);
 
   // If function parameters are null, fallback to standard scatter test method
   if (p0 == 0.0 || p1 == 0.0 || p2 == 0.0 || p3 == 0.0 || p4 == 0.0)
