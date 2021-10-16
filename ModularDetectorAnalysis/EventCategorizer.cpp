@@ -227,7 +227,7 @@ bool EventCategorizer::exec()
       }
 
       bool is2Gamma = EventCategorizerTools::checkFor2Gamma(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin,
-                                                            fToTCutAnniMax, fSourcePos, fScatterTOFTimeDiff);
+                                                            fToTCutAnniMax, fSourcePos, fConstansTree);
 
       // Select hits for TOF calibration, if making calibraiton
 

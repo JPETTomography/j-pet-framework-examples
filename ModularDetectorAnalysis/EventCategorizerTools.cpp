@@ -25,7 +25,8 @@ using namespace std;
  * Method for determining type of event - back to back 2 gamma
  */
 bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
-                                           double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, double scatterTestValue)
+                                           double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos,
+                                           boost::property_tree::ptree& calibTree)
 {
   bool isEvent2Gamma = false;
   if (event.getHits().size() < 2)
@@ -56,8 +57,13 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
         secondHit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(i));
       }
 
-      if (checkFor2Gamma(firstHit, secondHit, stats, saveHistos, maxThetaDiff, maxTimeDiff, totCutAnniMin, totCutAnniMax, sourcePos,
-                         scatterTestValue))
+      // Skip if scatter
+      if (EventCategorizerTools::checkForScatter(firstHit, secondHit, stats, true, calibTree))
+      {
+        continue;
+      }
+
+      if (checkFor2Gamma(firstHit, secondHit, stats, saveHistos, maxThetaDiff, maxTimeDiff, totCutAnniMin, totCutAnniMax, sourcePos))
       {
         isEvent2Gamma = true;
       }
@@ -71,7 +77,7 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
  */
 bool EventCategorizerTools::checkFor2Gamma(const JPetPhysRecoHit* firstHit, const JPetPhysRecoHit* secondHit, JPetStatistics& stats, bool saveHistos,
                                            double maxThetaDiff, double maxTimeDiff, double totCutAnniMin, double totCutAnniMax,
-                                           const TVector3& sourcePos, double scatterTestValue)
+                                           const TVector3& sourcePos)
 {
   int scin1ID = firstHit->getScin().getID();
   int scin2ID = secondHit->getScin().getID();
