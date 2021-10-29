@@ -43,7 +43,7 @@
 namespace bpt = boost::property_tree;
 
 void matrix_offsets(std::string fileName, std::string calibJSONFileName = "calibration_constants.json", bool saveResult = false,
-                    std::string resultDir = "./", int minPMID = 401, int maxPMID = 2896)
+                    std::string resultDir = "./", int minChannelID = 2100, int maxChannelID = 7140)
 {
 
   TFile* fileMtxSynchro = new TFile(fileName.c_str(), "READ");
@@ -58,12 +58,12 @@ void matrix_offsets(std::string fileName, std::string calibJSONFileName = "calib
   if (fileMtxSynchro->IsOpen())
   {
 
-    TH2F* mtxSiPMOffsets = dynamic_cast<TH2F*>(fileMtxSynchro->Get("mtx_offsets_sipm"));
+    TH2D* mtxSiPMOffsets = dynamic_cast<TH2D*>(fileMtxSynchro->Get("evtcat_channel_offsets"));
 
-    for (int pmID = minPMID; pmID <= maxPMID; ++pmID)
+    for (int channelID = minPMID; channelID <= maxPMID; ++channelID)
     {
 
-      TH1D* sipm_offset = mtxSiPMOffsets->ProjectionY(Form("offset_sipm_%d", pmID), pmID - 400, pmID - 400);
+      TH1D* channel_offset = mtxSiPMOffsets->ProjectionY(Form("offset_sipm_%d", channelID), channelID - 400, channelID - 400);
       if (sipm_offset->GetEntries() < 100)
       {
         continue;

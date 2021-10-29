@@ -1,8 +1,8 @@
 /**
- *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may find a copy of the License in the LICENCE file.
+ * @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may find a copy of the License in the LICENCE file.
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -10,14 +10,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file tof_synchro.C
+ * @file tot_norm_hit.C
  *
- *  @brief Script for reading histograms with selected annihilation and deexcitation events
- *  time differences and calculating constatns for Time of Flight synchronization,
- *  that can be used for correcting hit time.
+ * @brief Script for reading histograms with ToT spectra for scintillators and performing
+ * procedure of finding minima of derivative of distribution, that are equivalent to
+ * Compton edges.
  *
- *  This script uses histograms, that are produced by task "EventCategorizer".
- *  For more detailed description please refer to USAGE.md file.
+ * This script uses histograms, that are produced by task "HitFinder".
+ * For more detailed description please refer to README.md file.
  */
 
 #include <boost/property_tree/json_parser.hpp>
@@ -35,8 +35,8 @@
 
 namespace bpt = boost::property_tree;
 
-const double fNominalAnnihilationEdge = 75000.0;
-const double fNominalDeexcitationEdge = 130000.0;
+const double fNominalAnnihilationEdge = 150000.0;
+const double fNominalDeexcitationEdge = 250000.0;
 
 TGraph* getDerivativeGraph(TH1D* histo)
 {
@@ -61,7 +61,8 @@ pair<double, double> getEdges(TH1D* totHist)
   int anniBin = totHist->GetMaximumBin();
   TGraph* devGraph = getDerivativeGraph(totHist);
   devGraph->Draw();
-  for (int bin = totHist->GetMaximumBin(); bin < totHist->GetNbinsX() - 2 && bin < anniBin + 5; ++bin)
+  // for (int bin = 21; bin < totHist->GetNbinsX() - 5 && bin < anniBin + 5; ++bin)
+  for (int bin = totHist->GetMaximumBin(); bin < totHist->GetNbinsX() - 5; ++bin)
   {
     double deriv_x = devGraph->GetX()[bin];
     double deriv_y = devGraph->GetY()[bin];
@@ -71,12 +72,8 @@ pair<double, double> getEdges(TH1D* totHist)
       anniEdge = deriv_x;
       anniBin = bin;
     }
-    // else
-    // {
-    //   break;
-    // }
   }
-  for (int bin = anniBin; bin < totHist->GetNbinsX() - 2; ++bin)
+  for (int bin = anniBin + 15; bin < totHist->GetNbinsX() - 2; ++bin)
   {
     double deriv_x = devGraph->GetX()[bin];
     double deriv_y = devGraph->GetY()[bin];
@@ -111,9 +108,9 @@ void savePlotPNG(TH1D* totHist, double anniEdge, double deexEdge, string resultD
 }
 
 void tot_norm(string fileName, string calibJSONFileName = "calibration_constants.json", bool saveResult = false, string resultDir = "./",
-              int minSiPMID = 401, int maxSiPMID = 2896)
+              int minScinID = 201, int maxScinID = 512)
 {
-  TFile* fileSiPMTOT = new TFile(fileName.c_str(), "READ");
+  TFile* fileScinTOT = new TFile(fileName.c_str(), "READ");
 
   bpt::ptree tree;
   ifstream file(calibJSONFileName.c_str());
@@ -122,48 +119,30 @@ void tot_norm(string fileName, string calibJSONFileName = "calibration_constants
     bpt::read_json(calibJSONFileName, tree);
   }
 
-  if (fileSiPMTOT->IsOpen())
+  if (fileScinTOT->IsOpen())
   {
-    TH2F* allTHR1 = dynamic_cast<TH2F*>(fileSiPMTOT->Get("tot_sipm_id_thr1"));
-    TH2F* allTHR2 = dynamic_cast<TH2F*>(fileSiPMTOT->Get("tot_sipm_id_thr2"));
+    TH2D* allScins = dynamic_cast<TH2D*>(fileScinTOT->Get("hit_tot_scin"));
 
-    for (int sipmID = minSiPMID; sipmID <= maxSiPMID; ++sipmID)
+    for (int scinID = minScinID; scinID <= maxScinID; ++scinID)
     {
-      TH1D* totTHR1 = allTHR1->ProjectionY(Form("tot_thr1_sipm_%d", sipmID), sipmID - minSiPMID + 1, sipmID - minSiPMID + 1);
-      TH1D* totTHR2 = allTHR2->ProjectionY(Form("tot_thr2_sipm_%d", sipmID), sipmID - minSiPMID + 1, sipmID - minSiPMID + 1);
-      totTHR1->SetLineWidth(2);
-      totTHR2->SetLineWidth(2);
+      TH1D* totHist = allScins->ProjectionY(Form("tot_scin_%d", scinID), scinID - 200, scinID - 200);
+      totHist->SetLineWidth(2);
       // Rebbining histogram, so procedure that looks for a minimum
       // of a derivative does not get stuck on fluctuations of spectra
-      totTHR1->Rebin(4);
-      totTHR2->Rebin(4);
+      totHist->Rebin(2);
 
-      // Skip this sipm if not enought entries
-      if (totTHR1->GetEntries() > 100)
+      // Skip this scin if not enought entries
+      if (totHist->GetEntries() > 100)
       {
-        auto factors = getEdges(totTHR1);
+        auto factors = getEdges(totHist);
         double temp = fNominalAnnihilationEdge * factors.first / (factors.second - factors.first);
         double factorA = temp / factors.first;
         double factorB = fNominalDeexcitationEdge - temp;
-        tree.put("sipm." + to_string(sipmID) + ".tot_factor_thr1_a", factorA);
-        tree.put("sipm." + to_string(sipmID) + ".tot_factor_thr1_b", factorB);
+        tree.put("scin." + to_string(scinID) + ".tot_factor_a", factorA);
+        tree.put("scin." + to_string(scinID) + ".tot_factor_b", factorB);
         if (saveResult)
         {
-          savePlotPNG(totTHR1, factors.first, factors.second, resultDir);
-        }
-      }
-
-      if (totTHR2->GetEntries() > 100)
-      {
-        auto factors = getEdges(totTHR2);
-        double temp = fNominalAnnihilationEdge * factors.first / (factors.second - factors.first);
-        double factorA = temp / factors.first;
-        double factorB = fNominalDeexcitationEdge - temp;
-        tree.put("sipm." + to_string(sipmID) + ".tot_factor_thr2_a", factorA);
-        tree.put("sipm." + to_string(sipmID) + ".tot_factor_thr2_b", factorB);
-        if (saveResult)
-        {
-          savePlotPNG(totTHR2, factors.first, factors.second, resultDir);
+          savePlotPNG(totHist, factors.first, factors.second, resultDir);
         }
       }
     }
@@ -171,5 +150,5 @@ void tot_norm(string fileName, string calibJSONFileName = "calibration_constants
     // Saving tree into json file
     bpt::write_json(calibJSONFileName, tree);
   }
-  fileSiPMTOT->Close();
+  fileScinTOT->Close();
 }

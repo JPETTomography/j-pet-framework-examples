@@ -44,6 +44,7 @@ namespace bpt = boost::property_tree;
 
 int fStep = 4;
 bool fIgnoreFirst = true;
+double fRevToTFitLimit = 0.0000005;
 
 void time_walks(std::string fileName, std::string calibJSONFileName = "calibration_constants.json", bool saveResult = false,
                 std::string resultDir = "./")
@@ -61,104 +62,111 @@ void time_walks(std::string fileName, std::string calibJSONFileName = "calibrati
 
   if (fileTimeWalk->IsOpen())
   {
-    map<string, TH2F*> histoMap;
-    histoMap["thr1_mtx1"] = dynamic_cast<TH2F*>(fileTimeWalk->Get("time_walk_thr1_mtx_1"));
-    histoMap["thr1_mtx2"] = dynamic_cast<TH2F*>(fileTimeWalk->Get("time_walk_thr1_mtx_2"));
-    histoMap["thr1_mtx3"] = dynamic_cast<TH2F*>(fileTimeWalk->Get("time_walk_thr1_mtx_3"));
-    histoMap["thr1_mtx4"] = dynamic_cast<TH2F*>(fileTimeWalk->Get("time_walk_thr1_mtx_4"));
-    histoMap["thr2_mtx1"] = dynamic_cast<TH2F*>(fileTimeWalk->Get("time_walk_thr2_mtx_1"));
-    histoMap["thr2_mtx2"] = dynamic_cast<TH2F*>(fileTimeWalk->Get("time_walk_thr2_mtx_2"));
-    histoMap["thr2_mtx3"] = dynamic_cast<TH2F*>(fileTimeWalk->Get("time_walk_thr2_mtx_3"));
-    histoMap["thr2_mtx4"] = dynamic_cast<TH2F*>(fileTimeWalk->Get("time_walk_thr2_mtx_4"));
-    histoMap["sum_mtx1"] = dynamic_cast<TH2F*>(fileTimeWalk->Get("time_walk_sum_mtx_1"));
-    // histoMap["sum_mtx2"] = dynamic_cast<TH2F*>(fileTimeWalk->Get("time_walk_sum_mtx_2"));
-    // histoMap["sum_mtx3"] = dynamic_cast<TH2F*>(fileTimeWalk->Get("time_walk_sum_mtx_3"));
-    // histoMap["sum_mtx4"] = dynamic_cast<TH2F*>(fileTimeWalk->Get("time_walk_sum_mtx_4"));
+    auto histo = dynamic_cast<TH2D*>(fileTimeWalk->Get("time_walk_ab_tdiff"));
+    bool ignoreFirst = fIgnoreFirst;
 
-    for (auto elem : histoMap)
+    TGraphErrors* gr1 = new TGraphErrors();
+    TGraphErrors* gr2 = new TGraphErrors();
+    int graphIt1 = 0;
+    int graphIt2 = 0;
+
+    for (int bin = fStep; bin < histo->GetNbinsY(); bin += fStep)
     {
-      bool ignoreFirst = fIgnoreFirst;
-
-      auto name = elem.first;
-      auto hist = elem.second;
-
-      TGraphErrors* gr1 = new TGraphErrors();
-      int graphIt = 0;
-
-      for (int bin = fStep; bin < hist->GetNbinsY(); bin += fStep)
+      auto projX = histo->ProjectionX("_px", bin - fStep, bin);
+      if (projX->GetEntries() > 500)
       {
-        auto projX = hist->ProjectionX("_px", bin - fStep, bin);
-        if (projX->GetEntries() > 100)
+        if (ignoreFirst)
         {
-          if (ignoreFirst)
-          {
-            ignoreFirst = false;
-            continue;
-          }
+          ignoreFirst = false;
+          continue;
+        }
 
-          auto nBins = projX->GetNbinsX();
-          int binRange = (int)(0.2 * nBins);
+        auto nBins = projX->GetNbinsX();
+        int binRange = (int)(0.2 * nBins);
 
-          auto max = projX->GetMaximumBin();
-          auto low = projX->GetBinCenter(max - binRange);
-          auto upp = projX->GetBinCenter(max + binRange);
+        auto max = projX->GetMaximumBin();
+        auto low = projX->GetBinCenter(max - binRange);
+        auto upp = projX->GetBinCenter(max + binRange);
 
-          projX->Fit("gaus", "", "", low, upp);
-          auto fitGaus = projX->GetFunction("gaus");
-          fitGaus->SetLineColor(kGreen);
-          fitGaus->SetLineWidth(2);
+        projX->Fit("gaus", "", "", low, upp);
+        auto fitGaus = projX->GetFunction("gaus");
+        fitGaus->SetLineColor(kGreen);
+        fitGaus->SetLineWidth(2);
 
-          gr1->SetPoint(graphIt, hist->GetYaxis()->GetBinCenter(bin - ((int)fStep / 2)), fitGaus->GetParameter(1));
-          gr1->SetPointError(graphIt, 0.0, fitGaus->GetParameter(2));
-          graphIt++;
+        double x_val = histo->GetYaxis()->GetBinCenter(bin - ((int)fStep / 2));
+        double x_err = (histo->GetYaxis()->GetBinCenter(bin) - histo->GetYaxis()->GetBinCenter(bin - ((int)fStep))) / 2.0;
+        double y_val = fitGaus->GetParameter(1);
+        double y_err = fitGaus->GetParError(1);
+
+        gr1->SetPoint(graphIt1, x_val, y_val);
+        gr1->SetPointError(graphIt1, 0.0, y_err);
+        graphIt1++;
+
+        if (saveResult)
+        {
+          TCanvas projCan(projX->GetName(), projX->GetName(), 1200, 720);
+          projX->SetMaximum(1.5 * projX->GetMaximum());
+          projX->Draw();
+
+          auto legend = new TLegend(0.1, 0.7, 0.45, 0.9);
+          legend->AddEntry(fitGaus, "Gaussian fit", "l");
+          legend->AddEntry((TObject*)0, Form("const %f +- %f", fitGaus->GetParameter(0), fitGaus->GetParError(0)), "");
+          legend->AddEntry((TObject*)0, Form("mean %f +- %f", fitGaus->GetParameter(1), fitGaus->GetParError(1)), "");
+          legend->AddEntry((TObject*)0, Form("sigma %f +- %f", fitGaus->GetParameter(2), fitGaus->GetParError(2)), "");
+          legend->Draw();
+
+          projCan.SaveAs(Form("%s/fit_proj_%d%s", resultDir.c_str(), bin, ".png"));
         }
       }
+    }
 
-      gr1->Fit("pol1");
-      auto fun = gr1->GetFunction("pol1");
-      auto chi2 = fun->GetChisquare();
-      auto ndf = fun->GetNDF();
-      auto p0 = fun->GetParameter(0);
-      auto e0 = fun->GetParError(0);
-      auto p1 = fun->GetParameter(1);
-      auto e1 = fun->GetParError(1);
+    gr1->Fit("pol1", "", "", -fRevToTFitLimit, fRevToTFitLimit);
+    auto fun = gr1->GetFunction("pol1");
+    auto chi2 = fun->GetChisquare();
+    auto ndf = fun->GetNDF();
+    auto p0 = fun->GetParameter(0);
+    auto e0 = fun->GetParError(0);
+    auto p1 = fun->GetParameter(1);
+    auto e1 = fun->GetParError(1);
 
-      tree.put(Form("%s.%s.%s", "time_walk", name.c_str(), "param_a"), p1);
-      tree.put(Form("%s.%s.%s", "time_walk", name.c_str(), "param_b"), p0);
+    tree.put("time_walk.param_a", p1);
+    tree.put("time_walk.param_b", p0);
 
-      if (saveResult)
-      {
-        TCanvas can(hist->GetName(), hist->GetName(), 1200, 720);
-        gr1->SetNameTitle(hist->GetName(), hist->GetName());
-        gr1->GetXaxis()->SetTitle("Projection range center [1/ps]");
-        gr1->GetYaxis()->SetTitle("Projection Mean [ps]");
-        gr1->Draw("ap");
+    if (saveResult)
+    {
+      // Fit result
+      TCanvas can(histo->GetName(), histo->GetName(), 1200, 720);
 
-        auto legend = new TLegend(0.1, 0.7, 0.45, 0.9);
-        legend->AddEntry(fun, "fit ax+b", "l");
-        legend->AddEntry((TObject*)0, Form("a = %f +- %f", p1, e1), "");
-        legend->AddEntry((TObject*)0, Form("b = %f +- %f", p0, e0), "");
-        legend->AddEntry((TObject*)0, Form("Chi2 = %f     ndf = %i", chi2, ndf), "");
-        legend->Draw();
+      gr1->SetNameTitle("time walk", "time walk");
+      gr1->GetXaxis()->SetTitle("Reversed TOT projection range center [1/ps]");
+      gr1->GetYaxis()->SetTitle("Projection gauss fit mean [ps]");
+      gr1->Draw("ap*");
 
-        can.SaveAs(Form("%s/fit_%s%s", resultDir.c_str(), hist->GetName(), ".png"));
+      auto legend = new TLegend(0.1, 0.7, 0.45, 0.9);
+      legend->AddEntry(fun, "fit ax+b", "l");
+      legend->AddEntry((TObject*)0, Form("a = %f +- %f [ps^2]", p1, e1), "");
+      legend->AddEntry((TObject*)0, Form("b = %f +- %f [ps]", p0, e0), "");
+      legend->AddEntry((TObject*)0, Form("Chi^2 = %f     ndf = %i", chi2, ndf), "");
+      legend->Draw();
 
-        TCanvas can2(Form("can_%s%s", name.c_str(), ".png"), Form("can_%s%s", name.c_str(), ".png"), 1300, 700);
-        hist->Draw("colz");
+      can.SaveAs(Form("%s/fit_%s%s", resultDir.c_str(), "time_walk", ".png"));
 
-        auto minY = gr1->GetX()[1];
-        auto maxY = gr1->GetX()[gr1->GetN() - 1];
+      // Correction on source histogram
+      TCanvas can2(Form("can_%s%s", "time_walk", ".png"), Form("can_%s%s", "time_walk", ".png"), 1300, 700);
+      histo->Draw("colz");
 
-        auto minX = gr1->GetY()[1];
-        auto maxX = gr1->GetY()[gr1->GetN() - 1];
+      auto minY = gr1->GetX()[1];
+      auto maxY = gr1->GetX()[gr1->GetN() - 1];
 
-        auto line = new TLine(minX, minY, maxX, maxY);
-        line->SetLineColor(kRed);
-        line->SetLineWidth(2);
-        line->Draw("same");
+      auto minX = gr1->GetY()[1];
+      auto maxX = gr1->GetY()[gr1->GetN() - 1];
 
-        can2.SaveAs(Form("%s/tw_%s%s", resultDir.c_str(), hist->GetName(), ".png"));
-      }
+      auto line = new TLine(minX, minY, maxX, maxY);
+      line->SetLineColor(kRed);
+      line->SetLineWidth(2);
+      line->Draw("same");
+
+      can2.SaveAs(Form("%s/time_walk.png", resultDir.c_str()));
     }
   }
 

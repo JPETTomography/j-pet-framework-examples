@@ -1,8 +1,8 @@
 /**
- *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may find a copy of the License in the LICENCE file.
+ * @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may find a copy of the License in the LICENCE file.
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -10,14 +10,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file tof_synchro.C
+ * @file tot_norm_sipm.C
  *
- *  @brief Script for reading histograms with selected annihilation and deexcitation events
- *  time differences and calculating constatns for Time of Flight synchronization,
- *  that can be used for correcting hit time.
+ * @brief Script for reading histograms with ToT spectra for SiPMs and performing
+ * procedure of finding minima of derivative of distribution, that are equivalent to
+ * Compton edges.
  *
- *  This script uses histograms, that are produced by task "EventCategorizer".
- *  For more detailed description please refer to USAGE.md file.
+ * This script uses histograms, that are produced by task "SignalFinder".
+ * For more detailed description please refer to README.md file.
  */
 
 #include <boost/property_tree/json_parser.hpp>
@@ -35,8 +35,8 @@
 
 namespace bpt = boost::property_tree;
 
-const double fNominalAnnihilationEdge = 2000000.0;
-const double fNominalDeexcitationEdge = 5000000.0;
+const double fNominalAnnihilationEdge = 4000000.0;
+const double fNominalDeexcitationEdge = 8000000.0;
 
 TGraph* getDerivativeGraph(TH1D* histo)
 {
@@ -56,13 +56,17 @@ TGraph* getDerivativeGraph(TH1D* histo)
 // and then calculate a,b factors
 pair<double, double> getEdges(TH1D* totHist)
 {
-  double anniEdge = 399000.0, deexEdge = 399000.0;
-  double dMinA = 100000.0, dMinB = 10000.0;
+  double anniEdge = 0.0, deexEdge = 0.0;
+  double dMinA = 100000.0, dMinB = 100000.0;
   int anniBin = totHist->GetMaximumBin();
   TGraph* devGraph = getDerivativeGraph(totHist);
   devGraph->Draw();
-  for (int bin = totHist->GetMaximumBin(); bin < totHist->GetNbinsX() - 5 && bin < anniBin + 5; ++bin)
+  for (int bin = totHist->GetMaximumBin(); bin < totHist->GetNbinsX() - 5; ++bin)
   {
+    if (totHist->GetBinCenter(bin) < 3500000.0)
+    {
+      continue;
+    }
     double deriv_x = devGraph->GetX()[bin];
     double deriv_y = devGraph->GetY()[bin];
     if (deriv_y < dMinA)
@@ -88,6 +92,7 @@ pair<double, double> getEdges(TH1D* totHist)
 
 void savePlotPNG(TH1D* totHist, double anniEdge, double deexEdge, string resultDir)
 {
+
   int max = totHist->GetMaximum();
 
   TLine* l1 = new TLine(anniEdge, 0.0, anniEdge, max);
@@ -120,12 +125,12 @@ void tot_norm(string fileName, string calibJSONFileName = "calibration_constants
 
   if (fileSiPMTOT->IsOpen())
   {
-    TH2F* allSiPMs = dynamic_cast<TH2F*>(fileSiPMTOT->Get("tot_rec_sipm_id"));
+    TH2D* allSiPMs = dynamic_cast<TH2D*>(fileSiPMTOT->Get("tot_sipm_id"));
 
     // for (int sipmID = minSiPMID; sipmID <= maxSiPMID; ++sipmID)
     for (int sipmID = minSiPMID; sipmID <= maxSiPMID; ++sipmID)
     {
-      TH1D* totHist = allSiPMs->ProjectionY(Form("tot_rec_sipm_%d", sipmID), sipmID - 400, sipmID - 400);
+      TH1D* totHist = allSiPMs->ProjectionY(Form("tot_sipm_%d", sipmID), sipmID - 400, sipmID - 400);
       totHist->SetLineWidth(2);
       // Rebbining histogram, so procedure that looks for a minimum
       // of a derivative does not get stuck on fluctuations of spectra

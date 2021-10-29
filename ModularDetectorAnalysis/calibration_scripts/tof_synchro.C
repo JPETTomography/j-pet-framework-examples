@@ -36,7 +36,7 @@
 namespace bpt = boost::property_tree;
 
 void tof_synchro(std::string fileName, std::string calibJSONFileName = "calibration_constants.json", bool saveResult = false,
-                 std::string resultDir = "./", int minScinID = 201, int maxScinID = 512)
+                 std::string resultDir = "./", int iteration = 0, int minScinID = 201, int maxScinID = 512)
 {
 
   TFile* fileHitsTOF = new TFile(fileName.c_str(), "READ");
@@ -122,7 +122,7 @@ void tof_synchro(std::string fileName, std::string calibJSONFileName = "calibrat
       dFitFun->SetLineColor(4);
       dFitFun->SetLineWidth(2);
 
-      double tofCorr = (aFitFun->GetParameter(1) - dFitFun->GetParameter(1)) / 2.0;
+      double tofCorr = (fabs(aFitFun->GetParameter(1)) - fabs(dFitFun->GetParameter(1))) / 2.0;
       double tofCorrError = (aFitFun->GetParError(1) + dFitFun->GetParError(1)) / 2.0;
 
       peakDiffGraph->SetPoint(graphIt, (double)scinID, tofCorr);
@@ -149,7 +149,7 @@ void tof_synchro(std::string fileName, std::string calibJSONFileName = "calibrat
       {
         auto maxA = annhHist->GetMaximumBin();
         auto maxD = deexHist->GetMaximumBin();
-        auto name = Form("tof_fit_scin_%d", scinID);
+        auto name = Form("tof_fit_scin_%d_%d", scinID, iteration);
         TCanvas* can = new TCanvas(name, name, 1200, 800);
         if (annhHist->GetBinContent(maxA) > deexHist->GetBinContent(maxD))
         {
@@ -161,7 +161,7 @@ void tof_synchro(std::string fileName, std::string calibJSONFileName = "calibrat
           deexHist->Draw();
           annhHist->Draw("same");
         }
-        can->SaveAs(Form("%s/tof_corr_scin_%d.png", resultDir.c_str(), scinID));
+        can->SaveAs(Form("%s/tof_corr_scin_%d_%d.png", resultDir.c_str(), scinID, iteration));
       }
     }
 
@@ -169,26 +169,29 @@ void tof_synchro(std::string fileName, std::string calibJSONFileName = "calibrat
     {
       TCanvas* canTOF = new TCanvas("tof_corr_graph", "tof_corr_graph", 1200, 800);
       tofCorrGraph->Draw("AP*");
-      canTOF->SaveAs(Form("%s/tof_corr_scin.png", resultDir.c_str()));
+      canTOF->SaveAs(Form("%s/tof_corr_scin_%d.png", resultDir.c_str(), iteration));
 
-      string rmsTitle1 = "RMS_Y=" + to_string(peakDiffGraph->GetRMS(2));
       TCanvas* canPeakDiff = new TCanvas("peak_diff_graph", "peak_diff_graph", 1200, 800);
+      string rmsTitle1 = "Iteration " + to_string(iteration) + ":   RMS_X=" + to_string(peakDiffGraph->GetRMS(1)) +
+                         "   RMS_Y=" + to_string(peakDiffGraph->GetRMS(2));
       peakDiffGraph->SetTitle(rmsTitle1.c_str());
       peakDiffGraph->Draw("AP*");
-      canPeakDiff->SaveAs(Form("%s/peak_diff_scin.png", resultDir.c_str()));
+      canPeakDiff->SaveAs(Form("%s/peak_diff_scin_%d.png", resultDir.c_str(), iteration));
 
-      string rmsTitle2 = "RMS_Y=" + to_string(peakDiffGraphZoom->GetRMS(2));
       TCanvas* canPeakDiffZoom = new TCanvas("peak_diff_scin_zoom", "peak_diff_scin_zoom", 1200, 800);
+      string rmsTitle2 = "Iteration " + to_string(iteration) + ":   RMS_X=" + to_string(peakDiffGraphZoom->GetRMS(1)) +
+                         "   RMS_Y=" + to_string(peakDiffGraphZoom->GetRMS(2));
       peakDiffGraphZoom->SetTitle(rmsTitle2.c_str());
       peakDiffGraphZoom->Draw("AP*");
-      canPeakDiffZoom->SaveAs(Form("%s/peak_diff_scin_zoom.png", resultDir.c_str()));
+      canPeakDiffZoom->SaveAs(Form("%s/peak_diff_scin_zoom_%d.png", resultDir.c_str(), iteration));
 
       TCanvas* canMean = new TCanvas("mean_graph", "mean_graph", 1200, 800);
       meanGraph->Draw("AP*");
-      canMean->SaveAs(Form("%s/mean_scin.png", resultDir.c_str()));
+      canMean->SaveAs(Form("%s/mean_scin_%d.png", resultDir.c_str(), iteration));
     }
 
     // Saving tree into json file
     bpt::write_json(calibJSONFileName, tree);
+    bpt::write_json(Form("%s/tof_per_it_%d.json", resultDir.c_str(), iteration), tree);
   }
 }
