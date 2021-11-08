@@ -315,7 +315,7 @@ double HitFinderTools::calculateTOTside(const std::map<int, double> & thrToTOT_s
             break;
         case TOTCalculationType::kThresholdTrapeze:
             weight = (it->first - std::prev(it, 1)->first)/firstThr;
-            tot += weight*fabs(it->second - std::prev(it, 1)->second)/2; //fabs, because we do not know which TOT is lower
+            tot += weight*(std::prev(it, 1)->second - it->second)/2; //fabs, because we do not know which TOT is lower
             break;
         }
         tot += weight*it->second;
