@@ -16,9 +16,7 @@
 #ifndef EVENTANALYZER_H
 #define EVENTANALYZER_H
 
-#include "../ModularDetectorAnalysis/EventCategorizerTools.h"
 #include <JPetEvent/JPetEvent.h>
-#include <JPetHit/JPetHit.h>
 #include <JPetUserTask/JPetUserTask.h>
 
 class EventAnalyzer : public JPetUserTask
