@@ -61,7 +61,6 @@ pair<double, double> getEdges(TH1D* totHist)
   int anniBin = totHist->GetMaximumBin();
   TGraph* devGraph = getDerivativeGraph(totHist);
   devGraph->Draw();
-  // for (int bin = 21; bin < totHist->GetNbinsX() - 5 && bin < anniBin + 5; ++bin)
   for (int bin = totHist->GetMaximumBin(); bin < totHist->GetNbinsX() - 5; ++bin)
   {
     double deriv_x = devGraph->GetX()[bin];
