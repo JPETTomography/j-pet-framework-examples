@@ -37,6 +37,7 @@ set(HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/FilterEvents.h
             ${CMAKE_CURRENT_SOURCE_DIR}/SinogramCreator.h
             ${CMAKE_CURRENT_SOURCE_DIR}/ReconstructionTask.h
             ${CMAKE_CURRENT_SOURCE_DIR}/SinogramCreatorTools.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/JPetGojaParser.h
             ${CMAKE_CURRENT_SOURCE_DIR}/../j-pet-mlem/src/util/png_writer.h)
 
 set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/FilterEvents.cpp
@@ -45,6 +46,7 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/FilterEvents.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/SinogramCreator.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/ReconstructionTask.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/SinogramCreatorTools.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/JPetGojaParser.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/../j-pet-mlem/src/util/png_writer.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
 

@@ -19,6 +19,7 @@
 #include "MLEMRunner.h"
 #include "ReconstructionTask.h"
 #include "SinogramCreator.h"
+#include "JPetGojaParser.h"
 using namespace std;
 
 int main(int argc, const char* argv[])
@@ -32,12 +33,14 @@ int main(int argc, const char* argv[])
     manager.registerTask<MLEMRunner>("MLEMRunner");
     manager.registerTask<SinogramCreator>("SinogramCreator");
     manager.registerTask<ReconstructionTask>("ReconstructionTask");
+    manager.registerTask<JPetGojaParser>("JPetGojaParser");
 
     // manager.useTask("FilterEvents", "unk.evt", "reco.unk.evt");
     // manager.useTask("MLEMRunner", "reco.unk.evt", "");
     // manager.useTask("ImageReco", "reco.unk.evt", "reco");
     // manager.useTask("SinogramCreator", "reco.unk.evt", "sino");
     // manager.useTask("ReconstructionTask", "sino.mc", "reco.mc");
+    // manager.useTask("JPetGojaParser", "", "unk.evt");
 
     manager.run(argc, argv);
   }
