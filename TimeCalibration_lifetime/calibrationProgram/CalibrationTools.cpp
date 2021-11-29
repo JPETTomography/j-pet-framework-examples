@@ -94,8 +94,7 @@ void CalibrationTools::LoadCalibrationParameters()
         fNumberOfPointsToFilter = temp.get_value<int>();
         temp = loadPtreeRoot.get_child(kThresholdForDerivativeKey);
         fThresholdForDerivative = temp.get_value<int>();
-      }
-       else if (fCalibrationOption == "final") {
+      } else if (fCalibrationOption == "final") {
         fFileWithHistos = "";
         temp = loadPtreeRoot.get_child(kConstantsFileFinalKey);
         fFileWithConstants = temp.get_value<std::string>();
@@ -105,6 +104,22 @@ void CalibrationTools::LoadCalibrationParameters()
         fFileWithABParametersToVelocity = temp.get_value<std::string>();
         temp = loadPtreeRoot.get_child(kConstantsFileMultiKey);
         fFileWithPALSParameters = temp.get_value<std::string>();
+      } else if (fCalibrationOption == "TOT") {
+        std::cout << "TOT calibrating test" << std::endl;
+        temp = loadPtreeRoot.get_child(kHistoFileMultiKey);
+        fFileWithHistos = temp.get_value<std::string>();
+        temp = loadPtreeRoot.get_child(kSaveDerivativesKey);
+        fSaveDerivatives = temp.get_value<bool>();
+        temp = loadPtreeRoot.get_child(kNumberOfThresholdsKey);
+        fNumberOfThresholds = temp.get_value<int>();
+        temp = loadPtreeRoot.get_child(kMinScintillatorIDKey);
+        fMinScintillatorID = temp.get_value<int>();
+        temp = loadPtreeRoot.get_child(kMaxScintillatorIDKey);
+        fMaxScintillatorID = temp.get_value<int>();
+        temp = loadPtreeRoot.get_child(kNumberOfPointsToFilterKey);
+        fNumberOfPointsToFilter = temp.get_value<int>();
+        temp = loadPtreeRoot.get_child(kThresholdForDerivativeKey);
+        fThresholdForDerivative = temp.get_value<int>();
       } else {
         std::cerr << "Wrong calibration option: " << fCalibrationOption << ". Should be one of following: single, multi or final" << std::endl;
       }
@@ -126,6 +141,8 @@ void CalibrationTools::Calibrate()
     CalibrateBetweenModules();
   } else if (fCalibrationOption == "final") {
     GenerateCalibrationFile();
+  } else if (fCalibrationOption == "TOT") {
+    CalibrateTOTs();
   } else {
     std::cerr << "Wrong calibration option: " << fCalibrationOption << ". Or a missing file with parameters." << std::endl;
   }
@@ -170,6 +187,28 @@ void CalibrationTools::CalibrateBetweenModules()
     }
   } else
     std::cerr << "Number of histograms for Annihilation and Deexcitation does not match. Check their names" << std::endl;
+  delete fileIn;
+}
+
+void CalibrationTools::CalibrateTOTs()
+{
+  TFile* fileIn = new TFile(fFileWithHistos.c_str(), "READ" );
+  std::cout << "Trying to obtain TOT histogram" << std::endl;
+  std::vector<TH2D*> Histos = GetHistosFromFile(fileIn, 1, fCalibrationOption, "TOT_vs_ID_matched", "TOT_vs_ID_matched");
+
+  if ((int)Histos.size() > 0) {
+    std::cout << "Trying to fing TOT edges" << std::endl;
+    FindTOTEdges(Histos);
+    std::cout << "Edge finding ended" << std::endl;
+    fileIn->Close();
+
+  /*  if (fTOTsAnni.size() > 0) {
+      SaveTOTResults("test.root", fTOTsAnni, fTOTsDeex);
+    } else {
+      std::cerr << "Wrong name of the histograms or the file with histograms in the parameters json file" << std::endl;
+    }*/
+  } else
+    std::cerr << "Number of histograms for Annihilation and Deexcitation does not match. Problem with finding edges" << std::endl;
   delete fileIn;
 }
 
@@ -261,10 +300,10 @@ void CalibrationTools::GenerateCalibrationFile()
     CalibrationFile << NumberToChar(PALSParams.at(i).at(0), 0) << "\t" << NumberToChar(PALSParams.at(i).at(1), 0) << "\t";
     CalibrationFile << side << "\t" << NumberToChar(PALSParams.at(i).at(3), 0) << "\t";
     if (side == 'A') {
-      CalibrationFile << NumberToChar(oldParams.at(iteratorForOldParams).at(4) - PALSParams.at(i).at(4), 6) << "\t" << NumberToChar(PALSParams.at(i).at(5), 6) << "\t";
+      CalibrationFile << NumberToChar(oldParams.at(iteratorForOldParams).at(4) - PALSParams.at(i).at(4)/1000., 6) << "\t" << NumberToChar(PALSParams.at(i).at(5)/1000., 6) << "\t";
     } else if (side == 'B') {
-      CalibrationFile << NumberToChar(oldParams.at(iteratorForOldParams).at(4) - PALSParams.at(i).at(4) - ABParams.at(i).at(4), 6) << "\t"; 
-      CalibrationFile << NumberToChar(sqrt(pow(PALSParams.at(i).at(5), 2) + pow(ABParams.at(i).at(5), 2)), 6) << "\t";
+      CalibrationFile << NumberToChar(oldParams.at(iteratorForOldParams).at(4) - PALSParams.at(i).at(4)/1000. - ABParams.at(i).at(4)/1000., 6) << "\t"; 
+      CalibrationFile << NumberToChar(sqrt(pow(PALSParams.at(i).at(5)/1000., 2) + pow(ABParams.at(i).at(5)/1000., 2)), 6) << "\t";
     } else {
       std::cerr << "Wrong side while reading old clibration file" << std::endl;
     }
@@ -283,26 +322,36 @@ std::vector<TH2D*> GetHistosFromFile(TFile* fileIn, int numberOfThresholds, std:
     fileIn->GetObject("EventFinder subtask 0 stats", dir);
   } else if (calibrationOption == "multi") {
     fileIn->GetObject("PALSCalibrationTask subtask 0 stats", dir);
+  } else if (calibrationOption == "TOT") {
+    fileIn->GetObject("PALSCalibrationTask subtask 0 stats", dir);
   }
   if (!dir) {
     std::cerr << "No directory EventFinder or PALSCalibrationTask in a given file or wrong calibration option (single or multi)" << std::endl;
   } else {
     TH2D* tempHisto;
-    for (int i=1; i<=numberOfThresholds; i++) {
-      tempHisto = dynamic_cast<TH2D*>(dir->Get((histoName + std::to_string(i)).c_str()));
+    if (calibrationOption == "TOT") {
+      tempHisto = dynamic_cast<TH2D*>(dir->Get((histoName).c_str()));
       if (tempHisto)
         Histos.push_back(tempHisto);
       else
-        std::cerr << "Error retrieving histogram with name " << histoName + std::to_string(i) << std::endl;
-    }
-    if (calibrationOption == "multi") {
+        std::cerr << "Error retrieving histogram with name " << histoName << std::endl;
+    } else {
       for (int i=1; i<=numberOfThresholds; i++) {
-        tempHisto = dynamic_cast<TH2D*>(dir->Get((histoName2 + std::to_string(i)).c_str()));
+        tempHisto = dynamic_cast<TH2D*>(dir->Get((histoName + std::to_string(i)).c_str()));
         if (tempHisto)
           Histos.push_back(tempHisto);
         else
-          std::cerr << "Error retrieving histogram with name " << histoName2 + std::to_string(i) << std::endl;
-      }
+          std::cerr << "Error retrieving histogram with name " << histoName + std::to_string(i) << std::endl;
+        }
+        if (calibrationOption == "multi") {
+          for (int i=1; i<=numberOfThresholds; i++) {
+            tempHisto = dynamic_cast<TH2D*>(dir->Get((histoName2 + std::to_string(i)).c_str()));
+            if (tempHisto)
+              Histos.push_back(tempHisto);
+            else
+              std::cerr << "Error retrieving histogram with name " << histoName2 + std::to_string(i) << std::endl;
+          }
+        }
     }
   }
   return Histos;
@@ -414,6 +463,68 @@ void CalibrationTools::FindPeaks(std::vector<TH2D*> Histos)
   delete fileOut;
 }
 
+void CalibrationTools::FindTOTEdges(std::vector<TH2D*> Histos)
+{
+  TH1D *projection_copy1, *projection_copy2;
+  Parameter edgeAnni, edgeDeex;
+  double meanTemp, rangeParameter;
+  unsigned iterator = 0;
+  std::string titleOfHistogram, titleOfDirectory;
+  std::vector<Parameter> tempContainerA, tempContainerB;
+  
+  TFile* fileOut = new TFile("test.root", "RECREATE" );
+  
+  for (unsigned i=0; i<Histos.size(); i++) {
+    tempContainerA.clear();
+    tempContainerB.clear();
+    //Loop starts from the first bin - zero bin is underflow bin
+    for (int j=1; j<=fMaxScintillatorID - fMinScintillatorID + 1; j++) {
+      iterator++;
+      projection_copy1 = Histos.at(i)->ProjectionX("_px", j, j);
+      projection_copy2 = Histos.at(i)->ProjectionX("_px", j, j);
+      titleOfHistogram = "TOT_ID_nr" + std::to_string(j-1 + fMinScintillatorID);
+      
+      fileOut->cd();
+      titleOfDirectory = "ID_nr" + std::to_string(j-1 + fMinScintillatorID) + "/";
+      fileOut->mkdir(titleOfDirectory.c_str());
+      fileOut->cd(titleOfDirectory.c_str());
+      
+      if (projection_copy1 -> GetEntries() > 0 && projection_copy2 -> GetEntries() > 0) {
+        projection_copy1->Rebin(6);
+        meanTemp = projection_copy1->GetMean(1);
+        rangeParameter = 4*projection_copy1->GetStdDev();
+        double endRange = 80000;
+        edgeDeex = FindMiddle(projection_copy2, meanTemp-rangeParameter, endRange, Side::EdgeDeex, titleOfHistogram);
+        Parameter sigma1 = tempForSigma;
+        if (edgeDeex.Value - rangeParameter/16 > meanTemp)
+          endRange = edgeDeex.Value - rangeParameter/16;
+        edgeAnni = FindMiddle(projection_copy1, meanTemp-rangeParameter, endRange, Side::EdgeAnni, titleOfHistogram);
+        Parameter sigma2 = tempForSigma;
+
+        tempContainerA.push_back(edgeAnni);
+        tempContainerB.push_back(edgeDeex);
+        if (edgeDeex.Value < meanTemp/2)
+          edgeDeex.Value = meanTemp/2;
+        if (edgeAnni.Value < meanTemp/2)
+          edgeAnni.Value = meanTemp/2;
+        DrawPeaksOnHistogram(projection_copy1, projection_copy2, edgeAnni, edgeDeex, titleOfHistogram);
+        
+        sigma1.Value = sigma1.Value + edgeDeex.Value;
+        DrawPeaksOnHistogram(projection_copy1, projection_copy2, edgeDeex, sigma1, titleOfHistogram+"_DeexSigma");
+        sigma2.Value = sigma2.Value + edgeAnni.Value;
+        DrawPeaksOnHistogram(projection_copy1, projection_copy2, edgeAnni, sigma2, titleOfHistogram+"_AnniSigma");
+      } else {
+        std::cerr << "No data in histogram from scintillator nr " << j-1 + fMinScintillatorID << std::endl;
+        Parameter temp;
+        tempContainerA.push_back(temp);
+        tempContainerB.push_back(temp); 
+      }
+    }
+    fTOTsAnni.push_back(tempContainerA);
+    fTOTsDeex.push_back(tempContainerB);
+  }
+}
+
 Parameter CalibrationTools::FindMiddle(TH1D* histo, double firstBinCenter, double lastBinCenter, Side side, std::string titleOfHistogram)
 {
   Parameter finalEstimatioOfExtremum;
@@ -450,7 +561,7 @@ Parameter CalibrationTools::FindMiddle(TH1D* histo, double firstBinCenter, doubl
     if (fSaveDerivatives) {
       DrawDerivatives(titleOfHistogram, side, filterHalf, Arguments, FirstDerivative, temp);
     }
-  } else {
+  } else if (side == Side::Right || side == Side::Left) {
     //In case of the TDiff BA distributions maximum of the derivative corresponding to the edge on a given side is very sensitive
     //to any fluctuations. Therefore maximum is estimated as a first point after which moving average is changing trend. 
     //Change of the trend and direction of the changing the iterator depends on the side on which we want to estimate and edge
@@ -469,6 +580,25 @@ Parameter CalibrationTools::FindMiddle(TH1D* histo, double firstBinCenter, doubl
                                              firstEstimationForExtremumBin-binRangeForLinearFitting, firstEstimationForExtremumBin+binRangeForLinearFitting);
     finalEstimatioOfExtremum.Value = finalEstimatioOfExtremum.Value - 2*argumentShift;
 
+  } else {
+    firstEstimationForExtremumBin = EstimateExtremumBin(FirstDerivative, filterHalf, fNumberOfPointsToFilter, Side::Right);
+      
+    SecondDerivative = CalculateDerivative(FirstDerivative);
+    SecondDerivative = SmoothByLinearFilter(SecondDerivative, filterHalf);
+    finalEstimatioOfExtremum.Value = 0;
+    double argumentShift = Arguments.at(firstEstimationForExtremumBin+1) - Arguments.at(firstEstimationForExtremumBin);
+
+    if (fSaveDerivatives) {
+      DrawDerivatives(titleOfHistogram, side, filterHalf, Arguments, FirstDerivative, SecondDerivative);
+    }
+    
+    finalEstimatioOfExtremum = FindPeak(Arguments, SecondDerivative, 
+                                             firstEstimationForExtremumBin-binRangeForLinearFitting, firstEstimationForExtremumBin+binRangeForLinearFitting);
+    finalEstimatioOfExtremum.Value = finalEstimatioOfExtremum.Value - 2*argumentShift;
+    
+    std::pair<int, int> rangeForSigma = FindRangeForMinimum(Arguments, SecondDerivative, finalEstimatioOfExtremum.Value);
+    Parameter sigma = getSigmaFromFit(Arguments, FirstDerivative, rangeForSigma, titleOfHistogram);
+    tempForSigma = sigma;
   }
   return finalEstimatioOfExtremum;
 }
@@ -573,10 +703,76 @@ Parameter CalibrationTools::FindPeak(std::vector<double> arguments, std::vector<
       }
     }
   } else {
-    std::cerr << "Size of the vector for the linaer regression is too small ot something wrong with calculations" << std::endl;
+    std::cerr << "Size of the vector for the linear regression is too small or something went wrong with calculations" << std::endl;
     return peak;
   }
   return peak;
+}
+
+std::pair<int, int> FindRangeForMinimum(const std::vector<double> arguments, const std::vector<double> values, double peakValue)
+{
+  unsigned peakIndex = arguments.size()/2;
+  double minDistance = 1000;
+  for (unsigned i=0; i<arguments.size(); i++) {
+    if (fabs(arguments.at(i) - peakValue) < minDistance) {
+      peakIndex = i;
+      minDistance = fabs(arguments.at(i) - peakValue);
+    }
+  }
+  if (peakIndex == 0) {
+    return std::make_pair(0, 0);
+  }
+  int start = 0, end = 0;
+  double previousStart = values.at(peakIndex), previousEnd = values.at(peakIndex);
+  for (unsigned i=1; (!start || !end) && peakIndex-i >= 0 && peakIndex+i < values.size(); i++) {
+    if (values.at(peakIndex - i) < previousStart && !start) {
+      previousStart = values.at(peakIndex - i);
+    } else
+      start = peakIndex - i;
+    if (values.at(peakIndex + i) > previousEnd && !end) {
+      previousEnd = values.at(peakIndex + i);
+    } else
+      end = peakIndex + i;
+  }
+  if (start != 0)
+    start = start - 1;
+  if (end != values.size()-1)
+    end = end + 1;
+  return std::make_pair(start, end);
+}
+
+Parameter getSigmaFromFit(const std::vector<double> arguments, const std::vector<double> values, std::pair<int, int> range, std::string title)
+{
+  int rangeSize = range.second - range.first + 1;
+  Parameter sigma;
+  if (rangeSize < 3) {
+    return sigma;
+  }
+  TGraph* graphToFit = new TGraph(rangeSize);
+  for (int i=range.first; i<=range.second; i++) {
+//    std::cout << i << " " << arguments.at(i) << " " << values.at(i) << std::endl;
+    graphToFit -> SetPoint(i-range.first, arguments.at(i), values.at(i));
+  }
+  TF1 *fitFunction = new TF1("gaussFit", "[2]*TMath::Gaus(x,[0],[1]) + [3]");
+  fitFunction -> SetParameters(arguments.at((range.second + range.first)/2), 3000, -1, 0.1);
+ // std::cout << "Fitting gauss function for the " + title + ". Estimated sigma:" << std::endl;
+  std::string titleOfGraph = "TOT_derivative_" + title;
+  graphToFit -> GetXaxis() -> SetTitle("TOT [ps]");
+  graphToFit -> GetYaxis() -> SetTitle("Derivative");
+  graphToFit -> SetMarkerStyle(20);
+  graphToFit -> Fit(fitFunction, "Q");
+ // graphToFit -> Write(titleOfGraph.c_str());
+  Double_t* params = fitFunction->GetParameters();
+  const Double_t* parErr = fitFunction->GetParErrors();
+  sigma.Value = fabs(params[1]);
+  sigma.Uncertainty = parErr[1];
+  //std::cout << params[0] << " " << params[1] << " " << params[2] << " " << params[3] << "\t goodness of fit (Chisquared): " << fitFunction -> GetChisquare() << std::endl;
+  //std::cin >> sigma;
+ // delete params;
+ // delete parErr;
+  delete graphToFit;
+  delete fitFunction;
+  return sigma;
 }
 
 EffLengthTools::EffLengthTools(std::string fileWithParameters) 
@@ -832,33 +1028,39 @@ void DrawPeaksOnHistogram(TH1D *projection_copy1, TH1D *projection_copy2, Parame
   projection_copy2 -> GetXaxis()->SetTitle("TDiff PALS [ps]"); 
   projection_copy2 -> GetYaxis()->SetTitle("Counts");
 
-  lat1.SetTextSize(0.020);
-  lat1.SetTextAngle(270.);
-  lat1.DrawLatex(middleAnni.Value, maxCounts/5, Form("( %g )", middleAnni.Value));
+  if (middleAnni.Value != 0 && middleDeex.Value != 0) {
+    lat1.SetTextSize(0.020);
+    lat1.SetTextAngle(270.);
+    lat1.DrawLatex(middleAnni.Value, maxCounts/5, Form("( %g )", middleAnni.Value));
 
-  lat2.SetTextSize(0.020);
-  lat2.SetTextAngle(270.);
-  lat2.DrawLatex(middleDeex.Value, maxCounts/5, Form("( %g )", middleDeex.Value));
+    lat2.SetTextSize(0.020);
+    lat2.SetTextAngle(270.);
+    lat2.DrawLatex(middleDeex.Value, maxCounts/5, Form("( %g )", middleDeex.Value));
 
-  double minArgument = (middleAnni.Value > middleDeex.Value) ? middleDeex.Value : middleAnni.Value;
-  double maxArgument = (middleAnni.Value > middleDeex.Value) ? middleAnni.Value : middleDeex.Value;
-  c1 -> Range(minArgument - (maxArgument+minArgument)/2, -0.1*maxCounts, maxArgument + (maxArgument+minArgument)/2, maxCounts + 0.1*maxCounts);
-  TLine* line1 = new TLine(middleAnni.Value, -0.1*maxCounts, middleAnni.Value, maxCounts + 0.1*maxCounts);
-  line1 -> SetLineColor(kRed);
-  line1 -> SetLineWidth(1);
-  line1 -> SetLineStyle(kDashed);
-  line1 -> Draw();
+    double minArgument = (middleAnni.Value > middleDeex.Value) ? middleDeex.Value : middleAnni.Value;
+    double maxArgument = (middleAnni.Value > middleDeex.Value) ? middleAnni.Value : middleDeex.Value;
+    c1 -> Range(minArgument - (maxArgument+minArgument)/2, -0.1*maxCounts, maxArgument + (maxArgument+minArgument)/2, maxCounts + 0.1*maxCounts);
+    TLine* line1 = new TLine(middleAnni.Value, -0.1*maxCounts, middleAnni.Value, maxCounts + 0.1*maxCounts);
+    line1 -> SetLineColor(kRed);
+    line1 -> SetLineWidth(1);
+    line1 -> SetLineStyle(kDashed);
+    line1 -> Draw();
 
-  TLine* line2 = new TLine(middleDeex.Value, -0.1*maxCounts, middleDeex.Value, maxCounts + 0.1*maxCounts);
-  line2 -> SetLineColor(kRed);
-  line2 -> SetLineWidth(1);
-  line2 -> SetLineStyle(kDashed);
-  line2 -> Draw();
-
-  c1 -> Write( titleOfHistogram.c_str() );
-  delete c1;
-  delete line1;
-  delete line2;
+    TLine* line2 = new TLine(middleDeex.Value, -0.1*maxCounts, middleDeex.Value, maxCounts + 0.1*maxCounts);
+    line2 -> SetLineColor(kRed);
+    line2 -> SetLineWidth(1);
+    line2 -> SetLineStyle(kDashed);
+    line2 -> Draw();
+    
+    c1 -> Write( titleOfHistogram.c_str() );
+    delete c1;
+    
+    delete line1;
+    delete line2;
+  } else {
+    c1 -> Write( titleOfHistogram.c_str() );
+    delete c1;
+  }
 }
 
 //For a better visual feeling derivatives are drawn on the primary distribution (TDiff BA or PALS), following Alek`s idea from presentation
@@ -907,6 +1109,10 @@ void DrawDerivatives(std::string titleOfHistogram, Side side, int filterHalf, st
     secondDerivative -> GetXaxis() -> SetTitle("TDiff_B-A [ps]");
     secondDerivative -> GetYaxis() -> SetTitle("Second Derrivative");
     secondDerivative -> SetMarkerStyle(20);
+    if (side == Side::EdgeAnni || side == Side::EdgeDeex) {
+      firstDerivative -> GetXaxis() -> SetTitle("TOT [ps]");
+      secondDerivative -> GetXaxis() -> SetTitle("TOT [ps]");
+    }
     firstDerivative -> Write((titleOfHistogram + "_firstDerivative_" + sideToTitle).c_str());
     secondDerivative -> Write((titleOfHistogram + "_secondDerivative_" + sideToTitle).c_str());
     delete firstDerivative;

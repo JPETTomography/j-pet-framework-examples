@@ -27,6 +27,7 @@
 #include <algorithm>
 #include <iostream>
 #include <iterator>
+#include <utility>
 #include <fstream>
 #include <sstream>
 #include <iomanip> 
@@ -46,7 +47,9 @@ enum Side {
   Right,
   Left,
   MaxAnni,
-  MaxDeex
+  MaxDeex,
+  EdgeAnni,
+  EdgeDeex
 };
 
 class CalibrationTools {
@@ -58,10 +61,12 @@ public:
   void Calibrate();
   void CalibrateSingleModule();
   void CalibrateBetweenModules();
+  void CalibrateTOTs();
   void GenerateCalibrationFile();
   
   void FindEdges(std::vector<TH2D*> Histos);
   void FindPeaks(std::vector<TH2D*> Histos);
+  void FindTOTEdges(std::vector<TH2D*> Histos);
   Parameter FindMiddle(TH1D* histo, double firstBinCenter, double lastBinCenter, 
                                                             Side side, std::string titleOfHistogram);
   unsigned EstimateExtremumBin(const std::vector<double> vector, int filterHalf, unsigned shiftFromFilterHalf, Side side);
@@ -110,10 +115,13 @@ private:
   int fHalfRangeForExtremumEstimation = 2;
   float fEffectiveLength = 48; // cm
   unsigned binRangeForLinearFitting = 5;
+  Parameter tempForSigma;
   std::vector<std::vector<Parameter>> fEdgesA;
   std::vector<std::vector<Parameter>> fEdgesB;
   std::vector<std::vector<Parameter>> fMaxAnnihilation;
   std::vector<std::vector<Parameter>> fMaxDeexcitation;
+  std::vector<std::vector<Parameter>> fTOTsAnni;
+  std::vector<std::vector<Parameter>> fTOTsDeex;
 };
 
 class EffLengthTools {
@@ -150,6 +158,8 @@ void DrawDerivatives(std::string titleOfHistogram, Side side, int filterHalf, st
                      std::vector<double> firstDerivativeVector, std::vector<double> secondDerivativeVector);
 void PlotCorrectionHistos(std::vector<std::vector<Parameter>> vector1, std::vector<std::vector<Parameter>> vector2, double meanUnc);
 unsigned FindMaximum(std::vector<double> Values, std::vector<double> Arguments, double minimalArgument, double maximalArgument);
+std::pair<int, int> FindRangeForMinimum(const std::vector<double> arguments, const std::vector<double> values, double peakValue);
+Parameter getSigmaFromFit(const std::vector<double> arguments, const std::vector<double> values, std::pair<int, int> range, std::string title);
 std::vector<double> GetParamsFromLine(std::string line);
 std::vector<std::vector<std::vector<double>>> LoadParametersFromFiles(std::vector<std::string> filenames);
 std::vector<double> CalculateDerivative(std::vector<double> values);
