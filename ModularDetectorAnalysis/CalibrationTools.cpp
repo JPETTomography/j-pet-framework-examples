@@ -450,12 +450,13 @@ void CalibrationTools::selectCosmicsForToF(const JPetEvent& event, JPetStatistic
       auto vecN_X = TVector3(-1.0, 0.0, 0.0);
 
       // Checknig angle in XZ plane - including detector rotation in Y
-      auto vec21_XZ = TVector3(hit2->getPosX() - hit1->getPosX(), 0.0, hit2->getPosZ() - hit2->getPosZ());
-      double thetaXZ = TMath::RadToDeg() * vec21_XZ.Angle(vecN_X);
+      TVector3 hit1PosXZ(hit1->getPosX(), 0.0, hit1->getPosZ());
+      TVector3 hit2PosXZ(hit2->getPosX(), 0.0, hit2->getPosZ());
+      double thetaXZ = TMath::RadToDeg() * hit1PosXZ.Angle(hit2PosXZ);
 
       stats.fillHistogram("cosmic_hits_theta_xz_all", thetaXZ);
       stats.fillHistogram("cosmic_hits_z_diff_all", hit2->getPosZ() - hit1->getPosZ());
-      if (fabs(90.0 - thetaXZ - detectorYRot) < maxThetaDiff)
+      if (fabs(thetaXZ - detectorYRot) < maxThetaDiff)
       {
         test1 = true;
         stats.fillHistogram("cosmic_hits_theta_xz_cut", thetaXZ);
@@ -463,19 +464,26 @@ void CalibrationTools::selectCosmicsForToF(const JPetEvent& event, JPetStatistic
       }
 
       // Checknig angle in XZ plane - to select neighbouring strips
-      auto vec21_XY = TVector3(hit2->getPosX() - hit1->getPosX(), hit2->getPosY() - hit2->getPosY(), 0.0);
-      double thetaXY = TMath::RadToDeg() * vec21_XY.Angle(vecN_X);
+      TVector3 hit1PosXY(hit1->getPosX(), hit1->getPosY(), 0.0);
+      TVector3 hit2PosXY(hit2->getPosX(), hit2->getPosY(), 0.0);
+      double thetaXY = TMath::RadToDeg() * hit1PosXY.Angle(hit2PosXY);
 
-      stats.fillHistogram("cosmic_hits_theta_xy_all", thetaXZ);
+      stats.fillHistogram("cosmic_hits_theta_xy_all", thetaXY);
       if (fabs(thetaXY) < maxThetaDiff)
       {
         test2 = true;
-        stats.fillHistogram("cosmic_hits_theta_xy_cut", thetaXZ);
+        stats.fillHistogram("cosmic_hits_theta_xy_cut", thetaXY);
       }
 
+      auto tDiff1 = hit2->getTime() - hit1->getTime();
+      auto tDiff2 = EventCategorizerTools::calculateDistance(hit1, hit2) / kMuonAvVelocity_cm_ps;
+
+      stats.fillHistogram(Form("cosmic_tof_tdiff_scin_%d_all", hit1->getScin().getID()), hit2->getScin().getID(), tDiff1);
+      stats.fillHistogram(Form("cosmic_tof_offset_scin_%d_all", hit1->getScin().getID()), hit2->getScin().getID(), tDiff1 - tDiff2);
       if (test1 && test2)
       {
-        stats.fillHistogram(Form("cosmic_tof_scin_%d", hit1->getScin().getID()), hit2->getScin().getID(), hit2->getTime() - hit1->getTime());
+        stats.fillHistogram(Form("cosmic_tof_tdiff_scin_%d_cut", hit1->getScin().getID()), hit2->getScin().getID(), tDiff1);
+        stats.fillHistogram(Form("cosmic_tof_offset_scin_%d_cut", hit1->getScin().getID()), hit2->getScin().getID(), tDiff1 - tDiff2);
       }
     }
   }

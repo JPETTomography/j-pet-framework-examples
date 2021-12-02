@@ -532,7 +532,22 @@ void EventCategorizer::initialiseCalibrationHistograms()
   // Cosmic ToF
   for (int scinID = 201; scinID <= 213; ++scinID)
   {
-    getStatistics().createHistogramWithAxes(new TH2D(Form("cosmic_tof_scin_%d", scinID),
+    getStatistics().createHistogramWithAxes(new TH2D(Form("cosmic_tof_tdiff_scin_%d_all", scinID),
+                                                     Form("Time of Flight between hits from scin ID %d and from layer below", scinID), 200,
+                                                     -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0, 13, 214.5, 226.5),
+                                            "Scintillator ID", "Time of Flight [ps]");
+
+    getStatistics().createHistogramWithAxes(new TH2D(Form("cosmic_tof_tdiff_scin_%d_cut", scinID),
+                                                     Form("Time of Flight between hits from scin ID %d and from layer below", scinID), 200,
+                                                     -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0, 13, 214.5, 226.5),
+                                            "Scintillator ID", "Time of Flight [ps]");
+
+    getStatistics().createHistogramWithAxes(new TH2D(Form("cosmic_tof_offset_scin_%d_all", scinID),
+                                                     Form("Time of Flight between hits from scin ID %d and from layer below", scinID), 200,
+                                                     -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0, 13, 214.5, 226.5),
+                                            "Scintillator ID", "Time of Flight [ps]");
+
+    getStatistics().createHistogramWithAxes(new TH2D(Form("cosmic_tof_offset_scin_%d_cut", scinID),
                                                      Form("Time of Flight between hits from scin ID %d and from layer below", scinID), 200,
                                                      -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0, 13, 214.5, 226.5),
                                             "Scintillator ID", "Time of Flight [ps]");
