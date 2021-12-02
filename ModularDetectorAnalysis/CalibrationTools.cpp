@@ -453,20 +453,24 @@ void CalibrationTools::selectCosmicsForToF(const JPetEvent& event, JPetStatistic
       auto vec21_XZ = TVector3(hit2->getPosX() - hit1->getPosX(), 0.0, hit2->getPosZ() - hit2->getPosZ());
       double thetaXZ = TMath::RadToDeg() * vec21_XZ.Angle(vecN_X);
 
-      stats.fillHistogram(("cosmic_hits_z_diff_all"), hit2->getPosZ() - hit1->getPosZ());
+      stats.fillHistogram("cosmic_hits_theta_xz_all", thetaXZ);
+      stats.fillHistogram("cosmic_hits_z_diff_all", hit2->getPosZ() - hit1->getPosZ());
       if (fabs(90.0 - thetaXZ - detectorYRot) < maxThetaDiff)
       {
         test1 = true;
-        stats.fillHistogram(("cosmic_hits_z_diff_cut"), hit2->getPosZ() - hit1->getPosZ());
+        stats.fillHistogram("cosmic_hits_theta_xz_cut", thetaXZ);
+        stats.fillHistogram("cosmic_hits_z_diff_cut", hit2->getPosZ() - hit1->getPosZ());
       }
 
       // Checknig angle in XZ plane - to select neighbouring strips
       auto vec21_XY = TVector3(hit2->getPosX() - hit1->getPosX(), hit2->getPosY() - hit2->getPosY(), 0.0);
       double thetaXY = TMath::RadToDeg() * vec21_XY.Angle(vecN_X);
 
+      stats.fillHistogram("cosmic_hits_theta_xy_all", thetaXZ);
       if (fabs(thetaXY) < maxThetaDiff)
       {
         test2 = true;
+        stats.fillHistogram("cosmic_hits_theta_xy_cut", thetaXZ);
       }
 
       if (test1 && test2)

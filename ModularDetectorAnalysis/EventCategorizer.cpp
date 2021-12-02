@@ -536,11 +536,21 @@ void EventCategorizer::initialiseCalibrationHistograms()
                                                      Form("Time of Flight between hits from scin ID %d and from layer below", scinID), 200,
                                                      -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0, 13, 214.5, 226.5),
                                             "Scintillator ID", "Time of Flight [ps]");
-
-    getStatistics().createHistogramWithAxes(new TH1D("cosmic_hits_z_diff_all", "Z-Position difference of two comsic hits", 120, -15.0, 15.0),
-                                            "positon diff [cm]", "Number of pairs");
-    getStatistics().createHistogramWithAxes(
-        new TH1D("cosmic_hits_z_diff_cut", "Z-Position difference of two comsic hits after angle cut", 120, -15.0, 15.0), "positon diff [cm]",
-        "Number of pairs");
   }
+
+  getStatistics().createHistogramWithAxes(new TH1D("cosmic_hits_z_diff_all", "Z-Position difference of two comsic hits", 120, -15.0, 15.0),
+                                          "positon diff [cm]", "Number of pairs");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("cosmic_hits_z_diff_cut", "Z-Position difference of two comsic hits after angle cut", 120, -15.0, 15.0), "positon diff [cm]",
+      "Number of pairs");
+
+  getStatistics().createHistogramWithAxes(new TH1D("cosmic_hits_theta_xz_all", "Theta of two comsic hits", 180, 0.0, 90.0), "theta [deg]",
+                                          "Number of pairs");
+  getStatistics().createHistogramWithAxes(new TH1D("cosmic_hits_theta_xz_cut", "Theta of two comsic hits", 180, 0.0, 90.0), "theta [deg]",
+                                          "Number of pairs");
+
+  getStatistics().createHistogramWithAxes(new TH1D("cosmic_hits_theta_xy_all", "Theta of two comsic hits", 180, 0.0, 90.0), "theta [deg]",
+                                          "Number of pairs");
+  getStatistics().createHistogramWithAxes(new TH1D("cosmic_hits_theta_xy_cut", "Theta of two comsic hits", 180, 0.0, 90.0), "theta [deg]",
+                                          "Number of pairs");
 }
