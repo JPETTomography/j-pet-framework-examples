@@ -23,8 +23,13 @@
 #include <boost/property_tree/ptree.hpp>
 
 /**
+ * Average velocity of cosmic muons at the sea level
+ * http://web.mit.edu/lululiu/Public/pixx/not-pixx/muons.pdf
+ */
+static const double kMuonAvVelocity_cm_ps = 0.0299792458;
+
+/**
  * @brief Tools for managing calibrations
- *
  */
 class CalibrationTools
 {
@@ -41,6 +46,8 @@ public:
 
   static void selectForTimeWalk(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double maxThetaDiff, double maxTimeDiff,
                                 double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos);
+
+  static void selectCosmicsForToF(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double maxThetaDiff, double detectorYRot);
 
   static double calculateReveresedToT(const JPetPhysRecoHit* hit);
 };

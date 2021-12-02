@@ -407,6 +407,76 @@ void CalibrationTools::selectForTimeWalk(const JPetEvent& event, JPetStatistics&
   }
 }
 
+/**
+ * @brief Tools for managing calibrations
+ */
+void CalibrationTools::selectCosmicsForToF(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double maxThetaDiff,
+                                           double detectorYRot)
+{
+  if (event.getHits().size() < 2)
+  {
+    return;
+  }
+
+  for (uint i = 0; i < event.getHits().size(); i++)
+  {
+    for (uint j = i + 1; j < event.getHits().size(); j++)
+    {
+      // Check if hits are from different layers and assign them as upper or lower hit
+      auto layer1ID = event.getHits().at(i)->getScin().getSlot().getLayer().getID();
+      auto layer2ID = event.getHits().at(j)->getScin().getSlot().getLayer().getID();
+      auto layer1Radius = event.getHits().at(i)->getScin().getSlot().getLayer().getRadius();
+      auto layer2Radius = event.getHits().at(j)->getScin().getSlot().getLayer().getRadius();
+
+      if (layer1ID == layer2ID)
+      {
+        continue;
+      }
+
+      auto hit1 = dynamic_cast<const JPetBaseHit*>(event.getHits().at(i));
+      auto hit2 = dynamic_cast<const JPetBaseHit*>(event.getHits().at(j));
+
+      // Change the order of hits depending on layers
+      if (layer1Radius < layer2Radius)
+      {
+        hit1 = dynamic_cast<const JPetBaseHit*>(event.getHits().at(j));
+        hit2 = dynamic_cast<const JPetBaseHit*>(event.getHits().at(i));
+      }
+
+      auto test1 = false;
+      auto test2 = false;
+
+      // Normal vector in X pointing down
+      auto vecN_X = TVector3(-1.0, 0.0, 0.0);
+
+      // Checknig angle in XZ plane - including detector rotation in Y
+      auto vec21_XZ = TVector3(hit2->getPosX() - hit1->getPosX(), 0.0, hit2->getPosZ() - hit2->getPosZ());
+      double thetaXZ = TMath::RadToDeg() * vec21_XZ.Angle(vecN_X);
+
+      stats.fillHistogram(("cosmic_hits_z_diff_all"), hit2->getPosZ() - hit1->getPosZ());
+      if (fabs(90.0 - thetaXZ - detectorYRot) < maxThetaDiff)
+      {
+        test1 = true;
+        stats.fillHistogram(("cosmic_hits_z_diff_cut"), hit2->getPosZ() - hit1->getPosZ());
+      }
+
+      // Checknig angle in XZ plane - to select neighbouring strips
+      auto vec21_XY = TVector3(hit2->getPosX() - hit1->getPosX(), hit2->getPosY() - hit2->getPosY(), 0.0);
+      double thetaXY = TMath::RadToDeg() * vec21_XY.Angle(vecN_X);
+
+      if (fabs(thetaXY) < maxThetaDiff)
+      {
+        test2 = true;
+      }
+
+      if (test1 && test2)
+      {
+        stats.fillHistogram(Form("cosmic_tof_scin_%d", hit1->getScin().getID()), hit2->getScin().getID(), hit2->getTime() - hit1->getTime());
+      }
+    }
+  }
+}
+
 double CalibrationTools::calculateReveresedToT(const JPetPhysRecoHit* hit)
 {
   if (hit->getSignalA().getToT() != 0.0 && hit->getSignalB().getToT() != 0.0)

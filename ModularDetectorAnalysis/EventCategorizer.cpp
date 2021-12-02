@@ -175,6 +175,28 @@ bool EventCategorizer::init()
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMaxTimeDiffParamKey.c_str(), fMaxTimeDiff));
   }
 
+  // Variable used in measurements with Trento setup - rotation of Z axis with respect of
+  // vertical direction in Earth frame
+  if (isOptionSet(fParams.getOptions(), kDetectorYRotation))
+  {
+    fDetectorYRotationDeg = getOptionAsDouble(fParams.getOptions(), kDetectorYRotation);
+  }
+  else
+  {
+    WARNING(
+        Form("No value of the %s parameter provided by the user. Using default value of %lf.", kDetectorYRotation.c_str(), fDetectorYRotationDeg));
+  }
+
+  if (isOptionSet(fParams.getOptions(), kCosmicMaxThetaDeg))
+  {
+    fCosmicMaxThetaDiffDeg = getOptionAsDouble(fParams.getOptions(), kCosmicMaxThetaDeg);
+  }
+  else
+  {
+    WARNING(
+        Form("No value of the %s parameter provided by the user. Using default value of %lf.", kCosmicMaxThetaDeg.c_str(), fCosmicMaxThetaDiffDeg));
+  }
+
   // Getting bools for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey))
   {
@@ -212,18 +234,13 @@ bool EventCategorizer::exec()
 
       if (fSaveCalibHistos)
       {
-
         CalibrationTools::selectForTOF(event, getStatistics(), fSaveControlHistos, fToTCutAnniMin, fToTCutAnniMax, fToTCutDeexMin, fToTCutDeexMax,
                                        fConstansTree);
 
-        // CalibrationTools::selectForTOF2Gamma(event, getStatistics(), fSaveControlHistos, fToTCutAnniMin, fToTCutAnniMax, fToTCutDeexMin,
-        //                                      fToTCutDeexMax, fScatterTOFTimeDiff);
-        //
-        // CalibrationTools::selectForTOF3Gamma(event, getStatistics(), fSaveControlHistos, fToTCutAnniMin, fToTCutAnniMax, fToTCutDeexMin,
-        //                                      fToTCutDeexMax, fScatterTOFTimeDiff);
-
         CalibrationTools::selectForTimeWalk(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin, fToTCutAnniMax,
                                             fSourcePos);
+
+        CalibrationTools::selectCosmicsForToF(event, getStatistics(), fSaveControlHistos, fCosmicMaxThetaDiffDeg, fDetectorYRotationDeg);
       }
 
       bool is2Gamma = EventCategorizerTools::checkFor2Gamma(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin,
@@ -511,4 +528,19 @@ void EventCategorizer::initialiseCalibrationHistograms()
                                                    "Scatter angle vs. primary-secondary time difference for pairs that were accepted for TOf synchro",
                                                    201, 0.0, 2.0 * fScatterTOFTimeDiff, 181, -0.5, 180.5),
                                           "Time diffrence [ps]", "Scatter angle");
+
+  // Cosmic ToF
+  for (int scinID = 201; scinID <= 213; ++scinID)
+  {
+    getStatistics().createHistogramWithAxes(new TH2D(Form("cosmic_tof_scin_%d", scinID),
+                                                     Form("Time of Flight between hits from scin ID %d and from layer below", scinID), 200,
+                                                     -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0, 13, 214.5, 226.5),
+                                            "Scintillator ID", "Time of Flight [ps]");
+
+    getStatistics().createHistogramWithAxes(new TH1D("cosmic_hits_z_diff_all", "Z-Position difference of two comsic hits", 120, -15.0, 15.0),
+                                            "positon diff [cm]", "Number of pairs");
+    getStatistics().createHistogramWithAxes(
+        new TH1D("cosmic_hits_z_diff_cut", "Z-Position difference of two comsic hits after angle cut", 120, -15.0, 15.0), "positon diff [cm]",
+        "Number of pairs");
+  }
 }

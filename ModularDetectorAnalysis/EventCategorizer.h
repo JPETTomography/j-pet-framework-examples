@@ -69,6 +69,9 @@ protected:
   const std::string kScatterTOFTimeDiffParamKey = "Scatter_Categorizer_TOF_TimeDiff_double";
   const std::string kMaxTimeDiffParamKey = "EventCategorizer_MaxTimeDiff_double";
 
+  const std::string kDetectorYRotation = "CalibrationTools_Detector_Y_Rotation_Degrees_double";
+  const std::string kCosmicMaxThetaDeg = "CalibrationTools_Cosmic_MatTheta_Degrees_double";
+
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kSaveCalibHistosParamKey = "Save_Calib_Histograms_bool";
 
@@ -88,6 +91,8 @@ protected:
   double fLORPosZCut = 5.0;
   double fSourceDistXYCut = 5.0;
   double fSourceDistZCut = 10.0;
+  double fDetectorYRotationDeg = 60.0;
+  double fCosmicMaxThetaDiffDeg = 3.0;
   TVector3 fSourcePos;
 
   bool fSaveControlHistos = true;
