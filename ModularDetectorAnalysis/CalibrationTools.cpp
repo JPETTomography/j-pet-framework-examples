@@ -433,14 +433,14 @@ void CalibrationTools::selectCosmicsForToF(const JPetEvent& event, JPetStatistic
         continue;
       }
 
-      auto hit1 = dynamic_cast<const JPetBaseHit*>(event.getHits().at(i));
-      auto hit2 = dynamic_cast<const JPetBaseHit*>(event.getHits().at(j));
+      auto hit1 = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(i));
+      auto hit2 = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(j));
 
       // Change the order of hits depending on layers
       if (layer1Radius < layer2Radius)
       {
-        hit1 = dynamic_cast<const JPetBaseHit*>(event.getHits().at(j));
-        hit2 = dynamic_cast<const JPetBaseHit*>(event.getHits().at(i));
+        hit1 = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(j));
+        hit2 = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(i));
       }
 
       auto test1 = false;
