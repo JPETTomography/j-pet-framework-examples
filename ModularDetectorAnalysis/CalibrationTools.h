@@ -26,7 +26,7 @@
  * Average velocity of cosmic muons at the sea level
  * http://web.mit.edu/lululiu/Public/pixx/not-pixx/muons.pdf
  */
-static const double kMuonAvVelocity_cm_ps = 0.0299792458;
+static const double kMuonAvVelocity_cm_ps = 0.0298;
 
 /**
  * @brief Tools for managing calibrations

@@ -422,19 +422,19 @@ void CalibrationTools::selectCosmicsForToF(const JPetEvent& event, JPetStatistic
   {
     for (uint j = i + 1; j < event.getHits().size(); j++)
     {
+      auto hit1 = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(i));
+      auto hit2 = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(j));
+
       // Check if hits are from different layers and assign them as upper or lower hit
-      auto layer1ID = event.getHits().at(i)->getScin().getSlot().getLayer().getID();
-      auto layer2ID = event.getHits().at(j)->getScin().getSlot().getLayer().getID();
-      auto layer1Radius = event.getHits().at(i)->getScin().getSlot().getLayer().getRadius();
-      auto layer2Radius = event.getHits().at(j)->getScin().getSlot().getLayer().getRadius();
+      auto layer1ID = hit1->getScin().getSlot().getLayer().getID();
+      auto layer2ID = hit2->getScin().getSlot().getLayer().getID();
+      auto layer1Radius = hit1->getScin().getSlot().getLayer().getRadius();
+      auto layer2Radius = hit2->getScin().getSlot().getLayer().getRadius();
 
       if (layer1ID == layer2ID)
       {
         continue;
       }
-
-      auto hit1 = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(i));
-      auto hit2 = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(j));
 
       // Change the order of hits depending on layers
       if (layer1Radius < layer2Radius)
@@ -452,7 +452,8 @@ void CalibrationTools::selectCosmicsForToF(const JPetEvent& event, JPetStatistic
       // Checknig angle in XZ plane - including detector rotation in Y
       TVector3 hit1PosXZ(hit1->getPosX(), 0.0, hit1->getPosZ());
       TVector3 hit2PosXZ(hit2->getPosX(), 0.0, hit2->getPosZ());
-      double thetaXZ = TMath::RadToDeg() * hit1PosXZ.Angle(hit2PosXZ);
+      TVector3 cosmicXZ = hit2PosXZ - hit1PosXZ;
+      double thetaXZ = TMath::RadToDeg() * cosmicXZ.Angle(vecN_X);
 
       stats.fillHistogram("cosmic_hits_theta_xz_all", thetaXZ);
       stats.fillHistogram("cosmic_hits_z_diff_all", hit2->getPosZ() - hit1->getPosZ());
@@ -466,7 +467,8 @@ void CalibrationTools::selectCosmicsForToF(const JPetEvent& event, JPetStatistic
       // Checknig angle in XZ plane - to select neighbouring strips
       TVector3 hit1PosXY(hit1->getPosX(), hit1->getPosY(), 0.0);
       TVector3 hit2PosXY(hit2->getPosX(), hit2->getPosY(), 0.0);
-      double thetaXY = TMath::RadToDeg() * hit1PosXY.Angle(hit2PosXY);
+      TVector3 cosmicXY = hit2PosXY - hit1PosXY;
+      double thetaXY = TMath::RadToDeg() * hit1PosXY.Angle(vecN_X);
 
       stats.fillHistogram("cosmic_hits_theta_xy_all", thetaXY);
       if (fabs(thetaXY) < maxThetaDiff)
