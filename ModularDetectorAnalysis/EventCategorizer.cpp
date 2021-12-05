@@ -530,33 +530,45 @@ void EventCategorizer::initialiseCalibrationHistograms()
                                           "Time diffrence [ps]", "Scatter angle");
 
   // Cosmic ToF
-  for (int scinID = 201; scinID <= 213; ++scinID)
+  for (int scinID = 201; scinID <= 226; ++scinID)
   {
     getStatistics().createHistogramWithAxes(new TH2D(Form("cosmic_tof_tdiff_scin_%d_all", scinID),
-                                                     Form("Time of Flight between hits from scin ID %d and from layer below", scinID), 13, 214.5,
+                                                     Form("Time of Flight between hits from scin ID %d and from layer below", scinID), 26, 200.5,
                                                      226.5, 200, -fMaxTimeDiff, fMaxTimeDiff),
                                             "Scintillator ID", "Time of Flight [ps]");
 
     getStatistics().createHistogramWithAxes(new TH2D(Form("cosmic_tof_tdiff_scin_%d_cut", scinID),
-                                                     Form("Time of Flight between hits from scin ID %d and from layer below", scinID), 13, 214.5,
+                                                     Form("Time of Flight between hits from scin ID %d and from layer below", scinID), 26, 200.5,
                                                      226.5, 200, -fMaxTimeDiff, fMaxTimeDiff),
                                             "Scintillator ID", "Time of Flight [ps]");
 
     getStatistics().createHistogramWithAxes(new TH2D(Form("cosmic_tof_offset_scin_%d_all", scinID),
-                                                     Form("Time of Flight between hits from scin ID %d and from layer below", scinID), 13, 214.5,
+                                                     Form("Time of Flight between hits from scin ID %d and from layer below", scinID), 13, 200.5,
                                                      226.5, 200, -fMaxTimeDiff, fMaxTimeDiff),
                                             "Scintillator ID", "Time of Flight [ps]");
 
     getStatistics().createHistogramWithAxes(new TH2D(Form("cosmic_tof_offset_scin_%d_cut", scinID),
-                                                     Form("Time of Flight between hits from scin ID %d and from layer below", scinID), 13, 214.5,
+                                                     Form("Time of Flight between hits from scin ID %d and from layer below", scinID), 13, 200.5,
                                                      226.5, 200, -fMaxTimeDiff, fMaxTimeDiff),
                                             "Scintillator ID", "Time of Flight [ps]");
   }
 
-  getStatistics().createHistogramWithAxes(new TH1D("cosmic_hits_z_diff_all", "Z-Position difference of two comsic hits", 120, -20.0, 20.0),
+  getStatistics().createHistogramWithAxes(new TH1D("cosmic_hits_x_diff_all", "X-Position difference of two comsic hits", 120, -30.0, 30.0),
                                           "positon diff [cm]", "Number of pairs");
   getStatistics().createHistogramWithAxes(
-      new TH1D("cosmic_hits_z_diff_cut", "Z-Position difference of two comsic hits after angle cut", 120, -20.0, 20.0), "positon diff [cm]",
+      new TH1D("cosmic_hits_x_diff_cut", "X-Position difference of two comsic hits after angle cut", 120, -30.0, 30.0), "positon diff [cm]",
+      "Number of pairs");
+
+  getStatistics().createHistogramWithAxes(new TH1D("cosmic_hits_z_diff_all", "Z-Position difference of two comsic hits", 120, -30.0, 30.0),
+                                          "positon diff [cm]", "Number of pairs");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("cosmic_hits_z_diff_cut", "Z-Position difference of two comsic hits after angle cut", 120, -30.0, 30.0), "positon diff [cm]",
+      "Number of pairs");
+
+  getStatistics().createHistogramWithAxes(new TH1D("cosmic_hits_y_diff_all", "Y-Position difference of two comsic hits", 120, -30.0, 30.0),
+                                          "positon diff [cm]", "Number of pairs");
+  getStatistics().createHistogramWithAxes(
+      new TH1D("cosmic_hits_y_diff_cut", "Y-Position difference of two comsic hits after angle cut", 120, -30.0, 30.0), "positon diff [cm]",
       "Number of pairs");
 
   getStatistics().createHistogramWithAxes(new TH1D("cosmic_hits_theta_xz_all", "Theta of two comsic hits", 360, 0.0, 360.0), "theta [deg]",

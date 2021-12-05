@@ -446,6 +446,8 @@ void CalibrationTools::selectCosmicsForToF(const JPetEvent& event, JPetStatistic
       auto test1 = false;
       auto test2 = false;
 
+      stats.fillHistogram("cosmic_hits_x_diff_all", hit2->getPosX() - hit1->getPosX());
+
       // Normal vector in X pointing down
       auto vecN_X = TVector3(-1.0, 0.0, 0.0);
 
@@ -471,9 +473,11 @@ void CalibrationTools::selectCosmicsForToF(const JPetEvent& event, JPetStatistic
       double thetaXY = TMath::RadToDeg() * hit1PosXY.Angle(vecN_X);
 
       stats.fillHistogram("cosmic_hits_theta_xy_all", thetaXY);
-      if (fabs(thetaXY) < maxThetaDiff)
+      stats.fillHistogram("cosmic_hits_y_diff_all", hit2->getPosY() - hit1->getPosY());
+      if (fabs(180.0 - thetaXY) < maxThetaDiff)
       {
         test2 = true;
+        stats.fillHistogram("cosmic_hits_y_diff_cut", hit2->getPosY() - hit1->getPosY());
         stats.fillHistogram("cosmic_hits_theta_xy_cut", thetaXY);
       }
 
