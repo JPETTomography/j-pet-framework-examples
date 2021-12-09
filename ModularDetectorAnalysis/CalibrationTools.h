@@ -47,7 +47,8 @@ public:
   static void selectForTimeWalk(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double maxThetaDiff, double maxTimeDiff,
                                 double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos);
 
-  static void selectCosmicsForToF(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double maxThetaDiff, double detectorYRot);
+  static void selectCosmicsForToF(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double maxThetaDiff, double detectorYRot,
+                                  double scatterTestValue);
 
   static double calculateReveresedToT(const JPetPhysRecoHit* hit);
 };

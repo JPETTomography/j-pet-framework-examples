@@ -411,7 +411,7 @@ void CalibrationTools::selectForTimeWalk(const JPetEvent& event, JPetStatistics&
  * @brief Tools for managing calibrations
  */
 void CalibrationTools::selectCosmicsForToF(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double maxThetaDiff,
-                                           double detectorYRot)
+                                           double detectorYRot, double scatterTestValue)
 {
   if (event.getHits().size() < 2)
   {
@@ -441,6 +441,12 @@ void CalibrationTools::selectCosmicsForToF(const JPetEvent& event, JPetStatistic
       {
         hit1 = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(j));
         hit2 = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(i));
+      }
+
+      // Skip if scatter
+      if (EventCategorizerTools::checkForScatter(hit1, hit2, stats, false, scatterTestValue))
+      {
+        continue;
       }
 
       auto test1 = false;
