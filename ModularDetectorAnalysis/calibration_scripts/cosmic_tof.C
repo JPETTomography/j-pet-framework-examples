@@ -67,14 +67,14 @@ void cosmic_tof(std::string fileName, std::string calibJSONFileName = "calibrati
   }
 
   TGraphErrors* offsetCorrGraph = new TGraphErrors();
-  offsetCorrGraph->SetNameTitle("peak_diff_graph", "Difference of peaks means vs. scin ID");
+  offsetCorrGraph->SetNameTitle("offset_corr_graph", "Difference of peaks means vs. scin ID");
   offsetCorrGraph->GetXaxis()->SetTitle("Scin ID");
   offsetCorrGraph->GetYaxis()->SetTitle("time diff [ps]");
   offsetCorrGraph->SetMinimum(-8000.0);
   offsetCorrGraph->SetMaximum(8000.0);
 
   TGraphErrors* offsetCorrGraphZoom = new TGraphErrors();
-  offsetCorrGraphZoom->SetNameTitle("peak_diff_graph_zoom", "Difference of peaks means vs. sci ID, smaler scale");
+  offsetCorrGraphZoom->SetNameTitle("offset_corr_graph_zoom", "Difference of peaks means vs. sci ID, smaler scale");
   offsetCorrGraphZoom->GetXaxis()->SetTitle("Scin ID");
   offsetCorrGraphZoom->GetYaxis()->SetTitle("time diff [ps]");
   offsetCorrGraphZoom->SetMinimum(-1000.0);
@@ -127,7 +127,6 @@ void cosmic_tof(std::string fileName, std::string calibJSONFileName = "calibrati
 
     if (saveResult)
     {
-      // auto name = Form("fit_result_scin_%d", calibScinID);
       auto name = Form("tof_fit_scin_%d_%d", calibScinID, iteration);
 
       TCanvas* can = new TCanvas(name, name, 1200, 800);
@@ -141,8 +140,24 @@ void cosmic_tof(std::string fileName, std::string calibJSONFileName = "calibrati
       legend->Draw("same");
 
       can->SaveAs(Form("%s/tof_corr_scin_%d_%d.png", resultDir.c_str(), calibScinID, iteration));
-      // can->SaveAs(Form("%s/tof_offset_scin_%d.png", resultDir.c_str(), calibScinID));
     }
+  }
+
+  if (saveResult)
+  {
+    TCanvas* canOffsetCorr = new TCanvas("offset_corr_graph", "offset_corr_graph", 1200, 800);
+    string rmsTitle1 = "Iteration " + to_string(iteration) + ":   RMS_X=" + to_string(offsetCorrGraph->GetRMS(1)) +
+                       "   RMS_Y=" + to_string(offsetCorrGraph->GetRMS(2));
+    offsetCorrGraph->SetTitle(rmsTitle1.c_str());
+    offsetCorrGraph->Draw("AP*");
+    canOffsetCorr->SaveAs(Form("%s/offset_corr_scin_%d.png", resultDir.c_str(), iteration));
+
+    TCanvas* canOffsetCorrZoom = new TCanvas("offset_corr_scin_zoom", "offset_corr_scin_zoom", 1200, 800);
+    string rmsTitle2 = "Iteration " + to_string(iteration) + ":   RMS_X=" + to_string(offsetCorrGraphZoom->GetRMS(1)) +
+                       "   RMS_Y=" + to_string(offsetCorrGraphZoom->GetRMS(2));
+    offsetCorrGraphZoom->SetTitle(rmsTitle2.c_str());
+    offsetCorrGraphZoom->Draw("AP*");
+    canOffsetCorrZoom->SaveAs(Form("%s/offset_corr_scin_zoom_%d.png", resultDir.c_str(), iteration));
   }
 
   // Saving tree into json file
