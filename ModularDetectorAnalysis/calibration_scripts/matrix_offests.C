@@ -73,7 +73,7 @@ void matrix_offsets(std::string fileName, std::string calibJSONFileName = "calib
       // Calculating limits for gaussian fit
       auto max = channelHisto->GetMaximumBin();
       auto nBins = channelHisto->GetNbinsX();
-      int binRange = (int)(0.1 * nBins);
+      int binRange = (int)(0.2 * nBins);
       auto low = channelHisto->GetBinCenter(max - binRange);
       auto upp = channelHisto->GetBinCenter(max + binRange);
 
