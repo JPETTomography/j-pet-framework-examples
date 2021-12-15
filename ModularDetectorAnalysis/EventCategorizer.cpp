@@ -235,7 +235,7 @@ bool EventCategorizer::exec()
       if (fSaveCalibHistos)
       {
         CalibrationTools::selectForTOF(event, getStatistics(), fSaveControlHistos, fToTCutAnniMin, fToTCutAnniMax, fToTCutDeexMin, fToTCutDeexMax,
-                                       fConstansTree);
+                                       fScatterTOFTimeDiff, fConstansTree);
 
         CalibrationTools::selectForTimeWalk(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin, fToTCutAnniMax,
                                             fSourcePos);
@@ -244,7 +244,7 @@ bool EventCategorizer::exec()
       }
 
       bool is2Gamma = EventCategorizerTools::checkFor2Gamma(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin,
-                                                            fToTCutAnniMax, fSourcePos, fConstansTree);
+                                                            fToTCutAnniMax, fSourcePos, fScatterTOFTimeDiff, fConstansTree);
 
       // Select hits for TOF calibration, if making calibraiton
 

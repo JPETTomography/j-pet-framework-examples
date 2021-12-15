@@ -25,7 +25,7 @@ using namespace std;
  * Method for determining type of event - back to back 2 gamma
  */
 bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
-                                           double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos,
+                                           double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, double scatterTestValue,
                                            boost::property_tree::ptree& calibTree)
 {
   bool isEvent2Gamma = false;
@@ -58,7 +58,7 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
       }
 
       // Skip if scatter
-      if (EventCategorizerTools::checkForScatter(firstHit, secondHit, stats, true, calibTree))
+      if (EventCategorizerTools::checkForScatter(firstHit, secondHit, stats, true, scatterTestValue, calibTree))
       {
         continue;
       }
@@ -427,8 +427,11 @@ bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const
   double testDist = fabs(dist - timeDiff * kLightVelocity_cm_ps);
   double testTime = fabs(timeDiff - dist / kLightVelocity_cm_ps);
 
-  stats.fillHistogram("scatter_test_dist", testDist);
-  stats.fillHistogram("scatter_test_time", testTime);
+  if (saveHistos)
+  {
+    stats.fillHistogram("scatter_test_dist", testDist);
+    stats.fillHistogram("scatter_test_time", testTime);
+  }
 
   if (testTime < scatterTestValue)
   {
@@ -451,7 +454,7 @@ bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const
 }
 
 bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const JPetBaseHit* scatterHit, JPetStatistics& stats, bool saveHistos,
-                                            boost::property_tree::ptree& calibTree)
+                                            double scatterTestValue, boost::property_tree::ptree& calibTree)
 {
   // Getting function parameters and time cut value from calibration file
   double p0 = calibTree.get("scatter_test.lorentz_p0", 0.0);
@@ -459,7 +462,6 @@ bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const
   double p2 = calibTree.get("scatter_test.lorentz_p2", 0.0);
   double p3 = calibTree.get("scatter_test.exp_p0", 0.0);
   double p4 = calibTree.get("scatter_test.exp_p1", 0.0);
-  double scatterTestValue = calibTree.get("scatter_test.time_cut", 1400.0);
 
   // If function parameters are null, fallback to standard scatter test method
   if (p0 == 0.0 || p1 == 0.0 || p2 == 0.0 || p3 == 0.0 || p4 == 0.0)

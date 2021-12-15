@@ -53,14 +53,15 @@ public:
                               double scatterTestValue);
 
   static bool checkForScatter(const JPetBaseHit* primaryHit, const JPetBaseHit* scatterHit, JPetStatistics& stats, bool saveHistos,
-                              boost::property_tree::ptree& calibTree);
+                              double scatterTestValue, boost::property_tree::ptree& calibTree);
 
   // Scatter test
   // static bool checkForScatter(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double scatterTestValue);
 
   // Categorizing methods
   static bool checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
-                             double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, boost::property_tree::ptree& calibTree);
+                             double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, double scatterTestValue,
+                             boost::property_tree::ptree& calibTree);
 
   static bool checkFor2Gamma(const JPetPhysRecoHit* firstHit, const JPetPhysRecoHit* secondHit, JPetStatistics& stats, bool saveHistos,
                              double maxThetaDiff, double maxTimeDiff, double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos);

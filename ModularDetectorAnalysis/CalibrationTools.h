@@ -36,7 +36,7 @@ class CalibrationTools
 
 public:
   static void selectForTOF(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double totCutAnniMin, double totCutAnniMax,
-                           double totCutDeexMin, double totCutDeexMax, boost::property_tree::ptree& calibTree);
+                           double totCutDeexMin, double totCutDeexMax, double scatterTestValue, boost::property_tree::ptree& calibTree);
 
   static void selectForTOF2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double totCutAnniMin, double totCutAnniMax,
                                  double totCutDeexMin, double totCutDeexMax, double scatterTestValue);

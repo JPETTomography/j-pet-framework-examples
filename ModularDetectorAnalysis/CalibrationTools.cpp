@@ -22,7 +22,7 @@ using namespace std;
  * Selecting pair of hits for calibrations based on ToT and Scin ID with fitted scatter test
  */
 void CalibrationTools::selectForTOF(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double totCutAnniMin, double totCutAnniMax,
-                                    double totCutDeexMin, double totCutDeexMax, boost::property_tree::ptree& calibTree)
+                                    double totCutDeexMin, double totCutDeexMax, double scatterTestValue, boost::property_tree::ptree& calibTree)
 {
   if (event.getHits().size() < 2)
   {
@@ -46,7 +46,7 @@ void CalibrationTools::selectForTOF(const JPetEvent& event, JPetStatistics& stat
       }
 
       // Skip if scatter
-      if (EventCategorizerTools::checkForScatter(hit1, hit2, stats, true, calibTree))
+      if (EventCategorizerTools::checkForScatter(hit1, hit2, stats, true, scatterTestValue, calibTree))
       {
         continue;
       }
