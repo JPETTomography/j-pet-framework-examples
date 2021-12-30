@@ -131,6 +131,7 @@ void HitFinder::saveHits(const std::vector<JPetPhysRecoHit>& hits)
       int scinID = hit.getScin().getID();
       getStatistics().fillHistogram("hits_scin", scinID, sortedHits.size());
       getStatistics().fillHistogram("hit_pos", hit.getPosZ(), hit.getPosY(), hit.getPosX());
+      getStatistics().fillHistogram("hit_z_pos_scin", scinID, hit.getPosZ());
       getStatistics().fillHistogram("hit_multi", multi);
       getStatistics().fillHistogram("hit_multi_scin", scinID, multi);
       getStatistics().fillHistogram("hit_tdiff_scin", scinID, hit.getTimeDiff());
@@ -157,6 +158,10 @@ void HitFinder::initialiseHistograms()
 
   getStatistics().createHistogramWithAxes(new TH3D("hit_pos", "Hit Position", 101, -50.5, 50.5, 101, -50.5, 50.5, 101, -50.5, 50.5), "Z [cm]",
                                           "X [cm]", "Y [cm]");
+
+  getStatistics().createHistogramWithAxes(new TH2D("hit_z_pos_scin", "Z-axis position of hits in Scintillators", maxScinID - minScinID + 1,
+                                                   minScinID - 0.5, maxScinID + 0.5, 121, -30.5, 30.5),
+                                          "Scintillator ID", "Hit z-pos [cm]");
 
   getStatistics().createHistogramWithAxes(new TH1D("hit_multi", "Number of signals from SiPMs in created hit", 12, -0.5, 11.5), "Number of Signals",
                                           "Number of Hits");
