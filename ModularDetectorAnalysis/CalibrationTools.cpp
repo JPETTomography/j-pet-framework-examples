@@ -46,7 +46,7 @@ void CalibrationTools::selectForTOF(const JPetEvent& event, JPetStatistics& stat
       }
 
       // Skip if scatter
-      if (EventCategorizerTools::checkForScatter(hit1, hit2, stats, true, scatterTestValue, calibTree))
+      if (EventCategorizerTools::checkForScatter(hit1, hit2, stats, false, scatterTestValue, calibTree))
       {
         continue;
       }
@@ -135,7 +135,7 @@ void CalibrationTools::selectForTOF2Gamma(const JPetEvent& event, JPetStatistics
       }
 
       // Skip if scatter
-      if (EventCategorizerTools::checkForScatter(hit1, hit2, stats, true, scatterTestValue))
+      if (EventCategorizerTools::checkForScatter(hit1, hit2, stats, false, scatterTestValue))
       {
         continue;
       }

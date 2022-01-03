@@ -240,7 +240,8 @@ bool EventCategorizer::exec()
         CalibrationTools::selectForTimeWalk(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin, fToTCutAnniMax,
                                             fSourcePos);
 
-        CalibrationTools::selectCosmicsForToF(event, getStatistics(), fSaveControlHistos, fCosmicMaxThetaDiffDeg, fDetectorYRotationDeg);
+        // Method evauated fot Trento setup
+        // CalibrationTools::selectCosmicsForToF(event, getStatistics(), fSaveControlHistos, fCosmicMaxThetaDiffDeg, fDetectorYRotationDeg);
       }
 
       bool is2Gamma = EventCategorizerTools::checkFor2Gamma(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin,
@@ -529,7 +530,8 @@ void EventCategorizer::initialiseCalibrationHistograms()
                                                    201, 0.0, 2.0 * fScatterTOFTimeDiff, 181, -0.5, 180.5),
                                           "Time diffrence [ps]", "Scatter angle");
 
-  // Cosmic ToF
+  // Cosmic ToF - histograms for Trento setup
+  /*
   for (int scinID = 201; scinID <= 226; ++scinID)
   {
     getStatistics().createHistogramWithAxes(new TH2D(Form("cosmic_tof_tdiff_scin_%d_all", scinID),
@@ -580,4 +582,5 @@ void EventCategorizer::initialiseCalibrationHistograms()
                                           "Number of pairs");
   getStatistics().createHistogramWithAxes(new TH1D("cosmic_hits_theta_xy_cut", "Theta of two comsic hits", 360, 0.0, 360.0), "theta [deg]",
                                           "Number of pairs");
+  */
 }

@@ -466,7 +466,7 @@ bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const
   // If function parameters are null, fallback to standard scatter test method
   if (p0 == 0.0 || p1 == 0.0 || p2 == 0.0 || p3 == 0.0 || p4 == 0.0)
   {
-    return EventCategorizerTools::checkForScatter(primaryHit, scatterHit, stats, true, scatterTestValue);
+    return EventCategorizerTools::checkForScatter(primaryHit, scatterHit, stats, saveHistos, scatterTestValue);
   }
 
   double dist = calculateDistance(primaryHit, scatterHit);
