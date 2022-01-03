@@ -30,9 +30,10 @@ Correction is applied for a B side only.
 
 Calibration between modules is done iteratively. After AB calibration events with only one photon coming from positron-electron annihilation and only one photon coming from the deexcitation of the source is selected based on the TOT values. For every event lifetme estimator is calculated as Time(AnnihilationHit) - Time(DeexcitationHit). Positron lifetime distribution is filled for two histograms - for a given scintillator ID with annihilation hit and a given scintillator ID with deexcitation hit. Correction for a given scintillator is a difference between maximum of the distribution when annihilation photon hit a given ID and maximum of the distribution when deexcitation photon hit a given ID.
 
-At the end calibration file is created according to the convention.
+At the end calibration file is created according to the convention. The calibration constants are in [ns]!
 
-When calibration is done for different effective lengths, an optimal value of the effective length can be estimated using EstimateEffectiveLength.exe.  
+When calibration is done for different effective lengths, an optimal value of the effective length can be estimated using EstimateEffectiveLength.exe.
+Note that, when changing the assumed effective length cut on the Z position also should be adjusted properly!
 
 Additional info
 --------------
@@ -47,19 +48,19 @@ Running
 ------------
 standard running as for the LargeBarrelAnalysis.
 First step of calibration:
-- running analysis till EventFinder
+- running analysis till EventFinder (in userParams - old time calibration file, ex. from RUN2)
 - hadding unk.evt.root files
-- updating calibration params file with the name of the hadded files and other options
+- updating calibration params (calibParams.json) file with the name of the hadded files (All_unk.root) and other options
 - running ./Calibrate.exe [file with calibration params (calibParams.json)] single
 
 Second step of calibration:
 - running analysis for PALSCalibrationTaks
 - hadding cal.it.root files
-- updating calibration params file with the name of the hadded files and other options
+- updating calibration params file with the name of the hadded files (All_cal.root) and other options
 - running ./Calibrate.exe [file with calibration params (calibParams.json)] multi
 
 Third step of analysis:
-- repeating the second step until corrections are lower than uncertainities
+- repeating the second step until corrections are lower than uncertainities (till uncertainty does not change drastically)
 - running ./Calibrate.exe [file with calibration params (calibParams.json)] final
 
 Additional step of analysis
