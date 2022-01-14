@@ -45,7 +45,8 @@ public:
                                  double totCutDeexMin, double totCutDeexMax, double scatterTestValue);
 
   static void selectForTimeWalk(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double maxThetaDiff, double maxTimeDiff,
-                                double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos);
+                                double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, double scatterTestValue,
+                                boost::property_tree::ptree& calibTree);
 
   static void selectCosmicsForToF(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double maxThetaDiff, double detectorYRot);
 

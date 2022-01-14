@@ -238,7 +238,7 @@ bool EventCategorizer::exec()
                                        fScatterTOFTimeDiff, fConstansTree);
 
         CalibrationTools::selectForTimeWalk(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin, fToTCutAnniMax,
-                                            fSourcePos);
+                                            fSourcePos, fScatterTOFTimeDiff, fConstansTree);
 
         // Method evauated fot Trento setup
         // CalibrationTools::selectCosmicsForToF(event, getStatistics(), fSaveControlHistos, fCosmicMaxThetaDiffDeg, fDetectorYRotationDeg);

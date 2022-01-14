@@ -319,7 +319,8 @@ void CalibrationTools::selectForTOF3Gamma(const JPetEvent& event, JPetStatistics
 }
 
 void CalibrationTools::selectForTimeWalk(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double maxThetaDiff, double maxTimeDiff,
-                                         double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos)
+                                         double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, double scatterTestValue,
+                                         boost::property_tree::ptree& calibTree)
 {
   if (event.getHits().size() < 2)
   {
@@ -337,6 +338,12 @@ void CalibrationTools::selectForTimeWalk(const JPetEvent& event, JPetStatistics&
       if (!firstHit || !secondHit)
       {
         break;
+      }
+
+      // Skip if scatter
+      if (EventCategorizerTools::checkForScatter(firstHit, secondHit, stats, false, scatterTestValue, calibTree))
+      {
+        continue;
       }
 
       auto test1 = EventCategorizerTools::checkToT(firstHit, totCutAnniMin, totCutAnniMax);
