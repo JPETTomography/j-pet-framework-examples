@@ -1,3 +1,6 @@
+#include <iostream>
+#include <fstream>
+
 #include <TTree.h>
 #include <TFile.h>
 
@@ -56,46 +59,46 @@ int convert(const std::string inputFile, const std::string outputName = "test"){
     // true annihilation point
     info->SetVtxPosition(emissionX1, emissionY1, emissionZ1);
  
-      info->SetMomentumGamma(1, 0,0,0); 
+      info->SetMomentumGamma(1, emissionX1,emissionY1, emissionZ1); // this is not a momentum, this is emission place
 
       JPetGeantScinHits *geantHitFirst = event_pack->ConstructNextHit();
 
       Int_t scintillator_id = ID1+200;  // make sure that your IDs are the same as in config file
       Double_t deposited_energy = E_dep1; // in keV!
-      Double_t hit_time = t1/1E9*1E3;         // file has time in ns, converting to ps!
+      Double_t hit_time = t1*1E3;         // here converting to ps!
 
       geantHitFirst->Fill(event_pack->GetEventNumber(), scintillator_id, 1,
                      22, // photon particle code
                      1, deposited_energy, hit_time);
-      if(coincidenceType == 1 )
-        geantHitFirst->SetGenGammaMultiplicity(2); // 2 for true, 12 for detector scatter, 102 for phantom scatter
-      else if(coincidenceType == 2)
-        geantHitFirst->SetGenGammaMultiplicity(102); // 2 for true, 12 for detector scatter, 102 for phantom scatter
-      else if(coincidenceType == 3)
-        geantHitFirst->SetGenGammaMultiplicity(12); // 2 for true, 12 for detector scatter, 102 for phantom scatter
-      else if(coincidenceType == 4)
-        geantHitFirst->SetGenGammaMultiplicity(102); // 2 for true, 12 for detector scatter, 102 for phantom scatter
+      if(coincidenceType == 1 )   // true from GATE
+        geantHitFirst->SetGenGammaMultiplicity(2); // 2 for true, 102 for detector scatter, 12 for phantom scatter
+      else if(coincidenceType == 2)  // phantom scatter from GATE
+        geantHitFirst->SetGenGammaMultiplicity(12); // 2 for true, 102 for detector scatter, 12 for phantom scatter
+      else if(coincidenceType == 3)  // detector scatter from GATE
+        geantHitFirst->SetGenGammaMultiplicity(102); // 2 for true, 102 for detector scatter, 12 for phantom scatter
+      else if(coincidenceType == 4)  // random from GATE
+        geantHitFirst->SetGenGammaMultiplicity(1002); // 2 for true, 102 for detector scatter, 12 for phantom scatter
 
       geantHitFirst->SetHitPosition(x1, y1, z1); 
 
-      info->SetMomentumGamma(2, emissionX2, emissionY2, emissionZ2); // this is second emission point, will be different in case of random coincidences than VtxPosition
+      info->SetMomentumGamma(2, emissionX2, emissionY2, emissionZ2); // this is second emission point, will be different in case of random coincidences than Momentum of first gamma
 
       JPetGeantScinHits *geantHitSecond = event_pack->ConstructNextHit();
       scintillator_id = ID2+200;
       deposited_energy = E_dep2; // in keV!
-      hit_time = t2/1E3;         // file has time in ns, converting to ps!
+      hit_time = t2*1E3;         // file has time in ns, converting to ps!
 
       geantHitSecond->Fill(event_pack->GetEventNumber(), scintillator_id, 2,
                      22, // photon particle code
                      1, deposited_energy, hit_time);
       if(coincidenceType == 1 )
-        geantHitSecond -> SetGenGammaMultiplicity(2); // 2 for true, 12 for detector scatter, 102 for phantom scatter
+        geantHitSecond -> SetGenGammaMultiplicity(2); // 2 for true, 102 for detector scatter, 12 for phantom scatter
       else if(coincidenceType == 2)
-        geantHitSecond -> SetGenGammaMultiplicity(102); // 2 for true, 12 for detector scatter, 102 for phantom scatter
+        geantHitSecond -> SetGenGammaMultiplicity(12); // 2 for true, 102 for detector scatter, 12 for phantom scatter
       else if(coincidenceType == 3)
-        geantHitSecond -> SetGenGammaMultiplicity(12); // 2 for true, 12 for detector scatter, 102 for phantom scatter
+        geantHitSecond -> SetGenGammaMultiplicity(102); // 2 for true, 102 for detector scatter, 12 for phantom scatter
       else if(coincidenceType == 4)
-        geantHitSecond -> SetGenGammaMultiplicity(102); // 2 for true, 12 for detector scatter, 102 for phantom scatter
+        geantHitSecond -> SetGenGammaMultiplicity(1002); // 2 for true, 102 for detector scatter, 12 for phantom scatter
 
       geantHitSecond->SetHitPosition(x2, y2, z2);
 
