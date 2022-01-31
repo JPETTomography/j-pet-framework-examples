@@ -33,6 +33,14 @@ static const double kUndefinedValue = 999.0;
 class EventCategorizerTools
 {
 public:
+  enum ScatterTestType
+  {
+    kSimpleParam,
+    kLorentzExponent,
+    kGaussExponent,
+    kLandauExponent
+  };
+
   // Single observable tests
   static bool checkToT(const JPetPhysRecoHit* hit, double minToT, double maxToT);
 
@@ -50,17 +58,14 @@ public:
   // static bool checkRelativeAngles(const TVector3& pos1, const TVector3& pos2, const TVector3& pos3, double minTheta, const TVector3& sourcePos);
 
   static bool checkForScatter(const JPetBaseHit* primaryHit, const JPetBaseHit* scatterHit, JPetStatistics& stats, bool saveHistos,
-                              double scatterTestValue);
-
-  static bool checkForScatter(const JPetBaseHit* primaryHit, const JPetBaseHit* scatterHit, JPetStatistics& stats, bool saveHistos,
-                              double scatterTestValue, boost::property_tree::ptree& calibTree);
+                              ScatterTestType testType, double scatterTestValue, boost::property_tree::ptree& calibTree);
 
   // Scatter test
   // static bool checkForScatter(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double scatterTestValue);
 
   // Categorizing methods
   static bool checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
-                             double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, double scatterTestValue,
+                             double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, ScatterTestType testType, double scatterTestValue,
                              boost::property_tree::ptree& calibTree);
 
   static bool checkFor2Gamma(const JPetPhysRecoHit* firstHit, const JPetPhysRecoHit* secondHit, JPetStatistics& stats, bool saveHistos,

@@ -22,7 +22,8 @@ using namespace std;
  * Selecting pair of hits for calibrations based on ToT and Scin ID with fitted scatter test
  */
 void CalibrationTools::selectForTOF(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double totCutAnniMin, double totCutAnniMax,
-                                    double totCutDeexMin, double totCutDeexMax, double scatterTestValue, boost::property_tree::ptree& calibTree)
+                                    double totCutDeexMin, double totCutDeexMax, EventCategorizerTools::ScatterTestType testType,
+                                    double scatterTestValue, boost::property_tree::ptree& calibTree)
 {
   if (event.getHits().size() < 2)
   {
@@ -46,7 +47,7 @@ void CalibrationTools::selectForTOF(const JPetEvent& event, JPetStatistics& stat
       }
 
       // Skip if scatter
-      if (EventCategorizerTools::checkForScatter(hit1, hit2, stats, false, scatterTestValue, calibTree))
+      if (EventCategorizerTools::checkForScatter(hit1, hit2, stats, false, testType, scatterTestValue, calibTree))
       {
         continue;
       }
@@ -107,220 +108,9 @@ void CalibrationTools::selectForTOF(const JPetEvent& event, JPetStatistics& stat
   }
 }
 
-/**
- * Selecting pair of hits for calibrations based on ToT and Scin ID
- */
-void CalibrationTools::selectForTOF2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double totCutAnniMin,
-                                          double totCutAnniMax, double totCutDeexMin, double totCutDeexMax, double scatterTestValue)
-{
-  if (event.getHits().size() < 2)
-  {
-    return;
-  }
-
-  for (uint i = 0; i < event.getHits().size(); i++)
-  {
-    auto hit1 = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(i));
-    if (!hit1)
-    {
-      continue;
-    }
-
-    for (uint j = i + 1; j < event.getHits().size(); j++)
-    {
-      auto hit2 = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(j));
-      if (!hit2)
-      {
-        continue;
-      }
-
-      // Skip if scatter
-      if (EventCategorizerTools::checkForScatter(hit1, hit2, stats, false, scatterTestValue))
-      {
-        continue;
-      }
-
-      auto tot1 = hit1->getToT();
-      auto tot2 = hit2->getToT();
-
-      // Checking ToT of hits to classify them as annihilation or deexcitation
-      bool anih1 = (tot1 > totCutAnniMin && tot1 < totCutAnniMax);
-      bool anih2 = (tot2 > totCutAnniMin && tot2 < totCutAnniMax);
-      bool deex1 = (tot1 > totCutDeexMin && tot1 < totCutDeexMax);
-      bool deex2 = (tot2 > totCutDeexMin && tot2 < totCutDeexMax);
-
-      // Time differences and strip ID to be assigned
-      double aTime = 0.0, dTime = 0.0;
-      int aScinID = -1, dScinID = -1;
-      TVector3 posA, posD;
-
-      if (anih1 && deex2)
-      {
-        aScinID = hit1->getScin().getID();
-        dScinID = hit2->getScin().getID();
-        aTime = hit1->getTime();
-        dTime = hit2->getTime();
-        posA = hit1->getPos();
-        posD = hit2->getPos();
-      }
-      else if (anih2 && deex1)
-      {
-        aScinID = hit2->getScin().getID();
-        dScinID = hit1->getScin().getID();
-        aTime = hit2->getTime();
-        dTime = hit1->getTime();
-        posA = hit2->getPos();
-        posD = hit1->getPos();
-      }
-      else
-      {
-        continue;
-      }
-
-      // Filling histograms for specific scintillators
-      if (saveCalibHistos && aScinID != -1 && dScinID != -1)
-      {
-        stats.fillHistogram("tdiff_anni_scin", aScinID, aTime - dTime);
-        stats.fillHistogram("tdiff_deex_scin", dScinID, aTime - dTime);
-
-        // if (!EventCategorizerTools::checkForScatter(hit1, hit2, stats, true, scatterTestValue))
-        // {
-        //   stats.fillHistogram("tdiff_anni_scin_scat", aScinID, aTime - dTime);
-        //   stats.fillHistogram("tdiff_deex_scin_scat", dScinID, aTime - dTime);
-        // }
-      }
-    }
-  }
-}
-
-void CalibrationTools::selectForTOF3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double totCutAnniMin,
-                                          double totCutAnniMax, double totCutDeexMin, double totCutDeexMax, double scatterTestValue)
-{
-  if (event.getHits().size() < 3)
-  {
-    return;
-  }
-
-  for (uint i = 0; i < event.getHits().size(); i++)
-  {
-    auto hit1 = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(i));
-    if (!hit1)
-    {
-      continue;
-    }
-
-    for (uint j = i + 1; j < event.getHits().size(); j++)
-    {
-      auto hit2 = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(j));
-      if (!hit2)
-      {
-        continue;
-      }
-
-      // Skip if scatter
-      // if (EventCategorizerTools::checkForScatter(hit1, hit2, stats, true, scatterTestValue))
-      // {
-      //   continue;
-      // }
-
-      for (uint k = j + 1; k < event.getHits().size(); k++)
-      {
-        auto hit3 = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(k));
-        if (!hit3)
-        {
-          continue;
-        }
-
-        // Skip if scatter
-        // if (EventCategorizerTools::checkForScatter(hit2, hit3, stats, true, scatterTestValue))
-        // {
-        //   continue;
-        // }
-
-        auto tot1 = hit1->getToT();
-        auto tot2 = hit2->getToT();
-        auto tot3 = hit3->getToT();
-
-        // Checking ToT of hits to classify them as annihilation or deexcitation
-        bool anih1 = (tot1 > totCutAnniMin && tot1 < totCutAnniMax);
-        bool anih2 = (tot2 > totCutAnniMin && tot2 < totCutAnniMax);
-        bool anih3 = (tot3 > totCutAnniMin && tot3 < totCutAnniMax);
-        bool deex1 = (tot1 > totCutDeexMin && tot1 < totCutDeexMax);
-        bool deex2 = (tot2 > totCutDeexMin && tot2 < totCutDeexMax);
-        bool deex3 = (tot3 > totCutDeexMin && tot3 < totCutDeexMax);
-
-        // Time differences and strip ID to be assigned
-        double a1Time = 0.0, a2Time = 0.0, dTime = 0.0;
-        int a1ScinID = -1, a2ScinID, dScinID = -1;
-        TVector3 posA1, posA2, posD;
-
-        if (anih1 && anih2 && deex3)
-        {
-          a1ScinID = hit1->getScin().getID();
-          a2ScinID = hit2->getScin().getID();
-          dScinID = hit3->getScin().getID();
-          a1Time = hit1->getTime();
-          a2Time = hit2->getTime();
-          dTime = hit3->getTime();
-          posA1 = hit1->getPos();
-          posA2 = hit2->getPos();
-          posD = hit3->getPos();
-        }
-        else if (anih1 && anih3 && deex2)
-        {
-          a1ScinID = hit1->getScin().getID();
-          a2ScinID = hit3->getScin().getID();
-          dScinID = hit2->getScin().getID();
-          a1Time = hit1->getTime();
-          a2Time = hit3->getTime();
-          dTime = hit2->getTime();
-          posA1 = hit1->getPos();
-          posA2 = hit3->getPos();
-          posD = hit2->getPos();
-        }
-        else if (anih2 && anih3 && deex1)
-        {
-          a1ScinID = hit2->getScin().getID();
-          a2ScinID = hit3->getScin().getID();
-          dScinID = hit1->getScin().getID();
-          a1Time = hit2->getTime();
-          a2Time = hit3->getTime();
-          dTime = hit1->getTime();
-          posA1 = hit2->getPos();
-          posA2 = hit3->getPos();
-          posD = hit1->getPos();
-        }
-        else
-        {
-          continue;
-        }
-
-        // Filling histograms for specific scintillators
-        if (saveCalibHistos && a1ScinID != -1 && a2ScinID != -1 && dScinID != -1)
-        {
-          stats.fillHistogram("tdiff_anni_scin_3g", a1ScinID, a1Time - dTime);
-          stats.fillHistogram("tdiff_anni_scin_3g", a2ScinID, a2Time - dTime);
-          stats.fillHistogram("tdiff_deex_scin_3g", dScinID, a1Time - dTime);
-          stats.fillHistogram("tdiff_deex_scin_3g", dScinID, a2Time - dTime);
-
-          if (!EventCategorizerTools::checkForScatter(hit1, hit2, stats, false, scatterTestValue) &&
-              !EventCategorizerTools::checkForScatter(hit2, hit3, stats, false, scatterTestValue) &&
-              !EventCategorizerTools::checkForScatter(hit1, hit3, stats, false, scatterTestValue))
-          {
-            stats.fillHistogram("tdiff_anni_scin_3g_scat", a1ScinID, a1Time - dTime);
-            stats.fillHistogram("tdiff_anni_scin_3g_scat", a2ScinID, a2Time - dTime);
-            stats.fillHistogram("tdiff_deex_scin_3g_scat", dScinID, a1Time - dTime);
-            stats.fillHistogram("tdiff_deex_scin_3g_scat", dScinID, a2Time - dTime);
-          }
-        }
-      }
-    }
-  }
-}
-
 void CalibrationTools::selectForTimeWalk(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double maxThetaDiff, double maxTimeDiff,
-                                         double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, double scatterTestValue,
-                                         boost::property_tree::ptree& calibTree)
+                                         double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, EventCategorizerTools::ScatterTestType testType,
+                                         double scatterTestValue, boost::property_tree::ptree& calibTree)
 {
   if (event.getHits().size() < 2)
   {
@@ -341,7 +131,7 @@ void CalibrationTools::selectForTimeWalk(const JPetEvent& event, JPetStatistics&
       }
 
       // Skip if scatter
-      if (EventCategorizerTools::checkForScatter(firstHit, secondHit, stats, false, scatterTestValue, calibTree))
+      if (EventCategorizerTools::checkForScatter(firstHit, secondHit, stats, false, testType, scatterTestValue, calibTree))
       {
         continue;
       }

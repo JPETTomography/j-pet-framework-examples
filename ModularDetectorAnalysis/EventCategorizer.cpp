@@ -155,6 +155,28 @@ bool EventCategorizer::init()
     boost::property_tree::read_json(getOptionAsString(fParams.getOptions(), kConstantsFileParamKey), fConstansTree);
   }
 
+  // Set the type of scatter test - default is simple parameter cut
+  if (isOptionSet(fParams.getOptions(), kScatterTestTypeParamKey))
+  {
+    auto type = getOptionAsString(fParams.getOptions(), kScatterTestTypeParamKey);
+    if (type == "simple_param")
+    {
+      fTestType = EventCategorizerTools::kSimpleParam;
+    }
+    else if (type == "lorentz_expo")
+    {
+      fTestType = EventCategorizerTools::kLorentzExponent;
+    }
+    else if (type == "gaus_expo")
+    {
+      fTestType = EventCategorizerTools::kGaussExponent;
+    }
+    else if (type == "landau_expo")
+    {
+      fTestType = EventCategorizerTools::kLandauExponent;
+    }
+  }
+
   if (isOptionSet(fParams.getOptions(), kScatterTOFTimeDiffParamKey))
   {
     fScatterTOFTimeDiff = getOptionAsDouble(fParams.getOptions(), kScatterTOFTimeDiffParamKey);
@@ -235,17 +257,17 @@ bool EventCategorizer::exec()
       if (fSaveCalibHistos)
       {
         CalibrationTools::selectForTOF(event, getStatistics(), fSaveControlHistos, fToTCutAnniMin, fToTCutAnniMax, fToTCutDeexMin, fToTCutDeexMax,
-                                       fScatterTOFTimeDiff, fConstansTree);
+                                       fTestType, fScatterTOFTimeDiff, fConstansTree);
 
         CalibrationTools::selectForTimeWalk(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin, fToTCutAnniMax,
-                                            fSourcePos, fScatterTOFTimeDiff, fConstansTree);
+                                            fSourcePos, fTestType, fScatterTOFTimeDiff, fConstansTree);
 
         // Method evauated fot Trento setup
         // CalibrationTools::selectCosmicsForToF(event, getStatistics(), fSaveControlHistos, fCosmicMaxThetaDiffDeg, fDetectorYRotationDeg);
       }
 
       bool is2Gamma = EventCategorizerTools::checkFor2Gamma(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin,
-                                                            fToTCutAnniMax, fSourcePos, fScatterTOFTimeDiff, fConstansTree);
+                                                            fToTCutAnniMax, fSourcePos, fTestType, fScatterTOFTimeDiff, fConstansTree);
 
       // Select hits for TOF calibration, if making calibraiton
 

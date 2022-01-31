@@ -16,6 +16,7 @@
 #ifndef CALIBRATIONTOOLS_H
 #define CALIBRATIONTOOLS_H
 
+#include "EventCategorizerTools.h"
 #include <Hits/JPetPhysRecoHit/JPetPhysRecoHit.h>
 #include <JPetEvent/JPetEvent.h>
 #include <JPetStatistics/JPetStatistics.h>
@@ -36,17 +37,12 @@ class CalibrationTools
 
 public:
   static void selectForTOF(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double totCutAnniMin, double totCutAnniMax,
-                           double totCutDeexMin, double totCutDeexMax, double scatterTestValue, boost::property_tree::ptree& calibTree);
-
-  static void selectForTOF2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double totCutAnniMin, double totCutAnniMax,
-                                 double totCutDeexMin, double totCutDeexMax, double scatterTestValue);
-
-  static void selectForTOF3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double totCutAnniMin, double totCutAnniMax,
-                                 double totCutDeexMin, double totCutDeexMax, double scatterTestValue);
+                           double totCutDeexMin, double totCutDeexMax, EventCategorizerTools::ScatterTestType testType, double scatterTestValue,
+                           boost::property_tree::ptree& calibTree);
 
   static void selectForTimeWalk(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double maxThetaDiff, double maxTimeDiff,
-                                double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, double scatterTestValue,
-                                boost::property_tree::ptree& calibTree);
+                                double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, EventCategorizerTools::ScatterTestType testType,
+                                double scatterTestValue, boost::property_tree::ptree& calibTree);
 
   static void selectCosmicsForToF(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double maxThetaDiff, double detectorYRot);
 

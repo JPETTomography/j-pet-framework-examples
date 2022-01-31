@@ -15,6 +15,7 @@
 
 #include "EventCategorizerTools.h"
 #include <Hits/JPetPhysRecoHit/JPetPhysRecoHit.h>
+#include <Math/DistFunc.h>
 #include <TMath.h>
 #include <TRandom.h>
 #include <vector>
@@ -25,8 +26,8 @@ using namespace std;
  * Method for determining type of event - back to back 2 gamma
  */
 bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
-                                           double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, double scatterTestValue,
-                                           boost::property_tree::ptree& calibTree)
+                                           double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, ScatterTestType testType,
+                                           double scatterTestValue, boost::property_tree::ptree& calibTree)
 {
   bool isEvent2Gamma = false;
   if (event.getHits().size() < 2)
@@ -58,7 +59,7 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
       }
 
       // Skip if scatter
-      if (EventCategorizerTools::checkForScatter(firstHit, secondHit, stats, true, scatterTestValue, calibTree))
+      if (EventCategorizerTools::checkForScatter(firstHit, secondHit, stats, true, testType, scatterTestValue, calibTree))
       {
         continue;
       }
@@ -419,55 +420,9 @@ bool EventCategorizerTools::checkRelativeAngles(const TVector3& pos1, const TVec
  * Checking if pair of hits meet scattering condition
  */
 bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const JPetBaseHit* scatterHit, JPetStatistics& stats, bool saveHistos,
-                                            double scatterTestValue)
+                                            ScatterTestType testType, double scatterTestValue, boost::property_tree::ptree& calibTree)
 {
-  double dist = calculateDistance(primaryHit, scatterHit);
-  double timeDiff = scatterHit->getTime() - primaryHit->getTime();
-
-  double testDist = fabs(dist - timeDiff * kLightVelocity_cm_ps);
-  double testTime = fabs(timeDiff - dist / kLightVelocity_cm_ps);
-
-  if (saveHistos)
-  {
-    stats.fillHistogram("scatter_test_dist", testDist);
-    stats.fillHistogram("scatter_test_time", testTime);
-  }
-
-  if (testTime < scatterTestValue)
-  {
-    if (saveHistos)
-    {
-      stats.fillHistogram("scatter_test_pass", testTime);
-      auto scatAngle = primaryHit->getPos().Angle(scatterHit->getPos());
-      stats.fillHistogram("scatter_angle_time", scatterHit->getTime() - primaryHit->getTime(), scatAngle);
-    }
-    return true;
-  }
-  else
-  {
-    if (saveHistos)
-    {
-      stats.fillHistogram("scatter_test_fail", testTime);
-    }
-    return false;
-  }
-}
-
-bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const JPetBaseHit* scatterHit, JPetStatistics& stats, bool saveHistos,
-                                            double scatterTestValue, boost::property_tree::ptree& calibTree)
-{
-  // Getting function parameters and time cut value from calibration file
-  double p0 = calibTree.get("scatter_test.lorentz_p0", 0.0);
-  double p1 = calibTree.get("scatter_test.lorentz_p1", 0.0);
-  double p2 = calibTree.get("scatter_test.lorentz_p2", 0.0);
-  double p3 = calibTree.get("scatter_test.exp_p0", 0.0);
-  double p4 = calibTree.get("scatter_test.exp_p1", 0.0);
-
-  // If function parameters are null, fallback to standard scatter test method
-  if (p0 == 0.0 || p1 == 0.0 || p2 == 0.0 || p3 == 0.0 || p4 == 0.0)
-  {
-    return EventCategorizerTools::checkForScatter(primaryHit, scatterHit, stats, saveHistos, scatterTestValue);
-  }
+  bool isScatter = false;
 
   double dist = calculateDistance(primaryHit, scatterHit);
   double timeDiff = scatterHit->getTime() - primaryHit->getTime();
@@ -478,29 +433,77 @@ bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const
     stats.fillHistogram("scatter_test_time", testTime);
   }
 
-  // Getting weights for scatter test from fitted functions
-  double lorentz = (p0 / TMath::Pi()) * (pow(p1, 2) / (pow(testTime - p2, 2) + pow(p1, 2)));
-  double expo = exp(p3 + p4 * testTime);
-
-  if (gRandom->Uniform(lorentz + expo) < lorentz)
+  if (testType == EventCategorizerTools::kSimpleParam && testTime < scatterTestValue)
   {
-    // not scattered - scatter test fail
-    if (saveHistos)
+    isScatter = true;
+  }
+
+  if (testType == EventCategorizerTools::kLorentzExponent)
+  {
+    // Getting function parameters and time cut value from calibration file
+    double lor0 = calibTree.get("scatter_test.lorentz_p0", 0.0);
+    double lor1 = calibTree.get("scatter_test.lorentz_p1", 0.0);
+    double lor2 = calibTree.get("scatter_test.lorentz_p2", 0.0);
+    double exp0 = calibTree.get("scatter_test.exp_p0", 0.0);
+    double exp1 = calibTree.get("scatter_test.exp_p1", 0.0);
+
+    // Getting weights for scatter test from fitted functions
+    double lorentz = (lor0 / TMath::Pi()) * (pow(lor1, 2) / (pow(testTime - lor2, 2) + pow(lor1, 2)));
+    double expo = exp(exp0 + exp1 * testTime);
+
+    if (gRandom->Uniform(lorentz + expo) > lorentz)
+    {
+      isScatter = true;
+    }
+  }
+
+  if (testType == EventCategorizerTools::kGaussExponent)
+  {
+    double gaus0 = calibTree.get("scatter_test.gaus_p0", 0.0);
+    double gaus1 = calibTree.get("scatter_test.gaus_p1", 0.0);
+    double gaus2 = calibTree.get("scatter_test.gaus_p2", 0.0);
+    double exp0 = calibTree.get("scatter_test.exp_p0", 0.0);
+    double exp1 = calibTree.get("scatter_test.exp_p1", 0.0);
+
+    double gaus = gaus0 * exp(-0.5 * pow((testTime - gaus1) / gaus2, 2));
+    double expo = exp(exp0 + exp1 * testTime);
+
+    if (gRandom->Uniform(gaus + expo) > gaus)
+    {
+      isScatter = true;
+    }
+  }
+
+  if (testType == EventCategorizerTools::kLandauExponent)
+  {
+    double lan0 = calibTree.get("scatter_test.landau_p0", 0.0);
+    double lan1 = calibTree.get("scatter_test.landau_p1", 0.0);
+    double lan2 = calibTree.get("scatter_test.landau_p2", 0.0);
+    double exp0 = calibTree.get("scatter_test.exp_p0", 0.0);
+    double exp1 = calibTree.get("scatter_test.exp_p1", 0.0);
+
+    double landau = ROOT::Math::landau_pdf((testTime - lan1) / lan2) * lan0;
+    double expo = exp(exp0 + exp1 * testTime);
+
+    if (gRandom->Uniform(landau + expo) > landau)
+    {
+      isScatter = true;
+    }
+  }
+
+  if (saveHistos)
+  {
+    if (isScatter)
+    {
+      stats.fillHistogram("scatter_test_pass", testTime);
+    }
+    else
     {
       stats.fillHistogram("scatter_test_fail", testTime);
     }
-    return false;
   }
-  else
-  {
-    if (saveHistos)
-    {
-      stats.fillHistogram("scatter_test_pass", testTime);
-      auto scatAngle = primaryHit->getPos().Angle(scatterHit->getPos());
-      stats.fillHistogram("scatter_angle_time", scatterHit->getTime() - primaryHit->getTime(), scatAngle);
-    }
-    return true;
-  }
+
+  return isScatter;
 }
 
 /**

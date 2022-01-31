@@ -67,6 +67,7 @@ protected:
   const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
 
   const std::string kScatterTOFTimeDiffParamKey = "Scatter_Categorizer_TOF_TimeDiff_double";
+  const std::string kScatterTestTypeParamKey = "Scatter_Categorizer_TestType_std::string";
   const std::string kMaxTimeDiffParamKey = "EventCategorizer_MaxTimeDiff_double";
 
   const std::string kDetectorYRotation = "CalibrationTools_Detector_Y_Rotation_Degrees_double";
@@ -94,6 +95,7 @@ protected:
   double fDetectorYRotationDeg = 60.0;
   double fCosmicMaxThetaDiffDeg = 3.0;
   TVector3 fSourcePos;
+  EventCategorizerTools::ScatterTestType fTestType = EventCategorizerTools::kSimpleParam;
 
   bool fSaveControlHistos = true;
   bool fSaveCalibHistos = true;
