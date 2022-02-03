@@ -21,37 +21,39 @@
 #include <JPetMatrix/JPetMatrix.h>
 #include <boost/property_tree/ptree.hpp>
 #include <cstdint>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 class JPetWriter;
 
 /**
  * @brief User Task: ...
  */
-class SigMatLoader : public JPetUserTask
-{
+class SigMatLoader : public JPetUserTask {
 public:
-  SigMatLoader(const char* name);
+  SigMatLoader(const char *name);
   virtual ~SigMatLoader();
   virtual bool init() override;
   virtual bool exec() override;
   virtual bool terminate() override;
 
 protected:
-  const std::string kMergeSignalsTimeParamKey = "SigMatLoader_MergeSignalsTime_double";
+  const std::string kMergeSignalsTimeParamKey =
+      "SigMatLoader_MergeSignalsTime_double";
   const std::string kToTHistoUpperLimitParamKey = "ToTHisto_UpperLimit_double";
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kSaveCalibHistosParamKey = "Save_Calib_Histograms_bool";
   const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
-  void saveMatrixSignals(const std::vector<JPetMatrixSignal>& mtxSigVec);
+  void saveMatrixSignals(const std::vector<JPetMatrixSignal> &mtxSigVec);
   boost::property_tree::ptree fConstansTree;
   void initialiseHistograms();
   double fToTHistoUpperLimit = 200000.0;
   bool fSaveControlHistos = true;
   bool fSaveCalibHistos = false;
   double fMergingTime = 20000.0;
-  std::unordered_map<std::uint32_t, std::unordered_map<int, JPetMatrix*>> fMatrixMapping;
+  std::unordered_map<std::uint32_t, std::unordered_map<int, JPetMatrix *>>
+      fMatrixMapping;
+  std::unordered_map<int, std::unordered_map<int, JPetPM *>> fPMMapping;
 };
 
 #endif /* !SIGMATLOADER_H */
