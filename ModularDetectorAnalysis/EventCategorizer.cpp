@@ -469,7 +469,7 @@ void EventCategorizer::initialiseHistograms()
   getStatistics().createHistogramWithAxes(new TH1D("scatter_test_dist", "Scatter Test - Distance Difference", 201, 0.0, 120.0), "Dist Diff [cm]",
                                           "Number of Hit Pairs");
 
-  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_dist", "Scatter Test - Distance Difference", 201, -120.0, 120.0), "Dist Diff [cm]",
+  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_dist_2", "Scatter Test - Distance Difference", 201, -120.0, 120.0), "Dist Diff [cm]",
                                           "Number of Hit Pairs");
 
   getStatistics().createHistogramWithAxes(new TH1D("scatter_test_time", "Scatter Test - Time Difference", 201, 0.0, 10000.0), "Time Diff [ps]",
