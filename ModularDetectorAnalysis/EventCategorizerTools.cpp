@@ -427,10 +427,14 @@ bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const
   double dist = calculateDistance(primaryHit, scatterHit);
   double timeDiff = scatterHit->getTime() - primaryHit->getTime();
   double testTime = fabs(timeDiff - dist / kLightVelocity_cm_ps);
+  double testDist = fabs(dist - timeDiff * kLightVelocity_cm_ps);
 
   if (saveHistos)
   {
     stats.fillHistogram("scatter_test_time", testTime);
+    stats.fillHistogram("scatter_test_time_2", timeDiff - dist / kLightVelocity_cm_ps);
+    stats.fillHistogram("scatter_test_dist", testDist);
+    stats.fillHistogram("scatter_test_dist_2", dist - timeDiff * kLightVelocity_cm_ps);
   }
 
   if (testType == EventCategorizerTools::kSimpleParam && testTime < scatterTestValue)

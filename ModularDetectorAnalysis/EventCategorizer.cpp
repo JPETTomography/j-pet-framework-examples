@@ -466,10 +466,16 @@ void EventCategorizer::initialiseHistograms()
       "Y position [cm]");
 
   // Histograms for scattering category
-  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_dist", "Scatter Test - Distance Difference", 201, 0.0, 80.0), "Dist Diff [cm]",
+  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_dist", "Scatter Test - Distance Difference", 201, 0.0, 120.0), "Dist Diff [cm]",
+                                          "Number of Hit Pairs");
+
+  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_dist", "Scatter Test - Distance Difference", 201, -120.0, 120.0), "Dist Diff [cm]",
                                           "Number of Hit Pairs");
 
   getStatistics().createHistogramWithAxes(new TH1D("scatter_test_time", "Scatter Test - Time Difference", 201, 0.0, 10000.0), "Time Diff [ps]",
+                                          "Number of Hit Pairs");
+
+  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_time_2", "Scatter Test - Time Difference", 201, -8000.0, 8000.0), "Time Diff [ps]",
                                           "Number of Hit Pairs");
 
   getStatistics().createHistogramWithAxes(new TH1D("scatter_test_pass", "Passed Scatter Test - Time Difference", 201, 0.0, 10000.0), "Time Diff [ps]",
@@ -478,9 +484,9 @@ void EventCategorizer::initialiseHistograms()
   getStatistics().createHistogramWithAxes(new TH1D("scatter_test_fail", "Failed Scatter Test - Time Difference", 201, 0.0, 10000.0), "Time Diff [ps]",
                                           "Number of Hit Pairs");
 
-  getStatistics().createHistogramWithAxes(
-      new TH2D("scatter_angle_time", "Scatter angle vs. primary-secondary time difference", 201, 0.0, 2.0 * fScatterTOFTimeDiff, 181, -0.5, 180.5),
-      "Time diffrence [ps]", "Scatter angle");
+  // getStatistics().createHistogramWithAxes(
+  //     new TH2D("scatter_angle_time", "Scatter angle vs. primary-secondary time difference", 201, 0.0, 10000, 91, -0.5, 90.5), "Time diffrence
+  //     [ps]", "Scatter angle");
 }
 
 void EventCategorizer::initialiseCalibrationHistograms()

@@ -96,21 +96,15 @@ void CalibrationTools::selectForTOF(const JPetEvent& event, JPetStatistics& stat
       {
         stats.fillHistogram("tdiff_anni_scin", aScinID, tdiff);
         stats.fillHistogram("tdiff_deex_scin", dScinID, tdiff);
-
-        double scatterTestValue = calibTree.get("scatter_test.time_cut", 1400.0);
-        if (tdiff < scatterTestValue)
-        {
-          auto scatAngle = hit1->getPos().Angle(hit2->getPos());
-          stats.fillHistogram("scatter_angle_time_cut", tdiff, scatAngle);
-        }
       }
     }
   }
 }
 
 void CalibrationTools::selectForTimeWalk(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double maxThetaDiff, double maxTimeDiff,
-                                         double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, EventCategorizerTools::ScatterTestType testType,
-                                         double scatterTestValue, boost::property_tree::ptree& calibTree)
+                                         double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos,
+                                         EventCategorizerTools::ScatterTestType testType, double scatterTestValue,
+                                         boost::property_tree::ptree& calibTree)
 {
   if (event.getHits().size() < 2)
   {
