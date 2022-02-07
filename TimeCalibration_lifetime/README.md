@@ -40,6 +40,8 @@ Additional info
 Report is available on petwiki
 petwiki/images/2/2f/Calibration_Report_11_12.pdf
 
+Read the PARAMETERS.md file first, if you have any doubts about the parameters in the calibParams.json and effLenParams.json files.
+
 Compiling 
 ------------
 make
