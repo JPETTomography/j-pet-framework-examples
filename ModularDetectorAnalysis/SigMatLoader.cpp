@@ -19,7 +19,6 @@
 #include <Signals/JPetMatrixSignal/JPetMatrixSignal.h>
 #include <Signals/JPetPMSignal/JPetPMSignal.h>
 #include <algorithm>
-#include <bits/stdint-uintn.h>
 #include <boost/property_tree/json_parser.hpp>
 #include <utility>
 

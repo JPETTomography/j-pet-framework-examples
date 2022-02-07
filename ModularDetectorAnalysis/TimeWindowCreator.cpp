@@ -21,7 +21,6 @@
 #include <JPetWriter/JPetWriter.h>
 #include <Signals/JPetChannelSignal/JPetChannelSignal.h>
 #include <TRandom.h>
-#include <bits/stdint-uintn.h>
 #include <boost/property_tree/json_parser.hpp>
 
 #include <iostream>
