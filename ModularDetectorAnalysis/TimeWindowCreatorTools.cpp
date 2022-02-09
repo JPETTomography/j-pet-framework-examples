@@ -26,45 +26,6 @@ void TimeWindowCreatorTools::sortByTime(vector<JPetChannelSignal>& input)
 }
 
 /**
- * Building all Channel Signals from one TDC
- */
-vector<JPetChannelSignal> TimeWindowCreatorTools::buildChannelSignals(TDCChannel* tdcChannel, const JPetChannel& channel, double maxTime,
-                                                                      double minTime, boost::property_tree::ptree& calibTree)
-{
-  vector<JPetChannelSignal> allChSigs;
-
-  // Getting offsets for this channel
-  // if calibrations are empty then default vaule is 0.0
-  double offset = calibTree.get("channel_offests." + to_string(channel.getID()), 0.0);
-
-  // Loop over all entries on leading edge in current TDCChannel and create ChSig
-  for (int j = 0; j < tdcChannel->GetLeadHitsNum(); j++)
-  {
-    auto leadTime = tdcChannel->GetLeadTime(j);
-    if (leadTime > maxTime || leadTime < minTime)
-    {
-      continue;
-    }
-    auto leadChSig = generateChannelSignal(leadTime, channel, JPetChannelSignal::Leading, offset);
-    allChSigs.push_back(leadChSig);
-  }
-
-  // Loop over all entries on trailing edge in current TDCChannel and create ChSig
-  for (int j = 0; j < tdcChannel->GetTrailHitsNum(); j++)
-  {
-    auto trailTime = tdcChannel->GetTrailTime(j);
-    if (trailTime > maxTime || trailTime < minTime)
-    {
-      continue;
-    }
-    auto trailChSig = generateChannelSignal(trailTime, channel, JPetChannelSignal::Trailing, offset);
-    allChSigs.push_back(trailChSig);
-  }
-
-  return allChSigs;
-}
-
-/**
  * Method for investigation of repetated edges - setting RecoFlag for each ChSig.
  * ChSigs are flagged as GOOD if they appear in the sequence LTLTLTLT ->
  * in other words, each found LT pair is marked as GOOD. If sequence of one type of
