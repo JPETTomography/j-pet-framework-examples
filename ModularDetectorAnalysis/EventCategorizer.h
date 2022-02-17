@@ -67,6 +67,8 @@ protected:
   const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
 
   const std::string kScatterTOFTimeDiffParamKey = "Scatter_Categorizer_TOF_TimeDiff_double";
+  const std::string kScatterTestMinParamKey = "Scatter_Test_Min_double";
+  const std::string kScatterTestMaxParamKey = "Scatter_Test_Max_double";
   const std::string kScatterTestTypeParamKey = "Scatter_Categorizer_TestType_std::string";
   const std::string kMaxTimeDiffParamKey = "EventCategorizer_MaxTimeDiff_double";
 
@@ -80,6 +82,8 @@ protected:
 
   boost::property_tree::ptree fConstansTree;
   double fScatterTOFTimeDiff = 2000.0;
+  double fScatterTestMin = 0.0;
+  double fScatterTestMax = 3000.0;
   double fMaxTimeDiff = 15000.0;
   double f2gThetaDiff = 3.0;
   double f2gTimeDiff = 2000.0;
