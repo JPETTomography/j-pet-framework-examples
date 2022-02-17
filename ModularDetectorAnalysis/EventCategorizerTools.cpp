@@ -433,6 +433,7 @@ bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const
   double testTimeAbs = fabs(testTimeRel);
   double testDistRel = timeDiff * kLightVelocity_cm_ps - dist;
   double testDistAbs = fabs(testDistRel);
+  double scatterAngle = calculateScatteringAngle(primaryHit, scatterHit);
 
   if (saveHistos)
   {
@@ -440,6 +441,9 @@ bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const
     stats.fillHistogram("scatter_test_time_abs", testTimeAbs);
     stats.fillHistogram("scatter_test_dist_rel", testDistRel);
     stats.fillHistogram("scatter_test_dist_abs", testDistAbs);
+
+    stats.fillHistogram("scatter_angle_time", testTimeRel, scatterAngle);
+    stats.fillHistogram("scatter_angle_time_small", testTimeRel, scatterAngle);
   }
 
   if (testType == EventCategorizerTools::kSimpleParam && testTimeAbs < scatterTestValue)
