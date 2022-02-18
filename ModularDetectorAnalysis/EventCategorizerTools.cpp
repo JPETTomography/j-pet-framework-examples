@@ -27,8 +27,8 @@ using namespace std;
  */
 bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
                                            double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, ScatterTestType testType,
-                                           double scatterTestValue, double scatterTestMin, double scatterTestMax,
-                                           boost::property_tree::ptree& calibTree)
+                                           double scatterTestValue, double scatterTimeMin, double scatterTimeMax, double scatterAngleMin,
+                                           double scatterAngleMax, boost::property_tree::ptree& calibTree)
 {
   bool isEvent2Gamma = false;
   if (event.getHits().size() < 2)
@@ -60,8 +60,8 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
       }
 
       // Skip if scatter
-      if (EventCategorizerTools::checkForScatter(firstHit, secondHit, stats, true, testType, scatterTestValue, scatterTestMin, scatterTestMax,
-                                                 calibTree))
+      if (EventCategorizerTools::checkForScatter(firstHit, secondHit, stats, true, testType, scatterTestValue, scatterTimeMin, scatterTimeMax,
+                                                 scatterAngleMin, scatterAngleMax, calibTree))
       {
         continue;
       }
@@ -422,8 +422,8 @@ bool EventCategorizerTools::checkRelativeAngles(const TVector3& pos1, const TVec
  * Checking if pair of hits meet scattering condition
  */
 bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const JPetBaseHit* scatterHit, JPetStatistics& stats, bool saveHistos,
-                                            ScatterTestType testType, double scatterTestValue, double scatterTestMin, double scatterTestMax,
-                                            boost::property_tree::ptree& calibTree)
+                                            ScatterTestType testType, double scatterTestValue, double scatterTimeMin, double scatterTimeMax,
+                                            double scatterAngleMin, double scatterAngleMax, boost::property_tree::ptree& calibTree)
 {
   bool isScatter = false;
 
@@ -451,7 +451,8 @@ bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const
     isScatter = true;
   }
 
-  if (testType == EventCategorizerTools::kMinMaxParams && testTimeRel > scatterTestMin, testTimeRel < scatterTestMax)
+  if (testType == EventCategorizerTools::kMinMaxParams && testTimeRel > scatterTimeMin && testTimeRel < scatterTimeMax &&
+      scatterAngle > scatterAngleMin && scatterAngle < scatterAngleMax)
   {
     isScatter = true;
   }

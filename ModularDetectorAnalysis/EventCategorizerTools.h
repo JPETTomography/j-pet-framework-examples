@@ -59,8 +59,8 @@ public:
   // static bool checkRelativeAngles(const TVector3& pos1, const TVector3& pos2, const TVector3& pos3, double minTheta, const TVector3& sourcePos);
 
   static bool checkForScatter(const JPetBaseHit* primaryHit, const JPetBaseHit* scatterHit, JPetStatistics& stats, bool saveHistos,
-                              ScatterTestType testType, double scatterTestValue, double scatterTestMin, double scatterTestMax,
-                              boost::property_tree::ptree& calibTree);
+                              ScatterTestType testType, double scatterTestValue, double scatterTimeMin, double scatterTimeMax, double scatterAngleMin,
+                              double scatterAngleMax, boost::property_tree::ptree& calibTree);
 
   // Scatter test
   // static bool checkForScatter(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double scatterTestValue);
@@ -68,7 +68,8 @@ public:
   // Categorizing methods
   static bool checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
                              double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, ScatterTestType testType, double scatterTestValue,
-                             double scatterTestMin, double scatterTestMax, boost::property_tree::ptree& calibTree);
+                             double scatterTimeMin, double scatterTimeMax, double scatterAngleMin, double scatterAngleMax,
+                             boost::property_tree::ptree& calibTree);
 
   static bool checkFor2Gamma(const JPetPhysRecoHit* firstHit, const JPetPhysRecoHit* secondHit, JPetStatistics& stats, bool saveHistos,
                              double maxThetaDiff, double maxTimeDiff, double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos);

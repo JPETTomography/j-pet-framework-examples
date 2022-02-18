@@ -23,7 +23,8 @@ using namespace std;
  */
 void CalibrationTools::selectForTOF(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double totCutAnniMin, double totCutAnniMax,
                                     double totCutDeexMin, double totCutDeexMax, EventCategorizerTools::ScatterTestType testType,
-                                    double scatterTestValue, double scatterTestMin, double scatterTestMax, boost::property_tree::ptree& calibTree)
+                                    double scatterTestValue, double scatterTimeMin, double scatterTimeMax, double scatterAngleMin,
+                                    double scatterAngleMax, boost::property_tree::ptree& calibTree)
 {
   if (event.getHits().size() < 2)
   {
@@ -47,7 +48,8 @@ void CalibrationTools::selectForTOF(const JPetEvent& event, JPetStatistics& stat
       }
 
       // Skip if scatter
-      if (EventCategorizerTools::checkForScatter(hit1, hit2, stats, false, testType, scatterTestValue, scatterTestMin, scatterTestMax, calibTree))
+      if (EventCategorizerTools::checkForScatter(hit1, hit2, stats, false, testType, scatterTestValue, scatterTimeMin, scatterTimeMax,
+                                                 scatterAngleMin, scatterAngleMax, calibTree))
       {
         continue;
       }
@@ -103,8 +105,9 @@ void CalibrationTools::selectForTOF(const JPetEvent& event, JPetStatistics& stat
 
 void CalibrationTools::selectForTimeWalk(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double maxThetaDiff, double maxTimeDiff,
                                          double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos,
-                                         EventCategorizerTools::ScatterTestType testType, double scatterTestValue, double scatterTestMin,
-                                         double scatterTestMax, boost::property_tree::ptree& calibTree)
+                                         EventCategorizerTools::ScatterTestType testType, double scatterTestValue, double scatterTimeMin,
+                                         double scatterTimeMax, double scatterAngleMin, double scatterAngleMax,
+                                         boost::property_tree::ptree& calibTree)
 {
   if (event.getHits().size() < 2)
   {
@@ -125,8 +128,8 @@ void CalibrationTools::selectForTimeWalk(const JPetEvent& event, JPetStatistics&
       }
 
       // Skip if scatter
-      if (EventCategorizerTools::checkForScatter(firstHit, secondHit, stats, false, testType, scatterTestValue, scatterTestMin, scatterTestMax,
-                                                 calibTree))
+      if (EventCategorizerTools::checkForScatter(firstHit, secondHit, stats, false, testType, scatterTestValue, scatterTimeMin, scatterTimeMax,
+                                                 scatterAngleMin, scatterAngleMax, calibTree))
       {
         continue;
       }

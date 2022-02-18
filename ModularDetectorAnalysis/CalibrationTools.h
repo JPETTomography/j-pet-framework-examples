@@ -38,12 +38,13 @@ class CalibrationTools
 public:
   static void selectForTOF(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double totCutAnniMin, double totCutAnniMax,
                            double totCutDeexMin, double totCutDeexMax, EventCategorizerTools::ScatterTestType testType, double scatterTestValue,
-                           double scatterTestMin, double scatterTestMax, boost::property_tree::ptree& calibTree);
+                           double scatterTimeMin, double scatterTimeMax, double scatterAngleMin, double scatterAngleMax,
+                           boost::property_tree::ptree& calibTree);
 
   static void selectForTimeWalk(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double maxThetaDiff, double maxTimeDiff,
                                 double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos,
-                                EventCategorizerTools::ScatterTestType testType, double scatterTestValue, double scatterTestMin,
-                                double scatterTestMax, boost::property_tree::ptree& calibTree);
+                                EventCategorizerTools::ScatterTestType testType, double scatterTestValue, double scatterTimeMin,
+                                double scatterTimeMax, double scatterAngleMin, double scatterAngleMax, boost::property_tree::ptree& calibTree);
 
   static void selectCosmicsForToF(const JPetEvent& event, JPetStatistics& stats, bool saveCalibHistos, double maxThetaDiff, double detectorYRot);
 

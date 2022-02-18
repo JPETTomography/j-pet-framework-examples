@@ -185,13 +185,23 @@ bool EventCategorizer::init()
   {
     fScatterTOFTimeDiff = getOptionAsDouble(fParams.getOptions(), kScatterTOFTimeDiffParamKey);
   }
-  if (isOptionSet(fParams.getOptions(), kScatterTestMinParamKey))
+
+  if (isOptionSet(fParams.getOptions(), kScatterTimeMinParamKey))
   {
-    fScatterTestMin = getOptionAsDouble(fParams.getOptions(), kScatterTestMinParamKey);
+    fScatterTimeMin = getOptionAsDouble(fParams.getOptions(), kScatterTimeMinParamKey);
   }
-  if (isOptionSet(fParams.getOptions(), kScatterTestMaxParamKey))
+  if (isOptionSet(fParams.getOptions(), kScatterTimeMaxParamKey))
   {
-    fScatterTestMax = getOptionAsDouble(fParams.getOptions(), kScatterTestMaxParamKey);
+    fScatterTimeMax = getOptionAsDouble(fParams.getOptions(), kScatterTimeMaxParamKey);
+  }
+
+  if (isOptionSet(fParams.getOptions(), kScatterAngleMinParamKey))
+  {
+    fScatterAngleMin = getOptionAsDouble(fParams.getOptions(), kScatterAngleMinParamKey);
+  }
+  if (isOptionSet(fParams.getOptions(), kScatterAngleMaxParamKey))
+  {
+    fScatterAngleMax = getOptionAsDouble(fParams.getOptions(), kScatterAngleMaxParamKey);
   }
 
   // Time variable used as +- axis limits for histograms with time spectra
@@ -264,18 +274,20 @@ bool EventCategorizer::exec()
       if (fSaveCalibHistos)
       {
         CalibrationTools::selectForTOF(event, getStatistics(), fSaveControlHistos, fToTCutAnniMin, fToTCutAnniMax, fToTCutDeexMin, fToTCutDeexMax,
-                                       fTestType, fScatterTOFTimeDiff, fScatterTestMin, fScatterTestMax, fConstansTree);
+                                       fTestType, fScatterTOFTimeDiff, fScatterTimeMin, fScatterTimeMax, fScatterAngleMin, fScatterAngleMax,
+                                       fConstansTree);
 
         CalibrationTools::selectForTimeWalk(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin, fToTCutAnniMax,
-                                            fSourcePos, fTestType, fScatterTOFTimeDiff, fScatterTestMin, fScatterTestMax, fConstansTree);
+                                            fSourcePos, fTestType, fScatterTOFTimeDiff, fScatterTimeMin, fScatterTimeMax, fScatterAngleMin,
+                                            fScatterAngleMax, fConstansTree);
 
         // Method evauated fot Trento setup
         // CalibrationTools::selectCosmicsForToF(event, getStatistics(), fSaveControlHistos, fCosmicMaxThetaDiffDeg, fDetectorYRotationDeg);
       }
 
-      bool is2Gamma =
-          EventCategorizerTools::checkFor2Gamma(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin, fToTCutAnniMax,
-                                                fSourcePos, fTestType, fScatterTOFTimeDiff, fScatterTestMin, fScatterTestMax, fConstansTree);
+      bool is2Gamma = EventCategorizerTools::checkFor2Gamma(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin,
+                                                            fToTCutAnniMax, fSourcePos, fTestType, fScatterTOFTimeDiff, fScatterTimeMin,
+                                                            fScatterTimeMax, fScatterAngleMin, fScatterAngleMax, fConstansTree);
 
       // Select hits for TOF calibration, if making calibraiton
 
@@ -483,7 +495,7 @@ void EventCategorizer::initialiseHistograms()
   getStatistics().createHistogramWithAxes(new TH1D("scatter_test_time_abs", "Scatter Test - Time Difference", 201, 0.0, 10000.0), "Time Diff [ps]",
                                           "Number of Hit Pairs");
 
-  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_time_rel", "Scatter Test - Time Difference", 201, -8000.0, 8000.0), "Time Diff [ps]",
+  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_time_rel", "Scatter Test - Time Difference", 201, -5000.0, 5000.0), "Time Diff [ps]",
                                           "Number of Hit Pairs");
 
   getStatistics().createHistogramWithAxes(new TH1D("scatter_test_abs_pass", "Passed Scatter Test - Time Difference", 201, 0.0, 10000.0),
@@ -492,18 +504,18 @@ void EventCategorizer::initialiseHistograms()
   getStatistics().createHistogramWithAxes(new TH1D("scatter_test_abs_fail", "Failed Scatter Test - Time Difference", 201, 0.0, 10000.0),
                                           "Time Diff [ps]", "Number of Hit Pairs");
 
-  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_rel_pass", "Passed Scatter Test - Time Difference", 201, -8000.0, 8000.0),
+  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_rel_pass", "Passed Scatter Test - Time Difference", 201, -5000.0, 5000.0),
                                           "Time Diff [ps]", "Number of Hit Pairs");
 
-  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_rel_fail", "Failed Scatter Test - Time Difference", 201, -8000.0, 8000.0),
+  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_rel_fail", "Failed Scatter Test - Time Difference", 201, -5000.0, 5000.0),
                                           "Time Diff [ps]", "Number of Hit Pairs");
 
   getStatistics().createHistogramWithAxes(
-      new TH2D("scatter_angle_time", "Scatter angle vs. scatter test measure", 201, -8000.0, 8000.0, 181, -0.5, 180.5), "Time Diff [ps]",
+      new TH2D("scatter_angle_time", "Scatter angle vs. scatter test measure", 201, -5000.0, 5000.0, 181, -0.5, 180.5), "Time Diff [ps]",
       "Scatter angle");
 
   getStatistics().createHistogramWithAxes(
-      new TH2D("scatter_angle_time_small", "Scatter angle vs. scatter test measure", 201, -8000.0, 8000.0, 31, -0.5, 30.5), "Time Diff [ps]",
+      new TH2D("scatter_angle_time_small", "Scatter angle vs. scatter test measure", 201, -5000.0, 5000.0, 41, -139.5, 180.5), "Time Diff [ps]",
       "Scatter angle");
 }
 
