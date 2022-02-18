@@ -511,11 +511,11 @@ void EventCategorizer::initialiseHistograms()
                                           "Time Diff [ps]", "Number of Hit Pairs");
 
   getStatistics().createHistogramWithAxes(
-      new TH2D("scatter_angle_time", "Scatter angle vs. scatter test measure", 201, -5000.0, 5000.0, 181, -0.5, 180.5), "Time Diff [ps]",
+      new TH2D("scatter_angle_time", "Scatter angle vs. scatter test measure", 201, -4000.0, 6000.0, 181, -0.5, 180.5), "Time Diff [ps]",
       "Scatter angle");
 
   getStatistics().createHistogramWithAxes(
-      new TH2D("scatter_angle_time_small", "Scatter angle vs. scatter test measure", 201, -5000.0, 5000.0, 41, -139.5, 180.5), "Time Diff [ps]",
+      new TH2D("scatter_angle_time_small", "Scatter angle vs. scatter test measure", 201, -4000.0, 6000.0, 41, 139.5, 180.5), "Time Diff [ps]",
       "Scatter angle");
 }
 
