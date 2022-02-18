@@ -517,11 +517,13 @@ bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const
     {
       stats.fillHistogram("scatter_test_rel_pass", testTimeRel);
       stats.fillHistogram("scatter_test_abs_pass", testTimeAbs);
+      stats.fillHistogram("scatter_angle_time_pass", testTimeRel, scatterAngle);
     }
     else
     {
       stats.fillHistogram("scatter_test_rel_fail", testTimeRel);
       stats.fillHistogram("scatter_test_abs_fail", testTimeAbs);
+      stats.fillHistogram("scatter_angle_time_fail", testTimeRel, scatterAngle);
     }
   }
 
