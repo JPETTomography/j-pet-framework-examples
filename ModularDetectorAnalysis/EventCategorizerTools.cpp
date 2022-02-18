@@ -452,10 +452,12 @@ bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const
   }
 
   // Here the logic is reversed, parameters select non-scattering pairs, in order to test cuts on scatter angle/time histogram
-  if (testType == EventCategorizerTools::kMinMaxParams && testTimeRel > scatterTimeMin && testTimeRel < scatterTimeMax &&
-      scatterAngle > scatterAngleMin && scatterAngle < scatterAngleMax)
+  if (testType == EventCategorizerTools::kMinMaxParams)
   {
-    isScatter = false;
+    if (!(testTimeRel > scatterTimeMin && testTimeRel < scatterTimeMax && scatterAngle > scatterAngleMin && scatterAngle < scatterAngleMax))
+    {
+      isScatter = true;
+    }
   }
 
   if (testType == EventCategorizerTools::kLorentzExponent)
