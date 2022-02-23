@@ -91,6 +91,9 @@ bool TimeWindowCreator::exec() {
     for (auto &endp_data : event->fOriginalData) {
 
       unsigned int address = endp_data.first;
+      if (fChannelOffsets.count(address) == 0) {
+        continue;
+      }
       unsigned int channel_offset = fChannelOffsets.at(address);
 
       std::vector<unpacker::hit_t> &data = endp_data.second;
