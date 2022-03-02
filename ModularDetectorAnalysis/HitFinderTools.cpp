@@ -71,14 +71,14 @@ map<int, vector<JPetMatrixSignal>> HitFinderTools::getSignalsByScin(const JPetTi
 /**
  * Loop over all Scins invoking matching procedure
  */
-vector<JPetPhysRecoHit> HitFinderTools::matchAllSignals(map<int, vector<JPetMatrixSignal>>& allSignals, double timeDiffAB,
-                                                        boost::property_tree::ptree& calibTree, JPetStatistics& stats, bool saveHistos)
+vector<JPetPhysRecoHit> HitFinderTools::matchAllSignals(map<int, vector<JPetMatrixSignal>>& allSignals, double timeDiffAB, int refScinID,
+                                                        int refSlotID, boost::property_tree::ptree& calibTree, JPetStatistics& stats, bool saveHistos)
 {
   vector<JPetPhysRecoHit> allHits;
   for (auto& scinSignals : allSignals)
   {
     // Match signals for scintillators
-    auto scinHits = matchSignals(scinSignals.second, timeDiffAB, calibTree, stats, saveHistos);
+    auto scinHits = matchSignals(scinSignals.second, timeDiffAB, refScinID, refSlotID, calibTree, stats, saveHistos);
     allHits.insert(allHits.end(), scinHits.begin(), scinHits.end());
   }
   return allHits;
@@ -87,8 +87,8 @@ vector<JPetPhysRecoHit> HitFinderTools::matchAllSignals(map<int, vector<JPetMatr
 /**
  * Method matching signals on the same Scintillator
  */
-vector<JPetPhysRecoHit> HitFinderTools::matchSignals(vector<JPetMatrixSignal>& scinSignals, double timeDiffAB, boost::property_tree::ptree& calibTree,
-                                                     JPetStatistics& stats, bool saveHistos)
+vector<JPetPhysRecoHit> HitFinderTools::matchSignals(vector<JPetMatrixSignal>& scinSignals, double timeDiffAB, int refScinID, int refSlotID,
+                                                     boost::property_tree::ptree& calibTree, JPetStatistics& stats, bool saveHistos)
 {
   vector<JPetPhysRecoHit> scinHits;
   vector<JPetMatrixSignal> remainSignals;
@@ -97,6 +97,16 @@ vector<JPetPhysRecoHit> HitFinderTools::matchSignals(vector<JPetMatrixSignal>& s
   while (scinSignals.size() > 0)
   {
     auto mtxSig = scinSignals.at(0);
+
+    // Handling signals from scin/slot used as a reference detector
+    if (mtxSig.getMatrix().getScin().getID() == refScinID || mtxSig.getMatrix().getScin().getSlot().getID() == refSlotID)
+    {
+      auto refHit = createDummyHit(mtxSig);
+      scinHits.push_back(refHit);
+      scinSignals.erase(scinSignals.begin() + 0);
+      continue;
+    }
+
     if (scinSignals.size() == 1)
     {
       remainSignals.push_back(mtxSig);

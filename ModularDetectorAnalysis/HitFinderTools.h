@@ -37,10 +37,10 @@ public:
 
   static std::map<int, std::vector<JPetMatrixSignal>> getSignalsByScin(const JPetTimeWindow* timeWindow);
 
-  static std::vector<JPetPhysRecoHit> matchAllSignals(std::map<int, std::vector<JPetMatrixSignal>>& allSignals, double timeDiffAB,
-                                                      boost::property_tree::ptree& calibTree, JPetStatistics& stats, bool saveHistos);
+  static std::vector<JPetPhysRecoHit> matchAllSignals(std::map<int, std::vector<JPetMatrixSignal>>& allSignals, double timeDiffAB, int refScinID,
+                                                      int refSlotID, boost::property_tree::ptree& calibTree, JPetStatistics& stats, bool saveHistos);
 
-  static std::vector<JPetPhysRecoHit> matchSignals(std::vector<JPetMatrixSignal>& scinSignals, double timeDiffAB,
+  static std::vector<JPetPhysRecoHit> matchSignals(std::vector<JPetMatrixSignal>& scinSignals, double timeDiffAB, int refScinID, int refSlotID,
                                                    boost::property_tree::ptree& calibTree, JPetStatistics& stats, bool saveHistos);
 
   static JPetPhysRecoHit createHit(const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2, boost::property_tree::ptree& calibTree);

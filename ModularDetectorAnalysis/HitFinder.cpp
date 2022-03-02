@@ -73,6 +73,24 @@ bool HitFinder::init()
     fToTHistoUpperLimit = getOptionAsDouble(fParams.getOptions(), kToTHistoUpperLimitParamKey);
   }
 
+  // Getting IDs of reference detector (single scin or slot)
+  if (isOptionSet(fParams.getOptions(), kRefDetScinIDParamKey))
+  {
+    fRefDetScinID = getOptionAsInt(fParams.getOptions(), kRefDetScinIDParamKey);
+  }
+  else
+  {
+    INFO(Form("Using scintillator with ID %d as reference detector.", fRefDetScinID));
+  }
+  if (isOptionSet(fParams.getOptions(), kRefDetSlotIDParamKey))
+  {
+    fRefDetSlotID = getOptionAsInt(fParams.getOptions(), kRefDetSlotIDParamKey);
+  }
+  else
+  {
+    INFO(Form("Using slot with ID %d as reference detector.", fRefDetSlotID));
+  }
+
   // Control histograms
   if (fSaveControlHistos)
   {
@@ -87,7 +105,8 @@ bool HitFinder::exec()
   if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent))
   {
     auto signalsBySlot = HitFinderTools::getSignalsByScin(timeWindow);
-    auto allHits = HitFinderTools::matchAllSignals(signalsBySlot, fABTimeDiff, fConstansTree, getStatistics(), fSaveControlHistos);
+    auto allHits =
+        HitFinderTools::matchAllSignals(signalsBySlot, fABTimeDiff, fRefDetScinID, fRefDetSlotID, fConstansTree, getStatistics(), fSaveControlHistos);
     if (allHits.size() > 0)
     {
       saveHits(allHits);

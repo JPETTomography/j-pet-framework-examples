@@ -51,12 +51,16 @@ protected:
   const std::string kSaveCalibHistosParamKey = "Save_Calib_Histograms_bool";
   const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
   const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_double";
+  const std::string kRefDetScinIDParamKey = "HitFinder_RefDetScinID_int";
+  const std::string kRefDetSlotIDParamKey = "HitFinder_RefDetSlotID_int";
   boost::property_tree::ptree fConstansTree;
   double fToTHistoUpperLimit = 200000.0;
   bool fSaveControlHistos = true;
   bool fSaveCalibHistos = false;
   double fABTimeDiff = 10000.0;
   int fMinHitMultiplicity = -1;
+  int fRefDetScinID = -1;
+  int fRefDetSlotID = -1;
 };
 
 #endif /* !HITFINDER1_H */
