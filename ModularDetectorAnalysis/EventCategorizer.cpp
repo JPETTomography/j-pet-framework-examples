@@ -245,6 +245,10 @@ bool EventCategorizer::init()
   {
     fSaveCalibHistos = getOptionAsBool(fParams.getOptions(), kSaveCalibHistosParamKey);
   }
+  if (isOptionSet(fParams.getOptions(), kTrentoCalibrationParamKey))
+  {
+    fTrentoCalibHistos = getOptionAsBool(fParams.getOptions(), kTrentoCalibrationParamKey);
+  }
 
   // Input events type
   fOutputEvents = new JPetTimeWindow("JPetEvent");
@@ -273,16 +277,21 @@ bool EventCategorizer::exec()
 
       if (fSaveCalibHistos)
       {
-        CalibrationTools::selectForTOF(event, getStatistics(), fSaveControlHistos, fToTCutAnniMin, fToTCutAnniMax, fToTCutDeexMin, fToTCutDeexMax,
-                                       fTestType, fScatterTOFTimeDiff, fScatterTimeMin, fScatterTimeMax, fScatterAngleMin, fScatterAngleMax,
-                                       fConstansTree);
-
-        CalibrationTools::selectForTimeWalk(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin, fToTCutAnniMax,
-                                            fSourcePos, fTestType, fScatterTOFTimeDiff, fScatterTimeMin, fScatterTimeMax, fScatterAngleMin,
-                                            fScatterAngleMax, fConstansTree);
-
         // Method evauated fot Trento setup
-        // CalibrationTools::selectCosmicsForToF(event, getStatistics(), fSaveControlHistos, fCosmicMaxThetaDiffDeg, fDetectorYRotationDeg);
+        if (fTrentoCalibHistos)
+        {
+          CalibrationTools::selectCosmicsForToF(event, getStatistics(), fSaveControlHistos, fCosmicMaxThetaDiffDeg, fDetectorYRotationDeg);
+        }
+        else
+        {
+          CalibrationTools::selectForTOF(event, getStatistics(), fSaveControlHistos, fToTCutAnniMin, fToTCutAnniMax, fToTCutDeexMin, fToTCutDeexMax,
+                                         fTestType, fScatterTOFTimeDiff, fScatterTimeMin, fScatterTimeMax, fScatterAngleMin, fScatterAngleMax,
+                                         fConstansTree);
+
+          CalibrationTools::selectForTimeWalk(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin, fToTCutAnniMax,
+                                              fSourcePos, fTestType, fScatterTOFTimeDiff, fScatterTimeMin, fScatterTimeMax, fScatterAngleMin,
+                                              fScatterAngleMax, fConstansTree);
+        }
       }
 
       bool is2Gamma = EventCategorizerTools::checkFor2Gamma(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin,
@@ -592,7 +601,6 @@ void EventCategorizer::initialiseCalibrationHistograms()
                                           "Channel ID", "Offset");
 
   // Cosmic ToF - histograms for Trento setup
-  /*
   for (int scinID = 201; scinID <= 226; ++scinID)
   {
     getStatistics().createHistogramWithAxes(new TH2D(Form("cosmic_tof_tdiff_scin_%d_all", scinID),
@@ -643,5 +651,4 @@ void EventCategorizer::initialiseCalibrationHistograms()
                                           "Number of pairs");
   getStatistics().createHistogramWithAxes(new TH1D("cosmic_hits_theta_xy_cut", "Theta of two comsic hits", 360, 0.0, 360.0), "theta [deg]",
                                           "Number of pairs");
-  */
 }

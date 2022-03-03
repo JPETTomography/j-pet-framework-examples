@@ -81,6 +81,7 @@ protected:
 
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kSaveCalibHistosParamKey = "Save_Calib_Histograms_bool";
+  const std::string kTrentoCalibrationParamKey = "Trento_Calibration_bool";
 
   void saveEvents(const std::vector<JPetEvent>& event);
 
@@ -108,7 +109,8 @@ protected:
   EventCategorizerTools::ScatterTestType fTestType = EventCategorizerTools::kSimpleParam;
 
   bool fSaveControlHistos = true;
-  bool fSaveCalibHistos = true;
+  bool fSaveCalibHistos = false;
+  bool fTrentoCalibHistos = false;
 
   void initialiseHistograms();
   void initialiseCalibrationHistograms();
