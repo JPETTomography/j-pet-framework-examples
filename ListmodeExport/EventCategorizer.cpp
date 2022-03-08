@@ -220,9 +220,9 @@ bool EventCategorizer::init()
   return true;
 }
 
-bool EventCategorizer::checkTOT(const JPetPhysRecoHit& hit){
+bool EventCategorizer::checkSingleHit(const JPetPhysRecoHit& hit){
 
-
+  // skip one or two edge strips
   int id = hit.getScin().getID() - 200;
   id = id % 13;
   if(id == 1 || id == 0 || id == 2 || id == 12
@@ -232,10 +232,14 @@ bool EventCategorizer::checkTOT(const JPetPhysRecoHit& hit){
   
   getStatistics().fillHistogram("tot_initial", hit.getEnergy()/1000.);
   
-  if(hit.getEnergy() > fToTCutAnniMin && hit.getEnergy() < fToTCutAnniMax){
-    return true;
+  if(hit.getEnergy() < fToTCutAnniMin || hit.getEnergy() > fToTCutAnniMax){
+    return false;
   }
-  return false;
+
+  // cut on |Z|
+  if( fabs(hit.getPos().Z() ) > 23.0){
+    return false;
+  }
   
   return true;
 }
@@ -257,7 +261,7 @@ bool EventCategorizer::exec()
             for(int j=0; j<nhits-1; j++){
 
               const auto& hit1 = dynamic_cast<const JPetPhysRecoHit&>(*event.getHits().at(j));
-              if(!checkTOT(hit1)){
+              if(!checkSingleHit(hit1)){
                 fIndicesToRemove.insert(j);
                 continue;
               }
@@ -265,7 +269,7 @@ bool EventCategorizer::exec()
               for(int k=j+1; k<nhits; k++){
 
                 const auto& hit2 = dynamic_cast<const JPetPhysRecoHit&>(*event.getHits().at(k));
-                if(!checkTOT(hit2)){
+                if(!checkSingleHit(hit2)){
                   fIndicesToRemove.insert(k);
                   continue;
                 }

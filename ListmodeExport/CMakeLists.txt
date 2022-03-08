@@ -17,7 +17,7 @@ endif()
 ######################################################################
 ## Project name
 ######################################################################
-set(projectName Cat)
+set(projectName ListmodeExport)
 
 ## Auxiliary files are copied to build directory after CMake
 ## You can add any files to this list
@@ -56,11 +56,3 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/${AUXILIARY_FILES} DESTINATION ${CMAKE_CUR
 add_custom_target(copy_files_${projectName} DEPENDS ${copy_depends})
 ## Add dependencies between building project and copy files
 add_dependencies(${projectBinary} copy_files_${projectName})
-
-################################################################################
-# ## Unit tests
-# option(PACKAGE_TESTS "Build the tests" ON)
-# if(PACKAGE_TESTS)
-#     enable_testing()
-#     add_subdirectory(tests)
-# endif()

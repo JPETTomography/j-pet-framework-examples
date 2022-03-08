@@ -1,4 +1,5 @@
 #include "ConvertEvents.h"
+#include <iostream>
 #include <map>
 #include <limits>
 #include "ConvertEventsTools.h"
@@ -46,12 +47,6 @@ bool ConvertEvents::exec()
       // JPet Framework is storing position in cm, but castor uses mm, so multiply position by 10
       uint32_t castor1 = ConvertEventsTools::getCastorID(firstHit.getPosX()  * 10, firstHit.getPosY()  * 10, firstHit.getPosZ()  * 10, fCastorIDs);
       uint32_t castor2 = ConvertEventsTools::getCastorID(secondHit.getPosX() * 10, secondHit.getPosY() * 10, secondHit.getPosZ() * 10, fCastorIDs);
-
-      // std::cout << "h1=[" << firstHit.getPos().X() << ", " << firstHit.getPos().Y() << ", " << firstHit.getPos().Z() << "] ";
-      // std::cout << "id1=" << castor1 <<" ";
-      // std::cout << "h2=[" << secondHit.getPos().X() << ", " << secondHit.getPos().Y() << ", " << secondHit.getPos().Z() << "] ";
-      // std::cout << "id2=" << castor2;
-      // std::cout << std::endl;
       
       fOutputStream.write(reinterpret_cast<char *>(&time), sizeof(time));
       fOutputStream.write(reinterpret_cast<char *>(&tof), sizeof(tof));

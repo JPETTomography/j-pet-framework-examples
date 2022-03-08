@@ -175,7 +175,7 @@ endif()
 ################################################################################
 ## Directories with examples
 add_subdirectory(ModularDetectorAnalysis)
-add_subdirectory(Cat)
+add_subdirectory(ListmodeExport)
 add_subdirectory(MCGeantAnalysis)
 
 #add_subdirectory(Imaging)

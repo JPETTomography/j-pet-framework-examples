@@ -77,7 +77,7 @@ protected:
   const std::string kSaveCalibHistosParamKey = "Save_Calib_Histograms_bool";
 
   void saveEvents(const std::vector<JPetEvent>& event);
-  bool checkTOT(const JPetPhysRecoHit& hit);
+  bool checkSingleHit(const JPetPhysRecoHit& hit);
   
   
   boost::property_tree::ptree fConstansTree;

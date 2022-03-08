@@ -26,6 +26,8 @@ bool ConvertEventsTools::readLUTFile(const std::string& path, int numberOfCrysta
     nb_data_read += fread(&skip,sizeof(skip),1,LUT_file);
     nb_data_read += fread(&skip,sizeof(skip),1,LUT_file);
     readedLutGeometry.push_back(std::make_tuple(x, y, z));
+    
+    //    std::cout << "[ " << x << ", " << y << ", " << z << " ]"  << std::endl;
   }
 
   // Close file
