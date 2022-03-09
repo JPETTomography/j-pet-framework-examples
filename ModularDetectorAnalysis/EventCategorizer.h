@@ -113,6 +113,6 @@ protected:
   bool fTrentoCalibHistos = false;
 
   void initialiseHistograms();
-  void initialiseCalibrationHistograms();
+  void initialiseCalibrationHistograms(bool includeTrento);
 };
 #endif /* !EVENTCATEGORIZER_H */
