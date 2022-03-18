@@ -155,9 +155,9 @@ void HitFinder::saveHits(const std::vector<JPetPhysRecoHit>& hits)
       getStatistics().fillHistogram("hit_multi_scin", scinID, multi);
       getStatistics().fillHistogram("hit_tdiff_scin", scinID, hit.getTimeDiff());
 
-      if (hit.getEnergy() != 0.0)
+      if (hit.getToT() != 0.0)
       {
-        getStatistics().fillHistogram("hit_tot_scin", scinID, hit.getEnergy());
+        getStatistics().fillHistogram("hit_tot_scin", scinID, hit.getToT());
       }
     }
   }
