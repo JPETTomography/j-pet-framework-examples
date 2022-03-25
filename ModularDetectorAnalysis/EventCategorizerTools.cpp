@@ -92,9 +92,8 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetPhysRecoHit* firstHit, cons
   // Registration time difference, always positive
   double timeDiff = fabs(firstHit->getTime() - secondHit->getTime());
 
-  // Average ToT is temporaily stored as hit energy
-  auto tot1 = firstHit->getEnergy();
-  auto tot2 = secondHit->getEnergy();
+  auto tot1 = firstHit->getToT();
+  auto tot2 = secondHit->getToT();
 
   // TOF calculated by convention
   double tof = calculateTOFByConvention(firstHit, secondHit);
