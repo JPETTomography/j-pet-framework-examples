@@ -181,14 +181,13 @@ JPetPhysRecoHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const
 
   // Getting constants for this scintillator
   double tofCorrection = calibTree.get("scin." + to_string(scin.getID()) + ".tof_correction", 0.0);
-  double tofCorrection2 = calibTree.get("scin." + to_string(scin.getID()) + ".tof_correction_2", 0.0);
   double velocity = calibTree.get("scin." + to_string(scin.getID()) + ".eff_velocity", 0.0);
 
   JPetPhysRecoHit hit;
   hit.setSignals(signalA, signalB);
   hit.setScin(scin);
 
-  hit.setTime(((signalA.getTime() + signalB.getTime()) / 2.0) - tofCorrection - tofCorrection2);
+  hit.setTime(((signalA.getTime() + signalB.getTime()) / 2.0) - tofCorrection);
   hit.setTimeDiff(signalB.getTime() - signalA.getTime());
 
   // ToT of a signal is a average of ToT of AB signals
