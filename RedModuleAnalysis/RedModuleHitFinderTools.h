@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2022 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -10,7 +10,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- *  @file HitFinderTools.h
+ *  @file RedModuleHitFinderTools.h
  */
 
 #ifndef HITFINDERTOOLS_H
@@ -24,11 +24,11 @@
 #include <vector>
 
 /**
- * @brief Tools set fot HitFinder module
+ * @brief Tools set fot RedModuleHitFinder module
  *
  * Tols include methods of signal mapping and matching, helpers of sorting
  */
-class HitFinderTools
+class RedModuleHitFinderTools
 {
 public:
   static void sortByTime(std::vector<JPetMatrixSignal>& signals);
@@ -37,10 +37,10 @@ public:
 
   static std::map<int, std::vector<JPetMatrixSignal>> getSignalsByScin(const JPetTimeWindow* timeWindow);
 
-  static std::vector<JPetPhysRecoHit> matchAllSignals(std::map<int, std::vector<JPetMatrixSignal>>& allSignals, double timeDiffAB,
-                                                      boost::property_tree::ptree& calibTree, JPetStatistics& stats, bool saveHistos);
+  static std::vector<JPetPhysRecoHit> matchAllSignals(std::map<int, std::vector<JPetMatrixSignal>>& allSignals, double timeDiffAB, int refScinID,
+                                                      int refSlotID, boost::property_tree::ptree& calibTree, JPetStatistics& stats, bool saveHistos);
 
-  static std::vector<JPetPhysRecoHit> matchSignals(std::vector<JPetMatrixSignal>& scinSignals, double timeDiffAB,
+  static std::vector<JPetPhysRecoHit> matchSignals(std::vector<JPetMatrixSignal>& scinSignals, double timeDiffAB, int refScinID, int refSlotID,
                                                    boost::property_tree::ptree& calibTree, JPetStatistics& stats, bool saveHistos);
 
   static JPetPhysRecoHit createHit(const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2, boost::property_tree::ptree& calibTree);

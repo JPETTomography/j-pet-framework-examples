@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2022 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -10,11 +10,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file HitFinder.h
+ *  @file RedModuleHitFinder.h
  */
 
-#ifndef HITFINDER1_H
-#define HITFINDER1_H
+#ifndef REDMODULEHITFINDER_H
+#define REDMODULEHITFINDER_H
 
 #include <Hits/JPetPhysRecoHit/JPetPhysRecoHit.h>
 #include <JPetUserTask/JPetUserTask.h>
@@ -32,12 +32,12 @@ class JPetWriter;
  * of Signals, time window for hit matching can be specified in user options,
  * default one is provided. Matching method is contained in tools class.
  */
-class HitFinder : public JPetUserTask
+class RedModuleHitFinder : public JPetUserTask
 {
 
 public:
-  HitFinder(const char* name);
-  virtual ~HitFinder();
+  RedModuleHitFinder(const char* name);
+  virtual ~RedModuleHitFinder();
   virtual bool init() override;
   virtual bool exec() override;
   virtual bool terminate() override;
@@ -45,18 +45,22 @@ public:
 protected:
   void saveHits(const std::vector<JPetPhysRecoHit>& hits);
   void initialiseHistograms();
-  const std::string kMinHitMultiDiffParamKey = "HitFinder_MinHitMultiplicity_int";
+  const std::string kMinHitMultiDiffParamKey = "RedModuleHitFinder_MinHitMultiplicity_int";
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kToTHistoUpperLimitParamKey = "ToTHisto_UpperLimit_double";
   const std::string kSaveCalibHistosParamKey = "Save_Calib_Histograms_bool";
   const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
-  const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_double";
+  const std::string kABTimeDiffParamKey = "RedModuleHitFinder_ABTimeDiff_double";
+  const std::string kRefDetScinIDParamKey = "RedModuleHitFinder_RefDetScinID_int";
+  const std::string kRefDetSlotIDParamKey = "RedModuleHitFinder_RefDetSlotID_int";
   boost::property_tree::ptree fConstansTree;
   double fToTHistoUpperLimit = 200000.0;
   bool fSaveControlHistos = true;
   bool fSaveCalibHistos = false;
   double fABTimeDiff = 10000.0;
   int fMinHitMultiplicity = -1;
+  int fRefDetScinID = -1;
+  int fRefDetSlotID = -1;
 };
 
-#endif /* !HITFINDER1_H */
+#endif /* !REDMODULEHITFINDER_H */

@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2022 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -10,12 +10,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- *  @file HitFinderTools.cpp
+ *  @file RedModuleHitFinderTools.cpp
  */
 
 using namespace std;
 
-#include "HitFinderTools.h"
+#include "RedModuleHitFinderTools.h"
 #include <TMath.h>
 #include <cmath>
 #include <map>
@@ -24,7 +24,7 @@ using namespace std;
 /**
  * Helper method for sotring signals in vector
  */
-void HitFinderTools::sortByTime(vector<JPetMatrixSignal>& sigVec)
+void RedModuleHitFinderTools::sortByTime(vector<JPetMatrixSignal>& sigVec)
 {
   sort(sigVec.begin(), sigVec.end(), [](const JPetMatrixSignal& sig1, const JPetMatrixSignal& sig2) { return sig1.getTime() < sig2.getTime(); });
 }
@@ -32,7 +32,7 @@ void HitFinderTools::sortByTime(vector<JPetMatrixSignal>& sigVec)
 /**
  * Helper method for sotring hits in vector
  */
-void HitFinderTools::sortByTime(std::vector<JPetPhysRecoHit>& hitsVec)
+void RedModuleHitFinderTools::sortByTime(std::vector<JPetPhysRecoHit>& hitsVec)
 {
   sort(hitsVec.begin(), hitsVec.end(), [](const JPetPhysRecoHit& hit1, const JPetPhysRecoHit& hit2) { return hit1.getTime() < hit2.getTime(); });
 }
@@ -40,7 +40,7 @@ void HitFinderTools::sortByTime(std::vector<JPetPhysRecoHit>& hitsVec)
 /**
  * Method distributing Signals according to Scintillator they belong to
  */
-map<int, vector<JPetMatrixSignal>> HitFinderTools::getSignalsByScin(const JPetTimeWindow* timeWindow)
+map<int, vector<JPetMatrixSignal>> RedModuleHitFinderTools::getSignalsByScin(const JPetTimeWindow* timeWindow)
 {
   map<int, vector<JPetMatrixSignal>> signalScinMap;
   if (!timeWindow)
@@ -71,14 +71,15 @@ map<int, vector<JPetMatrixSignal>> HitFinderTools::getSignalsByScin(const JPetTi
 /**
  * Loop over all Scins invoking matching procedure
  */
-vector<JPetPhysRecoHit> HitFinderTools::matchAllSignals(map<int, vector<JPetMatrixSignal>>& allSignals, double timeDiffAB,
-                                                        boost::property_tree::ptree& calibTree, JPetStatistics& stats, bool saveHistos)
+vector<JPetPhysRecoHit> RedModuleHitFinderTools::matchAllSignals(map<int, vector<JPetMatrixSignal>>& allSignals, double timeDiffAB, int refScinID,
+                                                                 int refSlotID, boost::property_tree::ptree& calibTree, JPetStatistics& stats,
+                                                                 bool saveHistos)
 {
   vector<JPetPhysRecoHit> allHits;
   for (auto& scinSignals : allSignals)
   {
     // Match signals for scintillators
-    auto scinHits = matchSignals(scinSignals.second, timeDiffAB, calibTree, stats, saveHistos);
+    auto scinHits = matchSignals(scinSignals.second, timeDiffAB, refScinID, refSlotID, calibTree, stats, saveHistos);
     allHits.insert(allHits.end(), scinHits.begin(), scinHits.end());
   }
   return allHits;
@@ -87,8 +88,8 @@ vector<JPetPhysRecoHit> HitFinderTools::matchAllSignals(map<int, vector<JPetMatr
 /**
  * Method matching signals on the same Scintillator
  */
-vector<JPetPhysRecoHit> HitFinderTools::matchSignals(vector<JPetMatrixSignal>& scinSignals, double timeDiffAB, boost::property_tree::ptree& calibTree,
-                                                     JPetStatistics& stats, bool saveHistos)
+vector<JPetPhysRecoHit> RedModuleHitFinderTools::matchSignals(vector<JPetMatrixSignal>& scinSignals, double timeDiffAB, int refScinID, int refSlotID,
+                                                              boost::property_tree::ptree& calibTree, JPetStatistics& stats, bool saveHistos)
 {
   vector<JPetPhysRecoHit> scinHits;
   vector<JPetMatrixSignal> remainSignals;
@@ -97,6 +98,15 @@ vector<JPetPhysRecoHit> HitFinderTools::matchSignals(vector<JPetMatrixSignal>& s
   while (scinSignals.size() > 0)
   {
     auto mtxSig = scinSignals.at(0);
+
+    // Handling signals from scin/slot used as a reference detector
+    if (mtxSig.getMatrix().getScin().getID() == refScinID || mtxSig.getMatrix().getScin().getSlot().getID() == refSlotID)
+    {
+      auto refHit = createDummyHit(mtxSig);
+      scinHits.push_back(refHit);
+      scinSignals.erase(scinSignals.begin() + 0);
+      continue;
+    }
 
     if (scinSignals.size() == 1)
     {
@@ -152,7 +162,8 @@ vector<JPetPhysRecoHit> HitFinderTools::matchSignals(vector<JPetMatrixSignal>& s
 /**
  * Method for Hit creation - setting all fields that make sense here
  */
-JPetPhysRecoHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2, boost::property_tree::ptree& calibTree)
+JPetPhysRecoHit RedModuleHitFinderTools::createHit(const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2,
+                                                   boost::property_tree::ptree& calibTree)
 {
   JPetMatrixSignal signalA;
   JPetMatrixSignal signalB;
@@ -187,7 +198,11 @@ JPetPhysRecoHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const
   double totNormB = calibTree.get("scin." + to_string(scin.getID()) + ".tot_factor_b", 0.0);
   hit.setToT(tot * totNormA + totNormB);
 
-  TVector3 position(scin.getCenterX(), scin.getCenterY(), velocity * hit.getTimeDiff() / 2.0);
+  double x_pos = scin.getCenterX();
+  double y_pos = (scin.getSlot().getLayer().getRadius() + scin.getHeight() / 2.0) * TMath::Cos(TMath::DegToRad() * scin.getSlot().getTheta());
+  double z_pos = velocity * hit.getTimeDiff() / 2.0;
+  TVector3 position(x_pos, y_pos, z_pos);
+
   // Rotation of position vector according to configuration settings
   // Converting value from file in degrees to radians
   position.RotateX(TMath::DegToRad() * scin.getRotationX());
@@ -210,11 +225,11 @@ JPetPhysRecoHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const
 /**
  * Method for a dummy Hit creation, setting only some necessary fields.
  */
-JPetPhysRecoHit HitFinderTools::createDummyHit(const JPetMatrixSignal& signal)
+JPetPhysRecoHit RedModuleHitFinderTools::createDummyHit(const JPetMatrixSignal& signal)
 {
   JPetPhysRecoHit hit;
-  JPetMatrixSignal dummy;
-  hit.setSignalA(dummy);
+  // JPetMatrixSignal dummy;
+  // hit.setSignalA(dummy);
   hit.setSignalB(signal);
   hit.setTime(signal.getTime());
   hit.setTimeDiff(0.0);

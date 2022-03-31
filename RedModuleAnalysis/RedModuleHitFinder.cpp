@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2022 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -10,11 +10,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file HitFinder.cpp
+ *  @file RedModuleHitFinder.cpp
  */
 
-#include "HitFinder.h"
-#include "HitFinderTools.h"
+#include "RedModuleHitFinder.h"
+#include "RedModuleHitFinderTools.h"
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include <JPetWriter/JPetWriter.h>
 #include <boost/property_tree/json_parser.hpp>
@@ -24,11 +24,11 @@
 
 using namespace jpet_options_tools;
 
-HitFinder::HitFinder(const char* name) : JPetUserTask(name) {}
+RedModuleHitFinder::RedModuleHitFinder(const char* name) : JPetUserTask(name) {}
 
-HitFinder::~HitFinder() {}
+RedModuleHitFinder::~RedModuleHitFinder() {}
 
-bool HitFinder::init()
+bool RedModuleHitFinder::init()
 {
   INFO("Hit finding Started");
   fOutputEvents = new JPetTimeWindow("JPetPhysRecoHit");
@@ -72,6 +72,24 @@ bool HitFinder::init()
     fToTHistoUpperLimit = getOptionAsDouble(fParams.getOptions(), kToTHistoUpperLimitParamKey);
   }
 
+  // Getting IDs of reference detector (single scin or slot)
+  if (isOptionSet(fParams.getOptions(), kRefDetScinIDParamKey))
+  {
+    fRefDetScinID = getOptionAsInt(fParams.getOptions(), kRefDetScinIDParamKey);
+  }
+  else
+  {
+    INFO(Form("Using scintillator with ID %d as reference detector.", fRefDetScinID));
+  }
+  if (isOptionSet(fParams.getOptions(), kRefDetSlotIDParamKey))
+  {
+    fRefDetSlotID = getOptionAsInt(fParams.getOptions(), kRefDetSlotIDParamKey);
+  }
+  else
+  {
+    INFO(Form("Using slot with ID %d as reference detector.", fRefDetSlotID));
+  }
+
   // Control histograms
   if (fSaveControlHistos)
   {
@@ -81,12 +99,13 @@ bool HitFinder::init()
   return true;
 }
 
-bool HitFinder::exec()
+bool RedModuleHitFinder::exec()
 {
   if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent))
   {
-    auto signalsBySlot = HitFinderTools::getSignalsByScin(timeWindow);
-    auto allHits = HitFinderTools::matchAllSignals(signalsBySlot, fABTimeDiff, fConstansTree, getStatistics(), fSaveControlHistos);
+    auto signalsBySlot = RedModuleHitFinderTools::getSignalsByScin(timeWindow);
+    auto allHits =
+        RedModuleHitFinderTools::matchAllSignals(signalsBySlot, fABTimeDiff, fRefDetScinID, fRefDetSlotID, fConstansTree, getStatistics(), fSaveControlHistos);
     if (allHits.size() > 0)
     {
       saveHits(allHits);
@@ -99,16 +118,16 @@ bool HitFinder::exec()
   return true;
 }
 
-bool HitFinder::terminate()
+bool RedModuleHitFinder::terminate()
 {
   INFO("Hit finding ended");
   return true;
 }
 
-void HitFinder::saveHits(const std::vector<JPetPhysRecoHit>& hits)
+void RedModuleHitFinder::saveHits(const std::vector<JPetPhysRecoHit>& hits)
 {
   auto sortedHits = hits;
-  HitFinderTools::sortByTime(sortedHits);
+  RedModuleHitFinderTools::sortByTime(sortedHits);
 
   if (fSaveControlHistos)
   {
@@ -143,7 +162,7 @@ void HitFinder::saveHits(const std::vector<JPetPhysRecoHit>& hits)
   }
 }
 
-void HitFinder::initialiseHistograms()
+void RedModuleHitFinder::initialiseHistograms()
 {
   auto minScinID = getParamBank().getScins().begin()->first;
   auto maxScinID = getParamBank().getScins().rbegin()->first;

@@ -176,9 +176,9 @@ endif()
 ## Directories with examples
 add_subdirectory(ModularDetectorAnalysis)
 add_subdirectory(MCGeantAnalysis)
+add_subdirectory(RedModuleAnalysis)
 
 #add_subdirectory(Imaging)
-
 #add_subdirectory(InterfileReconstruction)
 #add_subdirectory(LargeBarrelAnalysis)
 #add_subdirectory(InterThresholdCalibration)
