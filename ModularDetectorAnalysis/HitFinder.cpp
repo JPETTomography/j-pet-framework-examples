@@ -148,7 +148,7 @@ void HitFinder::initialiseHistograms()
   auto minScinID = getParamBank().getScins().begin()->first;
   auto maxScinID = getParamBank().getScins().rbegin()->first;
 
-  getStatistics().createHistogramWithAxes(new TH1D("hits_tslot", "Number of Hits in Time Window", 60, 0.5, 60.5), "Hits in Time Slot",
+  getStatistics().createHistogramWithAxes(new TH1D("hits_tslot", "Number of Hits in Time Window", 400, 0.5, 400.5), "Hits in Time Slot",
                                           "Number of Time Slots");
 
   getStatistics().createHistogramWithAxes(

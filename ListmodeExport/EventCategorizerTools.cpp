@@ -15,7 +15,6 @@
 
 #include "EventCategorizerTools.h"
 #include <Hits/JPetPhysRecoHit/JPetPhysRecoHit.h>
-#include <Math/DistFunc.h>
 #include <TMath.h>
 #include <TRandom.h>
 #include <vector>
@@ -26,9 +25,8 @@ using namespace std;
  * Method for determining type of event - back to back 2 gamma
  */
 bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
-                                           double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, ScatterTestType testType,
-                                           double scatterTestValue, double scatterTimeMin, double scatterTimeMax, double scatterAngleMin,
-                                           double scatterAngleMax, boost::property_tree::ptree& calibTree)
+                                           double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, double scatterTestValue,
+                                           boost::property_tree::ptree& calibTree)
 {
   bool isEvent2Gamma = false;
   if (event.getHits().size() < 2)
@@ -60,8 +58,7 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
       }
 
       // Skip if scatter
-      if (EventCategorizerTools::checkForScatter(firstHit, secondHit, stats, true, testType, scatterTestValue, scatterTimeMin, scatterTimeMax,
-                                                 scatterAngleMin, scatterAngleMax, calibTree))
+      if (EventCategorizerTools::checkForScatter(firstHit, secondHit, stats, true, scatterTestValue, calibTree))
       {
         continue;
       }
@@ -92,8 +89,9 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetPhysRecoHit* firstHit, cons
   // Registration time difference, always positive
   double timeDiff = fabs(firstHit->getTime() - secondHit->getTime());
 
-  auto tot1 = firstHit->getToT();
-  auto tot2 = secondHit->getToT();
+  // Average ToT is temporaily stored as hit energy
+  auto tot1 = firstHit->getEnergy();
+  auto tot2 = secondHit->getEnergy();
 
   // TOF calculated by convention
   double tof = calculateTOFByConvention(firstHit, secondHit);
@@ -131,6 +129,9 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetPhysRecoHit* firstHit, cons
 
     stats.fillHistogram("cut_stats_none", scin1ID);
     stats.fillHistogram("cut_stats_none", scin2ID);
+
+    stats.fillHistogram("2g_angle_tof", tof, theta);
+
   }
 
   // Checking selection conditions
@@ -220,6 +221,9 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetPhysRecoHit* firstHit, cons
     stats.fillHistogram("ap_xy_zoom", annhilationPoint.X(), annhilationPoint.Y());
     stats.fillHistogram("ap_zx_zoom", annhilationPoint.Z(), annhilationPoint.X());
     stats.fillHistogram("ap_zy_zoom", annhilationPoint.Z(), annhilationPoint.Y());
+
+    if(fabs(annhilationPoint.Z()) < 2.0)
+      stats.fillHistogram("ap_xy_zoom_z0", annhilationPoint.X(), annhilationPoint.Y());
   }
   // Returning event as 2 gamma if meets cut conditions
   if (totCut && tDiffCut && thetaCut2)
@@ -421,114 +425,88 @@ bool EventCategorizerTools::checkRelativeAngles(const TVector3& pos1, const TVec
  * Checking if pair of hits meet scattering condition
  */
 bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const JPetBaseHit* scatterHit, JPetStatistics& stats, bool saveHistos,
-                                            ScatterTestType testType, double scatterTestValue, double scatterTimeMin, double scatterTimeMax,
-                                            double scatterAngleMin, double scatterAngleMax, boost::property_tree::ptree& calibTree)
+                                            double scatterTestValue)
 {
-  bool isScatter = false;
+  double dist = calculateDistance(primaryHit, scatterHit);
+  double timeDiff = scatterHit->getTime() - primaryHit->getTime();
+
+  double testDist = fabs(dist - timeDiff * kLightVelocity_cm_ps);
+  double testTime = fabs(timeDiff - dist / kLightVelocity_cm_ps);
+
+  if (saveHistos)
+  {
+    stats.fillHistogram("scatter_test_dist", testDist);
+    stats.fillHistogram("scatter_test_time", testTime);
+  }
+
+  if (testTime < scatterTestValue)
+  {
+    if (saveHistos)
+    {
+      stats.fillHistogram("scatter_test_pass", testTime);
+      auto scatAngle = primaryHit->getPos().Angle(scatterHit->getPos());
+      stats.fillHistogram("scatter_angle_time", scatterHit->getTime() - primaryHit->getTime(), scatAngle);
+    }
+    return true;
+  }
+  else
+  {
+    if (saveHistos)
+    {
+      stats.fillHistogram("scatter_test_fail", testTime);
+    }
+    return false;
+  }
+}
+
+bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const JPetBaseHit* scatterHit, JPetStatistics& stats, bool saveHistos,
+                                            double scatterTestValue, boost::property_tree::ptree& calibTree)
+{
+  // Getting function parameters and time cut value from calibration file
+  double p0 = calibTree.get("scatter_test.lorentz_p0", 0.0);
+  double p1 = calibTree.get("scatter_test.lorentz_p1", 0.0);
+  double p2 = calibTree.get("scatter_test.lorentz_p2", 0.0);
+  double p3 = calibTree.get("scatter_test.exp_p0", 0.0);
+  double p4 = calibTree.get("scatter_test.exp_p1", 0.0);
+
+  // If function parameters are null, fallback to standard scatter test method
+  if (p0 == 0.0 || p1 == 0.0 || p2 == 0.0 || p3 == 0.0 || p4 == 0.0)
+  {
+    return EventCategorizerTools::checkForScatter(primaryHit, scatterHit, stats, saveHistos, scatterTestValue);
+  }
 
   double dist = calculateDistance(primaryHit, scatterHit);
   double timeDiff = scatterHit->getTime() - primaryHit->getTime();
-  double testTimeRel = timeDiff - dist / kLightVelocity_cm_ps;
-  double testTimeAbs = fabs(testTimeRel);
-  double testDistRel = timeDiff * kLightVelocity_cm_ps - dist;
-  double testDistAbs = fabs(testDistRel);
-  double scatterAngle = calculateScatteringAngle(primaryHit, scatterHit);
+  double testTime = fabs(timeDiff - dist / kLightVelocity_cm_ps);
 
   if (saveHistos)
   {
-    stats.fillHistogram("scatter_test_time_rel", testTimeRel);
-    stats.fillHistogram("scatter_test_time_abs", testTimeAbs);
-    stats.fillHistogram("scatter_test_dist_rel", testDistRel);
-    stats.fillHistogram("scatter_test_dist_abs", testDistAbs);
-
-    stats.fillHistogram("scatter_angle_time", testTimeRel, scatterAngle);
-    stats.fillHistogram("scatter_angle_time_small", testTimeRel, scatterAngle);
+    stats.fillHistogram("scatter_test_time", testTime);
   }
 
-  if (testType == EventCategorizerTools::kSimpleParam && testTimeAbs < scatterTestValue)
+  // Getting weights for scatter test from fitted functions
+  double lorentz = (p0 / TMath::Pi()) * (pow(p1, 2) / (pow(testTime - p2, 2) + pow(p1, 2)));
+  double expo = exp(p3 + p4 * testTime);
+
+  if (gRandom->Uniform(lorentz + expo) < lorentz)
   {
-    isScatter = true;
+    // not scattered - scatter test fail
+    if (saveHistos)
+    {
+      stats.fillHistogram("scatter_test_fail", testTime);
+    }
+    return false;
   }
-
-  // Here the logic is reversed, parameters select non-scattering pairs, in order to test cuts on scatter angle/time histogram
-  if (testType == EventCategorizerTools::kMinMaxParams)
+  else
   {
-    if (!(testTimeRel > scatterTimeMin && testTimeRel < scatterTimeMax && scatterAngle > scatterAngleMin && scatterAngle < scatterAngleMax))
+    if (saveHistos)
     {
-      isScatter = true;
+      stats.fillHistogram("scatter_test_pass", testTime);
+      auto scatAngle = primaryHit->getPos().Angle(scatterHit->getPos());
+      stats.fillHistogram("scatter_angle_time", scatterHit->getTime() - primaryHit->getTime(), scatAngle);
     }
+    return true;
   }
-
-  if (testType == EventCategorizerTools::kLorentzExponent)
-  {
-    // Getting function parameters and time cut value from calibration file
-    double lor0 = calibTree.get("scatter_test.lorentz_p0", 0.0);
-    double lor1 = calibTree.get("scatter_test.lorentz_p1", 0.0);
-    double lor2 = calibTree.get("scatter_test.lorentz_p2", 0.0);
-    double exp0 = calibTree.get("scatter_test.exp_p0", 0.0);
-    double exp1 = calibTree.get("scatter_test.exp_p1", 0.0);
-
-    // Getting weights for scatter test from fitted functions
-    double lorentz = (lor0 / TMath::Pi()) * (pow(lor1, 2) / (pow(testTimeAbs - lor2, 2) + pow(lor1, 2)));
-    double expo = exp(exp0 + exp1 * testTimeAbs);
-
-    if (gRandom->Uniform(lorentz + expo) > lorentz)
-    {
-      isScatter = true;
-    }
-  }
-
-  if (testType == EventCategorizerTools::kGaussExponent)
-  {
-    double gaus0 = calibTree.get("scatter_test.gaus_p0", 0.0);
-    double gaus1 = calibTree.get("scatter_test.gaus_p1", 0.0);
-    double gaus2 = calibTree.get("scatter_test.gaus_p2", 0.0);
-    double exp0 = calibTree.get("scatter_test.exp_p0", 0.0);
-    double exp1 = calibTree.get("scatter_test.exp_p1", 0.0);
-
-    double gaus = gaus0 * exp(-0.5 * pow((testTimeAbs - gaus1) / gaus2, 2));
-    double expo = exp(exp0 + exp1 * testTimeAbs);
-
-    if (gRandom->Uniform(gaus + expo) > gaus)
-    {
-      isScatter = true;
-    }
-  }
-
-  if (testType == EventCategorizerTools::kLandauExponent)
-  {
-    double lan0 = calibTree.get("scatter_test.landau_p0", 0.0);
-    double lan1 = calibTree.get("scatter_test.landau_p1", 0.0);
-    double lan2 = calibTree.get("scatter_test.landau_p2", 0.0);
-    double exp0 = calibTree.get("scatter_test.exp_p0", 0.0);
-    double exp1 = calibTree.get("scatter_test.exp_p1", 0.0);
-
-    double landau = ROOT::Math::landau_pdf((testTimeAbs - lan1) / lan2) * lan0;
-    double expo = exp(exp0 + exp1 * testTimeAbs);
-
-    if (gRandom->Uniform(landau + expo) > landau)
-    {
-      isScatter = true;
-    }
-  }
-
-  if (saveHistos)
-  {
-    if (isScatter)
-    {
-      stats.fillHistogram("scatter_test_rel_pass", testTimeRel);
-      stats.fillHistogram("scatter_test_abs_pass", testTimeAbs);
-      stats.fillHistogram("scatter_angle_time_pass", testTimeRel, scatterAngle);
-    }
-    else
-    {
-      stats.fillHistogram("scatter_test_rel_fail", testTimeRel);
-      stats.fillHistogram("scatter_test_abs_fail", testTimeAbs);
-      stats.fillHistogram("scatter_angle_time_fail", testTimeRel, scatterAngle);
-    }
-  }
-
-  return isScatter;
 }
 
 /**

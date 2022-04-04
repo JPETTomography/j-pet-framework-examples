@@ -21,6 +21,7 @@
 #include <JPetUserTask/JPetUserTask.h>
 #include <Signals/JPetChannelSignal/JPetChannelSignal.h>
 #include <boost/property_tree/ptree.hpp>
+#include <cstdint>
 #include <map>
 #include <set>
 
@@ -30,21 +31,21 @@ class JPetWriter;
  * @brief User Task: translate Unpacker EventIII data to JPetTimeWindow
  *
  * Task translates data from Unpacker file fomrat - EventIII to JPetTimeWindow.
- * Parameters for start and end time can be specified in user options, default are
- * provided. Moreover time calibration and threshold values injection can be
+ * Parameters for start and end time can be specified in user options, default
+ * are provided. Moreover time calibration and threshold values injection can be
  * performed, if JSON file was provided.
  */
-class TimeWindowCreator : public JPetUserTask
-{
+class TimeWindowCreator : public JPetUserTask {
 public:
-  TimeWindowCreator(const char* name);
+  TimeWindowCreator(const char *name);
   virtual ~TimeWindowCreator();
   virtual bool init() override;
   virtual bool exec() override;
   virtual bool terminate() override;
 
 protected:
-  void saveChannelSignals(const std::vector<JPetChannelSignal>& channelSignalVec);
+  void
+  saveChannelSignals(const std::vector<JPetChannelSignal> &channelSignalVec);
   void initialiseHistograms();
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kMaxTimeParamKey = "TimeWindowCreator_MaxTime_double";
@@ -54,8 +55,13 @@ protected:
   bool fSaveControlHistos = true;
   double fMinTime = 0.0;
   double fMaxTime = 1.e6;
-  // Number for scaling some histograms, so they are not reaching their memory capacity
+  double fTimeWindowWidth = 1.e6;
+  // Number for scaling some histograms, so they are not reaching their memory
+  // capacity
   double fScalingFactor = 0.0001;
+
+  // temporary
+  std::map<std::uint32_t, int> fChannelOffsets;
 };
 
 #endif /* !TIMEWINDOWCREATOR_H */

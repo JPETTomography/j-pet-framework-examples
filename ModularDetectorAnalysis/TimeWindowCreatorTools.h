@@ -20,7 +20,6 @@
 #include "JPetParamBank/JPetParamBank.h"
 #include "JPetStatistics/JPetStatistics.h"
 #include "Signals/JPetChannelSignal/JPetChannelSignal.h"
-#include "TDCChannel.h"
 #include <boost/property_tree/ptree.hpp>
 #include <vector>
 
@@ -33,9 +32,6 @@ class TimeWindowCreatorTools
 {
 public:
   static void sortByTime(std::vector<JPetChannelSignal>& input);
-
-  static std::vector<JPetChannelSignal> buildChannelSignals(TDCChannel* tdcChannel, const JPetChannel& channel, double maxTime, double minTime,
-                                                            boost::property_tree::ptree& calibTree);
 
   static void flagChannelSignals(std::vector<JPetChannelSignal>& inputSigChs, JPetStatistics& stats, bool saveHistos);
 

@@ -190,7 +190,7 @@ void HitFinder::initialiseHistograms()
   binLabels.push_back(std::make_pair(3, "UNKNOWN"));
   getStatistics().setHistogramBinLabel("good_vs_bad_hits", getStatistics().AxisLabel::kXaxis, binLabels);
 
-  getStatistics().createHistogramWithAxes(new TH1D("hits_per_time_slot", "Number of Hits in Time Window", 100, -0.5, 99.5), "Hits in Time Slot",
+  getStatistics().createHistogramWithAxes(new TH1D("hits_per_time_slot", "Number of Hits in Time Window", 400, -0.5, 399.5), "Hits in Time Slot",
                                           "Number of Time Slots");
 
   getStatistics().createHistogramWithAxes(new TH2D("time_diff_per_scin", "Signals Time Difference per Scintillator ID", 4 * fABTimeDiff / 10,
