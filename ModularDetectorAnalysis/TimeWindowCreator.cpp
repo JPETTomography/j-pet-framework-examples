@@ -124,8 +124,8 @@ bool TimeWindowCreator::exec()
           if (fSaveControlHistos)
           {
             getStatistics().fillHistogram("wrong_channel", channelNumber);
-            continue;
           }
+          continue;
         }
 
         auto& channel = getParamBank().getChannel(channelNumber);
@@ -250,8 +250,6 @@ void TimeWindowCreator::initialiseHistograms()
   getStatistics().setHistogramBinLabel("reco_flags_chsig", getStatistics().AxisLabel::kXaxis, binLabels);
 
   // Flagging histograms
-  //  getStatistics().createHistogramWithAxes(new TH1D("filter_LT_tdiff", "LT
-  //  time diff", 200, 0.0, 200000.0), "Time Diff [ps]", "Number of LT pairs");
   getStatistics().createHistogramWithAxes(new TH1D("filter_LT_tdiff", "LT time diff", 400, -200000.0, 200000.0), "Time Diff [ps]",
                                           "Number of LT pairs");
 
