@@ -161,6 +161,9 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
 	getStatistics().fillHistogram("SyncTOT_all_hits", hit.getEnergy());
       }
       getStatistics().fillHistogram("TOT_all_hits", tot);
+      getStatistics().fillHistogram("tot_per_scin", tot,
+                                    (float)(hit.getScintillator().getID()));
+
       if(hit.getRecoFlag()==JPetHit::Good){
         getStatistics().fillHistogram("TOT_good_hits", tot);
       } else if(hit.getRecoFlag()==JPetHit::Corrupted){
@@ -196,7 +199,11 @@ void HitFinder::initialiseHistograms(){
     4 * fABTimeDiff / 10, -2 * fABTimeDiff, 2 * fABTimeDiff, 192, 0.5, 192.5),
     "A-B time difference", "ID of Scintillator"
   );
-
+  getStatistics().createHistogramWithAxes(
+      new TH2D("tot_per_scin", "Hit TOT per Scintillator ID", 2 * 250, -255.,
+               199500.0, 192, 0.5, 192.5),
+      "TOT hit", "ID of Scintillator");
+  
   getStatistics().createHistogramWithAxes(
     new TH2D("hit_pos_per_scin", "Hit Position per Scintillator ID",
     200, -49.75, 50.25, 192, 0.5, 192.5),
