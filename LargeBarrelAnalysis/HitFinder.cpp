@@ -31,6 +31,7 @@ using namespace std;
 
 using namespace tot_energy_converter;
 using namespace jpet_options_tools;
+using namespace boost::property_tree;
 
 HitFinder::HitFinder(const char* name) : JPetUserTask(name) {}
 
@@ -94,7 +95,22 @@ bool HitFinder::init()
       INFO("Hit finder will not convert ToT to deposited energy since no user parameters are provided.");
     }
   }
-  
+  // Loading parameters for TOT synchronizationi
+  if (isOptionSet(fParams.getOptions(), kUseToTSyncParamKey)) {
+    fSyncToT = getOptionAsBool(fParams.getOptions(), kUseToTSyncParamKey);
+    if (fSyncToT) {
+      if (isOptionSet(fParams.getOptions(), kTOTConstantsFileParamKey)) {
+        INFO("Hit finder will perform ToT synchronization.");
+	std::string kSync = getOptionAsString(fParams.getOptions(), kTOTConstantsFileParamKey);
+	read_json(kSync, fConstantsTree);
+      } else {
+        ERROR("No file for TOT synchronization provided. No synchroniztion "
+              "applied.");
+      }
+    } else {
+      WARNING("Hit finder won't performe the ToT synchronization.");
+    }
+  }
   if (isOptionSet(fParams.getOptions(), kTOTCalculationType)) {
     fTOTCalculationType = getOptionAsString(fParams.getOptions(), kTOTCalculationType);
   } else {
@@ -120,6 +136,9 @@ bool HitFinder::exec()
     if (fSaveControlHistos) {
       getStatistics().fillHistogram("hits_per_time_slot", allHits.size());
     }
+    if(fSyncToT){
+      HitFinderTools::saveTOTsync(allHits, fTOTCalculationType, fConstantsTree);
+    }
     saveHits(allHits);
   } else return false;
   return true;
@@ -135,14 +154,18 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
 {
   auto sortedHits = JPetAnalysisTools::getHitsOrderedByTime(hits);
   for (const auto& hit : sortedHits) {
-if (fSaveControlHistos) {
+    if (fSaveControlHistos) {
       auto tot = HitFinderTools::calculateTOT(hit, HitFinderTools::getTOTCalculationType(fTOTCalculationType));
+      // synchronization
+      if (fSyncToT) {
+	getStatistics().fillHistogram("SyncTOT_all_hits", hit.getEnergy());
+      }
       getStatistics().fillHistogram("TOT_all_hits", tot);
       if(hit.getRecoFlag()==JPetHit::Good){
         getStatistics().fillHistogram("TOT_good_hits", tot);
       } else if(hit.getRecoFlag()==JPetHit::Corrupted){
         getStatistics().fillHistogram("TOT_corr_hits", tot);
-      }
+      }      
     }
     fOutputEvents->add<JPetHit>(hit);
   }
@@ -182,15 +205,19 @@ void HitFinder::initialiseHistograms(){
 
   // TOT calculating for all hits and reco flags
   getStatistics().createHistogramWithAxes(
-    new TH1D("TOT_all_hits", "TOT of all hits", 200, -250.0, 99750.0),
+    new TH1D("TOT_all_hits", "TOT of all hits", 400, -250.0, 199500.0),
+    "Time over Threshold [ps]", "Number of Hits"
+  );
+    getStatistics().createHistogramWithAxes(
+    new TH1D("SyncTOT_all_hits", "Sync. TOT of all hits", 400, -250.0, 199500.0),
+    "Time over Threshold [ps] Synchronized", "Number of Hits"
+  );
+  getStatistics().createHistogramWithAxes(
+    new TH1D("TOT_good_hits", "TOT of hits with GOOD flag", 400, -250.0, 199500.0),
     "Time over Threshold [ps]", "Number of Hits"
   );
   getStatistics().createHistogramWithAxes(
-    new TH1D("TOT_good_hits", "TOT of hits with GOOD flag", 200, -250.0, 99750.0),
-    "Time over Threshold [ps]", "Number of Hits"
-  );
-  getStatistics().createHistogramWithAxes(
-    new TH1D("TOT_corr_hits", "TOT of hits with CORRUPTED flag", 200, -250.0, 99750.0),
+    new TH1D("TOT_corr_hits", "TOT of hits with CORRUPTED flag", 400, -250.0, 199500.0),
     "Time over Threshold [ps]", "Number of Hits"
   );
   getStatistics().createHistogramWithAxes(

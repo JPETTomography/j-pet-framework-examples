@@ -22,6 +22,8 @@
 #include <JPetHit/JPetHit.h>
 #include <vector>
 #include <map>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 class JPetWriter;
 
@@ -52,6 +54,8 @@ protected:
   const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_float";
   const std::string kConvertToTParamKey = "HitFinder_ConvertToT_bool";
   const std::string kTOTCalculationType = "HitFinder_TOTCalculationType_std::string";
+  const std::string kUseToTSyncParamKey = "HitFinder_SyncToT_bool";
+  const std::string kTOTConstantsFileParamKey = "TOTConstantsFile_std::string";
   ToTEnergyConverterFactory fToTConverterFactory;
   bool fUseCorruptedSignals = false;
   bool fSaveControlHistos = true;
@@ -59,6 +63,8 @@ protected:
   double fABTimeDiff = 6000.0;
   int fRefDetScinID = -1;
   std::string fTOTCalculationType = "";
+  bool fSyncToT = false;
+  boost::property_tree::ptree fConstantsTree;
 };
 
 #endif /* !HITFINDER_H */
