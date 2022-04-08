@@ -63,6 +63,12 @@ time window for matching Signals on the same scintillator and different sides. D
 - `HitFinder_TOTCalculationType_std::string`  
 Type of the calculations of the TOT - it can be standard sum (option "standard"), a extended sum taking into account thresholds differences and calculated as rectangulars (option "rectangular"), additional extension that add also differences between the TOTs on different thresholds and calculates sum as sum of the trapezes (option "trapeze"). Default value: 'standard'
 
+- `HitFinder_SyncToT_bool`
+Boolean to decide to do the TOT syncrhonization. True/False. If true syncFile.json is required.
+
+- `TOTConstantsFile_std::string`
+Path and json calibrationFile for the TOT synchronization.
+
 - `EventFinder_UseCorruptedHits_bool`  
 Indication if Event Finder module should use hits flagged as Corrupted in the previous task. Default value: `false`
 
