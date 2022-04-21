@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2022 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -103,6 +103,16 @@ bool SignalFinder::init()
     WARNING("Signal Finder is not using Corrupted Channel Signals (default option)");
   }
 
+  // Option for requiring all thresholds to be recinstructed in the signal
+  if (isOptionSet(fParams.getOptions(), kRequireAllThresholdsParamKey))
+  {
+    fRequireAllThresholds = getOptionAsBool(fParams.getOptions(), kRequireAllThresholdsParamKey);
+    if (fRequireAllThresholds)
+    {
+      INFO("Saving only signals with all the threshlds reconstructed correctly.");
+    }
+  }
+
   // Getting bool for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey))
   {
@@ -162,6 +172,12 @@ void SignalFinder::savePMSignals(const vector<JPetPMSignal>& pmSigVec)
 
   for (auto& pmSig : pmSigVec)
   {
+    // Skip saving this signal if there is a requirement for threshld number
+    if (fRequireAllThresholds && pmSig.getLeadTrailPairs().size() != kNumOfThresholds)
+    {
+      continue;
+    }
+
     fOutputEvents->add<JPetPMSignal>(pmSig);
     if (fSaveControlHistos)
     {

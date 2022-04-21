@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2022 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -45,6 +45,7 @@ protected:
   const std::string kUseCorruptedChSigParamKey = "SignalFinder_UseCorruptedChSig_bool";
   const std::string kEdgeMaxTimeParamKey = "SignalFinder_EdgeMaxTime_double";
   const std::string kLeadTrailMaxTimeParamKey = "SignalFinder_LeadTrailMaxTime_double";
+  const std::string kRequireAllThresholdsParamKey = "SignalFinder_RequireAllThresholds_bool";
   const std::string kToTCalculationTypeParamKey = "SignalFinder_ToTCalculationType_std::string";
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kToTHistoUpperLimitParamKey = "ToTHisto_UpperLimit_double";
@@ -56,6 +57,7 @@ protected:
   double fLeadTrailMaxTime = 200000.0;
   double fEdgeMaxTime = 5000.0;
   double fScalingFactor = 0.0001;
+  bool fRequireAllThresholds = false;
   bool fUseCorruptedChannelSignals = false;
   bool fSaveControlHistos = true;
   void initialiseHistograms();

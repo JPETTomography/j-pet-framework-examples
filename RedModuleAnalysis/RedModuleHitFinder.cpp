@@ -14,6 +14,7 @@
  */
 
 #include "RedModuleHitFinder.h"
+#include "../ModularDetectorAnalysis/HitFinderTools.h"
 #include "RedModuleHitFinderTools.h"
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include <JPetWriter/JPetWriter.h>
@@ -50,6 +51,12 @@ bool RedModuleHitFinder::init()
     boost::property_tree::read_json(getOptionAsString(fParams.getOptions(), kConstantsFileParamKey), fConstansTree);
   }
 
+  // Reading WLS config file
+  if (isOptionSet(fParams.getOptions(), kWLSConfigFileParamKey))
+  {
+    boost::property_tree::read_json(getOptionAsString(fParams.getOptions(), kWLSConfigFileParamKey), fWLSConfigTree);
+  }
+
   if (isOptionSet(fParams.getOptions(), kMinHitMultiDiffParamKey))
   {
     fMinHitMultiplicity = getOptionAsInt(fParams.getOptions(), kMinHitMultiDiffParamKey);
@@ -77,18 +84,12 @@ bool RedModuleHitFinder::init()
   {
     fRefDetScinID = getOptionAsInt(fParams.getOptions(), kRefDetScinIDParamKey);
   }
-  else
-  {
-    INFO(Form("Using scintillator with ID %d as reference detector.", fRefDetScinID));
-  }
+  INFO(Form("Using scintillator with ID %d as reference detector.", fRefDetScinID));
   if (isOptionSet(fParams.getOptions(), kRefDetSlotIDParamKey))
   {
     fRefDetSlotID = getOptionAsInt(fParams.getOptions(), kRefDetSlotIDParamKey);
   }
-  else
-  {
-    INFO(Form("Using slot with ID %d as reference detector.", fRefDetSlotID));
-  }
+  INFO(Form("Using slot with ID %d as reference detector.", fRefDetSlotID));
 
   // Control histograms
   if (fSaveControlHistos)
@@ -103,12 +104,13 @@ bool RedModuleHitFinder::exec()
 {
   if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent))
   {
-    auto signalsBySlot = RedModuleHitFinderTools::getSignalsByScin(timeWindow);
-    auto allHits =
-        RedModuleHitFinderTools::matchAllSignals(signalsBySlot, fABTimeDiff, fRefDetScinID, fRefDetSlotID, fConstansTree, getStatistics(), fSaveControlHistos);
-    if (allHits.size() > 0)
+    auto scinSigals = HitFinderTools::getSignalsByScin(timeWindow);
+
+    auto scinHits = RedModuleHitFinderTools::matchAllSignals(scinSigals, fABTimeDiff, fRefDetScinID, fRefDetSlotID, fConstansTree, fWLSConfigTree,
+                                                             getStatistics(), fSaveControlHistos);
+    if (scinHits.size() > 0)
     {
-      saveHits(allHits);
+      saveHits(scinHits);
     }
   }
   else
@@ -127,7 +129,7 @@ bool RedModuleHitFinder::terminate()
 void RedModuleHitFinder::saveHits(const std::vector<JPetPhysRecoHit>& hits)
 {
   auto sortedHits = hits;
-  RedModuleHitFinderTools::sortByTime(sortedHits);
+  HitFinderTools::sortByTime(sortedHits);
 
   if (fSaveControlHistos)
   {

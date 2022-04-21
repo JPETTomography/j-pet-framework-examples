@@ -10,59 +10,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *  @file RedModuleHitFinder.h
+ *  @file RedModuleSignalTransformer.h
  */
 
-#ifndef REDMODULEHITFINDER_H
-#define REDMODULEHITFINDER_H
+#ifndef REDMODULESIGNALTRANSFORMER_H
+#define REDMODULESIGNALTRANSFORMER_H
 
-#include <Hits/JPetPhysRecoHit/JPetPhysRecoHit.h>
-#include <JPetUserTask/JPetUserTask.h>
-#include <Signals/JPetMatrixSignal/JPetMatrixSignal.h>
+#include "JPetUserTask/JPetUserTask.h"
+#include "Signals/JPetMatrixSignal/JPetMatrixSignal.h"
 #include <boost/property_tree/ptree.hpp>
-#include <map>
 #include <vector>
 
 class JPetWriter;
 
 /**
- * @brief User Task creating JPetPhysRecoHit from matched Singlas
- *
- * Task pairs Matrix Signals and creates Hits, based on time comparison
- * of Signals, time window for hit matching can be specified in user options,
- * default one is provided. Matching method is contained in tools class.
+ * @brief User Task: method merging PM Signals into Matrix Signals.
  */
-class RedModuleHitFinder : public JPetUserTask
+class RedModuleSignalTransformer : public JPetUserTask
 {
-
 public:
-  RedModuleHitFinder(const char* name);
-  virtual ~RedModuleHitFinder();
+  RedModuleSignalTransformer(const char* name);
+  virtual ~RedModuleSignalTransformer();
   virtual bool init() override;
   virtual bool exec() override;
   virtual bool terminate() override;
 
 protected:
-  void saveHits(const std::vector<JPetPhysRecoHit>& hits);
-  void initialiseHistograms();
-  const std::string kMinHitMultiDiffParamKey = "RedModuleHitFinder_MinHitMultiplicity_int";
-  const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
+  const std::string kMergeSignalsTimeParamKey = "SignalTransformer_MergeSignalsTime_double";
   const std::string kToTHistoUpperLimitParamKey = "ToTHisto_UpperLimit_double";
+  const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kSaveCalibHistosParamKey = "Save_Calib_Histograms_bool";
   const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
   const std::string kWLSConfigFileParamKey = "WLSConfigFile_std::string";
-  const std::string kABTimeDiffParamKey = "RedModuleHitFinder_ABTimeDiff_double";
-  const std::string kRefDetScinIDParamKey = "RedModule_RefDetScinID_int";
-  const std::string kRefDetSlotIDParamKey = "RedModule_RefDetSlotID_int";
+  const std::string kWLSSlotIDParamKey = "RedModule_WLSSlotID_int";
+  void saveMatrixSignals(const std::vector<JPetMatrixSignal>& mtxSigVec);
   boost::property_tree::ptree fConstansTree;
   boost::property_tree::ptree fWLSConfigTree;
+  void initialiseHistograms();
   double fToTHistoUpperLimit = 200000.0;
   bool fSaveControlHistos = true;
   bool fSaveCalibHistos = false;
-  double fABTimeDiff = 10000.0;
-  int fMinHitMultiplicity = -1;
-  int fRefDetScinID = -1;
-  int fRefDetSlotID = -1;
+  double fMergingTime = 20000.0;
+  int fWLSSlotID = -1;
 };
 
-#endif /* !REDMODULEHITFINDER_H */
+#endif /* !REDMODULESIGNALTRANSFORMER_H */

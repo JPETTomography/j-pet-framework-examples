@@ -38,13 +38,15 @@ set(HEADERS ${use_modules_from}/TimeWindowCreator.h
             ${use_modules_from}/TimeWindowCreatorTools.h
             ${use_modules_from}/SignalFinder.h
             ${use_modules_from}/SignalFinderTools.h
-            ${use_modules_from}/SignalTransformer.h
             ${use_modules_from}/SignalTransformerTools.h
+            RedModuleSignalTransformer.h
+            RedModuleSignalTransformerTools.h
             RedModuleHitFinder.h
             RedModuleHitFinderTools.h
+            RedModuleEventCategorizer.h
+            ${use_modules_from}/HitFinderTools.h
             ${use_modules_from}/EventFinder.h
-            #${use_modules_from}/EventCategorizer.h
-            #${use_modules_from}/EventCategorizerTools.h
+            ${use_modules_from}/EventCategorizerTools.h
             )
 
 set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
@@ -54,11 +56,14 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
             ${use_modules_from}/SignalFinderTools.cpp
             ${use_modules_from}/SignalTransformer.cpp
             ${use_modules_from}/SignalTransformerTools.cpp
+            RedModuleSignalTransformer.cpp
+            RedModuleSignalTransformerTools.cpp
             RedModuleHitFinder.cpp
             RedModuleHitFinderTools.cpp
+            RedModuleEventCategorizer.cpp
+            ${use_modules_from}/HitFinderTools.cpp
             ${use_modules_from}/EventFinder.cpp
-            #${use_modules_from}/EventCategorizer.cpp
-            #${use_modules_from}/EventCategorizerTools.cpp
+            ${use_modules_from}/EventCategorizerTools.cpp
             )
 
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})

@@ -16,71 +16,37 @@
 using namespace std;
 
 #include "RedModuleHitFinderTools.h"
+#include "../ModularDetectorAnalysis/HitFinderTools.h"
 #include <TMath.h>
 #include <cmath>
 #include <map>
 #include <vector>
 
 /**
- * Helper method for sotring signals in vector
- */
-void RedModuleHitFinderTools::sortByTime(vector<JPetMatrixSignal>& sigVec)
-{
-  sort(sigVec.begin(), sigVec.end(), [](const JPetMatrixSignal& sig1, const JPetMatrixSignal& sig2) { return sig1.getTime() < sig2.getTime(); });
-}
-
-/**
- * Helper method for sotring hits in vector
- */
-void RedModuleHitFinderTools::sortByTime(std::vector<JPetPhysRecoHit>& hitsVec)
-{
-  sort(hitsVec.begin(), hitsVec.end(), [](const JPetPhysRecoHit& hit1, const JPetPhysRecoHit& hit2) { return hit1.getTime() < hit2.getTime(); });
-}
-
-/**
- * Method distributing Signals according to Scintillator they belong to
- */
-map<int, vector<JPetMatrixSignal>> RedModuleHitFinderTools::getSignalsByScin(const JPetTimeWindow* timeWindow)
-{
-  map<int, vector<JPetMatrixSignal>> signalScinMap;
-  if (!timeWindow)
-  {
-    WARNING("Pointer of Time Window object is not set, returning empty map");
-    return signalScinMap;
-  }
-  const unsigned int nSignals = timeWindow->getNumberOfEvents();
-  for (unsigned int i = 0; i < nSignals; i++)
-  {
-    auto mtxSig = dynamic_cast<const JPetMatrixSignal&>(timeWindow->operator[](i));
-    int scinID = mtxSig.getMatrix().getScin().getID();
-    auto search = signalScinMap.find(scinID);
-    if (search == signalScinMap.end())
-    {
-      vector<JPetMatrixSignal> tmp;
-      tmp.push_back(mtxSig);
-      signalScinMap.insert(pair<int, vector<JPetMatrixSignal>>(scinID, tmp));
-    }
-    else
-    {
-      search->second.push_back(mtxSig);
-    }
-  }
-  return signalScinMap;
-}
-
-/**
  * Loop over all Scins invoking matching procedure
  */
 vector<JPetPhysRecoHit> RedModuleHitFinderTools::matchAllSignals(map<int, vector<JPetMatrixSignal>>& allSignals, double timeDiffAB, int refScinID,
-                                                                 int refSlotID, boost::property_tree::ptree& calibTree, JPetStatistics& stats,
-                                                                 bool saveHistos)
+                                                                 int refSlotID, boost::property_tree::ptree& calibTree,
+                                                                 boost::property_tree::ptree& wlsConfig, JPetStatistics& stats, bool saveHistos)
 {
   vector<JPetPhysRecoHit> allHits;
   for (auto& scinSignals : allSignals)
   {
-    // Match signals for scintillators
-    auto scinHits = matchSignals(scinSignals.second, timeDiffAB, refScinID, refSlotID, calibTree, stats, saveHistos);
-    allHits.insert(allHits.end(), scinHits.begin(), scinHits.end());
+    JPetSlot::Type slotType = scinSignals.second.at(0).getMatrix().getScin().getSlot().getType();
+    if (slotType == JPetSlot::Module)
+    {
+      // Match signals for scintillators
+      auto scinHits = matchSignals(scinSignals.second, timeDiffAB, refScinID, refSlotID, calibTree, stats, saveHistos);
+      allHits.insert(allHits.end(), scinHits.begin(), scinHits.end());
+    }
+    else if (slotType == JPetSlot::WLS)
+    {
+      for (auto signal : scinSignals.second)
+      {
+        auto wlsHit = createWLSHit(signal, calibTree, wlsConfig);
+        allHits.push_back(wlsHit);
+      }
+    }
   }
   return allHits;
 }
@@ -93,17 +59,15 @@ vector<JPetPhysRecoHit> RedModuleHitFinderTools::matchSignals(vector<JPetMatrixS
 {
   vector<JPetPhysRecoHit> scinHits;
   vector<JPetMatrixSignal> remainSignals;
-  sortByTime(scinSignals);
+  HitFinderTools::sortByTime(scinSignals);
 
   while (scinSignals.size() > 0)
   {
     auto mtxSig = scinSignals.at(0);
 
-    // Handling signals from scin/slot used as a reference detector
     if (mtxSig.getMatrix().getScin().getID() == refScinID || mtxSig.getMatrix().getScin().getSlot().getID() == refSlotID)
     {
-      auto refHit = createDummyHit(mtxSig);
-      scinHits.push_back(refHit);
+      scinHits.push_back(HitFinderTools::createDummyHit(mtxSig));
       scinSignals.erase(scinSignals.begin() + 0);
       continue;
     }
@@ -120,7 +84,7 @@ vector<JPetPhysRecoHit> RedModuleHitFinderTools::matchSignals(vector<JPetMatrixS
       {
         if (mtxSig.getMatrix().getSide() != scinSignals.at(j).getMatrix().getSide())
         {
-          auto hit = createHit(mtxSig, scinSignals.at(j), calibTree);
+          auto hit = createRedModuleHit(mtxSig, scinSignals.at(j), calibTree);
           scinHits.push_back(hit);
           scinSignals.erase(scinSignals.begin() + j);
           scinSignals.erase(scinSignals.begin() + 0);
@@ -162,8 +126,8 @@ vector<JPetPhysRecoHit> RedModuleHitFinderTools::matchSignals(vector<JPetMatrixS
 /**
  * Method for Hit creation - setting all fields that make sense here
  */
-JPetPhysRecoHit RedModuleHitFinderTools::createHit(const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2,
-                                                   boost::property_tree::ptree& calibTree)
+JPetPhysRecoHit RedModuleHitFinderTools::createRedModuleHit(const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2,
+                                                            boost::property_tree::ptree& calibTree)
 {
   JPetMatrixSignal signalA;
   JPetMatrixSignal signalB;
@@ -222,15 +186,11 @@ JPetPhysRecoHit RedModuleHitFinderTools::createHit(const JPetMatrixSignal& signa
   return hit;
 }
 
-/**
- * Method for a dummy Hit creation, setting only some necessary fields.
- */
-JPetPhysRecoHit RedModuleHitFinderTools::createDummyHit(const JPetMatrixSignal& signal)
+JPetPhysRecoHit RedModuleHitFinderTools::createWLSHit(const JPetMatrixSignal& signal, boost::property_tree::ptree& calibTree,
+                                                      boost::property_tree::ptree& wlsConfig)
 {
   JPetPhysRecoHit hit;
-  // JPetMatrixSignal dummy;
-  // hit.setSignalA(dummy);
-  hit.setSignalB(signal);
+  hit.setSignalA(signal);
   hit.setTime(signal.getTime());
   hit.setTimeDiff(0.0);
   hit.setEnergy(0.0);

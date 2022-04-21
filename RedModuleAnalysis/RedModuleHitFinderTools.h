@@ -13,8 +13,8 @@
  *  @file RedModuleHitFinderTools.h
  */
 
-#ifndef HITFINDERTOOLS_H
-#define HITFINDERTOOLS_H
+#ifndef REDMODULEHITFINDERTOOLS_H
+#define REDMODULEHITFINDERTOOLS_H
 
 #include <Hits/JPetPhysRecoHit/JPetPhysRecoHit.h>
 #include <JPetStatistics/JPetStatistics.h>
@@ -31,21 +31,19 @@
 class RedModuleHitFinderTools
 {
 public:
-  static void sortByTime(std::vector<JPetMatrixSignal>& signals);
-
-  static void sortByTime(std::vector<JPetPhysRecoHit>& hits);
-
   static std::map<int, std::vector<JPetMatrixSignal>> getSignalsByScin(const JPetTimeWindow* timeWindow);
 
   static std::vector<JPetPhysRecoHit> matchAllSignals(std::map<int, std::vector<JPetMatrixSignal>>& allSignals, double timeDiffAB, int refScinID,
-                                                      int refSlotID, boost::property_tree::ptree& calibTree, JPetStatistics& stats, bool saveHistos);
+                                                      int refSlotID, boost::property_tree::ptree& calibTree, boost::property_tree::ptree& wlsConfig,
+                                                      JPetStatistics& stats, bool saveHistos);
 
   static std::vector<JPetPhysRecoHit> matchSignals(std::vector<JPetMatrixSignal>& scinSignals, double timeDiffAB, int refScinID, int refSlotID,
                                                    boost::property_tree::ptree& calibTree, JPetStatistics& stats, bool saveHistos);
 
-  static JPetPhysRecoHit createHit(const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2, boost::property_tree::ptree& calibTree);
+  static JPetPhysRecoHit createRedModuleHit(const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2, boost::property_tree::ptree& calibTree);
 
-  static JPetPhysRecoHit createDummyHit(const JPetMatrixSignal& signal);
+  static JPetPhysRecoHit createWLSHit(const JPetMatrixSignal& wlsSignal, boost::property_tree::ptree& calibTree,
+                                      boost::property_tree::ptree& wlsConfig);
 };
 
-#endif /* !HITFINDERTOOLS_H */
+#endif /* !REDMODULEHITFINDERTOOLS_H */
