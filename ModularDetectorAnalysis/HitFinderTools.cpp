@@ -213,9 +213,7 @@ JPetPhysRecoHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const
 JPetPhysRecoHit HitFinderTools::createDummyHit(const JPetMatrixSignal& signal)
 {
   JPetPhysRecoHit hit;
-  JPetMatrixSignal dummy;
-  hit.setSignalA(dummy);
-  hit.setSignalB(signal);
+  hit.setSignalA(signal);
   hit.setTime(signal.getTime());
   hit.setTimeDiff(0.0);
   hit.setEnergy(0.0);
