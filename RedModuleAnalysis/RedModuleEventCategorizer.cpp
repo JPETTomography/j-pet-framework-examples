@@ -94,34 +94,68 @@ bool RedModuleEventCategorizer::exec()
             continue;
           }
 
-          // auto tDiff = secondHit->getTime() - firstHit->getTime();
-          auto slotType1 = firstHit->getScin().getSlot().getType();
-          auto slotType2 = secondHit->getScin().getSlot().getType();
-          auto scinID1 = firstHit->getScin().getID();
-          auto scinID2 = secondHit->getScin().getID();
+          auto tDiff = secondHit->getTime() - firstHit->getTime();
+          auto slot1Type = firstHit->getScin().getSlot().getType();
+          auto slot2Type = secondHit->getScin().getSlot().getType();
+          auto slot1ID = firstHit->getScin().getSlot().getID();
+          auto slot2ID = secondHit->getScin().getSlot().getID();
+          auto scin1ID = firstHit->getScin().getID();
+          auto scin2ID = secondHit->getScin().getID();
 
           // WLS - Red module coincidences
-          if (slotType1 == JPetSlot::WLS && slotType2 == JPetSlot::Module && scinID2 != fRefDetSlotID)
+          if (slot1Type == JPetSlot::WLS && slot2Type == JPetSlot::Module && scin2ID != fRefDetSlotID)
           {
-            getStatistics().fillHistogram("hit_tdiff_red_wls", secondHit->getTime() - firstHit->getTime());
+            getStatistics().fillHistogram("hit_tdiff_red_wls", tDiff);
+            getStatistics().fillHistogram("hit_tdiff_red_wls_scin", scin2ID, tDiff);
           }
-          if (slotType2 == JPetSlot::WLS && slotType1 == JPetSlot::Module && scinID1 != fRefDetSlotID)
+          if (slot2Type == JPetSlot::WLS && slot1Type == JPetSlot::Module && scin1ID != fRefDetSlotID)
           {
-            getStatistics().fillHistogram("hit_tdiff_red_wls", firstHit->getTime() - secondHit->getTime());
+            getStatistics().fillHistogram("hit_tdiff_red_wls", tDiff);
+            getStatistics().fillHistogram("hit_tdiff_red_wls_scin", scin1ID, tDiff);
           }
 
-          // Red - black
-          if (slotType1 == JPetSlot::Module && slotType2 == JPetSlot::Module)
+          // Red - black -- several attempts of finding coincidences
+          if (slot1ID == 202 && slot2ID == 204)
           {
-            if (scinID1 == fRefDetSlotID)
-            {
-              getStatistics().fillHistogram("hit_tdiff_red_black", secondHit->getTime() - firstHit->getTime());
-            }
-            if (scinID2 == fRefDetSlotID)
-            {
-              getStatistics().fillHistogram("hit_tdiff_red_black", firstHit->getTime() - secondHit->getTime());
-            }
+            getStatistics().fillHistogram("hit_tdiff_red_black", tDiff);
+            getStatistics().fillHistogram("hit_tdiff_red_black_scin", scin1ID, tDiff);
           }
+          if (slot1ID == 203 && slot2ID == 204)
+          {
+            getStatistics().fillHistogram("hit_tdiff_red_black", tDiff);
+            getStatistics().fillHistogram("hit_tdiff_red_black_scin", scin1ID, tDiff);
+          }
+          if (slot2ID == 202 && slot1ID == 204)
+          {
+            getStatistics().fillHistogram("hit_tdiff_red_black", tDiff);
+            getStatistics().fillHistogram("hit_tdiff_red_black_scin", scin2ID, tDiff);
+          }
+          if (slot2ID == 203 && slot1ID == 204)
+          {
+            getStatistics().fillHistogram("hit_tdiff_red_black", tDiff);
+            getStatistics().fillHistogram("hit_tdiff_red_black_scin", scin2ID, tDiff);
+          }
+
+          // if (scin1ID == fRefDetSlotID && slot2Type == JPetSlot::Module)
+          // {
+          //   getStatistics().fillHistogram("hit_tdiff_red_black", secondHit->getTime() - firstHit->getTime());
+          // }
+          // else if (scin2ID == fRefDetSlotID && slot1Type == JPetSlot::Module)
+          // {
+          //   getStatistics().fillHistogram("hit_tdiff_red_black", firstHit->getTime() - secondHit->getTime());
+          // }
+          //
+          // if (slot1Type == JPetSlot::Module && slot2Type == JPetSlot::Module)
+          // {
+          //   if (scin1ID == fRefDetSlotID)
+          //   {
+          //     getStatistics().fillHistogram("hit_tdiff_red_black", secondHit->getTime() - firstHit->getTime());
+          //   }
+          //   if (scin2ID == fRefDetSlotID)
+          //   {
+          //     getStatistics().fillHistogram("hit_tdiff_red_black", firstHit->getTime() - secondHit->getTime());
+          //   }
+          // }
         }
       }
     }
@@ -150,9 +184,20 @@ void RedModuleEventCategorizer::saveEvents(const vector<JPetEvent>& events)
 
 void RedModuleEventCategorizer::initialiseHistograms()
 {
+  auto minScinID = getParamBank().getScins().begin()->first;
+  auto maxScinID = getParamBank().getScins().rbegin()->first;
+
   getStatistics().createHistogramWithAxes(new TH1D("hit_tdiff_red_wls", "hit_tdiff_red_wls", 200, -fEventTimeWindow, fEventTimeWindow), "tdiff [ps]",
                                           "hit pairs");
 
+  getStatistics().createHistogramWithAxes(new TH2D("hit_tdiff_red_wls_scin", "hit_tdiff_red_wls_scin", maxScinID - minScinID + 1, minScinID - 0.5,
+                                                   maxScinID + 0.5, 201, -fEventTimeWindow, fEventTimeWindow),
+                                          "Scintillator ID", "time difference [ps]");
+
   getStatistics().createHistogramWithAxes(new TH1D("hit_tdiff_red_black", "hit_tdiff_red_black", 200, -fEventTimeWindow, fEventTimeWindow),
                                           "tdiff [ps]", "hit pairs");
+
+  getStatistics().createHistogramWithAxes(new TH2D("hit_tdiff_red_black_scin", "hit_tdiff_red_black_scin", maxScinID - minScinID + 1, minScinID - 0.5,
+                                                   maxScinID + 0.5, 201, -fEventTimeWindow, fEventTimeWindow),
+                                          "Scintillator ID", "time difference [ps]");
 }
