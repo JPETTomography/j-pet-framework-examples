@@ -16,14 +16,14 @@
 #ifndef HITFINDER_H
 #define HITFINDER_H
 
-#include <JPetRawSignal/JPetRawSignal.h>
-#include <JPetUserTask/JPetUserTask.h>
 #include "ToTEnergyConverterFactory.h"
 #include <JPetHit/JPetHit.h>
-#include <vector>
-#include <map>
-#include <boost/property_tree/ptree.hpp>
+#include <JPetRawSignal/JPetRawSignal.h>
+#include <JPetUserTask/JPetUserTask.h>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <map>
+#include <vector>
 
 class JPetWriter;
 
@@ -34,7 +34,8 @@ class JPetWriter;
  * of Signals, time window for hit matching can be specified in user options,
  * default one is provided. Matching method is contained in tools class.
  */
-class HitFinder: public JPetUserTask {
+class HitFinder : public JPetUserTask
+{
 
 public:
   HitFinder(const char* name);
