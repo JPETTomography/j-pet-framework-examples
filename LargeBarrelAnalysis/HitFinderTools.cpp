@@ -374,9 +374,9 @@ double HitFinderTools::syncTOT(const JPetHit& hit, double TOT, const boost::prop
 {
   double syncTOT = 0;
   double factorA = syncTree.get("scin." + to_string(hit.getScintillator().getID()) + ".tot_scaling_factor_a",
-                                 1.0); // default 1.f
+                                1.0); // default 1.f
   double factorB = syncTree.get("scin." + to_string(hit.getScintillator().getID()) + ".tot_scaling_factor_b",
-                                 0.0); // default 0.f
+                                0.0); // default 0.f
 
   syncTOT = TOT * factorA + factorB;
   return syncTOT;
