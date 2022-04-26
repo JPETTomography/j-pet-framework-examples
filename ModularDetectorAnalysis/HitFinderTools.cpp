@@ -210,11 +210,11 @@ JPetPhysRecoHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const
 /**
  * Method for a dummy Hit creation, setting only some necessary fields.
  */
-JPetPhysRecoHit HitFinderTools::createDummyHit(const JPetMatrixSignal& signal)
+JPetPhysRecoHit HitFinderTools::createDummyHit(const JPetMatrixSignal& signal, double sigOffset)
 {
   JPetPhysRecoHit hit;
   hit.setSignalA(signal);
-  hit.setTime(signal.getTime());
+  hit.setTime(signal.getTime() - sigOffset);
   hit.setTimeDiff(0.0);
   hit.setEnergy(0.0);
   hit.setToT(signal.getToT());

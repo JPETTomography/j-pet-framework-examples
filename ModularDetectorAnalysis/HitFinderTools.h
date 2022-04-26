@@ -45,7 +45,7 @@ public:
 
   static JPetPhysRecoHit createHit(const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2, boost::property_tree::ptree& calibTree);
 
-  static JPetPhysRecoHit createDummyHit(const JPetMatrixSignal& signal);
+  static JPetPhysRecoHit createDummyHit(const JPetMatrixSignal& signal, double sigOffset = 0.0);
 };
 
 #endif /* !HITFINDERTOOLS_H */

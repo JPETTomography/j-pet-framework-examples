@@ -67,7 +67,8 @@ vector<JPetPhysRecoHit> RedModuleHitFinderTools::matchSignals(vector<JPetMatrixS
 
     if (mtxSig.getMatrix().getScin().getID() == refScinID || mtxSig.getMatrix().getScin().getSlot().getID() == refSlotID)
     {
-      scinHits.push_back(HitFinderTools::createDummyHit(mtxSig));
+      double correction = calibTree.get("scin." + to_string(mtxSig.getMatrix().getScin().getID()) + ".b_correction", 0.0);
+      scinHits.push_back(HitFinderTools::createDummyHit(mtxSig, correction));
       scinSignals.erase(scinSignals.begin() + 0);
       continue;
     }

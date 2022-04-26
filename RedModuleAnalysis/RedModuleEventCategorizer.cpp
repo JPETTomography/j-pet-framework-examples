@@ -169,23 +169,12 @@ bool RedModuleEventCategorizer::exec()
             getStatistics().fillHistogram("hit_tdiff_red_wls_scin", scin1ID, tDiff);
           }
 
-          // Red - black -- several attempts of finding coincidences
-          if (slot1ID == 202 && slot2ID == 204 || slot1ID == 203 && slot2ID == 204)
+          // Red - black -- finding coincidences
+          if (slot1ID == 202 && slot2ID == 204 || slot1ID == 203 && slot2ID == 204 || slot2ID == 202 && slot1ID == 204 ||
+              slot2ID == 203 && slot1ID == 204)
           {
             getStatistics().fillHistogram("hit_tdiff_red_black", tDiff);
             getStatistics().fillHistogram("hit_tdiff_red_black_scin", scin1ID, tDiff);
-
-            if (EventCategorizerTools::checkFor2Gamma(firstHit, secondHit, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff,
-                                                      fToTCutAnniMin, fToTCutAnniMax, fSourcePos))
-            {
-              JPetEvent newEvent = event;
-              newEvent.addEventType(JPetEventType::k2Gamma);
-              events.push_back(newEvent);
-            }
-          }
-          if (slot2ID == 202 && slot1ID == 204 || slot2ID == 203 && slot1ID == 204)
-          {
-            getStatistics().fillHistogram("hit_tdiff_red_black", tDiff);
             getStatistics().fillHistogram("hit_tdiff_red_black_scin", scin2ID, tDiff);
 
             if (EventCategorizerTools::checkFor2Gamma(firstHit, secondHit, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff,
