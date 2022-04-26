@@ -194,6 +194,7 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
       // synchronization
       if (fSyncToT)
       {
+	//ToDo change getEnergy() to getTOT() once implemented
         getStatistics().fillHistogram("SyncTOT_all_hits", hit.getEnergy());
       }
       getStatistics().fillHistogram("TOT_all_hits", tot);

@@ -202,6 +202,7 @@ JPetHit HitFinderTools::createHit(const JPetPhysSignal& signal1, const JPetPhysS
       auto energy = totConverter(tot);
       if (!isnan(energy))
       {
+	/// ToDo change setEnergy() to setTOT() once it is available
         hit.setEnergy(energy);
         stats.fillHistogram("conv_tot_range", tot);
         stats.fillHistogram("conv_dep_energy", energy);
