@@ -361,7 +361,7 @@ double HitFinderTools::calculateTOTside(const std::map<int, double>& thrToTOT_si
     return 0;
   return tot;
 }
-void HitFinderTools::saveTOTsync(std::vector<JPetHit>& hits, std::string TOTCalculationType, const boost::property_tree::ptree syncTree)
+void HitFinderTools::saveTOTsync(std::vector<JPetHit>& hits, std::string TOTCalculationType, const boost::property_tree::ptree& syncTree)
 {
   for (auto& hit : hits)
   {
@@ -370,7 +370,7 @@ void HitFinderTools::saveTOTsync(std::vector<JPetHit>& hits, std::string TOTCalc
     hit.setEnergy(tot);
   }
 }
-double HitFinderTools::syncTOT(const JPetHit& hit, double TOT, const boost::property_tree::ptree syncTree)
+double HitFinderTools::syncTOT(const JPetHit& hit, double TOT, const boost::property_tree::ptree& syncTree)
 {
   double syncTOT = 0;
   double factorA = syncTree.get("scin." + to_string(hit.getScintillator().getID()) + ".tot_scaling_factor_a",

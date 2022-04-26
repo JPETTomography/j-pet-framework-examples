@@ -58,8 +58,8 @@ public:
   static TOTCalculationType getTOTCalculationType(const std::string& type);
   static double calculateTOT(const JPetHit& hit, TOTCalculationType type = kSimplified);
   static double calculateTOTside(const std::map<int, double>& thrToTOT_side, TOTCalculationType type);
-  static void saveTOTsync(std::vector<JPetHit>& hits, std::string TOTCalculationType, const boost::property_tree::ptree syncTree);
-  static double syncTOT(const JPetHit& hit, double TOT, const boost::property_tree::ptree syncTree);
+  static void saveTOTsync(std::vector<JPetHit>& hits, std::string TOTCalculationType, const boost::property_tree::ptree& syncTree);
+  static double syncTOT(const JPetHit& hit, double TOT, const boost::property_tree::ptree& syncTree);
 };
 
 #endif /* !HITFINDERTOOLS_H */
