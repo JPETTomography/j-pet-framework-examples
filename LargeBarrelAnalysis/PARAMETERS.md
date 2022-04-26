@@ -64,7 +64,7 @@ time window for matching Signals on the same scintillator and different sides. D
 Type of the calculations of the TOT - it can be standard sum (option "standard"), a extended sum taking into account thresholds differences and calculated as rectangulars (option "rectangular"), additional extension that add also differences between the TOTs on different thresholds and calculates sum as sum of the trapezes (option "trapeze"). Default value: 'standard'
 
 - `HitFinder_SyncToT_bool`
-Boolean to decide to do the TOT syncrhonization. True/False. If true syncFile.json is required.
+Boolean to decide to do the TOT syncrhonization. True/False. If "true" a calibration file indicated with the TOTConstantsFile_std::string" option (see below) is required.
 
 - `TOTConstantsFile_std::string`
 Path and json calibrationFile for the TOT synchronization.
