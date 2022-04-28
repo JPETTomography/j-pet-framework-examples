@@ -16,12 +16,14 @@
 #ifndef HITFINDER_H
 #define HITFINDER_H
 
-#include <JPetRawSignal/JPetRawSignal.h>
-#include <JPetUserTask/JPetUserTask.h>
 #include "ToTEnergyConverterFactory.h"
 #include <JPetHit/JPetHit.h>
-#include <vector>
+#include <JPetRawSignal/JPetRawSignal.h>
+#include <JPetUserTask/JPetUserTask.h>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
 #include <map>
+#include <vector>
 
 class JPetWriter;
 
@@ -32,7 +34,8 @@ class JPetWriter;
  * of Signals, time window for hit matching can be specified in user options,
  * default one is provided. Matching method is contained in tools class.
  */
-class HitFinder: public JPetUserTask {
+class HitFinder : public JPetUserTask
+{
 
 public:
   HitFinder(const char* name);
@@ -52,6 +55,8 @@ protected:
   const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_float";
   const std::string kConvertToTParamKey = "HitFinder_ConvertToT_bool";
   const std::string kTOTCalculationType = "HitFinder_TOTCalculationType_std::string";
+  const std::string kUseToTSyncParamKey = "HitFinder_SyncToT_bool";
+  const std::string kTOTConstantsFileParamKey = "TOTConstantsFile_std::string";
   ToTEnergyConverterFactory fToTConverterFactory;
   bool fUseCorruptedSignals = false;
   bool fSaveControlHistos = true;
@@ -59,6 +64,8 @@ protected:
   double fABTimeDiff = 6000.0;
   int fRefDetScinID = -1;
   std::string fTOTCalculationType = "";
+  bool fSyncToT = false;
+  boost::property_tree::ptree fConstantsTree;
 };
 
 #endif /* !HITFINDER_H */
