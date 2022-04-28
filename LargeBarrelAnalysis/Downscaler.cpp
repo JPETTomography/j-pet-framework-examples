@@ -93,7 +93,6 @@ double Downscaler::getNormalizedRandom() { return fRandomDistribution(fRandomGen
 
 void Downscaler::saveEvent(const JPetEvent& event)
 {
-
   getStatistics().fillHistogram("filtered_event_multiplicity", event.getHits().size());
   fOutputEvents->add<JPetEvent>(event);
 }
