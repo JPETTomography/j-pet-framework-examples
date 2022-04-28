@@ -140,6 +140,7 @@ void CalibrationTools::selectForTimeWalk(const JPetEvent& event, JPetStatistics&
 
       if (test1 && test2 && test3)
       {
+        double posCut = 1.0;
         // Calculating reversed ToT for time walk studies
         auto revToT1 = calculateReveresedToT(firstHit);
         auto revToT2 = calculateReveresedToT(secondHit);
@@ -147,7 +148,11 @@ void CalibrationTools::selectForTimeWalk(const JPetEvent& event, JPetStatistics&
         stats.fillHistogram("time_walk_ab_tdiff", firstHit->getTimeDiff(), revToT1);
         stats.fillHistogram("time_walk_ab_tdiff", secondHit->getTimeDiff(), revToT2);
 
-        if (fabs(firstHit->getPosZ()) < 2.0 && fabs(secondHit->getPosZ()) < 2.0)
+        TVector3 ap = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit);
+
+        // Soft collimation of the source - hit z-pos and annihilation point around 0
+        if (fabs(firstHit->getPosZ()) < posCut && fabs(secondHit->getPosZ()) < posCut && fabs(ap.x()) < posCut && fabs(ap.y()) < posCut &&
+            fabs(ap.z()) < posCut)
         {
           stats.fillHistogram("time_walk_ab_tdiff_z_cut", firstHit->getTimeDiff(), revToT1);
         }
@@ -155,7 +160,8 @@ void CalibrationTools::selectForTimeWalk(const JPetEvent& event, JPetStatistics&
         if (firstHit->getScin().getSlot().getTheta() < secondHit->getScin().getSlot().getTheta())
         {
           stats.fillHistogram("time_walk_tof", EventCategorizerTools::calculateTOF(firstHit, secondHit), revToT1 - revToT2);
-          if (fabs(firstHit->getPosZ()) < 2.0 && fabs(secondHit->getPosZ()) < 2.0)
+          if (fabs(firstHit->getPosZ()) < posCut && fabs(secondHit->getPosZ()) < posCut && fabs(ap.x()) < posCut && fabs(ap.y()) < posCut &&
+              fabs(ap.z()) < posCut)
           {
             stats.fillHistogram("time_walk_tof_z_cut", EventCategorizerTools::calculateTOF(firstHit, secondHit), revToT1 - revToT2);
           }
@@ -163,7 +169,8 @@ void CalibrationTools::selectForTimeWalk(const JPetEvent& event, JPetStatistics&
         else
         {
           stats.fillHistogram("time_walk_tof", EventCategorizerTools::calculateTOF(secondHit, firstHit), revToT2 - revToT1);
-          if (fabs(firstHit->getPosZ()) < 2.0 && fabs(secondHit->getPosZ()) < 2.0)
+          if (fabs(firstHit->getPosZ()) < posCut && fabs(secondHit->getPosZ()) < posCut && fabs(ap.x()) < posCut && fabs(ap.y()) < posCut &&
+              fabs(ap.z()) < posCut)
           {
             stats.fillHistogram("time_walk_tof_z_cut", EventCategorizerTools::calculateTOF(secondHit, firstHit), revToT2 - revToT1);
           }
