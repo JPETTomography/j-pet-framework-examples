@@ -13,20 +13,20 @@
  *  @file main.cpp
  */
 
-#include <JPetManager/JPetManager.h>
-#include "TimeWindowCreator.h"
-#include "SignalTransformer.h"
+#include "Downscaler.h"
 #include "EventCategorizer.h"
-#include "SignalFinder.h"
 #include "EventFinder.h"
 #include "HitFinder.h"
-#include "Downscaler.h"
+#include "SignalFinder.h"
+#include "SignalTransformer.h"
+#include "TimeWindowCreator.h"
+#include <JPetManager/JPetManager.h>
 
 using namespace std;
 
-int main(int argc, const char* argv[]) {
+int main(int argc, const char *argv[]) {
   try {
-    JPetManager& manager = JPetManager::getManager();
+    JPetManager &manager = JPetManager::getManager();
 
     manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
     manager.registerTask<SignalFinder>("SignalFinder");
@@ -35,7 +35,7 @@ int main(int argc, const char* argv[]) {
     manager.registerTask<EventFinder>("EventFinder");
     manager.registerTask<Downscaler>("Downscaler");
     manager.registerTask<EventCategorizer>("EventCategorizer");
-    
+
     manager.useTask("TimeWindowCreator", "hld", "tslot.calib");
     manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
     manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
@@ -45,8 +45,9 @@ int main(int argc, const char* argv[]) {
     manager.useTask("EventCategorizer", "presel.evt", "cat.evt");
 
     manager.run(argc, argv);
-  } catch (const std::exception& except) {
-    std::cerr << "Unrecoverable error occured:" << except.what() << "Exiting the program!" << std::endl;
+  } catch (const std::exception &except) {
+    std::cerr << "Unrecoverable error occured:" << except.what()
+              << "Exiting the program!" << std::endl;
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;
