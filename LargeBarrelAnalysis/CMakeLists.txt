@@ -34,7 +34,8 @@ set(AUXILIARY_FILES
 set(projectBinary ${projectName}.x)
 project(${projectName} CXX)
 
-set(HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizer.h
+set(HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/Downscaler.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizer.h
             ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizerTools.h
             ${CMAKE_CURRENT_SOURCE_DIR}/EventFinder.h
             ${CMAKE_CURRENT_SOURCE_DIR}/HitFinder.h
@@ -48,7 +49,8 @@ set(HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizer.h
             ${CMAKE_CURRENT_SOURCE_DIR}/ToTEnergyConverter.h
             ${CMAKE_CURRENT_SOURCE_DIR}/ToTEnergyConverterFactory.h)
 
-set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizer.cpp
+set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Downscaler.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizer.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/EventCategorizerTools.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/EventFinder.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/HitFinder.cpp
