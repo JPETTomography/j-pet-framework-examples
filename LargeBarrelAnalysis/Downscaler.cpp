@@ -20,72 +20,80 @@
 using namespace jpet_options_tools;
 using namespace std;
 
-Downscaler::Downscaler(const char *name) : JPetUserTask(name) {
+Downscaler::Downscaler(const char* name) : JPetUserTask(name)
+{
   std::random_device rd;
   fRandomGenerator = std::mt19937(rd());
 }
 
 Downscaler::~Downscaler() {}
 
-bool Downscaler::init() {
+bool Downscaler::init()
+{
   INFO("Event downscaling started.");
 
   // Parameter for back to back categorization
-  if (isOptionSet(fParams.getOptions(), fDownscalingRatesKey)) {
-    fDownscalingRates =
-        getOptionAsVectorOfDoubles(fParams.getOptions(), fDownscalingRatesKey);
-  } else {
+  if (isOptionSet(fParams.getOptions(), fDownscalingRatesKey))
+  {
+    fDownscalingRates = getOptionAsVectorOfDoubles(fParams.getOptions(), fDownscalingRatesKey);
+  }
+  else
+  {
     WARNING("No downscaling rates provided by the user. All events will be "
             "passed on at a 100% rate.");
   }
 
-  getStatistics().createHistogramWithAxes(
-      new TH1D("filtered_event_multiplicity",
-               "Number of hits in filtered events", 20, 0.5, 20.5),
-      "Hits in Event", "Number of Hits");
+  getStatistics().createHistogramWithAxes(new TH1D("filtered_event_multiplicity", "Number of hits in filtered events", 20, 0.5, 20.5),
+                                          "Hits in Event", "Number of Hits");
 
   fOutputEvents = new JPetTimeWindow("JPetEvent");
 
   return true;
 }
 
-bool Downscaler::exec() {
-  if (auto timeWindow = dynamic_cast<const JPetTimeWindow *const>(fEvent)) {
+bool Downscaler::exec()
+{
+  if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent))
+  {
     vector<JPetEvent> events;
-    for (uint i = 0; i < timeWindow->getNumberOfEvents(); i++) {
-      const auto &event =
-          dynamic_cast<const JPetEvent &>(timeWindow->operator[](i));
+    for (uint i = 0; i < timeWindow->getNumberOfEvents(); i++)
+    {
+      const auto& event = dynamic_cast<const JPetEvent&>(timeWindow->operator[](i));
 
       int multiplicity = event.getHits().size();
       double rate = 1.0;
-      if (multiplicity <= fDownscalingRates.size()) {
+      if (multiplicity <= fDownscalingRates.size())
+      {
         rate = fDownscalingRates[multiplicity - 1] / 100.;
-        if (getNormalizedRandom() < rate) {
+        if (getNormalizedRandom() < rate)
+        {
           saveEvent(event);
         }
-      } else { // rate not specified for this multiplicity
+      }
+      else
+      { // rate not specified for this multiplicity
         saveEvent(event);
       }
     }
-
-  } else {
+  }
+  else
+  {
     return false;
   }
   return true;
 }
 
-bool Downscaler::terminate() {
+bool Downscaler::terminate()
+{
   INFO("Event downscaling completed.");
   return true;
 }
 
-double Downscaler::getNormalizedRandom() {
-  return fRandomDistribution(fRandomGenerator);
-}
+double Downscaler::getNormalizedRandom() { return fRandomDistribution(fRandomGenerator); }
 
-void Downscaler::saveEvent(const JPetEvent &event) {
+void Downscaler::saveEvent(const JPetEvent& event)
+{
 
-  getStatistics().fillHistogram("filtered_event_multiplicity",
-                                event.getHits().size());
+  getStatistics().fillHistogram("filtered_event_multiplicity", event.getHits().size());
   fOutputEvents->add<JPetEvent>(event);
 }

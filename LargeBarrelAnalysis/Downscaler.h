@@ -34,23 +34,22 @@ class JPetWriter;
  * for which the full statistics from the data is not needed.
  *
  */
-class Downscaler : public JPetUserTask {
+class Downscaler : public JPetUserTask
+{
 public:
-  Downscaler(const char *name);
+  Downscaler(const char* name);
   virtual ~Downscaler();
   virtual bool init() override;
   virtual bool exec() override;
   virtual bool terminate() override;
 
 protected:
-  const std::string fDownscalingRatesKey =
-      "Downscaler_DownscalingRates_std::vector<double>";
+  const std::string fDownscalingRatesKey = "Downscaler_DownscalingRates_std::vector<double>";
   std::vector<double> fDownscalingRates;
   std::mt19937 fRandomGenerator;
-  std::uniform_real_distribution<double> fRandomDistribution =
-      std::uniform_real_distribution<double>(0.0, 1.0);
+  std::uniform_real_distribution<double> fRandomDistribution = std::uniform_real_distribution<double>(0.0, 1.0);
 
-  void saveEvent(const JPetEvent &event);
+  void saveEvent(const JPetEvent& event);
   double getNormalizedRandom();
 };
 #endif /* !DOWNSCALER_H */

@@ -24,9 +24,11 @@
 
 using namespace std;
 
-int main(int argc, const char *argv[]) {
-  try {
-    JPetManager &manager = JPetManager::getManager();
+int main(int argc, const char* argv[])
+{
+  try
+  {
+    JPetManager& manager = JPetManager::getManager();
 
     manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
     manager.registerTask<SignalFinder>("SignalFinder");
@@ -45,9 +47,10 @@ int main(int argc, const char *argv[]) {
     manager.useTask("EventCategorizer", "presel.evt", "cat.evt");
 
     manager.run(argc, argv);
-  } catch (const std::exception &except) {
-    std::cerr << "Unrecoverable error occured:" << except.what()
-              << "Exiting the program!" << std::endl;
+  }
+  catch (const std::exception& except)
+  {
+    std::cerr << "Unrecoverable error occured:" << except.what() << "Exiting the program!" << std::endl;
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;
