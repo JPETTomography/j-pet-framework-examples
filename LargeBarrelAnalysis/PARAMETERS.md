@@ -78,7 +78,7 @@ time window for grouping hits in one event. Default value `5 000 ps`
 - `EventFinder_MinEventMultiplicity_int`  
 events of minimum multiplicity will only be saved in output file. Default value is 1, so all events are saved.
 
-- `Downscaler_DownscalingRates_std::vector<double>`__
+- `Downscaler_DownscalingRates_std::vector<double>`  
 Set of downscaling rates for 1-hit, 2-hit, 3-hit events etc., expressed in per-cent. 
 If the Downscaler module is used, it will only pass the percentages of particular kinds of events (distinguished by number of hits in an event) according to the rates from this vector.
 For events with number of hits greater than the number of elements in this vector, rates of 100% will be assumed.
