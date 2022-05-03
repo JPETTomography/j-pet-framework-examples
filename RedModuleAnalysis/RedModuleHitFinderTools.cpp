@@ -163,8 +163,8 @@ JPetPhysRecoHit RedModuleHitFinderTools::createRedModuleHit(const JPetMatrixSign
   double totNormB = calibTree.get("scin." + to_string(scin.getID()) + ".tot_factor_b", 0.0);
   hit.setToT(tot * totNormA + totNormB);
 
-  double x_pos = scin.getCenterX();
-  double y_pos = (scin.getSlot().getLayer().getRadius() + scin.getHeight() / 2.0) * TMath::Cos(TMath::DegToRad() * scin.getSlot().getTheta());
+  double x_pos = (scin.getSlot().getLayer().getRadius() + scin.getWidth() / 2.0) * TMath::Sin(TMath::DegToRad() * scin.getSlot().getTheta());
+  double y_pos = scin.getCenterY();
   double z_pos = velocity * hit.getTimeDiff() / 2.0;
   TVector3 position(x_pos, y_pos, z_pos);
 
