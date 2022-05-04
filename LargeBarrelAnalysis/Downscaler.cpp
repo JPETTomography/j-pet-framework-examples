@@ -16,6 +16,7 @@
 #include "Downscaler.h"
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include <iostream>
+#include <algorithm>
 
 using namespace jpet_options_tools;
 using namespace std;
@@ -36,6 +37,7 @@ bool Downscaler::init()
   if (isOptionSet(fParams.getOptions(), fDownscalingRatesKey))
   {
     fDownscalingRates = getOptionAsVectorOfDoubles(fParams.getOptions(), fDownscalingRatesKey);
+    std::transform(fDownscalingRates.begin(), fDownscalingRates.end(), fDownscalingRates.begin(), [](double el) -> double { return el / 100.; });
   }
   else
   {
@@ -64,7 +66,7 @@ bool Downscaler::exec()
       double rate = 1.0;
       if (multiplicity <= fDownscalingRates.size())
       {
-        rate = fDownscalingRates[multiplicity - 1] / 100.;
+        rate = fDownscalingRates[multiplicity - 1];
         if (getNormalizedRandom() < rate)
         {
           saveEvent(event);

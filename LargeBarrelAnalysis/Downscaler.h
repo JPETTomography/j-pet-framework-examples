@@ -20,8 +20,6 @@
 #include <JPetUserTask/JPetUserTask.h>
 #include <random>
 
-class JPetWriter;
-
 /**
  * @brief User Task filtering JPetEvent-s according to downscaling rules
  *
