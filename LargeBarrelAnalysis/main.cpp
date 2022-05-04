@@ -13,18 +13,21 @@
  *  @file main.cpp
  */
 
-#include <JPetManager/JPetManager.h>
-#include "TimeWindowCreator.h"
-#include "SignalTransformer.h"
+#include "Downscaler.h"
 #include "EventCategorizer.h"
-#include "SignalFinder.h"
 #include "EventFinder.h"
 #include "HitFinder.h"
+#include "SignalFinder.h"
+#include "SignalTransformer.h"
+#include "TimeWindowCreator.h"
+#include <JPetManager/JPetManager.h>
 
 using namespace std;
 
-int main(int argc, const char* argv[]) {
-  try {
+int main(int argc, const char* argv[])
+{
+  try
+  {
     JPetManager& manager = JPetManager::getManager();
 
     manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
@@ -32,6 +35,7 @@ int main(int argc, const char* argv[]) {
     manager.registerTask<SignalTransformer>("SignalTransformer");
     manager.registerTask<HitFinder>("HitFinder");
     manager.registerTask<EventFinder>("EventFinder");
+    manager.registerTask<Downscaler>("Downscaler");
     manager.registerTask<EventCategorizer>("EventCategorizer");
 
     manager.useTask("TimeWindowCreator", "hld", "tslot.calib");
@@ -39,10 +43,13 @@ int main(int argc, const char* argv[]) {
     manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
     manager.useTask("HitFinder", "phys.sig", "hits");
     manager.useTask("EventFinder", "hits", "unk.evt");
-    manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
+    manager.useTask("Downscaler", "unk.evt", "presel.evt");
+    manager.useTask("EventCategorizer", "presel.evt", "cat.evt");
 
     manager.run(argc, argv);
-  } catch (const std::exception& except) {
+  }
+  catch (const std::exception& except)
+  {
     std::cerr << "Unrecoverable error occured:" << except.what() << "Exiting the program!" << std::endl;
     return EXIT_FAILURE;
   }
