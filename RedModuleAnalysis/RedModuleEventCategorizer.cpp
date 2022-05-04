@@ -158,15 +158,12 @@ bool RedModuleEventCategorizer::exec()
           auto scin2ID = secondHit->getScin().getID();
 
           // WLS - Red module coincidences
-          if (slot1Type == JPetSlot::WLS && slot2Type == JPetSlot::Module && scin2ID != fRefDetSlotID)
-          {
-            getStatistics().fillHistogram("hit_tdiff_red_wls", tDiff);
-            getStatistics().fillHistogram("hit_tdiff_red_wls_scin", scin2ID, tDiff);
-          }
-          if (slot2Type == JPetSlot::WLS && slot1Type == JPetSlot::Module && scin1ID != fRefDetSlotID)
+          if (slot1ID == 201 && slot2ID == 202 || slot1ID == 201 && slot2ID == 203 || slot1ID == 202 && slot2ID == 201 ||
+              slot1ID == 203 && slot2ID == 201)
           {
             getStatistics().fillHistogram("hit_tdiff_red_wls", tDiff);
             getStatistics().fillHistogram("hit_tdiff_red_wls_scin", scin1ID, tDiff);
+            getStatistics().fillHistogram("hit_tdiff_red_wls_scin", scin2ID, tDiff);
           }
 
           // Red - black -- finding coincidences
