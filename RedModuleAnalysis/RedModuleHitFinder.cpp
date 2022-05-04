@@ -133,7 +133,23 @@ void RedModuleHitFinder::saveHits(const std::vector<JPetPhysRecoHit>& hits)
 
   if (fSaveControlHistos)
   {
-    getStatistics().fillHistogram("hits_tslot", hits.size());
+    int wlsHits = 0;
+    int redHits = 0;
+    int balckHits = 0;
+    for (auto& hit : sortedHits)
+    {
+      if (hit.getScin().getSlot().getID() == 201)
+        wlsHits++;
+      if (hit.getScin().getSlot().getID() == 202 || hit.getScin().getSlot().getID() == 203)
+        redHits++;
+      if (hit.getScin().getSlot().getID() == 204)
+        balckHits++;
+    }
+
+    getStatistics().fillHistogram("hits_tslot", wlsHits + redHits + balckHits);
+    getStatistics().fillHistogram("hits_wls_tslot", wlsHits);
+    getStatistics().fillHistogram("hits_red_tslot", redHits);
+    getStatistics().fillHistogram("hits_black_tslot", balckHits);
   }
 
   for (auto& hit : sortedHits)
@@ -170,6 +186,9 @@ void RedModuleHitFinder::initialiseHistograms()
   auto maxScinID = getParamBank().getScins().rbegin()->first;
 
   getStatistics().createHistogramWithAxes(new TH1D("hits_tslot", "Number of Hits in Time Window", 60, 0.5, 60.5), "Hits in Time Slot",
+                                          "Number of Time Slots");
+
+  getStatistics().createHistogramWithAxes(new TH1D("hits_wls_tslot", "Number of Hits in Time Window", 60, 0.5, 60.5), "Hits in Time Slot",
                                           "Number of Time Slots");
 
   getStatistics().createHistogramWithAxes(
