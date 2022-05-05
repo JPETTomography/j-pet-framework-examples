@@ -158,8 +158,9 @@ bool RedModuleEventCategorizer::exec()
           auto scin2ID = secondHit->getScin().getID();
 
           // WLS - Red module coincidences
-          if (slot1ID == 201 && slot2ID == 202 || slot1ID == 201 && slot2ID == 203 || slot1ID == 202 && slot2ID == 201 ||
-              slot1ID == 203 && slot2ID == 201)
+          // if (slot1ID == 201 && slot2ID == 202 || slot1ID == 201 && slot2ID == 203 || slot1ID == 202 && slot2ID == 201 ||
+          //     slot1ID == 203 && slot2ID == 201)
+          if (slot1ID == 201 || slot2ID == 201)
           {
             getStatistics().fillHistogram("hit_tdiff_red_wls", tDiff);
             getStatistics().fillHistogram("hit_tdiff_red_wls_scin", scin1ID, tDiff);
@@ -182,27 +183,6 @@ bool RedModuleEventCategorizer::exec()
               events.push_back(newEvent);
             }
           }
-
-          // if (scin1ID == fRefDetSlotID && slot2Type == JPetSlot::Module)
-          // {
-          //   getStatistics().fillHistogram("hit_tdiff_red_black", secondHit->getTime() - firstHit->getTime());
-          // }
-          // else if (scin2ID == fRefDetSlotID && slot1Type == JPetSlot::Module)
-          // {
-          //   getStatistics().fillHistogram("hit_tdiff_red_black", firstHit->getTime() - secondHit->getTime());
-          // }
-          //
-          // if (slot1Type == JPetSlot::Module && slot2Type == JPetSlot::Module)
-          // {
-          //   if (scin1ID == fRefDetSlotID)
-          //   {
-          //     getStatistics().fillHistogram("hit_tdiff_red_black", secondHit->getTime() - firstHit->getTime());
-          //   }
-          //   if (scin2ID == fRefDetSlotID)
-          //   {
-          //     getStatistics().fillHistogram("hit_tdiff_red_black", firstHit->getTime() - secondHit->getTime());
-          //   }
-          // }
         }
       }
     }
