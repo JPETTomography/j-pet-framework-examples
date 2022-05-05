@@ -188,8 +188,14 @@ void RedModuleHitFinder::initialiseHistograms()
   getStatistics().createHistogramWithAxes(new TH1D("hits_tslot", "Number of Hits in Time Window", 60, 0.5, 60.5), "Hits in Time Slot",
                                           "Number of Time Slots");
 
-  getStatistics().createHistogramWithAxes(new TH1D("hits_wls_tslot", "Number of Hits in Time Window", 60, 0.5, 60.5), "Hits in Time Slot",
+  getStatistics().createHistogramWithAxes(new TH1D("hits_wls_tslot", "Number of WLS Hits in Time Window", 60, 0.5, 60.5), "Hits in Time Slot",
                                           "Number of Time Slots");
+
+  getStatistics().createHistogramWithAxes(new TH1D("hits_red_tslot", "Number of Red Module Hits in Time Window", 60, 0.5, 60.5), "Hits in Time Slot",
+                                          "Number of Time Slots");
+
+  getStatistics().createHistogramWithAxes(new TH1D("hits_black_tslot", "Number of Reference Module Hits in Time Window", 60, 0.5, 60.5),
+                                          "Hits in Time Slot", "Number of Time Slots");
 
   getStatistics().createHistogramWithAxes(
       new TH1D("hits_scin", "Number of Hits per Scintillators", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5), "Scin ID",
