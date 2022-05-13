@@ -7,7 +7,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, ubuntu-18.04]
+        os: [ubuntu-22.04, ubuntu-20.04, ubuntu-18.04]
 
     steps:
     - uses: actions/checkout@v2
@@ -25,6 +25,12 @@ jobs:
         if [ "${GITHUB_BRANCH}" = "master" ]; then echo "BRANCH=master" | tee ${GITHUB_ENV};
         else echo "BRANCH=develop" | tee ${GITHUB_ENV};
         fi
+
+    - name: download  ROOT (for ubuntu 22.04)
+      run: |
+        wget https://root.cern/download/root_v6.26.02.Linux-ubuntu22-x86_64-gcc11.2.tar.gz
+        tar xzf root_v6.26.02.Linux-ubuntu22-x86_64-gcc11.2.tar.gz
+      if: matrix.os == 'ubuntu-22.04'
 
     - name: download  ROOT (for ubuntu 20.04)
       run: |
