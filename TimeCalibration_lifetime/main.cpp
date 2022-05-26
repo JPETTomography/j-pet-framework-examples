@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -13,45 +13,41 @@
  *  @file main.cpp
  */
 
-#include "Downscaler.h"
-#include "EventCategorizer.h"
-#include "EventFinder.h"
-#include "HitFinder.h"
-#include "SignalFinder.h"
-#include "SignalTransformer.h"
-#include "TimeWindowCreator.h"
+#include "PALSCalibrationTask.h"
 #include <JPetManager/JPetManager.h>
+#include "../LargeBarrelAnalysis/TimeWindowCreator.h"
+#include "../LargeBarrelAnalysis/SignalFinder.h"
+#include "../LargeBarrelAnalysis/SignalTransformer.h"
+#include "../LargeBarrelAnalysis/HitFinder.h"
+#include "../LargeBarrelAnalysis/HitFinderTools.h"
+#include "../LargeBarrelAnalysis/EventFinder.h"
+#include "../LargeBarrelAnalysis/EventCategorizerTools.h"
 
 using namespace std;
 
 int main(int argc, const char* argv[])
 {
-  try
-  {
+  try {
     JPetManager& manager = JPetManager::getManager();
-
     manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
     manager.registerTask<SignalFinder>("SignalFinder");
     manager.registerTask<SignalTransformer>("SignalTransformer");
     manager.registerTask<HitFinder>("HitFinder");
     manager.registerTask<EventFinder>("EventFinder");
-    manager.registerTask<Downscaler>("Downscaler");
-    manager.registerTask<EventCategorizer>("EventCategorizer");
+    manager.registerTask<PALSCalibrationTask>("PALSCalibrationTask");
 
-    manager.useTask("TimeWindowCreator", "hld", "tslot.calib");
-    manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
+    manager.useTask("TimeWindowCreator", "hld", "tslot.raw");
+    manager.useTask("SignalFinder", "tslot.raw", "raw.sig");
     manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
     manager.useTask("HitFinder", "phys.sig", "hits");
     manager.useTask("EventFinder", "hits", "unk.evt");
-    manager.useTask("Downscaler", "unk.evt", "presel.evt");
-    manager.useTask("EventCategorizer", "presel.evt", "cat.evt");
-
+    manager.useTask("PALSCalibrationTask", "unk.evt", "cal.it");
     manager.run(argc, argv);
-  }
-  catch (const std::exception& except)
-  {
+
+  } catch (const std::exception& except) {
     std::cerr << "Unrecoverable error occured:" << except.what() << "Exiting the program!" << std::endl;
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;
+
 }

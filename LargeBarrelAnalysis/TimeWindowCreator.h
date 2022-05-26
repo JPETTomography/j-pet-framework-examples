@@ -24,10 +24,6 @@
 
 class JPetWriter;
 
-#ifdef __CINT__
-#define override
-#endif
-
 /**
  * @brief User Task: translate Unpacker EventIII data to JPetTimeWindow
  *

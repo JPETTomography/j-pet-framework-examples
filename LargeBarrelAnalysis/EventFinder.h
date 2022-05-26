@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -24,10 +24,6 @@
 
 class JPetWriter;
 
-#ifdef __CINT__
-#define override
-#endif
-
 /**
  * @brief User Task creating JPetEvent from hits
  *
@@ -46,6 +42,8 @@ public:
   virtual bool exec() override;
   virtual bool terminate() override;
 
+  void PlotTDiffAB(JPetHit Hit);
+  
 protected:
   std::vector<JPetEvent> buildEvents(const JPetTimeWindow & hits);
   void saveEvents(const std::vector<JPetEvent>& event);
@@ -54,9 +52,11 @@ protected:
   const std::string kEventMinMultiplicity = "EventFinder_MinEventMultiplicity_int";
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
   const std::string kEventTimeParamKey = "EventFinder_EventTime_float";
+  const std::string kNmbOfThresholdsParamKey = "EventFinder_NmbOfThresholds_int";
   double fEventTimeWindow = 5000.0;
   bool fUseCorruptedHits = false;
   bool fSaveControlHistos = true;
+  uint fNmbOfThresholds = 4;
   uint fMinMultiplicity = 1;
 };
 #endif /* !EVENTFINDER_H */

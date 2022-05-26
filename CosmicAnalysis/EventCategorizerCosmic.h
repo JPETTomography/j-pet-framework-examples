@@ -25,10 +25,6 @@
 
 class JPetWriter;
 
-#ifdef __CINT__
-#	define override
-#endif
-
 class EventCategorizerCosmic : public JPetUserTask
 {
 public:

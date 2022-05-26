@@ -32,10 +32,6 @@
 
 class JPetWriter;
 
-#ifdef __CINT__
-#	define override
-#endif
-
 class DeltaTFinder : public JPetUserTask{
 public:
 	DeltaTFinder(const char * name);

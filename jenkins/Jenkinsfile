@@ -1,0 +1,59 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('BuildMatrix') {
+            matrix {
+                agent any
+                axes {
+                    axis {
+                        name 'ROOT'
+                        values 'root_v6.12.06'
+                    }
+                    axis {
+                        name 'GCC'
+                        values 'gcc-5.4.0'
+                    }
+                    axis {
+                        name 'BOOST'
+                        values 'boost_1_58'
+                    }
+                }
+                stages {
+                    stage('Build') {
+                        environment {
+                            WORKSPACE_JENKINS=sh(returnStdout: true, script: "echo ${WORKSPACE} | sed --expression='s/r\\/j/r\\/www\\/j/g'").trim()
+                        }
+                        steps {
+                            echo "Building..\nStarting build job: <${JOB_NAME}> in workspace: <${WORKSPACE}> for ${ROOT}, ${GCC}, ${BOOST}"
+                            echo "Jenkins workspace: <${WORKSPACE_JENKINS}>"
+                            sh 'git submodule update --init --recursive'
+                            dir("jenkins/root_6_matrix") {
+                                sh label: 'docker-build', script: 'docker-compose build'
+                            }
+                            sh label: 'build framework', script: "docker-compose -f jenkins/root_6_matrix/docker-compose.yml run --rm examples_rootv6"
+                        }
+                    }
+
+                    stage('Test') {
+                        steps {
+                            echo 'Testing..'
+                            sh label: 'mkdir', script: 'mkdir -p CPPCheckRaport'
+                            sh label: 'cppcheck', script: 'cppcheck --inline-suppr --enable=all --inconclusive --xml --suppress="*:${WORKSPACE}/build/*.*" --xml-version=2 ${WORKSPACE} 2> CPPCheckRaport/cppcheck.xml'
+                        }
+                    }
+                    stage('Deploy') {
+                        steps {
+                            echo 'Deploying....'
+                        }
+                    }
+                }
+            }
+        }
+    }
+    post { 
+        always { 
+            cleanWs()
+        }
+    }
+}

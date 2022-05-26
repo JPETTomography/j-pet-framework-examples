@@ -14,7 +14,7 @@ else()
     cmake_policy(VERSION 3.14)
 endif()
 
-project(JPetFrameworkExamples VERSION 1.0.0
+project(JPetFrameworkExamples VERSION 7.0.0
                   LANGUAGES CXX)
 set(PROJECT_DESCRIPTION "JPetFrameworkExamples module")
 
@@ -187,4 +187,6 @@ add_subdirectory(CosmicAnalysis)
 add_subdirectory(ScopeAnalysis)
 add_subdirectory(Imaging)
 add_subdirectory(TimeCalibration_iter)
+add_subdirectory(TimeCalibration_lifetime)
 add_subdirectory(UserDataClassExample)
+add_subdirectory(TOTAnalysis)

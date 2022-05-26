@@ -63,6 +63,12 @@ time window for matching Signals on the same scintillator and different sides. D
 - `HitFinder_TOTCalculationType_std::string`  
 Type of the calculations of the TOT - it can be standard sum (option "standard"), a extended sum taking into account thresholds differences and calculated as rectangulars (option "rectangular"), additional extension that add also differences between the TOTs on different thresholds and calculates sum as sum of the trapezes (option "trapeze"). Default value: 'standard'
 
+- `HitFinder_SyncToT_bool`
+Boolean to decide to do the TOT syncrhonization. True/False. If "true" a calibration file indicated with the TOTConstantsFile_std::string" option (see below) is required.
+
+- `TOTConstantsFile_std::string`
+Path and json calibrationFile for the TOT synchronization.
+
 - `EventFinder_UseCorruptedHits_bool`  
 Indication if Event Finder module should use hits flagged as Corrupted in the previous task. Default value: `false`
 
@@ -71,6 +77,12 @@ time window for grouping hits in one event. Default value `5 000 ps`
 
 - `EventFinder_MinEventMultiplicity_int`  
 events of minimum multiplicity will only be saved in output file. Default value is 1, so all events are saved.
+
+- `Downscaler_DownscalingRates_std::vector<double>`  
+Set of downscaling rates for 1-hit, 2-hit, 3-hit events etc., expressed in per-cent. 
+If the Downscaler module is used, it will only pass the percentages of particular kinds of events (distinguished by number of hits in an event) according to the rates from this vector.
+For events with number of hits greater than the number of elements in this vector, rates of 100% will be assumed.
+For example, `[]` means the Downscaler will pass on all of the events; `[5.0, 10.0]` means that only 5% of 1-hit events and 10% of 2-hit events will be kept in the files while keeping 100% of events with 3 and more hits.
 
 - `Scatter_Categorizer_TOF_TimeDiff_float`  
 categorizer tool for recognizing scatterings. User can constrain allowed discrepancy between calculated time of flight of scatter candidate and difference of two hit times. Default value `2000 ps`

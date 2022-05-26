@@ -24,10 +24,6 @@
 
 class JPetWriter;
 
-#ifdef __CINT__
-#define override
-#endif
-
 class LORFinder : public JPetUserTask {
 
 public:
