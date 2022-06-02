@@ -136,10 +136,22 @@ void RedModuleHitFinder::saveHits(const std::vector<JPetPhysRecoHit>& hits)
     int wlsHits = 0;
     int redHits = 0;
     int balckHits = 0;
+    double previousWLSTime = 0.0;
+    double previousWLSZPos = 0.0;
+
     for (auto& hit : sortedHits)
     {
       if (hit.getScin().getSlot().getID() == 201)
+      {
         wlsHits++;
+        if (previousWLSTime != 0.0 && previousWLSZPos != 0.0)
+        {
+          auto tDiff = hit.getTime() - previousWLSTime;
+          getStatistics().fillHistogram("wls_hit_tdiff_zpos", tDiff, previousWLSZPos, hit.getPosZ());
+          previousWLSTime = hit.getTime();
+          previousWLSZPos = hit.getPosZ();
+        }
+      }
       if (hit.getScin().getSlot().getID() == 202 || hit.getScin().getSlot().getID() == 203)
         redHits++;
       if (hit.getScin().getSlot().getID() == 204)
@@ -161,7 +173,9 @@ void RedModuleHitFinder::saveHits(const std::vector<JPetPhysRecoHit>& hits)
       continue;
     }
 
+    // Save hit
     fOutputEvents->add<JPetPhysRecoHit>(hit);
+
     if (fSaveControlHistos)
     {
       int scinID = hit.getScin().getID();
@@ -223,6 +237,11 @@ void RedModuleHitFinder::initialiseHistograms()
   getStatistics().createHistogramWithAxes(new TH2D("hit_tot_scin", "Hit ToT divided by multiplicity, all hits", maxScinID - minScinID + 1,
                                                    minScinID - 0.5, maxScinID + 0.5, 200, 0.0, 1.2 * fToTHistoUpperLimit),
                                           "Scintillator ID", "Time over Threshold [ps]");
+
+  getStatistics().createHistogramWithAxes(new TH3D("wls_hit_tdiff_zpos",
+                                                   "Time difference between two consecutive WLS hits and their positions along z-axis", 200, -50000.0,
+                                                   50000.0, 65, -20.69, 20.69, 65, -20.69, 20.69),
+                                          "time difference [ps]", "z pos hit 1 [cm]", "z pos hit 2 [cm]");
 
   // Unused sigals stats
   getStatistics().createHistogramWithAxes(

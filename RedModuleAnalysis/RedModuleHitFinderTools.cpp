@@ -197,12 +197,15 @@ JPetPhysRecoHit RedModuleHitFinderTools::createWLSHit(const JPetMatrixSignal& si
   hit.setEnergy(0.0);
   hit.setToT(signal.getToT());
 
-  // TODO user WLS configuration file to assign to proper scintillators from WLS slot
-  // Now all the WLS signals are assigned to one scin 201
+  // Using WLS configuration file to assign z axis position
+  // TODO assigning to correct WLS
+  auto pmID = signal.getPMSignals().at(0).getPM().getID();
+  double z_pos = wlsConfig.get("pm." + to_string(pmID) + ".zcenter", 1.0);
+
   auto& scin = signal.getMatrix().getScin();
   hit.setPosX(scin.getCenterX());
   hit.setPosY(scin.getCenterY());
-  hit.setPosZ(scin.getCenterZ());
+  hit.setPosZ(z_pos);
   hit.setScin(scin);
 
   return hit;
