@@ -144,7 +144,7 @@ void RedModuleHitFinder::saveHits(const std::vector<JPetPhysRecoHit>& hits)
       if (hit.getScin().getSlot().getID() == 201)
       {
         wlsHits++;
-        if (previousWLSTime != 0.0 && previousWLSZPos != 0.0)
+        if (previousWLSTime != 0.0)
         {
           auto tDiff = hit.getTime() - previousWLSTime;
           getStatistics().fillHistogram("wls_hit_tdiff_zpos", tDiff, previousWLSZPos, hit.getPosZ());
