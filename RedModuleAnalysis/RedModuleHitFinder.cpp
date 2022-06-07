@@ -144,16 +144,24 @@ void RedModuleHitFinder::saveHits(const std::vector<JPetPhysRecoHit>& hits)
       if (hit.getScin().getSlot().getID() == 201)
       {
         wlsHits++;
-        auto tDiff = hit.getTime() - previousWLSTime;
-        getStatistics().fillHistogram("wls_hit_tdiff_zpos", tDiff, previousWLSZPos, hit.getPosZ());
-
-        previousWLSTime = hit.getTime();
-        previousWLSZPos = hit.getPosZ();
+        getStatistics().fillHistogram("hits_wls_time", hit.getTime());
       }
       if (hit.getScin().getSlot().getID() == 202 || hit.getScin().getSlot().getID() == 203)
+      {
         redHits++;
+        getStatistics().fillHistogram("hits_red_time", hit.getTime());
+      }
       if (hit.getScin().getSlot().getID() == 204)
+      {
         balckHits++;
+        getStatistics().fillHistogram("hits_black_time", hit.getTime());
+      }
+
+      auto tDiff = hit.getTime() - previousWLSTime;
+      getStatistics().fillHistogram("wls_hit_tdiff_zpos", tDiff, previousWLSZPos, hit.getPosZ());
+
+      previousWLSTime = hit.getTime();
+      previousWLSZPos = hit.getPosZ();
     }
 
     getStatistics().fillHistogram("hits_tslot", wlsHits + redHits + balckHits);
@@ -207,6 +215,15 @@ void RedModuleHitFinder::initialiseHistograms()
                                           "Number of Time Slots");
 
   getStatistics().createHistogramWithAxes(new TH1D("hits_black_tslot", "Number of Reference Module Hits in Time Window", 60, 0.5, 60.5),
+                                          "Hits in Time Slot", "Number of Time Slots");
+
+  getStatistics().createHistogramWithAxes(new TH1D("hits_wls_time", "Time of WLS Hits in Time Window", 200, 0.0, 50000000000.0), "Hits in Time Slot",
+                                          "Number of Time Slots");
+
+  getStatistics().createHistogramWithAxes(new TH1D("hits_red_time", "Time of Red Module Hits in Time Window", 200, 0.0, 50000000000.0),
+                                          "Hits in Time Slot", "Number of Time Slots");
+
+  getStatistics().createHistogramWithAxes(new TH1D("hits_black_time", "Time of Reference Module Hits in Time Window", 200, 0.0, 50000000000.0),
                                           "Hits in Time Slot", "Number of Time Slots");
 
   getStatistics().createHistogramWithAxes(
