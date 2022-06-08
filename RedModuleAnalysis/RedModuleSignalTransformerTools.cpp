@@ -100,6 +100,7 @@ vector<JPetMatrixSignal> RedModuleSignalTransformerTools::mergePMSignalsOnWLS(ve
   for (auto pmSig : pmSigVec)
   {
     JPetMatrixSignal mtxSig;
+    mtxSig.setTime(pmSig.getTime());
     mtxSig.setMatrix(pmSigVec.at(0).getPM().getMatrix());
     if (!mtxSig.addPMSignal(pmSigVec.at(0)))
     {
