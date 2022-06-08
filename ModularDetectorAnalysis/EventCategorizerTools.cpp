@@ -123,6 +123,9 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetPhysRecoHit* firstHit, cons
     stats.fillHistogram("2g_ab_tdiff_scin", scin1ID, firstHit->getTimeDiff());
     stats.fillHistogram("2g_ab_tdiff_scin", scin2ID, secondHit->getTimeDiff());
 
+    stats.fillHistogram("2g_ab_tdiff_tot", firstHit->getTimeDiff(), tot1);
+    stats.fillHistogram("2g_ab_tdiff_tot", secondHit->getTimeDiff(), tot2);
+
     stats.fillHistogram("2g_theta", theta);
     stats.fillHistogram("2g_theta_scin", scin1ID, theta);
     stats.fillHistogram("2g_theta_scin", scin2ID, theta);
@@ -209,6 +212,9 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetPhysRecoHit* firstHit, cons
     stats.fillHistogram("ap_ab_tdiff", secondHit->getTimeDiff());
     stats.fillHistogram("ap_ab_tdiff_scin", scin1ID, firstHit->getTimeDiff());
     stats.fillHistogram("ap_ab_tdiff_scin", scin2ID, secondHit->getTimeDiff());
+
+    stats.fillHistogram("ap_ab_tdiff_tot", firstHit->getTimeDiff(), tot1);
+    stats.fillHistogram("ap_ab_tdiff_tot", secondHit->getTimeDiff(), tot2);
 
     stats.fillHistogram("ap_tof", tof);
     stats.fillHistogram("ap_tof_scin", scin1ID, tof);

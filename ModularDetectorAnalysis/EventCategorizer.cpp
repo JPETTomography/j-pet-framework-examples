@@ -381,6 +381,10 @@ void EventCategorizer::initialiseHistograms()
                                                    maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 201, -fMaxTimeDiff, fMaxTimeDiff),
                                           "Scintillator ID", "A-B Signal Time Difference [ps]");
 
+  getStatistics().createHistogramWithAxes(
+      new TH2D("2g_ab_tdiff_tot", "2 gamma event - hits A-B time difference vs TOT", 201, -fMaxTimeDiff, fMaxTimeDiff, 201, 0.0, fToTHistoUpperLimit),
+      "A-B Signal Time Difference [ps]", "Time over Threshold [ps]");
+
   getStatistics().createHistogramWithAxes(new TH1D("2g_theta", "2 gamma event - flight vectors theta", 181, -0.5, 180.5), "Angle [degree]",
                                           "Number of Hit Pairs");
 
@@ -465,6 +469,10 @@ void EventCategorizer::initialiseHistograms()
   getStatistics().createHistogramWithAxes(new TH2D("ap_ab_tdiff_scin", "Annihilation pairs hits A-B time difference per scintillator",
                                                    maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 201, -fMaxTimeDiff, fMaxTimeDiff),
                                           "Scintillator ID", "A-B Signal Time Difference [ps]");
+
+  getStatistics().createHistogramWithAxes(new TH2D("ap_ab_tdiff_tot", "Annihilation pairs - hits A-B time difference vs TOT", 201, -fMaxTimeDiff,
+                                                   fMaxTimeDiff, 201, 0.0, fToTHistoUpperLimit),
+                                          "A-B Signal Time Difference [ps]", "Time over Threshold [ps]");
 
   getStatistics().createHistogramWithAxes(new TH1D("ap_tof", "Annihilation pairs Time of Flight", 201, -fMaxTimeDiff, fMaxTimeDiff),
                                           "Time of Flight [ps]", "Number of Annihilation Pairs");
