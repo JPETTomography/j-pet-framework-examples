@@ -160,11 +160,20 @@ bool RedModuleEventCategorizer::exec()
           // WLS - Red module coincidences
           // if (slot1ID == 201 && slot2ID == 202 || slot1ID == 201 && slot2ID == 203 || slot1ID == 202 && slot2ID == 201 ||
           //     slot1ID == 203 && slot2ID == 201)
-          if (slot1ID == 201 || slot2ID == 201)
+          if (slot1ID == 201 && (slot2ID == 202 || slot2ID == 203))
+          {
+            getStatistics().fillHistogram("hit_tdiff_red_wls", tDiff);
+            getStatistics().fillHistogram("hit_tdiff_red_wls_scin", scin2ID, tDiff);
+            auto sipm1ID = firstHit->getSignalA().getPMSignals().at(0).getPM().getID();
+            getStatistics().fillHistogram(Form("hit_tdiff_red_wls_sipm_%d_scin", sipm1ID), scin2ID, tDiff);
+          }
+
+          if (slot2ID == 201 && (slot1ID == 202 || slot1ID == 203))
           {
             getStatistics().fillHistogram("hit_tdiff_red_wls", tDiff);
             getStatistics().fillHistogram("hit_tdiff_red_wls_scin", scin1ID, tDiff);
-            getStatistics().fillHistogram("hit_tdiff_red_wls_scin", scin2ID, tDiff);
+            auto sipm2ID = secondHit->getSignalA().getPMSignals().at(0).getPM().getID();
+            getStatistics().fillHistogram(Form("hit_tdiff_red_wls_sipm_%d_scin", sipm2ID), scin1ID, tDiff);
           }
 
           // Red - black -- finding coincidences
@@ -227,6 +236,13 @@ void RedModuleEventCategorizer::initialiseHistograms()
   getStatistics().createHistogramWithAxes(new TH2D("hit_tdiff_red_black_scin", "hit_tdiff_red_black_scin", maxScinID - minScinID + 1, minScinID - 0.5,
                                                    maxScinID + 0.5, 201, 0.0, fEventTimeWindow),
                                           "Scintillator ID", "time difference [ps]");
+
+  for (int pmID = 401; pmID <= 464; ++pmID)
+  {
+    getStatistics().createHistogramWithAxes(new TH2D(Form("hit_tdiff_red_wls_sipm_%d_scin", pmID), Form("hit_tdiff_red_wls_sipm_%d_scin", pmID),
+                                                     maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 201, 0.0, fEventTimeWindow),
+                                            "Scintillator ID", "time difference [ps]");
+  }
 
   // Histograms for 2 gamama events
   getStatistics().createHistogramWithAxes(new TH1D("2g_tot", "2 gamma event - average ToT scaled", 201, 0.0, fToTHistoUpperLimit),
