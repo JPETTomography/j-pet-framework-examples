@@ -166,6 +166,10 @@ bool RedModuleEventCategorizer::exec()
             getStatistics().fillHistogram("hit_tdiff_red_wls_scin", scin2ID, tDiff);
             auto sipm1ID = firstHit->getSignalA().getPMSignals().at(0).getPM().getID();
             getStatistics().fillHistogram(Form("hit_tdiff_red_wls_sipm_%d_scin", sipm1ID), scin2ID, tDiff);
+            if (firstHit->getPosZ() != -999.0)
+            {
+              getStatistics().fillHistogram(Form("hit_zdiff_red_wls_sipm_%d_scin", sipm1ID), scin2ID, firstHit->getPosZ() - secondHit->getPosZ());
+            }
           }
 
           if (slot2ID == 201 && (slot1ID == 202 || slot1ID == 203))
@@ -174,6 +178,10 @@ bool RedModuleEventCategorizer::exec()
             getStatistics().fillHistogram("hit_tdiff_red_wls_scin", scin1ID, tDiff);
             auto sipm2ID = secondHit->getSignalA().getPMSignals().at(0).getPM().getID();
             getStatistics().fillHistogram(Form("hit_tdiff_red_wls_sipm_%d_scin", sipm2ID), scin1ID, tDiff);
+            if (secondHit->getPosZ() != -999.0)
+            {
+              getStatistics().fillHistogram(Form("hit_zdiff_red_wls_sipm_%d_scin", sipm2ID), scin1ID, secondHit->getPosZ() - firstHit->getPosZ());
+            }
           }
 
           // Red - black -- finding coincidences
@@ -241,6 +249,10 @@ void RedModuleEventCategorizer::initialiseHistograms()
   {
     getStatistics().createHistogramWithAxes(new TH2D(Form("hit_tdiff_red_wls_sipm_%d_scin", pmID), Form("hit_tdiff_red_wls_sipm_%d_scin", pmID),
                                                      maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 201, 0.0, fEventTimeWindow),
+                                            "Scintillator ID", "time difference [ps]");
+
+    getStatistics().createHistogramWithAxes(new TH2D(Form("hit_zdiff_red_wls_sipm_%d_scin", pmID), Form("hit_zdiff_red_wls_sipm_%d_scin", pmID),
+                                                     maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 101, -25.0, 25.0),
                                             "Scintillator ID", "time difference [ps]");
   }
 
