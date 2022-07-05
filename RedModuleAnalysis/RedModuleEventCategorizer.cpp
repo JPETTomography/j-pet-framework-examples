@@ -250,7 +250,7 @@ void RedModuleEventCategorizer::initialiseHistograms()
                                           "Scintillator ID", "time difference [ps]");
 
   int wlsPMMinID = 401;
-  int wlsPMMaxID = 464;
+  int wlsPMMaxID = 504;
   int redScinMinID = 241;
   int redScinMaxID = 266;
 
