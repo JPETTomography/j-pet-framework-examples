@@ -55,6 +55,8 @@ protected:
   const std::string kToTCutAnniMaxParamKey = "EventCategorizer_ToT_Cut_Anni_Max_double";
   const std::string kMaxTimeDiffParamKey = "EventCategorizer_MaxTimeDiff_double";
   const std::string kToTHistoUpperLimitParamKey = "ToTHisto_UpperLimit_double";
+  const std::string kCoincidencesMaxTDiffParamKey = "RedModule_CoincidencesMaxTDiff_double";
+  const std::string kCoincidencesOffsetParamKey = "RedModule_CoincidencesOffset_double";
 
   boost::property_tree::ptree fConstansTree;
   double f2gThetaDiff = 10.0;
@@ -63,6 +65,8 @@ protected:
   double fToTCutAnniMax = 250000.0;
   double fEventTimeWindow = 5000.0;
   double fToTHistoUpperLimit = 200000.0;
+  double fCoincidencesMaxTDiff = 100000.0;
+  double fCoincidencesOffset = 0.0;
   double fMaxTimeDiff = 15000.0;
   bool fSaveControlHistos = true;
   int fRefDetSlotID = -1;

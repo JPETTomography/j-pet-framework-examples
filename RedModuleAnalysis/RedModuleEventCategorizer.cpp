@@ -92,6 +92,12 @@ bool RedModuleEventCategorizer::init()
     fToTHistoUpperLimit = getOptionAsDouble(fParams.getOptions(), kToTHistoUpperLimitParamKey);
   }
 
+  // Coincidence offset for one-sided calibrations (WLS, ref. module)
+  if (isOptionSet(fParams.getOptions(), kCoincidencesOffsetParamKey))
+  {
+    fCoincidencesOffset = getOptionAsDouble(fParams.getOptions(), kCoincidencesOffsetParamKey);
+  }
+
   if (isOptionSet(fParams.getOptions(), kRefDetSlotIDParamKey))
   {
     fRefDetSlotID = getOptionAsInt(fParams.getOptions(), kRefDetSlotIDParamKey);
@@ -149,7 +155,6 @@ bool RedModuleEventCategorizer::exec()
             continue;
           }
 
-          auto tDiff = secondHit->getTime() - firstHit->getTime();
           auto slot1Type = firstHit->getScin().getSlot().getType();
           auto slot2Type = secondHit->getScin().getSlot().getType();
           auto slot1ID = firstHit->getScin().getSlot().getID();
@@ -157,14 +162,19 @@ bool RedModuleEventCategorizer::exec()
           auto scin1ID = firstHit->getScin().getID();
           auto scin2ID = secondHit->getScin().getID();
 
-          // WLS - Red module coincidences
-          // if (slot1ID == 201 && slot2ID == 202 || slot1ID == 201 && slot2ID == 203 || slot1ID == 202 && slot2ID == 201 ||
-          //     slot1ID == 203 && slot2ID == 201)
           if (slot1ID == 201 && (slot2ID == 202 || slot2ID == 203))
           {
+            auto sipm1ID = firstHit->getSignalA().getPMSignals().at(0).getPM().getID();
+            double wlsOffset = fConstansTree.get("pm." + to_string(sipm1ID) + "." + to_string(scin2ID), 0.0);
+            // skip if time difference condidion not met
+            auto tDiff = secondHit->getTime() - (firstHit->getTime() - wlsOffset);
+            if (tDiff - fCoincidencesOffset > fCoincidencesMaxTDiff)
+            {
+              continue;
+            }
+
             getStatistics().fillHistogram("hit_tdiff_red_wls", tDiff);
             getStatistics().fillHistogram("hit_tdiff_red_wls_scin", scin2ID, tDiff);
-            auto sipm1ID = firstHit->getSignalA().getPMSignals().at(0).getPM().getID();
             getStatistics().fillHistogram(Form("hit_tdiff_red_wls_sipm_%d_scin", sipm1ID), scin2ID, tDiff);
             getStatistics().fillHistogram(Form("hit_tdiff_red_wls_sipm_scin_%d", scin2ID), sipm1ID, tDiff);
             if (firstHit->getPosZ() != -999.0)
@@ -176,9 +186,17 @@ bool RedModuleEventCategorizer::exec()
 
           if (slot2ID == 201 && (slot1ID == 202 || slot1ID == 203))
           {
+            auto sipm2ID = secondHit->getSignalA().getPMSignals().at(0).getPM().getID();
+            double wlsOffset = fConstansTree.get("pm." + to_string(sipm2ID) + "." + to_string(scin1ID), 0.0);
+            // skip if time difference condidion not met
+            auto tDiff = (secondHit->getTime() - wlsOffset) - firstHit->getTime();
+            if (tDiff - fCoincidencesOffset > fCoincidencesMaxTDiff)
+            {
+              continue;
+            }
+
             getStatistics().fillHistogram("hit_tdiff_red_wls", tDiff);
             getStatistics().fillHistogram("hit_tdiff_red_wls_scin", scin1ID, tDiff);
-            auto sipm2ID = secondHit->getSignalA().getPMSignals().at(0).getPM().getID();
             getStatistics().fillHistogram(Form("hit_tdiff_red_wls_sipm_%d_scin", sipm2ID), scin1ID, tDiff);
             getStatistics().fillHistogram(Form("hit_tdiff_red_wls_sipm_scin_%d", scin1ID), sipm2ID, tDiff);
             if (secondHit->getPosZ() != -999.0)
@@ -192,6 +210,13 @@ bool RedModuleEventCategorizer::exec()
           if (slot1ID == 202 && slot2ID == 204 || slot1ID == 203 && slot2ID == 204 || slot2ID == 202 && slot1ID == 204 ||
               slot2ID == 203 && slot1ID == 204)
           {
+            // skip if time difference condidion not met
+            auto tDiff = secondHit->getTime() - firstHit->getTime();
+            if (tDiff - fCoincidencesOffset > fCoincidencesMaxTDiff)
+            {
+              continue;
+            }
+
             getStatistics().fillHistogram("hit_tdiff_red_black", tDiff);
             getStatistics().fillHistogram("hit_tdiff_red_black_scin", scin1ID, tDiff);
             getStatistics().fillHistogram("hit_tdiff_red_black_scin", scin2ID, tDiff);
