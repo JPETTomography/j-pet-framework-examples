@@ -192,7 +192,6 @@ bool RedModuleEventCategorizer::exec()
             }
             getStatistics().fillHistogram("hit_tdiff_red_wls", sipm2ID, scin1ID, tDiff);
 
-            getStatistics().fillHistogram(Form("hit_tdiff_red_wls_sipm_scin_%d", scin1ID), sipm2ID, tDiff);
             if (secondHit->getPosZ() != -999.0)
             {
               getStatistics().fillHistogram("hit_zdiff_red_wls", sipm2ID, scin1ID, secondHit->getPosZ() - firstHit->getPosZ());
