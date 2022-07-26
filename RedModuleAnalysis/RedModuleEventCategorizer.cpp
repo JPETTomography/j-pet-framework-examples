@@ -173,14 +173,10 @@ bool RedModuleEventCategorizer::exec()
               continue;
             }
 
-            getStatistics().fillHistogram("hit_tdiff_red_wls", tDiff);
-            getStatistics().fillHistogram("hit_tdiff_red_wls_scin", scin2ID, tDiff);
-            getStatistics().fillHistogram(Form("hit_tdiff_red_wls_sipm_%d_scin", sipm1ID), scin2ID, tDiff);
-            getStatistics().fillHistogram(Form("hit_tdiff_red_wls_sipm_scin_%d", scin2ID), sipm1ID, tDiff);
+            getStatistics().fillHistogram("hit_tdiff_red_wls", sipm1ID, scin2ID, tDiff);
             if (firstHit->getPosZ() != -999.0)
             {
-              getStatistics().fillHistogram(Form("hit_zdiff_red_wls_sipm_%d_scin", sipm1ID), scin2ID, firstHit->getPosZ() - secondHit->getPosZ());
-              getStatistics().fillHistogram(Form("hit_zdiff_red_wls_sipm_scin_%d", scin2ID), sipm1ID, firstHit->getPosZ() - secondHit->getPosZ());
+              getStatistics().fillHistogram("hit_zdiff_red_wls", sipm1ID, scin2ID, firstHit->getPosZ() - secondHit->getPosZ());
             }
           }
 
@@ -194,15 +190,12 @@ bool RedModuleEventCategorizer::exec()
             {
               continue;
             }
+            getStatistics().fillHistogram("hit_tdiff_red_wls", sipm2ID, scin1ID, tDiff);
 
-            getStatistics().fillHistogram("hit_tdiff_red_wls", tDiff);
-            getStatistics().fillHistogram("hit_tdiff_red_wls_scin", scin1ID, tDiff);
-            getStatistics().fillHistogram(Form("hit_tdiff_red_wls_sipm_%d_scin", sipm2ID), scin1ID, tDiff);
             getStatistics().fillHistogram(Form("hit_tdiff_red_wls_sipm_scin_%d", scin1ID), sipm2ID, tDiff);
             if (secondHit->getPosZ() != -999.0)
             {
-              getStatistics().fillHistogram(Form("hit_zdiff_red_wls_sipm_%d_scin", sipm2ID), scin1ID, secondHit->getPosZ() - firstHit->getPosZ());
-              getStatistics().fillHistogram(Form("hit_zdiff_red_wls_sipm_scin_%d", scin1ID), sipm2ID, firstHit->getPosZ() - secondHit->getPosZ());
+              getStatistics().fillHistogram("hit_zdiff_red_wls", sipm2ID, scin1ID, secondHit->getPosZ() - firstHit->getPosZ());
             }
           }
 
@@ -275,34 +268,17 @@ void RedModuleEventCategorizer::initialiseHistograms()
                                           "Scintillator ID", "time difference [ps]");
 
   int wlsPMMinID = 401;
-  int wlsPMMaxID = 504;
+  int wlsPMMaxID = 464;
   int redScinMinID = 241;
-  int redScinMaxID = 266;
+  int redScinMaxID = 279;
 
-  for (int pmID = wlsPMMinID; pmID <= wlsPMMaxID; ++pmID)
-  {
-    getStatistics().createHistogramWithAxes(new TH2D(Form("hit_tdiff_red_wls_sipm_%d_scin", pmID), Form("hit_tdiff_red_wls_sipm_%d_scin", pmID),
-                                                     redScinMaxID - redScinMinID + 1, redScinMinID - 0.5, redScinMaxID + 0.5, 201, 0.0,
-                                                     fEventTimeWindow),
-                                            "Scintillator ID", "time difference [ps]");
+  getStatistics().createHistogramWithAxes(new TH3D("hit_tdiff_red_wls", "Time difference WLS-Scin hits", wlsPMMaxID - wlsPMMinID + 1,
+                                                   wlsPMMinID - 0.5, wlsPMMaxID + 0.5, redScinMaxID - redScinMinID + 1, redScinMinID - 0.5,
+                                                   redScinMaxID + 0.5, 201, 0.0, 20000.0));
 
-    getStatistics().createHistogramWithAxes(new TH2D(Form("hit_zdiff_red_wls_sipm_%d_scin", pmID), Form("hit_zdiff_red_wls_sipm_%d_scin", pmID),
-                                                     redScinMaxID - redScinMinID + 1, redScinMinID - 0.5, redScinMaxID + 0.5, 101, -25.0, 25.0),
-                                            "Scintillator ID", "time difference [ps]");
-  }
-
-  for (int redScinID = redScinMinID; redScinID <= redScinMaxID; ++redScinID)
-  {
-    getStatistics().createHistogramWithAxes(new TH2D(Form("hit_tdiff_red_wls_sipm_scin_%d", redScinID),
-                                                     Form("hit_tdiff_red_wls_sipm_scin_%d", redScinID), wlsPMMaxID - wlsPMMinID + 1, wlsPMMinID - 0.5,
-                                                     wlsPMMaxID + 0.5, 201, 0.0, fEventTimeWindow),
-                                            "SiPM ID", "time difference [ps]");
-
-    getStatistics().createHistogramWithAxes(new TH2D(Form("hit_zdiff_red_wls_sipm_scin_%d", redScinID),
-                                                     Form("hit_zdiff_red_wls_sipm_scin_%d", redScinID), wlsPMMaxID - wlsPMMinID + 1, wlsPMMinID - 0.5,
-                                                     wlsPMMaxID + 0.5, 101, -25.0, 25.0),
-                                            "SiPM ID", "time difference [ps]");
-  }
+  getStatistics().createHistogramWithAxes(new TH3D("hit_zdiff_red_wls", "Time difference WLS-Scin hits", wlsPMMaxID - wlsPMMinID + 1,
+                                                   wlsPMMinID - 0.5, wlsPMMaxID + 0.5, redScinMaxID - redScinMinID + 1, redScinMinID - 0.5,
+                                                   redScinMaxID + 0.5, 101, -25.0, 25.0));
 
   // Histograms for 2 gamama events
   getStatistics().createHistogramWithAxes(new TH1D("2g_tot", "2 gamma event - average ToT scaled", 201, 0.0, fToTHistoUpperLimit),
