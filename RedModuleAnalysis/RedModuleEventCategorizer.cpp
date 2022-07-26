@@ -253,12 +253,6 @@ void RedModuleEventCategorizer::initialiseHistograms()
   auto maxScinID = getParamBank().getScins().rbegin()->first;
 
   // Red module specific histograms
-  getStatistics().createHistogramWithAxes(new TH1D("hit_tdiff_red_wls", "hit_tdiff_red_wls", 200, 0.0, fEventTimeWindow), "tdiff [ps]", "hit pairs");
-
-  getStatistics().createHistogramWithAxes(new TH2D("hit_tdiff_red_wls_scin", "hit_tdiff_red_wls_scin", maxScinID - minScinID + 1, minScinID - 0.5,
-                                                   maxScinID + 0.5, 201, 0.0, fEventTimeWindow),
-                                          "Scintillator ID", "time difference [ps]");
-
   getStatistics().createHistogramWithAxes(new TH1D("hit_tdiff_red_black", "hit_tdiff_red_black", 200, 0.0, fEventTimeWindow), "tdiff [ps]",
                                           "hit pairs");
 
