@@ -155,72 +155,72 @@ bool RedModuleEventCategorizer::exec()
             continue;
           }
 
-          auto slot1Type = firstHit->getScin().getSlot().getType();
-          auto slot2Type = secondHit->getScin().getSlot().getType();
-          auto slot1ID = firstHit->getScin().getSlot().getID();
-          auto slot2ID = secondHit->getScin().getSlot().getID();
-          auto scin1ID = firstHit->getScin().getID();
-          auto scin2ID = secondHit->getScin().getID();
+          // auto slot1Type = firstHit->getScin().getSlot().getType();
+          // auto slot2Type = secondHit->getScin().getSlot().getType();
+          // auto slot1ID = firstHit->getScin().getSlot().getID();
+          // auto slot2ID = secondHit->getScin().getSlot().getID();
+          // auto scin1ID = firstHit->getScin().getID();
+          // auto scin2ID = secondHit->getScin().getID();
+          //
+          // if (slot1ID == 201 && (slot2ID == 202 || slot2ID == 203))
+          // {
+          //   auto sipm1ID = firstHit->getSignalA().getPMSignals().at(0).getPM().getID();
+          //   double wlsOffset = fConstansTree.get("pm." + to_string(sipm1ID) + "." + to_string(scin2ID), 0.0);
+          //   // skip if time difference condidion not met
+          //   auto tDiff = secondHit->getTime() - (firstHit->getTime() - wlsOffset);
+          //   if (tDiff - fCoincidencesOffset > fCoincidencesMaxTDiff)
+          //   {
+          //     continue;
+          //   }
+          //
+          //   getStatistics().fillHistogram("2g_tdiff_red_wls", sipm1ID, scin2ID, tDiff);
+          //   if (firstHit->getPosZ() != -999.0)
+          //   {
+          //     getStatistics().fillHistogram("2g_zdiff_red_wls", sipm1ID, scin2ID, firstHit->getPosZ() - secondHit->getPosZ());
+          //   }
+          // }
 
-          if (slot1ID == 201 && (slot2ID == 202 || slot2ID == 203))
-          {
-            auto sipm1ID = firstHit->getSignalA().getPMSignals().at(0).getPM().getID();
-            double wlsOffset = fConstansTree.get("pm." + to_string(sipm1ID) + "." + to_string(scin2ID), 0.0);
-            // skip if time difference condidion not met
-            auto tDiff = secondHit->getTime() - (firstHit->getTime() - wlsOffset);
-            if (tDiff - fCoincidencesOffset > fCoincidencesMaxTDiff)
-            {
-              continue;
-            }
-
-            getStatistics().fillHistogram("hit_tdiff_red_wls", sipm1ID, scin2ID, tDiff);
-            if (firstHit->getPosZ() != -999.0)
-            {
-              getStatistics().fillHistogram("hit_zdiff_red_wls", sipm1ID, scin2ID, firstHit->getPosZ() - secondHit->getPosZ());
-            }
-          }
-
-          if (slot2ID == 201 && (slot1ID == 202 || slot1ID == 203))
-          {
-            auto sipm2ID = secondHit->getSignalA().getPMSignals().at(0).getPM().getID();
-            double wlsOffset = fConstansTree.get("pm." + to_string(sipm2ID) + "." + to_string(scin1ID), 0.0);
-            // skip if time difference condidion not met
-            auto tDiff = (secondHit->getTime() - wlsOffset) - firstHit->getTime();
-            if (tDiff - fCoincidencesOffset > fCoincidencesMaxTDiff)
-            {
-              continue;
-            }
-            getStatistics().fillHistogram("hit_tdiff_red_wls", sipm2ID, scin1ID, tDiff);
-
-            if (secondHit->getPosZ() != -999.0)
-            {
-              getStatistics().fillHistogram("hit_zdiff_red_wls", sipm2ID, scin1ID, secondHit->getPosZ() - firstHit->getPosZ());
-            }
-          }
+          // if (slot2ID == 201 && (slot1ID == 202 || slot1ID == 203))
+          // {
+          //   auto sipm2ID = secondHit->getSignalA().getPMSignals().at(0).getPM().getID();
+          //   double wlsOffset = fConstansTree.get("pm." + to_string(sipm2ID) + "." + to_string(scin1ID), 0.0);
+          //   // skip if time difference condidion not met
+          //   auto tDiff = (secondHit->getTime() - wlsOffset) - firstHit->getTime();
+          //   if (tDiff - fCoincidencesOffset > fCoincidencesMaxTDiff)
+          //   {
+          //     continue;
+          //   }
+          //   getStatistics().fillHistogram("2g_tdiff_red_wls", sipm2ID, scin1ID, tDiff);
+          //
+          //   if (secondHit->getPosZ() != -999.0)
+          //   {
+          //     getStatistics().fillHistogram("2g_zdiff_red_wls", sipm2ID, scin1ID, secondHit->getPosZ() - firstHit->getPosZ());
+          //   }
+          // }
 
           // Red - black -- finding coincidences
-          if (slot1ID == 202 && slot2ID == 204 || slot1ID == 203 && slot2ID == 204 || slot2ID == 202 && slot1ID == 204 ||
-              slot2ID == 203 && slot1ID == 204)
-          {
-            // skip if time difference condidion not met
-            auto tDiff = secondHit->getTime() - firstHit->getTime();
-            if (tDiff - fCoincidencesOffset > fCoincidencesMaxTDiff)
-            {
-              continue;
-            }
-
-            getStatistics().fillHistogram("hit_tdiff_red_black", tDiff);
-            getStatistics().fillHistogram("hit_tdiff_red_black_scin", scin1ID, tDiff);
-            getStatistics().fillHistogram("hit_tdiff_red_black_scin", scin2ID, tDiff);
-
-            if (EventCategorizerTools::checkFor2Gamma(firstHit, secondHit, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff,
-                                                      fToTCutAnniMin, fToTCutAnniMax, fSourcePos))
-            {
-              JPetEvent newEvent = event;
-              newEvent.addEventType(JPetEventType::k2Gamma);
-              events.push_back(newEvent);
-            }
-          }
+          // if (slot1ID == 202 && slot2ID == 204 || slot1ID == 203 && slot2ID == 204 || slot2ID == 202 && slot1ID == 204 ||
+          //     slot2ID == 203 && slot1ID == 204)
+          // {
+          //   // skip if time difference condidion not met
+          //   auto tDiff = secondHit->getTime() - firstHit->getTime();
+          //   if (tDiff - fCoincidencesOffset > fCoincidencesMaxTDiff)
+          //   {
+          //     continue;
+          //   }
+          //
+          //   getStatistics().fillHistogram("2g_tdiff_red_black", tDiff);
+          //   getStatistics().fillHistogram("2g_tdiff_red_black_scin", scin1ID, tDiff);
+          //   getStatistics().fillHistogram("2g_tdiff_red_black_scin", scin2ID, tDiff);
+          //
+          //   if (EventCategorizerTools::checkFor2Gamma(firstHit, secondHit, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff,
+          //                                             fToTCutAnniMin, fToTCutAnniMax, fSourcePos))
+          //   {
+          //     JPetEvent newEvent = event;
+          //     newEvent.addEventType(JPetEventType::k2Gamma);
+          //     events.push_back(newEvent);
+          //   }
+          // }
         }
       }
     }
@@ -249,174 +249,180 @@ void RedModuleEventCategorizer::saveEvents(const vector<JPetEvent>& events)
 
 void RedModuleEventCategorizer::initialiseHistograms()
 {
-  auto minScinID = getParamBank().getScins().begin()->first;
-  auto maxScinID = getParamBank().getScins().rbegin()->first;
+  // auto minScinID = getParamBank().getScins().begin()->first;
+  // auto maxScinID = getParamBank().getScins().rbegin()->first;
 
   // Red module specific histograms
-  getStatistics().createHistogramWithAxes(new TH1D("hit_tdiff_red_black", "hit_tdiff_red_black", 200, 0.0, fEventTimeWindow), "tdiff [ps]",
-                                          "hit pairs");
+  // getStatistics().createHistogramWithAxes(new TH1D("2g_tdiff_red_black", "2 gamma event - red and reference module hits", 200, 0.0, fEventTimeWindow),
+  //                                         "tdiff [ps]", "hit pairs");
+  //
+  // getStatistics().createHistogramWithAxes(new TH2D("2g_tdiff_red_black_scin", "2 gamma event - red and reference module hits per scin",
+  //                                                  maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 201, 0.0, fEventTimeWindow),
+  //                                         "Scintillator ID", "time difference [ps]");
 
-  getStatistics().createHistogramWithAxes(new TH2D("hit_tdiff_red_black_scin", "hit_tdiff_red_black_scin", maxScinID - minScinID + 1, minScinID - 0.5,
-                                                   maxScinID + 0.5, 201, 0.0, fEventTimeWindow),
-                                          "Scintillator ID", "time difference [ps]");
+  // int wlsPMMinID = 401;
+  // int wlsPMMaxID = 464;
+  // int redScinMinID = 241;
+  // int redScinMaxID = 279;
 
-  int wlsPMMinID = 401;
-  int wlsPMMaxID = 464;
-  int redScinMinID = 241;
-  int redScinMaxID = 279;
-
-  getStatistics().createHistogramWithAxes(new TH3D("hit_tdiff_red_wls", "Time difference WLS-Scin hits", wlsPMMaxID - wlsPMMinID + 1,
-                                                   wlsPMMinID - 0.5, wlsPMMaxID + 0.5, redScinMaxID - redScinMinID + 1, redScinMinID - 0.5,
-                                                   redScinMaxID + 0.5, 201, 0.0, 20000.0));
-
-  getStatistics().createHistogramWithAxes(new TH3D("hit_zdiff_red_wls", "Time difference WLS-Scin hits", wlsPMMaxID - wlsPMMinID + 1,
-                                                   wlsPMMinID - 0.5, wlsPMMaxID + 0.5, redScinMaxID - redScinMinID + 1, redScinMinID - 0.5,
-                                                   redScinMaxID + 0.5, 101, -25.0, 25.0));
-
-  // Histograms for 2 gamama events
-  getStatistics().createHistogramWithAxes(new TH1D("2g_tot", "2 gamma event - average ToT scaled", 201, 0.0, fToTHistoUpperLimit),
-                                          "Time over Threshold [ps]", "Number of Hits");
-
-  getStatistics().createHistogramWithAxes(new TH2D("2g_tot_scin", "2 gamma event - average ToT scaled per scintillator", maxScinID - minScinID + 1,
-                                                   minScinID - 0.5, maxScinID + 0.5, 201, 0.0, fToTHistoUpperLimit),
-                                          "Scintillator ID", "Time over Threshold [ps]");
-
-  getStatistics().createHistogramWithAxes(
-      new TH2D("2g_tot_z_pos", "2 gamma event - average ToT scaled vs. hit z position", 101, -25.5, 25.5, 201, 0.0, fToTHistoUpperLimit),
-      "Hit z position [cm]", "Time over Threshold [ps]");
-
-  getStatistics().createHistogramWithAxes(new TH1D("2g_tof", "2 gamma event - TOF calculated by convention", 201, -fMaxTimeDiff, fMaxTimeDiff),
-                                          "Time of Flight [ps]", "Number of Hit Pairs");
-
-  getStatistics().createHistogramWithAxes(new TH2D("2g_tof_scin", "2 gamma event - TOF calculated by convention per scintillator",
-                                                   maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 201, -fMaxTimeDiff, fMaxTimeDiff),
-                                          "Scintillator ID", "Time of Flight [ps]");
-
-  getStatistics().createHistogramWithAxes(new TH1D("2g_ab_tdiff", "2 gamma event - hits A-B time difference", 201, -fMaxTimeDiff, fMaxTimeDiff),
-                                          "A-B Signal Time Difference [ps]", "Number of Hit Pairs");
-
-  getStatistics().createHistogramWithAxes(new TH2D("2g_ab_tdiff_scin", "2 gamma event - hits A-B time difference per scintillator",
-                                                   maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 201, -fMaxTimeDiff, fMaxTimeDiff),
-                                          "Scintillator ID", "A-B Signal Time Difference [ps]");
-
-  getStatistics().createHistogramWithAxes(
-      new TH2D("2g_ab_tdiff_tot", "2 gamma event - hits A-B time difference vs TOT", 201, -fMaxTimeDiff, fMaxTimeDiff, 201, 0.0, fToTHistoUpperLimit),
-      "A-B Signal Time Difference [ps]", "Time over Threshold [ps]");
-
-  getStatistics().createHistogramWithAxes(new TH1D("2g_theta", "2 gamma event - flight vectors theta", 181, -0.5, 180.5), "Angle [degree]",
-                                          "Number of Hit Pairs");
-
-  getStatistics().createHistogramWithAxes(new TH2D("2g_theta_scin", "2 gamma event - flight vectors theta per scintillator",
-                                                   maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 181, -0.5, 180.5),
-                                          "Scintillator ID", "Angle [degree]");
-
-  getStatistics().createHistogramWithAxes(
-      new TH2D("2g_theta_z_pos", "2 gamma event - flight vectors theta vs. hit z position", 101, -25.5, 25.5, 181, -0.5, 180.5),
-      "Hit z position [cm]", "Angle [degree]");
-
-  // Cut stats
-  getStatistics().createHistogramWithAxes(
-      new TH1D("cut_stats_none", "Hit pairs before cuts - scintillator occupancy", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5),
-      "Scintillator ID", "Number of Hits");
-
-  getStatistics().createHistogramWithAxes(
-      new TH1D("cut_stats_a1", "Hits after theta cut - scintillator occupancy", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5),
-      "Scintillator ID", "Number of Hits");
-
-  getStatistics().createHistogramWithAxes(
-      new TH1D("cut_stats_a2", "Hits after theta cut - scintillator occupancy", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5),
-      "Scintillator ID", "Number of Hits");
-
-  getStatistics().createHistogramWithAxes(new TH1D("cut_stats_tof", "Hits after time difference cut - scintillator occupancy",
-                                                   maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5),
-                                          "Scintillator ID", "Number of Hits");
-
-  getStatistics().createHistogramWithAxes(
-      new TH1D("cut_stats_tot", "Hits after ToT cut - scintillator occupancy", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5),
-      "Scintillator ID", "Number of Hits");
-
-  // Cut result on other observables
-  // TOF cut
-  getStatistics().createHistogramWithAxes(new TH1D("tof_cut_tot", "2 gamma event after TOF cut - average ToT scaled", 201, 0.0, fToTHistoUpperLimit),
-                                          "Time over Threshold [ps]", "Number of Hits");
-
-  getStatistics().createHistogramWithAxes(
-      new TH1D("tof_cut_ab_tdiff", "2 gamma event after TOF cut - hits A-B time difference", 201, -fMaxTimeDiff, fMaxTimeDiff),
-      "A-B Signal Time Difference [ps]", "Number of Hits");
-
-  getStatistics().createHistogramWithAxes(new TH1D("tof_cut_theta", "2 gamma event after TOF cut - theta between flight vectors", 181, -0.5, 180.5),
-                                          "Angle [degree]", "Number of Hit Pairs");
-
-  // After theta angle cut - back to back requirement
-  getStatistics().createHistogramWithAxes(
-      new TH1D("theta_cut_tof", "2 gamma event after theta cut - TOF calculated by convention", 201, -fMaxTimeDiff, fMaxTimeDiff),
-      "Time of Flight [ps]", "Number of Hit Pairs");
-
-  getStatistics().createHistogramWithAxes(
-      new TH1D("theta_cut_tot", "2 gamma event after theta cut - average ToT scaled", 201, 0.0, fToTHistoUpperLimit), "Time over Threshold [ps]",
-      "Number of Hit Pairs");
-
-  getStatistics().createHistogramWithAxes(
-      new TH1D("theta_cut_ab_tdiff", "2 gamma event after theta cut - hits A-B time difference", 201, -fMaxTimeDiff, fMaxTimeDiff),
-      "A-B Signal Time Difference [ps]", "Number of Hit Pairs");
-
-  // After ToT cut
-  getStatistics().createHistogramWithAxes(
-      new TH1D("tot_cut_tof", "2 gamma event after ToT cut - TOF calculated by convention", 201, -fMaxTimeDiff, fMaxTimeDiff),
-      "A-B Signal Time Difference [ps]", "Number of Hit Pairs");
-
-  getStatistics().createHistogramWithAxes(
-      new TH1D("tot_cut_ab_tdiff", "2 gamma event after ToT cut - hits A-B time difference", 201, -fMaxTimeDiff, fMaxTimeDiff),
-      "A-B Signal Time Difference [ps]", "Number of Hit Pairs");
-
-  getStatistics().createHistogramWithAxes(new TH1D("tot_cut_theta", "2 gamma event after ToT cut - theta between flight vectors", 181, -0.5, 180.5),
-                                          "Angle [degree]", "Number of Hit Pairs");
-
-  // Events after cut - defined as annihilation event
-  getStatistics().createHistogramWithAxes(new TH1D("ap_tot", "Annihilation pairs average ToT scaled", 201, 0.0, fToTHistoUpperLimit),
-                                          "Time over Threshold [ps]", "Number of Annihilation Pairs");
-
-  getStatistics().createHistogramWithAxes(new TH2D("ap_tot_scin", "Annihilation pairs average ToT scaled per scintillator", maxScinID - minScinID + 1,
-                                                   minScinID - 0.5, maxScinID + 0.5, 201, 0.0, fToTHistoUpperLimit),
-                                          "Scintillator ID", "Time over Threshold [ps]");
-
-  getStatistics().createHistogramWithAxes(
-      new TH1D("ap_ab_tdiff", "Annihilation pairs hits A-B time difference after ToT cut", 201, -fMaxTimeDiff, fMaxTimeDiff),
-      "A-B Signal Time Difference [ps]", "Number of Annihilation Pairs");
-
-  getStatistics().createHistogramWithAxes(new TH2D("ap_ab_tdiff_scin", "Annihilation pairs hits A-B time difference per scintillator",
-                                                   maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 201, -fMaxTimeDiff, fMaxTimeDiff),
-                                          "Scintillator ID", "A-B Signal Time Difference [ps]");
-
-  getStatistics().createHistogramWithAxes(new TH2D("ap_ab_tdiff_tot", "Annihilation pairs - hits A-B time difference vs TOT", 201, -fMaxTimeDiff,
-                                                   fMaxTimeDiff, 201, 0.0, fToTHistoUpperLimit),
-                                          "A-B Signal Time Difference [ps]", "Time over Threshold [ps]");
-
-  getStatistics().createHistogramWithAxes(new TH1D("ap_tof", "Annihilation pairs Time of Flight", 201, -fMaxTimeDiff, fMaxTimeDiff),
-                                          "Time of Flight [ps]", "Number of Annihilation Pairs");
-
-  getStatistics().createHistogramWithAxes(new TH2D("ap_tof_scin", "Annihilation pairs Time of Flight per scintillator", maxScinID - minScinID + 1,
-                                                   minScinID - 0.5, maxScinID + 0.5, 201, -fMaxTimeDiff, fMaxTimeDiff),
-                                          "Scintillator ID", "Time of Flight [ps]");
-
-  getStatistics().createHistogramWithAxes(new TH2D("ap_xy", "XY position of annihilation point (bin 0.5 cm)", 202, -50.5, 50.5, 202, -50.5, 50.5),
-                                          "X position [cm]", "Y position [cm]");
-
-  getStatistics().createHistogramWithAxes(new TH2D("ap_zx", "ZX position of annihilation point (bin 0.5 cm)", 202, -50.5, 50.5, 202, -50.5, 50.5),
-                                          "Z position [cm]", "X position [cm]");
-
-  getStatistics().createHistogramWithAxes(new TH2D("ap_zy", "ZY position of annihilation point (bin 0.5 cm)", 202, -50.5, 50.5, 202, -50.5, 50.5),
-                                          "Z position [cm]", "Y position [cm]");
-
-  getStatistics().createHistogramWithAxes(
-      new TH2D("ap_xy_zoom", "XY position of annihilation point (bin 0.25 cm)", 132, -16.5, 16.5, 132, -16.5, 16.5), "X position [cm]",
-      "Y position [cm]");
-
-  getStatistics().createHistogramWithAxes(
-      new TH2D("ap_zx_zoom", "ZX position of annihilation point (bin 0.25 cm)", 132, -16.5, 16.5, 132, -16.5, 16.5), "Z position [cm]",
-      "X position [cm]");
-
-  getStatistics().createHistogramWithAxes(
-      new TH2D("ap_zy_zoom", "ZY position of annihilation point (bin 0.25 cm)", 132, -16.5, 16.5, 132, -16.5, 16.5), "Z position [cm]",
-      "Y position [cm]");
+  // getStatistics().createHistogramWithAxes(new TH3D("2g_tdiff_red_wls", "Time difference WLS-Scin hits", wlsPMMaxID - wlsPMMinID + 1, wlsPMMinID -
+  // 0.5,
+  //                                                  wlsPMMaxID + 0.5, redScinMaxID - redScinMinID + 1, redScinMinID - 0.5, redScinMaxID + 0.5, 201,
+  //                                                  0.0, 20000.0));
+  //
+  // getStatistics().createHistogramWithAxes(new TH3D("2g_zdiff_red_wls", "Time difference WLS-Scin hits", wlsPMMaxID - wlsPMMinID + 1, wlsPMMinID -
+  // 0.5,
+  //                                                  wlsPMMaxID + 0.5, redScinMaxID - redScinMinID + 1, redScinMinID - 0.5, redScinMaxID + 0.5, 101,
+  //                                                  -25.0, 25.0));
+  //
+  // // Histograms for 2 gamama events
+  // getStatistics().createHistogramWithAxes(new TH1D("2g_tot", "2 gamma event - average ToT scaled", 201, 0.0, fToTHistoUpperLimit),
+  //                                         "Time over Threshold [ps]", "Number of Hits");
+  //
+  // getStatistics().createHistogramWithAxes(new TH2D("2g_tot_scin", "2 gamma event - average ToT scaled per scintillator", maxScinID - minScinID + 1,
+  //                                                  minScinID - 0.5, maxScinID + 0.5, 201, 0.0, fToTHistoUpperLimit),
+  //                                         "Scintillator ID", "Time over Threshold [ps]");
+  //
+  // getStatistics().createHistogramWithAxes(
+  //     new TH2D("2g_tot_z_pos", "2 gamma event - average ToT scaled vs. hit z position", 101, -25.5, 25.5, 201, 0.0, fToTHistoUpperLimit),
+  //     "Hit z position [cm]", "Time over Threshold [ps]");
+  //
+  // getStatistics().createHistogramWithAxes(new TH1D("2g_tof", "2 gamma event - TOF calculated by convention", 201, -fMaxTimeDiff, fMaxTimeDiff),
+  //                                         "Time of Flight [ps]", "Number of Hit Pairs");
+  //
+  // getStatistics().createHistogramWithAxes(new TH2D("2g_tof_scin", "2 gamma event - TOF calculated by convention per scintillator",
+  //                                                  maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 201, -fMaxTimeDiff, fMaxTimeDiff),
+  //                                         "Scintillator ID", "Time of Flight [ps]");
+  //
+  // getStatistics().createHistogramWithAxes(new TH1D("2g_ab_tdiff", "2 gamma event - hits A-B time difference", 201, -fMaxTimeDiff, fMaxTimeDiff),
+  //                                         "A-B Signal Time Difference [ps]", "Number of Hit Pairs");
+  //
+  // getStatistics().createHistogramWithAxes(new TH2D("2g_ab_tdiff_scin", "2 gamma event - hits A-B time difference per scintillator",
+  //                                                  maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 201, -fMaxTimeDiff, fMaxTimeDiff),
+  //                                         "Scintillator ID", "A-B Signal Time Difference [ps]");
+  //
+  // getStatistics().createHistogramWithAxes(
+  //     new TH2D("2g_ab_tdiff_tot", "2 gamma event - hits A-B time difference vs TOT", 201, -fMaxTimeDiff, fMaxTimeDiff, 201, 0.0,
+  //     fToTHistoUpperLimit), "A-B Signal Time Difference [ps]", "Time over Threshold [ps]");
+  //
+  // getStatistics().createHistogramWithAxes(new TH1D("2g_theta", "2 gamma event - flight vectors theta", 181, -0.5, 180.5), "Angle [degree]",
+  //                                         "Number of Hit Pairs");
+  //
+  // getStatistics().createHistogramWithAxes(new TH2D("2g_theta_scin", "2 gamma event - flight vectors theta per scintillator",
+  //                                                  maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 181, -0.5, 180.5),
+  //                                         "Scintillator ID", "Angle [degree]");
+  //
+  // getStatistics().createHistogramWithAxes(
+  //     new TH2D("2g_theta_z_pos", "2 gamma event - flight vectors theta vs. hit z position", 101, -25.5, 25.5, 181, -0.5, 180.5),
+  //     "Hit z position [cm]", "Angle [degree]");
+  //
+  // // Cut stats
+  // getStatistics().createHistogramWithAxes(
+  //     new TH1D("cut_stats_none", "Hit pairs before cuts - scintillator occupancy", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5),
+  //     "Scintillator ID", "Number of Hits");
+  //
+  // getStatistics().createHistogramWithAxes(
+  //     new TH1D("cut_stats_a1", "Hits after theta cut - scintillator occupancy", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5),
+  //     "Scintillator ID", "Number of Hits");
+  //
+  // getStatistics().createHistogramWithAxes(
+  //     new TH1D("cut_stats_a2", "Hits after theta cut - scintillator occupancy", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5),
+  //     "Scintillator ID", "Number of Hits");
+  //
+  // getStatistics().createHistogramWithAxes(new TH1D("cut_stats_tof", "Hits after time difference cut - scintillator occupancy",
+  //                                                  maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5),
+  //                                         "Scintillator ID", "Number of Hits");
+  //
+  // getStatistics().createHistogramWithAxes(
+  //     new TH1D("cut_stats_tot", "Hits after ToT cut - scintillator occupancy", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5),
+  //     "Scintillator ID", "Number of Hits");
+  //
+  // // Cut result on other observables
+  // // TOF cut
+  // getStatistics().createHistogramWithAxes(new TH1D("tof_cut_tot", "2 gamma event after TOF cut - average ToT scaled", 201, 0.0,
+  // fToTHistoUpperLimit),
+  //                                         "Time over Threshold [ps]", "Number of Hits");
+  //
+  // getStatistics().createHistogramWithAxes(
+  //     new TH1D("tof_cut_ab_tdiff", "2 gamma event after TOF cut - hits A-B time difference", 201, -fMaxTimeDiff, fMaxTimeDiff),
+  //     "A-B Signal Time Difference [ps]", "Number of Hits");
+  //
+  // getStatistics().createHistogramWithAxes(new TH1D("tof_cut_theta", "2 gamma event after TOF cut - theta between flight vectors", 181, -0.5,
+  // 180.5),
+  //                                         "Angle [degree]", "Number of Hit Pairs");
+  //
+  // // After theta angle cut - back to back requirement
+  // getStatistics().createHistogramWithAxes(
+  //     new TH1D("theta_cut_tof", "2 gamma event after theta cut - TOF calculated by convention", 201, -fMaxTimeDiff, fMaxTimeDiff),
+  //     "Time of Flight [ps]", "Number of Hit Pairs");
+  //
+  // getStatistics().createHistogramWithAxes(
+  //     new TH1D("theta_cut_tot", "2 gamma event after theta cut - average ToT scaled", 201, 0.0, fToTHistoUpperLimit), "Time over Threshold [ps]",
+  //     "Number of Hit Pairs");
+  //
+  // getStatistics().createHistogramWithAxes(
+  //     new TH1D("theta_cut_ab_tdiff", "2 gamma event after theta cut - hits A-B time difference", 201, -fMaxTimeDiff, fMaxTimeDiff),
+  //     "A-B Signal Time Difference [ps]", "Number of Hit Pairs");
+  //
+  // // After ToT cut
+  // getStatistics().createHistogramWithAxes(
+  //     new TH1D("tot_cut_tof", "2 gamma event after ToT cut - TOF calculated by convention", 201, -fMaxTimeDiff, fMaxTimeDiff),
+  //     "A-B Signal Time Difference [ps]", "Number of Hit Pairs");
+  //
+  // getStatistics().createHistogramWithAxes(
+  //     new TH1D("tot_cut_ab_tdiff", "2 gamma event after ToT cut - hits A-B time difference", 201, -fMaxTimeDiff, fMaxTimeDiff),
+  //     "A-B Signal Time Difference [ps]", "Number of Hit Pairs");
+  //
+  // getStatistics().createHistogramWithAxes(new TH1D("tot_cut_theta", "2 gamma event after ToT cut - theta between flight vectors", 181, -0.5,
+  // 180.5),
+  //                                         "Angle [degree]", "Number of Hit Pairs");
+  //
+  // // Events after cut - defined as annihilation event
+  // getStatistics().createHistogramWithAxes(new TH1D("ap_tot", "Annihilation pairs average ToT scaled", 201, 0.0, fToTHistoUpperLimit),
+  //                                         "Time over Threshold [ps]", "Number of Annihilation Pairs");
+  //
+  // getStatistics().createHistogramWithAxes(new TH2D("ap_tot_scin", "Annihilation pairs average ToT scaled per scintillator", maxScinID - minScinID +
+  // 1,
+  //                                                  minScinID - 0.5, maxScinID + 0.5, 201, 0.0, fToTHistoUpperLimit),
+  //                                         "Scintillator ID", "Time over Threshold [ps]");
+  //
+  // getStatistics().createHistogramWithAxes(
+  //     new TH1D("ap_ab_tdiff", "Annihilation pairs hits A-B time difference after ToT cut", 201, -fMaxTimeDiff, fMaxTimeDiff),
+  //     "A-B Signal Time Difference [ps]", "Number of Annihilation Pairs");
+  //
+  // getStatistics().createHistogramWithAxes(new TH2D("ap_ab_tdiff_scin", "Annihilation pairs hits A-B time difference per scintillator",
+  //                                                  maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 201, -fMaxTimeDiff, fMaxTimeDiff),
+  //                                         "Scintillator ID", "A-B Signal Time Difference [ps]");
+  //
+  // getStatistics().createHistogramWithAxes(new TH2D("ap_ab_tdiff_tot", "Annihilation pairs - hits A-B time difference vs TOT", 201, -fMaxTimeDiff,
+  //                                                  fMaxTimeDiff, 201, 0.0, fToTHistoUpperLimit),
+  //                                         "A-B Signal Time Difference [ps]", "Time over Threshold [ps]");
+  //
+  // getStatistics().createHistogramWithAxes(new TH1D("ap_tof", "Annihilation pairs Time of Flight", 201, -fMaxTimeDiff, fMaxTimeDiff),
+  //                                         "Time of Flight [ps]", "Number of Annihilation Pairs");
+  //
+  // getStatistics().createHistogramWithAxes(new TH2D("ap_tof_scin", "Annihilation pairs Time of Flight per scintillator", maxScinID - minScinID + 1,
+  //                                                  minScinID - 0.5, maxScinID + 0.5, 201, -fMaxTimeDiff, fMaxTimeDiff),
+  //                                         "Scintillator ID", "Time of Flight [ps]");
+  //
+  // getStatistics().createHistogramWithAxes(new TH2D("ap_xy", "XY position of annihilation point (bin 0.5 cm)", 202, -50.5, 50.5, 202, -50.5, 50.5),
+  //                                         "X position [cm]", "Y position [cm]");
+  //
+  // getStatistics().createHistogramWithAxes(new TH2D("ap_zx", "ZX position of annihilation point (bin 0.5 cm)", 202, -50.5, 50.5, 202, -50.5, 50.5),
+  //                                         "Z position [cm]", "X position [cm]");
+  //
+  // getStatistics().createHistogramWithAxes(new TH2D("ap_zy", "ZY position of annihilation point (bin 0.5 cm)", 202, -50.5, 50.5, 202, -50.5, 50.5),
+  //                                         "Z position [cm]", "Y position [cm]");
+  //
+  // getStatistics().createHistogramWithAxes(
+  //     new TH2D("ap_xy_zoom", "XY position of annihilation point (bin 0.25 cm)", 132, -16.5, 16.5, 132, -16.5, 16.5), "X position [cm]",
+  //     "Y position [cm]");
+  //
+  // getStatistics().createHistogramWithAxes(
+  //     new TH2D("ap_zx_zoom", "ZX position of annihilation point (bin 0.25 cm)", 132, -16.5, 16.5, 132, -16.5, 16.5), "Z position [cm]",
+  //     "X position [cm]");
+  //
+  // getStatistics().createHistogramWithAxes(
+  //     new TH2D("ap_zy_zoom", "ZY position of annihilation point (bin 0.25 cm)", 132, -16.5, 16.5, 132, -16.5, 16.5), "Z position [cm]",
+  //     "Y position [cm]");
 }

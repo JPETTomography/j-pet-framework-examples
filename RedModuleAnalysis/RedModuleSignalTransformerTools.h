@@ -23,6 +23,7 @@
  */
 
 #include "../ModularDetectorAnalysis/SignalTransformerTools.h"
+#include <JPetParamBank/JPetParamBank.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
 #include <Signals/JPetMatrixSignal/JPetMatrixSignal.h>
 #include <Signals/JPetPMSignal/JPetPMSignal.h>
@@ -37,9 +38,9 @@ public:
 
   static std::vector<JPetMatrixSignal> mergeSignalsAllSiPMs(std::map<JPetMatrix::Side, std::map<int, std::vector<JPetPMSignal>>>& pmSigMtxMap,
                                                             double mergingTime, boost::property_tree::ptree& calibTree,
-                                                            boost::property_tree::ptree& wlsConfig);
+                                                            boost::property_tree::ptree& wlsConfig, const JPetParamBank& paramBank);
 
   static std::vector<JPetMatrixSignal> mergePMSignalsOnWLS(std::vector<JPetPMSignal>& pmSigVec, double mergingTime,
-                                                           boost::property_tree::ptree& calibTree, boost::property_tree::ptree& wlsConfig);
+                                                           boost::property_tree::ptree& calibTree, const JPetMatrix& matrix);
 };
 #endif /* !REDMODULESIGNALTRANSFORMERTOOLS_H */

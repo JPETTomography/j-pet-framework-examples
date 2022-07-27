@@ -101,7 +101,8 @@ bool RedModuleSignalTransformer::exec()
     }
 
     // Merging max. 4 PM Signals into a MatrixSignal
-    auto mergedSignals = RedModuleSignalTransformerTools::mergeSignalsAllSiPMs(pmSigMtxMap, fMergingTime, fConstansTree, fWLSConfigTree);
+    auto mergedSignals =
+        RedModuleSignalTransformerTools::mergeSignalsAllSiPMs(pmSigMtxMap, fMergingTime, fConstansTree, fWLSConfigTree, getParamBank());
 
     // Saving method invocation
     if (mergedSignals.size() > 0)
@@ -148,6 +149,12 @@ void RedModuleSignalTransformer::saveMatrixSignals(const std::vector<JPetMatrixS
       {
         getStatistics().fillHistogram("mtxsig_scin_sideB", scinID);
         getStatistics().fillHistogram("mtxsig_sideB_tot", scinID, mtxSig.getToT());
+      }
+      else if (mtxSig.getMatrix().getSide() == JPetMatrix::WLS)
+      {
+        getStatistics().fillHistogram("mtxsig_wls", scinID);
+        getStatistics().fillHistogram("mtxsig_wls_tot", scinID, mtxSig.getToT());
+        getStatistics().fillHistogram("mtxsig_wls_multi", scinID, mtxSig.getPMSignals().size());
       }
     }
 
@@ -209,6 +216,18 @@ void RedModuleSignalTransformer::initialiseHistograms()
   getStatistics().createHistogramWithAxes(new TH2D("mtxsig_sideB_tot", "Matrix Signal ToT - Side B per scintillator", maxScinID - minScinID + 1,
                                                    minScinID - 0.5, maxScinID + 0.5, 200, 0.0, fToTHistoUpperLimit),
                                           "Scin ID", "ToT [ps]");
+
+  getStatistics().createHistogramWithAxes(
+      new TH1D("mtxsig_wls", "Number of Matrix Signals per WLS", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5), "Scin ID",
+      "Number of Matrix Signals");
+
+  getStatistics().createHistogramWithAxes(new TH2D("mtxsig_wls_tot", "Matrix Signal ToT - WLS layer", maxScinID - minScinID + 1, minScinID - 0.5,
+                                                   maxScinID + 0.5, 200, 0.0, fToTHistoUpperLimit),
+                                          "Scin ID", "ToT [ps]");
+
+  getStatistics().createHistogramWithAxes(
+      new TH2D("mtxsig_wls_multi", "WLS Matrix Signal Multiplicity", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 4, -0.5, 3.5),
+      "Scin ID", "Number of PM signals merged into WLS signal");
 
   // SiPM offsets if needed
   if (fSaveCalibHistos)
