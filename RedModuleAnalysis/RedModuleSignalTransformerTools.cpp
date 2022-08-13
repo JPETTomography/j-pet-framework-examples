@@ -46,15 +46,15 @@ const map<JPetMatrix::Side, map<int, vector<JPetPMSignal>>> RedModuleSignalTrans
   {
     auto pmSig = dynamic_cast<const JPetPMSignal&>(timeWindow->operator[](i));
 
-    auto scinID = pmSig.getPM().getMatrix().getScin().getID();
+    auto mtxID = pmSig.getPM().getMatrix().getID();
     auto side = pmSig.getPM().getMatrix().getSide();
 
-    auto search = mappedSignals.at(side).find(scinID);
+    auto search = mappedSignals.at(side).find(mtxID);
     if (search == mappedSignals.at(side).end())
     {
       vector<JPetPMSignal> tmpSigVec;
       tmpSigVec.push_back(pmSig);
-      mappedSignals.at(side)[scinID] = tmpSigVec;
+      mappedSignals.at(side)[mtxID] = tmpSigVec;
     }
     else
     {
@@ -84,77 +84,126 @@ vector<JPetMatrixSignal> RedModuleSignalTransformerTools::mergeSignalsAllSiPMs(m
     allMtxSignals.insert(allMtxSignals.end(), mtxSignals.begin(), mtxSignals.end());
   }
 
+  // WLS part - preparing vector of signals for merging
+  // Mapping signals by SiPM ID
+  map<int, vector<JPetPMSignal>> sigsBySiPMID;
+  for (auto& pmSigs : mappedSignals[JPetMatrix::WLS])
+  {
+    for (auto& pmSig : pmSigs.second)
+    {
+      auto pmID = pmSig.getPM().getID();
+      auto search = sigsBySiPMID.find(pmID);
+      if (search == sigsBySiPMID.end())
+      {
+        vector<JPetPMSignal> tmpSigVec;
+        tmpSigVec.push_back(pmSig);
+        sigsBySiPMID[pmID] = tmpSigVec;
+      }
+      else
+      {
+        search->second.push_back(pmSig);
+      }
+    }
+  }
+
+  // Iterating over matrices in the ParamBank to look for conincdences
   for (auto matrixPair : paramBank.getMatrices())
   {
     auto matrix = matrixPair.second;
+
     if (matrix->getSide() == JPetMatrix::WLS)
     {
-      // vector<int> sipmIDs;
-      vector<JPetPMSignal> signalsOnMatrix;
-      for (auto& item : wlsConfig.get_child("wls_matrix." + to_string(matrix->getID()) + ".matrix_sipm_ids"))
+      auto signalsOnMatrix = getPMSignalsOnWLSMatrix(sigsBySiPMID, wlsConfig, paramBank.getMatrix(matrix->getID()));
+      if (signalsOnMatrix.size() != 0)
       {
-        auto siPMID = item.second.get_value<int>(-1);
-        if (siPMID != -1)
-        {
-          signalsOnMatrix.insert(signalsOnMatrix.end(), mappedSignals[JPetMatrix::WLS][siPMID].begin(), mappedSignals[JPetMatrix::WLS][siPMID].end());
-        }
+        // cout << "mtx id " << matrix->getID() << " pm vec size " << signalsOnMatrix.size() << endl;
+        auto mtxSignals = SignalTransformerTools::mergePMSignalsOnSide(signalsOnMatrix, mergingTime, calibTree);
+        // auto mtxSignals = mergePMSignalsOnWLS(signalsOnMatrix, mergingTime, calibTree, paramBank.getMatrix(matrix->getID()));
+        allMtxSignals.insert(allMtxSignals.end(), mtxSignals.begin(), mtxSignals.end());
       }
-      auto mtxSignals = mergePMSignalsOnWLS(signalsOnMatrix, mergingTime, calibTree, paramBank.getMatrix(matrix->getID()));
-      allMtxSignals.insert(allMtxSignals.end(), mtxSignals.begin(), mtxSignals.end());
     }
   }
 
   return allMtxSignals;
 }
 
-vector<JPetMatrixSignal> RedModuleSignalTransformerTools::mergePMSignalsOnWLS(vector<JPetPMSignal>& pmSigVec, double mergingTime,
-                                                                              boost::property_tree::ptree& calibTree, const JPetMatrix& matrix)
+vector<JPetPMSignal> RedModuleSignalTransformerTools::getPMSignalsOnWLSMatrix(map<int, vector<JPetPMSignal>>& sigsBySiPMID,
+                                                                              boost::property_tree::ptree& wlsConfig, const JPetMatrix& matrix)
 {
-  vector<JPetMatrixSignal> mtxSigVec;
-  SignalTransformerTools::sortByTime(pmSigVec);
+  vector<JPetPMSignal> signalsOnMatrix;
 
-  while (pmSigVec.size() > 0)
+  // Reading the configuration to get the IDs of the SiPM that are attached to this matrix
+  for (auto& item : wlsConfig.get_child("wls_matrix." + to_string(matrix.getID()) + ".matrix_sipm_ids"))
   {
-    // Create Matrix Signal and add first PM Signal by default
-    JPetMatrixSignal mtxSig;
-    mtxSig.setMatrix(matrix);
-    if (!mtxSig.addPMSignal(pmSigVec.at(0)))
+    auto siPMID = item.second.get_value<int>(-1);
+    if (siPMID != -1)
     {
-      ERROR("Problem with adding the first signal to new object.");
-      break;
-    }
-
-    unsigned int nextIndex = 1;
-    while (true)
-    {
-      if (pmSigVec.size() <= nextIndex)
-      {
-        // nothing left to check
-        break;
-      }
-
-      // signal matching condidion
-      if (fabs(pmSigVec.at(nextIndex).getTime() - pmSigVec.at(0).getTime()) < mergingTime)
-      {
-        // mathing signal found
-        if (mtxSig.addPMSignal(pmSigVec.at(nextIndex)))
-        {
-          // added succesfully
-          pmSigVec.erase(pmSigVec.begin() + nextIndex);
-        }
-        else
-        {
-          // this mtx pos is already occupied, check the next one
-          nextIndex++;
-        }
-      }
-      else
-      {
-        // next signal is too far from reference one, this MtxSig is finished
-        break;
-      }
+      // for (auto& pmSig : sigsBySiPMID[siPMID])
+      // {
+      //   cout << "check mtx id old " << pmSig.getPM().getMatrix().getID() << " new " << matrix.getID() << endl;
+      //   JPetPMSignal newSig(pmSig);
+      //   newSig.setMatrix(matrix);
+      //   cout << " new sig " << newSig.getPM().getMatrix().getID() << endl;
+      //   signalsOnMatrix.push_back(newSig);
+      // }
+      signalsOnMatrix.insert(signalsOnMatrix.end(), sigsBySiPMID[siPMID].begin(), sigsBySiPMID[siPMID].end());
     }
   }
-
-  return mtxSigVec;
+  return signalsOnMatrix;
 }
+
+// vector<JPetMatrixSignal> RedModuleSignalTransformerTools::mergePMSignalsOnWLS(vector<JPetPMSignal>& pmSigVec, double mergingTime,
+//                                                                               boost::property_tree::ptree& calibTree, const JPetMatrix& matrix)
+// {
+//   cout << "method mtx id " << matrix.getID() << " pm vec size " << pmSigVec.size() << endl;
+//
+//   vector<JPetMatrixSignal> mtxSigVec;
+//   SignalTransformerTools::sortByTime(pmSigVec);
+//
+//   while (pmSigVec.size() > 0)
+//   {
+//     // Create Matrix Signal and add first PM Signal by default
+//     JPetMatrixSignal mtxSig;
+//     mtxSig.setMatrix(matrix);
+//     if (!mtxSig.addPMSignal(pmSigVec.at(0)))
+//     {
+//       ERROR("Problem with adding the first signal to new object.");
+//       break;
+//     }
+//
+//     unsigned int nextIndex = 1;
+//     while (true)
+//     {
+//       if (pmSigVec.size() <= nextIndex)
+//       {
+//         // nothing left to check
+//         break;
+//       }
+//
+//       cout << "sig 0 " << pmSigVec.at(0).getTime() << " sig next " << pmSigVec.at(nextIndex).getTime() << endl;
+//
+//       // signal matching condidion
+//       if (fabs(pmSigVec.at(nextIndex).getTime() - pmSigVec.at(0).getTime()) < mergingTime)
+//       {
+//         // mathing signal found
+//         if (mtxSig.addPMSignal(pmSigVec.at(nextIndex)))
+//         {
+//           // added succesfully
+//           pmSigVec.erase(pmSigVec.begin() + nextIndex);
+//         }
+//         else
+//         {
+//           // this mtx pos is already occupied, check the next one
+//           nextIndex++;
+//         }
+//       }
+//       else
+//       {
+//         // next signal is too far from reference one, this MtxSig is finished
+//         break;
+//       }
+//     }
+//   }
+//
+//   return mtxSigVec;
+// }

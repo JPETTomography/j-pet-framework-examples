@@ -88,19 +88,7 @@ bool RedModuleSignalTransformer::exec()
     // Distribute PM Signals per Matrices
     auto pmSigMtxMap = RedModuleSignalTransformerTools::getPMSigMtxMap(timeWindow);
 
-    // Check of WLS time in DAQ slot
-    if (fSaveControlHistos)
-    {
-      for (auto wlsVec : pmSigMtxMap[JPetMatrix::WLS])
-      {
-        for (auto sig : wlsVec.second)
-        {
-          getStatistics().fillHistogram("pmsig_time", sig.getTime());
-        }
-      }
-    }
-
-    // Merging max. 4 PM Signals into a MatrixSignal
+    // Merging max. 4 PM Signals into a MatrixSignal and separately signals on WLS SiPMs
     auto mergedSignals =
         RedModuleSignalTransformerTools::mergeSignalsAllSiPMs(pmSigMtxMap, fMergingTime, fConstansTree, fWLSConfigTree, getParamBank());
 
@@ -197,9 +185,6 @@ void RedModuleSignalTransformer::initialiseHistograms()
 
   getStatistics().createHistogramWithAxes(new TH1D("mtxsig_tslot", "Number of Matrix Signals in Time Window", 100, 0.5, 100.5),
                                           "Number of Matrix Signals in Time Window", "Number of Time Windows");
-
-  getStatistics().createHistogramWithAxes(new TH1D("pmsig_time", "Time of PM signal in DAQ slot", 200, 0.0, 50000000.0), "time [ps]",
-                                          "Number of PM Signals");
 
   getStatistics().createHistogramWithAxes(
       new TH1D("mtxsig_scin_sideA", "Number of Matrix Signals per scintillator side A", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5),

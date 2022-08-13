@@ -451,17 +451,14 @@ bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const
     stats.fillHistogram("scatter_angle_time_small", testTimeRel, scatterAngle);
   }
 
-  if (testType == EventCategorizerTools::kSimpleParam && testTimeAbs < scatterTestValue)
+  if (testType == EventCategorizerTools::kSimpleParam)
   {
-    isScatter = true;
+    isScatter = testTimeAbs < scatterTestValue;
   }
 
   if (testType == EventCategorizerTools::kMinMaxParams)
   {
-    if (testTimeRel > scatterTimeMin && testTimeRel < scatterTimeMax && scatterAngle > scatterAngleMin && scatterAngle < scatterAngleMax)
-    {
-      isScatter = true;
-    }
+    isScatter = !(scatterTimeMin < testTimeRel && testTimeRel < scatterTimeMax && scatterAngleMin < scatterAngle && scatterAngle < scatterAngleMax);
   }
 
   if (testType == EventCategorizerTools::kLorentzExponent)
@@ -476,11 +473,7 @@ bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const
     // Getting weights for scatter test from fitted functions
     double lorentz = (lor0 / TMath::Pi()) * (pow(lor1, 2) / (pow(testTimeAbs - lor2, 2) + pow(lor1, 2)));
     double expo = exp(exp0 + exp1 * testTimeAbs);
-
-    if (gRandom->Uniform(lorentz + expo) > lorentz)
-    {
-      isScatter = true;
-    }
+    isScatter = gRandom->Uniform(lorentz + expo) > lorentz;
   }
 
   if (testType == EventCategorizerTools::kGaussExponent)
@@ -493,11 +486,7 @@ bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const
 
     double gaus = gaus0 * exp(-0.5 * pow((testTimeAbs - gaus1) / gaus2, 2));
     double expo = exp(exp0 + exp1 * testTimeAbs);
-
-    if (gRandom->Uniform(gaus + expo) > gaus)
-    {
-      isScatter = true;
-    }
+    isScatter = gRandom->Uniform(gaus + expo) > gaus;
   }
 
   if (testType == EventCategorizerTools::kLandauExponent)
@@ -510,11 +499,7 @@ bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const
 
     double landau = ROOT::Math::landau_pdf((testTimeAbs - lan1) / lan2) * lan0;
     double expo = exp(exp0 + exp1 * testTimeAbs);
-
-    if (gRandom->Uniform(landau + expo) > landau)
-    {
-      isScatter = true;
-    }
+    isScatter = gRandom->Uniform(landau + expo) > landau;
   }
 
   if (saveHistos)

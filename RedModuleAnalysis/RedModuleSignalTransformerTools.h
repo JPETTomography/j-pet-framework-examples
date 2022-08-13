@@ -40,7 +40,10 @@ public:
                                                             double mergingTime, boost::property_tree::ptree& calibTree,
                                                             boost::property_tree::ptree& wlsConfig, const JPetParamBank& paramBank);
 
-  static std::vector<JPetMatrixSignal> mergePMSignalsOnWLS(std::vector<JPetPMSignal>& pmSigVec, double mergingTime,
-                                                           boost::property_tree::ptree& calibTree, const JPetMatrix& matrix);
+  static std::vector<JPetPMSignal> getPMSignalsOnWLSMatrix(std::map<int, std::vector<JPetPMSignal>>& sigsBySiPMID,
+                                                           boost::property_tree::ptree& wlsConfig, const JPetMatrix& matrix);
+
+  // static std::vector<JPetMatrixSignal> mergePMSignalsOnWLS(std::vector<JPetPMSignal> & pmSigVec, double mergingTime,
+  //                                                          boost::property_tree::ptree& calibTree, const JPetMatrix& matrix);
 };
 #endif /* !REDMODULESIGNALTRANSFORMERTOOLS_H */
