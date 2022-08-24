@@ -141,8 +141,17 @@ void RedModuleSignalTransformer::saveMatrixSignals(const std::vector<JPetMatrixS
       else if (mtxSig.getMatrix().getSide() == JPetMatrix::WLS)
       {
         getStatistics().fillHistogram("mtxsig_wls", scinID);
-        getStatistics().fillHistogram("mtxsig_wls_tot", scinID, mtxSig.getToT());
         getStatistics().fillHistogram("mtxsig_wls_multi", scinID, mtxSig.getPMSignals().size());
+
+        getStatistics().fillHistogram("mtxsig_wls_tot", scinID, mtxSig.getToT());
+        if (mtxSig.getPMSignals().size() == 1)
+        {
+          getStatistics().fillHistogram("mtxsig_wls_tot_multi1", scinID, mtxSig.getToT());
+        }
+        else if (mtxSig.getPMSignals().size() > 1)
+        {
+          getStatistics().fillHistogram("mtxsig_wls_tot_multi2p", scinID, mtxSig.getToT());
+        }
       }
     }
 
@@ -150,26 +159,26 @@ void RedModuleSignalTransformer::saveMatrixSignals(const std::vector<JPetMatrixS
     {
       // Filling histograms gor each channel in Matrix SiPMs to produce
       // channel offsets with the respect to channel on 1st THR of SiPM mtx pos 1
-      auto sigMap = mtxSig.getPMSignals();
-      if (sigMap.find(1) != sigMap.end())
-      {
-        auto t_1_1 = sigMap.at(1).getLeadTrailPairs().at(0).first.getTime();
-
-        for (auto pmSig : sigMap)
-        {
-          auto pairs = pmSig.second.getLeadTrailPairs();
-          for (auto pair : pairs)
-          {
-            auto t_ch_i = pair.first.getTime();
-            auto channelID = pair.first.getChannel().getID();
-            if (t_1_1 == t_ch_i)
-            {
-              continue;
-            }
-            getStatistics().fillHistogram("mtx_channel_offsets", channelID, t_ch_i - t_1_1);
-          }
-        }
-      }
+      // auto sigMap = mtxSig.getPMSignals();
+      // if (sigMap.find(1) != sigMap.end())
+      // {
+      //   auto t_1_1 = sigMap.at(1).getLeadTrailPairs().at(0).first.getTime();
+      //
+      //   for (auto pmSig : sigMap)
+      //   {
+      //     auto pairs = pmSig.second.getLeadTrailPairs();
+      //     for (auto pair : pairs)
+      //     {
+      //       auto t_ch_i = pair.first.getTime();
+      //       auto channelID = pair.first.getChannel().getID();
+      //       if (t_1_1 == t_ch_i)
+      //       {
+      //         continue;
+      //       }
+      //       getStatistics().fillHistogram("mtx_channel_offsets", channelID, t_ch_i - t_1_1);
+      //     }
+      //   }
+      // }
     }
   }
 }
@@ -210,8 +219,16 @@ void RedModuleSignalTransformer::initialiseHistograms()
                                                    maxScinID + 0.5, 200, 0.0, fToTHistoUpperLimit),
                                           "Scin ID", "ToT [ps]");
 
+  getStatistics().createHistogramWithAxes(new TH2D("mtxsig_wls_tot_multi1", "Matrix Signal ToT - WLS layer", maxScinID - minScinID + 1,
+                                                   minScinID - 0.5, maxScinID + 0.5, 200, 0.0, fToTHistoUpperLimit),
+                                          "Scin ID", "ToT [ps]");
+
+  getStatistics().createHistogramWithAxes(new TH2D("mtxsig_wls_tot_multi2p", "Matrix Signal ToT - WLS layer", maxScinID - minScinID + 1,
+                                                   minScinID - 0.5, maxScinID + 0.5, 200, 0.0, fToTHistoUpperLimit),
+                                          "Scin ID", "ToT [ps]");
+
   getStatistics().createHistogramWithAxes(
-      new TH2D("mtxsig_wls_multi", "WLS Matrix Signal Multiplicity", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 4, -0.5, 3.5),
+      new TH2D("mtxsig_wls_multi", "WLS Matrix Signal Multiplicity", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 3, 0.5, 3.5),
       "Scin ID", "Number of PM signals merged into WLS signal");
 
   // SiPM offsets if needed

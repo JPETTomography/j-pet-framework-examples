@@ -197,14 +197,14 @@ JPetPhysRecoHit RedModuleHitFinderTools::createWLSHit(const JPetMatrixSignal& si
   hit.setEnergy(0.0);
   hit.setToT(signal.getToT());
 
-  // Using WLS configuration file to assign z axis position
-  // TODO assigning to correct WLS
-  auto pmID = signal.getPMSignals().at(0).getPM().getID();
-  double z_pos = wlsConfig.get("sipm.zcenter." + to_string(pmID), -999.0);
-
+  // Assigning the hit position with center of the WLS
   auto& scin = signal.getMatrix().getScin();
-  hit.setPosX(scin.getCenterX());
-  hit.setPosY(scin.getCenterY());
+  double x_pos = (scin.getSlot().getLayer().getRadius() + scin.getWidth() / 2.0) * TMath::Sin(TMath::DegToRad() * scin.getSlot().getTheta());
+  double y_pos = scin.getCenterY();
+  double z_pos = scin.getCenterZ();
+
+  hit.setPosX(x_pos);
+  hit.setPosY(y_pos);
   hit.setPosZ(z_pos);
   hit.setScin(scin);
 
