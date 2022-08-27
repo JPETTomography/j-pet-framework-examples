@@ -559,24 +559,27 @@ void EventCategorizer::initialiseCalibrationHistograms(bool includeTrento)
                                           "Scin ID", "Time diffrence [ps]");
 
   // Time walk histograms
-  double revToTLimit = 0.000000015;
+  double revToTLimit = 0.000000018;
 
   getStatistics().createHistogramWithAxes(
       new TH2D("time_walk_ab_tdiff", "AB TDiff vs. reversed ToT", 200, -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0, 200, -revToTLimit, revToTLimit),
       "AB Time Difference [ps]", "Reversed ToT [1/ps]");
 
-  getStatistics().createHistogramWithAxes(new TH2D("time_walk_ab_tdiff_z_cut", "AB TDiff vs. reversed ToT for hits in the center of the strips", 200,
-                                                   -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0, 200, -revToTLimit, revToTLimit),
-                                          "AB Time Difference [ps]", "Reversed ToT [1/ps]");
-
   getStatistics().createHistogramWithAxes(
       new TH2D("time_walk_tof", "TOF vs. reversed ToT", 200, -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0, 200, -revToTLimit, revToTLimit),
       "Time of Flight [ps]", "Reversed ToT [1/ps]");
 
-  getStatistics().createHistogramWithAxes(new TH2D("time_walk_tof_z_cut", "TOF vs. reversed ToT for hits in the center of the strips", 200,
-                                                   -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0, 200, -revToTLimit, revToTLimit),
-                                          "Time of Flight [ps]", "Reversed ToT [1/ps]");
+  getStatistics().createHistogramWithAxes(new TH3D("time_walk_ab_tdiff_scin", "AB TDiff vs. reversed ToT per Scintillator", 200, -fMaxTimeDiff / 2.0,
+                                                   fMaxTimeDiff / 2.0, 200, -revToTLimit, revToTLimit, maxScinID - minScinID + 1, minScinID - 0.5,
+                                                   maxScinID + 0.5),
+                                          "AB Time Difference [ps]", "Reversed ToT [1/ps]", "Scintillator ID");
 
+  getStatistics().createHistogramWithAxes(new TH3D("time_walk_tof_scin", "TOF vs. reversed ToT per Scintillator", 200, -fMaxTimeDiff / 2.0,
+                                                   fMaxTimeDiff / 2.0, 200, -revToTLimit, revToTLimit, maxScinID - minScinID + 1, minScinID - 0.5,
+                                                   maxScinID + 0.5),
+                                          "Time of Flight [ps]", "Reversed ToT [1/ps]", "Scintillator ID");
+
+  // Fine channel offset calibration - using only 2g events
   auto minChannelID = getParamBank().getChannels().begin()->first;
   auto maxChannelID = getParamBank().getChannels().rbegin()->first;
 

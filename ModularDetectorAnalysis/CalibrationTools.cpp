@@ -140,40 +140,29 @@ void CalibrationTools::selectForTimeWalk(const JPetEvent& event, JPetStatistics&
 
       if (test1 && test2 && test3)
       {
-        double posCut = 1.0;
         // Calculating reversed ToT for time walk studies
         auto revToT1 = calculateReveresedToT(firstHit);
         auto revToT2 = calculateReveresedToT(secondHit);
 
         stats.fillHistogram("time_walk_ab_tdiff", firstHit->getTimeDiff(), revToT1);
         stats.fillHistogram("time_walk_ab_tdiff", secondHit->getTimeDiff(), revToT2);
-
-        TVector3 ap = EventCategorizerTools::calculateAnnihilationPoint(firstHit, secondHit);
-
-        // Soft collimation of the source - hit z-pos and annihilation point around 0
-        if (fabs(firstHit->getPosZ()) < posCut && fabs(secondHit->getPosZ()) < posCut && fabs(ap.x()) < posCut && fabs(ap.y()) < posCut &&
-            fabs(ap.z()) < posCut)
-        {
-          stats.fillHistogram("time_walk_ab_tdiff_z_cut", firstHit->getTimeDiff(), revToT1);
-        }
+        stats.fillHistogram("time_walk_ab_tdiff_scin", firstHit->getTimeDiff(), revToT1, firstHit->getScin().getID());
+        stats.fillHistogram("time_walk_ab_tdiff_scin", secondHit->getTimeDiff(), revToT2, secondHit->getScin().getID());
 
         if (firstHit->getScin().getSlot().getTheta() < secondHit->getScin().getSlot().getTheta())
         {
           stats.fillHistogram("time_walk_tof", EventCategorizerTools::calculateTOF(firstHit, secondHit), revToT1 - revToT2);
-          if (fabs(firstHit->getPosZ()) < posCut && fabs(secondHit->getPosZ()) < posCut && fabs(ap.x()) < posCut && fabs(ap.y()) < posCut &&
-              fabs(ap.z()) < posCut)
-          {
-            stats.fillHistogram("time_walk_tof_z_cut", EventCategorizerTools::calculateTOF(firstHit, secondHit), revToT1 - revToT2);
-          }
+          stats.fillHistogram("time_walk_ab_tdiff_scin", EventCategorizerTools::calculateTOF(firstHit, secondHit), revToT1 - revToT2,
+                              firstHit->getScin().getID());
+          stats.fillHistogram("time_walk_ab_tdiff_scin", EventCategorizerTools::calculateTOF(firstHit, secondHit), revToT1 - revToT2,
+                              secondHit->getScin().getID());
         }
         else
         {
-          stats.fillHistogram("time_walk_tof", EventCategorizerTools::calculateTOF(secondHit, firstHit), revToT2 - revToT1);
-          if (fabs(firstHit->getPosZ()) < posCut && fabs(secondHit->getPosZ()) < posCut && fabs(ap.x()) < posCut && fabs(ap.y()) < posCut &&
-              fabs(ap.z()) < posCut)
-          {
-            stats.fillHistogram("time_walk_tof_z_cut", EventCategorizerTools::calculateTOF(secondHit, firstHit), revToT2 - revToT1);
-          }
+          stats.fillHistogram("time_walk_tof_scin", EventCategorizerTools::calculateTOF(secondHit, firstHit), revToT2 - revToT1,
+                              firstHit->getScin().getID());
+          stats.fillHistogram("time_walk_tof_scin", EventCategorizerTools::calculateTOF(secondHit, firstHit), revToT2 - revToT1,
+                              secondHit->getScin().getID());
         }
 
         vector<JPetMatrixSignal> mtxSigs;
