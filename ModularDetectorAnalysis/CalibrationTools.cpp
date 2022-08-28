@@ -144,21 +144,25 @@ void CalibrationTools::selectForTimeWalk(const JPetEvent& event, JPetStatistics&
         auto revToT1 = calculateReveresedToT(firstHit);
         auto revToT2 = calculateReveresedToT(secondHit);
 
+        // A-B time difference vs. time walk effect
         stats.fillHistogram("time_walk_ab_tdiff", firstHit->getTimeDiff(), revToT1);
         stats.fillHistogram("time_walk_ab_tdiff", secondHit->getTimeDiff(), revToT2);
         stats.fillHistogram("time_walk_ab_tdiff_scin", firstHit->getTimeDiff(), revToT1, firstHit->getScin().getID());
         stats.fillHistogram("time_walk_ab_tdiff_scin", secondHit->getTimeDiff(), revToT2, secondHit->getScin().getID());
 
+        // TOF vs. time walk effect
         if (firstHit->getScin().getSlot().getTheta() < secondHit->getScin().getSlot().getTheta())
         {
           stats.fillHistogram("time_walk_tof", EventCategorizerTools::calculateTOF(firstHit, secondHit), revToT1 - revToT2);
-          stats.fillHistogram("time_walk_ab_tdiff_scin", EventCategorizerTools::calculateTOF(firstHit, secondHit), revToT1 - revToT2,
+          stats.fillHistogram("time_walk_tof_scin", EventCategorizerTools::calculateTOF(firstHit, secondHit), revToT2 - revToT1,
                               firstHit->getScin().getID());
-          stats.fillHistogram("time_walk_ab_tdiff_scin", EventCategorizerTools::calculateTOF(firstHit, secondHit), revToT1 - revToT2,
+          stats.fillHistogram("time_walk_tof_scin", EventCategorizerTools::calculateTOF(firstHit, secondHit), revToT2 - revToT1,
                               secondHit->getScin().getID());
         }
         else
         {
+          stats.fillHistogram("time_walk_tof", EventCategorizerTools::calculateTOF(secondHit, firstHit), revToT1 - revToT2);
+
           stats.fillHistogram("time_walk_tof_scin", EventCategorizerTools::calculateTOF(secondHit, firstHit), revToT2 - revToT1,
                               firstHit->getScin().getID());
           stats.fillHistogram("time_walk_tof_scin", EventCategorizerTools::calculateTOF(secondHit, firstHit), revToT2 - revToT1,
