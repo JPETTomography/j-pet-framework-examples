@@ -52,17 +52,17 @@ protected:
   const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
   const std::string kWLSConfigFileParamKey = "WLSConfigFile_std::string";
   const std::string kABTimeDiffParamKey = "RedModuleHitFinder_ABTimeDiff_double";
-  const std::string kRefDetScinIDParamKey = "RedModule_RefDetScinID_int";
-  const std::string kRefDetSlotIDParamKey = "RedModule_RefDetSlotID_int";
+  const std::string kWLSScinTimeDiffParamKey = "RedModuleHitFinder_WLSScinTimeDiff_double";
+  const std::string kTimeDiffOffsetParamKey = "RedModuleHitFinder_TimeDiffOffset_double";
   boost::property_tree::ptree fConstansTree;
   boost::property_tree::ptree fWLSConfigTree;
   double fToTHistoUpperLimit = 200000.0;
   bool fSaveControlHistos = true;
   bool fSaveCalibHistos = false;
   double fABTimeDiff = 10000.0;
+  double fWLSScinTimeDiff = 10000.0;
+  double fTimeDiffOffset = 0.0;
   int fMinHitMultiplicity = -1;
-  int fRefDetScinID = -1;
-  int fRefDetSlotID = -1;
 };
 
 #endif /* !REDMODULEHITFINDER_H */

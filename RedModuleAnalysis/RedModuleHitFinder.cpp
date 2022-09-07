@@ -24,6 +24,7 @@
 #include <vector>
 
 using namespace jpet_options_tools;
+using namespace std;
 
 RedModuleHitFinder::RedModuleHitFinder(const char* name) : JPetUserTask(name) {}
 
@@ -73,23 +74,30 @@ bool RedModuleHitFinder::init()
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kABTimeDiffParamKey.c_str(), fABTimeDiff));
   }
 
+  if (isOptionSet(fParams.getOptions(), kWLSScinTimeDiffParamKey))
+  {
+    fWLSScinTimeDiff = getOptionAsDouble(fParams.getOptions(), kWLSScinTimeDiffParamKey);
+  }
+  else
+  {
+    WARNING(
+        Form("No value of the %s parameter provided by the user. Using default value of %lf.", kWLSScinTimeDiffParamKey.c_str(), fWLSScinTimeDiff));
+  }
+
+  if (isOptionSet(fParams.getOptions(), kTimeDiffOffsetParamKey))
+  {
+    fTimeDiffOffset = getOptionAsDouble(fParams.getOptions(), kTimeDiffOffsetParamKey);
+  }
+  else
+  {
+    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kTimeDiffOffsetParamKey.c_str(), fTimeDiffOffset));
+  }
+
   // For plotting ToT histograms
   if (isOptionSet(fParams.getOptions(), kToTHistoUpperLimitParamKey))
   {
     fToTHistoUpperLimit = getOptionAsDouble(fParams.getOptions(), kToTHistoUpperLimitParamKey);
   }
-
-  // Getting IDs of reference detector (single scin or slot)
-  if (isOptionSet(fParams.getOptions(), kRefDetScinIDParamKey))
-  {
-    fRefDetScinID = getOptionAsInt(fParams.getOptions(), kRefDetScinIDParamKey);
-  }
-  INFO(Form("Using scintillator with ID %d as reference detector.", fRefDetScinID));
-  if (isOptionSet(fParams.getOptions(), kRefDetSlotIDParamKey))
-  {
-    fRefDetSlotID = getOptionAsInt(fParams.getOptions(), kRefDetSlotIDParamKey);
-  }
-  INFO(Form("Using slot with ID %d as reference detector.", fRefDetSlotID));
 
   // Control histograms
   if (fSaveControlHistos)
@@ -104,13 +112,46 @@ bool RedModuleHitFinder::exec()
 {
   if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent))
   {
-    auto scinSigals = HitFinderTools::getSignalsByScin(timeWindow);
+    auto allSigals = HitFinderTools::getSignalsByScin(timeWindow);
 
-    auto scinHits = RedModuleHitFinderTools::matchAllSignals(scinSigals, fABTimeDiff, fRefDetScinID, fRefDetSlotID, fConstansTree, fWLSConfigTree,
-                                                             getStatistics(), fSaveControlHistos);
-    if (scinHits.size() > 0)
+    // Copying map for signals only from matrices attached to the scintillators (241-279)
+    map<int, vector<JPetMatrixSignal>> wlsSignals;
+    map<int, vector<JPetMatrixSignal>> redSignals;
+    map<int, vector<JPetMatrixSignal>> refSignals;
+
+    auto minWLSScinID = 201;
+    auto maxWLSScinID = 240;
+    auto minRedScinID = 241;
+    auto maxRedScinID = 266;
+    auto minRefScinID = 267;
+    auto maxRefkScinID = 279;
+
+    // Separating signals registered on WLS layer
+    copy_if(begin(allSigals), end(allSigals), inserter(wlsSignals, begin(wlsSignals)),
+            [&minWLSScinID, &maxWLSScinID](pair<int, vector<JPetMatrixSignal>> p) { return p.first >= minWLSScinID && p.first <= maxWLSScinID; });
+
+    // Separating signals registered on Red Module
+    copy_if(begin(allSigals), end(allSigals), inserter(redSignals, begin(redSignals)),
+            [&minRedScinID, &maxRedScinID](pair<int, vector<JPetMatrixSignal>> p) { return p.first >= minRedScinID && p.first <= maxRedScinID; });
+
+    // Separating signals registered on Black Module (reference)
+    copy_if(begin(allSigals), end(allSigals), inserter(refSignals, begin(refSignals)),
+            [&minRefScinID, &maxRefkScinID](pair<int, vector<JPetMatrixSignal>> p) { return p.first >= minRefScinID && p.first <= maxRefkScinID; });
+
+    auto redHits = HitFinderTools::matchAllSignals(redSignals, fABTimeDiff, fConstansTree, getStatistics(), fSaveControlHistos);
+
+    auto refHits = HitFinderTools::matchAllSignals(refSignals, fABTimeDiff, fConstansTree, getStatistics(), fSaveControlHistos);
+
+    auto wlsHits = RedModuleHitFinderTools::matchHitsWithWLSSignals(redHits, wlsSignals, fWLSScinTimeDiff, fTimeDiffOffset, fConstansTree,
+                                                                    fWLSConfigTree, getStatistics(), fSaveControlHistos);
+
+    if (refHits.size() > 0)
     {
-      saveHits(scinHits);
+      saveHits(refHits);
+    }
+    if (wlsHits.size() > 0)
+    {
+      saveHits(wlsHits);
     }
   }
   else
@@ -126,49 +167,14 @@ bool RedModuleHitFinder::terminate()
   return true;
 }
 
-void RedModuleHitFinder::saveHits(const std::vector<JPetPhysRecoHit>& hits)
+void RedModuleHitFinder::saveHits(const vector<JPetPhysRecoHit>& hits)
 {
   auto sortedHits = hits;
   HitFinderTools::sortByTime(sortedHits);
 
-  if (fSaveControlHistos)
-  {
-    int wlsHits = 0;
-    int redHits = 0;
-    int balckHits = 0;
-    double previousWLSTime = 0.0;
-    double previousWLSZPos = 0.0;
-
-    for (auto& hit : sortedHits)
-    {
-      if (hit.getScin().getSlot().getID() == 201)
-      {
-        wlsHits++;
-        getStatistics().fillHistogram("hits_wls_time", hit.getTime());
-      }
-      if (hit.getScin().getSlot().getID() == 202 || hit.getScin().getSlot().getID() == 203)
-      {
-        redHits++;
-        getStatistics().fillHistogram("hits_red_time", hit.getTime());
-      }
-      if (hit.getScin().getSlot().getID() == 204)
-      {
-        balckHits++;
-        getStatistics().fillHistogram("hits_black_time", hit.getTime());
-      }
-
-      auto tDiff = hit.getTime() - previousWLSTime;
-      getStatistics().fillHistogram("wls_hit_tdiff_zpos", tDiff, previousWLSZPos, hit.getPosZ());
-
-      previousWLSTime = hit.getTime();
-      previousWLSZPos = hit.getPosZ();
-    }
-
-    getStatistics().fillHistogram("hits_tslot", wlsHits + redHits + balckHits);
-    getStatistics().fillHistogram("hits_wls_tslot", wlsHits);
-    getStatistics().fillHistogram("hits_red_tslot", redHits);
-    getStatistics().fillHistogram("hits_black_tslot", balckHits);
-  }
+  int wlsHits = 0;
+  int redHits = 0;
+  int refHits = 0;
 
   for (auto& hit : sortedHits)
   {
@@ -186,7 +192,7 @@ void RedModuleHitFinder::saveHits(const std::vector<JPetPhysRecoHit>& hits)
     {
       int scinID = hit.getScin().getID();
       getStatistics().fillHistogram("hits_scin", scinID, sortedHits.size());
-      getStatistics().fillHistogram("hit_pos", hit.getPosZ(), hit.getPosY(), hit.getPosX());
+      getStatistics().fillHistogram("hit_pos", hit.getPosZ(), hit.getPosX(), hit.getPosY());
       getStatistics().fillHistogram("hit_z_pos_scin", scinID, hit.getPosZ());
       getStatistics().fillHistogram("hit_multi", multi);
       getStatistics().fillHistogram("hit_multi_scin", scinID, multi);
@@ -196,7 +202,22 @@ void RedModuleHitFinder::saveHits(const std::vector<JPetPhysRecoHit>& hits)
       {
         getStatistics().fillHistogram("hit_tot_scin", scinID, hit.getToT());
       }
+
+      if (hit.getScin().getSlot().getID() == 201)
+        wlsHits++;
+      if (hit.getScin().getSlot().getID() == 202 || hit.getScin().getSlot().getID() == 203)
+        redHits++;
+      if (hit.getScin().getSlot().getID() == 204)
+        refHits++;
     }
+  }
+
+  if (fSaveControlHistos)
+  {
+    getStatistics().fillHistogram("hits_tslot", wlsHits + redHits + refHits);
+    getStatistics().fillHistogram("hits_wls_tslot", wlsHits);
+    getStatistics().fillHistogram("hits_red_tslot", redHits);
+    getStatistics().fillHistogram("hits_ref_tslot", refHits);
   }
 }
 
@@ -214,16 +235,7 @@ void RedModuleHitFinder::initialiseHistograms()
   getStatistics().createHistogramWithAxes(new TH1D("hits_red_tslot", "Number of Red Module Hits in Time Window", 60, 0.5, 60.5), "Hits in Time Slot",
                                           "Number of Time Slots");
 
-  getStatistics().createHistogramWithAxes(new TH1D("hits_black_tslot", "Number of Reference Module Hits in Time Window", 60, 0.5, 60.5),
-                                          "Hits in Time Slot", "Number of Time Slots");
-
-  getStatistics().createHistogramWithAxes(new TH1D("hits_wls_time", "Time of WLS Hits in Time Window", 200, 0.0, 50000000.0), "Hits in Time Slot",
-                                          "Number of Time Slots");
-
-  getStatistics().createHistogramWithAxes(new TH1D("hits_red_time", "Time of Red Module Hits in Time Window", 200, 0.0, 50000000.0),
-                                          "Hits in Time Slot", "Number of Time Slots");
-
-  getStatistics().createHistogramWithAxes(new TH1D("hits_black_time", "Time of Reference Module Hits in Time Window", 200, 0.0, 50000000.0),
+  getStatistics().createHistogramWithAxes(new TH1D("hits_ref_tslot", "Number of Reference Module Hits in Time Window", 60, 0.5, 60.5),
                                           "Hits in Time Slot", "Number of Time Slots");
 
   getStatistics().createHistogramWithAxes(
@@ -253,11 +265,10 @@ void RedModuleHitFinder::initialiseHistograms()
                                                    minScinID - 0.5, maxScinID + 0.5, 200, 0.0, 1.2 * fToTHistoUpperLimit),
                                           "Scintillator ID", "Time over Threshold [ps]");
 
-  getStatistics().createHistogramWithAxes(new TH3D("wls_hit_tdiff_zpos",
-                                                   "Time difference between two consecutive WLS hits and their positions along z-axis", 200, -50000.0,
-                                                   50000.0, 65, -20.69, 20.69, 65, -20.69, 20.69),
-                                          "time difference [ps]", "z pos hit 1 [cm]", "z pos hit 2 [cm]");
-
+  // WLS - scintilator time differences for calibration
+  getStatistics().createHistogramWithAxes(new TH3D("hit_scin_wls_tdiff", "Coincidences between scintillator and WLS hits", 26, 240.5, 266.5, 40,
+                                                   200.5, 240.5, 200, -fWLSScinTimeDiff, fWLSScinTimeDiff),
+                                          "Scin ID", "WLS ID", "Time difference [ps]");
   // Unused sigals stats
   getStatistics().createHistogramWithAxes(
       new TH1D("remain_signals_scin", "Number of Unused Signals in Scintillator", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5),

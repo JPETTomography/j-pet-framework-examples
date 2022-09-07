@@ -48,6 +48,7 @@ protected:
   const std::string kConstantsFileParamKey = "ConstantsFile_std::string";
   const std::string kRefDetSlotIDParamKey = "RedModule_RefDetSlotID_int";
   const std::string kSaveControlHistosParamKey = "Save_Control_Histograms_bool";
+  const std::string kSaveCalibHistosParamKey = "Save_Calib_Histograms_bool";
   const std::string kEventTimeParamKey = "EventFinder_EventTime_double";
   const std::string k2gThetaDiffParamKey = "EventCategorizer_2gThetaDiff_double";
   const std::string k2gTimeDiffParamKey = "EventCategorizer_2gTimeDiff_double";
@@ -69,6 +70,7 @@ protected:
   double fCoincidencesOffset = 0.0;
   double fMaxTimeDiff = 15000.0;
   bool fSaveControlHistos = true;
+  bool fSaveCalibHistos = false;
   int fRefDetSlotID = -1;
   TVector3 fSourcePos;
 

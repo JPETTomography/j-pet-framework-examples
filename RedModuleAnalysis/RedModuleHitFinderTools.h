@@ -31,19 +31,15 @@
 class RedModuleHitFinderTools
 {
 public:
-  static std::map<int, std::vector<JPetMatrixSignal>> getSignalsByScin(const JPetTimeWindow* timeWindow);
+  static std::vector<JPetPhysRecoHit> matchHitsWithWLSSignals(const std::vector<JPetPhysRecoHit>& scinHits,
+                                                              const std::map<int, std::vector<JPetMatrixSignal>>& wlsSignals, double maxTimeDiffWLS,
+                                                              double timeDiffOffset, boost::property_tree::ptree& calibTree,
+                                                              boost::property_tree::ptree& wlsConfig, JPetStatistics& stats, bool saveHistos);
 
-  static std::vector<JPetPhysRecoHit> matchAllSignals(std::map<int, std::vector<JPetMatrixSignal>>& allSignals, double timeDiffAB, int refScinID,
-                                                      int refSlotID, boost::property_tree::ptree& calibTree, boost::property_tree::ptree& wlsConfig,
-                                                      JPetStatistics& stats, bool saveHistos);
-
-  static std::vector<JPetPhysRecoHit> matchSignals(std::vector<JPetMatrixSignal>& scinSignals, double timeDiffAB, int refScinID, int refSlotID,
-                                                   boost::property_tree::ptree& calibTree, JPetStatistics& stats, bool saveHistos);
-
-  static JPetPhysRecoHit createRedModuleHit(const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2, boost::property_tree::ptree& calibTree);
-
-  static JPetPhysRecoHit createWLSHit(const JPetMatrixSignal& wlsSignal, boost::property_tree::ptree& calibTree,
+  static JPetPhysRecoHit createWLSHit(const JPetPhysRecoHit& scinHit, const JPetMatrixSignal& wlsSignal, boost::property_tree::ptree& calibTree,
                                       boost::property_tree::ptree& wlsConfig);
+
+  static double estimateZPosWithWLS(const JPetMatrixSignal& wlsSignal, boost::property_tree::ptree& wlsConfig);
 };
 
 #endif /* !REDMODULEHITFINDERTOOLS_H */
