@@ -145,14 +145,20 @@ bool RedModuleHitFinder::exec()
     auto wlsHits = RedModuleHitFinderTools::matchHitsWithWLSSignals(redHits, wlsSignals, fWLSScinTimeDiff, fTimeDiffOffset, fConstansTree,
                                                                     fWLSConfigTree, getStatistics(), fSaveControlHistos);
 
-    if (refHits.size() > 0)
+    if (fSaveControlHistos)
     {
-      saveHits(refHits);
+      getStatistics().fillHistogram("hits_tslot", refHits.size() + wlsHits.size());
+      getStatistics().fillHistogram("hits_red_tslot", redHits.size());
+      getStatistics().fillHistogram("hits_ref_tslot", refHits.size());
+      getStatistics().fillHistogram("hits_wls_tslot", wlsHits.size());
+      fillHistograms(redHits);
+      fillHistograms(refHits);
+      fillHistograms(wlsHits);
     }
-    if (wlsHits.size() > 0)
-    {
-      saveHits(wlsHits);
-    }
+
+    // Hits from red module are merged with WLS, so no need to save them twice
+    saveHits(refHits);
+    saveHits(wlsHits);
   }
   else
   {
@@ -167,57 +173,33 @@ bool RedModuleHitFinder::terminate()
   return true;
 }
 
-void RedModuleHitFinder::saveHits(const vector<JPetPhysRecoHit>& hits)
+void RedModuleHitFinder::fillHistograms(const vector<JPetPhysRecoHit>& hits)
 {
-  auto sortedHits = hits;
-  HitFinderTools::sortByTime(sortedHits);
-
-  int wlsHits = 0;
-  int redHits = 0;
-  int refHits = 0;
-
-  for (auto& hit : sortedHits)
+  for (auto& hit : hits)
   {
-    // Checking minimal multiplicity condition
+    int scinID = hit.getScin().getID();
     int multi = hit.getSignalA().getPMSignals().size() + hit.getSignalB().getPMSignals().size();
-    if (fMinHitMultiplicity != -1 && multi < fMinHitMultiplicity)
+
+    getStatistics().fillHistogram("hits_scin", scinID);
+    getStatistics().fillHistogram("hit_pos", hit.getPosZ(), hit.getPosX(), hit.getPosY());
+    getStatistics().fillHistogram("hit_z_pos_scin", scinID, hit.getPosZ());
+    getStatistics().fillHistogram("hit_multi", multi);
+    getStatistics().fillHistogram("hit_multi_scin", scinID, multi);
+    getStatistics().fillHistogram("hit_tdiff_scin", scinID, hit.getTimeDiff());
+
+    if (hit.getToT() != 0.0)
     {
-      continue;
-    }
-
-    // Save hit
-    fOutputEvents->add<JPetPhysRecoHit>(hit);
-
-    if (fSaveControlHistos)
-    {
-      int scinID = hit.getScin().getID();
-      getStatistics().fillHistogram("hits_scin", scinID, sortedHits.size());
-      getStatistics().fillHistogram("hit_pos", hit.getPosZ(), hit.getPosX(), hit.getPosY());
-      getStatistics().fillHistogram("hit_z_pos_scin", scinID, hit.getPosZ());
-      getStatistics().fillHistogram("hit_multi", multi);
-      getStatistics().fillHistogram("hit_multi_scin", scinID, multi);
-      getStatistics().fillHistogram("hit_tdiff_scin", scinID, hit.getTimeDiff());
-
-      if (hit.getToT() != 0.0)
-      {
-        getStatistics().fillHistogram("hit_tot_scin", scinID, hit.getToT());
-      }
-
-      if (hit.getScin().getSlot().getID() == 201)
-        wlsHits++;
-      if (hit.getScin().getSlot().getID() == 202 || hit.getScin().getSlot().getID() == 203)
-        redHits++;
-      if (hit.getScin().getSlot().getID() == 204)
-        refHits++;
+      getStatistics().fillHistogram("hit_tot_scin", scinID, hit.getToT());
     }
   }
+}
 
-  if (fSaveControlHistos)
+void RedModuleHitFinder::saveHits(const vector<JPetPhysRecoHit>& hits)
+{
+  for (auto& hit : hits)
   {
-    getStatistics().fillHistogram("hits_tslot", wlsHits + redHits + refHits);
-    getStatistics().fillHistogram("hits_wls_tslot", wlsHits);
-    getStatistics().fillHistogram("hits_red_tslot", redHits);
-    getStatistics().fillHistogram("hits_ref_tslot", refHits);
+    // Save hit
+    fOutputEvents->add<JPetPhysRecoHit>(hit);
   }
 }
 

@@ -63,6 +63,8 @@ protected:
   double fWLSScinTimeDiff = 10000.0;
   double fTimeDiffOffset = 0.0;
   int fMinHitMultiplicity = -1;
+
+  void fillHistograms(const std::vector<JPetPhysRecoHit>& hits);
 };
 
 #endif /* !REDMODULEHITFINDER_H */
