@@ -249,7 +249,7 @@ void RedModuleHitFinder::initialiseHistograms()
 
   // WLS - scintilator time differences for calibration
   getStatistics().createHistogramWithAxes(new TH3D("hit_scin_wls_tdiff", "Coincidences between scintillator and WLS hits", 26, 240.5, 266.5, 40,
-                                                   200.5, 240.5, 200, -fWLSScinTimeDiff, fWLSScinTimeDiff),
+                                                   200.5, 240.5, 200, 0.0, fWLSScinTimeDiff),
                                           "Scin ID", "WLS ID", "Time difference [ps]");
   // Unused sigals stats
   getStatistics().createHistogramWithAxes(
