@@ -47,7 +47,7 @@ vector<JPetPhysRecoHit> RedModuleHitFinderTools::matchHitsWithWLSSignals(
         // The time difference between scintilator hits and signals in WLS is artificially streached
         // to some constant value (i.e. 10 ns), so this value and the calibration constant are now
         // substracted from the registered times
-        double timeDiff = fabs(scinHit.getTime() - wlsSignal.getTime()) - wlsScinOffset;
+        double timeDiff = scinHit.getTime() - wlsSignal.getTime() - wlsScinOffset;
         if (timeDiff - timeDiffOffset < maxTimeDiffWLS)
         {
           auto wlsHit = createWLSHit(scinHit, wlsSignal, calibTree, wlsConfig);
