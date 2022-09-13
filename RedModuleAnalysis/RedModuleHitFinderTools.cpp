@@ -55,7 +55,10 @@ vector<JPetPhysRecoHit> RedModuleHitFinderTools::matchHitsWithWLSSignals(
           if (saveHistos)
           {
             stats.fillHistogram("hit_scin_wls_tdiff", scinID, wlsID, timeDiff);
+            stats.fillHistogram("hit_tot_wls_scin", wlsHit.getToT(), wlsSignal.getToT());
           }
+          // WLS signal - scin hit pair found, stop iterating the WLS signals
+          break;
         }
       }
     }
@@ -103,7 +106,9 @@ JPetPhysRecoHit RedModuleHitFinderTools::createWLSHit(const JPetPhysRecoHit& sci
   // Setting position
   wlsHit.setPos(position);
 
-  wlsHit.setEnergy(0.0);
+  // Temp. solution, save WLS signal ToT as energy
+  wlsHit.setEnergy(wlsSignal.getToT());
+
   // Default quality fields
   wlsHit.setQualityOfTime(-1.0);
   wlsHit.setQualityOfTimeDiff(-1.0);

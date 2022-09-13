@@ -247,10 +247,14 @@ void RedModuleHitFinder::initialiseHistograms()
                                                    minScinID - 0.5, maxScinID + 0.5, 200, 0.0, 1.2 * fToTHistoUpperLimit),
                                           "Scintillator ID", "Time over Threshold [ps]");
 
+  getStatistics().createHistogramWithAxes(new TH2D("hit_tot_wls_scin", "WLS ToT and hit ToT in coincidence with WLS signals", 200, 0.0,
+                                                   1.2 * fToTHistoUpperLimit, 200, 0.0, 1.2 * fToTHistoUpperLimit),
+                                          "scin hit ToT [ps]", "WLS signal ToT [ps]");
+
   // WLS - scintilator time differences for calibration
-  getStatistics().createHistogramWithAxes(new TH3D("hit_scin_wls_tdiff", "Coincidences between scintillator and WLS hits", 26, 240.5, 266.5, 40,
-                                                   200.5, 240.5, 200, 0.0, fWLSScinTimeDiff),
-                                          "Scin ID", "WLS ID", "Time difference [ps]");
+  getStatistics().createHistogramWithAxes(
+      new TH3D("hit_scin_wls_tdiff", "Coincidences between scintillator and WLS hits", 26, 240.5, 266.5, 40, 200.5, 240.5, 200, -20000.0, 20000.0),
+      "Scin ID", "WLS ID", "Time difference [ps]");
   // Unused sigals stats
   getStatistics().createHistogramWithAxes(
       new TH1D("remain_signals_scin", "Number of Unused Signals in Scintillator", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5),
