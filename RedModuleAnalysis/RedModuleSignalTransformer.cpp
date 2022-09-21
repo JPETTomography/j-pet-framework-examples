@@ -159,26 +159,31 @@ void RedModuleSignalTransformer::saveMatrixSignals(const std::vector<JPetMatrixS
     {
       // Filling histograms gor each channel in Matrix SiPMs to produce
       // channel offsets with the respect to channel on 1st THR of SiPM mtx pos 1
-      // auto sigMap = mtxSig.getPMSignals();
-      // if (sigMap.find(1) != sigMap.end())
-      // {
-      //   auto t_1_1 = sigMap.at(1).getLeadTrailPairs().at(0).first.getTime();
-      //
-      //   for (auto pmSig : sigMap)
-      //   {
-      //     auto pairs = pmSig.second.getLeadTrailPairs();
-      //     for (auto pair : pairs)
-      //     {
-      //       auto t_ch_i = pair.first.getTime();
-      //       auto channelID = pair.first.getChannel().getID();
-      //       if (t_1_1 == t_ch_i)
-      //       {
-      //         continue;
-      //       }
-      //       getStatistics().fillHistogram("mtx_channel_offsets", channelID, t_ch_i - t_1_1);
-      //     }
-      //   }
-      // }
+      auto sigMap = mtxSig.getPMSignals();
+
+      // Check only for matrices attached to scintillators
+      if (mtxSig.getMatrix().getScin().getSlot().getType() == JPetSlot::Module)
+      {
+        if (sigMap.find(1) != sigMap.end())
+        {
+          auto t_1_1 = sigMap.at(1).getLeadTrailPairs().at(0).first.getTime();
+
+          for (auto pmSig : sigMap)
+          {
+            auto pairs = pmSig.second.getLeadTrailPairs();
+            for (auto pair : pairs)
+            {
+              auto t_ch_i = pair.first.getTime();
+              auto channelID = pair.first.getChannel().getID();
+              if (t_1_1 == t_ch_i)
+              {
+                continue;
+              }
+              getStatistics().fillHistogram("mtx_channel_offsets", channelID, t_ch_i - t_1_1);
+            }
+          }
+        }
+      }
     }
   }
 }
