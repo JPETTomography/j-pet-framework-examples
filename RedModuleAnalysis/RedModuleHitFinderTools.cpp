@@ -35,6 +35,8 @@ vector<JPetPhysRecoHit> RedModuleHitFinderTools::matchHitsWithWLSSignals(
   for (unsigned int hit_i = 0; hit_i < scinHits.size(); ++hit_i)
   {
     int hitWLSMulti = 0;
+    double wlsToTSum = 0.0;
+
     for (auto& wlsSignals : wlsSignalsMap)
     {
       for (unsigned int wls_i = 0; wls_i < wlsSignals.second.size(); ++wls_i)
@@ -49,7 +51,7 @@ vector<JPetPhysRecoHit> RedModuleHitFinderTools::matchHitsWithWLSSignals(
         // to some constant value (i.e. 10 ns), so this value and the calibration constant are now
         // substracted from the registered times
         double timeDiff = scinHit.getTime() - wlsSignal.getTime() - wlsScinOffset;
-        if (timeDiff - timeDiffOffset < maxTimeDiffWLS)
+        if (fabs(timeDiff - timeDiffOffset) < maxTimeDiffWLS)
         {
           auto wlsHit = createWLSHit(scinHit, wlsSignal, calibTree, wlsConfig);
           wlsHits.push_back(wlsHit);
@@ -66,7 +68,7 @@ vector<JPetPhysRecoHit> RedModuleHitFinderTools::matchHitsWithWLSSignals(
     if (saveHistos)
     {
       stats.fillHistogram("hit_scin_wls_multi", scinHits.at(hit_i).getScin().getID(), hitWLSMulti);
-      stats.fillHistogram("hit_scin_wls_multi_tot", scinHits.at(hit_i).getToT(), hitWLSMulti);
+      stats.fillHistogram("hit_scin_wls_multi_tot", hitWLSMulti, scinHits.at(hit_i).getToT());
     }
   }
 

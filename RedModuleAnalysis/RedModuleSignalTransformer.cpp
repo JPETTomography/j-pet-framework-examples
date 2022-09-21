@@ -184,6 +184,40 @@ void RedModuleSignalTransformer::saveMatrixSignals(const std::vector<JPetMatrixS
           }
         }
       }
+      else if (mtxSig.getMatrix().getScin().getSlot().getType() == JPetSlot::WLS)
+      {
+        auto mtxID = mtxSig.getMatrix().getID();
+        int refID = 999;
+
+        for (auto& item : fWLSConfigTree.get_child("wls_matrix." + std::to_string(mtxID) + ".matrix_sipm_ids"))
+        {
+          auto siPMID = item.second.get_value<int>(-1);
+          if (siPMID != -1)
+          {
+            refID = std::min(refID, siPMID);
+          }
+        }
+
+        if (sigMap.find(refID) != sigMap.end())
+        {
+          auto t_1_1 = sigMap.at(refID).getLeadTrailPairs().at(0).first.getTime();
+
+          for (auto pmSig : sigMap)
+          {
+            auto pairs = pmSig.second.getLeadTrailPairs();
+            for (auto pair : pairs)
+            {
+              auto t_ch_i = pair.first.getTime();
+              auto channelID = pair.first.getChannel().getID();
+              if (t_1_1 == t_ch_i)
+              {
+                continue;
+              }
+              getStatistics().fillHistogram("mtx_channel_offsets", channelID, t_ch_i - t_1_1);
+            }
+          }
+        }
+      }
     }
   }
 }
