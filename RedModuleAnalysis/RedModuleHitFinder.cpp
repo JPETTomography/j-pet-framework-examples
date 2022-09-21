@@ -251,6 +251,14 @@ void RedModuleHitFinder::initialiseHistograms()
                                                    1.2 * fToTHistoUpperLimit, 200, 0.0, 1.2 * fToTHistoUpperLimit),
                                           "scin hit ToT [ps]", "WLS signal ToT [ps]");
 
+  getStatistics().createHistogramWithAxes(new TH2D("hit_scin_wls_multi", "Coincidence multiplicity of scintillator hit and WLS signals",
+                                                   maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 15, -0.5, 14.5),
+                                          "Scintillator ID", "multiplicity");
+
+  getStatistics().createHistogramWithAxes(new TH2D("hit_scin_wls_multi_tot", "Coincidence multiplicity of scintillator hit and WLS signals", 10, 0.0,
+                                                   1.2 * fToTHistoUpperLimit, 15, -0.5, 14.5),
+                                          "Scin Hit ToT [ps]", "multiplicity");
+
   // WLS - scintilator time differences for calibration
   getStatistics().createHistogramWithAxes(
       new TH3D("hit_scin_wls_tdiff", "Coincidences between scintillator and WLS hits", 26, 240.5, 266.5, 40, 200.5, 240.5, 200, -20000.0, 20000.0),

@@ -34,6 +34,7 @@ vector<JPetPhysRecoHit> RedModuleHitFinderTools::matchHitsWithWLSSignals(
   // Iterating hit and WLS signals for time coincidences
   for (unsigned int hit_i = 0; hit_i < scinHits.size(); ++hit_i)
   {
+    int hitWLSMulti = 0;
     for (auto& wlsSignals : wlsSignalsMap)
     {
       for (unsigned int wls_i = 0; wls_i < wlsSignals.second.size(); ++wls_i)
@@ -52,15 +53,20 @@ vector<JPetPhysRecoHit> RedModuleHitFinderTools::matchHitsWithWLSSignals(
         {
           auto wlsHit = createWLSHit(scinHit, wlsSignal, calibTree, wlsConfig);
           wlsHits.push_back(wlsHit);
+          hitWLSMulti++;
           if (saveHistos)
           {
             stats.fillHistogram("hit_scin_wls_tdiff", scinID, wlsID, timeDiff);
             stats.fillHistogram("hit_tot_wls_scin", wlsHit.getToT(), wlsSignal.getToT());
           }
-          // WLS signal - scin hit pair found, stop iterating the WLS signals
-          break;
         }
       }
+    }
+
+    if (saveHistos)
+    {
+      stats.fillHistogram("hit_scin_wls_multi", scinHits.at(hit_i).getScin().getID(), hitWLSMulti);
+      stats.fillHistogram("hit_scin_wls_multi_tot", scinHits.at(hit_i).getToT(), hitWLSMulti);
     }
   }
 
