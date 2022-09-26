@@ -46,7 +46,9 @@ set(HEADERS ${use_modules_from}/TimeWindowCreator.h
             RedModuleEventCategorizer.h
             ${use_modules_from}/HitFinderTools.h
             ${use_modules_from}/EventFinder.h
+            ${use_modules_from}/EventCategorizer.h
             ${use_modules_from}/EventCategorizerTools.h
+            ${use_modules_from}/CalibrationTools.h
             )
 
 set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
@@ -63,7 +65,10 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
             RedModuleEventCategorizer.cpp
             ${use_modules_from}/HitFinderTools.cpp
             ${use_modules_from}/EventFinder.cpp
+            ${use_modules_from}/EventCategorizer.cpp
             ${use_modules_from}/EventCategorizerTools.cpp
+            ${use_modules_from}/CalibrationTools.cpp
+
             )
 
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})

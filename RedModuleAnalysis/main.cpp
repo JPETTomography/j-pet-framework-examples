@@ -13,10 +13,11 @@
  *  @file main.cpp
  */
 
+#include "../ModularDetectorAnalysis/EventCategorizer.h"
 #include "../ModularDetectorAnalysis/EventFinder.h"
 #include "../ModularDetectorAnalysis/SignalFinder.h"
 #include "../ModularDetectorAnalysis/TimeWindowCreator.h"
-#include "RedModuleEventCategorizer.h"
+// #include "RedModuleEventCategorizer.h"
 #include "RedModuleHitFinder.h"
 #include "RedModuleSignalTransformer.h"
 #include <JPetManager/JPetManager.h>
@@ -34,14 +35,16 @@ int main(int argc, const char* argv[])
     manager.registerTask<RedModuleSignalTransformer>("RedModuleSignalTransformer");
     manager.registerTask<RedModuleHitFinder>("RedModuleHitFinder");
     manager.registerTask<EventFinder>("EventFinder");
-    manager.registerTask<RedModuleEventCategorizer>("RedModuleEventCategorizer");
+    manager.registerTask<EventCategorizer>("EventCategorizer");
+    // manager.registerTask<RedModuleEventCategorizer>("RedModuleEventCategorizer");
 
     manager.useTask("TimeWindowCreator", "hld", "tslot");
     manager.useTask("SignalFinder", "tslot", "sipm.sig");
     manager.useTask("RedModuleSignalTransformer", "sipm.sig", "mtx.sig");
     manager.useTask("RedModuleHitFinder", "mtx.sig", "hits");
     manager.useTask("EventFinder", "hits", "unk.evt");
-    manager.useTask("RedModuleEventCategorizer", "unk.evt", "cat.evt");
+    manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
+    // manager.useTask("RedModuleEventCategorizer", "unk.evt", "cat.evt");
 
     manager.run(argc, argv);
   }
