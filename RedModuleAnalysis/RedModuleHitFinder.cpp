@@ -157,8 +157,9 @@ bool RedModuleHitFinder::exec()
     }
 
     // Hits from red module are merged with WLS, so no need to save them twice
+    saveHits(redHits);
     saveHits(refHits);
-    saveHits(wlsHits);
+    // saveHits(wlsHits);
   }
   else
   {
