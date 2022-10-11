@@ -147,13 +147,13 @@ bool RedModuleHitFinder::exec()
 
     if (fSaveControlHistos)
     {
-      getStatistics().fillHistogram("hits_tslot", refHits.size() + wlsHits.size());
+      getStatistics().fillHistogram("hits_tslot", redHits.size() + refHits.size() + wlsHits.size());
       getStatistics().fillHistogram("hits_red_tslot", redHits.size());
       getStatistics().fillHistogram("hits_ref_tslot", refHits.size());
       getStatistics().fillHistogram("hits_wls_tslot", wlsHits.size());
-      fillHistograms(redHits);
-      fillHistograms(refHits);
-      fillHistograms(wlsHits);
+      fillHistograms(redHits, JPetSlot::Module);
+      fillHistograms(refHits, JPetSlot::Module);
+      fillHistograms(wlsHits, JPetSlot::WLS);
     }
 
     // Hits from red module are merged with WLS, so no need to save them twice
@@ -174,7 +174,7 @@ bool RedModuleHitFinder::terminate()
   return true;
 }
 
-void RedModuleHitFinder::fillHistograms(const vector<JPetPhysRecoHit>& hits)
+void RedModuleHitFinder::fillHistograms(const vector<JPetPhysRecoHit>& hits, JPetSlot::Type type)
 {
   for (auto& hit : hits)
   {
@@ -183,7 +183,22 @@ void RedModuleHitFinder::fillHistograms(const vector<JPetPhysRecoHit>& hits)
 
     getStatistics().fillHistogram("hits_scin", scinID);
     getStatistics().fillHistogram("hit_pos", hit.getPosZ(), hit.getPosX(), hit.getPosY());
+
+    // All scin and WLS hits
     getStatistics().fillHistogram("hit_z_pos_scin", scinID, hit.getPosZ());
+
+    // WLS hits, so those foud in WLS-Scin coincidence
+    if (type == JPetSlot::WLS)
+    {
+      // Get WLS and Strip IDs
+      auto wlsID = scinID;
+      auto sigABScinID = hit.getSignalA().getMatrix().getScin().getID();
+      // WLS position
+      getStatistics().fillHistogram("hit_z_pos_scin_wls", scinID, hit.getPosZ());
+      // Scin position - temp as QualityOfTime
+      getStatistics().fillHistogram("hit_z_pos_scin_wls", sigABScinID, hit.getQualityOfTime());
+    }
+
     getStatistics().fillHistogram("hit_multi", multi);
     getStatistics().fillHistogram("hit_multi_scin", scinID, multi);
     getStatistics().fillHistogram("hit_tdiff_scin", scinID, hit.getTimeDiff());
@@ -232,6 +247,10 @@ void RedModuleHitFinder::initialiseHistograms()
                                                    minScinID - 0.5, maxScinID + 0.5, 121, -30.5, 30.5),
                                           "Scintillator ID", "Hit z-pos [cm]");
 
+  getStatistics().createHistogramWithAxes(new TH2D("hit_z_pos_scin_wls", "Z-axis position in coincidence Scin-WLS", maxScinID - minScinID + 1,
+                                                   minScinID - 0.5, maxScinID + 0.5, 121, -30.5, 30.5),
+                                          "Scintillator ID", "Hit z-pos [cm]");
+
   getStatistics().createHistogramWithAxes(new TH1D("hit_multi", "Number of signals from SiPMs in created hit", 12, -0.5, 11.5), "Number of Signals",
                                           "Number of Hits");
 
@@ -260,10 +279,15 @@ void RedModuleHitFinder::initialiseHistograms()
                                                    19.5, 200, 0.0, 1.2 * fToTHistoUpperLimit),
                                           "multiplicity", "Scin Hit ToT [ps]");
 
-  // WLS - scintilator time differences for calibration
+  // WLS - scintilator time and z-pos differences
   getStatistics().createHistogramWithAxes(
       new TH3D("hit_scin_wls_tdiff", "Coincidences between scintillator and WLS hits", 26, 240.5, 266.5, 40, 200.5, 240.5, 200, -20000.0, 20000.0),
       "Scin ID", "WLS ID", "Time difference [ps]");
+
+  getStatistics().createHistogramWithAxes(
+      new TH3D("hit_scin_wls_zdiff", "Coincidences between scintillator and WLS hits", 26, 240.5, 266.5, 40, 200.5, 240.5, 41, -10.0, 10.0),
+      "Scin ID", "WLS ID", "z position difference [cm]");
+
   // Unused sigals stats
   getStatistics().createHistogramWithAxes(
       new TH1D("remain_signals_scin", "Number of Unused Signals in Scintillator", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5),

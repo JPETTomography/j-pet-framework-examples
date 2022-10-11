@@ -64,7 +64,7 @@ protected:
   double fTimeDiffOffset = 0.0;
   int fMinHitMultiplicity = -1;
 
-  void fillHistograms(const std::vector<JPetPhysRecoHit>& hits);
+  void fillHistograms(const std::vector<JPetPhysRecoHit>& hits, JPetSlot::Type type);
 };
 
 #endif /* !REDMODULEHITFINDER_H */

@@ -58,8 +58,15 @@ vector<JPetPhysRecoHit> RedModuleHitFinderTools::matchHitsWithWLSSignals(
           hitWLSMulti++;
           if (saveHistos)
           {
-            stats.fillHistogram("hit_scin_wls_tdiff", scinID, wlsID, timeDiff);
             stats.fillHistogram("hit_tot_wls_scin", wlsHit.getToT(), wlsSignal.getToT());
+
+            stats.fillHistogram("hit_scin_wls_tdiff", scinID, wlsID, timeDiff);
+
+            auto zdiff = scinHit.getPosZ() - wlsHit.getPosZ();
+            if (zdiff != 0.0)
+            {
+              stats.fillHistogram("hit_scin_wls_zdiff", scinID, wlsID, zdiff);
+            }
           }
         }
       }
@@ -86,6 +93,8 @@ JPetPhysRecoHit RedModuleHitFinderTools::createWLSHit(const JPetPhysRecoHit& sci
   wlsHit.setTime(scinHit.getTime());
   wlsHit.setTimeDiff(scinHit.getTime() - wlsSignal.getTime());
   wlsHit.setToT(scinHit.getToT());
+  // Temp. solution, save WLS signal ToT as energy
+  wlsHit.setEnergy(wlsSignal.getToT());
 
   auto& scin = wlsSignal.getMatrix().getScin();
   wlsHit.setScin(scin);
@@ -114,12 +123,12 @@ JPetPhysRecoHit RedModuleHitFinderTools::createWLSHit(const JPetPhysRecoHit& sci
   // Setting position
   wlsHit.setPos(position);
 
-  // Temp. solution, save WLS signal ToT as energy
-  wlsHit.setEnergy(wlsSignal.getToT());
+  // Temp. solution to store z position of the hit in the strip
+  wlsHit.setQualityOfTime(scinHit.getPosZ());
+  // Here write difference of the positions estimated by tDiff/velocity and WLS/Sipm
+  wlsHit.setQualityOfTimeDiff(scinHit.getPosZ() - z_pos);
 
-  // Default quality fields
-  wlsHit.setQualityOfTime(-1.0);
-  wlsHit.setQualityOfTimeDiff(-1.0);
+  // Other default quality fields
   wlsHit.setQualityOfEnergy(-1.0);
   wlsHit.setQualityOfToT(-1.0);
 
