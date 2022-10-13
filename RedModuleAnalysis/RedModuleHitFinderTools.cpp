@@ -99,9 +99,8 @@ JPetPhysRecoHit RedModuleHitFinderTools::createWLSHit(const JPetPhysRecoHit& sci
   auto& scin = wlsSignal.getMatrix().getScin();
   wlsHit.setScin(scin);
 
-  double x_pos =
-      scin.getCenterX() + (scin.getSlot().getLayer().getRadius() + scin.getWidth() / 2.0) * TMath::Sin(TMath::DegToRad() * scin.getSlot().getTheta());
-  double y_pos = scin.getCenterY();
+  double x_pos = scinHit.getScin().getCenterX();
+  double y_pos = scinHit.getScin().getCenterY();
 
   // Estimation of the z-axis position can be done with scintillator hit position
   // or with WLS position weighted by ToT of SiPM signals
