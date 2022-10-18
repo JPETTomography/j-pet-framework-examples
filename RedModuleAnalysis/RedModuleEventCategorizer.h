@@ -58,6 +58,7 @@ protected:
   const std::string kToTHistoUpperLimitParamKey = "ToTHisto_UpperLimit_double";
   const std::string kCoincidencesMaxTDiffParamKey = "RedModule_CoincidencesMaxTDiff_double";
   const std::string kCoincidencesOffsetParamKey = "RedModule_CoincidencesOffset_double";
+  const std::string kFillHistoWithWLSHitsParamKey = "RedModule_FillHisto_WLSHits_bool";
 
   boost::property_tree::ptree fConstansTree;
   double f2gThetaDiff = 10.0;
@@ -71,6 +72,7 @@ protected:
   double fMaxTimeDiff = 15000.0;
   bool fSaveControlHistos = true;
   bool fSaveCalibHistos = false;
+  bool fFillHistosWithWLSHits = false;
   int fRefDetSlotID = -1;
   TVector3 fSourcePos;
 

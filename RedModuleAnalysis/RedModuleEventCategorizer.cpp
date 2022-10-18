@@ -121,6 +121,11 @@ bool RedModuleEventCategorizer::init()
     fSaveCalibHistos = getOptionAsBool(fParams.getOptions(), kSaveCalibHistosParamKey);
   }
 
+  if (isOptionSet(fParams.getOptions(), kFillHistoWithWLSHitsParamKey))
+  {
+    fFillHistosWithWLSHits = getOptionAsBool(fParams.getOptions(), kFillHistoWithWLSHitsParamKey);
+  }
+
   fSourcePos.SetXYZ(0.0, 0.0, 0.0);
 
   // Input events type
@@ -144,24 +149,42 @@ bool RedModuleEventCategorizer::exec()
     {
       const auto& event = dynamic_cast<const JPetEvent&>(timeWindow->operator[](i));
 
-      for (uint i = 0; i < event.getHits().size(); i++)
+      vector<const JPetPhysRecoHit*> wlsHits;
+      vector<const JPetPhysRecoHit*> redHits;
+      vector<const JPetPhysRecoHit*> refHits;
+
+      for (uint i = 0; i < event.getHits().size(); ++i)
       {
-        auto firstHit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(i));
-        if (!firstHit)
+        auto hit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(i));
+        if (hit->getScin().getSlot().getID() == 201)
         {
-          continue;
+          wlsHits.push_back(hit);
         }
-
-        for (uint j = i + 1; j < event.getHits().size(); j++)
+        if (hit->getScin().getSlot().getID() == 202 || hit->getScin().getSlot().getID() == 203)
         {
-          auto secondHit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(j));
-          if (!secondHit)
-          {
-            continue;
-          }
+          redHits.push_back(hit);
+        }
+        if (hit->getScin().getSlot().getID() == 204)
+        {
+          refHits.push_back(hit);
+        }
+      }
 
-          // Reconstruction of the annihilation point
-          if (EventCategorizerTools::checkFor2Gamma(firstHit, secondHit, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff,
+      for (auto refHit : refHits)
+      {
+        for (auto redHit : redHits)
+        {
+          if (EventCategorizerTools::checkFor2Gamma(redHit, refHit, getStatistics(), !fFillHistosWithWLSHits, f2gThetaDiff, f2gTimeDiff,
+                                                    fToTCutAnniMin, fToTCutAnniMax, fSourcePos))
+          {
+            JPetEvent newEvent = event;
+            newEvent.addEventType(JPetEventType::k2Gamma);
+            events.push_back(newEvent);
+          }
+        }
+        for (auto wlsHit : wlsHits)
+        {
+          if (EventCategorizerTools::checkFor2Gamma(wlsHit, refHit, getStatistics(), fFillHistosWithWLSHits, f2gThetaDiff, f2gTimeDiff,
                                                     fToTCutAnniMin, fToTCutAnniMax, fSourcePos))
           {
             JPetEvent newEvent = event;
@@ -193,76 +216,6 @@ void RedModuleEventCategorizer::saveEvents(const vector<JPetEvent>& events)
     fOutputEvents->add<JPetEvent>(event);
   }
 }
-
-// void RedModuleEventCategorizer::selectForCalibrations(JPetPhysRecoHit* hit1, JPetPhysRecoHit* hit2)
-// {
-// Make callibratin part - all possible offsets
-// Later coincidence part
-// -- only red-wls
-// -- only red-black -> ap/tof
-// -- triple red-wls-black -> ap
-
-// auto slot1Type = firstHit->getScin().getSlot().getType();
-// auto slot2Type = secondHit->getScin().getSlot().getType();
-// auto slot1ID = firstHit->getScin().getSlot().getID();
-// auto slot2ID = secondHit->getScin().getSlot().getID();
-// auto scin1ID = firstHit->getScin().getID();
-// auto scin2ID = secondHit->getScin().getID();
-
-//
-// if (slot1ID == 201 && (slot2ID == 202 || slot2ID == 203))
-// {
-//   auto sipm1ID = firstHit->getSignalA().getPMSignals().at(0).getPM().getID();
-//   double wlsOffset = fConstansTree.get("pm." + to_string(sipm1ID) + "." + to_string(scin2ID), 0.0);
-//   // skip if time difference condidion not met
-//   auto tDiff = secondHit->getTime() - (firstHit->getTime() - wlsOffset);
-//   if (tDiff - fCoincidencesOffset > fCoincidencesMaxTDiff)
-//   {
-//     continue;
-//   }
-//
-//   getStatistics().fillHistogram("2g_tdiff_red_wls", sipm1ID, scin2ID, tDiff);
-//   if (firstHit->getPosZ() != -999.0)
-//   {
-//     getStatistics().fillHistogram("2g_zdiff_red_wls", sipm1ID, scin2ID, firstHit->getPosZ() - secondHit->getPosZ());
-//   }
-// }
-
-// if (slot2ID == 201 && (slot1ID == 202 || slot1ID == 203))
-// {
-//   auto sipm2ID = secondHit->getSignalA().getPMSignals().at(0).getPM().getID();
-//   double wlsOffset = fConstansTree.get("pm." + to_string(sipm2ID) + "." + to_string(scin1ID), 0.0);
-//   // skip if time difference condidion not met
-//   auto tDiff = (secondHit->getTime() - wlsOffset) - firstHit->getTime();
-//   if (tDiff - fCoincidencesOffset > fCoincidencesMaxTDiff)
-//   {
-//     continue;
-//   }
-//   getStatistics().fillHistogram("2g_tdiff_red_wls", sipm2ID, scin1ID, tDiff);
-//
-//   if (secondHit->getPosZ() != -999.0)
-//   {
-//     getStatistics().fillHistogram("2g_zdiff_red_wls", sipm2ID, scin1ID, secondHit->getPosZ() - firstHit->getPosZ());
-//   }
-// }
-
-// Red - black -- finding coincidences
-// if (slot1ID == 202 && slot2ID == 204 || slot1ID == 203 && slot2ID == 204 || slot2ID == 202 && slot1ID == 204 ||
-//     slot2ID == 203 && slot1ID == 204)
-// {
-//   // skip if time difference condidion not met
-//   auto tDiff = secondHit->getTime() - firstHit->getTime();
-//   if (tDiff - fCoincidencesOffset > fCoincidencesMaxTDiff)
-//   {
-//     continue;
-//   }
-//
-//   getStatistics().fillHistogram("2g_tdiff_red_black", tDiff);
-//   getStatistics().fillHistogram("2g_tdiff_red_black_scin", scin1ID, tDiff);
-//   getStatistics().fillHistogram("2g_tdiff_red_black_scin", scin2ID, tDiff);
-//
-// }
-// }
 
 void RedModuleEventCategorizer::initialiseHistograms()
 {
