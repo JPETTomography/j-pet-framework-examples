@@ -115,9 +115,10 @@ JPetPhysRecoHit RedModuleHitFinderTools::createWLSHit(const JPetPhysRecoHit& sci
   // Comparing various attempts of estimating of z position
   if (saveHistos)
   {
-    stats.fillHistogram("wls_z_pos_met0", wlsHit.getScin().getID(), zPosMethod0(wlsSignal, wlsConfig));
-    stats.fillHistogram("wls_z_pos_met1", wlsHit.getScin().getID(), zPosMethod1(wlsSignal, wlsConfig));
-    stats.fillHistogram("wls_z_pos_met2", wlsHit.getScin().getID(), zPosMethod2(wlsSignal, wlsConfig));
+    auto wlsID = wlsSignal.getMatrix().getScin().getID();
+    stats.fillHistogram("wls_z_pos_met0", wlsID, zPosMethod0(wlsSignal, wlsConfig));
+    stats.fillHistogram("wls_z_pos_met1", wlsID, zPosMethod1(wlsSignal, wlsConfig));
+    stats.fillHistogram("wls_z_pos_met2", wlsID, zPosMethod2(wlsSignal, wlsConfig));
   }
 
   TVector3 position(x_pos, y_pos, z_pos);
@@ -170,7 +171,7 @@ double RedModuleHitFinderTools::estimateZPosWithWLS(const JPetMatrixSignal& wlsS
 // The same as above with division by wieght sum (should be equal to 1)
 double RedModuleHitFinderTools::zPosMethod0(const JPetMatrixSignal& wlsSignal, boost::property_tree::ptree& wlsConfig)
 {
-  double z_pos = -9999.0;
+  double z_pos = 0.0;
   double w_all = 0.0;
   double tot_all = 0.0;
 
@@ -189,7 +190,6 @@ double RedModuleHitFinderTools::zPosMethod0(const JPetMatrixSignal& wlsSignal, b
 
       double w_i = (tot_i / tot_all);
       w_all += w_i;
-
       z_pos += z_i * w_i;
     }
   }
@@ -200,14 +200,14 @@ double RedModuleHitFinderTools::zPosMethod0(const JPetMatrixSignal& wlsSignal, b
   }
   else
   {
-    return -9999.0;
+    return 0.0;
   }
 }
 
 // Estimating the position with wieghts squared
 double RedModuleHitFinderTools::zPosMethod1(const JPetMatrixSignal& wlsSignal, boost::property_tree::ptree& wlsConfig)
 {
-  double z_pos = -9999.0;
+  double z_pos = 0.0;
   double w_all = 0.0;
   double tot_all = 0.0;
 
@@ -226,7 +226,6 @@ double RedModuleHitFinderTools::zPosMethod1(const JPetMatrixSignal& wlsSignal, b
 
       double w_i = (tot_i / tot_all);
       w_all += w_i * w_i;
-
       z_pos += z_i * w_i * w_i;
     }
   }
@@ -237,7 +236,7 @@ double RedModuleHitFinderTools::zPosMethod1(const JPetMatrixSignal& wlsSignal, b
   }
   else
   {
-    return -9999.0;
+    return 0.0;
   }
 }
 
@@ -245,7 +244,7 @@ double RedModuleHitFinderTools::zPosMethod1(const JPetMatrixSignal& wlsSignal, b
 double RedModuleHitFinderTools::zPosMethod2(const JPetMatrixSignal& wlsSignal, boost::property_tree::ptree& wlsConfig)
 {
   auto wlsID = wlsSignal.getMatrix().getID();
-  double z_pos = -9999.0;
+  double z_pos = 0.0;
   double w_all = 0.0;
   double tot_all = 0.0;
 
@@ -260,12 +259,11 @@ double RedModuleHitFinderTools::zPosMethod2(const JPetMatrixSignal& wlsSignal, b
     {
       auto sipmID = sigEl.second.getPM().getID();
       double z_i = wlsConfig.get("sipm.zcenter." + to_string(sipmID), 0.0);
-      double cover = wlsConfig.get("wls_matrix." + to_string(wlsID) + "sipm_coverage." + to_string(sipmID), 0.0);
+      double cover = wlsConfig.get("wls_matrix." + to_string(wlsID) + ".sipm_coverage." + to_string(sipmID), 0.0);
       double tot_i = sigEl.second.getToT();
 
       double w_i = cover * (tot_i / tot_all);
       w_all += w_i;
-
       z_pos += z_i * w_i;
     }
   }
@@ -276,6 +274,6 @@ double RedModuleHitFinderTools::zPosMethod2(const JPetMatrixSignal& wlsSignal, b
   }
   else
   {
-    return -9999.0;
+    return 0.0;
   }
 }
