@@ -174,18 +174,22 @@ bool RedModuleEventCategorizer::exec()
       {
         for (auto redHit : redHits)
         {
-          if (EventCategorizerTools::checkFor2Gamma(redHit, refHit, getStatistics(), !fFillHistosWithWLSHits, f2gThetaDiff, f2gTimeDiff,
-                                                    fToTCutAnniMin, fToTCutAnniMax, fSourcePos))
+          if (EventCategorizerTools::checkFor2Gamma(redHit, refHit, getStatistics(), false, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin, fToTCutAnniMax,
+                                                    fSourcePos))
           {
             JPetEvent newEvent = event;
             newEvent.addEventType(JPetEventType::k2Gamma);
             events.push_back(newEvent);
+
+            if (fSaveControlHistos)
+            {
+            }
           }
         }
         for (auto wlsHit : wlsHits)
         {
-          if (EventCategorizerTools::checkFor2Gamma(wlsHit, refHit, getStatistics(), fFillHistosWithWLSHits, f2gThetaDiff, f2gTimeDiff,
-                                                    fToTCutAnniMin, fToTCutAnniMax, fSourcePos))
+          if (EventCategorizerTools::checkFor2Gamma(wlsHit, refHit, getStatistics(), false, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin, fToTCutAnniMax,
+                                                    fSourcePos))
           {
             JPetEvent newEvent = event;
             newEvent.addEventType(JPetEventType::k2Gamma);
@@ -222,31 +226,7 @@ void RedModuleEventCategorizer::initialiseHistograms()
   auto minScinID = getParamBank().getScins().begin()->first;
   auto maxScinID = getParamBank().getScins().rbegin()->first;
 
-  // Red module specific histograms
-  // getStatistics().createHistogramWithAxes(new TH1D("2g_tdiff_red_black", "2 gamma event - red and reference module hits", 200, 0.0,
-  // fEventTimeWindow),
-  //                                         "tdiff [ps]", "hit pairs");
-  //
-  // getStatistics().createHistogramWithAxes(new TH2D("2g_tdiff_red_black_scin", "2 gamma event - red and reference module hits per scin",
-  //                                                  maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 201, 0.0, fEventTimeWindow),
-  //                                         "Scintillator ID", "time difference [ps]");
-
-  // int wlsPMMinID = 401;
-  // int wlsPMMaxID = 464;
-  // int redScinMinID = 241;
-  // int redScinMaxID = 279;
-
-  // getStatistics().createHistogramWithAxes(new TH3D("2g_tdiff_red_wls", "Time difference WLS-Scin hits", wlsPMMaxID - wlsPMMinID + 1, wlsPMMinID -
-  // 0.5,
-  //                                                  wlsPMMaxID + 0.5, redScinMaxID - redScinMinID + 1, redScinMinID - 0.5, redScinMaxID + 0.5, 201,
-  //                                                  0.0, 20000.0));
-  //
-  // getStatistics().createHistogramWithAxes(new TH3D("2g_zdiff_red_wls", "Time difference WLS-Scin hits", wlsPMMaxID - wlsPMMinID + 1, wlsPMMinID -
-  // 0.5,
-  //                                                  wlsPMMaxID + 0.5, redScinMaxID - redScinMinID + 1, redScinMinID - 0.5, redScinMaxID + 0.5, 101,
-  //                                                  -25.0, 25.0));
-  //
-  // // Histograms for 2 gamama events
+  // Histograms for 2 gamama events
   getStatistics().createHistogramWithAxes(new TH1D("2g_tot", "2 gamma event - average ToT scaled", 201, 0.0, fToTHistoUpperLimit),
                                           "Time over Threshold [ps]", "Number of Hits");
 

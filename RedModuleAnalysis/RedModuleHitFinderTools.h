@@ -37,9 +37,12 @@ public:
                                                               boost::property_tree::ptree& wlsConfig, JPetStatistics& stats, bool saveHistos);
 
   static JPetPhysRecoHit createWLSHit(const JPetPhysRecoHit& scinHit, const JPetMatrixSignal& wlsSignal, boost::property_tree::ptree& calibTree,
-                                      boost::property_tree::ptree& wlsConfig);
+                                      boost::property_tree::ptree& wlsConfig, JPetStatistics& stats, bool saveHistos);
 
   static double estimateZPosWithWLS(const JPetMatrixSignal& wlsSignal, boost::property_tree::ptree& wlsConfig);
+  static double zPosMethod0(const JPetMatrixSignal& wlsSignal, boost::property_tree::ptree& wlsConfig);
+  static double zPosMethod1(const JPetMatrixSignal& wlsSignal, boost::property_tree::ptree& wlsConfig);
+  static double zPosMethod2(const JPetMatrixSignal& wlsSignal, boost::property_tree::ptree& wlsConfig);
 };
 
 #endif /* !REDMODULEHITFINDERTOOLS_H */

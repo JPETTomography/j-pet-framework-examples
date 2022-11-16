@@ -250,6 +250,19 @@ void RedModuleHitFinder::initialiseHistograms()
   getStatistics().createHistogramWithAxes(new TH2D("hit_z_pos_scin_wls", "Z-axis position in coincidence Scin-WLS", maxScinID - minScinID + 1,
                                                    minScinID - 0.5, maxScinID + 0.5, 121, -30.5, 30.5),
                                           "Scintillator ID", "Hit z-pos [cm]");
+  // Comparing various attempts of estimating of z position
+
+  getStatistics().createHistogramWithAxes(new TH2D("wls_z_pos_met0", "Z-axis position in coincidence Scin-WLS Method 0", maxScinID - minScinID + 1,
+                                                   minScinID - 0.5, maxScinID + 0.5, 121, -30.5, 30.5),
+                                          "Scintillator ID", "Hit z-pos [cm]");
+
+  getStatistics().createHistogramWithAxes(new TH2D("wls_z_pos_met1", "Z-axis position in coincidence Scin-WLS Method 1", maxScinID - minScinID + 1,
+                                                   minScinID - 0.5, maxScinID + 0.5, 121, -30.5, 30.5),
+                                          "Scintillator ID", "Hit z-pos [cm]");
+
+  getStatistics().createHistogramWithAxes(new TH2D("wls_z_pos_met2", "Z-axis position in coincidence Scin-WLS Method 2", maxScinID - minScinID + 1,
+                                                   minScinID - 0.5, maxScinID + 0.5, 121, -30.5, 30.5),
+                                          "Scintillator ID", "Hit z-pos [cm]");
 
   getStatistics().createHistogramWithAxes(new TH1D("hit_multi", "Number of signals from SiPMs in created hit", 12, -0.5, 11.5), "Number of Signals",
                                           "Number of Hits");

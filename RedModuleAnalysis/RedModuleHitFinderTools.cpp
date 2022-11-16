@@ -53,7 +53,7 @@ vector<JPetPhysRecoHit> RedModuleHitFinderTools::matchHitsWithWLSSignals(
         double timeDiff = scinHit.getTime() - wlsSignal.getTime() - wlsScinOffset;
         if (fabs(timeDiff - timeDiffOffset) < maxTimeDiffWLS)
         {
-          auto wlsHit = createWLSHit(scinHit, wlsSignal, calibTree, wlsConfig);
+          auto wlsHit = createWLSHit(scinHit, wlsSignal, calibTree, wlsConfig, stats, saveHistos);
           wlsHits.push_back(wlsHit);
           hitWLSMulti++;
           if (saveHistos)
@@ -86,7 +86,8 @@ vector<JPetPhysRecoHit> RedModuleHitFinderTools::matchHitsWithWLSSignals(
  * Method for Hit creation - setting all fields that make sense here
  */
 JPetPhysRecoHit RedModuleHitFinderTools::createWLSHit(const JPetPhysRecoHit& scinHit, const JPetMatrixSignal& wlsSignal,
-                                                      boost::property_tree::ptree& calibTree, boost::property_tree::ptree& wlsConfig)
+                                                      boost::property_tree::ptree& calibTree, boost::property_tree::ptree& wlsConfig,
+                                                      JPetStatistics& stats, bool saveHistos)
 {
   JPetPhysRecoHit wlsHit;
   wlsHit.setSignals(scinHit.getSignalA(), scinHit.getSignalB());
@@ -109,6 +110,14 @@ JPetPhysRecoHit RedModuleHitFinderTools::createWLSHit(const JPetPhysRecoHit& sci
   if (z_pos == 0.0)
   {
     z_pos = scinHit.getPosZ();
+  }
+
+  // Comparing various attempts of estimating of z position
+  if (saveHistos)
+  {
+    stats.fillHistogram("wls_z_pos_met0", wlsHit.getScin().getID(), zPosMethod0(wlsSignal, wlsConfig));
+    stats.fillHistogram("wls_z_pos_met1", wlsHit.getScin().getID(), zPosMethod1(wlsSignal, wlsConfig));
+    stats.fillHistogram("wls_z_pos_met2", wlsHit.getScin().getID(), zPosMethod2(wlsSignal, wlsConfig));
   }
 
   TVector3 position(x_pos, y_pos, z_pos);
@@ -156,4 +165,117 @@ double RedModuleHitFinderTools::estimateZPosWithWLS(const JPetMatrixSignal& wlsS
   }
 
   return z_pos;
+}
+
+// The same as above with division by wieght sum (should be equal to 1)
+double RedModuleHitFinderTools::zPosMethod0(const JPetMatrixSignal& wlsSignal, boost::property_tree::ptree& wlsConfig)
+{
+  double z_pos = -9999.0;
+  double w_all = 0.0;
+  double tot_all = 0.0;
+
+  for (auto sigEl : wlsSignal.getPMSignals())
+  {
+    tot_all += sigEl.second.getToT();
+  }
+
+  if (tot_all != 0.0)
+  {
+    for (auto sigEl : wlsSignal.getPMSignals())
+    {
+      auto sipmID = sigEl.second.getPM().getID();
+      double z_i = wlsConfig.get("sipm.zcenter." + to_string(sipmID), 0.0);
+      double tot_i = sigEl.second.getToT();
+
+      double w_i = (tot_i / tot_all);
+      w_all += w_i;
+
+      z_pos += z_i * w_i;
+    }
+  }
+
+  if (w_all != 0.0)
+  {
+    return z_pos / w_all;
+  }
+  else
+  {
+    return -9999.0;
+  }
+}
+
+// Estimating the position with wieghts squared
+double RedModuleHitFinderTools::zPosMethod1(const JPetMatrixSignal& wlsSignal, boost::property_tree::ptree& wlsConfig)
+{
+  double z_pos = -9999.0;
+  double w_all = 0.0;
+  double tot_all = 0.0;
+
+  for (auto sigEl : wlsSignal.getPMSignals())
+  {
+    tot_all += sigEl.second.getToT();
+  }
+
+  if (tot_all != 0.0)
+  {
+    for (auto sigEl : wlsSignal.getPMSignals())
+    {
+      auto sipmID = sigEl.second.getPM().getID();
+      double z_i = wlsConfig.get("sipm.zcenter." + to_string(sipmID), 0.0);
+      double tot_i = sigEl.second.getToT();
+
+      double w_i = (tot_i / tot_all);
+      w_all += w_i * w_i;
+
+      z_pos += z_i * w_i * w_i;
+    }
+  }
+
+  if (w_all != 0.0)
+  {
+    return z_pos / w_all;
+  }
+  else
+  {
+    return -9999.0;
+  }
+}
+
+// Including an additional percentage from the WLS config of the surface covered by SiPM
+double RedModuleHitFinderTools::zPosMethod2(const JPetMatrixSignal& wlsSignal, boost::property_tree::ptree& wlsConfig)
+{
+  auto wlsID = wlsSignal.getMatrix().getID();
+  double z_pos = -9999.0;
+  double w_all = 0.0;
+  double tot_all = 0.0;
+
+  for (auto sigEl : wlsSignal.getPMSignals())
+  {
+    tot_all += sigEl.second.getToT();
+  }
+
+  if (tot_all != 0.0)
+  {
+    for (auto sigEl : wlsSignal.getPMSignals())
+    {
+      auto sipmID = sigEl.second.getPM().getID();
+      double z_i = wlsConfig.get("sipm.zcenter." + to_string(sipmID), 0.0);
+      double cover = wlsConfig.get("wls_matrix." + to_string(wlsID) + "sipm_coverage." + to_string(sipmID), 0.0);
+      double tot_i = sigEl.second.getToT();
+
+      double w_i = cover * (tot_i / tot_all);
+      w_all += w_i;
+
+      z_pos += z_i * w_i;
+    }
+  }
+
+  if (w_all != 0.0)
+  {
+    return z_pos / w_all;
+  }
+  else
+  {
+    return -9999.0;
+  }
 }
