@@ -25,9 +25,12 @@ using namespace std;
 /**
  * Method for Hit creation - setting all fields that make sense here
  */
-vector<JPetPhysRecoHit> RedModuleHitFinderTools::matchHitsWithWLSSignals(
-    const vector<JPetPhysRecoHit>& scinHits, const map<int, std::vector<JPetMatrixSignal>>& wlsSignalsMap, double maxTimeDiffWLS,
-    double timeDiffOffset, boost::property_tree::ptree& calibTree, boost::property_tree::ptree& wlsConfig, JPetStatistics& stats, bool saveHistos)
+vector<JPetPhysRecoHit> RedModuleHitFinderTools::matchHitsWithWLSSignals(const vector<JPetPhysRecoHit>& scinHits,
+                                                                         const map<int, std::vector<JPetMatrixSignal>>& wlsSignalsMap,
+                                                                         double maxTimeDiffWLS, double timeDiffOffset,
+                                                                         boost::property_tree::ptree& calibTree,
+                                                                         boost::property_tree::ptree& wlsConfig, JPetStatistics& stats,
+                                                                         bool saveHistos, double totCutAnniMin, double totCutAnniMax)
 {
   vector<JPetPhysRecoHit> wlsHits;
 
@@ -53,7 +56,7 @@ vector<JPetPhysRecoHit> RedModuleHitFinderTools::matchHitsWithWLSSignals(
         double timeDiff = scinHit.getTime() - wlsSignal.getTime() - wlsScinOffset;
         if (fabs(timeDiff - timeDiffOffset) < maxTimeDiffWLS)
         {
-          auto wlsHit = createWLSHit(scinHit, wlsSignal, calibTree, wlsConfig, stats, saveHistos);
+          auto wlsHit = createWLSHit(scinHit, wlsSignal, calibTree, wlsConfig, stats, saveHistos, totCutAnniMin, totCutAnniMax);
           wlsHits.push_back(wlsHit);
           hitWLSMulti++;
           if (saveHistos)
@@ -87,7 +90,7 @@ vector<JPetPhysRecoHit> RedModuleHitFinderTools::matchHitsWithWLSSignals(
  */
 JPetPhysRecoHit RedModuleHitFinderTools::createWLSHit(const JPetPhysRecoHit& scinHit, const JPetMatrixSignal& wlsSignal,
                                                       boost::property_tree::ptree& calibTree, boost::property_tree::ptree& wlsConfig,
-                                                      JPetStatistics& stats, bool saveHistos)
+                                                      JPetStatistics& stats, bool saveHistos, double totCutAnniMin, double totCutAnniMax)
 {
   JPetPhysRecoHit wlsHit;
   wlsHit.setSignals(scinHit.getSignalA(), scinHit.getSignalB());
@@ -116,9 +119,22 @@ JPetPhysRecoHit RedModuleHitFinderTools::createWLSHit(const JPetPhysRecoHit& sci
   if (saveHistos)
   {
     auto wlsID = wlsSignal.getMatrix().getScin().getID();
-    stats.fillHistogram("wls_z_pos_met0", wlsID, zPosMethod0(wlsSignal, wlsConfig));
-    stats.fillHistogram("wls_z_pos_met1", wlsID, zPosMethod1(wlsSignal, wlsConfig));
-    stats.fillHistogram("wls_z_pos_met2", wlsID, zPosMethod2(wlsSignal, wlsConfig));
+    stats.fillHistogram("wls_z_pos_1_met0", wlsID, zPosMethod0(wlsSignal, wlsConfig));
+    stats.fillHistogram("wls_z_pos_1_met1", wlsID, zPosMethod1(wlsSignal, wlsConfig));
+    stats.fillHistogram("wls_z_pos_1_met2", wlsID, zPosMethod2(wlsSignal, wlsConfig));
+    stats.fillHistogram("wls_z_pos_2_met0", wlsID, zPosMethod0(wlsSignal, wlsConfig));
+    stats.fillHistogram("wls_z_pos_2_met1", wlsID, zPosMethod1(wlsSignal, wlsConfig));
+    stats.fillHistogram("wls_z_pos_2_met2", wlsID, zPosMethod2(wlsSignal, wlsConfig));
+
+    if (scinHit.getToT() > totCutAnniMin && scinHit.getToT() < totCutAnniMax)
+    {
+      stats.fillHistogram("wls_z_pos_1_met0_cut", wlsID, zPosMethod0(wlsSignal, wlsConfig));
+      stats.fillHistogram("wls_z_pos_1_met1_cut", wlsID, zPosMethod1(wlsSignal, wlsConfig));
+      stats.fillHistogram("wls_z_pos_1_met2_cut", wlsID, zPosMethod2(wlsSignal, wlsConfig));
+      stats.fillHistogram("wls_z_pos_2_met0", wlsID, zPosMethod0(wlsSignal, wlsConfig));
+      stats.fillHistogram("wls_z_pos_2_met1", wlsID, zPosMethod1(wlsSignal, wlsConfig));
+      stats.fillHistogram("wls_z_pos_2_met2", wlsID, zPosMethod2(wlsSignal, wlsConfig));
+    }
   }
 
   TVector3 position(x_pos, y_pos, z_pos);

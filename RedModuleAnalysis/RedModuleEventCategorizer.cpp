@@ -351,4 +351,45 @@ void RedModuleEventCategorizer::initialiseHistograms()
   getStatistics().createHistogramWithAxes(
       new TH2D("ap_wls_zy_zoom", "ZY position of annihilation point (bin 0.25 cm)", 132, -16.5, 16.5, 132, -16.5, 16.5), "Z position [cm]",
       "Y position [cm]");
+
+  // Scattering tests
+  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_dist_abs", "Scatter Test - Distance Difference", 201, 0.0, 120.0), "Dist Diff [cm]",
+                                          "Number of Hit Pairs");
+
+  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_dist_rel", "Scatter Test - Distance Difference", 201, -120.0, 120.0),
+                                          "Dist Diff [cm]", "Number of Hit Pairs");
+
+  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_time_abs", "Scatter Test - Time Difference", 201, 0.0, 10000.0), "Time Diff [ps]",
+                                          "Number of Hit Pairs");
+
+  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_time_rel", "Scatter Test - Time Difference", 201, -5000.0, 5000.0), "Time Diff [ps]",
+                                          "Number of Hit Pairs");
+
+  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_abs_pass", "Passed Scatter Test - Time Difference", 201, 0.0, 10000.0),
+                                          "Time Diff [ps]", "Number of Hit Pairs");
+
+  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_abs_fail", "Failed Scatter Test - Time Difference", 201, 0.0, 10000.0),
+                                          "Time Diff [ps]", "Number of Hit Pairs");
+
+  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_rel_pass", "Passed Scatter Test - Time Difference", 201, -5000.0, 5000.0),
+                                          "Time Diff [ps]", "Number of Hit Pairs");
+
+  getStatistics().createHistogramWithAxes(new TH1D("scatter_test_rel_fail", "Failed Scatter Test - Time Difference", 201, -5000.0, 5000.0),
+                                          "Time Diff [ps]", "Number of Hit Pairs");
+
+  getStatistics().createHistogramWithAxes(
+      new TH2D("scatter_angle_time", "Scatter angle vs. scatter test measure", 201, -4000.0, 6000.0, 181, -0.5, 180.5), "Time Diff [ps]",
+      "Scatter angle");
+
+  getStatistics().createHistogramWithAxes(
+      new TH2D("scatter_angle_time_small", "Scatter angle vs. scatter test measure", 201, -4000.0, 6000.0, 41, 139.5, 180.5), "Time Diff [ps]",
+      "Scatter angle");
+
+  getStatistics().createHistogramWithAxes(
+      new TH2D("scatter_angle_time_pass", "Passed Scatter angle vs. scatter test measure", 201, -4000.0, 6000.0, 181, -0.5, 180.5), "Time Diff [ps]",
+      "Scatter angle");
+
+  getStatistics().createHistogramWithAxes(
+      new TH2D("scatter_angle_time_fail", "Failed Scatter angle vs. scatter test measure", 201, -4000.0, 6000.0, 181, -0.5, 180.5), "Time Diff [ps]",
+      "Scatter angle");
 }

@@ -34,10 +34,12 @@ public:
   static std::vector<JPetPhysRecoHit> matchHitsWithWLSSignals(const std::vector<JPetPhysRecoHit>& scinHits,
                                                               const std::map<int, std::vector<JPetMatrixSignal>>& wlsSignals, double maxTimeDiffWLS,
                                                               double timeDiffOffset, boost::property_tree::ptree& calibTree,
-                                                              boost::property_tree::ptree& wlsConfig, JPetStatistics& stats, bool saveHistos);
+                                                              boost::property_tree::ptree& wlsConfig, JPetStatistics& stats, bool saveHistos,
+                                                              double totCutAnniMin, double totCutAnniMax);
 
   static JPetPhysRecoHit createWLSHit(const JPetPhysRecoHit& scinHit, const JPetMatrixSignal& wlsSignal, boost::property_tree::ptree& calibTree,
-                                      boost::property_tree::ptree& wlsConfig, JPetStatistics& stats, bool saveHistos);
+                                      boost::property_tree::ptree& wlsConfig, JPetStatistics& stats, bool saveHistos, double totCutAnniMin,
+                                      double totCutAnniMax);
 
   static double estimateZPosWithWLS(const JPetMatrixSignal& wlsSignal, boost::property_tree::ptree& wlsConfig);
   static double zPosMethod0(const JPetMatrixSignal& wlsSignal, boost::property_tree::ptree& wlsConfig);

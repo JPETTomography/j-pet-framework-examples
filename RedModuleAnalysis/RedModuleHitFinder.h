@@ -54,9 +54,13 @@ protected:
   const std::string kABTimeDiffParamKey = "RedModuleHitFinder_ABTimeDiff_double";
   const std::string kWLSScinTimeDiffParamKey = "RedModuleHitFinder_WLSScinTimeDiff_double";
   const std::string kTimeDiffOffsetParamKey = "RedModuleHitFinder_TimeDiffOffset_double";
+  const std::string kToTCutAnniMinParamKey = "EventCategorizer_ToT_Cut_Anni_Min_double";
+  const std::string kToTCutAnniMaxParamKey = "EventCategorizer_ToT_Cut_Anni_Max_double";
   boost::property_tree::ptree fConstansTree;
   boost::property_tree::ptree fWLSConfigTree;
   double fToTHistoUpperLimit = 200000.0;
+  double fToTCutAnniMin = 150000.0;
+  double fToTCutAnniMax = 250000.0;
   bool fSaveControlHistos = true;
   bool fSaveCalibHistos = false;
   double fABTimeDiff = 10000.0;

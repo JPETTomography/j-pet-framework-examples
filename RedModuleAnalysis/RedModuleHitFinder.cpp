@@ -84,6 +84,25 @@ bool RedModuleHitFinder::init()
         Form("No value of the %s parameter provided by the user. Using default value of %lf.", kWLSScinTimeDiffParamKey.c_str(), fWLSScinTimeDiff));
   }
 
+  // Reading ToT cut values
+  if (isOptionSet(fParams.getOptions(), kToTCutAnniMinParamKey))
+  {
+    fToTCutAnniMin = getOptionAsDouble(fParams.getOptions(), kToTCutAnniMinParamKey);
+  }
+  else
+  {
+    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kToTCutAnniMinParamKey.c_str(), fToTCutAnniMin));
+  }
+
+  if (isOptionSet(fParams.getOptions(), kToTCutAnniMaxParamKey))
+  {
+    fToTCutAnniMax = getOptionAsDouble(fParams.getOptions(), kToTCutAnniMaxParamKey);
+  }
+  else
+  {
+    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kToTCutAnniMaxParamKey.c_str(), fToTCutAnniMax));
+  }
+
   if (isOptionSet(fParams.getOptions(), kTimeDiffOffsetParamKey))
   {
     fTimeDiffOffset = getOptionAsDouble(fParams.getOptions(), kTimeDiffOffsetParamKey);
@@ -142,8 +161,9 @@ bool RedModuleHitFinder::exec()
 
     auto refHits = HitFinderTools::matchAllSignals(refSignals, fABTimeDiff, fConstansTree, getStatistics(), fSaveControlHistos);
 
-    auto wlsHits = RedModuleHitFinderTools::matchHitsWithWLSSignals(redHits, wlsSignals, fWLSScinTimeDiff, fTimeDiffOffset, fConstansTree,
-                                                                    fWLSConfigTree, getStatistics(), fSaveControlHistos);
+    auto wlsHits =
+        RedModuleHitFinderTools::matchHitsWithWLSSignals(redHits, wlsSignals, fWLSScinTimeDiff, fTimeDiffOffset, fConstansTree, fWLSConfigTree,
+                                                         getStatistics(), fSaveControlHistos, fToTCutAnniMin, fToTCutAnniMax);
 
     if (fSaveControlHistos)
     {
@@ -252,21 +272,67 @@ void RedModuleHitFinder::initialiseHistograms()
                                           "Scintillator ID", "Hit z-pos [cm]");
   // Comparing various attempts of estimating of z position
 
-  getStatistics().createHistogramWithAxes(new TH2D("wls_z_pos_met0", "Z-axis position in coincidence Scin-WLS Method 0", maxScinID - minScinID + 1,
-                                                   minScinID - 0.5, maxScinID + 0.5, 121, -30.5, 30.5),
-                                          "Scintillator ID", "Hit z-pos [cm]");
+  // 0.25 cm bin
+  getStatistics().createHistogramWithAxes(new TH1D("wls_z_pos_0_met0", "Z-axis position in coincidence Scin-WLS Method 0", 204, -25.5, 25.5),
+                                          "Hit z-pos [cm]");
 
-  getStatistics().createHistogramWithAxes(new TH2D("wls_z_pos_met1", "Z-axis position in coincidence Scin-WLS Method 1", maxScinID - minScinID + 1,
-                                                   minScinID - 0.5, maxScinID + 0.5, 121, -30.5, 30.5),
-                                          "Scintillator ID", "Hit z-pos [cm]");
+  getStatistics().createHistogramWithAxes(new TH1D("wls_z_pos_0_met1", "Z-axis position in coincidence Scin-WLS Method 1", 204, -25.5, 25.5),
+                                          "Hit z-pos [cm]");
 
-  getStatistics().createHistogramWithAxes(new TH2D("wls_z_pos_met2", "Z-axis position in coincidence Scin-WLS Method 2", maxScinID - minScinID + 1,
-                                                   minScinID - 0.5, maxScinID + 0.5, 121, -30.5, 30.5),
-                                          "Scintillator ID", "Hit z-pos [cm]");
+  getStatistics().createHistogramWithAxes(new TH1D("wls_z_pos_0_met2", "Z-axis position in coincidence Scin-WLS Method 2", 204, -25.5, 25.5),
+                                          "Hit z-pos [cm]");
+
+  getStatistics().createHistogramWithAxes(new TH1D("wls_z_pos_0_met0_cut", "Z-axis position in coincidence Scin-WLS Method 0", 204, -25.5, 25.5),
+                                          "Hit z-pos [cm]");
+
+  getStatistics().createHistogramWithAxes(new TH1D("wls_z_pos_0_met1_cut", "Z-axis position in coincidence Scin-WLS Method 1", 204, -25.5, 25.5),
+                                          "Hit z-pos [cm]");
+
+  getStatistics().createHistogramWithAxes(new TH1D("wls_z_pos_0_met2_cut", "Z-axis position in coincidence Scin-WLS Method 2", 204, -25.5, 25.5),
+                                          "Hit z-pos [cm]");
+
+  // 0.5 cm bin
+  getStatistics().createHistogramWithAxes(new TH1D("wls_z_pos_1_met0", "Z-axis position in coincidence Scin-WLS Method 0", 102, -25.5, 25.5),
+                                          "Hit z-pos [cm]");
+
+  getStatistics().createHistogramWithAxes(new TH1D("wls_z_pos_1_met1", "Z-axis position in coincidence Scin-WLS Method 1", 102, -25.5, 25.5),
+                                          "Hit z-pos [cm]");
+
+  getStatistics().createHistogramWithAxes(new TH1D("wls_z_pos_1_met2", "Z-axis position in coincidence Scin-WLS Method 2", 102, -25.5, 25.5),
+                                          "Hit z-pos [cm]");
+
+  getStatistics().createHistogramWithAxes(new TH1D("wls_z_pos_1_met0_cut", "Z-axis position in coincidence Scin-WLS Method 0", 102, -25.5, 25.5),
+                                          "Hit z-pos [cm]");
+
+  getStatistics().createHistogramWithAxes(new TH1D("wls_z_pos_1_met1_cut", "Z-axis position in coincidence Scin-WLS Method 1", 102, -25.5, 25.5),
+                                          "Hit z-pos [cm]");
+
+  getStatistics().createHistogramWithAxes(new TH1D("wls_z_pos_1_met2_cut", "Z-axis position in coincidence Scin-WLS Method 2", 102, -25.5, 25.5),
+                                          "Hit z-pos [cm]");
+
+  // 1 cm bin
+  getStatistics().createHistogramWithAxes(new TH1D("wls_z_pos_2_met0", "Z-axis position in coincidence Scin-WLS Method 0", 51, -25.5, 25.5),
+                                          "Hit z-pos [cm]");
+
+  getStatistics().createHistogramWithAxes(new TH1D("wls_z_pos_2_met1", "Z-axis position in coincidence Scin-WLS Method 1", 51, -25.5, 25.5),
+                                          "Hit z-pos [cm]");
+
+  getStatistics().createHistogramWithAxes(new TH1D("wls_z_pos_2_met2", "Z-axis position in coincidence Scin-WLS Method 2", 51, -25.5, 25.5),
+                                          "Hit z-pos [cm]");
+
+  getStatistics().createHistogramWithAxes(new TH1D("wls_z_pos_2_met0_cut", "Z-axis position in coincidence Scin-WLS Method 0", 51, -25.5, 25.5),
+                                          "Hit z-pos [cm]");
+
+  getStatistics().createHistogramWithAxes(new TH1D("wls_z_pos_2_met1_cut", "Z-axis position in coincidence Scin-WLS Method 1", 51, -25.5, 25.5),
+                                          "Hit z-pos [cm]");
+
+  getStatistics().createHistogramWithAxes(new TH1D("wls_z_pos_2_met2_cut", "Z-axis position in coincidence Scin-WLS Method 2", 51, -25.5, 25.5),
+                                          "Hit z-pos [cm]");
 
   getStatistics().createHistogramWithAxes(new TH1D("hit_multi", "Number of signals from SiPMs in created hit", 12, -0.5, 11.5), "Number of Signals",
                                           "Number of Hits");
 
+  // Multiplicity
   getStatistics().createHistogramWithAxes(new TH2D("hit_multi_scin", "Number of signals from SiPMs in created hit per Scin",
                                                    maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 12, -0.5, 11.5),
                                           "Scintillator ID", "Signal multiplicity [ps]");
