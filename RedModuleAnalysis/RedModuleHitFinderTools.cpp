@@ -119,21 +119,27 @@ JPetPhysRecoHit RedModuleHitFinderTools::createWLSHit(const JPetPhysRecoHit& sci
   if (saveHistos)
   {
     auto wlsID = wlsSignal.getMatrix().getScin().getID();
-    stats.fillHistogram("wls_z_pos_1_met0", wlsID, zPosMethod0(wlsSignal, wlsConfig));
-    stats.fillHistogram("wls_z_pos_1_met1", wlsID, zPosMethod1(wlsSignal, wlsConfig));
-    stats.fillHistogram("wls_z_pos_1_met2", wlsID, zPosMethod2(wlsSignal, wlsConfig));
-    stats.fillHistogram("wls_z_pos_2_met0", wlsID, zPosMethod0(wlsSignal, wlsConfig));
-    stats.fillHistogram("wls_z_pos_2_met1", wlsID, zPosMethod1(wlsSignal, wlsConfig));
-    stats.fillHistogram("wls_z_pos_2_met2", wlsID, zPosMethod2(wlsSignal, wlsConfig));
+    stats.fillHistogram("wls_z_pos_0_met0", zPosMethod0(wlsSignal, wlsConfig));
+    stats.fillHistogram("wls_z_pos_0_met1", zPosMethod1(wlsSignal, wlsConfig));
+    stats.fillHistogram("wls_z_pos_0_met2", zPosMethod2(wlsSignal, wlsConfig));
+    stats.fillHistogram("wls_z_pos_1_met0", zPosMethod0(wlsSignal, wlsConfig));
+    stats.fillHistogram("wls_z_pos_1_met1", zPosMethod1(wlsSignal, wlsConfig));
+    stats.fillHistogram("wls_z_pos_1_met2", zPosMethod2(wlsSignal, wlsConfig));
+    stats.fillHistogram("wls_z_pos_2_met0", zPosMethod0(wlsSignal, wlsConfig));
+    stats.fillHistogram("wls_z_pos_2_met1", zPosMethod1(wlsSignal, wlsConfig));
+    stats.fillHistogram("wls_z_pos_2_met2", zPosMethod2(wlsSignal, wlsConfig));
 
     if (scinHit.getToT() > totCutAnniMin && scinHit.getToT() < totCutAnniMax)
     {
-      stats.fillHistogram("wls_z_pos_1_met0_cut", wlsID, zPosMethod0(wlsSignal, wlsConfig));
-      stats.fillHistogram("wls_z_pos_1_met1_cut", wlsID, zPosMethod1(wlsSignal, wlsConfig));
-      stats.fillHistogram("wls_z_pos_1_met2_cut", wlsID, zPosMethod2(wlsSignal, wlsConfig));
-      stats.fillHistogram("wls_z_pos_2_met0", wlsID, zPosMethod0(wlsSignal, wlsConfig));
-      stats.fillHistogram("wls_z_pos_2_met1", wlsID, zPosMethod1(wlsSignal, wlsConfig));
-      stats.fillHistogram("wls_z_pos_2_met2", wlsID, zPosMethod2(wlsSignal, wlsConfig));
+      stats.fillHistogram("wls_z_pos_0_met0_cut", zPosMethod0(wlsSignal, wlsConfig));
+      stats.fillHistogram("wls_z_pos_0_met1_cut", zPosMethod1(wlsSignal, wlsConfig));
+      stats.fillHistogram("wls_z_pos_0_met2_cut", zPosMethod2(wlsSignal, wlsConfig));
+      stats.fillHistogram("wls_z_pos_1_met0_cut", zPosMethod0(wlsSignal, wlsConfig));
+      stats.fillHistogram("wls_z_pos_1_met1_cut", zPosMethod1(wlsSignal, wlsConfig));
+      stats.fillHistogram("wls_z_pos_1_met2_cut", zPosMethod2(wlsSignal, wlsConfig));
+      stats.fillHistogram("wls_z_pos_2_met0_cut", zPosMethod0(wlsSignal, wlsConfig));
+      stats.fillHistogram("wls_z_pos_2_met1_cut", zPosMethod1(wlsSignal, wlsConfig));
+      stats.fillHistogram("wls_z_pos_2_met2_cut", zPosMethod2(wlsSignal, wlsConfig));
     }
   }
 
