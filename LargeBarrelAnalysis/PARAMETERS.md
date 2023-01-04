@@ -16,7 +16,7 @@ Path to and name of a `ROOT` file with calibrations of nonlinearities occurring 
 Dedicated for files with data from measurement with Reference Detector - it denotes which `ID` has the scintillator we calibrate. If option is absent in the user parameters file, part with reference detector is ignored
 
 - `TimeWindowCreator_MinTime_float`  
-Time Slots have certain duration for specific runs, minimum time is usually negative, default value `-1*10^6 ps`
+Time Slots have certain duration for specific runs, minimum time is usually negative, default value `-1*10^9 ps`
 
 - `TimeWindowCreator_MaxTime_float`  
 default value `0.0 ps`
@@ -79,7 +79,7 @@ time window for grouping hits in one event. Default value `5 000 ps`
 events of minimum multiplicity will only be saved in output file. Default value is 1, so all events are saved.
 
 - `Downscaler_DownscalingRates_std::vector<double>`  
-Set of downscaling rates for 1-hit, 2-hit, 3-hit events etc., expressed in per-cent. 
+Set of downscaling rates for 1-hit, 2-hit, 3-hit events etc., expressed in per-cent.
 If the Downscaler module is used, it will only pass the percentages of particular kinds of events (distinguished by number of hits in an event) according to the rates from this vector.
 For events with number of hits greater than the number of elements in this vector, rates of 100% will be assumed.
 For example, `[]` means the Downscaler will pass on all of the events; `[5.0, 10.0]` means that only 5% of 1-hit events and 10% of 2-hit events will be kept in the files while keeping 100% of events with 3 and more hits.
