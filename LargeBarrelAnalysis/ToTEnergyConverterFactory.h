@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2023 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -35,8 +35,13 @@ public:
   ToTEnergyConverterFactory& operator=(ToTEnergyConverterFactory const&) = delete;
 
   void loadConverterOptions(const ConverterOptions& opts);
+  void setEnergyConverterOptions(const FuncParamsAndLimits formula);
+  void setToTConverterOptions(const FuncParamsAndLimits formula);
   tot_energy_converter::ToTEnergyConverter getToTConverter() const;
   tot_energy_converter::ToTEnergyConverter getEnergyConverter() const;
+
+  void setNullObject(bool isNull);
+  bool isNullObject() const;
 
 private:
   const std::string kEnergy2ToTParametersParamKey = "ToTEnergyConverterFactory_Energy2ToTParameters_std::vector<double>";
@@ -49,6 +54,9 @@ private:
 
   FuncParamsAndLimits fEnergy2ToTAll;
   FuncParamsAndLimits fToT2EnergyAll;
+
+  /// By default null, has to be initialised with parameters
+  bool fIsNullObject = true;
 };
 
 #endif /* !TOTENERGYCONVERTERFACTORY_H */

@@ -22,13 +22,14 @@ using FunctionLimits = std::pair<double, double>;
 using FunctionParams = std::vector<double>;
 using FuncParamsAndLimits = std::pair<FunctionFormula, std::pair<FunctionParams, FunctionLimits>>;
 
-namespace tot_energy_converter {
+namespace tot_energy_converter
+{
 
 ToTEnergyConverter::ToTEnergyConverter(const ToTEParams& params, const ToTERange range) : fFunction(params, range) {}
 
 double ToTEnergyConverter::operator()(double x) const { return fFunction(x); }
 
-std::pair<double, double> ToTEnergyConverter::getRange() const { return {fFunction.getRange().fMin, fFunction.getRange().fMax }; }
+std::pair<double, double> ToTEnergyConverter::getRange() const { return {fFunction.getRange().fMin, fFunction.getRange().fMax}; }
 
 ToTEnergyConverter generateToTEnergyConverter(const FuncParamsAndLimits& formula)
 {
@@ -40,4 +41,4 @@ ToTEnergyConverter generateToTEnergyConverter(const FuncParamsAndLimits& formula
   ToTEnergyConverter conv(params, Range(100000, funcLimits.first, funcLimits.second));
   return conv;
 }
-}
+} // namespace tot_energy_converter
