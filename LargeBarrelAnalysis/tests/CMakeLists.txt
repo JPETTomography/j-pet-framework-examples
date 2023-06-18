@@ -50,12 +50,12 @@ foreach(test_source IN ITEMS ${UNIT_TEST_SOURCES})
       # TimeWindowCreatorToolsTests requires UniversalFileLoader
       package_add_test(${test} ${test_source} ../UniversalFileLoader.cpp)
     elseif(${test} MATCHES HitFinderToolsTest)
-      # HitFinderToolsTest requires UniversalFileLoader and ToTEnergyConverter
-      package_add_test(${test} ${test_source} ../UniversalFileLoader.cpp ../ToTEnergyConverter.cpp)
+      # HitFinderToolsTest requires UniversalFileLoader and ToTEnergyConverter and ToTEnergyConverterFactory
+      package_add_test(${test} ${test_source} ../UniversalFileLoader.cpp ../ToTEnergyConverter.cpp ../ToTEnergyConverterFactory.cpp)
     elseif(${test} MATCHES ToTEnergyConverterFactoryTest)
       package_add_test(${test} ${test_source} ../ToTEnergyConverter.cpp)
     elseif(${test} MATCHES EventCategorizerToolsTest)
-      package_add_test(${test} ${test_source} ../HitFinderTools.cpp ../UniversalFileLoader.cpp ../ToTEnergyConverter.cpp)
+      package_add_test(${test} ${test_source} ../HitFinderTools.cpp ../UniversalFileLoader.cpp ../ToTEnergyConverter.cpp ../ToTEnergyConverterFactory.cpp)
     else()
       package_add_test(${test} ${test_source})
     endif(${test} MATCHES TimeWindowCreatorToolsTest)
