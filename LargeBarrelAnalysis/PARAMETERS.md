@@ -97,9 +97,11 @@ denotes Time over Threshold cut minimal value for simple selection of deexcitati
 denotes Time over Threshold cut maximal value for simple selection of deexcitation photons. Default value: `50 000 ps`
 
 - TOT to energy conversion parameters:  
+`HitFinder_ConvertToT_bool`  
+Set `true` to initialise the parameters for TOT/Edep conversion, by default `false`.  
 `ToTEnergyConverterFactory_ToT2EnergyFunction_std::string`  
 String with function formula in ROOT format  
-See documentation of [TFormula class](https://root.cern.ch/doc/master/classTFormula.html)
+See documentation of [TFormula class](https://root.cern.ch/doc/master/classTFormula.html)  
 `ToTEnergyConverterFactory_ToT2EnergyParameters_std::vector<double>`  
 Array of parameters for function above, given as a vector of doubles  
 `ToTEnergyConverterFactory_ToT2EnergyFunctionLimits_std::vector<double>`  
