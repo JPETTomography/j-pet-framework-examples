@@ -112,6 +112,7 @@ bool HitFinder::init()
     else
     {
       INFO("Hit finder will not convert ToT to deposited energy since no user parameters are provided.");
+      fToTConverterFactory.setNullObject(true);
     }
   }
   // Loading parameters for TOT synchronizationi
@@ -159,8 +160,7 @@ bool HitFinder::exec()
   if (auto& timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent))
   {
     auto signalsBySlot = HitFinderTools::getSignalsBySlot(timeWindow, fUseCorruptedSignals);
-    auto totConverter = fToTConverterFactory.getEnergyConverter();
-    auto allHits = HitFinderTools::matchAllSignals(signalsBySlot, fVelocities, fABTimeDiff, fRefDetScinID, fConvertToT, totConverter, getStatistics(),
+    auto allHits = HitFinderTools::matchAllSignals(signalsBySlot, fVelocities, fABTimeDiff, fRefDetScinID, fToTConverterFactory, getStatistics(),
                                                    fSaveControlHistos);
     if (fSaveControlHistos)
     {
@@ -194,7 +194,7 @@ void HitFinder::saveHits(const std::vector<JPetHit>& hits)
       // synchronization
       if (fSyncToT)
       {
-	//ToDo change getEnergy() to getTOT() once implemented
+        // ToDo change getEnergy() to getTOT() once implemented
         getStatistics().fillHistogram("SyncTOT_all_hits", hit.getEnergy());
       }
       getStatistics().fillHistogram("TOT_all_hits", tot);

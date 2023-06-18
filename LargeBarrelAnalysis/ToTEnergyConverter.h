@@ -31,14 +31,13 @@ public:
   ToTEnergyConverter(const ToTEParams& params, ToTERange);
   double operator()(double val) const;
   /// Function returns the range of arguments for which the converter is valid
-  std::pair<double, double> getRange() const; 
+  std::pair<double, double> getRange() const;
 
 private:
   CachedFunction fFunction;
 };
 
-ToTEnergyConverter generateToTEnergyConverter(
-  const std::pair<std::string, std::pair<std::vector<double>, std::pair<double, double>>>& formula);
-}
+ToTEnergyConverter generateToTEnergyConverter(const std::pair<std::string, std::pair<std::vector<double>, std::pair<double, double>>>& formula);
+} // namespace tot_energy_converter
 
 #endif /* !TOTENERGYCONVERTER_H */

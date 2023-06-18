@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2023 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -76,7 +76,27 @@ void ToTEnergyConverterFactory::loadConverterOptions(const ToTEnergyConverterFac
   {
     fToT2EnergyAll = {toT2EnergyFormula, {toT2EnergyParameters, {}}};
   }
+
+  /// Converter factory by default is null, only after proper initialisation
+  /// the flag is changed to true and can be used in the examples
+  fIsNullObject = false;
 }
+
+void ToTEnergyConverterFactory::setEnergyConverterOptions(const FuncParamsAndLimits formula)
+{
+  fEnergy2ToTAll = formula;
+  fIsNullObject = false;
+}
+
+void ToTEnergyConverterFactory::setToTConverterOptions(const FuncParamsAndLimits formula)
+{
+  fToT2EnergyAll = formula;
+  fIsNullObject = false;
+}
+
+void ToTEnergyConverterFactory::setNullObject(bool isNull) { fIsNullObject = isNull; }
+
+bool ToTEnergyConverterFactory::isNullObject() const { return fIsNullObject; }
 
 tot_energy_converter::ToTEnergyConverter ToTEnergyConverterFactory::getToTConverter() const { return generateToTEnergyConverter(fEnergy2ToTAll); }
 

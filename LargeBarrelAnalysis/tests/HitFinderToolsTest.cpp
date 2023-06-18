@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2020 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2023 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -17,14 +17,15 @@
 #define BOOST_TEST_MODULE HitFinderToolsTest
 
 #include <JPetCachedFunction/JPetCachedFunction.h>
-#include <JPetPhysSignal/JPetPhysSignal.h>
-#include <JPetRecoSignal/JPetRecoSignal.h>
-#include <JPetRawSignal/JPetRawSignal.h>
-#include <JPetSigCh/JPetSigCh.h>
 #include <JPetLoggerInclude.h>
+#include <JPetPhysSignal/JPetPhysSignal.h>
+#include <JPetRawSignal/JPetRawSignal.h>
+#include <JPetRecoSignal/JPetRecoSignal.h>
+#include <JPetSigCh/JPetSigCh.h>
 
-#include "../ToTEnergyConverter.h"
 #include "../HitFinderTools.h"
+#include "../ToTEnergyConverter.h"
+#include "../ToTEnergyConverterFactory.h"
 
 #include <boost/test/unit_test.hpp>
 
@@ -32,6 +33,11 @@ using namespace tot_energy_converter;
 using namespace jpet_common_tools;
 
 const double kEpsilon = 0.01;
+
+using FunctionFormula = std::string;
+using FunctionParams = std::vector<double>;
+using FunctionLimits = std::pair<double, double>;
+using FuncParamsAndLimits = std::pair<FunctionFormula, std::pair<FunctionParams, FunctionLimits>>;
 
 BOOST_AUTO_TEST_SUITE(HitFinderTestSuite)
 
@@ -67,7 +73,8 @@ BOOST_AUTO_TEST_CASE(sortByTime_test)
   BOOST_REQUIRE_CLOSE(sigVec.at(4).getTime(), 16.0, epsilon);
 }
 
-BOOST_AUTO_TEST_CASE(getSignalsBySlot_test_empty) {
+BOOST_AUTO_TEST_CASE(getSignalsBySlot_test_empty)
+{
   auto results = HitFinderTools::getSignalsBySlot(nullptr, false);
   BOOST_REQUIRE(results.empty());
 }
@@ -148,16 +155,24 @@ BOOST_AUTO_TEST_CASE(matchAllSignals_test_refDetID)
   JPetStatistics stats;
   std::map<unsigned int, std::vector<double>> velocitiesMap;
 
-  JPetCachedFunctionParams params("pol1", {0.0, 10.0});
-  ToTEnergyConverter conv(params, Range(10000, 0., 100.));
+  FunctionFormula formula1 = "pol1";
+  FunctionParams params1 = {-91958, 19341};
+  FunctionLimits limits1 = {0, 100};
 
-  auto result1 = HitFinderTools::matchAllSignals(
-    allSignals, velocitiesMap, 5.0, 193, false, conv, stats, false
-  );
+  FunctionFormula formula2 = "[0] + [1] * TMath::Log(x)";
+  FunctionParams params2 = {1, -2};
+  FunctionLimits limits2 = {2, 100};
 
-  auto result2 = HitFinderTools::matchAllSignals(
-    allSignals, velocitiesMap, 5.0, 1, false, conv, stats, false
-  );
+  FuncParamsAndLimits e2tot = {formula1, {params1, limits1}};
+  FuncParamsAndLimits tot2e = {formula2, {params2, limits2}};
+
+  ToTEnergyConverterFactory fact;
+  fact.setEnergyConverterOptions(e2tot);
+  fact.setToTConverterOptions(tot2e);
+
+  auto result1 = HitFinderTools::matchAllSignals(allSignals, velocitiesMap, 5.0, 193, fact, stats, false);
+
+  auto result2 = HitFinderTools::matchAllSignals(allSignals, velocitiesMap, 5.0, 1, fact, stats, false);
 
   BOOST_REQUIRE_EQUAL(result1.size(), 2);
   BOOST_REQUIRE_EQUAL(result2.size(), 1);
@@ -229,12 +244,14 @@ BOOST_AUTO_TEST_CASE(createHit_test)
 
   JPetStatistics stats;
 
-  JPetCachedFunctionParams params1("pol1", {0.0, 10.0});
-  ToTEnergyConverter conv1(params1, Range(10000, 0., 100.));
+  FunctionFormula formula1 = "pol1";
+  FunctionParams params1 = {0.0, 10.0};
+  FunctionLimits limits1 = {0., 100.};
+  FuncParamsAndLimits tot2e1 = {formula1, {params1, limits1}};
+  ToTEnergyConverterFactory fact1;
+  fact1.setToTConverterOptions(tot2e1);
 
-  auto hit1 = HitFinderTools::createHit(
-    physSigA, physSigB, velocitiesMap, true, conv1, stats, false
-  );
+  auto hit1 = HitFinderTools::createHit(physSigA, physSigB, velocitiesMap, fact1, stats, false);
 
   auto epsilon = 0.0001;
 
@@ -244,37 +261,43 @@ BOOST_AUTO_TEST_CASE(createHit_test)
   BOOST_REQUIRE_CLOSE(hit1.getQualityOfTimeDiff(), -1.0, epsilon);
   BOOST_REQUIRE_EQUAL(hit1.getScintillator().getID(), 1);
   BOOST_REQUIRE_EQUAL(hit1.getBarrelSlot().getID(), 2);
-  BOOST_REQUIRE_CLOSE(hit1.getPosX(), 10.0*cos(TMath::DegToRad() * 30.0), epsilon);
-  BOOST_REQUIRE_CLOSE(hit1.getPosY(), 10.0*sin(TMath::DegToRad() * 30.0), epsilon);
-  BOOST_REQUIRE_CLOSE(hit1.getPosZ(), 4.0*1.0/2000.0, epsilon);
+  BOOST_REQUIRE_CLOSE(hit1.getPosX(), 10.0 * cos(TMath::DegToRad() * 30.0), epsilon);
+  BOOST_REQUIRE_CLOSE(hit1.getPosY(), 10.0 * sin(TMath::DegToRad() * 30.0), epsilon);
+  BOOST_REQUIRE_CLOSE(hit1.getPosZ(), 4.0 * 1.0 / 2000.0, epsilon);
   BOOST_REQUIRE_CLOSE(hit1.getEnergy(), 40.0, epsilon);
   BOOST_REQUIRE_CLOSE(hit1.getQualityOfEnergy(), -1.0, epsilon);
 
   // Case: resultcan be caluculated but ToT is outside range of function
-  JPetCachedFunctionParams params2("pol1", {0.0, 10.0});
-  ToTEnergyConverter conv2(params2, Range(10000, 0., 1.));
+  FunctionFormula formula2 = "pol1";
+  FunctionParams params2 = {0.0, 10.0};
+  FunctionLimits limits2 = {0., 1.};
+  FuncParamsAndLimits tot2e2 = {formula2, {params2, limits2}};
+  ToTEnergyConverterFactory fact2;
+  fact2.setToTConverterOptions(tot2e2);
 
-  auto hit2 = HitFinderTools::createHit(
-    physSigA, physSigB, velocitiesMap, true, conv2, stats, false
-  );
+  auto hit2 = HitFinderTools::createHit(physSigA, physSigB, velocitiesMap, fact2, stats, false);
   BOOST_REQUIRE_CLOSE(hit2.getEnergy(), -1.0, epsilon);
 
   // Case with different function
-  JPetCachedFunctionParams params3("sqrt([0]*x)", {1.0});
-  ToTEnergyConverter conv3(params3, Range(10000, 0., 100.));
+  FunctionFormula formula3 = "sqrt([0]*x)";
+  FunctionParams params3 = {1.0};
+  FunctionLimits limits3 = {0.0, 100.0};
+  FuncParamsAndLimits tot2e3 = {formula3, {params3, limits3}};
+  ToTEnergyConverterFactory fact3;
+  fact3.setToTConverterOptions(tot2e3);
 
-  auto hit3 = HitFinderTools::createHit(
-    physSigA, physSigB, velocitiesMap, true, conv3, stats, false
-  );
+  auto hit3 = HitFinderTools::createHit(physSigA, physSigB, velocitiesMap, fact3, stats, false);
   BOOST_REQUIRE_CLOSE(hit3.getEnergy(), 2, epsilon);
 
   // Case: result is -nan, energy set to -1.0
-  JPetCachedFunctionParams params4("sqrt([0]*x)", {-1.0});
-  ToTEnergyConverter conv4(params4, Range(10000, -100.0, 100.));
+  FunctionFormula formula4 = "sqrt([0]*x)";
+  FunctionParams params4 = {-1.0};
+  FunctionLimits limits4 = {-100.0, 100.0};
+  FuncParamsAndLimits tot2e4 = {formula4, {params4, limits4}};
+  ToTEnergyConverterFactory fact4;
+  fact4.setToTConverterOptions(tot2e4);
 
-  auto hit4 = HitFinderTools::createHit(
-    physSigA, physSigB, velocitiesMap, true, conv4, stats, false
-  );
+  auto hit4 = HitFinderTools::createHit(physSigA, physSigB, velocitiesMap, fact4, stats, false);
   BOOST_REQUIRE_CLOSE(hit4.getEnergy(), -1.0, epsilon);
 }
 
@@ -303,12 +326,15 @@ BOOST_AUTO_TEST_CASE(matchSignals_test_sameSide)
 
   JPetStatistics stats;
   std::map<unsigned int, std::vector<double>> velocitiesMap;
-  JPetCachedFunctionParams params("pol1", {0.0, 10.0});
-  ToTEnergyConverter conv(params, Range(10000, 0., 100.));
 
-  auto result = HitFinderTools::matchSignals(
-    slotSignals, velocitiesMap, 5.0, false, conv, stats, false
-  );
+  FunctionFormula formula1 = "pol1";
+  FunctionParams params1 = {0.0, 10.0};
+  FunctionLimits limits1 = {0., 100.};
+  FuncParamsAndLimits tot2e1 = {formula1, {params1, limits1}};
+  ToTEnergyConverterFactory fact1;
+  fact1.setToTConverterOptions(tot2e1);
+
+  auto result = HitFinderTools::matchSignals(slotSignals, velocitiesMap, 5.0, fact1, stats, false);
   BOOST_REQUIRE(result.empty());
 }
 
@@ -408,12 +434,14 @@ BOOST_AUTO_TEST_CASE(matchSignals_test)
   velocitiesMap.insert(std::make_pair(66, velVec));
   velocitiesMap.insert(std::make_pair(88, velVec));
 
-  JPetCachedFunctionParams params("pol1", {0.0, 10.0});
-  ToTEnergyConverter conv(params, Range(10000, 0., 100.));
+  FunctionFormula formula1 = "pol1";
+  FunctionParams params1 = {0.0, 10.0};
+  FunctionLimits limits1 = {0., 100.};
+  FuncParamsAndLimits tot2e1 = {formula1, {params1, limits1}};
+  ToTEnergyConverterFactory fact1;
+  fact1.setToTConverterOptions(tot2e1);
 
-  auto result = HitFinderTools::matchSignals(
-    slotSignals, velocitiesMap, 1.0, false, conv, stats, false
-  );
+  auto result = HitFinderTools::matchSignals(slotSignals, velocitiesMap, 1.0, fact1, stats, false);
   auto epsilon = 0.0001;
 
   BOOST_REQUIRE_EQUAL(result.size(), 3);
@@ -425,18 +453,12 @@ BOOST_AUTO_TEST_CASE(matchSignals_test)
   BOOST_REQUIRE_EQUAL(result.at(2).getSignalA().getPM().getID(), 31);
   BOOST_REQUIRE_EQUAL(result.at(2).getSignalB().getPM().getID(), 75);
 
-  BOOST_REQUIRE_EQUAL(result.at(0).getSignalA().getRecoFlag(),
-                      JPetBaseSignal::Good);
-  BOOST_REQUIRE_EQUAL(result.at(0).getSignalB().getRecoFlag(),
-                      JPetBaseSignal::Good);
-  BOOST_REQUIRE_EQUAL(result.at(1).getSignalA().getRecoFlag(),
-                      JPetBaseSignal::Good);
-  BOOST_REQUIRE_EQUAL(result.at(1).getSignalB().getRecoFlag(),
-                      JPetBaseSignal::Corrupted);
-  BOOST_REQUIRE_EQUAL(result.at(2).getSignalA().getRecoFlag(),
-                      JPetBaseSignal::Good);
-  BOOST_REQUIRE_EQUAL(result.at(2).getSignalB().getRecoFlag(),
-                      JPetBaseSignal::Good);
+  BOOST_REQUIRE_EQUAL(result.at(0).getSignalA().getRecoFlag(), JPetBaseSignal::Good);
+  BOOST_REQUIRE_EQUAL(result.at(0).getSignalB().getRecoFlag(), JPetBaseSignal::Good);
+  BOOST_REQUIRE_EQUAL(result.at(1).getSignalA().getRecoFlag(), JPetBaseSignal::Good);
+  BOOST_REQUIRE_EQUAL(result.at(1).getSignalB().getRecoFlag(), JPetBaseSignal::Corrupted);
+  BOOST_REQUIRE_EQUAL(result.at(2).getSignalA().getRecoFlag(), JPetBaseSignal::Good);
+  BOOST_REQUIRE_EQUAL(result.at(2).getSignalB().getRecoFlag(), JPetBaseSignal::Good);
 
   BOOST_REQUIRE_EQUAL(result.at(0).getSignalA().getPM().getScin().getID(), 23);
   BOOST_REQUIRE_EQUAL(result.at(0).getSignalB().getPM().getScin().getID(), 23);
@@ -461,12 +483,9 @@ BOOST_AUTO_TEST_CASE(matchSignals_test)
   BOOST_REQUIRE_CLOSE(result.at(1).getPosY(), 5.0, epsilon);
   BOOST_REQUIRE_CLOSE(result.at(2).getPosY(), 5.0, epsilon);
 
-  BOOST_REQUIRE_CLOSE(result.at(0).getPosZ(),
-                      2.0 * result.at(0).getTimeDiff() / 2000.0, epsilon);
-  BOOST_REQUIRE_CLOSE(result.at(1).getPosZ(),
-                      2.0 * result.at(1).getTimeDiff() / 2000.0, epsilon);
-  BOOST_REQUIRE_CLOSE(result.at(2).getPosZ(),
-                      2.0 * result.at(2).getTimeDiff() / 2000.0, epsilon);
+  BOOST_REQUIRE_CLOSE(result.at(0).getPosZ(), 2.0 * result.at(0).getTimeDiff() / 2000.0, epsilon);
+  BOOST_REQUIRE_CLOSE(result.at(1).getPosZ(), 2.0 * result.at(1).getTimeDiff() / 2000.0, epsilon);
+  BOOST_REQUIRE_CLOSE(result.at(2).getPosZ(), 2.0 * result.at(2).getTimeDiff() / 2000.0, epsilon);
 
   BOOST_REQUIRE(result.at(0).getPosZ() > 0.0);
   BOOST_REQUIRE(result.at(1).getPosZ() > 0.0);
@@ -477,7 +496,8 @@ BOOST_AUTO_TEST_CASE(matchSignals_test)
   BOOST_REQUIRE_EQUAL(result.at(2).getRecoFlag(), JPetHit::Good);
 }
 
-BOOST_AUTO_TEST_CASE(checkForPromptTest_checkTOTCalc) {
+BOOST_AUTO_TEST_CASE(checkForPromptTest_checkTOTCalc)
+{
   JPetBarrelSlot barrelSlot(666, true, "Some Slot", 66.0, 666);
   JPetPM pmA(1, "A");
   JPetPM pmB(2, "B");
@@ -512,7 +532,7 @@ BOOST_AUTO_TEST_CASE(checkForPromptTest_checkTOTCalc) {
   sigCh6.setThresholdNumber(2);
   sigCh7.setThresholdNumber(3);
   sigCh8.setThresholdNumber(4);
-  
+
   sigCh1.setThreshold(80);
   sigCh2.setThreshold(160);
   sigCh3.setThreshold(240);
@@ -628,13 +648,11 @@ BOOST_AUTO_TEST_CASE(checkForPromptTest_checkTOTCalc) {
   hit1.setSignals(physSignal1A, physSignal1B);
   hit2.setSignals(physSignal2A, physSignal2B);
   hit3.setSignals(physSignal3A, physSignal3B);
-  
+
   std::string TOTCalculationType = "standard";
   BOOST_REQUIRE_CLOSE(HitFinderTools::calculateTOT(hit1, HitFinderTools::getTOTCalculationType(TOTCalculationType)), 0.0, kEpsilon);
-  BOOST_REQUIRE_CLOSE(HitFinderTools::calculateTOT(hit2, HitFinderTools::getTOTCalculationType(TOTCalculationType)), 56.0,
-                      kEpsilon);
-  BOOST_REQUIRE_CLOSE(HitFinderTools::calculateTOT(hit3, HitFinderTools::getTOTCalculationType(TOTCalculationType)), 560.0,
-                      kEpsilon);
+  BOOST_REQUIRE_CLOSE(HitFinderTools::calculateTOT(hit2, HitFinderTools::getTOTCalculationType(TOTCalculationType)), 56.0, kEpsilon);
+  BOOST_REQUIRE_CLOSE(HitFinderTools::calculateTOT(hit3, HitFinderTools::getTOTCalculationType(TOTCalculationType)), 560.0, kEpsilon);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -16,7 +16,7 @@
 #ifndef HITFINDERTOOLS_H
 #define HITFINDERTOOLS_H
 
-#include "ToTEnergyConverter.h"
+#include "ToTEnergyConverterFactory.h"
 #include <JPetHit/JPetHit.h>
 #include <JPetStatistics/JPetStatistics.h>
 #include <JPetTimeWindow/JPetTimeWindow.h>
@@ -44,14 +44,13 @@ public:
   static std::map<int, std::vector<JPetPhysSignal>> getSignalsBySlot(const JPetTimeWindow* timeWindow, bool useCorrupts);
   static std::vector<JPetHit> matchAllSignals(std::map<int, std::vector<JPetPhysSignal>>& allSignals,
                                               const std::map<unsigned int, std::vector<double>>& velocitiesMap, double timeDiffAB, int refDetScinId,
-                                              bool convertToT, const tot_energy_converter::ToTEnergyConverter& totConverter, JPetStatistics& stats,
-                                              bool saveHistos);
+                                              const ToTEnergyConverterFactory& totEnergyConverterFactory, JPetStatistics& stats, bool saveHistos);
   static std::vector<JPetHit> matchSignals(std::vector<JPetPhysSignal>& slotSignals, const std::map<unsigned int, std::vector<double>>& velocitiesMap,
-                                           double timeDiffAB, bool convertToT, const tot_energy_converter::ToTEnergyConverter& totConverter,
-                                           JPetStatistics& stats, bool saveHistos);
+                                           double timeDiffAB, const ToTEnergyConverterFactory& totEnergyConverterFactory, JPetStatistics& stats,
+                                           bool saveHistos);
   static JPetHit createHit(const JPetPhysSignal& signal1, const JPetPhysSignal& signal2,
-                           const std::map<unsigned int, std::vector<double>>& velocitiesMap, bool convertToT,
-                           const tot_energy_converter::ToTEnergyConverter& totConverter, JPetStatistics& stats, bool saveHistos);
+                           const std::map<unsigned int, std::vector<double>>& velocitiesMap,
+                           const ToTEnergyConverterFactory& totEnergyConverterFactory, JPetStatistics& stats, bool saveHistos);
   static JPetHit createDummyRefDetHit(const JPetPhysSignal& signal);
   static int getProperChannel(const JPetPhysSignal& signal);
   static void checkTheta(const double& theta);

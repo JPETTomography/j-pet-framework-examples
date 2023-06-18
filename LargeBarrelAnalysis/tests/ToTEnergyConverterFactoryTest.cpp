@@ -1,15 +1,38 @@
+/**
+ *  @copyright Copyright 2023 The J-PET Framework Authors. All rights reserved.
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may find a copy of the License in the LICENCE file.
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ *  @file ToTEnergyConverterFactoryTest.cpp
+ */
+
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE ToTEnergyConverterFactoryTest
 
 #include "../ToTEnergyConverterFactory.h"
 #include "JPetLoggerInclude.h"
 #include <boost/test/unit_test.hpp>
+
 using namespace jpet_common_tools;
 using namespace tot_energy_converter;
 
-/// Returns Time-over-threshold for given deposited energy
-/// the current parametrization is par1 + par2 * eDep
-/// Returned value in ps, and eDep is given in keV.
+using FunctionFormula = std::string;
+using FunctionParams = std::vector<double>;
+using FunctionLimits = std::pair<double, double>;
+using FuncParamsAndLimits = std::pair<FunctionFormula, std::pair<FunctionParams, FunctionLimits>>;
+
+/**
+ * Returns Time-over-threshold for given deposited energy
+ * the current parametrization is par1 + par2 * eDep
+ * Returned value in ps, and eDep is given in keV.
+ */
 double getToT1(double eDep, double par1 = -91958, double par2 = 19341)
 {
   if (eDep < 0)
@@ -20,7 +43,17 @@ double getToT1(double eDep, double par1 = -91958, double par2 = 19341)
 
 BOOST_AUTO_TEST_SUITE(ToTEnergyConverterFactoryTestSuite)
 
-BOOST_AUTO_TEST_CASE(test1)
+BOOST_AUTO_TEST_CASE(null_factory)
+{
+  ToTEnergyConverterFactory convFact;
+  BOOST_CHECK(convFact.isNullObject());
+  convFact.setNullObject(false);
+  BOOST_CHECK(!convFact.isNullObject());
+  convFact.setNullObject(true);
+  BOOST_CHECK(convFact.isNullObject());
+}
+
+BOOST_AUTO_TEST_CASE(test1_optionLoader)
 {
   std::string formula1 = "pol1";
   std::vector<double> params1 = {-91958, 19341};
@@ -30,18 +63,19 @@ BOOST_AUTO_TEST_CASE(test1)
   std::vector<double> params2 = {1, -2};
   std::vector<double> limits2 = {2, 100};
 
-  std::map<std::string, boost::any> options = {
-    {"ToTEnergyConverterFactory_Energy2ToTParameters_std::vector<double>", params1},
-    {"ToTEnergyConverterFactory_Energy2ToTFunction_std::string", formula1},
-    {"ToTEnergyConverterFactory_Energy2ToTFunctionLimits_std::vector<double>", limits1},
-    {"ToTEnergyConverterFactory_ToT2EnergyParameters_std::vector<double>", params2},
-    {"ToTEnergyConverterFactory_ToT2EnergyFunction_std::string", formula2},
-    {"ToTEnergyConverterFactory_ToT2EnergyFunctionLimits_std::vector<double>", limits2}
-  };
+  std::map<std::string, boost::any> options = {{"ToTEnergyConverterFactory_Energy2ToTParameters_std::vector<double>", params1},
+                                               {"ToTEnergyConverterFactory_Energy2ToTFunction_std::string", formula1},
+                                               {"ToTEnergyConverterFactory_Energy2ToTFunctionLimits_std::vector<double>", limits1},
+                                               {"ToTEnergyConverterFactory_ToT2EnergyParameters_std::vector<double>", params2},
+                                               {"ToTEnergyConverterFactory_ToT2EnergyFunction_std::string", formula2},
+                                               {"ToTEnergyConverterFactory_ToT2EnergyFunctionLimits_std::vector<double>", limits2}};
 
   ToTEnergyConverterFactory fact;
+  BOOST_CHECK(fact.isNullObject());
   fact.loadConverterOptions(options);
+  BOOST_CHECK(!fact.isNullObject());
   auto conv = fact.getToTConverter();
+
   BOOST_CHECK_CLOSE(conv(0), getToT1(0), 0.1);
   BOOST_CHECK_CLOSE(conv(1), getToT1(1), 0.1);
   BOOST_CHECK_CLOSE(conv(10), getToT1(10), 0.1);
@@ -56,6 +90,33 @@ BOOST_AUTO_TEST_CASE(test1)
   BOOST_CHECK_CLOSE(conv2(5.5), funcTest.Eval(5.5), 0.1);
   BOOST_CHECK_CLOSE(conv2(45.25), funcTest.Eval(45.25), 0.1);
   BOOST_CHECK_CLOSE(conv2(91), funcTest.Eval(91), 0.1);
+}
+
+BOOST_AUTO_TEST_CASE(test2)
+{
+  FunctionFormula formula1 = "pol1";
+  FunctionParams params1 = {-91958, 19341};
+  FunctionLimits limits1 = {0, 100};
+
+  FunctionFormula formula2 = "[0] + [1] * TMath::Log(x)";
+  FunctionParams params2 = {1, -2};
+  FunctionLimits limits2 = {2, 100};
+
+  FuncParamsAndLimits e2tot = {formula1, {params1, limits1}};
+  FuncParamsAndLimits tot2e = {formula2, {params2, limits2}};
+
+  ToTEnergyConverterFactory fact;
+  BOOST_CHECK(fact.isNullObject());
+  fact.setEnergyConverterOptions(e2tot);
+  fact.setToTConverterOptions(tot2e);
+  BOOST_CHECK(!fact.isNullObject());
+
+  auto conv = fact.getToTConverter();
+  BOOST_CHECK_CLOSE(conv(0), getToT1(0), 0.1);
+  BOOST_CHECK_CLOSE(conv(1), getToT1(1), 0.1);
+  BOOST_CHECK_CLOSE(conv(10), getToT1(10), 0.1);
+  BOOST_CHECK_CLOSE(conv(59.5), getToT1(59.5), 0.1);
+  BOOST_CHECK_CLOSE(conv(99.9), getToT1(99.9), 0.1);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
