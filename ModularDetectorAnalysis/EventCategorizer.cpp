@@ -491,6 +491,10 @@ void EventCategorizer::initialiseHistograms()
                                           "Z position [cm]", "Y position [cm]");
 
   getStatistics().createHistogramWithAxes(
+      new TH3D("ap_pos", "Position of the annihilation point (bin 0.5 cm)", 202, -50.5, 50.5, 202, -50.5, 50.5, 202, -50.5, 50.5), "Z [cm]", "X [cm]",
+      "Y [cm]");
+
+  getStatistics().createHistogramWithAxes(
       new TH2D("ap_xy_zoom", "XY position of annihilation point (bin 0.25 cm)", 132, -16.5, 16.5, 132, -16.5, 16.5), "X position [cm]",
       "Y position [cm]");
 
@@ -501,6 +505,10 @@ void EventCategorizer::initialiseHistograms()
   getStatistics().createHistogramWithAxes(
       new TH2D("ap_zy_zoom", "ZY position of annihilation point (bin 0.25 cm)", 132, -16.5, 16.5, 132, -16.5, 16.5), "Z position [cm]",
       "Y position [cm]");
+
+  getStatistics().createHistogramWithAxes(
+      new TH3D("ap_pos_zoom", "Position of the annihilation point (bin 0.25 cm)", 132, -16.5, 16.5, 132, -16.5, 16.5, 132, -16.5, 16.5), "Z [cm]",
+      "X [cm]", "Y [cm]");
 
   // Histograms for scattering category
   getStatistics().createHistogramWithAxes(new TH1D("scatter_test_dist_abs", "Scatter Test - Distance Difference", 201, 0.0, 120.0), "Dist Diff [cm]",

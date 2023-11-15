@@ -223,9 +223,11 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetPhysRecoHit* firstHit, cons
     stats.fillHistogram("ap_xy", annhilationPoint.X(), annhilationPoint.Y());
     stats.fillHistogram("ap_zx", annhilationPoint.Z(), annhilationPoint.X());
     stats.fillHistogram("ap_zy", annhilationPoint.Z(), annhilationPoint.Y());
+    stats.fillHistogram("ap_pos", annhilationPoint.Z(), annhilationPoint.X(), annhilationPoint.Y());
     stats.fillHistogram("ap_xy_zoom", annhilationPoint.X(), annhilationPoint.Y());
     stats.fillHistogram("ap_zx_zoom", annhilationPoint.Z(), annhilationPoint.X());
     stats.fillHistogram("ap_zy_zoom", annhilationPoint.Z(), annhilationPoint.Y());
+    stats.fillHistogram("ap_pos_zoom", annhilationPoint.Z(), annhilationPoint.X(), annhilationPoint.Y());
   }
   // Returning event as 2 gamma if meets cut conditions
   if (totCut && tDiffCut && thetaCut2)
