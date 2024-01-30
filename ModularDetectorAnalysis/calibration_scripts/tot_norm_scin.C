@@ -1,5 +1,5 @@
 /**
- * @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
+ * @copyright Copyright 2024 The J-PET Framework Authors. All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may find a copy of the License in the LICENCE file.
@@ -35,9 +35,15 @@
 
 namespace bpt = boost::property_tree;
 
-const double fNominalAnnihilationEdge = 150000.0;
-const double fNominalDeexcitationEdge = 250000.0;
+/**
+ * The parameters for the edges - depend on the ToT calculation method and units
+ */
+const double fNominalAnnihilationEdge = 4000000.0;
+const double fNominalDeexcitationEdge = 8000000.0;
 
+/**
+ * Produce the derivative graph for input histogram
+ */
 TGraph* getDerivativeGraph(TH1D* histo)
 {
   TGraph* derivGraph = new TGraph();
@@ -52,8 +58,10 @@ TGraph* getDerivativeGraph(TH1D* histo)
   return derivGraph;
 }
 
-// Iterating graph of histogram derivative to find annihilation and deexcitation edges
-// and then calculate a,b factors
+/**
+ * Iterating the bins of the graph of the histogram derivative
+ * to find annihilation and deexcitation edges and then return calculated a,b factors
+ */
 pair<double, double> getEdges(TH1D* totHist)
 {
   double anniEdge = 399000.0, deexEdge = 399000.0;
@@ -86,6 +94,9 @@ pair<double, double> getEdges(TH1D* totHist)
   return make_pair(anniEdge, deexEdge);
 }
 
+/**
+ * Tool for drawing the result and saving to PNG image
+ */
 void savePlotPNG(TH1D* totHist, double anniEdge, double deexEdge, string resultDir)
 {
   int max = totHist->GetMaximum();
@@ -106,6 +117,10 @@ void savePlotPNG(TH1D* totHist, double anniEdge, double deexEdge, string resultD
   can->SaveAs(Form("%s/%s.png", resultDir.c_str(), name));
 }
 
+/**
+ * The main method of the macro, that iterates over the projections of the input histogram
+ * and searches for the Compton edges. The output is printed into the JSON file
+ */
 void tot_norm(string fileName, string calibJSONFileName = "calibration_constants.json", bool saveResult = false, string resultDir = "./",
               int minScinID = 201, int maxScinID = 512)
 {
