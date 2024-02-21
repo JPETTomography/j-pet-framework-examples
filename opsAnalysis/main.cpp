@@ -13,18 +13,21 @@
  *  @file main.cpp
  */
 
-#include "../ModularDetectorAnalysis/EventCategorizer.h"
+// #include "../ModularDetectorAnalysis/EventCategorizer.h"
 #include "../ModularDetectorAnalysis/EventFinder.h"
 #include "../ModularDetectorAnalysis/HitFinder.h"
 #include "../ModularDetectorAnalysis/SignalFinder.h"
 #include "../ModularDetectorAnalysis/SignalTransformer.h"
 #include "../ModularDetectorAnalysis/TimeWindowCreator.h"
+#include "EventCategorizer.h"
+#include "NTupler.h"
 #include <JPetManager/JPetManager.h>
-#include "NTupler.h" 
 using namespace std;
 
-int main(int argc, const char* argv[]) {
-  try {
+int main(int argc, const char* argv[])
+{
+  try
+  {
     JPetManager& manager = JPetManager::getManager();
 
     manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
@@ -32,7 +35,7 @@ int main(int argc, const char* argv[]) {
     manager.registerTask<SignalTransformer>("SignalTransformer");
     manager.registerTask<HitFinder>("HitFinder");
     manager.registerTask<EventFinder>("EventFinder");
-    //manager.registerTask<NTupler>("NTupler");
+    // manager.registerTask<NTupler>("NTupler");
     manager.registerTask<EventCategorizer>("EventCategorizer");
 
     manager.useTask("TimeWindowCreator", "hld", "tslot.calib");
@@ -44,7 +47,9 @@ int main(int argc, const char* argv[]) {
     manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
 
     manager.run(argc, argv);
-  } catch (const std::exception& except) {
+  }
+  catch (const std::exception& except)
+  {
     std::cerr << "Unrecoverable error occured:" << except.what() << "Exiting the program!" << std::endl;
     return EXIT_FAILURE;
   }
