@@ -35,16 +35,16 @@ int main(int argc, const char* argv[])
     manager.registerTask<SignalTransformer>("SignalTransformer");
     manager.registerTask<HitFinder>("HitFinder");
     manager.registerTask<EventFinder>("EventFinder");
-    // manager.registerTask<NTupler>("NTupler");
     manager.registerTask<EventCategorizer>("EventCategorizer");
+    manager.registerTask<NTupler>("NTupler");
 
     manager.useTask("TimeWindowCreator", "hld", "tslot.calib");
     manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
     manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
     manager.useTask("HitFinder", "phys.sig", "hits");
     manager.useTask("EventFinder", "hits", "unk.evt");
-    // manager.useTask("NTupler", "unk.evt", "tupler");
     manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
+    manager.useTask("NTupler", "cat.evt", "ntu");
 
     manager.run(argc, argv);
   }

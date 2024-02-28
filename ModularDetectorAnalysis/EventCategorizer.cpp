@@ -567,7 +567,7 @@ void EventCategorizer::initialiseCalibrationHistograms(bool includeTrento)
                                           "Scin ID", "Time diffrence [ps]");
 
   // Time walk histograms
-  double revToTLimit = 0.000000018;
+  double revToTLimit = 0.000000030;
 
   getStatistics().createHistogramWithAxes(
       new TH2D("time_walk_ab_tdiff", "AB TDiff vs. reversed ToT", 200, -fMaxTimeDiff / 2.0, fMaxTimeDiff / 2.0, 200, -revToTLimit, revToTLimit),
