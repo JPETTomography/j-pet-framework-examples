@@ -165,7 +165,7 @@ void SignalTransformer::initialiseHistograms()
   getStatistics().createHistogramWithAxes(new TH1D("mtxsig_multi", "Multiplicity of matched MatrixSignals", 5, 0.5, 5.5),
                                           "Number of PM Signals in Matrix Signal", "Number of Matrix Signals");
 
-  getStatistics().createHistogramWithAxes(new TH1D("mtxsig_tslot", "Number of Matrix Signals in Time Window", 100, 0.5, 100.5),
+  getStatistics().createHistogramWithAxes(new TH1D("mtxsig_tslot", "Number of Matrix Signals in Time Window", 200, 0.5, 200.5),
                                           "Number of Matrix Signals in Time Window", "Number of Time Windows");
 
   getStatistics().createHistogramWithAxes(

@@ -549,7 +549,7 @@ void EventCategorizer::initialiseHistograms()
 
   getStatistics().createHistogramWithAxes(new TH1D("lifetime_2g_prompt_zoom",
                                                    "Time difference of 2 gamma pair decay time and prompt emmission time - closeup", 201,
-                                                   -0.1 * fEventTimeWindow, 0.25 * fEventTimeWindow),
+                                                   -0.1 * 0.25 * fEventTimeWindow, 0.25 * fEventTimeWindow),
                                           "Time Diff [ps]", "Number of events");
 }
 
