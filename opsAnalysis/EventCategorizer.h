@@ -32,10 +32,6 @@
 using namespace std;
 class JPetWriter;
 
-#ifdef __CINT__
-#define override
-#endif
-
 static const double kLightVelocity_cm_ns = 29.9792458;
 
 enum EvtType
@@ -77,7 +73,6 @@ public:
 
   double meanTime_3Hits;
 
-  double Magnitude(TVector3 p1);
   void saveEvents(const std::vector<JPetEvent>& event);
 
   void initialiseHistograms();
@@ -85,7 +80,7 @@ public:
   vector<const JPetPhysRecoHit*> tot(const JPetEvent* event);
   vector<const JPetPhysRecoHit*> scatTest(vector<const JPetPhysRecoHit*> hits_tot);
 
-  void ReconHitsCalculation(vector<const JPetPhysRecoHit*> hits, EvtType& event_type, const JPetTimeWindowMC& time_window_mc);
+  void reconHitsCalculation(vector<const JPetPhysRecoHit*> hits, EvtType& event_type, const JPetTimeWindowMC& time_window_mc);
 
   double scatterTest(vector<const JPetPhysRecoHit*> hits, EvtType event_type);
 

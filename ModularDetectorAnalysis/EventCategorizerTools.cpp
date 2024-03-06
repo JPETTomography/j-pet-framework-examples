@@ -329,24 +329,28 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetPhysRecoHit* firstHit, cons
 /**
  * Method for determining type of event - 3Gamma
  */
-/*bool EventCategorizerTools::checkFor3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos)
+bool EventCategorizerTools::checkFor3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos)
 {
   if (event.getHits().size() < 3)
+  {
     return false;
+  }
+
+  // Iteration over the hits in the event
   for (uint i = 0; i < event.getHits().size(); i++)
   {
     for (uint j = i + 1; j < event.getHits().size(); j++)
     {
       for (uint k = j + 1; k < event.getHits().size(); k++)
       {
-        JPetBaseHit firstHit = event.getHits().at(i);
-        JPetBaseHit secondHit = event.getHits().at(j);
-        JPetBaseHit thirdHit = event.getHits().at(k);
+        auto firstHit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(i));
+        auto secondHit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(j));
+        auto thirdHit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(k));
 
         vector<double> thetaAngles;
-        thetaAngles.push_back(firstHit.getScin().getSlot().getTheta());
-        thetaAngles.push_back(secondHit.getScin().getSlot().getTheta());
-        thetaAngles.push_back(thirdHit.getScin().getSlot().getTheta());
+        thetaAngles.push_back(firstHit->getScin().getSlot().getTheta());
+        thetaAngles.push_back(secondHit->getScin().getSlot().getTheta());
+        thetaAngles.push_back(thirdHit->getScin().getSlot().getTheta());
         sort(thetaAngles.begin(), thetaAngles.end());
 
         vector<double> relativeAngles;
@@ -359,13 +363,124 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetPhysRecoHit* firstHit, cons
 
         if (saveHistos)
         {
-          stats.getHisto2D("3Gamma_Angles")->Fill(transformedX, transformedY);
+          stats.getHisto2D("3g_rel_angles")->Fill(transformedX, transformedY);
         }
       }
     }
   }
   return true;
-}*/
+}
+
+bool EventCategorizerTools::checkFor3GammaLifetime(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff,
+                                                   double maxTimeDiff, double totCutAnniMin, double totCutAnniMax, double totCutDeexMin,
+                                                   double totCutDeexMax, const TVector3& sourcePos, ScatterTestType testType, double scatterTestValue,
+                                                   double scatterTimeMin, double scatterTimeMax, double scatterAngleMin, double scatterAngleMax,
+                                                   boost::property_tree::ptree& calibTree)
+{
+  if (event.getHits().size() < 3)
+  {
+    return false;
+  }
+
+  vector<const JPetPhysRecoHit*> prompts;
+  vector<pair<const JPetPhysRecoHit*, const JPetPhysRecoHit*>> annihilaions;
+
+  // First check if any of the hits in the event is prompt based on TOT selection
+  for (uint i = 0; i < event.getHits().size(); i++)
+  {
+    auto promptHit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(i));
+    if (checkToT(promptHit, totCutDeexMin, totCutDeexMax))
+    {
+      prompts.push_back(promptHit);
+    }
+  }
+  if (prompts.size() == 0)
+  {
+    return false;
+  }
+
+  // Then looking for annihilation back to back pairs
+  for (uint i = 0; i < event.getHits().size(); i++)
+  {
+    auto firstHit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(i));
+    if (!firstHit)
+    {
+      continue;
+    }
+
+    for (uint j = i + 1; j < event.getHits().size(); j++)
+    {
+      auto secondHit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(j));
+      if (!secondHit)
+      {
+        continue;
+      }
+
+      // Change order or hits, if needed
+      if (event.getHits().at(i)->getTime() > event.getHits().at(j)->getTime())
+      {
+        firstHit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(j));
+        secondHit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(i));
+      }
+
+      // Skip if scatter
+      if (checkForScatter(firstHit, secondHit, stats, false, testType, scatterTestValue, scatterTimeMin, scatterTimeMax, scatterAngleMin,
+                          scatterAngleMax, calibTree))
+      {
+        continue;
+      }
+
+      if (checkFor2Gamma(firstHit, secondHit, stats, false, maxThetaDiff, maxTimeDiff, totCutAnniMin, totCutAnniMax, sourcePos))
+      {
+        annihilaions.push_back(make_pair(firstHit, secondHit));
+      }
+    }
+  }
+
+  if (annihilaions.size() == 0)
+  {
+    return false;
+  }
+
+  bool isLifetimeEvent = false;
+
+  // Iterating over all combinations of found pairs and prompt photons
+  for (auto pair2g : annihilaions)
+  {
+    for (auto prompt : prompts)
+    {
+      // Check if neighter of the two annihilation photons are scattered from prompt photon
+      if (checkForScatter(prompt, pair2g.first, stats, false, testType, scatterTestValue, scatterTimeMin, scatterTimeMax, scatterAngleMin,
+                          scatterAngleMax, calibTree) ||
+          checkForScatter(prompt, pair2g.second, stats, false, testType, scatterTestValue, scatterTimeMin, scatterTimeMax, scatterAngleMin,
+                          scatterAngleMax, calibTree))
+      {
+        continue;
+      }
+
+      isLifetimeEvent = true;
+
+      // Calculate the annihilation point position
+      TVector3 annhilationPoint = calculateAnnihilationPoint(pair2g.first, pair2g.second);
+
+      // Caculate event times - annihilation
+      auto tof = calculateTOFByConvention(pair2g.first, pair2g.second);
+      double annihTime1 = pair2g.first->getTime() - tof;
+      double annihTime2 = pair2g.second->getTime() - tof;
+      double promptTime = prompt->getTime() - tof;
+      // Calculate lifetime
+      double lifetime = (annihTime1 + annihTime2) / 2.0 - promptTime;
+
+      if (saveHistos)
+      {
+        stats.fillHistogram("lifetime_2g_prompt", lifetime);
+        stats.fillHistogram("lifetime_2g_prompt_zoom", lifetime);
+      }
+    }
+  }
+
+  return isLifetimeEvent;
+}
 
 /**
  * Method for determining type of event - prompt

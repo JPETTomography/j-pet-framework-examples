@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2024 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -16,9 +16,11 @@
 #include "EventCategorizer.h"
 #include "EventFinder.h"
 #include "HitFinder.h"
+// #include "NTupler.h"
 #include "SignalFinder.h"
 #include "SignalTransformer.h"
 #include "TimeWindowCreator.h"
+
 #include <JPetManager/JPetManager.h>
 using namespace std;
 
@@ -34,6 +36,7 @@ int main(int argc, const char* argv[])
     manager.registerTask<HitFinder>("HitFinder");
     manager.registerTask<EventFinder>("EventFinder");
     manager.registerTask<EventCategorizer>("EventCategorizer");
+    // manager.registerTask<NTupler>("NTupler");
 
     manager.useTask("TimeWindowCreator", "hld", "tslot");
     manager.useTask("SignalFinder", "tslot", "pm.sig");
@@ -41,6 +44,7 @@ int main(int argc, const char* argv[])
     manager.useTask("HitFinder", "mtx.sig", "hits");
     manager.useTask("EventFinder", "hits", "unk.evt");
     manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
+    // manager.useTask("NTupler", "cat.evt", "ntu");
 
     manager.run(argc, argv);
   }

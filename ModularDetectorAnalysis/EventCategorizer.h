@@ -44,6 +44,8 @@ public:
   virtual bool terminate() override;
 
 protected:
+  const std::string kEventTimeParamKey = "EventFinder_EventTime_double";
+
   const std::string k2gThetaDiffParamKey = "EventCategorizer_2gThetaDiff_double";
   const std::string k2gTimeDiffParamKey = "EventCategorizer_2gTimeDiff_double";
 
@@ -86,6 +88,7 @@ protected:
   void saveEvents(const std::vector<JPetEvent>& event);
 
   boost::property_tree::ptree fConstansTree;
+  double fEventTimeWindow = 5000.0;
   double fScatterTOFTimeDiff = 2000.0;
   double fScatterTimeMin = 0.0;
   double fScatterTimeMax = 3000.0;

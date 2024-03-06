@@ -33,6 +33,11 @@ bool EventCategorizer::init()
   INFO("Event categorization started.");
 
   // Reading user parameters
+  if (isOptionSet(fParams.getOptions(), kEventTimeParamKey))
+  {
+    fEventTimeWindow = getOptionAsDouble(fParams.getOptions(), kEventTimeParamKey);
+  }
+
   if (isOptionSet(fParams.getOptions(), k2gThetaDiffParamKey))
   {
     f2gThetaDiff = getOptionAsDouble(fParams.getOptions(), k2gThetaDiffParamKey);
@@ -298,34 +303,16 @@ bool EventCategorizer::exec()
                                                             fToTCutAnniMax, fSourcePos, fTestType, fScatterTOFTimeDiff, fScatterTimeMin,
                                                             fScatterTimeMax, fScatterAngleMin, fScatterAngleMax, fConstansTree);
 
-      // Select hits for TOF calibration, if making calibraiton
+      bool isLifetime2Gamma = EventCategorizerTools::checkFor3GammaLifetime(
+          event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin, fToTCutAnniMax, fToTCutDeexMin, fToTCutDeexMax,
+          fSourcePos, fTestType, fScatterTOFTimeDiff, fScatterTimeMin, fScatterTimeMax, fScatterAngleMin, fScatterAngleMax, fConstansTree);
 
-      // Selection of other type of events is currently not used
-      // bool is3Gamma = EventCategorizerTools::checkFor3Gamma(
-      //   event, getStatistics(), fSaveControlHistos
-      // );
-      // bool isPrompt = EventCategorizerTools::checkForPrompt(
-      //   event, getStatistics(), fSaveControlHistos, fToTCutDeexMin, fToTCutDeexMax
-      // );
-      // bool isScattered = EventCategorizerTools::checkForScatter(
-      //   event, getStatistics(), fSaveControlHistos, fScatterTOFTimeDiff
-      // );
-
-      // JPetEvent newEvent = event;
-      // if (is2Gamma)
-      // {
-      //   newEvent.addEventType(JPetEventType::k2Gamma);
-      //   events.push_back(newEvent);
-      // }
-      // if(is3Gamma) newEvent.addEventType(JPetEventType::k3Gamma);
-      // if(isPrompt) newEvent.addEventType(JPetEventType::kPrompt);
-      // if(isScattered) newEvent.addEventType(JPetEventType::kScattered);
-      //
-      // if(fSaveControlHistos){
-      //   for(auto hit : event.getHits()){
-      //     getStatistics().getHisto2D("All_XYpos")->Fill(hit.getPosX(), hit.getPosY());
-      //   }
-      // }
+      JPetEvent newEvent = event;
+      if (is2Gamma || isLifetime2Gamma)
+      {
+        newEvent.addEventType(JPetEventType::k2Gamma);
+        events.push_back(newEvent);
+      }
     }
     saveEvents(events);
   }
@@ -454,7 +441,7 @@ void EventCategorizer::initialiseHistograms()
   getStatistics().createHistogramWithAxes(new TH1D("tot_cut_theta", "2 gamma event after ToT cut - theta between flight vectors", 181, -0.5, 180.5),
                                           "Angle [degree]", "Number of Hit Pairs");
 
-  // Events after cut - defined as annihilation event
+  // Events after cut - defined as 2 gamma annihilation event
   getStatistics().createHistogramWithAxes(new TH1D("ap_tot", "Annihilation pairs average ToT scaled", 201, 0.0, fToTHistoUpperLimit),
                                           "Time over Threshold [ps]", "Number of Annihilation Pairs");
 
@@ -550,6 +537,20 @@ void EventCategorizer::initialiseHistograms()
   getStatistics().createHistogramWithAxes(
       new TH2D("scatter_angle_time_fail", "Failed Scatter angle vs. scatter test measure", 201, -4000.0, 6000.0, 181, -0.5, 180.5), "Time Diff [ps]",
       "Scatter angle");
+
+  // Histograms for 3 gamma events
+  getStatistics().createHistogramWithAxes(
+      new TH2D("3g_rel_angles", "Sum vs. difference of two smallest relative angles in 3 gamma event", 250, 0.0, 250, 200, 0.0, 200.0),
+      "ang1+ang2 [deg]", "ang2-ang1 [deg]");
+
+  getStatistics().createHistogramWithAxes(
+      new TH1D("lifetime_2g_prompt", "Time difference of 2 gamma pair decay time and prompt emmission time", 201, 0.0, fEventTimeWindow),
+      "Time Diff [ps]", "Number of events");
+
+  getStatistics().createHistogramWithAxes(new TH1D("lifetime_2g_prompt_zoom",
+                                                   "Time difference of 2 gamma pair decay time and prompt emmission time - closeup", 201, 0.0,
+                                                   0.25 * fEventTimeWindow),
+                                          "Time Diff [ps]", "Number of events");
 }
 
 void EventCategorizer::initialiseCalibrationHistograms(bool includeTrento)

@@ -128,7 +128,7 @@ bool EventCategorizer::exec()
 
           getStatistics().fillHistogram("HitMult", event_type);
 
-          ReconHitsCalculation(hits, event_type = UNKNOWN, *time_window_mc);
+          reconHitsCalculation(hits, event_type = UNKNOWN, *time_window_mc);
 
           hits.clear();
           hits_tot.clear();
@@ -148,7 +148,7 @@ bool EventCategorizer::exec()
   return true;
 }
 
-void EventCategorizer::ReconHitsCalculation(vector<const JPetPhysRecoHit*> hits, EvtType& event_type, const JPetTimeWindowMC& time_window_mc)
+void EventCategorizer::reconHitsCalculation(vector<const JPetPhysRecoHit*> hits, EvtType& event_type, const JPetTimeWindowMC& time_window_mc)
 {
   // Reconstructed hits -- Annihilation Point ( Trilateration Method ) (Alek's code)
   const JPetPhysRecoHit* hit1 = hits.at(0);

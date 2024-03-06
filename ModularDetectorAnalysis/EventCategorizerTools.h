@@ -77,7 +77,12 @@ public:
   // static std::vector<JPetEvent> getLORs(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxTOF, double maxScatter,
   //                                       double totCutAnniMin, double totCutAnniMax);
 
-  // static bool checkFor3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos);
+  static bool checkFor3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos);
+
+  static bool checkFor3GammaLifetime(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
+                                     double totCutAnniMin, double totCutAnniMax, double totCutDeexMin, double totCutDeexMax,
+                                     const TVector3& sourcePos, ScatterTestType testType, double scatterTestValue, double scatterTimeMin,
+                                     double scatterTimeMax, double scatterAngleMin, double scatterAngleMax, boost::property_tree::ptree& calibTree);
 
   // static bool checkForPrompt(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double deexToTCutMin, double deexToTCutMax);
 
