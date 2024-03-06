@@ -543,13 +543,13 @@ void EventCategorizer::initialiseHistograms()
       new TH2D("3g_rel_angles", "Sum vs. difference of two smallest relative angles in 3 gamma event", 250, 0.0, 250, 200, 0.0, 200.0),
       "ang1+ang2 [deg]", "ang2-ang1 [deg]");
 
-  getStatistics().createHistogramWithAxes(
-      new TH1D("lifetime_2g_prompt", "Time difference of 2 gamma pair decay time and prompt emmission time", 201, 0.0, fEventTimeWindow),
-      "Time Diff [ps]", "Number of events");
+  getStatistics().createHistogramWithAxes(new TH1D("lifetime_2g_prompt", "Time difference of 2 gamma pair decay time and prompt emmission time", 201,
+                                                   -0.1 * fEventTimeWindow, fEventTimeWindow),
+                                          "Time Diff [ps]", "Number of events");
 
   getStatistics().createHistogramWithAxes(new TH1D("lifetime_2g_prompt_zoom",
-                                                   "Time difference of 2 gamma pair decay time and prompt emmission time - closeup", 201, 0.0,
-                                                   0.25 * fEventTimeWindow),
+                                                   "Time difference of 2 gamma pair decay time and prompt emmission time - closeup", 201,
+                                                   -0.1 * fEventTimeWindow, 0.25 * fEventTimeWindow),
                                           "Time Diff [ps]", "Number of events");
 }
 
