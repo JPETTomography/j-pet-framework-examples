@@ -144,6 +144,12 @@ void CalibrationTools::selectForTimeWalk(const JPetEvent& event, JPetStatistics&
         auto revToT1 = calculateReveresedToT(firstHit);
         auto revToT2 = calculateReveresedToT(secondHit);
 
+        double revToT1Offset = calibTree.get("scin." + to_string(firstHit->getScin().getID()) + ".rev_tot", 0.0);
+        double revToT2Offset = calibTree.get("scin." + to_string(secondHit->getScin().getID()) + ".rev_tot", 0.0);
+
+        revToT1 -= revToT1Offset;
+        revToT2 -= revToT2Offset;
+
         // A-B time difference vs. time walk effect
         stats.fillHistogram("time_walk_ab_tdiff", firstHit->getTimeDiff(), revToT1);
         stats.fillHistogram("time_walk_ab_tdiff", secondHit->getTimeDiff(), revToT2);
