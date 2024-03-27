@@ -169,7 +169,7 @@ double SignalTransformerTools::calculateAverageTime(JPetMatrixSignal& mtxSig, bo
   auto tot = mtxSig.getToT();
   if (tot != 0.0)
   {
-    auto p1 = calibTree.get("time_walk.param_a", 0.0);
+    auto p1 = calibTree.get("scin." + to_string(scinID) + ".time_walk_a", 0.0);
     timeWalkCorrection = p1 / mtxSig.getToT();
   }
 
