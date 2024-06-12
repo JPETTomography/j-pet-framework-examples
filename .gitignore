@@ -14,6 +14,7 @@
 *.exe
 *.json
 *.xml
+*.lut
 
 # CMake specific files
 CMakeFiles

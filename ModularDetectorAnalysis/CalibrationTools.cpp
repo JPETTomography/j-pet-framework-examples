@@ -49,7 +49,7 @@ void CalibrationTools::selectForTOF(const JPetEvent& event, JPetStatistics& stat
 
       // Skip if scatter
       if (EventCategorizerTools::checkForScatter(hit1, hit2, stats, false, testType, scatterTestValue, scatterTimeMin, scatterTimeMax,
-                                                 scatterAngleMin, scatterAngleMax, calibTree))
+                                                 scatterAngleMin, scatterAngleMax))
       {
         continue;
       }
@@ -129,7 +129,7 @@ void CalibrationTools::selectForTimeWalk(const JPetEvent& event, JPetStatistics&
 
       // Skip if scatter
       if (EventCategorizerTools::checkForScatter(firstHit, secondHit, stats, false, testType, scatterTestValue, scatterTimeMin, scatterTimeMax,
-                                                 scatterAngleMin, scatterAngleMax, calibTree))
+                                                 scatterAngleMin, scatterAngleMax))
       {
         continue;
       }

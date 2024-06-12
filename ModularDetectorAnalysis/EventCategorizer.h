@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2024 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -49,6 +49,8 @@ protected:
   const std::string k2gThetaDiffParamKey = "EventCategorizer_2gThetaDiff_double";
   const std::string k2gTimeDiffParamKey = "EventCategorizer_2gTimeDiff_double";
 
+  const std::string k3gMinRelAngleParamKey = "EventCategorizer_3gMinRelativeAngle_double";
+
   const std::string kToTCutAnniMinParamKey = "EventCategorizer_ToT_Cut_Anni_Min_double";
   const std::string kToTCutAnniMaxParamKey = "EventCategorizer_ToT_Cut_Anni_Max_double";
   const std::string kToTCutDeexMinParamKey = "EventCategorizer_ToT_Cut_Deex_Min_double";
@@ -90,13 +92,14 @@ protected:
   boost::property_tree::ptree fConstansTree;
   double fEventTimeWindow = 5000.0;
   double fScatterTOFTimeDiff = 2000.0;
-  double fScatterTimeMin = 0.0;
-  double fScatterTimeMax = 3000.0;
+  double fScatterTimeMin = -5000.0;
+  double fScatterTimeMax = 0.0;
   double fScatterAngleMin = 160.0;
   double fScatterAngleMax = 180.0;
   double fMaxTimeDiff = 15000.0;
   double f2gThetaDiff = 3.0;
   double f2gTimeDiff = 2000.0;
+  double f3gMinRelAngle = 185.0;
   double fToTCutAnniMin = 150000.0;
   double fToTCutAnniMax = 250000.0;
   double fToTCutDeexMin = 270000.0;

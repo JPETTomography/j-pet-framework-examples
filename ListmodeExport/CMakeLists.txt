@@ -23,12 +23,7 @@ set(projectName ListmodeExport)
 ## You can add any files to this list
 set(AUXILLIARY_FILES
   README.md
-  conf_djpet.xml
   userParamsModular.json
-  calibration_scripts/README.md
-  calibration_scripts/matrix_offests.C
-  calibration_scripts/tof_synchro.C
-  calibration_scripts/hit_tdiff_effvel.C
 )
 
 ################################################################################
@@ -37,8 +32,24 @@ set(projectBinary ${projectName}.x)
 project(${projectName} CXX) # using only C++
 
 ## Name your header files with .h extension and source files with .cpp
-file(GLOB HEADERS *.h)
-file(GLOB SOURCES *.cpp)
+#file(GLOB HEADERS *.h)
+#file(GLOB SOURCES *.cpp)
+
+######################################################################
+## Using source files of modules from ModularDetectorAnalysis
+set(use_modules_from ../ModularDetectorAnalysis)
+## Add your own HEADERS/SOURCES
+set(HEADERS
+  ${use_modules_from}/EventCategorizerTools.h
+  ConvertEvents.h
+  ConvertEventsTools.h
+)
+
+set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+  ${use_modules_from}/EventCategorizerTools.cpp
+  ConvertEvents.cpp
+  ConvertEventsTools.cpp
+)
 
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})
 target_link_libraries(${projectBinary} JPetFramework::JPetFramework)
@@ -56,3 +67,11 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/${AUXILIARY_FILES} DESTINATION ${CMAKE_CUR
 add_custom_target(copy_files_${projectName} DEPENDS ${copy_depends})
 ## Add dependencies between building project and copy files
 add_dependencies(${projectBinary} copy_files_${projectName})
+
+################################################################################
+## Unit tests
+option(PACKAGE_TESTS "Build the tests" ON)
+if(PACKAGE_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()

@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2024 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -36,56 +36,34 @@ public:
   enum ScatterTestType
   {
     kSimpleParam,
-    kMinMaxParams,
-    kLorentzExponent,
-    kGaussExponent,
-    kLandauExponent
+    kMinMaxParams
   };
-
-  // Single observable tests
-  static bool checkToT(const JPetPhysRecoHit* hit, double minToT, double maxToT);
-
-  static bool checkAnnihilationPair(const JPetBaseHit* hit1, const JPetBaseHit* hit2, double minEnergy, double maxEnergy, double minToT,
-                                    double maxToT);
-
-  static bool checkForPrompt(const JPetBaseHit* hit, double minEnergy, double maxEnergy, double minToT, double maxToT);
-
-  static bool checkRelativeAngles(const TVector3& pos1, const TVector3& pos2, double maxThetaDiff);
-
-  // static bool checkRelativeAngles(const TVector3& pos1, const TVector3& pos2, double maxThetaDiff, const TVector3& sourcePos);
-  //
-  // static bool checkRelativeAngles(const TVector3& pos1, const TVector3& pos2, const TVector3& pos3, double minTheta);
-  //
-  // static bool checkRelativeAngles(const TVector3& pos1, const TVector3& pos2, const TVector3& pos3, double minTheta, const TVector3& sourcePos);
-
-  static bool checkForScatter(const JPetBaseHit* primaryHit, const JPetBaseHit* scatterHit, JPetStatistics& stats, bool saveHistos,
-                              ScatterTestType testType, double scatterTestValue, double scatterTimeMin, double scatterTimeMax, double scatterAngleMin,
-                              double scatterAngleMax, boost::property_tree::ptree& calibTree);
-
-  // Scatter test
-  // static bool checkForScatter(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double scatterTestValue);
 
   // Categorizing methods
   static bool checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
                              double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, ScatterTestType testType, double scatterTestValue,
-                             double scatterTimeMin, double scatterTimeMax, double scatterAngleMin, double scatterAngleMax,
-                             boost::property_tree::ptree& calibTree);
+                             double scatterTimeMin, double scatterTimeMax, double scatterAngleMin, double scatterAngleMax);
 
   static bool checkFor2Gamma(const JPetPhysRecoHit* firstHit, const JPetPhysRecoHit* secondHit, JPetStatistics& stats, bool saveHistos,
                              double maxThetaDiff, double maxTimeDiff, double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos);
 
-  // static std::vector<JPetEvent> getLORs(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxTOF, double maxScatter,
-  //                                       double totCutAnniMin, double totCutAnniMax);
+  static bool checkFor3Gamma(const JPetEvent& event, double minRelAngleCut, JPetStatistics& stats, bool saveHistos);
 
-  static bool checkFor3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos);
-
-  static bool checkFor3GammaLifetime(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
+  static bool checkFor2GammaLifetime(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
                                      double totCutAnniMin, double totCutAnniMax, double totCutDeexMin, double totCutDeexMax,
                                      const TVector3& sourcePos, ScatterTestType testType, double scatterTestValue, double scatterTimeMin,
-                                     double scatterTimeMax, double scatterAngleMin, double scatterAngleMax, boost::property_tree::ptree& calibTree);
+                                     double scatterTimeMax, double scatterAngleMin, double scatterAngleMax);
 
-  // static bool checkForPrompt(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double deexToTCutMin, double deexToTCutMax);
+  // Single observable tests
+  static bool checkToT(const JPetPhysRecoHit* hit, double minToT, double maxToT);
 
+  static bool checkRelativeAngles(const TVector3& pos1, const TVector3& pos2, double maxThetaDiff);
+
+  static bool checkForScatter(const JPetBaseHit* primaryHit, const JPetBaseHit* scatterHit, JPetStatistics& stats, bool saveHistos,
+                              ScatterTestType testType, double scatterTestValue, double scatterTimeMin, double scatterTimeMax, double scatterAngleMin,
+                              double scatterAngleMax);
+
+  // Utilities
   static double calculateDistance(const JPetBaseHit* hit1, const JPetBaseHit* hit2);
 
   static double calculateScatteringTime(const JPetBaseHit* hit1, const JPetBaseHit* hit2);
@@ -103,8 +81,9 @@ public:
   // cppcheck-suppress unusedFunction
   static double calculateTOFByConvention(const JPetBaseHit* hitA, const JPetBaseHit* hitB);
 
+  // Annijilation point estimations
   static TVector3 calculateAnnihilationPoint(const JPetBaseHit* hit1, const JPetBaseHit* hit2);
-  //
+
   // static TVector3 calculateAnnihilationPoint(const JPetBaseHit& hit1, const JPetBaseHit& hit2, const JPetBaseHit& hit3);
   //
   // static double calculatePlaneCenterDistance(const JPetBaseHit& firstHit, const JPetBaseHit& secondHit, const JPetBaseHit& thirdHit);

@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2024 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -54,6 +54,16 @@ bool EventCategorizer::init()
   else
   {
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", k2gTimeDiffParamKey.c_str(), f2gTimeDiff));
+  }
+
+  // 3 gamma selection
+  if (isOptionSet(fParams.getOptions(), k3gMinRelAngleParamKey))
+  {
+    f3gMinRelAngle = getOptionAsDouble(fParams.getOptions(), k3gMinRelAngleParamKey);
+  }
+  else
+  {
+    WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", k3gMinRelAngleParamKey.c_str(), f3gMinRelAngle));
   }
 
   // Reading ToT cut values
@@ -172,18 +182,6 @@ bool EventCategorizer::init()
     {
       fTestType = EventCategorizerTools::kMinMaxParams;
     }
-    else if (type == "lorentz_expo")
-    {
-      fTestType = EventCategorizerTools::kLorentzExponent;
-    }
-    else if (type == "gaus_expo")
-    {
-      fTestType = EventCategorizerTools::kGaussExponent;
-    }
-    else if (type == "landau_expo")
-    {
-      fTestType = EventCategorizerTools::kLandauExponent;
-    }
   }
 
   if (isOptionSet(fParams.getOptions(), kScatterTOFTimeDiffParamKey))
@@ -219,28 +217,6 @@ bool EventCategorizer::init()
     WARNING(Form("No value of the %s parameter provided by the user. Using default value of %lf.", kMaxTimeDiffParamKey.c_str(), fMaxTimeDiff));
   }
 
-  // Variable used in measurements with Trento setup - rotation of Z axis with respect of
-  // vertical direction in Earth frame
-  if (isOptionSet(fParams.getOptions(), kDetectorYRotation))
-  {
-    fDetectorYRotationDeg = getOptionAsDouble(fParams.getOptions(), kDetectorYRotation);
-  }
-  else
-  {
-    WARNING(
-        Form("No value of the %s parameter provided by the user. Using default value of %lf.", kDetectorYRotation.c_str(), fDetectorYRotationDeg));
-  }
-
-  if (isOptionSet(fParams.getOptions(), kCosmicMaxThetaDeg))
-  {
-    fCosmicMaxThetaDiffDeg = getOptionAsDouble(fParams.getOptions(), kCosmicMaxThetaDeg);
-  }
-  else
-  {
-    WARNING(
-        Form("No value of the %s parameter provided by the user. Using default value of %lf.", kCosmicMaxThetaDeg.c_str(), fCosmicMaxThetaDiffDeg));
-  }
-
   // Getting bools for saving histograms
   if (isOptionSet(fParams.getOptions(), kSaveControlHistosParamKey))
   {
@@ -255,8 +231,30 @@ bool EventCategorizer::init()
     fTrentoCalibHistos = getOptionAsBool(fParams.getOptions(), kTrentoCalibrationParamKey);
   }
 
-  // Input events type
-  fOutputEvents = new JPetTimeWindow("JPetEvent");
+  if (fTrentoCalibHistos)
+  {
+    // Variable used in measurements with Trento setup - rotation of Z axis with respect of
+    // vertical direction in Earth frame
+    if (isOptionSet(fParams.getOptions(), kDetectorYRotation))
+    {
+      fDetectorYRotationDeg = getOptionAsDouble(fParams.getOptions(), kDetectorYRotation);
+    }
+    else
+    {
+      WARNING(
+          Form("No value of the %s parameter provided by the user. Using default value of %lf.", kDetectorYRotation.c_str(), fDetectorYRotationDeg));
+    }
+
+    if (isOptionSet(fParams.getOptions(), kCosmicMaxThetaDeg))
+    {
+      fCosmicMaxThetaDiffDeg = getOptionAsDouble(fParams.getOptions(), kCosmicMaxThetaDeg);
+    }
+    else
+    {
+      WARNING(
+          Form("No value of the %s parameter provided by the user. Using default value of %lf.", kCosmicMaxThetaDeg.c_str(), fCosmicMaxThetaDiffDeg));
+    }
+  }
 
   // Initialise hisotgrams
   if (fSaveControlHistos)
@@ -268,6 +266,10 @@ bool EventCategorizer::init()
   {
     initialiseCalibrationHistograms(fTrentoCalibHistos);
   }
+
+  // Input events type
+  fOutputEvents = new JPetTimeWindow("JPetEvent");
+
   return true;
 }
 
@@ -299,20 +301,41 @@ bool EventCategorizer::exec()
         }
       }
 
+      // Categorization of the events
       bool is2Gamma = EventCategorizerTools::checkFor2Gamma(event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin,
                                                             fToTCutAnniMax, fSourcePos, fTestType, fScatterTOFTimeDiff, fScatterTimeMin,
-                                                            fScatterTimeMax, fScatterAngleMin, fScatterAngleMax, fConstansTree);
+                                                            fScatterTimeMax, fScatterAngleMin, fScatterAngleMax);
 
-      // bool is3Gamma = EventCategorizerTools::checkFor3Gamma(event, getStatistics(), fSaveControlHistos);
+      bool is3Gamma = EventCategorizerTools::checkFor3Gamma(event, f3gMinRelAngle, getStatistics(), fSaveControlHistos);
 
-      // bool isLifetime2Gamma = EventCategorizerTools::checkFor3GammaLifetime(
-      //     event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin, fToTCutAnniMax, fToTCutDeexMin, fToTCutDeexMax,
-      //     fSourcePos, fTestType, fScatterTOFTimeDiff, fScatterTimeMin, fScatterTimeMax, fScatterAngleMin, fScatterAngleMax, fConstansTree);
+      bool isLifetime2Gamma = EventCategorizerTools::checkFor2GammaLifetime(
+          event, getStatistics(), fSaveControlHistos, f2gThetaDiff, f2gTimeDiff, fToTCutAnniMin, fToTCutAnniMax, fToTCutDeexMin, fToTCutDeexMax,
+          fSourcePos, fTestType, fScatterTOFTimeDiff, fScatterTimeMin, fScatterTimeMax, fScatterAngleMin, fScatterAngleMax);
 
       JPetEvent newEvent = event;
       if (is2Gamma)
       {
         newEvent.addEventType(JPetEventType::k2Gamma);
+        getStatistics().fillHistogram("evt_types", 2);
+      }
+      if (is3Gamma)
+      {
+        newEvent.addEventType(JPetEventType::k3Gamma);
+        getStatistics().fillHistogram("evt_types", 3);
+      }
+      if (isLifetime2Gamma)
+      {
+        newEvent.addEventType(JPetEventType::kPrompt);
+        getStatistics().fillHistogram("evt_types", 4);
+      }
+
+      if (newEvent.isOnlyTypeOf(JPetEventType::kUnknown))
+      {
+        getStatistics().fillHistogram("evt_types", 1);
+      }
+      else
+      {
+        // Saving the event only if it was categorized
         events.push_back(newEvent);
       }
     }
@@ -343,6 +366,12 @@ void EventCategorizer::initialiseHistograms()
 {
   auto minScinID = getParamBank().getScins().begin()->first;
   auto maxScinID = getParamBank().getScins().rbegin()->first;
+
+  // Event categories
+  getStatistics().createHistogramWithAxes(new TH1D("evt_types", "Categories of events", 5, 0.5, 5.5), " ", "Number of events");
+  vector<pair<unsigned, string>> binLabels = {make_pair(1, "Unknown"), make_pair(2, "2 gamma"), make_pair(3, "3 gamma"),
+                                              make_pair(4, "2 gamma + prompt"), make_pair(5, " ")};
+  getStatistics().setHistogramBinLabel("evt_types", getStatistics().AxisLabel::kXaxis, binLabels);
 
   // Histograms for 2 gamama events
   getStatistics().createHistogramWithAxes(new TH1D("2g_tot", "2 gamma event - average ToT scaled", 201, 0.0, fToTHistoUpperLimit),
@@ -391,11 +420,7 @@ void EventCategorizer::initialiseHistograms()
       "Scintillator ID", "Number of Hits");
 
   getStatistics().createHistogramWithAxes(
-      new TH1D("cut_stats_a1", "Hits after theta cut - scintillator occupancy", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5),
-      "Scintillator ID", "Number of Hits");
-
-  getStatistics().createHistogramWithAxes(
-      new TH1D("cut_stats_a2", "Hits after theta cut - scintillator occupancy", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5),
+      new TH1D("cut_stats_angle", "Hits after theta cut - scintillator occupancy", maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5),
       "Scintillator ID", "Number of Hits");
 
   getStatistics().createHistogramWithAxes(new TH1D("cut_stats_tof", "Hits after time difference cut - scintillator occupancy",
@@ -499,6 +524,39 @@ void EventCategorizer::initialiseHistograms()
       new TH3D("ap_pos_zoom", "Position of the annihilation point (bin 0.25 cm)", 132, -16.5, 16.5, 132, -16.5, 16.5, 132, -16.5, 16.5), "Z [cm]",
       "X [cm]", "Y [cm]");
 
+  // Position of the annihilation position in a 2g+prompt case
+  getStatistics().createHistogramWithAxes(
+      new TH2D("lifetime_ap_xy", "XY position of annihilation point (bin 0.5 cm)", 202, -50.5, 50.5, 202, -50.5, 50.5), "X position [cm]",
+      "Y position [cm]");
+
+  getStatistics().createHistogramWithAxes(
+      new TH2D("lifetime_ap_zx", "ZX position of annihilation point (bin 0.5 cm)", 202, -50.5, 50.5, 202, -50.5, 50.5), "Z position [cm]",
+      "X position [cm]");
+
+  getStatistics().createHistogramWithAxes(
+      new TH2D("lifetime_ap_zy", "ZY position of annihilation point (bin 0.5 cm)", 202, -50.5, 50.5, 202, -50.5, 50.5), "Z position [cm]",
+      "Y position [cm]");
+
+  getStatistics().createHistogramWithAxes(
+      new TH3D("lifetime_ap_pos", "Position of the annihilation point (bin 0.5 cm)", 202, -50.5, 50.5, 202, -50.5, 50.5, 202, -50.5, 50.5), "Z [cm]",
+      "X [cm]", "Y [cm]");
+
+  getStatistics().createHistogramWithAxes(
+      new TH2D("lifetime_ap_xy_zoom", "XY position of annihilation point (bin 0.25 cm)", 132, -16.5, 16.5, 132, -16.5, 16.5), "X position [cm]",
+      "Y position [cm]");
+
+  getStatistics().createHistogramWithAxes(
+      new TH2D("lifetime_ap_zx_zoom", "ZX position of annihilation point (bin 0.25 cm)", 132, -16.5, 16.5, 132, -16.5, 16.5), "Z position [cm]",
+      "X position [cm]");
+
+  getStatistics().createHistogramWithAxes(
+      new TH2D("lifetime_ap_zy_zoom", "ZY position of annihilation point (bin 0.25 cm)", 132, -16.5, 16.5, 132, -16.5, 16.5), "Z position [cm]",
+      "Y position [cm]");
+
+  getStatistics().createHistogramWithAxes(
+      new TH3D("lifetime_ap_pos_zoom", "Position of the annihilation point (bin 0.25 cm)", 132, -16.5, 16.5, 132, -16.5, 16.5, 132, -16.5, 16.5),
+      "Z [cm]", "X [cm]", "Y [cm]");
+
   // Histograms for scattering category
   getStatistics().createHistogramWithAxes(new TH1D("scatter_test_dist_abs", "Scatter Test - Distance Difference", 201, 0.0, 120.0), "Dist Diff [cm]",
                                           "Number of Hit Pairs");
@@ -544,6 +602,11 @@ void EventCategorizer::initialiseHistograms()
   getStatistics().createHistogramWithAxes(
       new TH2D("3g_rel_angles", "Sum vs. difference of two smallest relative angles in 3 gamma event", 250, 0.0, 250, 200, 0.0, 200.0),
       "ang1+ang2 [deg]", "ang2-ang1 [deg]");
+
+  getStatistics().createHistogramWithAxes(new TH2D("3g_rel_angles_sel",
+                                                   "Sum vs. difference of two smallest relative angles in 3 gamma event - after cut", 250, 0.0, 250,
+                                                   200, 0.0, 200.0),
+                                          "ang1+ang2 [deg]", "ang2-ang1 [deg]");
 
   getStatistics().createHistogramWithAxes(new TH1D("lifetime_2g_prompt", "Time difference of 2 gamma pair decay time and prompt emmission time", 201,
                                                    -0.1 * fEventTimeWindow, fEventTimeWindow),

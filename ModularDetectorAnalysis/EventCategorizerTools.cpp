@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2024 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -28,7 +28,7 @@ using namespace std;
 bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff, double maxTimeDiff,
                                            double totCutAnniMin, double totCutAnniMax, const TVector3& sourcePos, ScatterTestType testType,
                                            double scatterTestValue, double scatterTimeMin, double scatterTimeMax, double scatterAngleMin,
-                                           double scatterAngleMax, boost::property_tree::ptree& calibTree)
+                                           double scatterAngleMax)
 {
   bool isEvent2Gamma = false;
   if (event.getHits().size() < 2)
@@ -60,8 +60,8 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetEvent& event, JPetStatistic
       }
 
       // Skip if scatter
-      if (EventCategorizerTools::checkForScatter(firstHit, secondHit, stats, true, testType, scatterTestValue, scatterTimeMin, scatterTimeMax,
-                                                 scatterAngleMin, scatterAngleMax, calibTree))
+      if (checkForScatter(firstHit, secondHit, stats, true, testType, scatterTestValue, scatterTimeMin, scatterTimeMax, scatterAngleMin,
+                          scatterAngleMax))
       {
         continue;
       }
@@ -137,30 +137,15 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetPhysRecoHit* firstHit, cons
   }
 
   // Checking selection conditions
-  bool thetaCut1 = false, thetaCut2 = false, tDiffCut = false, totCut = false;
-  // Angular cut is performed to select hits in opposite modules
-  // Can be done in a precise way (vector theta diff around 180 degree theta)
-  // or exactly opposite slot, based on ID difference (equal to 12)
-  int slot1ID = firstHit->getScin().getSlot().getID();
-  int slot2ID = secondHit->getScin().getSlot().getID();
-  int slotIDDiff = max(slot1ID - slot2ID, slot2ID - slot1ID);
-  if (slotIDDiff == 12)
-  {
-    thetaCut1 = true;
-    if (saveHistos)
-    {
-      stats.fillHistogram("cut_stats_a1", scin1ID);
-      stats.fillHistogram("cut_stats_a1", scin2ID);
-    }
-  }
+  bool thetaCut = checkRelativeAngles(firstHit->getPos(), secondHit->getPos(), maxThetaDiff);
+  bool tDiffCut = false, totCut = false;
 
-  if (180.0 - theta < maxThetaDiff)
+  if (thetaCut)
   {
-    thetaCut2 = true;
     if (saveHistos)
     {
-      stats.fillHistogram("cut_stats_a2", scin1ID);
-      stats.fillHistogram("cut_stats_a2", scin2ID);
+      stats.fillHistogram("cut_stats_angle", scin1ID);
+      stats.fillHistogram("cut_stats_angle", scin2ID);
       stats.fillHistogram("theta_cut_tof", tof);
       stats.fillHistogram("theta_cut_tot", tot1);
       stats.fillHistogram("theta_cut_tot", tot2);
@@ -199,142 +184,55 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetPhysRecoHit* firstHit, cons
   }
 
   // Pair of hits that meet cut conditions are treated as coming from annihilation point
-  if (saveHistos && tDiffCut && thetaCut2 && totCut)
-  {
-    TVector3 annhilationPoint = calculateAnnihilationPoint(firstHit, secondHit);
-
-    stats.fillHistogram("ap_tot", tot1);
-    stats.fillHistogram("ap_tot", tot2);
-    stats.fillHistogram("ap_tot_scin", scin1ID, tot1);
-    stats.fillHistogram("ap_tot_scin", scin2ID, tot2);
-
-    stats.fillHistogram("ap_ab_tdiff", firstHit->getTimeDiff());
-    stats.fillHistogram("ap_ab_tdiff", secondHit->getTimeDiff());
-    stats.fillHistogram("ap_ab_tdiff_scin", scin1ID, firstHit->getTimeDiff());
-    stats.fillHistogram("ap_ab_tdiff_scin", scin2ID, secondHit->getTimeDiff());
-
-    stats.fillHistogram("ap_ab_tdiff_tot", firstHit->getTimeDiff(), tot1);
-    stats.fillHistogram("ap_ab_tdiff_tot", secondHit->getTimeDiff(), tot2);
-
-    stats.fillHistogram("ap_tof", tof);
-    stats.fillHistogram("ap_tof_scin", scin1ID, tof);
-    stats.fillHistogram("ap_tof_scin", scin2ID, tof);
-
-    stats.fillHistogram("ap_xy", annhilationPoint.X(), annhilationPoint.Y());
-    stats.fillHistogram("ap_zx", annhilationPoint.Z(), annhilationPoint.X());
-    stats.fillHistogram("ap_zy", annhilationPoint.Z(), annhilationPoint.Y());
-    stats.fillHistogram("ap_pos", annhilationPoint.Z(), annhilationPoint.X(), annhilationPoint.Y());
-    stats.fillHistogram("ap_xy_zoom", annhilationPoint.X(), annhilationPoint.Y());
-    stats.fillHistogram("ap_zx_zoom", annhilationPoint.Z(), annhilationPoint.X());
-    stats.fillHistogram("ap_zy_zoom", annhilationPoint.Z(), annhilationPoint.Y());
-    stats.fillHistogram("ap_pos_zoom", annhilationPoint.Z(), annhilationPoint.X(), annhilationPoint.Y());
-  }
   // Returning event as 2 gamma if meets cut conditions
-  if (totCut && tDiffCut && thetaCut2)
+  if (totCut && tDiffCut && thetaCut)
   {
+    if (saveHistos)
+    {
+      TVector3 annhilationPoint = calculateAnnihilationPoint(firstHit, secondHit);
+
+      stats.fillHistogram("ap_tot", tot1);
+      stats.fillHistogram("ap_tot", tot2);
+      stats.fillHistogram("ap_tot_scin", scin1ID, tot1);
+      stats.fillHistogram("ap_tot_scin", scin2ID, tot2);
+
+      stats.fillHistogram("ap_ab_tdiff", firstHit->getTimeDiff());
+      stats.fillHistogram("ap_ab_tdiff", secondHit->getTimeDiff());
+      stats.fillHistogram("ap_ab_tdiff_scin", scin1ID, firstHit->getTimeDiff());
+      stats.fillHistogram("ap_ab_tdiff_scin", scin2ID, secondHit->getTimeDiff());
+
+      stats.fillHistogram("ap_ab_tdiff_tot", firstHit->getTimeDiff(), tot1);
+      stats.fillHistogram("ap_ab_tdiff_tot", secondHit->getTimeDiff(), tot2);
+
+      stats.fillHistogram("ap_tof", tof);
+      stats.fillHistogram("ap_tof_scin", scin1ID, tof);
+      stats.fillHistogram("ap_tof_scin", scin2ID, tof);
+
+      stats.fillHistogram("ap_xy", annhilationPoint.X(), annhilationPoint.Y());
+      stats.fillHistogram("ap_zx", annhilationPoint.Z(), annhilationPoint.X());
+      stats.fillHistogram("ap_zy", annhilationPoint.Z(), annhilationPoint.Y());
+      stats.fillHistogram("ap_pos", annhilationPoint.Z(), annhilationPoint.X(), annhilationPoint.Y());
+      stats.fillHistogram("ap_xy_zoom", annhilationPoint.X(), annhilationPoint.Y());
+      stats.fillHistogram("ap_zx_zoom", annhilationPoint.Z(), annhilationPoint.X());
+      stats.fillHistogram("ap_zy_zoom", annhilationPoint.Z(), annhilationPoint.Y());
+      stats.fillHistogram("ap_pos_zoom", annhilationPoint.Z(), annhilationPoint.X(), annhilationPoint.Y());
+    }
     return true;
   }
   return false;
 }
 
 /**
- * Checking each pair of hits in the event if meet selection conditions for 2 gamma annihilation.
- * If yes, the two hits are used to create a new event, that represent Line of Response, and can be used
- * to calculate annihilation point based on TOF and distance.
- */
-/*vector<JPetEvent> EventCategorizerTools::getLORs(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxTOF, double maxScatter,
-                                                 double totCutAnniMin, double totCutAnniMax)
-{
-  vector<JPetEvent> lors;
-  if (event.getHits().size() < 2)
-  {
-    return lors;
-  }
-
-  for (uint i = 0; i < event.getHits().size(); i++)
-  {
-    for (uint j = i + 1; j < event.getHits().size(); j++)
-    {
-      JPetBaseHit firstHit, secondHit;
-
-      if (event.getHits().at(i).getTime() < event.getHits().at(j).getTime())
-      {
-        firstHit = event.getHits().at(i);
-        secondHit = event.getHits().at(j);
-      }
-      else
-      {
-        firstHit = event.getHits().at(j);
-        secondHit = event.getHits().at(i);
-      }
-
-      // The pair of hits is rejected, if they pass scatter test
-      if (checkForScatter(firstHit, secondHit, stats, saveHistos, maxScatter))
-      {
-        continue;
-      }
-
-      // TOF calculated by convention
-      double tof = calculateTOFByConvention(firstHit, secondHit);
-
-      // Average ToT is temporaily stored as hit energy
-      auto tot1 = firstHit.getEnergy();
-      auto tot2 = secondHit.getEnergy();
-
-      // Pre-cut statistics
-      if (saveHistos)
-      {
-        stats.fillHistogram("2g_tot", tot1);
-        stats.fillHistogram("2g_tot", tot2);
-        stats.fillHistogram("2g_tof", tof);
-      }
-
-      // Checking conditions
-      bool tofCutPass = false, totCutPass = false;
-      if (tof < maxTOF)
-      {
-        tofCutPass = true;
-      }
-      if (tot1 > totCutAnniMin && tot1 < totCutAnniMax && tot2 > totCutAnniMin && tot2 < totCutAnniMax)
-      {
-        totCutPass = true;
-      }
-
-      if (tofCutPass && totCutPass)
-      {
-        // Creating LOR
-        JPetEvent lor;
-        lor.addHit(firstHit);
-        lor.addHit(secondHit);
-        lor.addEventType(JPetEventType::k2Gamma);
-        lors.push_back(lor);
-
-        // Pair of hits that meet cut conditions are treated as coming from annihilation point
-        if (saveHistos)
-        {
-          TVector3 ap = calculateAnnihilationPoint(firstHit, secondHit);
-          stats.fillHistogram("ap_yx", ap.Y(), ap.X());
-          stats.fillHistogram("ap_zx", ap.Z(), ap.X());
-          stats.fillHistogram("ap_zy", ap.Z(), ap.Y());
-          stats.fillHistogram("ap_yx_zoom", ap.Y(), ap.X());
-          stats.fillHistogram("ap_zx_zoom", ap.Z(), ap.X());
-          stats.fillHistogram("ap_zy_zoom", ap.Z(), ap.Y());
-        }
-      }
-    }
-  }
-  return lors;
-}*/
-
-/**
  * Method for determining type of event - 3Gamma
  */
-bool EventCategorizerTools::checkFor3Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos)
+bool EventCategorizerTools::checkFor3Gamma(const JPetEvent& event, double minRelAngleCut, JPetStatistics& stats, bool saveHistos)
 {
   if (event.getHits().size() < 3)
   {
     return false;
   }
+
+  double is3Gamma = false;
 
   // Iteration over the hits in the event
   for (uint i = 0; i < event.getHits().size(); i++)
@@ -361,21 +259,31 @@ bool EventCategorizerTools::checkFor3Gamma(const JPetEvent& event, JPetStatistic
         double transformedX = relativeAngles.at(1) + relativeAngles.at(0);
         double transformedY = relativeAngles.at(1) - relativeAngles.at(0);
 
+        // TODO Estimate annihilation position from trilateration method (commented code)
+
         if (saveHistos)
         {
-          stats.getHisto2D("3g_rel_angles")->Fill(transformedX, transformedY);
+          stats.fillHistogram("3g_rel_angles", transformedX, transformedY);
+        }
+
+        if (transformedX > minRelAngleCut)
+        {
+          is3Gamma = true;
+          if (saveHistos)
+          {
+            stats.fillHistogram("3g_rel_angles_sel", transformedX, transformedY);
+          }
         }
       }
     }
   }
-  return true;
+  return is3Gamma;
 }
 
-bool EventCategorizerTools::checkFor3GammaLifetime(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff,
+bool EventCategorizerTools::checkFor2GammaLifetime(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double maxThetaDiff,
                                                    double maxTimeDiff, double totCutAnniMin, double totCutAnniMax, double totCutDeexMin,
                                                    double totCutDeexMax, const TVector3& sourcePos, ScatterTestType testType, double scatterTestValue,
-                                                   double scatterTimeMin, double scatterTimeMax, double scatterAngleMin, double scatterAngleMax,
-                                                   boost::property_tree::ptree& calibTree)
+                                                   double scatterTimeMin, double scatterTimeMax, double scatterAngleMin, double scatterAngleMax)
 {
   if (event.getHits().size() < 3)
   {
@@ -425,7 +333,7 @@ bool EventCategorizerTools::checkFor3GammaLifetime(const JPetEvent& event, JPetS
 
       // Skip if scatter
       if (checkForScatter(firstHit, secondHit, stats, false, testType, scatterTestValue, scatterTimeMin, scatterTimeMax, scatterAngleMin,
-                          scatterAngleMax, calibTree))
+                          scatterAngleMax))
       {
         continue;
       }
@@ -451,9 +359,9 @@ bool EventCategorizerTools::checkFor3GammaLifetime(const JPetEvent& event, JPetS
     {
       // Check if neighter of the two annihilation photons are scattered from prompt photon
       if (checkForScatter(prompt, pair2g.first, stats, false, testType, scatterTestValue, scatterTimeMin, scatterTimeMax, scatterAngleMin,
-                          scatterAngleMax, calibTree) ||
+                          scatterAngleMax) ||
           checkForScatter(prompt, pair2g.second, stats, false, testType, scatterTestValue, scatterTimeMin, scatterTimeMax, scatterAngleMin,
-                          scatterAngleMax, calibTree))
+                          scatterAngleMax))
       {
         continue;
       }
@@ -475,33 +383,21 @@ bool EventCategorizerTools::checkFor3GammaLifetime(const JPetEvent& event, JPetS
       {
         stats.fillHistogram("lifetime_2g_prompt", lifetime);
         stats.fillHistogram("lifetime_2g_prompt_zoom", lifetime);
+
+        stats.fillHistogram("lifetime_ap_xy", annhilationPoint.X(), annhilationPoint.Y());
+        stats.fillHistogram("lifetime_ap_zx", annhilationPoint.Z(), annhilationPoint.X());
+        stats.fillHistogram("lifetime_ap_zy", annhilationPoint.Z(), annhilationPoint.Y());
+        stats.fillHistogram("lifetime_ap_pos", annhilationPoint.Z(), annhilationPoint.X(), annhilationPoint.Y());
+        stats.fillHistogram("lifetime_ap_xy_zoom", annhilationPoint.X(), annhilationPoint.Y());
+        stats.fillHistogram("lifetime_ap_zx_zoom", annhilationPoint.Z(), annhilationPoint.X());
+        stats.fillHistogram("lifetime_ap_zy_zoom", annhilationPoint.Z(), annhilationPoint.Y());
+        stats.fillHistogram("lifetime_ap_pos_zoom", annhilationPoint.Z(), annhilationPoint.X(), annhilationPoint.Y());
       }
     }
   }
 
   return isLifetimeEvent;
 }
-
-/**
- * Method for determining type of event - prompt
- */
-/*bool EventCategorizerTools::checkForPrompt(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double deexToTCutMin, double
-deexToTCutMax)
-{
-  for (unsigned i = 0; i < event.getHits().size(); i++)
-  {
-    double tot = event.getHits().at(i).getEnergy();
-    if (tot > deexToTCutMin && tot < deexToTCutMax)
-    {
-      if (saveHistos)
-      {
-        stats.fillHistogram("deex_tot_cut_pass", tot);
-      }
-      return true;
-    }
-  }
-  return false;
-}*/
 
 bool EventCategorizerTools::checkToT(const JPetPhysRecoHit* hit, double minToT, double maxToT)
 {
@@ -515,37 +411,11 @@ bool EventCategorizerTools::checkRelativeAngles(const TVector3& pos1, const TVec
 }
 
 /**
- * Method for determining type of event - scatter
- */
-/*bool EventCategorizerTools::checkForScatter(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double scatterTestValue)
-{
-  if (event.getHits().size() < 2)
-  {
-    return false;
-  }
-  for (uint i = 0; i < event.getHits().size(); ++i)
-  {
-    for (uint j = i + 1; j < event.getHits().size(); ++j)
-    {
-      if (event.getHits().at(i)->getTime() < event.getHits().at(j)->getTime())
-      {
-        return checkForScatter(event.getHits().at(i), event.getHits().at(j), stats, saveHistos, scatterTestValue);
-      }
-      else
-      {
-        return checkForScatter(event.getHits().at(j), event.getHits().at(i), stats, saveHistos, scatterTestValue);
-      }
-    }
-  }
-  return false;
-}*/
-
-/**
  * Checking if pair of hits meet scattering condition
  */
 bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const JPetBaseHit* scatterHit, JPetStatistics& stats, bool saveHistos,
                                             ScatterTestType testType, double scatterTestValue, double scatterTimeMin, double scatterTimeMax,
-                                            double scatterAngleMin, double scatterAngleMax, boost::property_tree::ptree& calibTree)
+                                            double scatterAngleMin, double scatterAngleMax)
 {
   bool isScatter = false;
 
@@ -576,47 +446,6 @@ bool EventCategorizerTools::checkForScatter(const JPetBaseHit* primaryHit, const
   if (testType == EventCategorizerTools::kMinMaxParams)
   {
     isScatter = !(scatterTimeMin < testTimeRel && testTimeRel < scatterTimeMax && scatterAngleMin < scatterAngle && scatterAngle < scatterAngleMax);
-  }
-
-  if (testType == EventCategorizerTools::kLorentzExponent)
-  {
-    // Getting function parameters and time cut value from calibration file
-    double lor0 = calibTree.get("scatter_test.lorentz_p0", 0.0);
-    double lor1 = calibTree.get("scatter_test.lorentz_p1", 0.0);
-    double lor2 = calibTree.get("scatter_test.lorentz_p2", 0.0);
-    double exp0 = calibTree.get("scatter_test.exp_p0", 0.0);
-    double exp1 = calibTree.get("scatter_test.exp_p1", 0.0);
-
-    // Getting weights for scatter test from fitted functions
-    double lorentz = (lor0 / TMath::Pi()) * (pow(lor1, 2) / (pow(testTimeAbs - lor2, 2) + pow(lor1, 2)));
-    double expo = exp(exp0 + exp1 * testTimeAbs);
-    isScatter = gRandom->Uniform(lorentz + expo) > lorentz;
-  }
-
-  if (testType == EventCategorizerTools::kGaussExponent)
-  {
-    double gaus0 = calibTree.get("scatter_test.gaus_p0", 0.0);
-    double gaus1 = calibTree.get("scatter_test.gaus_p1", 0.0);
-    double gaus2 = calibTree.get("scatter_test.gaus_p2", 0.0);
-    double exp0 = calibTree.get("scatter_test.exp_p0", 0.0);
-    double exp1 = calibTree.get("scatter_test.exp_p1", 0.0);
-
-    double gaus = gaus0 * exp(-0.5 * pow((testTimeAbs - gaus1) / gaus2, 2));
-    double expo = exp(exp0 + exp1 * testTimeAbs);
-    isScatter = gRandom->Uniform(gaus + expo) > gaus;
-  }
-
-  if (testType == EventCategorizerTools::kLandauExponent)
-  {
-    double lan0 = calibTree.get("scatter_test.landau_p0", 0.0);
-    double lan1 = calibTree.get("scatter_test.landau_p1", 0.0);
-    double lan2 = calibTree.get("scatter_test.landau_p2", 0.0);
-    double exp0 = calibTree.get("scatter_test.exp_p0", 0.0);
-    double exp1 = calibTree.get("scatter_test.exp_p1", 0.0);
-
-    double landau = ROOT::Math::landau_pdf((testTimeAbs - lan1) / lan2) * lan0;
-    double expo = exp(exp0 + exp1 * testTimeAbs);
-    isScatter = gRandom->Uniform(landau + expo) > landau;
   }
 
   if (saveHistos)
@@ -661,6 +490,25 @@ double EventCategorizerTools::calculateScatteringAngle(const JPetBaseHit* hit1, 
 {
   return TMath::RadToDeg() * hit1->getPos().Angle(hit2->getPos() - hit1->getPos());
 }
+
+double EventCategorizerTools::calculateTOFByConvention(const JPetBaseHit* hitA, const JPetBaseHit* hitB)
+{
+  if (hitA->getScin().getSlot().getTheta() < hitB->getScin().getSlot().getTheta())
+  {
+    return calculateTOF(hitA, hitB);
+  }
+  else
+  {
+    return calculateTOF(hitB, hitA);
+  }
+}
+
+double EventCategorizerTools::calculateTOF(const JPetBaseHit* hitA, const JPetBaseHit* hitB)
+{
+  return EventCategorizerTools::calculateTOF(hitA->getTime(), hitB->getTime());
+}
+
+double EventCategorizerTools::calculateTOF(double time1, double time2) { return (time1 - time2); }
 
 /**
  * @brief Calculation of an annihilation point based on LOR and TOFof two hits.
@@ -740,25 +588,6 @@ TVector3 EventCategorizerTools::calculateAnnihilationPoint(const JPetBaseHit* hi
   return annihilationPoint;
 }*/
 
-double EventCategorizerTools::calculateTOFByConvention(const JPetBaseHit* hitA, const JPetBaseHit* hitB)
-{
-  if (hitA->getScin().getSlot().getTheta() < hitB->getScin().getSlot().getTheta())
-  {
-    return calculateTOF(hitA, hitB);
-  }
-  else
-  {
-    return calculateTOF(hitB, hitA);
-  }
-}
-
-double EventCategorizerTools::calculateTOF(const JPetBaseHit* hitA, const JPetBaseHit* hitB)
-{
-  return EventCategorizerTools::calculateTOF(hitA->getTime(), hitB->getTime());
-}
-
-double EventCategorizerTools::calculateTOF(double time1, double time2) { return (time1 - time2); }
-
 /**
  * Calculating distance from the center of the decay plane
  */
@@ -775,71 +604,6 @@ double EventCategorizerTools::calculateTOF(double time1, double time2) { return 
     ERROR("One of the hit has zero position vector - unable to calculate distance from the center of the surface");
     return -1.;
   }
-}*/
-
-/**
- * Method for determining type of event for streaming - 2 gamma
- * @todo: the selection criteria b2b distance from center needs to be checked
- * and implemented again
- */
-/*bool EventCategorizerTools::stream2Gamma(const JPetEvent& event, JPetStatistics& stats, bool saveHistos, double b2bSlotthetaDiff, double
-b2bTimeDiff,
-                                         double maxScatter)
-{
-  if (event.getHits().size() < 2)
-  {
-    return false;
-  }
-  for (uint i = 0; i < event.getHits().size(); i++)
-  {
-    for (uint j = i + 1; j < event.getHits().size(); j++)
-    {
-      JPetBaseHit firstHit, secondHit;
-      if (event.getHits().at(i).getTime() < event.getHits().at(j).getTime())
-      {
-        firstHit = event.getHits().at(i);
-        secondHit = event.getHits().at(j);
-      }
-      else
-      {
-        firstHit = event.getHits().at(j);
-        secondHit = event.getHits().at(i);
-      }
-
-      // Cutting pairs passing scatter test
-      if (checkForScatter(firstHit, secondHit, stats, saveHistos, maxScatter))
-      {
-        continue;
-      }
-
-      // Checking for back to back
-      double timeDiff = fabs(firstHit.getTime() - secondHit.getTime());
-      double deltaLor = (secondHit.getTime() - firstHit.getTime()) * kLightVelocity_cm_ps / 2.0;
-      double theta = TMath::RadToDeg() * firstHit.getPos().Angle(secondHit.getPos());
-
-      if (saveHistos)
-      {
-        stats.fillHistogram("stream2g_tdiff", timeDiff);
-        stats.fillHistogram("stream2g_dlor_dist", deltaLor);
-        stats.fillHistogram("stream2g_theta_diff", theta);
-      }
-      if (fabs(theta - 180.0) < b2bSlotthetaDiff && timeDiff < b2bTimeDiff)
-      {
-        if (saveHistos)
-        {
-          TVector3 ap = calculateAnnihilationPoint(firstHit, secondHit);
-          stats.fillHistogram("ap_yx", ap.Y(), ap.X());
-          stats.fillHistogram("ap_zx", ap.Z(), ap.X());
-          stats.fillHistogram("ap_zy", ap.Z(), ap.Y());
-          stats.fillHistogram("ap_yx_zoom", ap.Y(), ap.X());
-          stats.fillHistogram("ap_zx_zoom", ap.Z(), ap.X());
-          stats.fillHistogram("ap_zy_zoom", ap.Z(), ap.Y());
-        }
-        return true;
-      }
-    }
-  }
-  return false;
 }*/
 
 /**

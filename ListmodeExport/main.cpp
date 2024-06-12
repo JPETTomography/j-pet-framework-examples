@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2024 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -13,12 +13,6 @@
  *  @file main.cpp
  */
 
-#include "../ModularDetectorAnalysis/EventCategorizer.h"
-#include "../ModularDetectorAnalysis/EventFinder.h"
-#include "../ModularDetectorAnalysis/HitFinder.h"
-#include "../ModularDetectorAnalysis/SignalFinder.h"
-#include "../ModularDetectorAnalysis/SignalTransformer.h"
-#include "../ModularDetectorAnalysis/TimeWindowCreator.h"
 #include "ConvertEvents.h"
 #include <JPetManager/JPetManager.h>
 
@@ -30,21 +24,9 @@ int main(int argc, const char* argv[])
   {
     JPetManager& manager = JPetManager::getManager();
 
-    manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
-    manager.registerTask<SignalFinder>("SignalFinder");
-    manager.registerTask<SignalTransformer>("SignalTransformer");
-    manager.registerTask<HitFinder>("HitFinder");
-    manager.registerTask<EventFinder>("EventFinder");
-    manager.registerTask<EventCategorizer>("EventCategorizer");
     manager.registerTask<ConvertEvents>("ConvertEvents");
 
-    manager.useTask("TimeWindowCreator", "hld", "tslot.calib");
-    manager.useTask("SignalFinder", "tslot.calib", "raw.sig");
-    manager.useTask("SignalTransformer", "raw.sig", "phys.sig");
-    manager.useTask("HitFinder", "phys.sig", "hits");
-    manager.useTask("EventFinder", "hits", "unk.evt");
-    manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
-    manager.useTask("ConvertEvents", "cat.evt", "lor");
+    manager.useTask("ConvertEvents", "cat.evt", "castor");
 
     manager.run(argc, argv);
   }
