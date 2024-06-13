@@ -245,17 +245,12 @@ bool EventCategorizerTools::checkFor3Gamma(const JPetEvent& event, double minRel
         auto secondHit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(j));
         auto thirdHit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(k));
 
-        vector<double> thetaAngles;
-        thetaAngles.push_back(firstHit->getScin().getSlot().getTheta());
-        thetaAngles.push_back(secondHit->getScin().getSlot().getTheta());
-        thetaAngles.push_back(thirdHit->getScin().getSlot().getTheta());
-        sort(thetaAngles.begin(), thetaAngles.end());
-
         vector<double> relativeAngles;
-        relativeAngles.push_back(thetaAngles.at(1) - thetaAngles.at(0));
-        relativeAngles.push_back(thetaAngles.at(2) - thetaAngles.at(1));
-        relativeAngles.push_back(360.0 - thetaAngles.at(2) + thetaAngles.at(0));
+        relativeAngles.push_back(TMath::RadToDeg() * firstHit->getPos().Angle(secondHit->getPos()));
+        relativeAngles.push_back(TMath::RadToDeg() * secondHit->getPos().Angle(thirdHit->getPos()));
+        relativeAngles.push_back(TMath::RadToDeg() * thirdHit->getPos().Angle(firstHit->getPos()));
         sort(relativeAngles.begin(), relativeAngles.end());
+
         double transformedX = relativeAngles.at(1) + relativeAngles.at(0);
         double transformedY = relativeAngles.at(1) - relativeAngles.at(0);
 
