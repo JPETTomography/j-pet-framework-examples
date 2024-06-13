@@ -495,6 +495,13 @@ void EventCategorizer::initialiseHistograms()
                                                    minScinID - 0.5, maxScinID + 0.5, 201, -fMaxTimeDiff, fMaxTimeDiff),
                                           "Scintillator ID", "Time of Flight [ps]");
 
+  getStatistics().createHistogramWithAxes(new TH1D("ap_theta", "Annihilation pairs flight vectors theta", 181, -0.5, 180.5), "Angle [degree]",
+                                          "Number of Hit Pairs");
+
+  getStatistics().createHistogramWithAxes(new TH2D("ap_theta_scin", "Annihilation pairs flight vectors theta per scintillator",
+                                                   maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 181, -0.5, 180.5),
+                                          "Scintillator ID", "Angle [degree]");
+
   getStatistics().createHistogramWithAxes(new TH2D("ap_xy", "XY position of annihilation point (bin 0.5 cm)", 202, -50.5, 50.5, 202, -50.5, 50.5),
                                           "X position [cm]", "Y position [cm]");
 

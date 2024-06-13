@@ -208,6 +208,10 @@ bool EventCategorizerTools::checkFor2Gamma(const JPetPhysRecoHit* firstHit, cons
       stats.fillHistogram("ap_tof_scin", scin1ID, tof);
       stats.fillHistogram("ap_tof_scin", scin2ID, tof);
 
+      stats.fillHistogram("ap_theta", theta);
+      stats.fillHistogram("ap_theta_scin", scin1ID, theta);
+      stats.fillHistogram("ap_theta_scin", scin2ID, theta);
+
       stats.fillHistogram("ap_xy", annhilationPoint.X(), annhilationPoint.Y());
       stats.fillHistogram("ap_zx", annhilationPoint.Z(), annhilationPoint.X());
       stats.fillHistogram("ap_zy", annhilationPoint.Z(), annhilationPoint.Y());
