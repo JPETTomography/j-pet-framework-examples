@@ -37,7 +37,7 @@ namespace bpt = boost::property_tree;
 
 // Scintillators are to be divided into separate detectors ("crystals")
 // of the same sizes (dimensions in [cm])
-int fCrystalSizeZ = 5;
+double fCrystalSizeZ = 0.25;
 
 void generate_lut_file(std::string confFileName, int setupID = 38, std::string lutFileName = "jpetDector.lut")
 {

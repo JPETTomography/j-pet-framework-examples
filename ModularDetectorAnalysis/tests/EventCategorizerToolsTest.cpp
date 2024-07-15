@@ -54,6 +54,30 @@ BOOST_AUTO_TEST_CASE(calculateDistance_test)
   BOOST_REQUIRE_CLOSE(EventCategorizerTools::calculateDistance(&hit1, &hit2), sqrt(12.0), epsilon);
 }
 
+BOOST_AUTO_TEST_CASE(calculatePlaneCenterDistance_test)
+{
+  JPetBaseHit hit1;
+  JPetBaseHit hit2;
+  JPetBaseHit hit3;
+  hit1.setPos(1.0, -1.0, 0.0);
+  hit2.setPos(0.0, 1.0, 0.0);
+  hit3.setPos(-1.0, 1.0, 0.0);
+
+  auto distance1 = EventCategorizerTools::calculatePlaneCenterDistance(hit1, hit2, hit3);
+  BOOST_REQUIRE_CLOSE(distance1, 0.0, epsilon);
+
+  JPetBaseHit hit4;
+  JPetBaseHit hit5;
+  JPetBaseHit hit6;
+
+  hit4.setPos(1.0, -1.0, 1.0);
+  hit5.setPos(0.0, 1.0, 1.0);
+  hit6.setPos(-1.0, 1.0, 1.0);
+
+  auto distance2 = EventCategorizerTools::calculatePlaneCenterDistance(hit4, hit5, hit6);
+  BOOST_REQUIRE_CLOSE(distance2, 1.0, epsilon);
+}
+
 // TODO make more tests for annihilation point methods
 
 BOOST_AUTO_TEST_SUITE_END()

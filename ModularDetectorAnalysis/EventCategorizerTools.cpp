@@ -531,6 +531,24 @@ TVector3 EventCategorizerTools::calculateAnnihilationPoint(const JPetBaseHit* hi
 }
 
 /**
+ * Calculating distance from the center of the decay plane
+ */
+double EventCategorizerTools::calculatePlaneCenterDistance(const JPetBaseHit& firstHit, const JPetBaseHit& secondHit, const JPetBaseHit& thirdHit)
+{
+  TVector3 crossProd = (secondHit.getPos() - firstHit.getPos()).Cross(thirdHit.getPos() - secondHit.getPos());
+  double distCoef = -crossProd.X() * secondHit.getPosX() - crossProd.Y() * secondHit.getPosY() - crossProd.Z() * secondHit.getPosZ();
+  if (crossProd.Mag() != 0)
+  {
+    return fabs(distCoef) / crossProd.Mag();
+  }
+  else
+  {
+    ERROR("One of the hit has zero position vector - unable to calculate distance from the center of the surface");
+    return -1.;
+  }
+}
+
+/**
  * @brief Calculation of an annihilation point based on positions of three hits.
  */
 /*TVector3 EventCategorizerTools::calculateAnnihilationPoint(const JPetBaseHit& hit1, const JPetBaseHit& hit2, const JPetBaseHit& hit3)
@@ -585,24 +603,6 @@ TVector3 EventCategorizerTools::calculateAnnihilationPoint(const JPetBaseHit* hi
   // Transforming back found intersection by reverse rotation
   TVector3 annihilationPoint(rotXr * intersection, rotYr * intersection, rotZr * intersection);
   return annihilationPoint;
-}*/
-
-/**
- * Calculating distance from the center of the decay plane
- */
-/*double EventCategorizerTools::calculatePlaneCenterDistance(const JPetBaseHit& firstHit, const JPetBaseHit& secondHit, const JPetBaseHit& thirdHit)
-{
-  TVector3 crossProd = (secondHit.getPos() - firstHit.getPos()).Cross(thirdHit.getPos() - secondHit.getPos());
-  double distCoef = -crossProd.X() * secondHit.getPosX() - crossProd.Y() * secondHit.getPosY() - crossProd.Z() * secondHit.getPosZ();
-  if (crossProd.Mag() != 0)
-  {
-    return fabs(distCoef) / crossProd.Mag();
-  }
-  else
-  {
-    ERROR("One of the hit has zero position vector - unable to calculate distance from the center of the surface");
-    return -1.;
-  }
 }*/
 
 /**
