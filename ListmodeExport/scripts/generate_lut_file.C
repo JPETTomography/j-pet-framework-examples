@@ -35,11 +35,7 @@
 
 namespace bpt = boost::property_tree;
 
-// Scintillators are to be divided into separate detectors ("crystals")
-// of the same sizes (dimensions in [cm])
-double fCrystalSizeZ = 0.25;
-
-void generate_lut_file(std::string confFileName, int setupID = 38, std::string lutFileName = "jpetDector.lut")
+void generate_lut_file(std::string confFileName, int setupID = 38, std::string lutFileName = "jpetDector.lut", double crystalSizeZ = 0.25)
 {
   bpt::ptree tree;
   ifstream file(confFileName.c_str());
@@ -54,12 +50,10 @@ void generate_lut_file(std::string confFileName, int setupID = 38, std::string l
 
   BOOST_FOREACH (boost::property_tree::ptree::value_type& v, tree.get_child(to_string(setupID) + ".scin"))
   {
-    assert(v.first.empty()); // array elements have no names
+    // array elements have no names
+    assert(v.first.empty());
     // Get scintillator lenght
     double scinLength = v.second.get("length", -1.0);
-    int splitOnZ = std::round(scinLength / fCrystalSizeZ);
-    int startSplit = -(splitOnZ / 2);
-    int endSplit = (splitOnZ / 2);
 
     // Get position and rotation of the scintillator
     double pos_x = v.second.get("xcenter", -1.0);
@@ -69,16 +63,13 @@ void generate_lut_file(std::string confFileName, int setupID = 38, std::string l
     double rot_y = v.second.get("rot_y", -1.0);
     double rot_z = v.second.get("rot_z", -1.0);
 
-    // std::cout << v.second.get("id", -1) << " " << v.second.get("xcenter", -1.0) << " " << v.second.get("ycenter", -1.0) << " "
-    //           << v.second.get("rot_x", -1.0) << " " << v.second.get("rot_y", -1.0) << " " << v.second.get("rot_z", -1.0) << " " << std::endl;
-
     // Divide the strip into smaller cristals
     // CASToR uses milimeters as default units and Framework centimeter, converting [cm]->[mm]
-    for (int j = startSplit; j < endSplit; j++)
+    for (double z_pos = -scinLength / 2.0 + crystalSizeZ / 2.0; z_pos <= scinLength / 2.0 - crystalSizeZ / 2.0; z_pos += crystalSizeZ)
     {
       output.push_back(10.0 * pos_x);
       output.push_back(10.0 * pos_y);
-      output.push_back(10.0 * (fCrystalSizeZ * j));
+      output.push_back(10.0 * (z_pos));
       output.push_back(rot_x);
       output.push_back(rot_y);
       output.push_back(rot_z);
