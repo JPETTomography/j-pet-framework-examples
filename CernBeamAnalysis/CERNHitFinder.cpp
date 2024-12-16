@@ -52,7 +52,8 @@ bool CERNHitFinder::init()
 
   if (isOptionSet(fParams.getOptions(), kOutputStatsFileParamKey))
   {
-    boost::property_tree::read_json(getOptionAsString(fParams.getOptions(), kOutputStatsFileParamKey), fOutputStatsJSON);
+    fOutputStatsFile = getOptionAsString(fParams.getOptions(), kOutputStatsFileParamKey);
+    boost::property_tree::read_json(fOutputStatsFile, fOutputStatsJSON);
   }
 
   if (isOptionSet(fParams.getOptions(), kMinHitMultiDiffParamKey))
@@ -106,6 +107,7 @@ bool CERNHitFinder::exec()
 
 bool CERNHitFinder::terminate()
 {
+  boost::property_tree::write_json(fOutputStatsFile, fOutputStatsJSON);
   INFO("Hit finding ended");
   return true;
 }

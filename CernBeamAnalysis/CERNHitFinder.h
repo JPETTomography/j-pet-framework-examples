@@ -54,6 +54,7 @@ protected:
   const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_double";
   boost::property_tree::ptree fConstansTree;
   boost::property_tree::ptree fOutputStatsJSON;
+  std::string fOutputStatsFile = "hitRate.json";
   double fToTHistoUpperLimit = 200000.0;
   bool fSaveControlHistos = true;
   bool fSaveCalibHistos = false;
