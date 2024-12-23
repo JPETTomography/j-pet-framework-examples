@@ -13,6 +13,7 @@
  *  @file main.cpp
  */
 
+#include "Downscaler.h"
 #include "EventCategorizer.h"
 #include "EventFinder.h"
 #include "HitFinder.h"
@@ -21,6 +22,7 @@
 #include "TimeWindowCreator.h"
 
 #include <JPetManager/JPetManager.h>
+
 using namespace std;
 
 int main(int argc, const char* argv[])
@@ -34,6 +36,7 @@ int main(int argc, const char* argv[])
     manager.registerTask<SignalTransformer>("SignalTransformer");
     manager.registerTask<HitFinder>("HitFinder");
     manager.registerTask<EventFinder>("EventFinder");
+    manager.registerTask<Downscaler>("Downscaler");
     manager.registerTask<EventCategorizer>("EventCategorizer");
 
     manager.useTask("TimeWindowCreator", "hld", "tslot");
@@ -41,7 +44,8 @@ int main(int argc, const char* argv[])
     manager.useTask("SignalTransformer", "pm.sig", "mtx.sig");
     manager.useTask("HitFinder", "mtx.sig", "hits");
     manager.useTask("EventFinder", "hits", "unk.evt");
-    manager.useTask("EventCategorizer", "unk.evt", "cat.evt");
+    manager.useTask("Downscaler", "unk.evt", "pre.evt");
+    manager.useTask("EventCategorizer", "pre.evt", "cat.evt");
 
     manager.run(argc, argv);
   }

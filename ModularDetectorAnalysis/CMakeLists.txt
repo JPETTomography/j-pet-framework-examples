@@ -23,7 +23,6 @@ set(projectName ModularDetectorAnalysis)
 ## You can add any files to this list
 set(AUXILLIARY_FILES
   README.md
-  conf_djpet.xml
   userParamsModular.json
   calibration_scripts/README.md
   calibration_scripts/matrix_offests.C
