@@ -70,6 +70,8 @@ bool EventAnalyzer::exec()
       {
         fillResolutionHistograms(event, time_window_mc);
       }
+
+      fOutputEvents->add<JPetEvent>(event);
     }
   }
   else

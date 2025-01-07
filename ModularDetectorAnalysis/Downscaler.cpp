@@ -57,7 +57,6 @@ bool Downscaler::exec()
 {
   if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent))
   {
-    vector<JPetEvent> events;
     for (uint i = 0; i < timeWindow->getNumberOfEvents(); i++)
     {
       const auto& event = dynamic_cast<const JPetEvent&>(timeWindow->operator[](i));

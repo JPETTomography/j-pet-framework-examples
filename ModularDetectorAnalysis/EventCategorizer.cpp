@@ -333,11 +333,8 @@ bool EventCategorizer::exec()
       {
         getStatistics().fillHistogram("evt_types", 1);
       }
-      else
-      {
-        // Saving the event only if it was categorized
-        events.push_back(newEvent);
-      }
+      // Saving all events
+      events.push_back(newEvent);
     }
     saveEvents(events);
   }
