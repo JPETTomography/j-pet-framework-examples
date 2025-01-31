@@ -138,6 +138,7 @@ void HitFinder::saveHits(const std::vector<JPetPhysRecoHit>& hits)
       if (hit.getToT() != 0.0)
       {
         getStatistics().fillHistogram("hit_tot_scin", scinID, hit.getToT());
+        getStatistics().fillHistogram("hit_tot_scin_z_pos", scinID, hit.getToT(), hit.getPosZ());
       }
     }
   }
@@ -177,6 +178,11 @@ void HitFinder::initialiseHistograms()
   getStatistics().createHistogramWithAxes(new TH2D("hit_tot_scin", "Hit ToT divided by multiplicity, all hits", maxScinID - minScinID + 1,
                                                    minScinID - 0.5, maxScinID + 0.5, 200, 0.0, 1.2 * fToTHistoUpperLimit),
                                           "Scintillator ID", "Time over Threshold [ps]");
+
+  getStatistics().createHistogramWithAxes(new TH3D("hit_tot_scin_z_pos", "Hit ToT divided by multiplicity per scin vs z-axis",
+                                                   maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 200, 0.0, 1.2 * fToTHistoUpperLimit,
+                                                   121, -30.5, 30.5),
+                                          "Z [cm]", "X [cm]", "Y [cm]");
 
   // Unused sigals stats
   getStatistics().createHistogramWithAxes(
