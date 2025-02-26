@@ -34,15 +34,15 @@ bool NTupler::init()
     fOutFileName = getOptionAsString(fParams.getOptions(), "inputFile_std::string");
   }
 
+  // initialize output file and tree
+  if (fOutFileName.find("cat.evt.root") != std::string::npos)
+  {
+    fOutFileName.replace(fOutFileName.find("cat.evt.root"), std::string::npos, "ntu.root");
+  }
+
   if (isOptionSet(fParams.getOptions(), "outputPath_std::string"))
   {
     fOutFilePath = getOptionAsString(fParams.getOptions(), "outputPath_std::string");
-  }
-
-  // initialize output file and tree
-  if (fOutFileName.find("unk.evt.root") != std::string::npos)
-  {
-    fOutFileName.replace(fOutFileName.find("unk.evt.root"), std::string::npos, "ntu.root");
   }
 
   if (!fOutFilePath.empty())
@@ -54,11 +54,11 @@ bool NTupler::init()
   fOutFile = new TFile(fOutFileName.c_str(), "RECREATE");
   fOutTree = new TTree("T", "JPET Events");
 
-  fOutTree->Branch("nhits", &fNumberOfHits, "nhits/b");
-  fOutTree->Branch("times", &fHitTimes);
-  fOutTree->Branch("pos", &fHitPos);
-  fOutTree->Branch("tots", &fHitTOTs);
-  fOutTree->Branch("scins", &fHitScinIDs);
+  fOutTree->SetBranchAddress("nhits", &fNumberOfHits);
+  fOutTree->SetBranchAddress("times", &fHitTimes);
+  fOutTree->SetBranchAddress("pos", &fHitPos);
+  fOutTree->SetBranchAddress("tots", &fHitTOTs);
+  fOutTree->SetBranchAddress("scins", &fHitScinIDs);
 
   return true;
 }

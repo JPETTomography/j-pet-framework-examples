@@ -17,6 +17,7 @@
 #include "EventCategorizer.h"
 #include "EventFinder.h"
 #include "HitFinder.h"
+#include "NTupler.h"
 #include "SignalFinder.h"
 #include "SignalTransformer.h"
 #include "TimeWindowCreator.h"
@@ -38,6 +39,7 @@ int main(int argc, const char* argv[])
     manager.registerTask<EventFinder>("EventFinder");
     manager.registerTask<Downscaler>("Downscaler");
     manager.registerTask<EventCategorizer>("EventCategorizer");
+    manager.registerTask<NTupler>("NTupler");
 
     manager.useTask("TimeWindowCreator", "hld", "tslot");
     manager.useTask("SignalFinder", "tslot", "pm.sig");
@@ -46,6 +48,7 @@ int main(int argc, const char* argv[])
     manager.useTask("EventFinder", "hits", "unk.evt");
     manager.useTask("Downscaler", "unk.evt", "pre.evt");
     manager.useTask("EventCategorizer", "pre.evt", "cat.evt");
+    manager.useTask("NTupler", "cat.evt", "histo.evt");
 
     manager.run(argc, argv);
   }

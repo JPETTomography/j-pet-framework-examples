@@ -187,14 +187,8 @@ JPetPhysRecoHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const
   double totNormB = calibTree.get("scin." + to_string(scin.getID()) + ".tot_factor_b", 0.0);
   hit.setToT(tot * totNormA + totNormB);
 
-  TVector3 position(scin.getCenterX(), scin.getCenterY(), velocity * hit.getTimeDiff() / 2.0);
-  // Rotation of position vector according to configuration settings
-  // Converting value from file in degrees to radians
-  position.RotateX(TMath::DegToRad() * scin.getRotationX());
-  position.RotateY(TMath::DegToRad() * scin.getRotationY());
-  position.RotateZ(TMath::DegToRad() * scin.getRotationZ());
-
   // Setting position
+  TVector3 position(scin.getCenterX(), scin.getCenterY(), velocity * hit.getTimeDiff() / 2.0);
   hit.setPos(position);
 
   hit.setEnergy(0.0);
