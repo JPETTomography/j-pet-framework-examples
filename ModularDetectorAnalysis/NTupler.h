@@ -51,9 +51,9 @@ protected:
   std::vector<double> fHitTimes;
   std::vector<TVector3> fHitPos;
   std::vector<double> fHitTOTs;
-  std::vector<UChar_t> fHitScinIDs;
+  std::vector<UInt_t> fHitScinIDs;
 
-  UChar_t fNumberOfHits;
+  UInt_t fNumberOfHits;
 };
 
-#endif /*  !NTUPLER_H */
+#endif /* !NTUPLER_H */

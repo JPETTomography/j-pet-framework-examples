@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2024 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2025 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -15,6 +15,7 @@
 
 #include "NTupler.h"
 #include "../ModularDetectorAnalysis/HitFinderTools.h"
+#include <JPetCommonTools/JPetCommonTools.h>
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include <iostream>
 
@@ -29,16 +30,9 @@ bool NTupler::init()
 
   fOutputEvents = new JPetTimeWindow("JPetEvent");
 
-  if (isOptionSet(fParams.getOptions(), "inputFile_std::string"))
-  {
-    fOutFileName = getOptionAsString(fParams.getOptions(), "inputFile_std::string");
-  }
+  auto inputFileName = getOptionAsString(fParams.getOptions(), "inputFile_std::string");
 
-  // initialize output file and tree
-  if (fOutFileName.find("cat.evt.root") != std::string::npos)
-  {
-    fOutFileName.replace(fOutFileName.find("cat.evt.root"), std::string::npos, "ntu.root");
-  }
+  fOutFileName = JPetCommonTools::replaceDataTypeInFileName(inputFileName, "ntu");
 
   if (isOptionSet(fParams.getOptions(), "outputPath_std::string"))
   {
@@ -54,11 +48,11 @@ bool NTupler::init()
   fOutFile = new TFile(fOutFileName.c_str(), "RECREATE");
   fOutTree = new TTree("T", "JPET Events");
 
-  fOutTree->SetBranchAddress("nhits", &fNumberOfHits);
-  fOutTree->SetBranchAddress("times", &fHitTimes);
-  fOutTree->SetBranchAddress("pos", &fHitPos);
-  fOutTree->SetBranchAddress("tots", &fHitTOTs);
-  fOutTree->SetBranchAddress("scins", &fHitScinIDs);
+  fOutTree->Branch("nhits", &fNumberOfHits, "nhits/b");
+  fOutTree->Branch("times", &fHitTimes);
+  fOutTree->Branch("pos", &fHitPos);
+  fOutTree->Branch("tots", &fHitTOTs);
+  fOutTree->Branch("scins", &fHitScinIDs);
 
   return true;
 }
@@ -77,12 +71,13 @@ bool NTupler::exec()
       const auto& hits = event.getHits();
       fNumberOfHits = event.getHits().size();
 
-      for (auto& hit : hits)
+      for (uint i = 0; i < event.getHits().size(); i++)
       {
+        auto hit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(i));
         // Writing time in nanoseconds
         fHitTimes.push_back(hit->getTime() / 1000.);
         fHitPos.push_back(hit->getPos());
-        fHitTOTs.push_back(hit->getEnergy());
+        fHitTOTs.push_back(hit->getToT());
         fHitScinIDs.push_back(hit->getScin().getID());
       }
 
