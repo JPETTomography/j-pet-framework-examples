@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2024 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2025 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -16,9 +16,6 @@
 #ifndef NTUPLER_H
 #define NTUPLER_H
 
-#include <Hits/JPetBaseHit/JPetBaseHit.h>
-#include <JPetCommonTools/JPetCommonTools.h>
-#include <JPetEvent/JPetEvent.h>
 #include <JPetUserTask/JPetUserTask.h>
 
 #include <map>

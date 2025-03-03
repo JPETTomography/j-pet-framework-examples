@@ -13,16 +13,17 @@
  *  @file main.cpp
  */
 
+#include "../NTupleExport/NTupler.h"
 #include "Downscaler.h"
 #include "EventCategorizer.h"
 #include "EventFinder.h"
 #include "HitFinder.h"
-#include "NTupler.h"
 #include "SignalFinder.h"
 #include "SignalTransformer.h"
 #include "TimeWindowCreator.h"
 
 #include <JPetManager/JPetManager.h>
+#include <TError.h>
 
 using namespace std;
 
@@ -30,6 +31,8 @@ int main(int argc, const char* argv[])
 {
   try
   {
+    gErrorIgnoreLevel = kError;
+
     JPetManager& manager = JPetManager::getManager();
 
     manager.registerTask<TimeWindowCreator>("TimeWindowCreator");

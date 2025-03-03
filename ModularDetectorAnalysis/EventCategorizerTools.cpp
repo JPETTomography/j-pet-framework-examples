@@ -371,17 +371,17 @@ bool EventCategorizerTools::checkFor2GammaLifetime(const JPetEvent& event, JPetS
       TVector3 annhilationPoint = calculateAnnihilationPoint(pair2g.first, pair2g.second);
 
       // Caculate event times - annihilation
-      auto tof = calculateTOFByConvention(pair2g.first, pair2g.second);
-      double annihTime1 = pair2g.first->getTime() - tof;
-      double annihTime2 = pair2g.second->getTime() - tof;
-      double promptTime = prompt->getTime() - tof;
+      // auto tof = calculateTOFByConvention(pair2g.first, pair2g.second);
+      double annihTime1 = pair2g.first->getTime() - (pair2g.first->getPos() - annhilationPoint).Mag() / kLightVelocity_cm_ps;
+      double annihTime2 = pair2g.second->getTime() - (pair2g.second->getPos() - annhilationPoint).Mag() / kLightVelocity_cm_ps;
+      double promptTime = prompt->getTime() - (prompt->getPos()).Mag() / kLightVelocity_cm_ps;
       // Calculate lifetime
       double lifetime = (annihTime1 + annihTime2) / 2.0 - promptTime;
 
       if (saveHistos)
       {
-        stats.fillHistogram("lifetime_2g_prompt", lifetime);
-        stats.fillHistogram("lifetime_2g_prompt_zoom", lifetime);
+        stats.fillHistogram("lifetime_2g_prompt", -lifetime);
+        stats.fillHistogram("lifetime_2g_prompt_zoom", -lifetime);
 
         stats.fillHistogram("lifetime_ap_xy", annhilationPoint.X(), annhilationPoint.Y());
         stats.fillHistogram("lifetime_ap_zx", annhilationPoint.Z(), annhilationPoint.X());

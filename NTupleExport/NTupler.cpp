@@ -14,8 +14,9 @@
  */
 
 #include "NTupler.h"
-#include "../ModularDetectorAnalysis/HitFinderTools.h"
+#include <Hits/JPetPhysRecoHit/JPetPhysRecoHit.h>
 #include <JPetCommonTools/JPetCommonTools.h>
+#include <JPetEvent/JPetEvent.h>
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include <iostream>
 
