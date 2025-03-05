@@ -49,7 +49,7 @@ bool NTupler::init()
   fOutFile = new TFile(fOutFileName.c_str(), "RECREATE");
   fOutTree = new TTree("T", "JPET Events");
 
-  fOutTree->Branch("nhits", &fNumberOfHits, "nhits/b");
+  fOutTree->Branch("nhits", &fNumberOfHits, "nhits/I");
   fOutTree->Branch("times", &fHitTimes);
   fOutTree->Branch("pos", &fHitPos);
   fOutTree->Branch("tots", &fHitTOTs);
