@@ -177,6 +177,7 @@ endif()
 add_subdirectory(ModularDetectorAnalysis)
 add_subdirectory(ListmodeExport)
 add_subdirectory(MCGeantAnalysis)
+add_subdirectory(MCGateAnalysis)
 add_subdirectory(CernBeamAnalysis)
 
 #add_subdirectory(RedModuleAnalysis)
