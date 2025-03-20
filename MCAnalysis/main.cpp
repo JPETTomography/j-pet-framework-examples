@@ -13,9 +13,9 @@
  *  @file main.cpp
  */
 
-//#include "../ModularDetectorAnalysis/Downscaler.h"
+#include "../ModularDetectorAnalysis/Downscaler.h"
 #include "../ModularDetectorAnalysis/EventFinder.h"
-//#include "EventAnalyzer.h"
+#include "EventAnalyzer.h"
 #include <JPetManager/JPetManager.h>
 
 using namespace std;

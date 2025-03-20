@@ -9,6 +9,10 @@ default value [keV] : 10.0
 Energy threshold applied by the electronics - different for different runs, so be careful while
 applying. This value influence on number of reconstructed hits and events.
 
+- "GateParser_ClockWindowTimeInps_double"
+default value [ps] : 20000000.0
+Electronics time window. Default value is for Modular J-PET
+
 ## Parameters controlling Z position smearing:
 
 - "GateParser_ZPositionSmearingParameters_std::vector<double>"

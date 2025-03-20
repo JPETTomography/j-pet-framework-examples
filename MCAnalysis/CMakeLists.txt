@@ -16,14 +16,18 @@ endif()
 
 ################################################################################
 ## Project name
-set(projectName MCGateAnalysis)
+set(projectName MCAnalysis)
 
 ## Auxiliary files
 set(AUXILLIARY_FILES
-  userParams.json
-  README.md
-  PARAMETERS.md
-  run.sh
+  userParams_Geant.json
+  README_Geant.md
+  PARAMETERS_Geant.md
+  run_Geant.sh
+  userParams_Gate.json
+  README_Gate.md
+  PARAMETERS_Gate.md
+  run_Gate.sh
 )
 
 ################################################################################

@@ -5,4 +5,4 @@ if [ -z ${3+x} ]; then
     exit 
 fi
 
-./MCGateAnalysis.x -t mcGATE -f $1 -u userParams.json -l $2 -i $3
+./MCAnalysis.x -t mcGATE -f $1 -u userParams_Gate.json -l $2 -i $3
