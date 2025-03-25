@@ -5,4 +5,4 @@ if [ -z ${3+x} ]; then
     exit 
 fi
 
-./MCGeantAnalysis.x -t mcGeant -f $1 -u userParams.json -l $2 -i $3
+./MCAnalysis.x -t mcGeant -f $1 -u userParams_Geant.json -l $2 -i $3

@@ -27,12 +27,12 @@ int main(int argc, const char* argv[])
     JPetManager& manager = JPetManager::getManager();
 
     manager.registerTask<EventFinder>("EventFinder");
-    manager.registerTask<Downscaler>("Downscaler");
-    manager.registerTask<EventAnalyzer>("EventAnalyzer");
+    //manager.registerTask<Downscaler>("Downscaler");
+    //manager.registerTask<EventAnalyzer>("EventAnalyzer");
 
     manager.useTask("EventFinder", "hits", "unk.evt");
-    manager.useTask("Downscaler", "unk.evt", "pre.evt");
-    manager.useTask("EventAnalyzer", "pre.evt", "ana.evt");
+    //manager.useTask("Downscaler", "unk.evt", "pre.evt");
+    //manager.useTask("EventAnalyzer", "pre.evt", "ana.evt");
 
     manager.run(argc, argv);
   }
