@@ -18,7 +18,7 @@ endif()
 ## Project name - set this section appropriately for your project
 ## (please remove this comment in your template-derived analysis)
 ######################################################################
-set(projectName NTuplerExport)
+set(projectName NTupleExport)
 
 ## Auxiliary files are copied to build directory after CMake
 ## You can add any files to this list
