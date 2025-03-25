@@ -182,7 +182,7 @@ void HitFinder::initialiseHistograms()
   getStatistics().createHistogramWithAxes(new TH3D("hit_tot_scin_z_pos", "Hit ToT divided by multiplicity per scin vs z-axis",
                                                    maxScinID - minScinID + 1, minScinID - 0.5, maxScinID + 0.5, 200, 0.0, 1.2 * fToTHistoUpperLimit,
                                                    121, -30.5, 30.5),
-                                          "Z [cm]", "X [cm]", "Y [cm]");
+                                          "Scintillator ID", "Time over Threshold [ps]", "z [cm]");
 
   // Unused sigals stats
   getStatistics().createHistogramWithAxes(

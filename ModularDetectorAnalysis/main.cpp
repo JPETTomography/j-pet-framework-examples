@@ -13,6 +13,7 @@
  *  @file main.cpp
  */
 
+#include "../NTupleExport/NTupler.h"
 #include "Downscaler.h"
 #include "EventCategorizer.h"
 #include "EventFinder.h"
@@ -22,6 +23,7 @@
 #include "TimeWindowCreator.h"
 
 #include <JPetManager/JPetManager.h>
+#include <TError.h>
 
 using namespace std;
 
@@ -29,6 +31,8 @@ int main(int argc, const char* argv[])
 {
   try
   {
+    gErrorIgnoreLevel = kError;
+
     JPetManager& manager = JPetManager::getManager();
 
     manager.registerTask<TimeWindowCreator>("TimeWindowCreator");
@@ -38,6 +42,7 @@ int main(int argc, const char* argv[])
     manager.registerTask<EventFinder>("EventFinder");
     manager.registerTask<Downscaler>("Downscaler");
     manager.registerTask<EventCategorizer>("EventCategorizer");
+    manager.registerTask<NTupler>("NTupler");
 
     manager.useTask("TimeWindowCreator", "hld", "tslot");
     manager.useTask("SignalFinder", "tslot", "pm.sig");
@@ -46,6 +51,7 @@ int main(int argc, const char* argv[])
     manager.useTask("EventFinder", "hits", "unk.evt");
     manager.useTask("Downscaler", "unk.evt", "pre.evt");
     manager.useTask("EventCategorizer", "pre.evt", "cat.evt");
+    manager.useTask("NTupler", "cat.evt", "histo.evt");
 
     manager.run(argc, argv);
   }

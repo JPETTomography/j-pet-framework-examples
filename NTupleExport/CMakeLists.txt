@@ -1,9 +1,9 @@
 ################################################################################
 ## Data analysis project based on J-PET Framework
-## Created by J-PET Framework developers 2016-2020
+## Created by J-PET Framework developers 2016-2025
 ##
 ## Description:
-##   Data reconstruction in Modular J-PET Detector
+##   Exporting files form Event Categorizer to a reduced TTree
 ################################################################################
 
 cmake_minimum_required(VERSION 3.1...3.14)
@@ -15,19 +15,15 @@ else()
 endif()
 
 ######################################################################
-## Project name
+## Project name - set this section appropriately for your project
+## (please remove this comment in your template-derived analysis)
 ######################################################################
-set(projectName ModularDetectorAnalysis)
+set(projectName NTupleExport)
 
 ## Auxiliary files are copied to build directory after CMake
 ## You can add any files to this list
 set(AUXILLIARY_FILES
   README.md
-  userParamsModular.json
-  calibration_scripts/README.md
-  calibration_scripts/matrix_offests.C
-  calibration_scripts/tof_synchro.C
-  calibration_scripts/hit_tdiff_effvel.C
 )
 
 ################################################################################
@@ -35,9 +31,16 @@ set(AUXILLIARY_FILES
 set(projectBinary ${projectName}.x)
 project(${projectName} CXX) # using only C++
 
-## Name your header files with .h extension and source files with .cpp
-file(GLOB HEADERS *.h ../NTupleExport/NTupler.h)
-file(GLOB SOURCES *.cpp ../NTupleExport/NTupler.cpp)
+######################################################################
+## If you are using your own version of some module which is also present
+## in LargeBarrelAnalysis, comment out the respective lines below
+## so as not to use this module's source from LargeBarrelAnalysis.
+## (please remove this comment in your template-derived analysis)
+## Add your own HEADERS/SOURCES
+set(HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/NTupler.h)
+
+set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/NTupler.cpp)
 
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})
 target_link_libraries(${projectBinary} JPetFramework::JPetFramework)
@@ -49,17 +52,3 @@ add_custom_target(clean_data_${projectName}
 ################################################################################
 ## Copy the example auxiliary files
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/${AUXILIARY_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
-
-################################################################################
-## Add new target that depends on copied files
-add_custom_target(copy_files_${projectName} DEPENDS ${copy_depends})
-## Add dependencies between building project and copy files
-add_dependencies(${projectBinary} copy_files_${projectName})
-
-################################################################################
-## Unit tests
-option(PACKAGE_TESTS "Build the tests" ON)
-if(PACKAGE_TESTS)
-    enable_testing()
-    add_subdirectory(tests)
-endif()

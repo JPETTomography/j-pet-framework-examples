@@ -175,6 +175,7 @@ endif()
 ################################################################################
 ## Directories with examples
 add_subdirectory(ModularDetectorAnalysis)
+add_subdirectory(NTupleExport)
 add_subdirectory(ListmodeExport)
 add_subdirectory(MCAnalysis)
 add_subdirectory(CernBeamAnalysis)

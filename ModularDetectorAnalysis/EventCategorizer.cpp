@@ -262,7 +262,7 @@ bool EventCategorizer::init()
     initialiseHistograms();
   }
 
-  if (fSaveControlHistos)
+  if (fSaveCalibHistos)
   {
     initialiseCalibrationHistograms(fTrentoCalibHistos);
   }
