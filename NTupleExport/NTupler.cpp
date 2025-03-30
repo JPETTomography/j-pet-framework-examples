@@ -14,6 +14,7 @@
  */
 
 #include "NTupler.h"
+#include <Hits/JPetMCRecoHit/JPetMCRecoHit.h>
 #include <Hits/JPetPhysRecoHit/JPetPhysRecoHit.h>
 #include <JPetCommonTools/JPetCommonTools.h>
 #include <JPetEvent/JPetEvent.h>
@@ -69,17 +70,36 @@ bool NTupler::exec()
     {
       const JPetEvent& event = dynamic_cast<const JPetEvent&>(timeWindow->operator[](entry));
 
+      bool isMC = false;
+      if (event.getRecoFlag() == JPetEvent::MC)
+      {
+        isMC = true;
+      }
+
       const auto& hits = event.getHits();
       fNumberOfHits = event.getHits().size();
 
       for (uint i = 0; i < event.getHits().size(); i++)
       {
-        auto hit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(i));
-        // Writing time in nanoseconds
-        fHitTimes.push_back(hit->getTime() / 1000.);
-        fHitPos.push_back(hit->getPos());
-        fHitTOTs.push_back(hit->getToT());
-        fHitScinIDs.push_back(hit->getScin().getID());
+        if (isMC)
+        {
+          auto hit = dynamic_cast<const JPetMCRecoHit*>(event.getHits().at(i));
+          // Writing time in nanoseconds
+          fHitTimes.push_back(hit->getTime() / 1000.);
+          fHitPos.push_back(hit->getPos());
+          // Saving deposited energy as TOT - TODO Edep/TOT conversion
+          fHitTOTs.push_back(hit->getEnergy());
+          fHitScinIDs.push_back(hit->getScin().getID());
+        }
+        else
+        {
+          auto hit = dynamic_cast<const JPetPhysRecoHit*>(event.getHits().at(i));
+          // Writing time in nanoseconds
+          fHitTimes.push_back(hit->getTime() / 1000.);
+          fHitPos.push_back(hit->getPos());
+          fHitTOTs.push_back(hit->getToT());
+          fHitScinIDs.push_back(hit->getScin().getID());
+        }
       }
 
       fOutTree->Fill();

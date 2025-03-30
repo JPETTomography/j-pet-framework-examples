@@ -1,5 +1,5 @@
 /**
- *  @copyright Copyright 2021 The J-PET Framework Authors. All rights reserved.
+ *  @copyright Copyright 2025 The J-PET Framework Authors. All rights reserved.
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may find a copy of the License in the LICENCE file.
@@ -13,10 +13,9 @@
  *  @file main.cpp
  */
 
-#include "../ModularDetectorAnalysis/EventFinder.h"
-#include "../NTupleExport/NTupler.h"
-#include "EventAnalyzer.h"
+#include "ReadNTuple.h"
 #include <JPetManager/JPetManager.h>
+#include <TError.h>
 
 using namespace std;
 
@@ -24,15 +23,13 @@ int main(int argc, const char* argv[])
 {
   try
   {
+    gErrorIgnoreLevel = 6001;
+
     JPetManager& manager = JPetManager::getManager();
 
-    manager.registerTask<EventFinder>("EventFinder");
-    manager.registerTask<NTupler>("NTupler");
-    // manager.registerTask<EventAnalyzer>("EventAnalyzer");
+    manager.registerTask<ReadNTuple>("ReadNTuple");
 
-    manager.useTask("EventFinder", "hits", "unk.evt");
-    manager.useTask("NTupler", "unk.evt", "histo.evt");
-    // manager.useTask("EventAnalyzer", "pre.evt", "ana.evt");
+    manager.useTask("ReadNTuple", "ntu", "evt");
 
     manager.run(argc, argv);
   }
@@ -41,4 +38,5 @@ int main(int argc, const char* argv[])
     std::cerr << "Unrecoverable error occured:" << except.what() << "Exiting the program!" << std::endl;
     return EXIT_FAILURE;
   }
+  return EXIT_SUCCESS;
 }

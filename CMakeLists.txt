@@ -178,6 +178,7 @@ add_subdirectory(ModularDetectorAnalysis)
 add_subdirectory(NTupleExport)
 add_subdirectory(ListmodeExport)
 add_subdirectory(MCAnalysis)
+add_subdirectory(NTupleAnalysis)
 add_subdirectory(CernBeamAnalysis)
 
 #add_subdirectory(RedModuleAnalysis)

@@ -202,9 +202,13 @@ vector<JPetEvent> EventFinder::buildEvents(const JPetTimeWindow& timeWindow)
       {
         getStatistics().fillHistogram("reco_flags_events", 2);
       }
-      else
+      else if (event.getRecoFlag() == JPetEvent::MC)
       {
         getStatistics().fillHistogram("reco_flags_events", 3);
+      }
+      else
+      {
+        getStatistics().fillHistogram("reco_flags_events", 4);
       }
     }
 
@@ -234,8 +238,9 @@ void EventFinder::initialiseHistograms()
   getStatistics().createHistogramWithAxes(new TH1D("event_multi_selected", "Number of Hits in selected Events", 20, 0.5, 20.5), "Hits in Event",
                                           "Number of Hits");
 
-  getStatistics().createHistogramWithAxes(new TH1D("reco_flags_events", "Reconstruction flags of created events", 4, 0.5, 4.5), " ",
+  getStatistics().createHistogramWithAxes(new TH1D("reco_flags_events", "Reconstruction flags of created events", 5, 0.5, 5.5), " ",
                                           "Number of Channel Signals");
-  vector<pair<unsigned, string>> binLabels = {make_pair(1, "GOOD"), make_pair(2, "CORRUPTED"), make_pair(3, "UNKNOWN"), make_pair(4, "")};
+  vector<pair<unsigned, string>> binLabels = {make_pair(1, "GOOD"), make_pair(2, "CORRUPTED"), make_pair(3, "MC"), make_pair(4, "UNKNOWN"),
+                                              make_pair(5, "")};
   getStatistics().setHistogramBinLabel("reco_flags_events", getStatistics().AxisLabel::kXaxis, binLabels);
 }
