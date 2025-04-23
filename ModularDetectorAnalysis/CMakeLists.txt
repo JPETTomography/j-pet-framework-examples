@@ -36,8 +36,14 @@ set(projectBinary ${projectName}.x)
 project(${projectName} CXX) # using only C++
 
 ## Name your header files with .h extension and source files with .cpp
-file(GLOB HEADERS *.h ../NTupleExport/NTupler.h)
-file(GLOB SOURCES *.cpp ../NTupleExport/NTupler.cpp)
+file(GLOB HEADERS *.h
+  ../NTupleExport/NTupler.h
+  ../CommonTools/ToTEnergyConverterFactory.h
+  ../CommonTools/ToTEnergyConverter.h)
+file(GLOB SOURCES *.cpp
+  ../NTupleExport/NTupler.cpp
+  ../CommonTools/ToTEnergyConverterFactory.cpp
+  ../CommonTools/ToTEnergyConverter.cpp)
 
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})
 target_link_libraries(${projectBinary} JPetFramework::JPetFramework)

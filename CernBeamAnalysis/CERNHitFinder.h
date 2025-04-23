@@ -16,6 +16,7 @@
 #ifndef CERNHITFINDER_H
 #define CERNHITFINDER_H
 
+#include "../CommonTools/ToTEnergyConverterFactory.h"
 #include <Hits/JPetPhysRecoHit/JPetPhysRecoHit.h>
 #include <JPetUserTask/JPetUserTask.h>
 #include <Signals/JPetMatrixSignal/JPetMatrixSignal.h>
@@ -54,6 +55,7 @@ protected:
   const std::string kABTimeDiffParamKey = "HitFinder_ABTimeDiff_double";
   boost::property_tree::ptree fConstansTree;
   boost::property_tree::ptree fOutputStatsJSON;
+  ToTEnergyConverterFactory fToTConverterFactory;
   std::string fOutputStatsFile = "hitRate.json";
   double fToTHistoUpperLimit = 200000.0;
   bool fSaveControlHistos = true;
