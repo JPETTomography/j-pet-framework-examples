@@ -194,6 +194,7 @@ JPetPhysRecoHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const
   TVector3 position(scin.getCenterX(), scin.getCenterY(), velocity * hit.getTimeDiff() / 2.0);
   hit.setPos(position);
 
+  hit.setEnergy(-1.0);
   if (convertToT)
   {
     /// Checking if provided conversion function accepts calculated value of ToT
@@ -204,19 +205,7 @@ JPetPhysRecoHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const
       {
         hit.setEnergy(energy);
       }
-      else
-      {
-        hit.setEnergy(-1.0);
-      }
     }
-    else
-    {
-      hit.setEnergy(-1.0);
-    }
-  }
-  else
-  {
-    hit.setEnergy(-1.0);
   }
 
   // Default quality fields
