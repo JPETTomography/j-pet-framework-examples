@@ -23,6 +23,8 @@
 #include <boost/property_tree/ptree.hpp>
 #include <vector>
 
+#include "../CommonTools/ToTEnergyConverter.h"
+
 /**
  * @brief Tools set fot HitFinder module
  *
@@ -38,12 +40,17 @@ public:
   static std::map<int, std::vector<JPetMatrixSignal>> getSignalsByScin(const JPetTimeWindow* timeWindow);
 
   static std::vector<JPetPhysRecoHit> matchAllSignals(std::map<int, std::vector<JPetMatrixSignal>>& allSignals, double timeDiffAB,
-                                                      boost::property_tree::ptree& calibTree, JPetStatistics& stats, bool saveHistos);
+                                                      boost::property_tree::ptree& calibTree, bool convertToT,
+                                                      const tot_energy_converter::ToTEnergyConverter& totConverter, JPetStatistics& stats,
+                                                      bool saveHistos);
 
   static std::vector<JPetPhysRecoHit> matchSignals(std::vector<JPetMatrixSignal>& scinSignals, double timeDiffAB,
-                                                   boost::property_tree::ptree& calibTree, JPetStatistics& stats, bool saveHistos);
+                                                   boost::property_tree::ptree& calibTree, bool convertToT,
+                                                   const tot_energy_converter::ToTEnergyConverter& totConverter, JPetStatistics& stats,
+                                                   bool saveHistos);
 
-  static JPetPhysRecoHit createHit(const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2, boost::property_tree::ptree& calibTree);
+  static JPetPhysRecoHit createHit(const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2, boost::property_tree::ptree& calibTree,
+                                   bool convertToT, const tot_energy_converter::ToTEnergyConverter& totConverter);
 
   static JPetPhysRecoHit createDummyHit(const JPetMatrixSignal& signal, double sigOffset = 0.0);
 };

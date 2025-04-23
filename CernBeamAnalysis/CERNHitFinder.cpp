@@ -14,6 +14,7 @@
  */
 
 #include "CERNHitFinder.h"
+#include "../CommonTools/ToTEnergyConverter.h"
 #include "../ModularDetectorAnalysis/HitFinderTools.h"
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include <JPetWriter/JPetWriter.h>
@@ -92,7 +93,9 @@ bool CERNHitFinder::exec()
   if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent))
   {
     auto signalsBySlot = HitFinderTools::getSignalsByScin(timeWindow);
-    auto allHits = HitFinderTools::matchAllSignals(signalsBySlot, fABTimeDiff, fConstansTree, getStatistics(), fSaveControlHistos);
+    auto totConverter = fToTConverterFactory.getEnergyConverter();
+    auto allHits =
+        HitFinderTools::matchAllSignals(signalsBySlot, fABTimeDiff, fConstansTree, false, totConverter, getStatistics(), fSaveControlHistos);
     if (allHits.size() > 0)
     {
       saveHits(allHits);

@@ -51,6 +51,8 @@ set(HEADERS
   ${use_modules_from}/EventCategorizer.h
   ${use_modules_from}/EventCategorizerTools.h
   ${use_modules_from}/CalibrationTools.h
+  ../CommonTools/ToTEnergyConverterFactory.h
+  ../CommonTools/ToTEnergyConverter.h
   CERNHitFinder.h
 )
 
@@ -67,6 +69,8 @@ set(SOURCES
   ${use_modules_from}/EventCategorizer.cpp
   ${use_modules_from}/EventCategorizerTools.cpp
   ${use_modules_from}/CalibrationTools.cpp
+  ../CommonTools/ToTEnergyConverterFactory.cpp
+  ../CommonTools/ToTEnergyConverter.cpp
   CERNHitFinder.cpp
 )
 add_executable(${projectBinary} ${SOURCES} ${HEADERS})

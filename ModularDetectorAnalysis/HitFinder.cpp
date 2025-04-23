@@ -14,6 +14,7 @@
  */
 
 #include "HitFinder.h"
+#include "../CommonTools/ToTEnergyConverter.h"
 #include "HitFinderTools.h"
 #include <JPetOptionsTools/JPetOptionsTools.h>
 #include <JPetWriter/JPetWriter.h>
@@ -72,6 +73,21 @@ bool HitFinder::init()
     fToTHistoUpperLimit = getOptionAsDouble(fParams.getOptions(), kToTHistoUpperLimitParamKey);
   }
 
+  // Loading parameters for conversion to ToT to energy
+  if (isOptionSet(fParams.getOptions(), kConvertToTParamKey))
+  {
+    fConvertToT = getOptionAsBool(fParams.getOptions(), kConvertToTParamKey);
+    if (fConvertToT)
+    {
+      INFO("Hit finder performs conversion of ToT to deposited energy with provided params.");
+      fToTConverterFactory.loadConverterOptions(fParams.getOptions());
+    }
+    else
+    {
+      INFO("Hit finder will not convert ToT to deposited energy since no user parameters are provided.");
+    }
+  }
+
   // Control histograms
   if (fSaveControlHistos)
   {
@@ -86,7 +102,9 @@ bool HitFinder::exec()
   if (auto timeWindow = dynamic_cast<const JPetTimeWindow* const>(fEvent))
   {
     auto signalsBySlot = HitFinderTools::getSignalsByScin(timeWindow);
-    auto allHits = HitFinderTools::matchAllSignals(signalsBySlot, fABTimeDiff, fConstansTree, getStatistics(), fSaveControlHistos);
+    auto totConverter = fToTConverterFactory.getEnergyConverter();
+    auto allHits =
+        HitFinderTools::matchAllSignals(signalsBySlot, fABTimeDiff, fConstansTree, fConvertToT, totConverter, getStatistics(), fSaveControlHistos);
     if (allHits.size() > 0)
     {
       saveHits(allHits);
@@ -140,6 +158,12 @@ void HitFinder::saveHits(const std::vector<JPetPhysRecoHit>& hits)
         getStatistics().fillHistogram("hit_tot_scin", scinID, hit.getToT());
         getStatistics().fillHistogram("hit_tot_scin_z_pos", scinID, hit.getToT(), hit.getPosZ());
       }
+      if (fConvertToT && hit.getEnergy() > 0.0)
+      {
+        getStatistics().fillHistogram("conv_tot_range", hit.getToT());
+        getStatistics().fillHistogram("conv_dep_energy", hit.getEnergy());
+        getStatistics().fillHistogram("conv_dep_energy_vs_tot", hit.getEnergy(), hit.getToT());
+      }
     }
   }
 }
@@ -192,4 +216,25 @@ void HitFinder::initialiseHistograms()
   getStatistics().createHistogramWithAxes(
       new TH1D("remain_signals_tdiff", "Time Diff of an unused signal and the consecutive one", 200, fABTimeDiff, 5.0 * fABTimeDiff),
       "Time difference [ps]", "Number of Signals");
+
+  if (fConvertToT)
+  {
+    auto converterRange = fToTConverterFactory.getEnergyConverter().getRange();
+    auto totConverter = fToTConverterFactory.getEnergyConverter();
+
+    auto minToT = converterRange.first;
+    auto maxToT = converterRange.second;
+    auto minEDep = totConverter(converterRange.first);
+    auto maxEDep = totConverter(converterRange.second);
+
+    getStatistics().createHistogramWithAxes(new TH1D("conv_tot_range", "TOT of hits in range of conversion function", 200, minToT, maxToT),
+                                            "Time over Threshold [ps]", "Number of Hits");
+    getStatistics().createHistogramWithAxes(
+        new TH1D("conv_dep_energy", "Deposited energy of hits, converted from ToT with provied formula", 200, minEDep, maxEDep),
+        "Deposited energy [keV]", "Number of Hits");
+    getStatistics().createHistogramWithAxes(new TH2D("conv_dep_energy_vs_tot",
+                                                     "Deposited energy of hits, converted from ToT with provied formula vs. input ToT", 200, minEDep,
+                                                     maxEDep, 200, minToT, maxToT),
+                                            "Deposited energy [keV]", "ToT of Hit [ps]");
+  }
 }

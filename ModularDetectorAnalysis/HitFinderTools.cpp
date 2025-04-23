@@ -13,13 +13,14 @@
  *  @file HitFinderTools.cpp
  */
 
-using namespace std;
-
 #include "HitFinderTools.h"
 #include <TMath.h>
 #include <cmath>
 #include <map>
 #include <vector>
+
+using namespace tot_energy_converter;
+using namespace std;
 
 /**
  * Helper method for sotring signals in vector
@@ -72,13 +73,14 @@ map<int, vector<JPetMatrixSignal>> HitFinderTools::getSignalsByScin(const JPetTi
  * Loop over all Scins invoking matching procedure
  */
 vector<JPetPhysRecoHit> HitFinderTools::matchAllSignals(map<int, vector<JPetMatrixSignal>>& allSignals, double timeDiffAB,
-                                                        boost::property_tree::ptree& calibTree, JPetStatistics& stats, bool saveHistos)
+                                                        boost::property_tree::ptree& calibTree, bool convertToT,
+                                                        const ToTEnergyConverter& totConverter, JPetStatistics& stats, bool saveHistos)
 {
   vector<JPetPhysRecoHit> allHits;
   for (auto& scinSignals : allSignals)
   {
     // Match signals for scintillators
-    auto scinHits = matchSignals(scinSignals.second, timeDiffAB, calibTree, stats, saveHistos);
+    auto scinHits = matchSignals(scinSignals.second, timeDiffAB, calibTree, convertToT, totConverter, stats, saveHistos);
     allHits.insert(allHits.end(), scinHits.begin(), scinHits.end());
   }
   return allHits;
@@ -88,7 +90,7 @@ vector<JPetPhysRecoHit> HitFinderTools::matchAllSignals(map<int, vector<JPetMatr
  * Method matching signals on the same Scintillator
  */
 vector<JPetPhysRecoHit> HitFinderTools::matchSignals(vector<JPetMatrixSignal>& scinSignals, double timeDiffAB, boost::property_tree::ptree& calibTree,
-                                                     JPetStatistics& stats, bool saveHistos)
+                                                     bool convertToT, const ToTEnergyConverter& totConverter, JPetStatistics& stats, bool saveHistos)
 {
   vector<JPetPhysRecoHit> scinHits;
   vector<JPetMatrixSignal> remainSignals;
@@ -110,7 +112,7 @@ vector<JPetPhysRecoHit> HitFinderTools::matchSignals(vector<JPetMatrixSignal>& s
       {
         if (mtxSig.getMatrix().getSide() != scinSignals.at(j).getMatrix().getSide())
         {
-          auto hit = createHit(mtxSig, scinSignals.at(j), calibTree);
+          auto hit = createHit(mtxSig, scinSignals.at(j), calibTree, convertToT, totConverter);
           scinHits.push_back(hit);
           scinSignals.erase(scinSignals.begin() + j);
           scinSignals.erase(scinSignals.begin() + 0);
@@ -152,7 +154,8 @@ vector<JPetPhysRecoHit> HitFinderTools::matchSignals(vector<JPetMatrixSignal>& s
 /**
  * Method for Hit creation - setting all fields that make sense here
  */
-JPetPhysRecoHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2, boost::property_tree::ptree& calibTree)
+JPetPhysRecoHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const JPetMatrixSignal& signal2, boost::property_tree::ptree& calibTree,
+                                          bool convertToT, const ToTEnergyConverter& totConverter)
 {
   JPetMatrixSignal signalA;
   JPetMatrixSignal signalB;
@@ -191,7 +194,31 @@ JPetPhysRecoHit HitFinderTools::createHit(const JPetMatrixSignal& signal1, const
   TVector3 position(scin.getCenterX(), scin.getCenterY(), velocity * hit.getTimeDiff() / 2.0);
   hit.setPos(position);
 
-  hit.setEnergy(0.0);
+  if (convertToT)
+  {
+    /// Checking if provided conversion function accepts calculated value of ToT
+    if (tot > totConverter.getRange().first && tot < totConverter.getRange().second)
+    {
+      auto energy = totConverter(tot);
+      if (!isnan(energy))
+      {
+        hit.setEnergy(energy);
+      }
+      else
+      {
+        hit.setEnergy(-1.0);
+      }
+    }
+    else
+    {
+      hit.setEnergy(-1.0);
+    }
+  }
+  else
+  {
+    hit.setEnergy(-1.0);
+  }
+
   // Default quality fields
   hit.setQualityOfTime(-1.0);
   hit.setQualityOfTimeDiff(-1.0);
